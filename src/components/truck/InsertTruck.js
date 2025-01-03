@@ -1,50 +1,29 @@
-import React, { useContext, useEffect, useState } from "react";
+import CancelIcon from '@mui/icons-material/Cancel';
 import {
-    Badge,
     Box,
     Button,
     Checkbox,
     Chip,
-    Container,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
     FormControlLabel,
-    FormGroup,
     Grid,
-    IconButton,
-    InputBase,
     MenuItem,
     Paper,
-    Popover,
     Select,
-    Slide,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     TextField,
-    Tooltip,
-    Typography,
+    Typography
 } from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
-import CancelIcon from '@mui/icons-material/Cancel';
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
-import UploadButton from "./UploadButton";
+import React, { useEffect, useState } from "react";
 import { database } from "../../server/firebase";
+import { IconButtonError } from "../../theme/style";
+import theme from "../../theme/theme";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import UploadButton from "./UploadButton";
 
 const InsertTruck = (props) => {
     const { openMenu } = props;

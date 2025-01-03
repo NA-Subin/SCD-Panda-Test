@@ -1,32 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
 import {
-  Badge,
   Box,
-  Button,
   Container,
   Divider,
   Grid,
-  IconButton,
-  InputBase,
   Paper,
-  Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import OilBarrelIcon from '@mui/icons-material/OilBarrel';
-import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
-import theme from "../../theme/theme";
-import { RateOils, TablecellHeader } from "../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
-import Wholesale from "./Trips";
-import Retail from "./Retail";
+import React, { useState } from "react";
 import InsetTrips from "./InsertTrips";
+import Wholesale from "./Trips";
 
 const Selling = () => {
   const [open, setOpen] = useState(true);

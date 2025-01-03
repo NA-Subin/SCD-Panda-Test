@@ -1,7 +1,6 @@
 import React from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import Logo from "../../../public/logoPanda.jpg";
 import theme from "../../theme/theme";
 
 const MySwal = withReactContent(Swal);
@@ -69,7 +68,6 @@ export function ShowConfirmTrip(title, onConfirm, onCancel) {
 
 export function showLogin(title, item) {
   MySwal.fire({
-    imageUrl: Logo, // ใส่ URL ของโลโก้ที่ต้องการ
     imageWidth: 200, // กำหนดความกว้างของโลโก้
     imageHeight: 200, // กำหนดความสูงของโลโก้
     imageAlt: "Logo", // ข้อความเมื่อไม่สามารถแสดงรูปได้
@@ -87,7 +85,6 @@ export function showLogin(title, item) {
 
 export function showLogout(title, item) {
   MySwal.fire({
-    imageUrl: Logo, // ใส่ URL ของโลโก้ที่ต้องการ
     imageWidth: 200, // กำหนดความกว้างของโลโก้
     imageHeight: 200, // กำหนดความสูงของโลโก้
     imageAlt: "Logo", // ข้อความเมื่อไม่สามารถแสดงรูปได้

@@ -1,40 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { HTTP } from "../../server/axios";
+import EmailIcon from "@mui/icons-material/Email";
+import PasswordIcon from "@mui/icons-material/Password";
 import {
   Box,
   Button,
   Container,
-  Divider,
   Grid,
   InputAdornment,
   Paper,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup
+} from "firebase/auth";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth, database, googleProvider } from "../../server/firebase";
 import theme from "../../theme/theme";
-import { Link, useNavigate } from "react-router-dom";
-import EmailIcon from "@mui/icons-material/Email";
-import PasswordIcon from "@mui/icons-material/Password";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import FireTruckIcon from "@mui/icons-material/FireTruck";
-import Navbar from "../navbar/Navbar";
 import {
   ShowError,
-  ShowInfo,
-  ShowSuccess,
-  ShowWarning,
+  ShowWarning
 } from "../sweetalert/sweetalert";
-import Cookies from "js-cookie";
-import dayjs from "dayjs";
-import Logo from "../../../public/logoPanda.jpg";
-import { RateOils } from "../../theme/style";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-} from "firebase/auth";
-import { auth, database, googleProvider } from "../../server/firebase";
-import { child, ref, get } from "firebase/database";
 
 function createData(No, Email, Password, Position) {
   return {
@@ -201,7 +188,7 @@ const Login = () => {
             alignItems="center"
             marginTop={-1}
           >
-            <img src={Logo} width="150" />
+            {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width="150"/> */}
             <Box
               display="flex"
               justifyContent="center"

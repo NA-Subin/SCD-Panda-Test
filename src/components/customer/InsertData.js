@@ -1,11 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import CancelIcon from '@mui/icons-material/Cancel';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import {
-  Badge,
-  Box,
   Button,
   Checkbox,
   Chip,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,37 +12,18 @@ import {
   FormControlLabel,
   FormGroup,
   Grid,
-  IconButton,
-  InputBase,
   MenuItem,
   Paper,
-  Popover,
   Select,
-  Slide,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
-  Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import React, { useEffect, useState } from "react";
+import { database } from "../../server/firebase";
+import { IconButtonError } from "../../theme/style";
 import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
-import CancelIcon from '@mui/icons-material/Cancel';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
-import { auth, database } from "../../server/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const InsertData = () => {
   const [menu, setMenu] = React.useState(0);

@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+import HandymanIcon from '@mui/icons-material/Handyman';
+import ReplyAllIcon from '@mui/icons-material/ReplyAll';
 import {
   Badge,
   Box,
@@ -6,48 +7,18 @@ import {
   Container,
   Divider,
   Grid,
-  IconButton,
-  Paper,
-  Popover,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
-import HailIcon from "@mui/icons-material/Hail";
-import AirlineSeatReclineNormalIcon from "@mui/icons-material/AirlineSeatReclineNormal";
-import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import EmojiTransportationIcon from '@mui/icons-material/EmojiTransportation';
-import CarRentalIcon from '@mui/icons-material/CarRental';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import BentoIcon from '@mui/icons-material/Bento';
-import CommuteIcon from '@mui/icons-material/Commute';
-import HandymanIcon from '@mui/icons-material/Handyman';
-import ReplyAllIcon from '@mui/icons-material/ReplyAll';
-import theme from "../../theme/theme";
-import { RateOils, TablecellHeader } from "../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
+import React, { useEffect, useState } from "react";
 import { database } from "../../server/firebase";
-import SmallTruck from "./smalltruck/SmallTruck";
-import InsertTruck from "./InsertTruck";
-import BigTruckRegHead from "./headtruck/BigTruckRegHead";
-import BigTruckRegTail from "./tailtruck/BigTruckRegTail";
 import { SmallTruckIconBlack, SmallTruckIconWhite, TailTruckIconBlack, TailTruckIconWhite, TruckIconBlack, TruckIconWhite } from "../../theme/icon";
+import theme from "../../theme/theme";
+import InsertTruck from "./InsertTruck";
 import RepairTruck from "./RepairTruck";
+import BigTruckRegHead from "./headtruck/BigTruckRegHead";
+import SmallTruck from "./smalltruck/SmallTruck";
+import BigTruckRegTail from "./tailtruck/BigTruckRegTail";
 
 const Trucks = () => {
   const [open, setOpen] = useState(1);

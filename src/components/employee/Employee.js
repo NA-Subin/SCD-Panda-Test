@@ -1,4 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import AirlineSeatReclineNormalIcon from "@mui/icons-material/AirlineSeatReclineNormal";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HailIcon from "@mui/icons-material/Hail";
+import InfoIcon from '@mui/icons-material/Info';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {
   Badge,
   Box,
@@ -13,7 +20,6 @@ import {
   IconButton,
   MenuItem,
   Paper,
-  Popover,
   Select,
   Table,
   TableBody,
@@ -23,28 +29,14 @@ import {
   TableRow,
   TextField,
   Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import SettingsIcon from '@mui/icons-material/Settings';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import InfoIcon from '@mui/icons-material/Info';
-import HailIcon from "@mui/icons-material/Hail";
-import AirlineSeatReclineNormalIcon from "@mui/icons-material/AirlineSeatReclineNormal";
-import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
+import React, { useEffect, useState } from "react";
 import { database } from "../../server/firebase";
-import InsertEmployee from "./InsertEmployee";
+import { IconButtonError, TablecellHeader } from "../../theme/style";
+import theme from "../../theme/theme";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import InsertEmployee from "./InsertEmployee";
 import UpdateDriver from "./UpdateDriver";
 
 const Employee = () => {
@@ -62,7 +54,6 @@ const Employee = () => {
     setOpenTab(newOpen);
   };
 
-  const [all, setAll] = useState([]);
   const [office, setOffice] = useState([]);
   const [driver, setDriver] = useState([]);
   const [setting, setSetting] = React.useState("");

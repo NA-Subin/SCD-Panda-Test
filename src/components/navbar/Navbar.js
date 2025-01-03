@@ -1,27 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { styled, useTheme } from "@mui/material/styles";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import MuiDrawer from "@mui/material/Drawer";
-import MuiAppBar from "@mui/material/AppBar";
-import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import StoreMallDirectoryIcon from "@mui/icons-material/StoreMallDirectory";
-import HomeIcon from "@mui/icons-material/Home";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
-import SettingsIcon from "@mui/icons-material/Settings";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import GroupsIcon from "@mui/icons-material/Groups";
-import EngineeringIcon from "@mui/icons-material/Engineering";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import HomeIcon from "@mui/icons-material/Home";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import SettingsIcon from "@mui/icons-material/Settings";
+import StoreMallDirectoryIcon from "@mui/icons-material/StoreMallDirectory";
 import {
   Alert,
   Avatar,
@@ -51,19 +41,19 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { IconButtonOnNavbar, TablecellHeader } from "../../theme/style";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
-import {
-  ShowError,
-  showLogout,
-  ShowSuccess,
-  showWelcome,
-} from "../sweetalert/sweetalert";
-import { auth, database } from "../../server/firebase";
+import MuiAppBar from "@mui/material/AppBar";
+import MuiDrawer from "@mui/material/Drawer";
+import { styled, useTheme } from "@mui/material/styles";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import theme from "../../theme/theme";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { auth, database } from "../../server/firebase";
+import { IconButtonOnNavbar, TablecellHeader } from "../../theme/style";
+import {
+  ShowError
+} from "../sweetalert/sweetalert";
 const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
@@ -341,11 +331,8 @@ export default function Navbar() {
               >
                 <MenuIcon />
               </IconButton>
-              <img
-                src={Logo}
-                width={logo ? "60" : "50"}
-                onClick={handleHomepage}
-              />
+              {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width={logo ? "60" : "50"}
+                onClick={handleHomepage}/> */}
               <Box
                 display="flex"
                 justifyContent="center"
@@ -528,7 +515,7 @@ export default function Navbar() {
       <Drawer variant="permanent" open={open} sx={{ zIndex: 800 }}>
         <DrawerHeader sx={{ height: 60 }}>
           <Box display="flex" justifyContent="center" alignItems="center">
-            <img src={Logo} width="50" />
+          {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width="50"/> */}
             <Box
               display="flex"
               justifyContent="center"

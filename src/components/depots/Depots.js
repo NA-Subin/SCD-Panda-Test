@@ -1,44 +1,23 @@
-import React, { useContext, useEffect, useState } from "react";
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
+import OilBarrelIcon from "@mui/icons-material/OilBarrel";
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import {
   Badge,
   Box,
   Button,
   Container,
   Divider,
-  Drawer,
   Grid,
-  IconButton,
-  Paper,
-  Popover,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import OilBarrelIcon from "@mui/icons-material/OilBarrel";
-import theme from "../../theme/theme";
-import { RateOils, TablecellHeader } from "../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
+import React, { useEffect, useState } from "react";
 import { database } from "../../server/firebase";
-import GasStationsDetail from "./gasstations/GasStationsDetail";
+import theme from "../../theme/theme";
 import DepotDetail from "./depot/DepotDetail";
-import StockDetail from "./stock/StockDetail";
+import GasStationsDetail from "./gasstations/GasStationsDetail";
 import InserDepots from "./InsertDepots";
+import StockDetail from "./stock/StockDetail";
 
 const Depots = () => {
   const [openMenu, setOpenMenu] = React.useState(1);

@@ -1,33 +1,19 @@
-import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
-  Button,
   Container,
   Divider,
   Grid,
   Paper,
-  Popover,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
+  Typography
 } from "@mui/material";
-import theme from "../../theme/theme";
-import { RateOils, TablecellHeader } from "../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
-import { borderRadius, keyframes, width } from "@mui/system";
-import { database } from "../../server/firebase";
-import axios from "axios";
+import { keyframes } from "@mui/system";
 import { BarChart, PieChart, SparkLineChart } from "@mui/x-charts";
+import Cookies from "js-cookie";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { database } from "../../server/firebase";
+import theme from "../../theme/theme";
 
 const slideOutRight = keyframes`
   0% {
@@ -105,7 +91,7 @@ const Dashboard = () => {
           position: "relative",
         }}
       >
-        <img src={Logo} width="200" />
+        {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width="200"/> */}
         <Box
           display="flex"
           justifyContent="center"

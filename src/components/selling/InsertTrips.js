@@ -1,48 +1,34 @@
-import React, { useContext, useEffect, useState } from "react";
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+import CancelIcon from '@mui/icons-material/Cancel';
 import {
-    Badge,
-    Box,
     Button,
-    Container,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
     Grid,
-    IconButton,
     InputAdornment,
-    InputBase,
     MenuItem,
     Paper,
-    Popover,
     Select,
-    Slide,
     Table,
     TableBody,
-    TableCell,
     TableContainer,
     TableHead,
     TableRow,
     TextField,
-    Tooltip,
-    Typography,
+    Typography
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
-import CancelIcon from '@mui/icons-material/Cancel';
-import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
+import React, { useEffect, useState } from "react";
 import { database } from "../../server/firebase";
+import { IconButtonError, TablecellHeader } from "../../theme/style";
+import theme from "../../theme/theme";
 import { ShowConfirmTrip, ShowError, ShowSuccess, ShowWarning } from "../sweetalert/sweetalert";
-import InfoIcon from '@mui/icons-material/Info';
 import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 

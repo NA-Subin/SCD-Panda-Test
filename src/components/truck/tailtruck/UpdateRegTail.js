@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import CancelIcon from '@mui/icons-material/Cancel';
+import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
+import InfoIcon from '@mui/icons-material/Info';
 import {
-    Badge,
     Box,
     Button,
     Chip,
-    Container,
     Dialog,
     DialogActions,
     DialogContent,
@@ -13,34 +13,17 @@ import {
     FormControl,
     Grid,
     IconButton,
-    InputLabel,
     MenuItem,
     Paper,
-    Popover,
     Select,
-    Table,
-    TableBody,
     TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     TextField,
-    Tooltip,
-    Typography,
+    Typography
 } from "@mui/material";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import SettingsIcon from '@mui/icons-material/Settings';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import InfoIcon from '@mui/icons-material/Info';
-import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
-import theme from "../../../theme/theme";
-import { IconButtonError, IconButtonSuccess, IconButtonWarning, RateOils, TablecellHeader } from "../../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
 import { database } from "../../../server/firebase";
+import { IconButtonError } from "../../../theme/style";
+import theme from "../../../theme/theme";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
 const UpdateRegTail = (props) => {
@@ -57,9 +40,6 @@ const UpdateRegTail = (props) => {
     };
 
     const [openTab, setOpenTab] = React.useState(true);
-    const [openMenu, setOpenMenu] = React.useState(false);
-    const [setting, setSetting] = React.useState("0:0");
-    const [tail, setTail] = React.useState(0);
     const [company, setCompany] = React.useState([]);
 
     const toggleDrawer = (newOpen) => () => {
@@ -74,9 +54,9 @@ const UpdateRegTail = (props) => {
             const datas = snapshot.val();
             const dataRegistrationTail = [];
             for (let id in datas) {
-                datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" ?
-                    dataRegistrationTail.push({ id, ...datas[id] })
-                    : ""
+                if (datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว") {
+                    dataRegistrationTail.push({ id, ...datas[id] });
+                }
             }
             setRegTailLength(datas.length);
             setRegistrationTail(dataRegistrationTail);

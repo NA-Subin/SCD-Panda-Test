@@ -1,46 +1,24 @@
-import React, { useContext, useEffect, useState } from "react";
+import CancelIcon from '@mui/icons-material/Cancel';
+import InfoIcon from '@mui/icons-material/Info';
 import {
-    Badge,
-    Box,
     Button,
-    Chip,
-    Container,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    Divider,
-    FormControl,
     Grid,
     IconButton,
-    MenuItem,
     Paper,
-    Popover,
-    Select,
-    Table,
-    TableBody,
     TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     TextField,
-    Tooltip,
-    Typography,
+    Typography
 } from "@mui/material";
-import CancelIcon from '@mui/icons-material/Cancel';
-import InfoIcon from '@mui/icons-material/Info';
-import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
-import theme from "../../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { HTTP } from "../../../server/axios";
-import Cookies from "js-cookie";
+import React, { useState } from "react";
 import { database } from "../../../server/firebase";
+import { IconButtonError } from "../../../theme/style";
+import theme from "../../../theme/theme";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const UpdateDepot = (props) => {
     const { depot } = props;

@@ -1,48 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
 import {
-    Badge,
     Box,
-    Button,
-    Chip,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
     Grid,
-    IconButton,
     InputAdornment,
-    InputBase,
-    MenuItem,
-    Paper,
-    Popover,
-    Select,
-    Slide,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Tooltip,
-    Typography,
+    Paper
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import theme from "../../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { HTTP } from "../../../server/axios";
-import Cookies from "js-cookie";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import HailIcon from "@mui/icons-material/Hail";
-import AirlineSeatReclineNormalIcon from "@mui/icons-material/AirlineSeatReclineNormal";
+import React, { useEffect, useState } from "react";
 import { database } from "../../../server/firebase";
 import UpdateGasStations from "./UpdateGasStations";
 

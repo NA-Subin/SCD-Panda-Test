@@ -1,41 +1,18 @@
-import React, { useContext, useEffect, useState } from "react";
 import {
-    Badge,
-    Box,
-    Button,
-    Container,
-    Dialog,
-    DialogContent,
-    DialogTitle,
     Divider,
     Grid,
-    IconButton,
-    InputBase,
-    MenuItem,
     Paper,
-    Popover,
-    Select,
-    Slide,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    TextField,
-    Tooltip,
-    Typography,
+    Typography
 } from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import "dayjs/locale/th";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import theme from "../../theme/theme";
-import { RateOils, TablecellHeader } from "../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { HTTP } from "../../server/axios";
-import Cookies from "js-cookie";
-import Logo from "../../../public/logoPanda.jpg";
+import React from "react";
+import { TablecellHeader } from "../../theme/style";
 import InsertRetail from "./InsertRetail";
 
 const Retail = () => {

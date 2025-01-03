@@ -1,51 +1,19 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-    Badge,
-    Box,
-    Button,
-    Chip,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    Grid,
-    IconButton,
-    InputBase,
-    MenuItem,
-    Paper,
-    Popover,
-    Select,
-    Slide,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Tooltip,
-    Typography,
-} from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
-import "dayjs/locale/th";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import theme from "../../../theme/theme";
-import { IconButtonError, IconButtonWarning, RateOils, TablecellHeader } from "../../../theme/style";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { HTTP } from "../../../server/axios";
-import Cookies from "js-cookie";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import OilBarrelIcon from "@mui/icons-material/OilBarrel";
+import {
+    Box,
+    Grid,
+    IconButton,
+    TableCell,
+    TableRow,
+    TextField,
+    Typography
+} from "@mui/material";
+import "dayjs/locale/th";
+import React, { useEffect, useState } from "react";
 import { database } from "../../../server/firebase";
+import { IconButtonWarning } from "../../../theme/style";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
 const UpdateStock = (props) => {

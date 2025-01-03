@@ -6,20 +6,18 @@ import { Box } from "@mui/material";
 import Navbar from "./components/navbar/Navbar";
 import Selling from "./components/selling/Selling";
 import Employee from "./components/employee/Employee";
-import theme from "./theme/theme";
-import Cookies from "js-cookie";
 import Depots from "./components/depots/Depots";
 import Customer from "./components/customer/Customer";
 import Tickets from "./components/ticket/Tickets";
 import Setting from "./components/setting/Setting";
 import Trucks from "./components/truck/Trucks";
 import Creditor from "./components/creditor/Creditor";
+import './App.css';
 
-const App = () => {
-  const token = Cookies.get("token");
+function App() {
 
   return (
-    <BrowserRouter>
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         {/* <Route path="/:email/*" element={ */}
@@ -69,6 +67,6 @@ const App = () => {
       </Routes>
     </BrowserRouter>
   );
-};
+}
 
 export default App;
