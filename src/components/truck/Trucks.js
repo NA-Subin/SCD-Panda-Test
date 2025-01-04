@@ -141,8 +141,8 @@ const Trucks = () => {
       {
         repair === false ?
           <>
-            <Grid container spacing={5} marginTop={0.5} marginBottom={2}>
-              <Grid item xs={openMenu === 1 ? 10 : 1}>
+            <Grid container spacing={5} marginTop={0.5} marginBottom={2} >
+              <Grid item xs={openMenu === 1 ? 6 : 3} sm={openMenu === 1 ? 8 : 2} lg={openMenu === 1 ? 10 : 1}>
                 <Tooltip title="รถใหญ่" placement="top">
                   <Button
                     variant="contained"
@@ -176,7 +176,7 @@ const Trucks = () => {
                   }
                 </Tooltip>
               </Grid>
-              <Grid item xs={openMenu === 2 ? 10 : 1}>
+              <Grid item xs={openMenu === 2 ? 6 : 3} sm={openMenu === 2 ? 8 : 2} lg={openMenu === 2 ? 10 : 1}>
                 <Tooltip title="หางรถ" placement="top">
                   <Button
                     variant="contained"
@@ -210,7 +210,7 @@ const Trucks = () => {
                   }
                 </Tooltip>
               </Grid>
-              <Grid item xs={openMenu === 3 ? 10 : 1}>
+              <Grid item xs={openMenu === 3 ? 6 : 3} sm={openMenu === 3 ? 8 : 2} lg={openMenu === 3 ? 10 : 1}>
                 <Tooltip title="รถเล็ก" placement="top">
                   <Button
                     variant="contained"

@@ -132,7 +132,7 @@ const GasStationsDetail = (props) => {
                 }}
             >
                 <Grid container spacing={2}>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} sm={6} lg={4}>
                         <Paper
                             component="form"
                             sx={{
@@ -173,7 +173,7 @@ const GasStationsDetail = (props) => {
                             </LocalizationProvider>
                         </Paper>
                     </Grid>
-                    <Grid item xs={9} >
+                    <Grid item sm={6} lg={8}>
 
                     </Grid>
                     <Grid item xs={12}>

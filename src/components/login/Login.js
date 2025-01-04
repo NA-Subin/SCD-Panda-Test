@@ -157,7 +157,7 @@ const Login = () => {
   // };
 
   return (
-    <Container maxWidth="sm" sx={{ p: 12 }}>
+    <Container sx={{ p: { xs: 3, sm: 6, md: 9 }, maxWidth: { xs: "lg", sm: "md", md: "sm" }}}>
       <Paper
         sx={{
           borderRadius: 5,
@@ -172,7 +172,11 @@ const Login = () => {
             borderTopRightRadius: 20,
           }}
         />
-        <Box p={5} marginTop={-2} marginBottom={-3}>
+        <Box sx={{
+    p: { xs: 3, sm: 4, md: 5 },
+    marginTop: { xs: -2, sm: -3, md: -4 },
+    marginBottom: { xs: -1, sm: -2, md: -3 },
+  }}>
           <Typography
             variant="h4"
             fontWeight="bold"

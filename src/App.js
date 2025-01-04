@@ -9,7 +9,7 @@ import Selling from "./components/selling/Selling";
 import Employee from "./components/employee/Employee";
 import Depots from "./components/depots/Depots";
 import Customer from "./components/customer/Customer";
-import Tickets from "./components/ticket/Tickets";
+// import Tickets from "./components/ticket/Tickets";
 import Setting from "./components/setting/Setting";
 import Trucks from "./components/truck/Trucks";
 import Creditor from "./components/creditor/Creditor";
@@ -48,9 +48,9 @@ function App() {
                 <Routes>
                   <Route path="/employee" element={<Employee />} />
                 </Routes>
-                <Routes>
+                {/* <Routes>
                   <Route path="/ticket" element={<Tickets />} />
-                </Routes>
+                </Routes> */}
                 <Routes>
                   <Route path="/creditor" element={<Creditor />} />
                 </Routes>

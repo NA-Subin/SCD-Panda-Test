@@ -154,8 +154,19 @@ const Dashboard = () => {
         </Box>
       </Box>
       <Divider />
-      <Grid container spacing={4} marginTop={2}>
-        <Grid item xs={3}>
+<Grid
+  container
+  spacing={4}
+  marginTop={2}
+  sx={{
+    flexDirection: {
+      xs: "column",  // หน้าจอเล็ก (<=599px) จะแสดงเป็นคอลัมน์
+      sm: "row",     // หน้าจอขนาด 600px ขึ้นไปจะแสดงเป็นแถว
+      lg: "row", // หน้าจอขนาด 900px ขึ้นไปกลับด้านแถว
+    },
+  }}
+>
+  <Grid item xs={12} sm={6} lg={3}>
           <Paper sx={{ height: "30vh",borderRadius:5,backgroundColor: theme.palette.warning.light,color: "white",paddingTop:5 }}>
           <Box
                     display="flex"
@@ -200,7 +211,7 @@ const Dashboard = () => {
                   </Box>
           </Paper>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={12} sm={6} lg={3}>
           <Paper sx={{ height: "30vh",backgroundColor: theme.palette.success.light,borderRadius:5,color: "white",paddingTop:5 }}>
           <Box
                     display="flex"
@@ -208,7 +219,10 @@ const Dashboard = () => {
                     alignItems="center"
                   >
                     <Box textAlign="right">
-                      <Typography marginTop={-2} variant="h5" gutterBottom>
+                      <Typography 
+                      marginTop={-2} 
+                      variant="h5" 
+                      gutterBottom>
                         Gasohol
                       </Typography>
                       <Typography
@@ -245,7 +259,7 @@ const Dashboard = () => {
                   </Box>
           </Paper>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={12} sm={6} lg={3}>
           <Paper sx={{ height: "30vh",backgroundColor: theme.palette.primary.light,borderRadius:5,color: "white",paddingTop:5 }}>
           <Box
                     display="flex"
@@ -281,7 +295,7 @@ const Dashboard = () => {
                   </Box>
           </Paper>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={12} sm={6} lg={3}>
           <Paper sx={{ height: "30vh",backgroundColor: theme.palette.panda.contrastText,borderRadius:5 }}>
             <Box sx={{ backgroundColor: theme.palette.panda.main, borderTopLeftRadius: 15, borderTopRightRadius: 15, color: "white" }}>
               <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>จำนวนพนักงาน( ทั้งหมด {office.length+driver.length+creditor.length} คน)</Typography> 
@@ -311,7 +325,7 @@ const Dashboard = () => {
             </Box>
           </Paper>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={12} sm={12} lg={8}>
           <Paper sx={{ height: "60vh",backgroundColor: theme.palette.panda.contrastText,borderRadius:5,p:1 }}>
           <Stack direction="row" sx={{ width: '100%',backgroundColor: "white",height: 420, borderRadius:5,paddingTop:1,paddingLeft:2,paddingRight:2 }}>
       <Box sx={{ flexGrow: 1 }}>
@@ -352,7 +366,7 @@ const Dashboard = () => {
     </Stack>
           </Paper>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={12} sm={12} lg={4}>
           <Paper sx={{ height: "60vh",backgroundColor: theme.palette.panda.contrastText,borderRadius:5 }}></Paper>
         </Grid>
       </Grid>
