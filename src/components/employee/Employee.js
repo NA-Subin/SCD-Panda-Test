@@ -1,11 +1,4 @@
-import AirlineSeatReclineNormalIcon from "@mui/icons-material/AirlineSeatReclineNormal";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import HailIcon from "@mui/icons-material/Hail";
-import InfoIcon from '@mui/icons-material/Info';
-import SettingsIcon from '@mui/icons-material/Settings';
+import React, { useContext, useEffect, useState } from "react";
 import {
   Badge,
   Box,
@@ -20,6 +13,7 @@ import {
   IconButton,
   MenuItem,
   Paper,
+  Popover,
   Select,
   Table,
   TableBody,
@@ -29,14 +23,23 @@ import {
   TableRow,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
-import { IconButtonError, TablecellHeader } from "../../theme/style";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import SettingsIcon from '@mui/icons-material/Settings';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
+import HailIcon from "@mui/icons-material/Hail";
+import AirlineSeatReclineNormalIcon from "@mui/icons-material/AirlineSeatReclineNormal";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import theme from "../../theme/theme";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { database } from "../../server/firebase";
 import InsertEmployee from "./InsertEmployee";
+import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import UpdateDriver from "./UpdateDriver";
 
 const Employee = () => {
@@ -87,9 +90,9 @@ const Employee = () => {
       const datas = snapshot.val();
       const dataRegistration = [];
       for (let id in datas) {
-        datas[id].Driver === "ไม่มี" ?
+        if(datas[id].Driver === "ไม่มี"){
           dataRegistration.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRegistrationHead(dataRegistration);
     });
@@ -98,9 +101,9 @@ const Employee = () => {
       const datas = snapshot.val();
       const dataRegistration = [];
       for (let id in datas) {
-        datas[id].Driver === "ไม่มี" ?
+        if(datas[id].Driver === "ไม่มี"){
           dataRegistration.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRegistrationSmallTruck(dataRegistration);
     });

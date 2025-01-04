@@ -1,18 +1,38 @@
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SettingsIcon from '@mui/icons-material/Settings';
+import React, { useContext, useEffect, useState } from "react";
 import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
   IconButton,
   InputAdornment,
   MenuItem,
   Paper,
   Select,
+  Table,
+  TableBody,
   TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
-  TextField
+  TextField,
+  Typography,
 } from "@mui/material";
-import React from "react";
+import { IconButtonError, IconButtonWarning, TablecellHeader } from "../../theme/style";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import SettingsIcon from '@mui/icons-material/Settings';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
+import theme from "../../theme/theme";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const TicketsDetail = (props) => {

@@ -1,19 +1,30 @@
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
+  Button,
   Container,
   Divider,
   Grid,
   Paper,
+  Popover,
   Stack,
-  Typography
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { keyframes } from "@mui/system";
-import { BarChart, PieChart, SparkLineChart } from "@mui/x-charts";
-import Cookies from "js-cookie";
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
+import { RateOils, TablecellHeader } from "../../theme/style";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import Cookies from "js-cookie";
+import Logo from "../../theme/img/logoPanda.jpg";
+import { borderRadius, keyframes, width } from "@mui/system";
+import { database } from "../../server/firebase";
+import { BarChart, PieChart, SparkLineChart } from "@mui/x-charts";
 
 const slideOutRight = keyframes`
   0% {
@@ -91,7 +102,7 @@ const Dashboard = () => {
           position: "relative",
         }}
       >
-        {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width="200"/> */}
+        <img src={Logo} width="200" />
         <Box
           display="flex"
           justifyContent="center"

@@ -1,7 +1,13 @@
-import { Inventory } from "@mui/icons-material";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
+  Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Grid,
   Paper,
@@ -12,15 +18,21 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  TextField,
+  Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
+import theme from "../../theme/theme";
 import {
+  IconButtonError,
+  IconButtonInfo,
+  IconButtonWarning,
+  RateOils,
   TablecellHeader,
-  TablecellNoData
+  TablecellNoData,
 } from "../../theme/style";
 import InsertCustomer from "./InsertData";
+import { Inventory } from "@mui/icons-material";
+import { database } from "../../server/firebase";
 import UpdateCustomer from "./UpdateCustomer";
 
 const Transition = React.forwardRef(function Transition(props, ref) {

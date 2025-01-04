@@ -1,23 +1,38 @@
-import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
-import OilBarrelIcon from "@mui/icons-material/OilBarrel";
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import React, { useContext, useEffect, useState } from "react";
 import {
   Badge,
   Box,
   Button,
   Container,
   Divider,
+  Drawer,
   Grid,
+  IconButton,
+  Paper,
+  Popover,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import OilBarrelIcon from "@mui/icons-material/OilBarrel";
 import theme from "../../theme/theme";
-import DepotDetail from "./depot/DepotDetail";
+import { database } from "../../server/firebase";
 import GasStationsDetail from "./gasstations/GasStationsDetail";
-import InserDepots from "./InsertDepots";
+import DepotDetail from "./depot/DepotDetail";
 import StockDetail from "./stock/StockDetail";
+import InserDepots from "./InsertDepots";
 
 const Depots = () => {
   const [openMenu, setOpenMenu] = React.useState(1);
@@ -177,7 +192,7 @@ const Depots = () => {
         <GasStationsDetail gasStation={gasStation} />
         : openMenu === 2 ?
           <StockDetail stock={stock}/>
-        : <DepotDetail/>
+        : <DepotDetail depot={depot}/>
       }
     </Container>
   );

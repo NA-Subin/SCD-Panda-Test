@@ -1,8 +1,4 @@
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import BusinessIcon from '@mui/icons-material/Business';
-import CancelIcon from '@mui/icons-material/Cancel';
-import InfoIcon from '@mui/icons-material/Info';
-import PasswordIcon from '@mui/icons-material/Password';
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -24,11 +20,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import PasswordIcon from '@mui/icons-material/Password';
+import BusinessIcon from '@mui/icons-material/Business';
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import SettingsIcon from '@mui/icons-material/Settings';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
 import { IconButtonError, TablecellHeader } from "../../theme/style";
-import theme from "../../theme/theme";
+import { database } from "../../server/firebase";
 import InsertCompany from "./InsertCompany";
+import theme from "../../theme/theme";
 
 const Setting = () => {
   const [open, setOpen] = useState(1);

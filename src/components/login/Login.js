@@ -1,27 +1,32 @@
-import EmailIcon from "@mui/icons-material/Email";
-import PasswordIcon from "@mui/icons-material/Password";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
   Container,
+  Divider,
   Grid,
   InputAdornment,
   Paper,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
-import {
-  signInWithEmailAndPassword,
-  signInWithPopup
-} from "firebase/auth";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { auth, database, googleProvider } from "../../server/firebase";
 import theme from "../../theme/theme";
+import { Link, useNavigate } from "react-router-dom";
+import EmailIcon from "@mui/icons-material/Email";
+import PasswordIcon from "@mui/icons-material/Password";
 import {
   ShowError,
-  ShowWarning
+  ShowInfo,
+  ShowSuccess,
+  ShowWarning,
 } from "../sweetalert/sweetalert";
+import Logo from "../../theme/img/logoPanda.jpg";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth, database, googleProvider } from "../../server/firebase";
 
 function createData(No, Email, Password, Position) {
   return {
@@ -31,11 +36,6 @@ function createData(No, Email, Password, Position) {
     Position,
   };
 }
-const data = [
-  createData(1, "admin@gmail.com", "1234567", "admin"),
-  createData(2, "sale@gmail.com", "1234567", "sale"),
-  createData(3, "finance@gmail.com", "1234567", "finance"),
-];
 
 const Login = () => {
   const navigate = useNavigate();
@@ -91,8 +91,8 @@ const Login = () => {
   // ฟังก์ชันสำหรับเข้าสู่ระบบด้วย Email และ Password
   const loginUser = async (event) => {
     event.preventDefault();
-    email !== "" && password !== ""
-      ? signInWithEmailAndPassword(auth, email, password)
+    if(email !== "" && password !== ""){
+      signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             database
               .ref("/employee/officers")
@@ -103,14 +103,11 @@ const Login = () => {
                 const dataList = [];
                 for (let id in datas) {
                   dataList.push({ id, ...datas[id] });
-                  datas[id].Password === password
-                    ? navigate("/dashboard")
-                    : // (
-                      //   Cookies.set('token', datas[id].Email.split('@')[0]+"#"+dayjs(new Date())+"?"+datas[id].Position, { expires: 7 }),
-                      //   navigate("/dashboard"),
-                      //   console.log(userCredential)
-                      // )
-                      ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+                  if(datas[id].Password === password){
+                    navigate("/dashboard");
+                  }else{
+                    ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+                  }
                 }
               });
           })
@@ -118,7 +115,10 @@ const Login = () => {
             ShowError("Email หรือ Pasword ไม่ถูกต้อง");
             console.log(error);
           })
-      : ShowWarning("กรุณากรอก Email และ Password");
+    }
+    else{
+      ShowWarning("กรุณากรอก Email และ Password");
+    }
   };
 
   // const loginUser = async (email, password) => {
@@ -188,7 +188,7 @@ const Login = () => {
             alignItems="center"
             marginTop={-1}
           >
-            {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width="150"/> */}
+            <img src={Logo} width="150" />
             <Box
               display="flex"
               justifyContent="center"

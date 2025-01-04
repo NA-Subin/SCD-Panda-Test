@@ -1,23 +1,50 @@
-import CancelIcon from '@mui/icons-material/Cancel';
-import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
-import OilBarrelIcon from "@mui/icons-material/OilBarrel";
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import React, { useContext, useEffect, useState } from "react";
 import {
+    Badge,
+    Box,
     Button,
     Checkbox,
+    Chip,
+    Container,
     Dialog,
+    DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
     FormControlLabel,
     FormGroup,
     Grid,
-    Typography
+    IconButton,
+    InputBase,
+    MenuItem,
+    Paper,
+    Popover,
+    Select,
+    Slide,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Tooltip,
+    Typography,
 } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import "dayjs/locale/th";
-import React from "react";
-import { IconButtonError } from "../../theme/style";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
+import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import CancelIcon from '@mui/icons-material/Cancel';
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import OilBarrelIcon from "@mui/icons-material/OilBarrel";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import Cookies from "js-cookie";
+import { database } from "../../server/firebase";
 import InsertDepot from "./depot/InsertDepot";
 import InsertGasStations from "./gasstations/InsertGasStations";
 import InsertStock from "./stock/InsertStock";

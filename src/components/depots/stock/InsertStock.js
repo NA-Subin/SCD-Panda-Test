@@ -1,19 +1,42 @@
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import React, { useContext, useEffect, useState } from "react";
 import {
+    Badge,
+    Box,
     Button,
+    Checkbox,
     Chip,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Divider,
+    FormControlLabel,
+    FormGroup,
     Grid,
     IconButton,
+    InputBase,
+    MenuItem,
+    Paper,
+    Popover,
+    Select,
+    Slide,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     TextField,
-    Typography
+    Tooltip,
+    Typography,
 } from "@mui/material";
 import "dayjs/locale/th";
-import React from "react";
-import { database } from "../../../server/firebase";
 import theme from "../../../theme/theme";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
+import CancelIcon from '@mui/icons-material/Cancel';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { database } from "../../../server/firebase";
 
 const InsertStock = (props) => {
     const { stock } = props;

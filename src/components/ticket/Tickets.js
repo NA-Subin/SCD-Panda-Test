@@ -1,19 +1,36 @@
+import React, { useContext, useEffect, useState } from "react";
 import {
+  Box,
+  Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Grid,
+  IconButton,
   Paper,
   Table,
   TableBody,
+  TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  TextField,
+  Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
-import { TablecellHeader } from "../../theme/style";
+import { IconButtonError, TablecellHeader } from "../../theme/style";
 import PopupTickets from "./PopupTickets";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import SettingsIcon from '@mui/icons-material/Settings';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
+import { database } from "../../server/firebase";
+import theme from "../../theme/theme";
+import UpdateTickets from "./TicketsDetail";
 import TicketsDetail from "./TicketsDetail";
 
 const Tickets = () => {

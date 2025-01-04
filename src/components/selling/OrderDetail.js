@@ -1,17 +1,36 @@
+import React, { useContext, useEffect, useState } from "react";
 import {
+    Badge,
+    Box,
     Button,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
     Grid,
+    IconButton,
+    InputBase,
+    MenuItem,
     Paper,
+    Popover,
+    Select,
+    Slide,
+    Table,
+    TableBody,
     TableCell,
+    TableContainer,
+    TableHead,
     TableRow,
     TextField,
-    Typography
+    Tooltip,
+    Typography,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import { database } from "../../server/firebase";
-import { TablecellHeader } from "../../theme/style";
+import { ShowConfirmTrip, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const OrderDetail = (props) => {
     const { detail, ticketsTrip, onSendBack, total } = props;

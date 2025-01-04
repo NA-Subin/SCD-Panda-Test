@@ -1,34 +1,44 @@
-import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
-import CancelIcon from '@mui/icons-material/Cancel';
+import React, { useContext, useEffect, useState } from "react";
 import {
+    Badge,
+    Box,
     Button,
+    Container,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
     Grid,
+    IconButton,
     InputAdornment,
+    InputBase,
     MenuItem,
     Paper,
+    Popover,
     Select,
+    Slide,
     Table,
     TableBody,
+    TableCell,
     TableContainer,
     TableHead,
     TableRow,
     TextField,
-    Typography
+    Tooltip,
+    Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
-import { IconButtonError, TablecellHeader } from "../../theme/style";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
+import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import CancelIcon from '@mui/icons-material/Cancel';
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+import { database } from "../../server/firebase";
 import { ShowConfirmTrip, ShowError, ShowSuccess, ShowWarning } from "../sweetalert/sweetalert";
+import InfoIcon from '@mui/icons-material/Info';
 import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 
@@ -96,9 +106,9 @@ const InsertTrips = () => {
             const datas = snapshot.val();
             const dataRegHead = [];
             for (let id in datas) {
-                datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" ?
+                if(datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี"){
                     dataRegHead.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setRegHead(dataRegHead);
         });
@@ -270,9 +280,9 @@ const InsertTrips = () => {
                             const datas = snapshot.val();
                             const dataOrder = [];
                             for (let id in datas) {
-                                datas[id].Trip === trip.length ?
+                                if(datas[id].Trip === trip.length){
                                     dataOrder.push({ id, ...datas[id] })
-                                    : ""
+                                }
                             }
                             setOrders(dataOrder);
                         });
@@ -289,9 +299,9 @@ const InsertTrips = () => {
                                     database.ref("/customer").on("value", (snapshot) => {
                                         const customer = snapshot.val();
                                         for (let T in customer) {
-                                            customer[T].Name === TicketName ?
-                                            dataT.push({ T, ...customer[T] })
-                                            : ""
+                                            if(customer[T].Name === TicketName){
+                                                dataT.push({ T, ...customer[T] })
+                                            }
                                         }
                                     });
                                 } else if (ticketType === "PS") {
@@ -307,9 +317,9 @@ const InsertTrips = () => {
                                     database.ref("/customer").on("value", (snapshot) => {
                                         const customer = snapshot.val();
                                         for (let A in customer) {
-                                            customer[A].Name !== TicketName ?
-                                            dataA.push({ A, ...customer[A] })
-                                            : ""
+                                            if(customer[A].Name !== TicketName){
+                                                dataA.push({ A, ...customer[A] })
+                                            }
                                         }
                                     });
                                     // database.ref("/depot/stock/").on("value", (snapshot) => {

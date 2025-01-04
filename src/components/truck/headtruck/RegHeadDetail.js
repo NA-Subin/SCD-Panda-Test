@@ -1,16 +1,45 @@
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SettingsIcon from '@mui/icons-material/Settings';
+import React, { useContext, useEffect, useState } from "react";
 import {
+  Badge,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
   MenuItem,
   Paper,
+  Popover,
   Select,
+  Table,
+  TableBody,
   TableCell,
-  TableRow
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import SettingsIcon from '@mui/icons-material/Settings';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
+import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
+import theme from "../../../theme/theme";
+import { IconButtonError, IconButtonSuccess, IconButtonWarning, RateOils, TablecellHeader } from "../../../theme/style";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import UpdateRegHead from "./UpdateRegHead";
@@ -34,9 +63,9 @@ const RegHeadDetail = (props) => {
       const datas = snapshot.val();
       const dataRegistrationTail = [];
       for (let id in datas) {
-        datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && datas[id].Company === truck.Company ?
+        if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && datas[id].Company === truck.Company){
           dataRegistrationTail.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRegTailLength(datas.length);
       setRegistrationTail(dataRegistrationTail);

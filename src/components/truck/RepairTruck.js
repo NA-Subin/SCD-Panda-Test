@@ -1,26 +1,39 @@
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
   Checkbox,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
   FormControl,
   FormControlLabel,
+  FormGroup,
   Grid,
   InputLabel,
   MenuItem,
   Paper,
   Select,
   Slide,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
+import theme from "../../theme/theme";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import Cookies from "js-cookie";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
-import theme from "../../theme/theme";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { database } from "../../server/firebase";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -111,9 +124,9 @@ const RepairTruck = () => {
       const datas = snapshot.val();
       const dataRepair = [];
       for (let id in datas) {
-        datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" ?
+        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
           dataRepair.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRepairRegHead(dataRepair);
     });
@@ -122,9 +135,9 @@ const RepairTruck = () => {
       const datas = snapshot.val();
       const dataRepair = [];
       for (let id in datas) {
-        datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" ?
+        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
           dataRepair.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRepairSmallTruck(dataRepair);
     });

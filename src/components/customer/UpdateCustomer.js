@@ -1,23 +1,38 @@
-import CancelIcon from '@mui/icons-material/Cancel';
-import InfoIcon from '@mui/icons-material/Info';
+import React, { useContext, useEffect, useState } from "react";
 import {
+    Badge,
+    Box,
     Button,
+    Chip,
+    Container,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
+    Divider,
+    FormControl,
     Grid,
     IconButton,
+    MenuItem,
     Paper,
+    Popover,
+    Select,
+    Table,
+    TableBody,
     TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     TextField,
-    Typography
+    Tooltip,
+    Typography,
 } from "@mui/material";
-import "dayjs/locale/th";
-import React, { useEffect, useState } from "react";
-import { database } from "../../server/firebase";
-import { IconButtonError } from "../../theme/style";
+import CancelIcon from '@mui/icons-material/Cancel';
+import InfoIcon from '@mui/icons-material/Info';
 import theme from "../../theme/theme";
+import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import "dayjs/locale/th";
+import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const UpdateCustomer = (props) => {
@@ -46,7 +61,7 @@ const UpdateCustomer = (props) => {
             const dataRegistration = [];
             for (let id in datas) {
                 if(datas[id].Driver === "ไม่มี"){
-                    dataRegistration.push({ id, ...datas[id] });
+                    dataRegistration.push({ id, ...datas[id] })
                 }
             }
             

@@ -1,17 +1,27 @@
+import React, { useState, useEffect } from "react";
+import { styled, useTheme } from "@mui/material/styles";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import MuiDrawer from "@mui/material/Drawer";
+import MuiAppBar from "@mui/material/AppBar";
+import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import BookOnlineIcon from '@mui/icons-material/BookOnline';
+import StoreMallDirectoryIcon from "@mui/icons-material/StoreMallDirectory";
+import HomeIcon from "@mui/icons-material/Home";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import SettingsIcon from "@mui/icons-material/Settings";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import GroupsIcon from "@mui/icons-material/Groups";
-import HomeIcon from "@mui/icons-material/Home";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
-import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import SettingsIcon from "@mui/icons-material/Settings";
-import StoreMallDirectoryIcon from "@mui/icons-material/StoreMallDirectory";
 import {
   Alert,
   Avatar,
@@ -41,19 +51,16 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import MuiAppBar from "@mui/material/AppBar";
-import MuiDrawer from "@mui/material/Drawer";
-import { styled, useTheme } from "@mui/material/styles";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import { auth, database } from "../../server/firebase";
 import { IconButtonOnNavbar, TablecellHeader } from "../../theme/style";
+import Logo from "../../theme/img/logoPanda.jpg";
 import {
-  ShowError
+  ShowError,
+  showLogout,
+  ShowSuccess,
+  showWelcome,
 } from "../sweetalert/sweetalert";
+import { auth, database } from "../../server/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
@@ -178,8 +185,8 @@ export default function Navbar() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
   const [setting, setSetting] = React.useState(false);
-  const [show1, setShow1] = React.useState(show1);
-  const [show2, setShow2] = React.useState(show2);
+  const [show1, setShow1] = React.useState(false);
+  const [show2, setShow2] = React.useState(false);
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
 
@@ -217,8 +224,8 @@ export default function Navbar() {
         // Cookies.remove('token');
         navigate("/"); // นำผู้ใช้ไปยังหน้า login
       })
-      .catch((error) => {
-        console.error("Error logging out:", error);
+      .catch(() => {
+        console.error("Error logging out:");
       });
   };
 
@@ -255,11 +262,9 @@ export default function Navbar() {
             })
             .catch((error) => {
               Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");
-              console.log(error);
             });
         } else if (result.isDenied) {
           Swal.fire("ออกจากระบบล้มเหลว", "", "error");
-          console.log(error);
         }
       });
   };
@@ -331,8 +336,11 @@ export default function Navbar() {
               >
                 <MenuIcon />
               </IconButton>
-              {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width={logo ? "60" : "50"}
-                onClick={handleHomepage}/> */}
+              <img
+                src={Logo}
+                width={logo ? "60" : "50"}
+                onClick={handleHomepage}
+              />
               <Box
                 display="flex"
                 justifyContent="center"
@@ -515,7 +523,7 @@ export default function Navbar() {
       <Drawer variant="permanent" open={open} sx={{ zIndex: 800 }}>
         <DrawerHeader sx={{ height: 60 }}>
           <Box display="flex" justifyContent="center" alignItems="center">
-          {/* <img src={`${process.env.PUBLIC_URL}/logoPanda.jpg`} alt="Logo" width="50"/> */}
+            <img src={Logo} width="50" />
             <Box
               display="flex"
               justifyContent="center"
