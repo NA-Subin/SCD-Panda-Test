@@ -85,7 +85,9 @@ const InsertTruck = (props) => {
             const datas = snapshot.val();
             const dataDriver = [];
             for (let id in datas) {
-                datas[id].Status === "ว่าง" ? dataDriver.push({ id, ...datas[id] }) : ""
+                if(datas[id].Status === "ว่าง"){
+                    dataDriver.push({ id, ...datas[id] })
+                }
             }
             setDriver(dataDriver);
         });
@@ -105,9 +107,9 @@ const InsertTruck = (props) => {
             const datas = snapshot.val();
             const dataRegistrationTail = [];
             for (let id in datas) {
-                datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" ?
+                if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว"){
                     dataRegistrationTail.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setRegTailLength(datas.length);
             setRegistrationTail(dataRegistrationTail);

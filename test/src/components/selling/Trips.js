@@ -53,9 +53,9 @@ const Wholesale = () => {
             const datas = snapshot.val();
             const dataTrip = [];
             for (let id in datas) {
-                datas[id].id !== 1 ?
+                if(datas[id].id !== 1){
                     dataTrip.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setTrip(dataTrip);
         });

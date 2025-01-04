@@ -124,9 +124,9 @@ const RepairTruck = () => {
       const datas = snapshot.val();
       const dataRepair = [];
       for (let id in datas) {
-        datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" ?
+        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
           dataRepair.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRepairRegHead(dataRepair);
     });
@@ -135,9 +135,9 @@ const RepairTruck = () => {
       const datas = snapshot.val();
       const dataRepair = [];
       for (let id in datas) {
-        datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" ?
+        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
           dataRepair.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRepairSmallTruck(dataRepair);
     });

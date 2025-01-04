@@ -69,9 +69,9 @@ const Trucks = () => {
       const dataRepair = [];
       for (let id in datas) {
         dataRegHead.push({ id, ...datas[id] })
-        datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" ?
+        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
           dataRepair.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRegHead(dataRegHead);
       setRepairRegHead(dataRepair.length);
@@ -83,8 +83,9 @@ const Trucks = () => {
       const dataStatus = [];
       for (let id in datas) {
         dataRegTail.push({ id, ...datas[id] })
-        datas[id].Status !== "เชื่อมทะเบียนหัวแล้ว" ?
-          dataStatus.push({ id, ...datas[id] }) : ""
+        if(datas[id].Status !== "เชื่อมทะเบียนหัวแล้ว"){
+          dataStatus.push({ id, ...datas[id] })
+        }
       }
       setRegTail(dataRegTail);
       setStatus(dataStatus.length);
@@ -96,9 +97,9 @@ const Trucks = () => {
       const dataRepair = [];
       for (let id in datas) {
         dataSmallTruck.push({ id, ...datas[id] })
-        datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" ?
+        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
           dataRepair.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setSmallTruck(dataSmallTruck);
       setRepairSmallTruck(dataRepair.length);

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "test-scd-panda"
-  }
+    "default": "scd-panda-1bc5a",
+    "SCD-PandaStartOil": "scd-panda-1bc5a"
+  },
+  "targets": {},
+  "etags": {}
 }

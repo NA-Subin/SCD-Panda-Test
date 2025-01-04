@@ -4,6 +4,7 @@ import Login from "./components/login/Login";
 import Dashboard from "./components/dashboard/Dashboard";
 import { Box } from "@mui/material";
 import Navbar from "./components/navbar/Navbar";
+import { ThemeProvider } from "@mui/material";
 import Selling from "./components/selling/Selling";
 import Employee from "./components/employee/Employee";
 import Depots from "./components/depots/Depots";
@@ -13,11 +14,13 @@ import Setting from "./components/setting/Setting";
 import Trucks from "./components/truck/Trucks";
 import Creditor from "./components/creditor/Creditor";
 import './App.css';
+import theme from "./theme/theme";
 
 function App() {
 
   return (
       <BrowserRouter>
+      <ThemeProvider theme={theme}>
       <Routes>
         <Route path="/" element={<Login />} />
         {/* <Route path="/:email/*" element={ */}
@@ -65,6 +68,7 @@ function App() {
           }
         />
       </Routes>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

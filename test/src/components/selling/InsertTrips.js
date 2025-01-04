@@ -106,9 +106,9 @@ const InsertTrips = () => {
             const datas = snapshot.val();
             const dataRegHead = [];
             for (let id in datas) {
-                datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" ?
+                if(datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี"){
                     dataRegHead.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setRegHead(dataRegHead);
         });
@@ -280,9 +280,9 @@ const InsertTrips = () => {
                             const datas = snapshot.val();
                             const dataOrder = [];
                             for (let id in datas) {
-                                datas[id].Trip === trip.length ?
+                                if(datas[id].Trip === trip.length){
                                     dataOrder.push({ id, ...datas[id] })
-                                    : ""
+                                }
                             }
                             setOrders(dataOrder);
                         });
@@ -299,9 +299,9 @@ const InsertTrips = () => {
                                     database.ref("/customer").on("value", (snapshot) => {
                                         const customer = snapshot.val();
                                         for (let T in customer) {
-                                            customer[T].Name === TicketName ?
-                                            dataT.push({ T, ...customer[T] })
-                                            : ""
+                                            if(customer[T].Name === TicketName){
+                                                dataT.push({ T, ...customer[T] })
+                                            }
                                         }
                                     });
                                 } else if (ticketType === "PS") {
@@ -317,9 +317,9 @@ const InsertTrips = () => {
                                     database.ref("/customer").on("value", (snapshot) => {
                                         const customer = snapshot.val();
                                         for (let A in customer) {
-                                            customer[A].Name !== TicketName ?
-                                            dataA.push({ A, ...customer[A] })
-                                            : ""
+                                            if(customer[A].Name !== TicketName){
+                                                dataA.push({ A, ...customer[A] })
+                                            }
                                         }
                                     });
                                     // database.ref("/depot/stock/").on("value", (snapshot) => {

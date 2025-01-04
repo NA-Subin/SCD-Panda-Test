@@ -33,7 +33,7 @@ export function ShowSuccess(title, item) {
     showConfirmButton: false,
     timer: 1000,
   }).then(() => {
-    item;
+    if (typeof item === "function") item();
   });
 }
 
@@ -81,7 +81,7 @@ export function showLogin(title, item) {
     showConfirmButton: false,
     timer: 1300,
   }).then(() => {
-    item;
+    if (typeof item === "function") item();
   });
 }
 
@@ -99,6 +99,6 @@ export function showLogout(title, item) {
     showConfirmButton: false,
     timer: 1300,
   }).then(() => {
-    item;
+    if (typeof item === "function") item();
   });
 }

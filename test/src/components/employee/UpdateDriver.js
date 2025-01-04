@@ -86,9 +86,9 @@ const UpdateDriver = (props) => {
             const datas = snapshot.val();
             const dataRegistration = [];
             for (let id in datas) {
-                datas[id].Driver === "ไม่มี" ?
+                if(datas[id].Driver === "ไม่มี"){
                     dataRegistration.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setRegistrationHead(dataRegistration);
         });
@@ -97,9 +97,9 @@ const UpdateDriver = (props) => {
             const datas = snapshot.val();
             const dataRegistration = [];
             for (let id in datas) {
-                datas[id].Driver === "ไม่มี" ?
+                if(datas[id].Driver === "ไม่มี"){
                     dataRegistration.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setRegistrationSmallTruck(dataRegistration);
         });

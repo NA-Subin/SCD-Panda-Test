@@ -21,7 +21,7 @@ import theme from "../../theme/theme";
 import { RateOils, TablecellHeader } from "../../theme/style";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
-// import Logo from "../../../public/logoPanda.jpg";
+import Logo from "../../theme/img/logoPanda.jpg";
 import { borderRadius, keyframes, width } from "@mui/system";
 import { database } from "../../server/firebase";
 import { BarChart, PieChart, SparkLineChart } from "@mui/x-charts";
@@ -102,7 +102,7 @@ const Dashboard = () => {
           position: "relative",
         }}
       >
-        {/* <img src={Logo} width="200" /> */}
+        <img src={Logo} width="200" />
         <Box
           display="flex"
           justifyContent="center"

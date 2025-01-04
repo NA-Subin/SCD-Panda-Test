@@ -75,9 +75,9 @@ const UpdateSmallTruck = (props) => {
             const datas = snapshot.val();
             const dataRegistrationTail = [];
             for (let id in datas) {
-                datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" ?
+                if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว"){
                     dataRegistrationTail.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setRegTailLength(datas.length);
             setRegistrationTail(dataRegistrationTail);

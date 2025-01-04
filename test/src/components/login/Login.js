@@ -20,7 +20,7 @@ import {
   ShowSuccess,
   ShowWarning,
 } from "../sweetalert/sweetalert";
-// import Logo from "../../../public/logoPanda.jpg";
+import Logo from "../../theme/img/logoPanda.jpg";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -36,11 +36,6 @@ function createData(No, Email, Password, Position) {
     Position,
   };
 }
-const data = [
-  createData(1, "admin@gmail.com", "1234567", "admin"),
-  createData(2, "sale@gmail.com", "1234567", "sale"),
-  createData(3, "finance@gmail.com", "1234567", "finance"),
-];
 
 const Login = () => {
   const navigate = useNavigate();
@@ -96,8 +91,8 @@ const Login = () => {
   // ฟังก์ชันสำหรับเข้าสู่ระบบด้วย Email และ Password
   const loginUser = async (event) => {
     event.preventDefault();
-    email !== "" && password !== ""
-      ? signInWithEmailAndPassword(auth, email, password)
+    if(email !== "" && password !== ""){
+      signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             database
               .ref("/employee/officers")
@@ -108,14 +103,11 @@ const Login = () => {
                 const dataList = [];
                 for (let id in datas) {
                   dataList.push({ id, ...datas[id] });
-                  datas[id].Password === password
-                    ? navigate("/dashboard")
-                    : // (
-                      //   Cookies.set('token', datas[id].Email.split('@')[0]+"#"+dayjs(new Date())+"?"+datas[id].Position, { expires: 7 }),
-                      //   navigate("/dashboard"),
-                      //   console.log(userCredential)
-                      // )
-                      ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+                  if(datas[id].Password === password){
+                    navigate("/dashboard");
+                  }else{
+                    ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+                  }
                 }
               });
           })
@@ -123,7 +115,10 @@ const Login = () => {
             ShowError("Email หรือ Pasword ไม่ถูกต้อง");
             console.log(error);
           })
-      : ShowWarning("กรุณากรอก Email และ Password");
+    }
+    else{
+      ShowWarning("กรุณากรอก Email และ Password");
+    }
   };
 
   // const loginUser = async (email, password) => {
@@ -193,7 +188,7 @@ const Login = () => {
             alignItems="center"
             marginTop={-1}
           >
-            {/* <img src={Logo} width="150" /> */}
+            <img src={Logo} width="150" />
             <Box
               display="flex"
               justifyContent="center"

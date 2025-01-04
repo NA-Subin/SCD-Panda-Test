@@ -88,9 +88,9 @@ const InsertEmployee = () => {
             const datas = snapshot.val();
             const dataTruck = [];
             for (let id in datas) {
-                datas[id].Driver === "ไม่มี" ?
+                if(datas[id].Driver === "ไม่มี"){
                     dataTruck.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setTruck(dataTruck);
         });
@@ -99,9 +99,9 @@ const InsertEmployee = () => {
             const datas = snapshot.val();
             const dataSmallTruck = [];
             for (let id in datas) {
-                datas[id].Driver === "ไม่มี" ?
+                if(datas[id].Driver === "ไม่มี"){
                     dataSmallTruck.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             setSmallTruck(dataSmallTruck);
         });

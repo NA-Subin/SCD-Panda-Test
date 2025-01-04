@@ -63,9 +63,9 @@ const RegHeadDetail = (props) => {
       const datas = snapshot.val();
       const dataRegistrationTail = [];
       for (let id in datas) {
-        datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && datas[id].Company === truck.Company ?
+        if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && datas[id].Company === truck.Company){
           dataRegistrationTail.push({ id, ...datas[id] })
-          : ""
+        }
       }
       setRegTailLength(datas.length);
       setRegistrationTail(dataRegistrationTail);

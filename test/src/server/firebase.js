@@ -4,14 +4,14 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_1POgwclTGt7GgM5f51u4a3hcnlQXAjM",
-  authDomain: "pandastaroil-70b11.firebaseapp.com",
-  databaseURL: "https://pandastaroil-70b11-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "pandastaroil-70b11",
-  storageBucket: "pandastaroil-70b11.firebasestorage.app",
-  messagingSenderId: "977519524333",
-  appId: "1:977519524333:web:35ae84a37c15d3551b0fe4",
-  measurementId: "G-VMJMXJHP04"
+  apiKey: "AIzaSyADfKpfQckZyxWjM7i8kxvtMjDkgh0G3O8",
+  authDomain: "scd-panda-1bc5a.firebaseapp.com",
+  databaseURL: "https://scd-panda-1bc5a-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "scd-panda-1bc5a",
+  storageBucket: "scd-panda-1bc5a.firebasestorage.app",
+  messagingSenderId: "222666567078",
+  appId: "1:222666567078:web:8e8512c9ff63853b897367",
+  measurementId: "G-SGK6FNMEYT"
 };
 
   if (!firebase.apps.length) {

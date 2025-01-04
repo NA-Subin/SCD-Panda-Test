@@ -52,7 +52,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IconButtonOnNavbar, TablecellHeader } from "../../theme/style";
-// import Logo from "../../../public/logoPanda.jpg";
+import Logo from "../../theme/img/logoPanda.jpg";
 import {
   ShowError,
   showLogout,
@@ -185,8 +185,8 @@ export default function Navbar() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
   const [setting, setSetting] = React.useState(false);
-  const [show1, setShow1] = React.useState(show1);
-  const [show2, setShow2] = React.useState(show2);
+  const [show1, setShow1] = React.useState(false);
+  const [show2, setShow2] = React.useState(false);
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
 
@@ -224,8 +224,8 @@ export default function Navbar() {
         // Cookies.remove('token');
         navigate("/"); // นำผู้ใช้ไปยังหน้า login
       })
-      .catch((error) => {
-        console.error("Error logging out:", error);
+      .catch(() => {
+        console.error("Error logging out:");
       });
   };
 
@@ -262,11 +262,9 @@ export default function Navbar() {
             })
             .catch((error) => {
               Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");
-              console.log(error);
             });
         } else if (result.isDenied) {
           Swal.fire("ออกจากระบบล้มเหลว", "", "error");
-          console.log(error);
         }
       });
   };
@@ -339,7 +337,7 @@ export default function Navbar() {
                 <MenuIcon />
               </IconButton>
               <img
-                // src={Logo}
+                src={Logo}
                 width={logo ? "60" : "50"}
                 onClick={handleHomepage}
               />
@@ -525,7 +523,7 @@ export default function Navbar() {
       <Drawer variant="permanent" open={open} sx={{ zIndex: 800 }}>
         <DrawerHeader sx={{ height: 60 }}>
           <Box display="flex" justifyContent="center" alignItems="center">
-            {/* <img src={Logo} width="50" /> */}
+            <img src={Logo} width="50" />
             <Box
               display="flex"
               justifyContent="center"

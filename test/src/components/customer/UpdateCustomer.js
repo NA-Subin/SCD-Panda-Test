@@ -29,14 +29,11 @@ import {
 } from "@mui/material";
 import CancelIcon from '@mui/icons-material/Cancel';
 import InfoIcon from '@mui/icons-material/Info';
-import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 import theme from "../../theme/theme";
 import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import "dayjs/locale/th";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const UpdateCustomer = (props) => {
     const { customer } = props;
@@ -63,9 +60,9 @@ const UpdateCustomer = (props) => {
             const datas = snapshot.val();
             const dataRegistration = [];
             for (let id in datas) {
-                datas[id].Driver === "ไม่มี" ?
+                if(datas[id].Driver === "ไม่มี"){
                     dataRegistration.push({ id, ...datas[id] })
-                    : ""
+                }
             }
             
         });
