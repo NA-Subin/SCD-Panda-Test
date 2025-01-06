@@ -43,6 +43,7 @@ import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import UpdateRegHead from "./UpdateRegHead";
+import TruckRepair from "./TruckRepair";
 
 const RegHeadDetail = (props) => {
   const { truck } = props;
@@ -170,6 +171,7 @@ const RegHeadDetail = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{truck.Company}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.Driver}</TableCell>
                         <UpdateRegHead key={truck.id} truck={truck}/>
+                        <TruckRepair key={truck.id} row={truck} />
                       </TableRow>
     </React.Fragment>
   );

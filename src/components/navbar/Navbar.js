@@ -50,6 +50,7 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { IconButtonOnNavbar, TablecellHeader } from "../../theme/style";
 import Logo from "../../theme/img/logoPanda.jpg";
@@ -190,8 +191,24 @@ export default function Navbar() {
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
 
+  const isMobile = useMediaQuery("(max-width:800px)");
+
+  const shouldDrawerOpen = React.useMemo(() => {
+    if (isMobile) {
+      return !open; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
+    } else {
+      return open; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
+    }
+  }, [open, isMobile]);
+
   const handleDrawerOpen = () => {
-    setOpen(true);
+    if (isMobile) {
+      // จอเท่ากับโทรศัพท์
+      setOpen((prevOpen) => !prevOpen);
+    } else {
+      // จอไม่เท่ากับโทรศัพท์
+      setOpen((prevOpen) => !prevOpen);
+    }
   };
 
   const handleDrawerClose = () => {
@@ -303,10 +320,34 @@ export default function Navbar() {
       <CssBaseline />
       <AppBar
         position="fixed"
-        open={open}
+        open={shouldDrawerOpen}
         sx={{ backgroundColor: theme.palette.panda.dark, height: 60,zIndex: 900 }}
       >
-        <Toolbar variant="dense">
+        <Toolbar variant="dense"
+        sx={{
+          display: isMobile ? "flex" : "", // ใช้ flexbox
+          justifyContent: isMobile ?  "center": "", // จัดให้อยู่กึ่งกลางแนวนอน
+          alignItems: isMobile ? "center" : "", // จัดให้อยู่กึ่งกลางแนวตั้ง
+        }}
+        >
+        {isMobile ? (
+      // แสดงเฉพาะ IconButton สำหรับจอโทรศัพท์
+      <IconButton
+        color={open ? "inherit" : theme.palette.panda.dark}
+        aria-label="open drawer"
+        onClick={handleDrawerOpen}
+        edge="start"
+        sx={{
+          marginLeft: 2,
+          mr: 1.5,
+          ...(shouldDrawerOpen && { display: "none" }),
+        }}
+      >
+        <MenuIcon color="inherit" fontSize="large" />
+      </IconButton>
+    ) : (
+      // แสดงเนื้อหาทั้งหมดสำหรับหน้าจอที่ไม่ใช่โทรศัพท์
+      <>
           {!open ? (
             <Box
               display="flex"
@@ -323,14 +364,14 @@ export default function Navbar() {
               onMouseLeave={() => setLogo(false)}
             >
               <IconButton
-                color={open ? "inherit" : theme.palette.panda.dark}
+                color={shouldDrawerOpen ? "inherit" : theme.palette.panda.dark}
                 aria-label="open drawer"
                 onClick={handleDrawerOpen}
                 edge="start"
                 sx={{
                   marginLeft: 2,
                   mr: 1.5,
-                  ...(open && { display: "none" }),
+                  ...(shouldDrawerOpen && { display: "none" }),
                   marginRight: logo ? 3 : 0,
                 }}
               >
@@ -518,9 +559,12 @@ export default function Navbar() {
               </Menu>
             </Grid>
           </Grid>
+          </>
+          )
+        }
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open} sx={{ zIndex: 800 }}>
+      <Drawer variant="permanent" open={shouldDrawerOpen} sx={{ zIndex: 800 }}>
         <DrawerHeader sx={{ height: 60 }}>
           <Box display="flex" justifyContent="center" alignItems="center">
             <img src={Logo} width="50" />
@@ -561,7 +605,7 @@ export default function Navbar() {
             </Box>
           </Box>
           <IconButton
-            onClick={handleDrawerClose}
+            onClick={handleDrawerOpen}
             size="small"
             sx={{ marginLeft: 4 }}
           >
@@ -573,7 +617,7 @@ export default function Navbar() {
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <Box textAlign="center" marginTop={1} sx={{ opacity: open ? 1 : 0 }}>
+        <Box textAlign="center" marginTop={1} sx={{ opacity: shouldDrawerOpen ? 1 : 0 }}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             {
               // token.split("?")[2] === "meter" ? "รถมิเตอร์" : token.split("?")[2] === "truck" ? "รถช่อง" : ""
@@ -582,11 +626,11 @@ export default function Navbar() {
         </Box>
         <Box
           sx={{
-            height: open ? 200 : 100,
+            height: shouldDrawerOpen ? 200 : 100,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: open ? -6 : -3,
+            marginTop: shouldDrawerOpen ? -6 : -3,
           }}
         >
           <StyledBadge
@@ -596,7 +640,7 @@ export default function Navbar() {
           >
             <Avatar
               /*alt={token.split("#")[0]}*/ src="/static/images/avatar/2.jpg"
-              sx={{ width: open ? 100 : 40, height: open ? 100 : 40 }}
+              sx={{ width: shouldDrawerOpen ? 100 : 40, height: shouldDrawerOpen ? 100 : 40 }}
             />
           </StyledBadge>
         </Box>
@@ -604,7 +648,7 @@ export default function Navbar() {
           textAlign="center"
           marginTop={-4}
           marginBottom={2}
-          sx={{ opacity: open ? 1 : 0 }}
+          sx={{ opacity: shouldDrawerOpen ? 1 : 0 }}
         >
           {/* <Typography variant='subtitle2' fontWeight="bold" gutterBottom>
             {
