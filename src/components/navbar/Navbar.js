@@ -191,7 +191,7 @@ export default function Navbar() {
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
 
-  const isMobile = useMediaQuery("(max-width:800px)");
+  const isMobile = useMediaQuery("(max-width:1000px)");
 
   const shouldDrawerOpen = React.useMemo(() => {
     if (isMobile) {

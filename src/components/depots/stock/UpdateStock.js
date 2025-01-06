@@ -114,26 +114,41 @@ const UpdateStock = (props) => {
                 <TableRow>
                     <TableCell colSpan={5}>
                         <Grid container spacing={2} p={5} marginTop={-3} marginBottom={-3}>
-                            <Grid item xs={1}>
+                            <Grid item lg={1} md={2} sm={3} xs={4}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ชื่อคลัง</Typography>
                             </Grid>
-                            <Grid item xs={7}>
+                            <Grid item lg={7} md={10} sm={9} xs={8}>
                                 <TextField fullWidth variant="standard" value={name} disabled={update ? true : false} onChange={(e) => setName(e.target.value)} />
                             </Grid>
-                            <Grid item xs={1.5}>
+                            <Grid item lg={1.5} md={4} sm={6} xs={8}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ปริมาณน้ำหนักรวม</Typography>
                             </Grid>
-                            <Grid item xs={2.5}>
+                            <Grid item lg={2.5} md={8} sm={6} xs={4}>
                                 <TextField fullWidth variant="standard" value={volume} disabled={update ? true : false} onChange={(e) => setVolume(e.target.value)} />
                             </Grid>
-                            <Grid item xs={1} sx={{ borderRight: "1px solid lightgray" }}>
+                            <Grid item lg={1} sx={{ borderRight: "1px solid lightgray" }}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ผลิตภัณฑ์</Typography>
                             </Grid>
-                            <Grid item xs={11}>
-                                <Grid container spacing={2}>
+                            <Grid item
+                            md={12} // เต็มความกว้างในหน้าจอเล็ก
+                            lg={11}  // 1/3 ในหน้าจอกว้าง
+                            display="flex"
+                            flexDirection="column" 
+                            >
+                                <Grid container spacing={2}
+                                >
                                     {
                                         stocks.map((product) => (
-                                            <Grid item xs={3} display="flex">
+                                            <Grid
+                                            item
+                                            xs={12} // เต็มความกว้างในหน้าจอเล็ก
+                                            sm={6}  // ครึ่งหนึ่งในหน้าจอกลาง
+                                            md={4}  // 1/3 ในหน้าจอกว้าง
+                                            lg={3}  // 1/4 ในหน้าจอใหญ่
+                                            display="flex"
+                                            flexDirection="column" // จัดให้เป็นแนวคอลัมน์ในแต่ละ item
+                                            key={product.ProductName}
+    >
                                         <Box sx={{ backgroundColor: "lightgray", borderRadius: 3, display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
                                             <Grid container>
                                                 <Grid item xs={4} sx={{ display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: product.Color, borderRadius: 3, color: "white" }}>

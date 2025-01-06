@@ -24,6 +24,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
@@ -52,6 +53,26 @@ const Employee = () => {
   };
 
   const [openTab, setOpenTab] = React.useState(true);
+
+  const isMobile = useMediaQuery("(max-width:1000px)");
+  
+    const shouldDrawerOpen = React.useMemo(() => {
+      if (isMobile) {
+        return !openTab; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
+      } else {
+        return openTab; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
+      }
+    }, [openTab, isMobile]);
+  
+    const handleDrawerOpen = () => {
+      if (isMobile) {
+        // จอเท่ากับโทรศัพท์
+        setOpenTab((prevOpen) => !prevOpen);
+      } else {
+        // จอไม่เท่ากับโทรศัพท์
+        setOpenTab((prevOpen) => !prevOpen);
+      }
+    };
 
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
@@ -177,7 +198,7 @@ const Employee = () => {
       <Divider sx={{ marginBottom: 2 }} />
       <InsertEmployee />
       <Grid container spacing={3} marginTop={1} marginLeft={-7}>
-        {openTab ? (
+        {shouldDrawerOpen ? (
           <Grid item xs={1.5}>
             <Button
               variant="text"
@@ -185,7 +206,7 @@ const Employee = () => {
               size="small"
               fullWidth
               sx={{ marginBottom: 1.3, fontWeight: "bold", marginBottom: 1, marginTop: -3 }}
-              onClick={toggleDrawer(false)}
+              onClick={handleDrawerOpen}
             >
               <Grid container spacing={2}>
                 <Grid item xs={12} textAlign="center">
@@ -262,14 +283,21 @@ const Employee = () => {
             </Paper>
           </Grid>
         ) : (
-          <Grid item xs={0.7} sx={{ borderRight: "1px solid lightgray" }}>
+          <Grid item xs={0.7} sx={{ borderRight: "1px solid lightgray",
+            "@media (max-width: 1100px)": {
+              marginTop: -10, // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+            },
+            "@media (max-width: 800px)": {
+              marginTop: -15, // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+            },
+            }}>
             <Tooltip title="แสดงเมนู" placement="left">
               <Button
                 variant="contained"
                 color="inherit"
                 startIcon={<ArrowCircleRightIcon />}
                 sx={{ marginBottom: 1, marginTop: -3 }}
-                onClick={toggleDrawer(true)}
+                onClick={handleDrawerOpen}
               >
               </Button>
             </Tooltip>

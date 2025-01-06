@@ -27,6 +27,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
@@ -50,6 +51,26 @@ const BigTruckRegHead = (props) => {
   const [openTab, setOpenTab] = React.useState(true);
   const [setting, setSetting] = React.useState("0:0");
   const [tail, setTail] = React.useState(0);
+
+  const isMobile = useMediaQuery("(max-width:1100px)");
+    
+      const shouldDrawerOpen = React.useMemo(() => {
+        if (isMobile) {
+          return !openTab; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
+        } else {
+          return openTab; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
+        }
+      }, [openTab, isMobile]);
+    
+      const handleDrawerOpen = () => {
+        if (isMobile) {
+          // จอเท่ากับโทรศัพท์
+          setOpenTab((prevOpen) => !prevOpen);
+        } else {
+          // จอไม่เท่ากับโทรศัพท์
+          setOpenTab((prevOpen) => !prevOpen);
+        }
+      };
 
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
@@ -109,7 +130,7 @@ const BigTruckRegHead = (props) => {
   return (
     <React.Fragment>
       <Grid container spacing={3} marginTop={1} marginLeft={-7}>
-        {openTab ? (
+        {shouldDrawerOpen ? (
           <Grid item xs={1.5}>
             <Button
               variant="text"
@@ -118,7 +139,7 @@ const BigTruckRegHead = (props) => {
               fullWidth
               endIcon={<ArrowCircleLeftIcon />}
               sx={{ marginBottom: 1.3, fontWeight: "bold", marginBottom: 1, marginTop: -1, backgroundColor: theme.palette.panda.contrastText }}
-              onClick={toggleDrawer(false)}
+              onClick={handleDrawerOpen}
             >
               ซ่อนแถบ
             </Button>
@@ -156,7 +177,7 @@ const BigTruckRegHead = (props) => {
                 color="inherit"
                 startIcon={<ArrowCircleRightIcon />}
                 sx={{ marginBottom: 1, marginTop: -3 }}
-                onClick={toggleDrawer(true)}
+                onClick={handleDrawerOpen}
               >
               </Button>
             </Tooltip>

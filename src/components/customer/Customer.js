@@ -69,45 +69,85 @@ const Customer = () => {
       <Box textAlign="right" marginTop={-8} marginBottom={4} marginRight={5}>
         <InsertCustomer />
       </Box>
-      <Divider sx={{ marginBottom: 1 }}/>
-      <Grid container spacing={3} p={5}>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
-              รายการลูกค้า
-            </Typography>
+      <Grid container spacing={3} marginTop={1}>
+        <Grid item xs={12}>
         <Divider sx={{ marginTop: 1 }} />
-        <TableContainer
-          component={Paper}
-          style={{ maxHeight: "90vh" }}
-          sx={{ marginTop: 2 }}
-        >
-          <Table stickyHeader size="small">
+        <Paper
+                      sx={{
+                        p: 2,
+                        height: "70vh"
+                      }}
+                    >
+                      <Typography variant="h6" fontWeight="bold" gutterBottom>
+          รายการลูกค้า
+        </Typography>
+                      <Divider sx={{ marginBottom: 1 }} />
+                      <TableContainer
+                        component={Paper}
+                        style={{ maxHeight: "90vh" }}
+                        sx={{ marginTop: 2 }}
+                      >
+                        <Table stickyHeader size="small">
             <TableHead sx={{ height: "7vh" }}>
               <TableRow>
-                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                width: 50,
+                //   "@media (max-width: 1000px)": {
+                //   width: "10%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                 }}>
                   ลำดับ
                 </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                //   "@media (max-width: 1000px)": {
+                //   width: "30%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                 }}>
                   ชื่อสถานที่ / ชื่อลูกค้า
                 </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                //   "@media (max-width: 1000px)": {
+                //   width: "15%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                 }}>
                   บัตรประชาชน
                 </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                //   "@media (max-width: 1000px)": {
+                //   width: "30%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                 }}>
                   ที่อยู่
                 </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                //   "@media (max-width: 1000px)": {
+                //   width: "15%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                 }}>
                   เบอร์โทร
                 </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                //   "@media (max-width: 1000px)": {
+                //   width: "10%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                 }}>
                   วงเงินเครดิต
                 </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                //   "@media (max-width: 1000px)": {
+                //   width: "10%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                }}>
                   ระยะเวลาเครดิต
                 </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,
+                //   "@media (max-width: 1000px)": {
+                //   width: "10%", // เปลี่ยนความกว้างเมื่อหน้าจอเล็กลง
+                // },
+                 }}>
                   หนี้สิน
                 </TablecellHeader>
-                <TablecellHeader />
+                <TablecellHeader width={100}/>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -135,7 +175,9 @@ const Customer = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        </Paper>
         </Grid>
+      </Grid>
     </Container>
   );
 };

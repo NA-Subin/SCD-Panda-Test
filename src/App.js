@@ -15,6 +15,7 @@ import Trucks from "./components/truck/Trucks";
 import Creditor from "./components/creditor/Creditor";
 import './App.css';
 import theme from "./theme/theme";
+import GasStationA from "./components/attendant/GasStationA";
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         {/* <Route path="/:email/*" element={ */}
+        <Route path="/gasstation-attendant" element={<GasStationA />} />
         <Route
           path="/*"
           element={
