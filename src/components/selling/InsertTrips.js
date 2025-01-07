@@ -37,7 +37,7 @@ import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import { database } from "../../server/firebase";
-import { ShowConfirmTrip, ShowError, ShowSuccess, ShowWarning } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess, ShowWarning } from "../sweetalert/sweetalert";
 import InfoIcon from '@mui/icons-material/Info';
 import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
@@ -215,7 +215,7 @@ const InsertTrips = () => {
         if (registration === "0:0") {
             ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
         } else {
-            ShowConfirmTrip(
+            ShowConfirm(
                 "ต้องการสร้างตั๋วใช่หรือไม่",
                 () => {
                     // เงื่อนไขเมื่อกดปุ่มตกลง
@@ -256,7 +256,7 @@ const InsertTrips = () => {
     }
 
     const handleTrip = () => {
-        ShowConfirmTrip(
+        ShowConfirm(
             "ต้องการสร้างเที่ยววิ่งใช่หรือไม่?",
             () => {
                 // เงื่อนไขเมื่อกดปุ่มตกลง

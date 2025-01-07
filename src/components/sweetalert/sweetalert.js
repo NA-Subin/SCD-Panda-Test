@@ -47,7 +47,7 @@ export function ShowInfo(title, text) {
   });
 }
 
-export function ShowConfirmTrip(title, onConfirm, onCancel) {
+export function ShowConfirm(title, onConfirm, onCancel) {
   MySwal.fire({
     icon: "info",
     title: title,

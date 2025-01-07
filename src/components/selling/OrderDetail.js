@@ -29,7 +29,7 @@ import {
 } from "@mui/material";
 import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import { database } from "../../server/firebase";
-import { ShowConfirmTrip, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
 
 const OrderDetail = (props) => {

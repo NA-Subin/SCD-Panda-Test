@@ -27,6 +27,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth, database, googleProvider } from "../../server/firebase";
+import Cookies from 'js-cookie';
 
 function createData(No, Email, Password, Position) {
   return {
@@ -39,6 +40,8 @@ function createData(No, Email, Password, Position) {
 
 const Login = () => {
   const navigate = useNavigate();
+
+// ตั้งค่า Token
 
   // useEffect(() => {
   //   const token = Cookies.get('token'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
@@ -104,7 +107,22 @@ const Login = () => {
                 for (let id in datas) {
                   dataList.push({ id, ...datas[id] });
                   if(datas[id].Password === password){
-                    navigate("/dashboard");
+                    // Cookies.set('sessionToken', email.split("@")[0]+"$"+datas[id].id, { 
+                    //   expires: 30, // อายุ 30 วัน
+                    //   secure: true, // ใช้งานเฉพาะ HTTPS
+                    //   sameSite: 'Lax' // จำกัดการส่งคุกกี้
+                    // });
+                  
+                    // // ดึงค่าคุกกี้เพื่อตรวจสอบ
+                    // const token = Cookies.get('sessionToken');
+                    // console.log(token); // แสดง JWT Token ในคอนโซล
+                    if(datas[id].Position === "พนักงานขายหน้าลาน"){
+                      navigate("/gasstation-attendant", { 
+                        state: { Employee: datas[id] } 
+                      });
+                    }else{
+                      navigate("/dashboard");
+                    }
                   }else{
                     ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
                   }

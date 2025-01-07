@@ -1,5 +1,5 @@
-import axios from 'axios';
+// import axios from 'axios';
 
-export const HTTP = axios.create({
-  baseURL: 'http://localhost:9501/',
-});
+// export const HTTP = axios.create({
+//   baseURL: 'http://localhost:9501/',
+// });

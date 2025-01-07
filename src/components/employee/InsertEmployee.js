@@ -82,6 +82,8 @@ const InsertEmployee = () => {
     const [expiration,setExpiration] = React.useState("");
     const [truck, setTruck] = useState([]);
     const [smallTruck, setSmallTruck] = useState([]);
+    const [gasStation, setGasStation] = useState([]);
+    const [gasStations, setGasStations] = useState("");
 
     const getTruck = async () => {
         database.ref("/truck/registration/").on("value", (snapshot) => {
@@ -107,6 +109,17 @@ const InsertEmployee = () => {
         });
     };
 
+    const getGasStation = async () => {
+        database.ref("/depot/gasStations/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            const dataGasStation = [];
+            for (let id in datas) {
+                dataGasStation.push({ id, ...datas[id] })
+            }
+            setGasStation(dataGasStation);
+        });
+    };
+
     const [driver, setDriver] = useState([]);
     const getDriver = async () => {
         database.ref("/employee/drivers/").on("value", (snapshot) => {
@@ -116,6 +129,7 @@ const InsertEmployee = () => {
     };
 
     useEffect(() => {
+        getGasStation();
         getTruck();
         getOfficer();
         getDriver();
@@ -138,7 +152,8 @@ const InsertEmployee = () => {
                             Email: email,
                             Password: password,
                             Position: position,
-                            Phone: phone
+                            Phone: phone,
+                            GasStation: gasStations
                         })
                         .then(() => {
                             ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -291,7 +306,7 @@ const InsertEmployee = () => {
                                     <MenuItem value={0}>
                                         กรุณาเลือกประเภทพนักงาน
                                     </MenuItem>
-                                    <MenuItem value={1}>พนักงานบริษัท</MenuItem>
+                                    <MenuItem value={1}>พนักงานทั่วไป</MenuItem>
                                     <MenuItem value={2}>พนักงานขับรถ</MenuItem>
                                 </Select>
                             </Paper>
@@ -301,16 +316,30 @@ const InsertEmployee = () => {
                                 <>
                                     <Grid item xs={12}>
                                         <Divider>
-                                            <Chip label="พนักงานบริษัท" size="small" />
+                                            <Chip label="พนักงานทั่วไป" size="small" />
                                         </Divider>
                                     </Grid>
                                     <Grid item xs={2}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ตำแหน่ง</Typography>
                                     </Grid>
                                     <Grid item xs={4}>
-                                        <Paper component="form">
-                                            <TextField size="small" fullWidth value={position} onChange={(e) => setPosition(e.target.value)} />
-                                        </Paper>
+                                    <Paper
+                                component="form">
+                                <Select
+                                    id="demo-simple-select"
+                                    value={position}
+                                    size="small"
+                                    sx={{ textAlign: "left" }}
+                                    onChange={(e) => setPosition(e.target.value)}
+                                    fullWidth
+                                >
+                                    <MenuItem value={0}>
+                                        กรุณาเลือกตำแหน่ง
+                                    </MenuItem>
+                                    <MenuItem value={"แอดมิน"}>แอดมิน</MenuItem>
+                                    <MenuItem value={"พนักงานขายหน้าลาน"}>พนักงานขายหน้าลาน</MenuItem>
+                                </Select>
+                            </Paper>
                                     </Grid>
                                     <Grid item xs={2}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
@@ -320,6 +349,36 @@ const InsertEmployee = () => {
                                             <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
                                         </Paper>
                                     </Grid>
+                                    {
+                                        position === "พนักงานขายหน้าลาน" &&
+                                        <>
+                                            <Grid item xs={2}>
+                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ปั้ม</Typography>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Paper
+                                                    component="form">
+                                                    <Select
+                                                        id="demo-simple-select"
+                                                        value={gasStations}
+                                                        size="small"
+                                                        sx={{ textAlign: "left" }}
+                                                        onChange={(e) => setGasStations(e.target.value)}
+                                                        fullWidth
+                                                    >
+                                                        <MenuItem value={""}>
+                                                            กรุณาเลือกปั้ม
+                                                        </MenuItem>
+                                                        {
+                                                            gasStation.map((row) => (
+                                                                <MenuItem value={row.Name}>{row.Name}</MenuItem>
+                                                            ))
+                                                        }
+                                                    </Select>
+                                                </Paper>
+                                            </Grid>
+                                        </>
+                                    }
                                 </>
                                 : menu === 2 ?
                                     <>
