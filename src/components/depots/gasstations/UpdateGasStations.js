@@ -115,14 +115,13 @@ const UpdateGasStations = (props) => {
                     ProductName: value?.ProductName || "",
                     Capacity: value?.Capacity || 0,
                     Color: value?.Color || "",
-                    Value: value?.Value || 0,
+                    Volume: value?.Volume || 0,
                     Squeeze: value?.Squeeze || 800,
                     Delivered: value?.Delivered || 0,
                     Pending1: value?.Pending1 || 0,
                     Pending2: value?.Pending2 || 0,
                     EstimateSell: value?.EstimateSell || 0,
                     Period: value?.Period || 0,
-                    // ป้องกันการซ้ำกันของ DownHole โดยการเลือกค่าแรกที่มีอยู่
                     DownHole: value?.DownHole || 0,
                     YesterDay: value?.YesterDay || 0,
                     Sell: value?.Sell || 0,
@@ -142,14 +141,14 @@ const UpdateGasStations = (props) => {
                     ProductName: row?.ProductName || "",
                     Capacity: row?.Capacity || 0,
                     Color: row?.Color || "",
-                    Value: gasStation?.Products?.[row?.ProductName] || 0,
+                    Volume: 0,
                     Squeeze: squeeze,
                     Delivered: 0,
                     Pending1: 0,
                     Pending2: 0,
                     EstimateSell: 0,
                     Period: 0,
-                    DownHole: downHoleValue, // ใช้ DownHole ที่คำนวณแล้ว
+                    DownHole: downHoleValue,
                     YesterDay: yesterdayEntry?.Value || 0,
                     Sell: 0,
                 };
@@ -161,8 +160,12 @@ const UpdateGasStations = (props) => {
             row.DownHole = calculateDownHole(row);
         });
     
-        setValues(updatedValues);
-    }, [stock, selectedDate, gasStation, squeeze, gasStationOil, downHole]);
+        // เพิ่มเงื่อนไขการอัปเดต state ถ้าข้อมูลมีการเปลี่ยนแปลงจริงๆ
+        if (JSON.stringify(updatedValues) !== JSON.stringify(values)) {
+            setValues(updatedValues);
+        }
+    }, [stock, selectedDate, gasStation, squeeze, gasStationOil, downHole, values]);  // เพิ่ม values ใน dependencies
+    
     
     const handleInputChange = (index, field, value) => {
         const updatedValues = [...values];
@@ -173,7 +176,7 @@ const UpdateGasStations = (props) => {
                 ProductName: "",
                 Capacity: 0,
                 Color: "",
-                Value: 0,
+                Volume: 0,
                 Squeeze: squeeze,
                 Delivered: 0,
                 Pending1: 0,
@@ -209,11 +212,11 @@ const UpdateGasStations = (props) => {
         const Pending1 = parseFloat(row.Pending1) || 0;
         const Pending2 = parseFloat(row.Pending2) || 0;
         const squeezeoil = parseFloat(row.Squeeze) || squeeze;
-        const value = parseFloat(row.Value) || 0;
+        const volume = parseFloat(row.Volume) || 0;
         if (estimateSell === 0) {
-            return ((value + Delivered + Pending1 + Pending2) - squeezeoil).toFixed(2);
+            return ((volume + Delivered + Pending1 + Pending2) - squeezeoil).toFixed(2);
         } else {
-            return (((value + Delivered + Pending1 + Pending2) - squeezeoil) / estimateSell).toFixed(2);
+            return (((volume + Delivered + Pending1 + Pending2) - squeezeoil) / estimateSell).toFixed(2);
         }
     };
 
@@ -222,23 +225,23 @@ const UpdateGasStations = (props) => {
         const Pending1 = parseFloat(row.Pending1) || 0;
         const Pending2 = parseFloat(row.Pending2) || 0;
         const downHole = parseFloat(row.DownHole) || 0;
-        const value = parseFloat(row.Value) || 0;
+        const volume = parseFloat(row.Volume) || 0;
         
         // console.log("downHole :",downHole);
         // console.log("value :",value);
         // return ((value + Delivered + Pending1 + Pending2)).toFixed(2);
-        if(downHole === value){
-            return ((value + Delivered + Pending1 + Pending2)).toFixed(2);
+        if(downHole === volume){
+            return ((volume + Delivered + Pending1 + Pending2)).toFixed(2);
         }
         else{
-            return ((value + Delivered + Pending1 + Pending2 + downHole)).toFixed(2);
+            return ((volume + Delivered + Pending1 + Pending2 + downHole)).toFixed(2);
         }
     };
 
     const calculateSell = (row) => {
         const yesterDay = parseFloat(row.YesterDay) || 0;
-        const value = parseFloat(row.Value) || 0;
-        return ((yesterDay - value)).toFixed(2); // ผลรวมในรูปทศนิยม 2 ตำแหน่ง
+        const volume = parseFloat(row.Volume) || 0;
+        return ((yesterDay - volume)).toFixed(2); // ผลรวมในรูปทศนิยม 2 ตำแหน่ง
     };
 
     console.log(values);
@@ -433,7 +436,7 @@ const UpdateGasStations = (props) => {
                                                 <TableRow key={key}>
                                                     <TablecellHeader sx={{ backgroundColor: value.Color, width: 50, color: "black" }}>{value.ProductName}</TablecellHeader>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Value)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Volume)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Squeeze)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Grid container>
@@ -574,7 +577,7 @@ const UpdateGasStations = (props) => {
                                                 <TableRow key={row.id}>
                                                     <TablecellHeader sx={{ backgroundColor: values[index]?.Color || 0, width: 50, color: "black" }}>{values[index]?.ProductName || 0}</TablecellHeader>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || 0)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Value || 0)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Volume || 0)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <TextField
                                                             style={{ display: 'none' }}
@@ -750,7 +753,7 @@ const UpdateGasStations = (props) => {
                                                             fullWidth
                                                         />
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Period || (values[index]?.Value - values[index]?.Squeeze))}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format((values[index]?.Capacity || 0)-(values[index]?.DownHole || 0))}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <TextField

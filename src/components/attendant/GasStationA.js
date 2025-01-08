@@ -44,7 +44,14 @@ const GasStationA = () => {
     const [open, setOpen] = React.useState(true);
     const [gasStationOil, setGasStationsOil] = useState([]);
     const [stock, setStock] = useState([]);
-    const [newdata, setNewData] = React.useState(0);
+    const [newVolume, setNewVolume] = React.useState(0);
+    const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
+        const handleDateChange = (newValue) => {
+            if (newValue) {
+                const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+                setSelectedDate(formattedDate);
+            }
+        };
 
     const location = useLocation();
     const { Employee } = location.state || {};
@@ -66,32 +73,77 @@ const GasStationA = () => {
     // ตัวอย่างการใช้งาน
     const { prefix, firstName, lastName } = getNameParts(Employee.Name);
 
+    const [gasStationID,setGasStationID] = React.useState(0);
+    const [newVolumes, setNewVolumes] = useState({});
+    const [products, setProducts] = useState([]);
+    const [report,setReport] = React.useState([]);
+    const [setting,setSetting] = React.useState(true);
+    const [gasStationReport,setGasStationReport] = React.useState([]);
+
+
+    // ฟังก์ชันอัปเดตค่า newVolume
+    const handleNewVolumeChange = (key, value) => {
+        setNewVolumes((prev) => ({
+          ...prev,
+          [key]: value, // อัปเดตเฉพาะ ProductName ที่เปลี่ยน
+        }));
+      };
+
+      const [updateVolumes, setUpdateVolumes] = useState({}); // สำหรับเก็บข้อมูล NewVolume ที่ถูกแก้ไข
+
+      const handleUpdateVolumeChange = (productName, newVolume) => {
+        // อัปเดตค่าใหม่ใน state
+        setUpdateVolumes((prevVolumes) => ({
+          ...prevVolumes,
+          [productName]: newVolume, // เก็บค่าใหม่สำหรับแต่ละ productName
+        }));
+      };
+
     const getStockOil = async () => {
         const gasStation = [];
         database.ref("/depot/gasStations").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                dataList.push({ id, ...datas[id] });
-                if (datas[id].Name === Employee.GasStation) {
-                    gasStation.push({ id, ...datas[id] });
+            const datasG = snapshot.val();
+            const dataListG = [];
+            for (let idG in datasG) {
+                dataListG.push({ idG, ...datasG[idG] });
+                if (datasG[idG].Name === Employee.GasStation) {
+                    gasStation.push({ idG, ...datasG[idG] });
+                    database.ref("/depot/stock").on("value", (snapshot) => {
+                        const datasS = snapshot.val();
+                        const productsList = [];
+                        const dataListReport = [];
+        
+                        for (let idS in datasS) {
+                            if (datasS[idS].Name === datasG[idG].Stock) {
+                                // ดึงเฉพาะ Products และบันทึกลง productsList
+                                const products = datasS[idS].Products || {};
+                                productsList.push(...Object.values(products)); // รวม Products ทั้งหมดเข้าใน array
+
+                                const report = datasG[idG].Report || {};
+                                dataListReport.push(...Object.values(report));
+                                
+                                // ตั้งค่า GasStationID
+                                setGasStationID(datasG[idG].id);
+                                database.ref("depot/gasStations/" + (datasG[idG].id - 1) + "/Report/"+ dayjs(selectedDate).format("DD-MM-YYYY")).on("value", (snapshot) => {
+                                    const datas = snapshot.val();
+                                    const dataList = [];
+                                    for (let id in datas) {
+                                        dataList.push({ id, ...datas[id] });
+                                    }
+                                    setGasStationReport(dataList);
+                                });
+                            }
+                        }
+                        if (dataListReport.length === 0) {
+                            setReport(0); // ถ้าไม่มีข้อมูลใน dataListReport ให้ตั้งค่าเป็น 0
+                          } else {
+                            setReport(dataListReport); // ถ้ามีข้อมูลให้บันทึกลง state
+                          }
+                        setStock(productsList);
+                    })
                 }
             }
             setGasStationsOil(gasStation);
-        });
-
-        database.ref("/depot/stock").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                dataList.push({ id, ...datas[id] });
-            }
-            setStock(dataList);
-
-            // const matchedStocks = dataList.filter((stock) =>
-            //     gasStation.some((station) => station.Stock === stock.Name)
-            // );
-            // setStock(matchedStocks);
         });
     };
 
@@ -118,6 +170,74 @@ const GasStationA = () => {
             }
         )
     };
+
+    console.log("show :",stock);
+    console.log("gasStation :",gasStationID);
+    console.log("Report: ",report);
+    console.log("gasStationReport: ",gasStationReport);
+
+
+    const saveProduct = () => {
+        const updatedProducts = gasStationOil.flatMap((row) =>
+          Object.entries(row.Products).map(([key, value]) => {
+            const matchingStock = stock.find((s) => s.ProductName === key);
+            if (matchingStock) {
+              return {
+                ProductName: key,
+                Capacity: matchingStock.Capacity,
+                Color: matchingStock.Color,
+                Volume: Number(value) + Number(newVolumes[key] || 0),
+                OilVolume: Number(value),
+                NewVolume: Number(newVolumes[key] || 0),
+              };
+            }
+            return null;
+          })
+        ).filter(Boolean);
+      
+        // อัปเดตข้อมูลในฐานข้อมูล
+        database
+          .ref("/depot/gasStations/" + (gasStationID - 1) + "/Report")
+          .child(dayjs(selectedDate).format("DD-MM-YYYY"))
+          .update(updatedProducts)
+          .then(() => {
+            ShowSuccess("บันทึกข้อมูลสำเร็จ");
+            console.log("Data pushed successfully");
+            window.location.reload();
+          })
+          .catch((error) => {
+            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+            console.error("Error pushing data:", error);
+          });
+      };
+
+      const updateProduct = () => {
+        const updatedProducts = gasStationReport.map((row) => {
+            return {
+              ProductName: row.ProductName,
+              Capacity: row.Capacity,
+              Color: row.Color,
+              Volume: Number(row.OilVolume) + Number(updateVolumes[row.ProductName] || 0), // คำนวณจากค่าใหม่
+              OilVolume: row.OilVolume,
+              NewVolume: Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
+            };
+          });
+        
+          // อัปเดตข้อมูลในฐานข้อมูล Firebase
+          database
+            .ref("/depot/gasStations/" + (gasStationID - 1) + "/Report")
+            .child(dayjs(selectedDate).format("DD-MM-YYYY"))
+            .update(updatedProducts)
+            .then(() => {
+              ShowSuccess("บันทึกข้อมูลสำเร็จ");
+              console.log("Data pushed successfully");
+              window.location.reload();
+            })
+            .catch((error) => {
+              ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+              console.error("Error pushing data:", error);
+            });
+      };
 
     return (
         <Container sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: { xs: "lg", sm: "lg", md: "lg" } }}>
@@ -216,9 +336,9 @@ const GasStationA = () => {
                                         <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(new Date()).locale("th")} // ตั้ง locale เป็นไทย
-                                            onChange={(newValue) => console.log(newValue)} // เอาไว้ใช้งานเมื่อมีการเลือกวันที่
+                                            value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
                                             format="DD/MM/YYYY"
+                                            onChange={handleDateChange}
                                             slotProps={{
                                                 textField: {
                                                     size: "small",
@@ -325,6 +445,7 @@ const GasStationA = () => {
                                         <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ผลิตภัณฑ์</Typography>
                                     </Grid>
                                     {
+                                        report === 0 ?
                                         gasStationOil.map((row) => (
                                             Object.entries(row.Products).map(([key, value], index) => (
                                                 <React.Fragment key={index}>
@@ -352,36 +473,108 @@ const GasStationA = () => {
                                                         </Box>
                                                     </Grid>
                                                     <Grid item xs={3.5} md={2} lg={1.5}>
-                                                        <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom >ค่าเดิม</Typography>
+                                                        <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom >ปริมาณรวม</Typography>
                                                         <Paper component="form" sx={{ marginTop: -1 }}>
                                                             <TextField
                                                                 size="small"
                                                                 type="text"
                                                                 fullWidth
-                                                                value={new Intl.NumberFormat("en-US").format(value)} // ใช้ NumberFormat สำหรับฟอร์แมตค่า
+                                                                value={new Intl.NumberFormat("en-US").format( Number(value) + Number(newVolumes[key] || 0))} // ใช้ NumberFormat สำหรับฟอร์แมตค่า
                                                                 disabled
                                                             />
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={3.5} md={2} lg={1.5}>
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom >ค่าใหม่</Typography>
+                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom >รับเข้า</Typography>
                                                         <Paper component="form" sx={{ marginTop: -1 }}>
-                                                            <TextField size="small" type="number" fullWidth value={newdata} />
+                                                            <TextField size="small" type="number" fullWidth 
+                                                            value={newVolumes[key] || ""} // ดึงค่า newVolume ตาม ProductName
+                                                            onChange={(e) =>
+                                                              handleNewVolumeChange(key, e.target.value)
+                                                            }
+                                                            />
                                                         </Paper>
                                                     </Grid>
                                                 </React.Fragment>
                                             ))
                                         ))
+                                        :
+                                        gasStationReport.map((row, index) => (
+                                            <React.Fragment key={index}>
+                                              <Grid item xs={5} md={2} lg={1}>
+                                                <Box
+                                                  sx={{
+                                                    backgroundColor: row.Color,
+                                                    borderRadius: 3,
+                                                    textAlign: "center",
+                                                    paddingTop: 2,
+                                                    paddingBottom: 1
+                                                  }}
+                                                  disabled
+                                                >
+                                                  <Typography variant="h5" fontWeight="bold" gutterBottom>{row.ProductName}</Typography>
+                                                </Box>
+                                              </Grid>
+                                      
+                                              <Grid item xs={3.5} md={2} lg={1.5}>
+                                                <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom>ปริมาณรวม</Typography>
+                                                <Paper component="form" sx={{ marginTop: -1 }}>
+                                                  <TextField
+                                                    size="small"
+                                                    type="text"
+                                                    fullWidth
+                                                    value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Volume))) : (new Intl.NumberFormat("en-US").format(Number(row.OilVolume) + Number(updateVolumes[row.ProductName] || 0)))}
+                                                    disabled
+                                                  />
+                                                </Paper>
+                                              </Grid>
+                                      
+                                              <Grid item xs={3.5} md={2} lg={1.5}>
+                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รับเข้า</Typography>
+                                                <Paper component="form" sx={{ marginTop: -1 }}>
+                                                  <TextField
+                                                    size="small"
+                                                    type={setting ? "" : "number"}
+                                                    fullWidth
+                                                    value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.NewVolume))) : (updateVolumes[row.ProductName] || row.NewVolume || "")}
+                                                    onChange={(e) => handleUpdateVolumeChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
+                                                    disabled={setting ? true : false}
+                                                  />
+                                                </Paper>
+                                              </Grid>
+                                            </React.Fragment>
+                                          ))
                                     }
                                 </Grid>
                                 <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-                                    <Button variant="contained" color="warning" type="submit" sx={{ marginRight: 3 }}>
-                                        แก้ไข
-                                    </Button>
-                                    <Button variant="contained" color="success" type="submit">
+                                    {
+                                        report === 0 ?
+                                        <Button variant="contained" color="success" onClick={saveProduct}>
                                         บันทึก
                                     </Button>
+                                    :
+                                    (
+                                        setting ? 
+                                        <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
+                                        แก้ไข
+                                    </Button>
+                                    :
+                                    <>
+                                    <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>
+                                        ยกเลิก
+                                    </Button>
+                                    <Button variant="contained" color="success" onClick={updateProduct}>
+                                        บันทึก
+                                    </Button>
+                                    </>
+                                    )
+                                    }
                                 </Box>
+                                {products.map((product, index) => (
+                                    <li key={index}>
+                                        {product.ProductName}: ปริมาณ {product.Volume},  ปริมาณก่อนรับเข้า {product.OilVolume},  รับเข้า {product.NewVolume}
+                                    </li>
+                                ))}
                             </>
                             :
                             <SettingA employee={Employee} />
