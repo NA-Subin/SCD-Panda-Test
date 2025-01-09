@@ -87,29 +87,37 @@ const InsertGasStations = (props) => {
     const [stocks, setStocks] = React.useState(0);
     const [volumeData, setVolumeData] = useState([]);
 
-    const handleVolumeChange = (product, volume) => {
+    const handleVolumeChange = (product, volume, isChecked) => {
         setVolumeData((prevData) => {
             const existingEntryIndex = prevData.findIndex(
                 (item) => item.Name === product.ProductName
             );
-
+    
             let updatedData;
-
+    
             if (existingEntryIndex !== -1) {
-                // ถ้ามีรายการอยู่แล้ว อัปเดตค่า Volume
+                // ถ้ามีรายการอยู่แล้ว อัปเดตค่า Volume และ CheckBox
                 updatedData = [...prevData];
                 updatedData[existingEntryIndex].Volume = volume;
+                updatedData[existingEntryIndex].CheckBox = isChecked;
             } else {
                 // ถ้าไม่มีรายการ เพิ่มใหม่
-                updatedData = [...prevData, { Name: product.ProductName, Volume: volume }];
+                updatedData = [
+                    ...prevData,
+                    {
+                        Name: product.ProductName,
+                        Volume: volume,
+                        CheckBox: isChecked, // บันทึกค่า CheckBox
+                    },
+                ];
             }
-
-            // นับจำนวนของสินค้า Volume ไม่เท่ากับ 0
-            const nonZeroCount = updatedData.filter(item => Number(item.Volume) !== 0).length;
-
+    
+            // นับจำนวนของ CheckBox === true
+            const selectedCount = updatedData.filter((item) => item.CheckBox === true).length;
+    
             // อัปเดตสถานะ oilWell
-            setOilWell(nonZeroCount);
-
+            setOilWell(selectedCount);
+    
             // คืนค่าการอัปเดต volumeData
             return updatedData;
         });
@@ -141,7 +149,7 @@ const InsertGasStations = (props) => {
                 Name: name,
                 OilWellNumber: oilWell,
                 Products: volumeData.reduce((acc, row) => {
-                    if (Number(row.Volume) !== 0) {
+                    if (row.CheckBox === true || row.CheckBox === "true") {
                         acc[row.Name] = row.Volume; // เพิ่ม key-value ในออบเจ็กต์
                     }
                     return acc; // คืนค่า acc เสมอ
@@ -222,7 +230,22 @@ const InsertGasStations = (props) => {
                                 <React.Fragment key={row.Name}>
                                     {row.Products.map((product, index) => (
                                         <React.Fragment key={index}>
-                                            <Grid item xs={1.5}></Grid>
+                                            <Grid item xs={1}></Grid>
+                                            <Grid item xs={0.5}>
+                                                <Checkbox
+                                                    checked={
+                                                        Array.isArray(volumeData) &&
+                                                        volumeData.find((item) => item.Name === product.ProductName)?.CheckBox === true
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleVolumeChange(
+                                                            product,
+                                                            volumeData.find((item) => item.Name === product.ProductName)?.Volume || 0,
+                                                            e.target.checked
+                                                        )
+                                                    }
+                                                />
+                                            </Grid>
                                             <Grid item xs={1.5}>
                                                 <Box sx={{ borderRadius: 3,backgroundColor: product.Color, width: "100%",height: 40, display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                       <Typography variant="h5" fontWeight="bold">{product.ProductName}</Typography>

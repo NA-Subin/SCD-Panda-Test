@@ -149,7 +149,7 @@ const UpdateGasStations = (props) => {
                     EstimateSell: 0,
                     Period: 0,
                     DownHole: downHoleValue,
-                    YesterDay: yesterdayEntry?.Value || 0,
+                    YesterDay: yesterdayEntry?.Volume || 0,
                     Sell: 0,
                 };
             });
@@ -435,7 +435,7 @@ const UpdateGasStations = (props) => {
                                             .map(([key, value]) => (
                                                 <TableRow key={key}>
                                                     <TablecellHeader sx={{ backgroundColor: value.Color, width: 50, color: "black" }}>{value.ProductName}</TablecellHeader>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity )}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Volume)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Squeeze)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
@@ -529,7 +529,7 @@ const UpdateGasStations = (props) => {
                                                         <TableRow key={row.id}>
                                                             <TablecellHeader sx={{ backgroundColor: row.Color, width: 50, color: "black" }}>{row.ProductName}</TablecellHeader>
                                                             <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value)}</TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
                                                                 <Grid container>
@@ -582,7 +582,7 @@ const UpdateGasStations = (props) => {
                                                         <TextField
                                                             style={{ display: 'none' }}
                                                             inputProps={{ readOnly: true }}
-                                                            value={values[index]?.Value || 0}
+                                                            value={values[index]?.Volume || 0}
                                                         />
                                                         <TextField
                                                             style={{ display: 'none' }}
