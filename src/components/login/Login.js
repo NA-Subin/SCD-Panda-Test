@@ -44,9 +44,9 @@ const Login = () => {
 // ตั้งค่า Token
 
   // useEffect(() => {
-  //   const token = Cookies.get('token'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
+  //   const token = Cookies.get('email'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
   //   if (token) {
-  //     if (token.split('?')[2]){
+  //     if (token){
   //       navigate('/dashboard');
   //     }
   //     else{
@@ -107,11 +107,17 @@ const Login = () => {
                 for (let id in datas) {
                   dataList.push({ id, ...datas[id] });
                   if(datas[id].Password === password){
-                    // Cookies.set('sessionToken', email.split("@")[0]+"$"+datas[id].id, { 
-                    //   expires: 30, // อายุ 30 วัน
-                    //   secure: true, // ใช้งานเฉพาะ HTTPS
-                    //   sameSite: 'Lax' // จำกัดการส่งคุกกี้
-                    // });
+                    Cookies.set('email', email, {
+                      expires: 30,
+                      secure: true,
+                      sameSite: 'Lax',
+                    });
+                    
+                    Cookies.set('sessionToken', email.split("@")[0]+"$"+datas[id].id, {
+                      expires: 30,
+                      secure: true,
+                      sameSite: 'Lax',
+                    });
                   
                     // // ดึงค่าคุกกี้เพื่อตรวจสอบ
                     // const token = Cookies.get('sessionToken');

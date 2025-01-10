@@ -116,6 +116,7 @@ const UpdateGasStations = (props) => {
                     Capacity: value?.Capacity || 0,
                     Color: value?.Color || "",
                     Volume: value?.Volume || 0,
+                    Volume: value?.Volume || 0,
                     Squeeze: value?.Squeeze || 800,
                     Delivered: value?.Delivered || 0,
                     Pending1: value?.Pending1 || 0,
@@ -144,6 +145,7 @@ const UpdateGasStations = (props) => {
                     Volume: 0,
                     Squeeze: squeeze,
                     Delivered: 0,
+                    Volume: 0,
                     Pending1: 0,
                     Pending2: 0,
                     EstimateSell: 0,
@@ -179,6 +181,7 @@ const UpdateGasStations = (props) => {
                 Volume: 0,
                 Squeeze: squeeze,
                 Delivered: 0,
+                Volume: 0,
                 Pending1: 0,
                 Pending2: 0,
                 EstimateSell: 0,
@@ -480,7 +483,7 @@ const UpdateGasStations = (props) => {
                                                         <TableRow key={row.id}>
                                                             <TablecellHeader sx={{ backgroundColor: row.Color, width: 50, color: "black" }}>{row.ProductName}</TablecellHeader>
                                                             <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value)}</TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
                                                                 <Grid container>

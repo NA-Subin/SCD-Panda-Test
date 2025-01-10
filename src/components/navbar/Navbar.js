@@ -27,6 +27,8 @@ import {
   Avatar,
   Badge,
   Box,
+  Button,
+  ButtonGroup,
   CssBaseline,
   Divider,
   Fade,
@@ -62,6 +64,7 @@ import {
 } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import Cookies from 'js-cookie';
 const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
@@ -190,19 +193,25 @@ export default function Navbar() {
   const [show2, setShow2] = React.useState(false);
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
+  const [activeButton, setActiveButton] = useState(null); // เก็บสถานะของปุ่มที่ถูกคลิก
 
-  const isMobile = useMediaQuery("(max-width:1000px)");
+  const handleButtonClick = (index) => {
+    setActiveButton(index); // อัพเดตสถานะของปุ่มที่ถูกคลิก
+  };
+
+  const isMobileMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const isMobileSM = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
   const shouldDrawerOpen = React.useMemo(() => {
-    if (isMobile) {
+    if (isMobileMD) {
       return !open; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
     } else {
       return open; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
     }
-  }, [open, isMobile]);
+  }, [open, isMobileMD]);
 
   const handleDrawerOpen = () => {
-    if (isMobile) {
+    if (isMobileMD) {
       // จอเท่ากับโทรศัพท์
       setOpen((prevOpen) => !prevOpen);
     } else {
@@ -321,31 +330,88 @@ export default function Navbar() {
       <AppBar
         position="fixed"
         open={shouldDrawerOpen}
-        sx={{ backgroundColor: theme.palette.panda.dark, height: 60,zIndex: 900 }}
+        sx={{ backgroundColor: theme.palette.panda.dark, height: 70,zIndex: 900 }}
       >
+        <Box textAlign="right" marginBottom={-3.5} marginRight={2}>
+        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>เข้าสู่ระบบโดย {Cookies.get('email')}</Typography>
+        </Box>
         <Toolbar variant="dense"
         sx={{
-          display: isMobile ? "flex" : "", // ใช้ flexbox
-          justifyContent: isMobile ?  "center": "", // จัดให้อยู่กึ่งกลางแนวนอน
-          alignItems: isMobile ? "center" : "", // จัดให้อยู่กึ่งกลางแนวตั้ง
+          display: isMobileSM ? "flex" : "", // ใช้ flexbox
+          justifyContent: isMobileSM ?  "center": "", // จัดให้อยู่กึ่งกลางแนวนอน
+          alignItems: isMobileSM ? "center" : "", // จัดให้อยู่กึ่งกลางแนวตั้ง
+          flexGrow: isMobileSM ? 1 : 0,
+          marginLeft: isMobileSM ? -2 : 0,
+          marginRight: isMobileSM ? -2 : 0,
+          paddingTop: 2,
         }}
         >
-        {isMobile ? (
+        {
+        isMobileSM ? (
       // แสดงเฉพาะ IconButton สำหรับจอโทรศัพท์
-      <IconButton
-        color={open ? "inherit" : theme.palette.panda.dark}
-        aria-label="open drawer"
-        onClick={handleDrawerOpen}
-        edge="start"
-        sx={{
-          marginLeft: 2,
-          mr: 1.5,
-          ...(shouldDrawerOpen && { display: "none" }),
-        }}
+      <>
+      <ButtonGroup
+      variant="text"
+      color="inherit"
+      size="large"
+      fullWidth
+      aria-label="Basic button group"
+      sx={{
+        "& .MuiButtonGroup-grouped:not(:last-of-type)": {
+          borderColor: "white", // กำหนดสีของเส้นแบ่ง
+          borderWidth: 2,       // กำหนดความหนาของเส้นแบ่ง
+          borderRightStyle: "solid", // รูปแบบเส้น
+        },
+        flexGrow: 1,
+        marginTop: 1,
+        height: 50
+      }}
       >
-        <MenuIcon color="inherit" fontSize="large" />
-      </IconButton>
-    ) : (
+        {[
+        { to: "/dashboard", icon: <HomeIcon fontSize="small"/> },
+        { to: "/employee", icon: <AccountCircleIcon fontSize="small"/> },
+        { to: "/trucks", icon: <LocalShippingIcon fontSize="small"/> },
+        { to: "/selling", icon: <ListAltIcon fontSize="small"/> },
+        { to: "/depots", icon: <StoreMallDirectoryIcon /> },
+        { to: "/customer", icon: <GroupsIcon fontSize="small"/> },
+        { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="small"/> },
+        { to: "/settings", icon: <SettingsIcon fontSize="small"/> },
+      ].map((item, index) => (
+        <Button
+          key={index}
+          component={Link}
+          to={item.to}
+          onClick={() => handleButtonClick(index)}
+          sx={{
+            backgroundColor: activeButton === index ? "white" : "inherit",
+            color: activeButton === index ? "info.main" : "inherit",
+            fontWeight: activeButton === index ? "bold" : "normal",
+          }}
+        >
+          {item.icon}
+        </Button>
+      ))}
+        <Button onClick={UserSignOut}><MeetingRoomIcon /></Button>
+      </ButtonGroup>
+      </>
+      
+    ) 
+    : isMobileMD ? ( 
+      <IconButton
+    color={open ? "inherit" : theme.palette.panda.dark}
+    aria-label="open drawer"
+    onClick={handleDrawerOpen}
+    edge="start"
+    sx={{
+      marginLeft: 2,
+      mr: 1.5,
+      ...(shouldDrawerOpen && { display: "none" }),
+    }}
+  >
+    <MenuIcon color="inherit" fontSize="large" />
+  </IconButton>
+    )
+    : (
       // แสดงเนื้อหาทั้งหมดสำหรับหน้าจอที่ไม่ใช่โทรศัพท์
       <>
           {!open ? (
@@ -534,7 +600,7 @@ export default function Navbar() {
                   aria-controls={!menu ? "demo-positioned-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={!menu ? "true" : undefined}
-                  onClick={handleClick}
+                  onClick={UserSignOut}
                 >
                   <MeetingRoomIcon />
                 </IconButtonOnNavbar>
@@ -564,7 +630,11 @@ export default function Navbar() {
         }
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={shouldDrawerOpen} sx={{ zIndex: 800 }}>
+      {
+        isMobileSM ?
+        ""
+        :
+        <Drawer variant="permanent" open={shouldDrawerOpen} sx={{ zIndex: 800 }}>
         <DrawerHeader sx={{ height: 60 }}>
           <Box display="flex" justifyContent="center" alignItems="center">
             <img src={Logo} width="50" />
@@ -793,6 +863,7 @@ export default function Navbar() {
           ))}
         </List>
       </Drawer>
+      }
     </>
   );
 }

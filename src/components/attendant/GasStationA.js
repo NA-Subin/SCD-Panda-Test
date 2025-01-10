@@ -39,11 +39,13 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/th';
 import SettingA from "./SettingA";
 import ReceiveOil from "./ReceiveOil";
+import SellingOil from "./SellingOil";
 
 const GasStationA = () => {
 
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(true);
+    const [openOil, setOpenOil] = React.useState("");
     const [gasStationOil, setGasStationsOil] = useState([]);
     const [stock, setStock] = useState([]);
     const [newVolume, setNewVolume] = React.useState(0);
@@ -373,6 +375,8 @@ const GasStationA = () => {
                     </Grid>
                     {
                         open ?
+                        (
+                            openOil === true ? 
                             <ReceiveOil 
                                 stock={stock}
                                 gasStationID={gasStationID}
@@ -381,6 +385,31 @@ const GasStationA = () => {
                                 selectedDate={selectedDate}
                                 gasStationOil={gasStationOil}
                             />
+                            : openOil === false ? 
+                            <SellingOil 
+                                stock={stock}
+                                gasStationID={gasStationID}
+                                report={report}
+                                gasStationReport={gasStationReport}
+                                selectedDate={selectedDate}
+                                gasStationOil={gasStationOil}
+                            />
+                            :
+                            <Grid container spacing={5} marginTop={1}>
+                                <Grid item xs={1} />
+                                <Grid item xs={5}>
+                                    <Button variant="contained" color="warning" fullWidth sx={{ height: 100,borderRadius: 3 }} onClick={() => setOpenOil(true)}>
+                                        รับน้ำมัน
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={5}>
+                                    <Button variant="contained" color="warning" fullWidth sx={{ height: 100,borderRadius: 3 }} onClick={() => setOpenOil(false)}>
+                                        ขายน้ำมัน
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={1} />
+                            </Grid>
+                        )
                             :
                             <SettingA employee={Employee} />
                     }

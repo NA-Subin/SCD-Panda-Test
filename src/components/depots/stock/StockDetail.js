@@ -29,100 +29,127 @@ import {
     Typography,
 } from "@mui/material";
 import "dayjs/locale/th";
-import { IconButtonError, RateOils, TablecellHeader } from "../../../theme/style";
+import { IconButtonError, IconButtonWarning, RateOils, TablecellHeader } from "../../../theme/style";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import SettingsIcon from '@mui/icons-material/Settings';
 import { database } from "../../../server/firebase";
-import UpdateStock from "./UpdateStock";
+import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
 const StockDetail = (props) => {
     const { stock } = props;
-    const [open, setOpen] = useState(false);
-    const [openTab, setOpenTab] = React.useState(true);
-    const toggleDrawer = (newOpen) => () => {
-        setOpenTab(newOpen);
-    };
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    const [update, setUpdate] = React.useState(true);
+    const [show, setShow] = React.useState(true);
+    const [name, setName] = React.useState(stock.Name);
+    const [volume, setVolume] = React.useState(stock.Volume);
 
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const [name, setName] = React.useState("");
-    const [no, setNo] = React.useState("");
-    const [road, setRoad] = React.useState("");
-    const [subDistrict, setSubDistrict] = React.useState("");
-    const [district, setDistrict] = React.useState("");
-    const [province, setProvince] = React.useState("");
-    const [zipCode, setZipCode] = React.useState("");
-    const [lat, setLat] = React.useState("");
-    const [lng, setLng] = React.useState("");
+    const [G91, setG91] = React.useState(stock.G91);
+    const [G95, setG95] = React.useState(stock.G95);
+    const [B7, setB7] = React.useState(stock.B7);
+    const [B95, setB95] = React.useState(stock.B95);
+    const [B10, setB10] = React.useState(stock.B10);
+    const [B20, setB20] = React.useState(stock.B20);
+    const [E20, setE20] = React.useState(stock.E20);
+    const [E85, setE85] = React.useState(stock.E85);
+    const [PWD, setPWD] = React.useState(stock.PWD);
 
     const [stocks,setStocks] = useState([]);
-    const getStock = async () => {
-        database.ref("/depot/stock").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                dataList.push({ id, ...datas[id] });
-            }
-            setStocks(dataList);
-        });
-    };
-    useEffect(() => {
-        getStock();
-    }, []);
+        const getStock = async () => {
+            database.ref("/depot/stock/"+ (stock.id - 1) +"/Products").on("value", (snapshot) => {
+                const datas = snapshot.val();
+                const dataList = [];
+                for (let id in datas) {
+                    dataList.push({ id, ...datas[id] });
+                }
+                setStocks(dataList);
+            });
+        };
+        useEffect(() => {
+            getStock();
+        }, []);
+
+        console.log(stocks);
+
+    const handleUpdate = () => {
+        database
+            .ref("/depot/stock")
+            .child(stock.id - 1)
+            .update({
+                Name: name,
+                Volume: volume,
+            })
+            .then(() => {
+                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    }
 
     return (
         <React.Fragment>
-            <Paper
-                        sx={{
-                            p: 2,
-                            // height: "70vh"
-                        }}
-                    >
-                        <Grid container spacing={2}>
-                            <Grid item xs={8} marginTop={1}>
-                                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                คลังสต็อกน้ำมัน
-                                </Typography>
+            <Paper sx={{ backgroundColor: "#f5f5f5", p:5, marginBottom:2, border: "2px solid lightgray",borderRadius: 3 }}>
+            <Grid container spacing={2} marginTop={-3} marginBottom={-1}>
+                            <Grid item lg={1} md={2} sm={3} xs={4}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ชื่อคลัง</Typography>
+                            </Grid>
+                            <Grid item lg={7} md={10} sm={9} xs={8}>
+                                <TextField fullWidth variant="standard" value={name} disabled={update ? true : false} onChange={(e) => setName(e.target.value)} />
+                            </Grid>
+                            <Grid item lg={1.5} md={4} sm={6} xs={8}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ปริมาณน้ำหนักรวม</Typography>
+                            </Grid>
+                            <Grid item lg={2.5} md={8} sm={6} xs={4}>
+                                <TextField fullWidth variant="standard" value={volume} disabled={update ? true : false} onChange={(e) => setVolume(e.target.value)} />
+                            </Grid>
+                            <Grid item lg={1} sx={{ borderRight: "1px solid lightgray" }}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ผลิตภัณฑ์</Typography>
+                            </Grid>
+                            <Grid item
+                            md={12} // เต็มความกว้างในหน้าจอเล็ก
+                            lg={11}  // 1/3 ในหน้าจอกว้าง
+                            display="flex"
+                            flexDirection="column" 
+                            >
+                                <Grid container spacing={2}
+                                >
+                                    {
+                                        stocks.map((product) => (
+                                            <Grid
+                                            item
+                                            xs={12} // เต็มความกว้างในหน้าจอเล็ก
+                                            sm={6}  // ครึ่งหนึ่งในหน้าจอกลาง
+                                            md={4}  // 1/3 ในหน้าจอกว้าง
+                                            lg={3}  // 1/4 ในหน้าจอใหญ่
+                                            display="flex"
+                                            flexDirection="column" // จัดให้เป็นแนวคอลัมน์ในแต่ละ item
+                                            key={product.ProductName}
+    >
+                                        <Box sx={{ backgroundColor: "lightgray", borderRadius: 3, display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
+                                            <Grid container>
+                                                <Grid item xs={4} sx={{ display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: product.Color, borderRadius: 3, borderRight: "4px solid #757575" }}>
+                                                    <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ marginTop: 1 }}>{product.ProductName}</Typography>
+                                                </Grid>
+                                                <Grid item xs={6} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                    <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ marginTop: 1 }}>{product.Capacity}</Typography>
+                                                </Grid>
+                                                <Grid item xs={2} marginTop={1} textAlign="center">
+                                                    <IconButtonWarning size="small">
+                                                        <SettingsIcon fontSize="small" />
+                                                    </IconButtonWarning>
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                    </Grid>
+                                        ))
+                                    }
+                                </Grid>
                             </Grid>
                         </Grid>
-                        <Divider sx={{ marginBottom: 1 }} />
-                                <TableContainer
-                                    component={Paper}
-                                    // style={{ maxHeight: "70vh" }}
-                                    sx={{ marginTop: 2 }}
-                                >
-                                    <Table stickyHeader size="small">
-                                        <TableHead sx={{ height: "7vh" }}>
-                                            <TableRow>
-                                                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                                                    ลำดับ
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                                    ชื่อคลัง
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                                    ปริมาณน้ำมัน
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                                    ที่อยู่
-                                                </TablecellHeader>
-                                                <TablecellHeader/>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {
-                                                stocks.map((row) => (
-                                                    <UpdateStock key={row.id} stock={row}/>
-                                                ))
-                                            }
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                    </Paper>
+            </Paper>
         </React.Fragment>
 
     );
