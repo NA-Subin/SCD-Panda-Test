@@ -319,7 +319,7 @@ const RepairTruck = () => {
             console.error("Error pushing Noise:", error);
           });
         database
-          .ref("truck")
+          .ref("truck/registration/")
           .child(regHead.split(":")[0])
           .update({
             RepairTruck:

@@ -337,7 +337,7 @@ const UpdateGasStations = (props) => {
             <TableContainer
                 component={Paper}
                 style={{ maxHeight: "70vh" }}
-                sx={{ marginBottom: 2 }}
+                sx={{ marginBottom: 2}}
             >
                 <Table stickyHeader size="small">
                     <TableHead>

@@ -78,8 +78,30 @@ const Dashboard = () => {
     });
   };
 
+  const [order,setOrder] = React.useState([]);
+  const [trip,setTrip] = React.useState([]);
+  const [tickets,setTickets] = React.useState([]);
+
+  const getOrder = async () => {
+    database.ref("/order").on("value", (snapshot) => {
+      const datas = snapshot.val();
+      setOrder(datas);
+    });
+
+    database.ref("/trip").on("value", (snapshot) => {
+      const datas = snapshot.val();
+      setTrip(datas);
+    });
+
+    database.ref("/tickets").on("value", (snapshot) => {
+      const datas = snapshot.val();
+      setTickets(datas);
+    });
+  };
+
   useEffect(() => {
     getEmployee();
+    getOrder();
     getDriver();
     getCreditor()
   }, []);
@@ -167,8 +189,17 @@ const Dashboard = () => {
   }}
 >
   <Grid item xs={12} sm={6} lg={3}>
-          <Paper sx={{ height: "30vh",borderRadius:5,backgroundColor: theme.palette.warning.light,color: "white",paddingTop:5 }}>
-          <Box
+          <Paper sx={{ height: "30vh",borderRadius:5,backgroundColor: theme.palette.primary.light,color: "white",paddingTop:5 }}>
+          <Box textAlign="center">
+              <Typography variant="h4" gutterBottom>
+                จำนวนเที่ยว
+              </Typography>
+              <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
+              <Typography variant="h2" gutterBottom>
+                {trip.length}
+              </Typography>
+            </Box>
+          {/* <Box
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
@@ -208,12 +239,21 @@ const Dashboard = () => {
                     >
                       40.45
                     </Typography>
-                  </Box>
+                  </Box> */}
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <Paper sx={{ height: "30vh",backgroundColor: theme.palette.success.light,borderRadius:5,color: "white",paddingTop:5 }}>
-          <Box
+          <Box textAlign="center">
+              <Typography variant="h4" gutterBottom>
+                สินค้า
+              </Typography>
+              <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
+              <Typography variant="h2" gutterBottom>
+                {order.length}
+              </Typography>
+            </Box>
+          {/* <Box
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
@@ -256,12 +296,21 @@ const Dashboard = () => {
                     >
                       40.18
                     </Typography>
-                  </Box>
+                  </Box> */}
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
-          <Paper sx={{ height: "30vh",backgroundColor: theme.palette.primary.light,borderRadius:5,color: "white",paddingTop:5 }}>
-          <Box
+          <Paper sx={{ height: "30vh",backgroundColor: theme.palette.warning.light,borderRadius:5,color: "white",paddingTop:5 }}>
+            <Box textAlign="center">
+              <Typography variant="h4" gutterBottom>
+                ตั๋วสินค้า
+              </Typography>
+              <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
+              <Typography variant="h2" gutterBottom>
+                {tickets.length}
+              </Typography>
+            </Box>
+          {/* <Box
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
@@ -292,7 +341,7 @@ const Dashboard = () => {
                     >
                       31.94
                     </Typography>
-                  </Box>
+                  </Box> */}
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -327,43 +376,7 @@ const Dashboard = () => {
         </Grid>
         <Grid item xs={12} sm={12} lg={8}>
           <Paper sx={{ height: "60vh",backgroundColor: theme.palette.panda.contrastText,borderRadius:5,p:1 }}>
-          <Stack direction="row" sx={{ width: '100%',backgroundColor: "white",height: 420, borderRadius:5,paddingTop:1,paddingLeft:2,paddingRight:2 }}>
-      <Box sx={{ flexGrow: 1 }}>
-        <SparkLineChart
-          data={[1, 4, 2, 5, 7, 2, 4, 6]}
-          xAxis={{
-            scaleType: 'time',
-            data: [
-              new Date(2024, 11, 1),
-              new Date(2024, 11, 2),
-              new Date(2024, 11, 5),
-              new Date(2024, 11, 6),
-              new Date(2024, 11, 7),
-              new Date(2024, 11, 8),
-              new Date(2024, 11, 11),
-              new Date(2024, 11, 12),
-            ],
-            valueFormatter: (value) => value.toISOString().slice(0, 10),
-          }}
-          height={400}
-          showTooltip
-          showHighlight
-        />
-      </Box>
-      <Box sx={{ flexGrow: 1 }}>
-      <BarChart
-      series={[
-        { data: [4], color: '#FF5733', label: '4' }, // สีแดง
-        { data: [3], color: '#33FF57', label: '3' }, // สีเขียว
-        { data: [5], color: '#3357FF', label: '5' }, // สีน้ำเงิน
-      ]}
-      width={500}
-      height={300}
-      margin={{ top: 20, bottom: 50 }} // เพิ่มพื้นที่ด้านล่างสำหรับ label
-      barCategoryGap={50} // เพิ่มช่องว่างระหว่างแท่ง
-    />
-      </Box>
-    </Stack>
+          
           </Paper>
         </Grid>
         <Grid item xs={12} sm={12} lg={4}>

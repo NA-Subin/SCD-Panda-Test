@@ -43,7 +43,7 @@ const SellingOil = (props) => {
 
     const [delivered, setDelivered] = useState({});
     const [setting, setSetting] = React.useState(true);
-
+    let showSingleButton = true;
 
     // ฟังก์ชันอัปเดตค่า newVolume
     const handleNewVolumeChange = (key, value) => {
@@ -130,27 +130,16 @@ const SellingOil = (props) => {
 
     const updateProduct = () => {
         const updatedProducts = 
-        gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
-        ? gasStationReport.map((row) => {
-            if(row.EstimateSell === 0 ){
-                return {
+            gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+            ? gasStationReport.map((row) => {
+            return {
                     ProductName: row.ProductName,
                     Capacity: row.Capacity,
                     Color: row.Color,
-                    Volume: row.OldVolume,
+                    Volume: row.Volume,
                     Delivered: row.Delivered,
                     EstimateSell: Number(row.EstimateSell) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
                 };
-            }else{
-                return {
-                    ProductName: row.ProductName,
-                    Capacity: row.Capacity,
-                    Color: row.Color,
-                    Volume: row.OldVolume,
-                    Delivered: row.Delivered,
-                    EstimateSell: Number(row.EstimateSell) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
-                };
-            }
             
         })
         : []
@@ -259,7 +248,7 @@ const SellingOil = (props) => {
                         :
                         gasStationReport.map((row, index) => (
                             <React.Fragment key={index}>
-                                <Grid item xs={setting ? 5 : 3} md={2} lg={1}>
+                                <Grid item xs={setting ? 5 : 3} md={setting ? 2 : 1.5} lg={1}>
                                     <Box
                                         sx={{
                                             backgroundColor: row.Color,
@@ -274,19 +263,19 @@ const SellingOil = (props) => {
                                     </Box>
                                 </Grid>
 
-                                <Grid item xs={setting ? 3.5 : 3} md={2} lg={1.5}>
+                                <Grid item xs={setting ? 3.5 : 3} md={setting ? 2 : 1.5} lg={setting ? 1.5 : 1}>
                                                                     <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom>ปริมาณรวม</Typography>
                                                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                                                         <TextField
                                                                             size="small"
                                                                             type="text"
                                                                             fullWidth
-                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Volume))) : (new Intl.NumberFormat("en-US").format(Number(row.Volume)-(Number(row.EstimateSell) + Number(updateVolumes[row.ProductName] || 0))))}
+                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Volume))) : (new Intl.NumberFormat("en-US").format((Number(row.Volume)-(Number(row.EstimateSell)) + Number(updateVolumes[row.ProductName] || 0))))}
                                                                             disabled
                                                                         />
                                                                     </Paper>
                                                                 </Grid>
-                                                                <Grid item xs={setting ? 3.5 : 3} md={2} lg={1.5}>
+                                                                <Grid item xs={setting ? 3.5 : 3} md={setting ? 2 : 1.5} lg={setting ? 1.5 : 1}>
                                                                     <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom>รวมขายไป</Typography>
                                                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                                                         <TextField
@@ -300,7 +289,7 @@ const SellingOil = (props) => {
                                                                 </Grid>
                                                                 {
                                                                     setting ? "" :
-                                                                    <Grid item xs={3} md={2} lg={1.5}>
+                                                                    <Grid item xs={3} md={1.5} lg={1}>
                                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ขายไป</Typography>
                                                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                                                         <TextField
@@ -327,21 +316,9 @@ const SellingOil = (props) => {
                         :
                         (
                             setting ?
-                            gasStationReport.map((row) => {
-                                const isEstimateSellZero = row.EstimateSell === 0;
-                              
-                                return (
-                                  <Button
-                                    key={row.id} // ควรมี key เพื่อป้องกัน warning ใน React
-                                    variant="contained"
-                                    color="warning"
-                                    sx={{ marginRight: 3 }}
-                                    onClick={isEstimateSellZero ? updateProduct : () => setSetting(false)}
-                                  >
-                                    {isEstimateSellZero ? "บันทึก" : "แก้ไข"}
-                                  </Button>
-                                );
-                              })
+                                <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
+                                    แก้ไข
+                                </Button>
                                 :
                                 <>
                                     <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>

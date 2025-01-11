@@ -350,9 +350,7 @@ const TruckRepair = (props) => {
         >
           <Grid container spacing={2}>
             <Grid item xs={10}>
-              {"จัดการซ่อม" +
-                row.Type +
-                "ทะเบียน " +
+              {"จัดการซ่อมทะเบียน " +
                 row.RegHead +
                 "::" +
                 row.RegTail +
@@ -413,19 +411,6 @@ const TruckRepair = (props) => {
                 }}
               >
                 {row.RegTail}
-              </u>
-              ประเภทรถ
-              <u
-                style={{
-                  textDecoration: "none",
-                  borderBottom: "1px dotted grey",
-                  width: "100px",
-                  display: "inline-block",
-                  textAlign: "center",
-                  color: "gray",
-                }}
-              >
-                {row.Type}
               </u>
             </Typography>
             <Grid

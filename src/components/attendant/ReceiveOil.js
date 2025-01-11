@@ -138,9 +138,9 @@ const ReceiveOil = (props) => {
                 Capacity: row.Capacity,
                 Color: row.Color,
                 // Volume: Number(row.OldVolume) + Number(updateVolumes[row.ProductName] || 0), // คำนวณจากค่าใหม่
-                Volume: row.OldVolume,
+                Volume: row.Volume,
                 Delivered: Number(row.Delivered) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
-                EstimateSell: 0
+                EstimateSell: row.EstimateSell
             };
         })
         : []

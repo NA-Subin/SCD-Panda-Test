@@ -40,6 +40,7 @@ import 'dayjs/locale/th';
 import SettingA from "./SettingA";
 import ReceiveOil from "./ReceiveOil";
 import SellingOil from "./SellingOil";
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 const GasStationA = () => {
 
@@ -213,7 +214,11 @@ const GasStationA = () => {
                         gutterBottom
                     >
                         {
-                            open ? "ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน" : "ตั้งค่าบัญชีผู้ใช้"
+                            open ? (
+                                openOil === true ? "รับน้ำมัน"
+                                : openOil === false ? "ขายน้ำมัน"
+                                : "ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน"
+                            ) : "ตั้งค่าบัญชีผู้ใช้"
                         }
                     </Typography>
                     <Box
@@ -293,7 +298,11 @@ const GasStationA = () => {
                                         />
                                     </LocalizationProvider>
                                 </Grid>
-                                <Grid item xs={5} md={7} lg={9} />
+                                <Grid item xs={5} md={7} lg={9} textAlign="right">
+                                    {
+                                        openOil === true || openOil === false ? <Button variant="contained" color="error" onClick={() => setOpenOil("")}>ย้อนกลับ</Button> : ""
+                                    }
+                                </Grid>
                             </>
                         }
                         <Grid item xs={12} sm={3} md={2} display="flex" justifyContent="center" alignItems="center">
@@ -398,13 +407,37 @@ const GasStationA = () => {
                             <Grid container spacing={5} marginTop={1}>
                                 <Grid item xs={1} />
                                 <Grid item xs={5}>
-                                    <Button variant="contained" color="warning" fullWidth sx={{ height: 100,borderRadius: 3 }} onClick={() => setOpenOil(true)}>
-                                        รับน้ำมัน
+                                    <Button
+                                        variant="contained"
+                                        color="info"
+                                        fullWidth
+                                        sx={{
+                                            height: 100,
+                                            borderRadius: 3,
+                                            fontSize: 24, // ขนาดตัวหนังสือ
+                                            fontWeight: "bold"
+                                        }}
+                                        onClick={() => setOpenOil(true)}
+                                        startIcon={isMobile ? "" : <PostAddIcon style={{ fontSize: "50px" }}/>} // กำหนดขนาดไอคอน
+                                        >
+                                        {isMobile ? <PostAddIcon style={{ fontSize: "50px" }}/> : "รับน้ำมัน"}
                                     </Button>
                                 </Grid>
                                 <Grid item xs={5}>
-                                    <Button variant="contained" color="warning" fullWidth sx={{ height: 100,borderRadius: 3 }} onClick={() => setOpenOil(false)}>
-                                        ขายน้ำมัน
+                                    <Button
+                                        variant="contained"
+                                        color="info"
+                                        fullWidth
+                                        sx={{
+                                            height: 100,
+                                            borderRadius: 3,
+                                            fontSize: 24, // ขนาดตัวหนังสือ
+                                            fontWeight: "bold"
+                                        }}
+                                        onClick={() => setOpenOil(false)}
+                                        startIcon={isMobile ? "" : <AttachMoneyIcon style={{ fontSize: "50px" }}/>} // กำหนดขนาดไอคอน
+                                        >
+                                            {isMobile ? <AttachMoneyIcon style={{ fontSize: "50px" }}/> : "ขายน้ำมัน"}
                                     </Button>
                                 </Grid>
                                 <Grid item xs={1} />

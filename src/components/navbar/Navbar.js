@@ -397,19 +397,157 @@ export default function Navbar() {
       
     ) 
     : isMobileMD ? ( 
-      <IconButton
+      <>
+      <Grid container spacing={2} paddingTop={1}>
+            <Grid item xs={6}>
+            <IconButton
     color={open ? "inherit" : theme.palette.panda.dark}
     aria-label="open drawer"
     onClick={handleDrawerOpen}
     edge="start"
     sx={{
-      marginLeft: 2,
-      mr: 1.5,
       ...(shouldDrawerOpen && { display: "none" }),
     }}
   >
     <MenuIcon color="inherit" fontSize="large" />
   </IconButton>
+            </Grid>
+            <Grid
+              item
+              xs={6}
+              justifyContent="right"
+              display="flex"
+              alignItems="center"
+            >
+<Tooltip title="แจ้งเตือน">
+                <IconButtonOnNavbar
+                  sx={{
+                    backgroundColor: !notify
+                      ? theme.palette.panda.dark
+                      : "white",
+                    marginRight: 1,
+                    marginLeft: 1,
+                  }}
+                  color={!notify ? "inherit" : theme.palette.panda.dark}
+                  onClick={handleNotify}
+                >
+                  <Badge
+                    badgeContent={20}
+                    color="error"
+                    max={9}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        fontSize: 11, // ขนาดตัวเลขใน Badge
+                        minWidth: 15, // ความกว้างของ Badge
+                        height: 15, // ความสูงของ Badge
+                        right: -2,
+                      },
+                    }}
+                  >
+                    <NotificationsActiveIcon />
+                  </Badge>
+                  <Snackbar
+                    open={notify}
+                    onClose={handleNotifyClose}
+                    autoHideDuration={5000}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }} // Position at top-right
+                  >
+                    <Alert onClose={handleNotifyClose} severity="info" sx={{ width: "100%", marginTop: 5 }}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>แจ้งเตือน</Typography>
+                      <Divider sx={{ marginTop:1 }}/>
+                      <TableContainer
+                        component={Paper}
+                        style={{ maxHeight: "50vh" }}
+                      >
+                        <Table stickyHeader size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 14,backgroundColor: theme.palette.panda.dark }}>
+                                ลำดับ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 14 }}>
+                                แจ้งเตือน
+                              </TablecellHeader>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell>1</TableCell>
+                              <TableCell>มีการอนุมัติเที่ยววิ่งแล้ว</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Alert>
+                  </Snackbar>
+                </IconButtonOnNavbar>
+              </Tooltip>
+              <Divider
+                orientation="vertical"
+                variant="fullWidth"
+                flexItem
+                sx={{ border: "1px solid white" }}
+              />
+              <Tooltip title="ตั้งค่า">
+                <IconButtonOnNavbar
+                  sx={{
+                    backgroundColor: !setting
+                      ? theme.palette.panda.dark
+                      : "white",
+                    marginRight: 1,
+                    marginLeft: 1,
+                  }}
+                  color={!setting ? "inherit" : theme.palette.panda.dark}
+                  onClick={handleSetting}
+                >
+                  <SettingsIcon />
+                </IconButtonOnNavbar>
+              </Tooltip>
+              <Divider
+                orientation="vertical"
+                variant="fullWidth"
+                flexItem
+                sx={{ border: "1px solid white" }}
+              />
+              <Tooltip title="ออกจากระบบ">
+                <IconButtonOnNavbar
+                  sx={{
+                    backgroundColor: !menu ? theme.palette.panda.dark : "white",
+                    marginRight: 1,
+                    marginLeft: 1,
+                  }}
+                  color={!menu ? "inherit" : theme.palette.panda.dark}
+                  id="demo-positioned-button"
+                  aria-controls={!menu ? "demo-positioned-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={!menu ? "true" : undefined}
+                  onClick={UserSignOut}
+                >
+                  <MeetingRoomIcon />
+                </IconButtonOnNavbar>
+              </Tooltip>
+              <Divider
+                orientation="vertical"
+                variant="fullWidth"
+                flexItem
+                sx={{ border: "1px solid white" }}
+              />
+              <Menu
+                id="fade-menu"
+                MenuListProps={{
+                  "aria-labelledby": "fade-button",
+                }}
+                anchorEl={anchorEl}
+                open={menu}
+                onClose={handleClose}
+                TransitionComponent={Fade}
+              >
+                <MenuItem onClick={handleLogout}>ออกจากระบบ</MenuItem>
+              </Menu>
+            </Grid>
+      </Grid>
+      </>
+      
     )
     : (
       // แสดงเนื้อหาทั้งหมดสำหรับหน้าจอที่ไม่ใช่โทรศัพท์
