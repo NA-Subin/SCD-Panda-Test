@@ -54,6 +54,22 @@ const Trucks = () => {
     setOpenTab(newOpen);
   };
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+      
+        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+        useEffect(() => {
+          const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+          };
+      
+          window.addEventListener('resize', handleResize); // เพิ่ม event listener
+      
+          // ลบ event listener เมื่อ component ถูกทำลาย
+          return () => {
+            window.removeEventListener('resize', handleResize);
+          };
+        }, []);
+
   const [smallTruck, setSmallTruck] = React.useState([]);
   const [regHead, setRegHead] = React.useState([]);
   const [regTail, setRegTail] = React.useState([]);
@@ -141,7 +157,7 @@ const Trucks = () => {
       {
         repair === false ?
           <>
-            <Grid container spacing={5} marginTop={0.5} marginBottom={2} >
+            <Grid container spacing={5} marginTop={0.5} marginBottom={2} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-75) : windowWidth <= 600 ? (windowWidth) : (windowWidth-200) }}>
               <Grid item xs={openMenu === 1 ? 6 : 3} sm={openMenu === 1 ? 8 : 2} lg={openMenu === 1 ? 10 : 1}>
                 <Tooltip title="รถใหญ่" placement="top">
                   <Button
@@ -246,14 +262,18 @@ const Trucks = () => {
                   }
                 </Tooltip>
               </Grid>
-            </Grid>
-            <InsertTruck />
-            {
-              openMenu === 1 ? <BigTruckRegHead truck={regHead} repair={repairRegHead} />
-                : openMenu === 2 ? <BigTruckRegTail truck={regTail} status={status} />
-                  : <SmallTruck truck={smallTruck} repair={repairSmallTruck} />
+              <Grid item xs={12} marginBottom={-7}>
+                <InsertTruck />
+              </Grid>
+              <Grid item xs={12}>
+              {
+                openMenu === 1 ? <BigTruckRegHead truck={regHead} repair={repairRegHead} />
+                  : openMenu === 2 ? <BigTruckRegTail truck={regTail} status={status} />
+                    : <SmallTruck truck={smallTruck} repair={repairSmallTruck} />
 
-            }
+              }
+              </Grid>
+            </Grid>
           </>
           :
           <RepairTruck />

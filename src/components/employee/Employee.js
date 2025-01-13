@@ -135,6 +135,22 @@ const Employee = () => {
     getRegitration();
   }, []);
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+      
+        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+        useEffect(() => {
+          const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+          };
+      
+          window.addEventListener('resize', handleResize); // เพิ่ม event listener
+      
+          // ลบ event listener เมื่อ component ถูกทำลาย
+          return () => {
+            window.removeEventListener('resize', handleResize);
+          };
+        }, []);
+
   const handlePost = () => {
     database
       .ref("/employee/drivers/")
@@ -196,8 +212,10 @@ const Employee = () => {
         พนักงาน
       </Typography>
       <Divider sx={{ marginBottom: 2 }} />
-      <InsertEmployee />
-      <Grid container spacing={3} marginTop={1} marginLeft={-7}>
+      <Grid container spacing={3} marginTop={1} marginLeft={-7} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-75) : windowWidth <= 600 ? (windowWidth) : (windowWidth-200) }}>
+        <Grid item xs={12}>
+          <InsertEmployee />
+        </Grid>
         {shouldDrawerOpen ? (
           <Grid item xs={1.5}>
             <Button
@@ -370,7 +388,7 @@ const Employee = () => {
                 style={{ maxHeight: "90vh" }}
                 sx={{ marginTop: 2 }}
               >
-                <Table stickyHeader size="small">
+                <Table stickyHeader size="small" sx={{ width: "1200px"}}>
                   <TableHead sx={{ height: "7vh" }}>
                     <TableRow>
                       <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -496,7 +514,7 @@ const Employee = () => {
                 style={{ maxHeight: "90vh" }}
                 sx={{ marginTop: 2 }}
               >
-                <Table stickyHeader size="small">
+                <Table stickyHeader size="small" sx={{ width: "1200px" }}>
                   <TableHead sx={{ height: "7vh" }}>
                     <TableRow>
                       <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>

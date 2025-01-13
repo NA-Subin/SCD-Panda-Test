@@ -56,6 +56,22 @@ const Customer = () => {
     getData();
   }, []);
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+      
+        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+        useEffect(() => {
+          const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+          };
+      
+          window.addEventListener('resize', handleResize); // เพิ่ม event listener
+      
+          // ลบ event listener เมื่อ component ถูกทำลาย
+          return () => {
+            window.removeEventListener('resize', handleResize);
+          };
+        }, []);
+
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
       <Typography
@@ -66,10 +82,10 @@ const Customer = () => {
       >
         ลูกค้า
       </Typography>
-      <Box textAlign="right" marginTop={-8} marginBottom={4} marginRight={5}>
-        <InsertCustomer />
-      </Box>
-      <Grid container spacing={3} marginTop={1}>
+      <Grid container spacing={3} marginTop={1} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-85) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-220) }}>
+        <Grid item xs={12} textAlign="right" marginTop={-12} marginBottom={4} marginRight={5}>
+          <InsertCustomer />
+        </Grid>
         <Grid item xs={12}>
         <Divider sx={{ marginTop: 1 }} />
         <Paper
@@ -83,11 +99,11 @@ const Customer = () => {
         </Typography>
                       <Divider sx={{ marginBottom: 1 }} />
                       <TableContainer
-                        component={Paper}
-                        style={{ maxHeight: "90vh" }}
-                        sx={{ marginTop: 2 }}
-                      >
-                        <Table stickyHeader size="small">
+                                      component={Paper}
+                                      style={{ maxHeight: "70vh" }}
+                                      sx={{ marginBottom: 2}}
+                                  >
+                                      <Table stickyHeader size="small" sx={{ width: "1200px" }}>
             <TableHead sx={{ height: "7vh" }}>
               <TableRow>
                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16,

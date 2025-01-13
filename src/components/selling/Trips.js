@@ -65,10 +65,26 @@ const Wholesale = () => {
         getTrip();
     }, []);
 
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+          
+            // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+            useEffect(() => {
+              const handleResize = () => {
+                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+              };
+          
+              window.addEventListener('resize', handleResize); // เพิ่ม event listener
+          
+              // ลบ event listener เมื่อ component ถูกทำลาย
+              return () => {
+                window.removeEventListener('resize', handleResize);
+              };
+            }, []);
+
 
     return (
         <React.Fragment>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-150) : windowWidth <= 600 ? (windowWidth-50) : (windowWidth-300) }}>
                 <Grid item xs={12}>
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                         รายการขายน้ำมัน
@@ -80,7 +96,7 @@ const Wholesale = () => {
                         component={Paper}
                         style={{ maxHeight: "90vh" }}
                         sx={{
-                            maxWidth: 1200,
+                            maxWidth: "1200px",
                             overflowX: "auto", // แสดง scrollbar แนวนอน
                             marginTop: 2,
                         }}

@@ -75,25 +75,24 @@ const Setting = () => {
       </Typography>
       <Divider />
       <Grid container spacing={2} marginTop={2}>
-        <Grid item xs={3} />
-        <Grid item xs={2}>
+        <Grid item xs={12} sm={1.5} md={3}/>
+        <Grid item xs={4} sm={3} md={2}>
           <Button variant="contained" color={open === 1 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(1)}>
             <BusinessIcon fontSize="large" />
           </Button>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={4} sm={3} md={2}>
           <Button variant="contained" color={open === 2 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(2)}>
             <AssignmentIndIcon fontSize="large" />
           </Button>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={4} sm={3} md={2}>
           <Button variant="contained" color={open === 3 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(3)}>
             <PasswordIcon fontSize="large" />
           </Button>
         </Grid>
-        <Grid item xs={3} />
-        <Grid item xs={1} />
-        <Grid item xs={10} marginTop={3}>
+        <Grid item xs={12} sm={1.5} md={3} />
+        <Grid item xs={12} marginTop={3}>
           {
             open === 1 ?
               <Paper sx={{ height: "70vh", borderRadius: 5, padding: 2 }}>
@@ -308,7 +307,6 @@ const Setting = () => {
                   : ""
           }
         </Grid>
-        <Grid item xs={1} />
       </Grid>
     </Container>
   );

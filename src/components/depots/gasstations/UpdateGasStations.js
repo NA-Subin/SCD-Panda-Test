@@ -267,10 +267,8 @@ const UpdateGasStations = (props) => {
     return (
         <React.Fragment>
             <Grid container marginBottom={1}>
-                <Grid item xs={0.5}>
-                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" gutterBottom>ชื่อปั้ม</Typography>
-                </Grid>
-                <Grid item xs={1.5}>
+                <Grid item xs={6.5} sm={5} md={3} display="flex" justifyContent="center" alignItems="center">
+                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ชื่อปั้ม</Typography>
                     <TextField
                         fullWidth
                         variant="standard"
@@ -287,10 +285,8 @@ const UpdateGasStations = (props) => {
                         }}
                         disabled />
                 </Grid>
-                <Grid item xs={1}>
-                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" gutterBottom>จำนวนหลุม</Typography>
-                </Grid>
-                <Grid item xs={1.5}>
+                <Grid item xs={5.5} sm={3} md={2} display="flex" justifyContent="center" alignItems="center">
+                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>จำนวนหลุม</Typography>
                     <TextField
                         fullWidth
                         variant="standard"
@@ -307,10 +303,8 @@ const UpdateGasStations = (props) => {
                         }}
                         disabled />
                 </Grid>
-                <Grid item xs={1}>
-                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" gutterBottom>คลังสต็อก</Typography>
-                </Grid>
-                <Grid item xs={1.5}>
+                <Grid item xs={12} sm={4} md={3} display="flex" justifyContent="center" alignItems="center">
+                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>คลังสต็อก</Typography>
                     <TextField
                         fullWidth
                         variant="standard"
@@ -327,10 +321,8 @@ const UpdateGasStations = (props) => {
                         }}
                         disabled />
                 </Grid>
-                <Grid item xs={0.5}>
-                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" gutterBottom>ที่อยู่</Typography>
-                </Grid>
-                <Grid item xs={4.5}>
+                <Grid item xs={12} sm={12} md={4} display="flex" justifyContent="center" alignItems="center">
+                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ที่อยู่</Typography>
                     <TextField fullWidth variant="standard" value={gasStation.Address} disabled />
                 </Grid>
             </Grid>
@@ -339,7 +331,7 @@ const UpdateGasStations = (props) => {
                 style={{ maxHeight: "70vh" }}
                 sx={{ marginBottom: 2}}
             >
-                <Table stickyHeader size="small">
+                <Table stickyHeader size="small" sx={{ width: 1200 }}>
                     <TableHead>
                         <TableRow>
                             <TablecellHeader colSpan={2} width={160} sx={{ textAlign: "center", backgroundColor: theme.palette.panda.main }}>

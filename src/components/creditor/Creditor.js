@@ -46,6 +46,22 @@ const Creditor = () => {
     setOpenTab(newOpen);
   };
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+        
+          // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+          useEffect(() => {
+            const handleResize = () => {
+              setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            };
+        
+            window.addEventListener('resize', handleResize); // เพิ่ม event listener
+        
+            // ลบ event listener เมื่อ component ถูกทำลาย
+            return () => {
+              window.removeEventListener('resize', handleResize);
+            };
+          }, []);
+
   const [creditor, setCreditor] = useState([]);
 
   const getCreditor = async () => {
@@ -73,21 +89,22 @@ const Creditor = () => {
       >
         เจ้าหนี้การค้า
       </Typography>
-      <Box textAlign="right" marginTop={-8} marginBottom={4} marginRight={5}>
-        <InsertCreditor/>
-      </Box>
       <Divider sx={{ marginBottom: 1 }}/>
-      <Grid container spacing={3} p={5}>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
+      <Grid container spacing={3} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-85) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-220) }}>
+        <Grid item xs={12} textAlign="right" marginTop={-10} marginBottom={4} marginRight={5}>
+          <InsertCreditor/>
+        </Grid>
+        <Grid item xs={12}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
                 รายชื่อเจ้าหนี้การค้า
               </Typography>
               <Divider sx={{ marginBottom: 1 }} />
               <TableContainer
-                component={Paper}
-                style={{ maxHeight: "90vh" }}
-                sx={{ marginTop: 2 }}
-              >
-                <Table stickyHeader size="small">
+                              component={Paper}
+                              style={{ maxHeight: "70vh" }}
+                              sx={{ marginBottom: 2}}
+                          >
+                              <Table stickyHeader size="small" sx={{ width: "1200px" }}>
                   <TableHead sx={{ height: "7vh" }}>
                     <TableRow>
                       <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -128,6 +145,7 @@ const Creditor = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+        </Grid>
               </Grid>
     </Container>
   );
