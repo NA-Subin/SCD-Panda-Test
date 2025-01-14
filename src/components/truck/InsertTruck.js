@@ -255,10 +255,10 @@ const InsertTruck = (props) => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2}>
-                        <Grid item xs={2}>
+                        <Grid item sm={2} xs={4}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทรถ</Typography>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item sm={4} xs={8}>
                             <Paper
                                 component="form">
                                 <Select
@@ -278,10 +278,10 @@ const InsertTruck = (props) => {
                                 </Select>
                             </Paper>
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid item sm={2} xs={4}>
                                             <Typography variant="subtitle1" textAlign="right" fontWeight="bold" marginTop={1} gutterBottom>เลือกบริษัท</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item sm={4} xs={8}>
                                             <Paper
                                                 component="form">
                                                 <Select
@@ -307,18 +307,18 @@ const InsertTruck = (props) => {
                         {
                             menu === 1 ?
                                 <>
-                                    <Grid item xs={2}>
+                                    <Grid item sm={2} xs={4}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ทะเบียนหัว</Typography>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item sm={4} xs={8}>
                                         <Paper component="form">
                                             <TextField size="small" fullWidth value={regHead} onChange={(e) => setRegHead(e.target.value)} />
                                         </Paper>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item sm={2} xs={4}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" gutterBottom marginTop={1}>ใบจดทะเบียนหัว</Typography>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item sm={4} xs={8}>
                                         <FormControlLabel
                                             checked={licenseRegHead === "มี" ? true : false}
                                             control={<Checkbox onChange={() => setLicenseRegHead("มี")} />}
@@ -330,10 +330,10 @@ const InsertTruck = (props) => {
                                             label="ไม่มี"
                                         />
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item sm={2} xs={4}>
                                         <Typography variant="subtitle1" textAlign="right" fontWeight="bold" marginTop={1} gutterBottom>ทะเบียนหาง</Typography>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item sm={4} xs={8}>
                                         <Paper
                                             component="form">
                                             <Select
@@ -359,10 +359,10 @@ const InsertTruck = (props) => {
                                             </Select>
                                         </Paper>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item sm={2} xs={4}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ช่อง</Typography>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item sm={4} xs={8}>
                                         <Paper component="form">
                                             {
                                                 tail === "ไม่มี" ?
@@ -372,10 +372,10 @@ const InsertTruck = (props) => {
                                             }
                                         </Paper>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item sm={2} xs={4}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>น้ำหนักรวม</Typography>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item sm={4} xs={8}>
                                         <Paper component="form">
                                             <TextField size="small" fullWidth value={weight} onChange={(e) => setWeight(e.target.value)} />
                                         </Paper>
@@ -383,28 +383,28 @@ const InsertTruck = (props) => {
                                     {
                                         licenseRegHead === "มี" ?
                                             <>
-                                                <Grid item xs={12}>
+                                                <Grid item sm={12} xs={12}>
                                                     <Divider>
                                                         <Chip label="ใบจดทะเบียนหัวรถใหญ่" size="small" />
                                                     </Divider>
                                                 </Grid>
-                                                <Grid item xs={2}>
+                                                <Grid item sm={2} xs={4}>
                                                     <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่</Typography>
                                                 </Grid>
-                                                <Grid item xs={4}>
+                                                <Grid item sm={4} xs={8}>
                                                     <Paper component="form" >
                                                         <TextField size="small" fullWidth value={vehicleRegistration} onChange={(e) => setVehicleRegistration(e.target.value)} />
                                                     </Paper>
                                                 </Grid>
-                                                <Grid item xs={2}>
+                                                <Grid item sm={2} xs={4}>
                                                     <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
                                                 </Grid>
-                                                <Grid item xs={4}>
+                                                <Grid item sm={4} xs={8}>
                                                     <Paper component="form" >
                                                         <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
                                                     </Paper>
                                                 </Grid>
-                                                <Grid item xs={12}>
+                                                <Grid item sm={12} xs={12}>
                                                     <UploadButton />
                                                 </Grid>
                                             </>
@@ -413,18 +413,18 @@ const InsertTruck = (props) => {
                                 </>
                                 : menu === 2 ?
                                     <>
-                                        <Grid item xs={2}>
+                                        <Grid item sm={2} xs={4}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ทะเบียนหาง</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item sm={4} xs={8}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={regTail} onChange={(e) => setRegTail(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item sm={2} xs={4}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ใบจดทะเบียนหาง</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item sm={4} xs={8}>
                                             <FormControlLabel
                                                 checked={licenseRegTail === "มี" ? true : false}
                                                 control={<Checkbox onChange={() => setLicenseRegTail("มี")} />}
@@ -436,18 +436,18 @@ const InsertTruck = (props) => {
                                                 label="ไม่มี"
                                             />
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item sm={2} xs={4}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ช่อง</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item sm={4} xs={8}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={cap} onChange={(e) => setCap(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item sm={2} xs={4}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>น้ำหนัก</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item sm={4} xs={8}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={weight} onChange={(e) => setWeight(e.target.value)} />
                                             </Paper>
@@ -455,28 +455,28 @@ const InsertTruck = (props) => {
                                         {
                                             licenseRegTail === "มี" ?
                                                 <>
-                                                    <Grid item xs={12}>
+                                                    <Grid item sm={12} xs={12}>
                                                         <Divider>
                                                             <Chip label="ใบจดทะเบียนหางรถใหญ่" size="small" />
                                                         </Divider>
                                                     </Grid>
-                                                    <Grid item xs={2}>
+                                                    <Grid item sm={2} xs={4}>
                                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่</Typography>
                                                     </Grid>
-                                                    <Grid item xs={4}>
+                                                    <Grid item sm={4} xs={8}>
                                                         <Paper component="form" >
                                                             <TextField size="small" fullWidth value={vehicleRegistration} onChange={(e) => setVehicleRegistration(e.target.value)} />
                                                         </Paper>
                                                     </Grid>
-                                                    <Grid item xs={2}>
+                                                    <Grid item sm={2} xs={4}>
                                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
                                                     </Grid>
-                                                    <Grid item xs={4}>
+                                                    <Grid item sm={4} xs={8}>
                                                         <Paper component="form" >
                                                             <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
                                                         </Paper>
                                                     </Grid>
-                                                    <Grid item xs={12}>
+                                                    <Grid item sm={12} xs={12}>
                                                         <UploadButton />
                                                     </Grid>
                                                 </>
@@ -486,18 +486,18 @@ const InsertTruck = (props) => {
                                     :
                                     menu === 3 ?
                                         <>
-                                            <Grid item xs={2}>
+                                            <Grid item sm={2} xs={4}>
                                                 <Typography variant="subtitle1" fontWeight="bold" marginTop={1} textAlign="right" gutterBottom>ทะเบียน</Typography>
                                             </Grid>
-                                            <Grid item xs={4}>
+                                            <Grid item sm={4} xs={8}>
                                                 <Paper component="form">
                                                     <TextField size="small" fullWidth value={registration} onChange={(e) => setRegistration(e.target.value)} />
                                                 </Paper>
                                             </Grid>
-                                            <Grid item xs={2}>
+                                            <Grid item sm={2} xs={4}>
                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" gutterBottom marginTop={1}>ใบจดทะเบียน</Typography>
                                             </Grid>
-                                            <Grid item xs={4}>
+                                            <Grid item sm={4} xs={8}>
                                                 <FormControlLabel
                                                     checked={licenseSmallTruck === "มี" ? true : false}
                                                     control={<Checkbox onChange={() => setLicenseSmallTruck("มี")} />}
@@ -509,10 +509,10 @@ const InsertTruck = (props) => {
                                                     label="ไม่มี"
                                                 />
                                             </Grid>
-                                            <Grid item xs={2}>
+                                            <Grid item sm={2} xs={4}>
                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>น้ำหนัก</Typography>
                                             </Grid>
-                                            <Grid item xs={4}>
+                                            <Grid item sm={4} xs={8}>
                                                 <Paper component="form">
                                                     <TextField size="small" fullWidth value={weight} onChange={(e) => setWeight(e.target.value)} />
                                                 </Paper>
@@ -520,28 +520,28 @@ const InsertTruck = (props) => {
                                             {
                                                 licenseSmallTruck === "มี" ?
                                                     <>
-                                                        <Grid item xs={12}>
+                                                        <Grid item sm={12} xs={12}>
                                                             <Divider>
                                                                 <Chip label="ใบจดทะเบียนรถเล็ก" size="small" />
                                                             </Divider>
                                                         </Grid>
-                                                        <Grid item xs={2}>
+                                                        <Grid item sm={2} xs={4}>
                                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่</Typography>
                                                         </Grid>
-                                                        <Grid item xs={4}>
+                                                        <Grid item sm={4} xs={8}>
                                                             <Paper component="form" >
                                                                 <TextField size="small" fullWidth value={vehicleRegistration} onChange={(e) => setVehicleRegistration(e.target.value)} />
                                                             </Paper>
                                                         </Grid>
-                                                        <Grid item xs={2}>
+                                                        <Grid item sm={2} xs={4}>
                                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
                                                         </Grid>
-                                                        <Grid item xs={4}>
+                                                        <Grid item sm={4} xs={8}>
                                                             <Paper component="form" >
                                                                 <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
                                                             </Paper>
                                                         </Grid>
-                                                        <Grid item xs={12}>
+                                                        <Grid item sm={12} xs={12}>
                                                             <UploadButton />
                                                         </Grid>
                                                     </>

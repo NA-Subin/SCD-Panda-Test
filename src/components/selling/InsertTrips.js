@@ -499,12 +499,10 @@ const InsertTrips = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={1} marginTop={2}>
-                        <Grid item xs={1} textAlign="right" marginTop={1}>
+                        <Grid item sm={1} xs={3} textAlign="right" marginTop={1}>
                             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>วันที่รับ</Typography>
                         </Grid>
-                        <Grid item xs={11} textAlign="right">
-                            <Grid container spacing={2}>
-                                <Grid item xs={3.5}>
+                        <Grid item sm={4} xs={9} textAlign="right">
                                     <Paper
                                         component="form">
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -520,10 +518,10 @@ const InsertTrips = () => {
                                         </LocalizationProvider>
                                     </Paper>
                                 </Grid>
-                                <Grid item xs={1.5} marginTop={1}>
+                                <Grid item sm={1.5} xs={3} marginTop={1}>
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                 </Grid>
-                                <Grid item xs={7}>
+                                <Grid item sm={5.5} xs={9}>
                                     <Paper
                                         component="form">
                                         <Select
@@ -546,8 +544,8 @@ const InsertTrips = () => {
                                         </Select>
                                     </Paper>
                                 </Grid>
-                            </Grid>
                         </Grid>
+                        <Grid container spacing={1} marginTop={2}>
                         {
                             showTickers ?
                                 <Grid item xs={12} marginTop={1} marginBottom={1}>
@@ -576,10 +574,10 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={80} sx={{ textAlign: "center" }} rowSpan={2}>
                                                                 ลำดับ
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={80} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                            <TablecellHeader width={80} sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
                                                                 รหัสตั๋ว
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={500} sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
+                                                            <TablecellHeader width={500} sx={{ textAlign: "center"}} rowSpan={2}>
                                                                 ตั๋ว
                                                             </TablecellHeader>
                                                             <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
@@ -720,18 +718,18 @@ const InsertTrips = () => {
                                                 </Table>
                                             </TableContainer>
                                             <Grid container spacing={1} marginTop={1}>
-                                                <Grid item xs={5}>
+                                                <Grid item sm={5} xs={12}>
                                                     <Paper
                                                         component="form"
                                                     >
                                                         <Grid container>
-                                                            <Grid item xs={1.5}>
+                                                            <Grid item sm={1.5} xs={2}>
                                                                 <Paper
                                                                     component="form">
                                                                     <TextField size="small" fullWidth sx={{ borderRadius: 10 }} value={code} onChange={(e) => setCode(e.target.value)} />
                                                                 </Paper>
                                                             </Grid>
-                                                            <Grid item xs={8}>
+                                                            <Grid item sm={8} xs={7}>
                                                                 <Select
                                                                     id="demo-simple-select"
                                                                     value={tickets}
@@ -774,16 +772,16 @@ const InsertTrips = () => {
                                                                     )} */}
                                                                 </Select>
                                                             </Grid>
-                                                            <Grid item xs={2.5} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
+                                                            <Grid item sm={2.5} xs={3} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
                                                                 <Button variant="contained" color="info" fullWidth onClick={handlePost}>เพิ่มตั๋ว</Button>
                                                             </Grid>
                                                         </Grid>
                                                     </Paper>
                                                 </Grid>
-                                                <Grid item xs={1} marginTop={1}>
+                                                <Grid item sm={1} xs={2} marginTop={1}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>สถานะ</Typography>
                                                 </Grid>
-                                                <Grid item xs={6}>
+                                                <Grid item sm={6} xs={10}>
                                                     <Paper
                                                         component="form">
                                                         <Select
@@ -803,10 +801,10 @@ const InsertTrips = () => {
                                                         </Select>
                                                     </Paper>
                                                 </Grid>
-                                                <Grid item xs={1} marginTop={1}>
+                                                <Grid item sm={1} xs={3} marginTop={1}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>น้ำมันหนัก</Typography>
                                                 </Grid>
-                                                <Grid item xs={3.5}>
+                                                <Grid item sm={3.5} xs={9}>
                                                     <Paper
                                                         component="form">
                                                         <TextField size="small" type="number" fullWidth
@@ -819,12 +817,12 @@ const InsertTrips = () => {
                                                             disabled />
                                                     </Paper>
                                                 </Grid>
-                                                <Grid item xs={1} marginTop={1}>
+                                                <Grid item sm={1} xs={3} marginTop={1}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>น้ำหนักรถ</Typography>
                                                 </Grid>
                                                 {
                                                     registration.split(":")[0] === 0 ?
-                                                        <Grid item xs={2}>
+                                                        <Grid item sm={2} xs={9} >
                                                             <Paper
                                                                 component="form">
                                                                 <TextField size="small" type="number" fullWidth
@@ -841,7 +839,7 @@ const InsertTrips = () => {
                                                         :
                                                         regHead.map((row) => (
                                                             row.RegHead === registration.split(":")[0] ?
-                                                                <Grid item xs={3.5} key={row.id}>
+                                                                <Grid item sm={3.5} xs={9}  key={row.id}>
                                                                     <Paper
                                                                         component="form">
                                                                         <TextField size="small" type="number" fullWidth sx={{ borderRadius: 10 }}
@@ -858,10 +856,10 @@ const InsertTrips = () => {
                                                                 null
                                                         ))
                                                 }
-                                                <Grid item xs={0.5} marginTop={1}>
+                                                <Grid item sm={0.5} xs={3}  marginTop={1} >
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
                                                 </Grid>
-                                                <Grid item xs={2.5}>
+                                                <Grid item sm={2.5} xs={9} >
                                                     <Paper
                                                         component="form">
                                                         <TextField size="small" fullWidth
@@ -895,13 +893,12 @@ const InsertTrips = () => {
                         showTrips ?
                             ""
                             :
+                            <>
                             <Grid container spacing={1} marginTop={1} marginBottom={1}>
-                                <Grid item xs={1} textAlign="right" marginTop={1}>
+                                <Grid item sm={1} xs={3} textAlign="right" marginTop={1}>
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>วันที่ส่ง</Typography>
                                 </Grid>
-                                <Grid item xs={11} textAlign="right">
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={3.5}>
+                                <Grid item sm={11} xs={9} textAlign="right">
                                             <Paper
                                                 component="form">
                                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -916,10 +913,10 @@ const InsertTrips = () => {
                                                 </LocalizationProvider>
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={1.5} marginTop={1}>
+                                        <Grid item sm={1.5} xs={3} marginTop={1}>
                                             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                         </Grid>
-                                        <Grid item xs={7}>
+                                        <Grid item sm={7} xs={9}>
                                             <Paper
                                                 component="form">
                                                 <Select
@@ -941,8 +938,8 @@ const InsertTrips = () => {
                                                 </Select>
                                             </Paper>
                                         </Grid>
-                                    </Grid>
                                 </Grid>
+                                <Grid container spacing={1} marginTop={1} marginBottom={1}>
                                 <Grid item xs={1} textAlign="right">
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ขายน้ำมัน</Typography>
                                 </Grid>
@@ -962,10 +959,10 @@ const InsertTrips = () => {
                                                         <TablecellHeader width={60} sx={{ textAlign: "center" }} rowSpan={2}>
                                                             ลำดับ
                                                         </TablecellHeader>
-                                                        <TablecellHeader width={250} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
+                                                        <TablecellHeader width={200} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
                                                             ลูกค้า
                                                         </TablecellHeader>
-                                                        <TablecellHeader width={250} sx={{ textAlign: "center", left: 20, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
+                                                        <TablecellHeader width={250} sx={{ textAlign: "center"}} rowSpan={2}>
                                                             ตั๋ว
                                                         </TablecellHeader>
                                                         <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
@@ -1137,18 +1134,18 @@ const InsertTrips = () => {
                                             </Table>
                                         </TableContainer>
                                         <Grid container spacing={1} marginTop={1}>
-                                            <Grid item xs={5}>
+                                            <Grid item sm={5} xs={12}>
                                                 <Paper
                                                     component="form"
                                                 >
                                                     <Grid container>
-                                                            <Grid item xs={1.5}>
+                                                            <Grid item sm={1.5} xs={2}>
                                                                 <Paper
                                                                     component="form">
                                                                     <TextField size="small" fullWidth sx={{ borderRadius: 10 }} value={codes} onChange={(e) => setCodes(e.target.value)} />
                                                                 </Paper>
                                                             </Grid>
-                                                            <Grid item xs={8}>
+                                                            <Grid item sm={8} xs={7}>
                                                             <Select
                                                                 id="demo-simple-select"
                                                                 value={customers}
@@ -1191,25 +1188,25 @@ const InsertTrips = () => {
                                                                     )} */}
                                                             </Select>
                                                         </Grid>
-                                                        <Grid item xs={2.5} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
+                                                        <Grid item sm={2.5} xs={3} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
                                                             <Button variant="contained" color="info" fullWidth onClick={handleCustomer}>เพิ่มออเดอร์</Button>
                                                         </Grid>
                                                     </Grid>
                                                 </Paper>
                                             </Grid>
-                                            <Grid item xs={1} marginTop={1}>
+                                            <Grid item sm={1} xs={3} marginTop={1}>
                                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ค่าเที่ยว</Typography>
                                             </Grid>
-                                            <Grid item xs={2}>
+                                            <Grid item sm={2} xs={9}>
                                                 <Paper
                                                     component="form">
                                                     <TextField size="small" fullWidth sx={{ borderRadius: 10 }} />
                                                 </Paper>
                                             </Grid>
-                                            <Grid item xs={0.5} marginTop={1}>
+                                            <Grid item sm={0.5} xs={3} marginTop={1}>
                                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>คลัง</Typography>
                                             </Grid>
-                                            <Grid item xs={3.5}>
+                                            <Grid item sm={3.5} xs={9}>
                                                 <Paper
                                                     component="form">
                                                     <Select
@@ -1234,6 +1231,7 @@ const InsertTrips = () => {
                                         </Grid></Paper>
                                 </Grid>
                             </Grid>
+                            </>
                     }
                 </DialogContent>
                 <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>

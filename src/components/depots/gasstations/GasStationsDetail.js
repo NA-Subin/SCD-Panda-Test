@@ -196,6 +196,7 @@ const GasStationsDetail = (props) => {
                         {
                             stocks.map((stock, index) => {
                                 let lastReport = null; // เก็บค่า row.Report ของรายการก่อนหน้า
+                                let matchCount = 0;
                                 return (
                                     <Paper
                                         sx={{
@@ -211,6 +212,12 @@ const GasStationsDetail = (props) => {
                                         {gasStationOil.map((row, rowIndex) => {
                                             let currentReport = row.Report; // ค่า row.Report ปัจจุบัน
                                             if (stock.Name === row.Stock) {
+                                                matchCount++; // เพิ่มตัวนับเมื่อเงื่อนไขเป็นจริง
+
+                                                console.log(
+                                                    `Match ${matchCount}: stock.Name = ${stock.Name}, row.Stock = ${row.Stock}`,matchCount
+                                                );
+
                                                 if (!row.Report) {
                                                     // ถ้าไม่มี row.Report
                                                     if (rowIndex === 0) {
@@ -231,7 +238,7 @@ const GasStationsDetail = (props) => {
                                                         gasStation={row}
                                                         gasStationOil={gasStationOil}
                                                         selectedDate={selectedDate}
-                                                        Squeeze={rowIndex === 0 ? 800 : 0} // กำหนดค่า Squeeze
+                                                        Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
                                                         currentReport={currentReport} // ส่งค่า Report ที่ตรวจสอบแล้ว
                                                         onSendBack={handleSendBack}
                                                     />

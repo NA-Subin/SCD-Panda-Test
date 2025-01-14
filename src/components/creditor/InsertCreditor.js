@@ -143,10 +143,10 @@ const InsertCreditor = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
-                        <Grid item xs={2.5}>
+                        <Grid item sm={2.5} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>คำนำหน้าชื่อ</Typography>
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid item sm={2} xs={9}>
                             <Paper
                                 component="form">
                                 <Select
@@ -166,34 +166,34 @@ const InsertCreditor = () => {
                                 </Select>
                             </Paper>
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item sm={1} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อ</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item sm={3} xs={9}>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                             </Paper>
                         </Grid>
-                        <Grid item xs={0.5}>
+                        <Grid item sm={0.5} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>สกุล</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item sm={3} xs={9}>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
                             </Paper>
                         </Grid>
-                        <Grid item xs={2.5}>
+                        <Grid item sm={2.5} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขประจำตัวผู้เสียภาษี</Typography>
                         </Grid>
-                        <Grid item xs={3.5}>
+                        <Grid item sm={3.5} xs={9}>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} />
                             </Paper>
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid item sm={2} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทเจ้าหนี้</Typography>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item sm={4} xs={9}>
                             <Paper
                                 component="form">
                                 <Select
@@ -212,78 +212,78 @@ const InsertCreditor = () => {
                                 </Select>
                             </Paper>
                         </Grid>
-                        <Grid item xs={2.5}>
+                        <Grid item sm={2.5} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ระยะเครดิต</Typography>
                         </Grid>
-                        <Grid item xs={3.5}>
+                        <Grid item sm={3.5} xs={9}>
                             <Paper component="form">
                                 <TextField size="small" type="number" fullWidth value={creditTime} onChange={(e) => setCreditTime(e.target.value)} />
                             </Paper>
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid item sm={2} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item sm={4} xs={9}>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
                             </Paper>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item sm={12} xs={12}>
                             <Divider>
                                 <Chip label="ที่อยู่" size="small" />
                             </Divider>
                         </Grid>
-                        <Grid item xs={1.5}>
+                        <Grid item sm={1.5} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>บ้านเลขที่</Typography>
                         </Grid>
-                        <Grid item xs={2.5}>
+                        <Grid item sm={2.5} xs={9}>
                             <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} />
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item sm={1} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>หมู่ที่</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item sm={3} xs={9}>
                             <TextField size="small" fullWidth value={village} onChange={(e) => setVillage(e.target.value)} />
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item sm={1} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ตำบล</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item sm={3} xs={9}>
                             <TextField size="small" fullWidth value={subDistrict} onChange={(e) => setSubDistrict(e.target.value)} />
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item sm={1} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>อำเภอ</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item sm={3} xs={9}>
                             <TextField size="small" fullWidth value={district} onChange={(e) => setDistrict(e.target.value)} />
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item sm={1} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>จังหวัด</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item sm={3} xs={9}>
                             <TextField size="small" fullWidth value={province} onChange={(e) => setProvince(e.target.value)} />
                         </Grid>
-                        <Grid item xs={1.5}>
+                        <Grid item sm={1.5} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>รหัสไปรณีย์</Typography>
                         </Grid>
-                        <Grid item xs={2.5}>
+                        <Grid item sm={2.5} xs={9}>
                             <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item sm={12} xs={12}>
                             <Divider>
                                 <Chip label="พิกัด" size="small" />
                             </Divider>
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item sm={1} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>lat</Typography>
                         </Grid>
-                        <Grid item xs={5}>
+                        <Grid item sm={5} xs={9}>
                             <TextField size="small" type="number" fullWidth value={lat} onChange={(e) => setLat(e.target.value)} />
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item sm={1} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>lng</Typography>
                         </Grid>
-                        <Grid item xs={5}>
+                        <Grid item sm={5} xs={9}>
                             <TextField size="small" type="number" fullWidth value={lng} onChange={(e) => setLng(e.target.value)} />
                         </Grid>
                     </Grid>

@@ -79,6 +79,7 @@ const SellingOil = (props) => {
                         ProductName: key,
                         Capacity: matchingStock.Capacity,
                         Color: matchingStock.Color,
+                        TotalVolume: Number(value) - Number(delivered[key]),
                         Volume: Number(value),
                         Delivered: 0,
                         EstimateSell: Number(delivered[key] || 0),
@@ -115,7 +116,7 @@ const SellingOil = (props) => {
 
         database
             .ref("/depot/gasStations/" + (gasStationID - 1))
-            .child("/Test")
+            .child("/Products")
             .update(updatedVolume)
             .then(() => {
                 ShowSuccess("บันทึกข้อมูลสำเร็จ");
@@ -136,6 +137,7 @@ const SellingOil = (props) => {
                     ProductName: row.ProductName,
                     Capacity: row.Capacity,
                     Color: row.Color,
+                    TotalVolume: Number(row.TotalVolume) - Number(updateVolumes[row.ProductName] || 0),
                     Volume: row.Volume,
                     Delivered: row.Delivered,
                     EstimateSell: Number(row.EstimateSell) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
@@ -148,7 +150,7 @@ const SellingOil = (props) => {
         gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
         ? gasStationReport.reduce((acc, row) => {
             const updatedVolume =
-              Number(row.OldVolume) - Number(updateVolumes[row.ProductName] || 0);
+              Number(row.TotalVolume) - Number(updateVolumes[row.ProductName] || 0);
           
             acc[row.ProductName] = updatedVolume; // เก็บค่าใน key ที่ตรงกับ ProductName
             return acc;
@@ -172,7 +174,7 @@ const SellingOil = (props) => {
 
             database
             .ref("/depot/gasStations/" + (gasStationID - 1))
-            .child("/Test")
+            .child("/Products")
             .update(updatedVolumes)
             .then(() => {
                 ShowSuccess("บันทึกข้อมูลสำเร็จ");

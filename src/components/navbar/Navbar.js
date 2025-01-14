@@ -375,7 +375,7 @@ export default function Navbar() {
         { to: "/depots", icon: <StoreMallDirectoryIcon /> },
         { to: "/customer", icon: <GroupsIcon fontSize="small"/> },
         { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="small"/> },
-        { to: "/settings", icon: <SettingsIcon fontSize="small"/> },
+        { to: "/setting", icon: <SettingsIcon fontSize="small"/> },
       ].map((item, index) => (
         <Button
           key={index}

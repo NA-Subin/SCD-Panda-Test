@@ -226,10 +226,10 @@ const InsertEmployee = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
-                        <Grid item xs={2.5}>
+                        <Grid item md={2.5} sm={2} xs={4}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>คำนำหน้าชื่อ</Typography>
                         </Grid>
-                        <Grid item xs={2.5}>
+                        <Grid item md={2.5} sm={10} xs={8}>
                             <Paper
                                 component="form">
                                 <Select
@@ -249,18 +249,18 @@ const InsertEmployee = () => {
                                 </Select>
                             </Paper>
                         </Grid>
-                        <Grid item xs={0.5}>
+                        <Grid item md={0.5} sm={2} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อ</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item md={3} sm={4} xs={10}>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                             </Paper>
                         </Grid>
-                        <Grid item xs={0.5}>
+                        <Grid item md={0.5} sm={2} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>สกุล</Typography>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item md={3} sm={4} xs={10}>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
                             </Paper>
@@ -268,10 +268,10 @@ const InsertEmployee = () => {
                         {
                             menu === 1 ?
                                 <>
-                                    <Grid item xs={2.5}>
+                                    <Grid item md={2.5} sm={2} xs={2}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>Email</Typography>
                                     </Grid>
-                                    <Grid item xs={3.5}>
+                                    <Grid item md={3.5} sm={4} xs={10}>
                                         <Paper component="form">
                                             <TextField size="small" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
                                         </Paper>
@@ -279,20 +279,20 @@ const InsertEmployee = () => {
                                 </>
                                 :
                                 <>
-                                    <Grid item xs={2.5}>
+                                    <Grid item md={2.5} sm={3} xs={6}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขประจำตัวผู้เสียภาษี</Typography>
                                     </Grid>
-                                    <Grid item xs={3.5}>
+                                    <Grid item md={3.5} sm={3} xs={6}>
                                         <Paper component="form">
                                             <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} />
                                         </Paper>
                                     </Grid>
                                 </>
                         }
-                        <Grid item xs={2}>
+                        <Grid item md={2} sm={2} xs={4}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทพนักงาน</Typography>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item md={4} sm={4} xs={8}>
                             <Paper
                                 component="form">
                                 <Select
@@ -314,15 +314,15 @@ const InsertEmployee = () => {
                         {
                             menu === 1 ?
                                 <>
-                                    <Grid item xs={12}>
+                                    <Grid item md={12} sm={12} xs={12}>
                                         <Divider>
                                             <Chip label="พนักงานทั่วไป" size="small" />
                                         </Divider>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item md={2} sm={2} xs={2}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ตำแหน่ง</Typography>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item md={4} sm={4} xs={10}>
                                     <Paper
                                 component="form">
                                 <Select
@@ -341,10 +341,10 @@ const InsertEmployee = () => {
                                 </Select>
                             </Paper>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item md={2} sm={2} xs={3}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid item md={4} sm={4} xs={9}>
                                         <Paper component="form">
                                             <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
                                         </Paper>
@@ -352,10 +352,10 @@ const InsertEmployee = () => {
                                     {
                                         position === "พนักงานขายหน้าลาน" &&
                                         <>
-                                            <Grid item xs={2}>
+                                            <Grid item md={2} sm={2} xs={2}>
                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ปั้ม</Typography>
                                             </Grid>
-                                            <Grid item xs={4}>
+                                            <Grid item md={4} sm={4} xs={10}>
                                                 <Paper
                                                     component="form">
                                                     <Select
@@ -382,10 +382,10 @@ const InsertEmployee = () => {
                                 </>
                                 : menu === 2 ?
                                     <>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทรถ</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper
                                                 component="form">
                                                 <Select
@@ -404,10 +404,10 @@ const InsertEmployee = () => {
                                                 </Select>
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ทะเบียนรถ</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper
                                                 component="form">
                                                 <Select
@@ -436,97 +436,97 @@ const InsertEmployee = () => {
                                                 </Select>
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid item md={12} sm={12} xs={12}>
                                             <Divider>
                                                 <Chip label="ข้อมูลการเงินของพนักงานขับรถ" size="small" />
                                             </Divider>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่บัญชี</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={bankID} onChange={(e) => setBankID(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ธนาคาร</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={bank} onChange={(e) => setBank(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินเดือน</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={salary} onChange={(e) => setSalary(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าเที่ยว</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={tripCost} onChange={(e) => setTripCost(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าจุดส่ง</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={pointCost} onChange={(e) => setPointCost(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>สวัสดิการ</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={security} onChange={(e) => setSecurity(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินประกัน</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={deposit} onChange={(e) => setDeposit(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินกู้ยืม</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={loan} onChange={(e) => setLoan(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid item md={12} sm={12} xs={12}>
                                             <Divider>
                                                 <Chip label="ใบอนุญาตการขับขี่รถ" size="small" />
                                             </Divider>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขจดทะเบียน</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={drivingLicense} onChange={(e) => setDrivingLicense(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={2}>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
                                                 <TextField size="small" fullWidth value={expiration} onChange={(e) => setExpiration(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid item md={12} sm={12} xs={12}>
                                             <UploadButton />
                                         </Grid>
                                     </>

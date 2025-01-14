@@ -108,25 +108,20 @@ const UpdateGasStations = (props) => {
     
         const updatedValues = reportData
             ? Object.entries(reportData)
-                .sort(([keyA, valueA], [keyB, valueB]) =>
-                    valueA?.ProductName?.localeCompare(valueB?.ProductName || "") || 0
-                )
-                .map(([key, value]) => ({
-                    ProductName: value?.ProductName || "",
-                    Capacity: value?.Capacity || 0,
-                    Color: value?.Color || "",
-                    Volume: value?.Volume || 0,
-                    Volume: value?.Volume || 0,
-                    Squeeze: value?.Squeeze || 800,
-                    Delivered: value?.Delivered || 0,
-                    Pending1: value?.Pending1 || 0,
-                    Pending2: value?.Pending2 || 0,
-                    EstimateSell: value?.EstimateSell || 0,
-                    Period: value?.Period || 0,
-                    DownHole: value?.DownHole || 0,
-                    YesterDay: value?.YesterDay || 0,
-                    Sell: value?.Sell || 0,
-                }))
+            .sort(([keyA, valueA], [keyB, valueB]) =>
+                valueA?.ProductName?.localeCompare(valueB?.ProductName || "") || 0
+            )
+            .map(([key, value]) => {
+                const existingValue = values.find((val) => val.ProductName === value.ProductName);
+                return {
+                    ...value,
+                    Squeeze: existingValue?.Squeeze ?? value?.Squeeze ?? squeeze, // ใช้ค่าเดิมถ้ามี
+                    Delivered: existingValue?.Delivered ?? value?.Delivered ?? 0, // ใช้ค่าเดิมถ้ามี
+                    Pending1: existingValue?.Pending1 ?? value?.Pending1 ?? 0, // ใช้ค่าเดิมถ้ามี
+                    Pending2: existingValue?.Pending2 ?? value?.Pending2 ?? 0, // ใช้ค่าเดิมถ้ามี
+                    EstimateSell: existingValue?.EstimateSell ?? value?.EstimateSell ?? 0, // ใช้ค่าเดิมถ้ามี
+                };
+            })
             : stock.map((row) => {
                 const yesterdayEntry = Object.values(yesterdayData || {}).find(
                     (entry) => entry?.ProductName === row?.ProductName
@@ -145,14 +140,14 @@ const UpdateGasStations = (props) => {
                     Volume: 0,
                     Squeeze: squeeze,
                     Delivered: 0,
-                    Volume: 0,
                     Pending1: 0,
                     Pending2: 0,
                     EstimateSell: 0,
                     Period: 0,
                     DownHole: downHoleValue,
-                    YesterDay: yesterdayEntry?.Volume || 0,
+                    YesterDay: yesterdayEntry?.TotalVolume || 0,
                     Sell: 0,
+                    TotalVolume: 0
                 };
             });
     
@@ -160,16 +155,48 @@ const UpdateGasStations = (props) => {
             row.Period = calculatePeriod(row);
             row.Sell = calculateSell(row);
             row.DownHole = calculateDownHole(row);
+            row.TotalVolume = calculateTotalVolume(row);
         });
     
         // เพิ่มเงื่อนไขการอัปเดต state ถ้าข้อมูลมีการเปลี่ยนแปลงจริงๆ
-        if (JSON.stringify(updatedValues) !== JSON.stringify(values)) {
-            setValues(updatedValues);
+        const hasChanged = updatedValues.some((newRow, index) => {
+            const existingRow = values[index] || {};
+            return (
+                newRow.ProductName !== existingRow.ProductName ||
+                newRow.Squeeze !== existingRow.Squeeze ||
+                newRow.Delivered !== existingRow.Delivered ||
+                newRow.Pending1 !== existingRow.Pending1 ||
+                newRow.Pending2 !== existingRow.Pending2 ||
+                newRow.EstimateSell !== existingRow.EstimateSell
+            );
+        });
+        
+        // หากข้อมูลเปลี่ยนแปลงจึงอัปเดต state
+        if (hasChanged) {
+            setValues((prevValues) =>
+                updatedValues.map((newRow) => {
+                    const prevRow = prevValues.find((row) => row.ProductName === newRow.ProductName) || {};
+                    return {
+                        ...newRow,
+                        // คงค่าฟิลด์ที่แก้ไขไว้
+                        Squeeze: prevRow.Squeeze ?? newRow.Squeeze ?? squeeze, // ค่าเริ่มต้นคือ 800
+                        Delivered: prevRow.Delivered ?? newRow.Delivered ?? 0, // ค่าเริ่มต้นคือ 0
+                        Pending1: prevRow.Pending1 ?? newRow.Pending1 ?? 0, // ค่าเริ่มต้นคือ 0
+                        Pending2: prevRow.Pending2 ?? newRow.Pending2 ?? 0, // ค่าเริ่มต้นคือ 0
+                        EstimateSell: prevRow.EstimateSell ?? newRow.EstimateSell ?? 0, // ค่าเริ่มต้นคือ 0
+                    };
+                })
+            );
         }
-    }, [stock, selectedDate, gasStation, squeeze, gasStationOil, downHole, values]);  // เพิ่ม values ใน dependencies
+        
+    }, [stock, selectedDate, gasStation, squeeze, gasStationOil, downHole]);  // เพิ่ม values ใน dependencies
     
+    const deepEqual = (obj1, obj2) => {
+        return JSON.stringify(obj1) === JSON.stringify(obj2);
+    };
     
     const handleInputChange = (index, field, value) => {
+        console.log("Before update:", { index, field, value, currentValue: values[index]?.[field] });
         const updatedValues = [...values];
     
         // ตรวจสอบการเพิ่มข้อมูลครั้งแรก
@@ -189,11 +216,13 @@ const UpdateGasStations = (props) => {
                 // ใช้ค่า DownHole เริ่มต้นจาก gasStation ถ้าค่าใน downHole ไม่มี
                 DownHole: 0, 
                 YesterDay: 0,
-                Sell: 0
+                Sell: 0,
+                TotalVolume: 0
             };
         }
     
-        updatedValues[index][field] = value;
+        const newValue = value === "" || isNaN(value) ? 0 : parseFloat(value);
+        updatedValues[index][field] = newValue;
     
         // ตรวจสอบว่า DownHole ถูกตั้งค่าแล้วหรือยัง
         const downHoleValue = downHole
@@ -204,6 +233,9 @@ const UpdateGasStations = (props) => {
         updatedValues[index].DownHole = downHoleValue; // ใช้ค่าจากการตรวจสอบ
         updatedValues[index].Sell = calculateSell(updatedValues[index]);
         updatedValues[index].DownHole = calculateDownHole(updatedValues[index]);
+        updatedValues[index].TotalVolume = calculateTotalVolume(updatedValues[index]);
+
+        console.log("After update:", updatedValues[index]);
     
         setValues(updatedValues);
     };
@@ -224,6 +256,8 @@ const UpdateGasStations = (props) => {
     };
 
     const calculateDownHole = (row) => {
+        console.log("Before calculateDownHole:", row);
+
         const Delivered = parseFloat(row.Delivered) || 0;
         const Pending1 = parseFloat(row.Pending1) || 0;
         const Pending2 = parseFloat(row.Pending2) || 0;
@@ -233,7 +267,7 @@ const UpdateGasStations = (props) => {
         // console.log("downHole :",downHole);
         // console.log("value :",value);
         // return ((value + Delivered + Pending1 + Pending2)).toFixed(2);
-        if(downHole === volume){
+        if(downHole !== 0){
             return ((volume + Delivered + Pending1 + Pending2)).toFixed(2);
         }
         else{
@@ -247,6 +281,12 @@ const UpdateGasStations = (props) => {
         return ((yesterDay - volume)).toFixed(2); // ผลรวมในรูปทศนิยม 2 ตำแหน่ง
     };
 
+    const calculateTotalVolume = (row) => {
+        const downHole = parseFloat(row.DownHole) || 0;
+        const estimateSell = parseFloat(row.EstimateSell) || 0;
+        return ((downHole - estimateSell)).toFixed(2); // ผลรวมในรูปทศนิยม 2 ตำแหน่ง
+    };
+
     console.log(values);
 
     const handleUpdate = () => {
@@ -257,6 +297,7 @@ const UpdateGasStations = (props) => {
             .then(() => {
                 ShowSuccess("แก้ไขข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
+                setUpdate(true);
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -429,7 +470,18 @@ const UpdateGasStations = (props) => {
                                             )
                                             .map(([key, value]) => (
                                                 <TableRow key={key}>
-                                                    <TablecellHeader sx={{ backgroundColor: value.Color, width: 50, color: "black" }}>{value.ProductName}</TablecellHeader>
+                                                    <TablecellHeader 
+                                                        sx={{ 
+                                                            backgroundColor: value.Color, 
+                                                            width: 50, 
+                                                            color: "black",
+                                                            position: "sticky",
+                                                            left: 0,
+                                                            zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน
+                                                            }}
+                                                        >
+                                                            {value.ProductName}
+                                                        </TablecellHeader>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity )}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Volume)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Squeeze)}</TableCell>
@@ -460,7 +512,7 @@ const UpdateGasStations = (props) => {
                                                         </Grid>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Period)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.DownHole)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity-value.DownHole)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.YesterDay)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Sell)}</TableCell>
                                                 </TableRow>
@@ -473,7 +525,18 @@ const UpdateGasStations = (props) => {
                                                     stock.map((row, index) => (
                                                         row.ProductName === key &&
                                                         <TableRow key={row.id}>
-                                                            <TablecellHeader sx={{ backgroundColor: row.Color, width: 50, color: "black" }}>{row.ProductName}</TablecellHeader>
+                                                            <TablecellHeader 
+                                                                sx={{ 
+                                                                    backgroundColor: row.Color, 
+                                                                    width: 50, 
+                                                                    color: "black",
+                                                                    position: "sticky",
+                                                                    left: 0,
+                                                                    zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
+                                                                }}
+                                                            >
+                                                                {row.ProductName}
+                                                            </TablecellHeader>
                                                             <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
@@ -522,7 +585,18 @@ const UpdateGasStations = (props) => {
                                                     stock.map((row, index) => (
                                                         row.ProductName === key &&
                                                         <TableRow key={row.id}>
-                                                            <TablecellHeader sx={{ backgroundColor: row.Color, width: 50, color: "black" }}>{row.ProductName}</TablecellHeader>
+                                                            <TablecellHeader 
+                                                                sx={{ 
+                                                                    backgroundColor: row.Color, 
+                                                                    width: 50, 
+                                                                    color: "black",
+                                                                    position: "sticky",
+                                                                    left: 0,
+                                                                    zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
+                                                                    }}
+                                                            >
+                                                                {row.ProductName}
+                                                            </TablecellHeader>
                                                             <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
@@ -570,7 +644,18 @@ const UpdateGasStations = (props) => {
                                             stock.map((row, index) => (
                                                 row.ProductName === key &&
                                                 <TableRow key={row.id}>
-                                                    <TablecellHeader sx={{ backgroundColor: values[index]?.Color || 0, width: 50, color: "black" }}>{values[index]?.ProductName || 0}</TablecellHeader>
+                                                    <TablecellHeader 
+                                                        sx={{ 
+                                                            backgroundColor: values[index]?.Color || 0, 
+                                                            width: 50, 
+                                                            color: "black",
+                                                            position: "sticky",
+                                                            left: 0,
+                                                            zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
+                                                            }}
+                                                    >
+                                                        {values[index]?.ProductName || 0}
+                                                    </TablecellHeader>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || 0)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Volume || 0)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
@@ -665,7 +750,7 @@ const UpdateGasStations = (props) => {
                                                             label="ที่จะมาลง"
                                                             value={values[index]?.Pending1 || 0}
                                                             onChange={(e) =>
-                                                                handleInputChange(index, "Pending1", e.target.value)
+                                                                handleInputChange(index, "Pending1", parseFloat(e.target.value) || 0)
                                                             }
                                                             InputLabelProps={{
                                                                 sx: {

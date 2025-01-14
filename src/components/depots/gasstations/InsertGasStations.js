@@ -179,22 +179,22 @@ const InsertGasStations = (props) => {
 
     return (
         <React.Fragment>
-            <Grid item xs={1}>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อปั้ม</Typography>
             </Grid>
-            <Grid item xs={3.5}>
+            <Grid item sm={3.5} xs={9}>
                 <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item sm={1.5} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>จำนวนหลุม</Typography>
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item sm={1.5} xs={9}>
                 <TextField size="small" type="number" fullWidth value={oilWell} />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item sm={1.5} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>คลังสต็อก</Typography>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item sm={3} xs={9}>
                 <Paper
                     component="form">
                     <Select
@@ -219,7 +219,7 @@ const InsertGasStations = (props) => {
             {
                 stocks !== 0 ?
                     <>
-                        <Grid item xs={12}>
+                        <Grid item sm={12} xs={12}>
                             <Divider>
                                 <Chip label="สินค้า" size="small" />
                             </Divider>
@@ -230,8 +230,8 @@ const InsertGasStations = (props) => {
                                 <React.Fragment key={row.Name}>
                                     {row.Products.map((product, index) => (
                                         <React.Fragment key={index}>
-                                            <Grid item xs={1}></Grid>
-                                            <Grid item xs={0.5}>
+                                            <Grid item sm={1}  xs={12}></Grid>
+                                            <Grid item sm={0.5}  xs={2}>
                                                 <Checkbox
                                                     checked={
                                                         Array.isArray(volumeData) &&
@@ -246,12 +246,12 @@ const InsertGasStations = (props) => {
                                                     }
                                                 />
                                             </Grid>
-                                            <Grid item xs={1.5}>
+                                            <Grid item sm={1.5}  xs={10}>
                                                 <Box sx={{ borderRadius: 3,backgroundColor: product.Color, width: "100%",height: 40, display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                       <Typography variant="h5" fontWeight="bold">{product.ProductName}</Typography>
                                                 </Box>
                                             </Grid>
-                                            <Grid item xs={1}>
+                                            <Grid item sm={1}  xs={2}>
                                                 <Typography
                                                     variant="subtitle1"
                                                     fontWeight="bold"
@@ -262,7 +262,7 @@ const InsertGasStations = (props) => {
                                                     ความจุ
                                                 </Typography>
                                             </Grid>
-                                            <Grid item xs={3}>
+                                            <Grid item sm={3} xs={4}>
                                                 <TextField
                                                     size="small"
                                                     fullWidth
@@ -273,7 +273,7 @@ const InsertGasStations = (props) => {
                                                     disabled
                                                 />
                                             </Grid>
-                                            <Grid item xs={1}>
+                                            <Grid item sm={1} xs={2}>
                                                 <Typography
                                                     variant="subtitle1"
                                                     fontWeight="bold"
@@ -284,7 +284,7 @@ const InsertGasStations = (props) => {
                                                     ปริมาณ
                                                 </Typography>
                                             </Grid>
-                                            <Grid item xs={3}>
+                                            <Grid item sm={3} xs={4}>
                                                 <TextField
                                                     size="small"
                                                     type="number"
@@ -328,8 +328,8 @@ const InsertGasStations = (props) => {
                                                     }}
                                                 />
                                             </Grid>
-                                            <Grid item xs={1.5}></Grid>
-                                            <Grid item xs={12} textAlign="right" marginTop={-11} marginRight={7}>
+                                            <Grid item sm={1.5}  xs={12}></Grid>
+                                            <Grid item sm={12} textAlign="right" marginTop={-11} marginRight={7}>
                                                 {
                                                     Array.isArray(volumeData) &&
                                                         Number(
@@ -351,68 +351,68 @@ const InsertGasStations = (props) => {
                     </>
                     : ""
             }
-            <Grid item xs={12}>
+            <Grid item sm={12}  xs={12}>
                 <Divider>
                     <Chip label="ที่อยู่" size="small" />
                 </Divider>
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item sm={1.5}  xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>บ้านเลขที่</Typography>
             </Grid>
-            <Grid item xs={2.5}>
+            <Grid item sm={2.5} xs={9}>
                 <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} />
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>หมู่ที่</Typography>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item sm={3} xs={9}>
                 <TextField size="small" fullWidth value={village} onChange={(e) => setVillage(e.target.value)} />
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ตำบล</Typography>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item sm={3} xs={9}>
                 <TextField size="small" fullWidth value={subDistrict} onChange={(e) => setSubDistrict(e.target.value)} />
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>อำเภอ</Typography>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item sm={3} xs={9}>
                 <TextField size="small" fullWidth value={district} onChange={(e) => setDistrict(e.target.value)} />
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>จังหวัด</Typography>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item sm={3} xs={9}>
                 <TextField size="small" fullWidth value={province} onChange={(e) => setProvince(e.target.value)} />
             </Grid>
-            <Grid item xs={1.5}>
+            <Grid item sm={1.5} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>รหัสไปรณีย์</Typography>
             </Grid>
-            <Grid item xs={2.5}>
+            <Grid item sm={2.5} xs={9}>
                 <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item sm={12} xs={12}>
                 <Divider>
                     <Chip label="พิกัด" size="small" />
                 </Divider>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>lat</Typography>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item sm={5} xs={9}>
                 <TextField size="small" fullWidth value={lat} onChange={(e) => setLat(e.target.value)} />
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>long</Typography>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item sm={5} xs={9}>
                 <TextField size="small" fullWidth value={lng} onChange={(e) => setLng(e.target.value)} />
             </Grid>
-            <Grid item xs={12} marginTop={1} marginBottom={1}>
+            <Grid item sm={12}  xs={12} marginTop={1} marginBottom={1}>
                 <Divider sx={{ border: "1px solid " + theme.palette.panda.dark }} />
             </Grid>
-            <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
+            <Grid item sm={12} xs={12} display="flex" justifyContent="center" alignItems="center">
                 <Button onClick={handlePost} variant="contained" color="success" sx={{ marginRight: 1 }}>บันทึก</Button>
                 <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
             </Grid>

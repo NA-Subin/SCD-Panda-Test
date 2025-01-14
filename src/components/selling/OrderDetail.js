@@ -316,10 +316,10 @@ const OrderDetail = (props) => {
                 <TablecellHeader sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.id}</Typography>
                 </TablecellHeader>
-                <TableCell sx={{ textAlign: "center"}}>
+                <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light}}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]}</Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light }}>
+                <TableCell sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[1]}</Typography>
                 </TableCell>
                 {
