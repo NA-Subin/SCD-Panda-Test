@@ -48,7 +48,6 @@ const InsertCreditor = () => {
     const [prefix, setPrefix] = React.useState(0);
     const [name, setName] = React.useState('');
     const [lastname, setLastname] = React.useState('');
-    const [email, setEmail] = React.useState('');
     const [idCard, setIDCard] = React.useState('');
 
     const handleClickOpen = () => {
@@ -66,7 +65,7 @@ const InsertCreditor = () => {
     const [province, setProvince] = React.useState("");
     const [zipCode, setZipCode] = React.useState("");
     const [creditTime, setCreditTime] = React.useState("");
-    const [creditorType, setCreditorType] = React.useState(0);
+    const [email, setEmail] = React.useState("");
     const [lat,setLat] = React.useState("");
     const [lng,setLng] = React.useState("");
 
@@ -103,7 +102,8 @@ const InsertCreditor = () => {
                 lat: lat,
                 lng: lng,
                 Credit: creditTime,
-                Type: creditorType,
+                Email: email,
+                Password: "1234567",
                 IDCard: idCard,
                 Phone: phone
             })
@@ -191,12 +191,13 @@ const InsertCreditor = () => {
                             </Paper>
                         </Grid>
                         <Grid item sm={2} xs={3}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทเจ้าหนี้</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>Email</Typography>
                         </Grid>
                         <Grid item sm={4} xs={9}>
                             <Paper
                                 component="form">
-                                <Select
+                                    <TextField size="small" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
+                                {/* <Select
                                     id="demo-simple-select"
                                     value={creditorType}
                                     size="small"
@@ -209,7 +210,7 @@ const InsertCreditor = () => {
                                     </MenuItem>
                                     <MenuItem value={"เจ้าหนี้ขนส่ง"}>เจ้าหนี้ขนส่ง</MenuItem>
                                     <MenuItem value={"เจ้าหนี้น้ำมัน"}>เจ้าหนี้น้ำมัน</MenuItem>
-                                </Select>
+                                </Select> */}
                             </Paper>
                         </Grid>
                         <Grid item sm={2.5} xs={3}>

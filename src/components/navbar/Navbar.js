@@ -285,6 +285,7 @@ export default function Navbar() {
             .then(() => {
               navigate("/");
               Swal.fire("ออกจากระบบเรียบร้อย", "", "success");
+              Cookies.remove('email');
             })
             .catch((error) => {
               Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");

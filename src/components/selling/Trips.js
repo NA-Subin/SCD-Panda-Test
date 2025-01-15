@@ -33,10 +33,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
 import { RateOils, TablecellHeader } from "../../theme/style";
 import { database } from "../../server/firebase";
+import TripsDetail from "./TripsDetail";
 
 const Wholesale = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
+    const [approve, setApprove] = React.useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -155,37 +157,24 @@ const Wholesale = () => {
                                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                         น้ำหนักรวม
                                     </TablecellHeader>
-                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100,position: "sticky",
+      right: "200px", // ติดซ้ายสุด
+      zIndex: 4, }}>
                                         สถานะ
                                     </TablecellHeader>
                                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
                                         เพิ่มเที่ยววิ่งโดย
                                     </TablecellHeader>
-                                    <TablecellHeader />
+                                    <TablecellHeader sx={{ width: 200,position: "sticky",
+      right: 0, // ระยะที่ชิดซ้ายต่อจากเซลล์ก่อนหน้า
+      backgroundColor: theme.palette.panda.light, // ใส่พื้นหลังเพื่อไม่ให้โปร่งใส
+      zIndex: 2, }}/>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {
                                     trip.map((row) => (
-                                        <TableRow>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Date}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Depot}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Driver}/{row.Registration}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order1 === undefined ? "-" : row.Order1.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order2 === undefined ? "-" : row.Order2.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order3 === undefined ? "-" : row.Order3.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order4 === undefined ? "-" : row.Order4.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order5 === undefined ? "-" : row.Order5.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order6 === undefined ? "-" : row.Order6.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order7 === undefined ? "-" : row.Order7.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Order8 === undefined ? "-" : row.Order8.split(":")[2]}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.WeightOil}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.WeightTruck}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{parseFloat(row.WeightOil) + parseFloat(row.WeightTruck)}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{row.Employee}</TableCell>
-                                        </TableRow>
+                                        <TripsDetail key={row.id} trips={row} />
                                     ))
                                 }
                             </TableBody>

@@ -120,7 +120,7 @@ const Creditor = () => {
                         เบอร์โทร
                       </TablecellHeader>
                       <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                        ประเภทเจ้าหนี้
+                        Email
                       </TablecellHeader>
                       <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                         ระยะเครดิต
@@ -136,7 +136,7 @@ const Creditor = () => {
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
-                          <TableCell sx={{ textAlign: "center" }}>{row.Type}</TableCell>
+                          <TableCell sx={{ textAlign: "center" }}>{row.Email}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Credit}</TableCell>
                           <UpdateCreditor key={row.id} employee={row}/>
                         </TableRow>

@@ -45,7 +45,7 @@ const UpdateCreditor = (props) => {
     const [idCard,setIDCard] = React.useState(employee.IDCard);
     const [phone,setPhone] = React.useState(employee.Phone);
     const [credit,setCredit] = React.useState(employee.Credit);
-    const [type,setType] = React.useState(employee.Type);
+    const [email,setEmail] = React.useState(employee.Email);
     const [no, setNo] = React.useState(employee.Address.split(",")[0] === undefined ? "-" : employee.Address.split(",")[0]);
     const [village, setVillage] = React.useState(employee.Address.split(",")[1] === undefined ? "-" : employee.Address.split(",")[1]);
     const [subDistrict, setSubDistrict] = React.useState(employee.Address.split(",")[2] === undefined ? "-" : employee.Address.split(",")[2]);
@@ -81,7 +81,7 @@ const UpdateCreditor = (props) => {
                 lng: lng,
                 IDCard: idCard,
                 Credit: credit,
-                Type: type,
+                Email: email,
                 Phone: phone
             })
             .then(() => {
@@ -154,24 +154,25 @@ const UpdateCreditor = (props) => {
                                 <TextField fullWidth variant="standard" value={credit} disabled={update ? true : false} onChange={(e) => setCredit(e.target.value)}/>
                             </Grid>
                             <Grid item xs={2}>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ประเภทเจ้าหนี้</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>Email</Typography>
                             </Grid>
                             <Grid item xs={3.5}>
                                 {
                                     update ?
-                                    <TextField fullWidth variant="standard" value={type} disabled onChange={(e) => setType(e.target.value)}/>
+                                    <TextField fullWidth variant="standard" value={email} disabled onChange={(e) => setEmail(e.target.value)}/>
                                     :
-                                    <FormControl variant="standard" fullWidth>
-                                            <Select
-                                                labelId="demo-simple-select-standard-label"
-                                                id="demo-simple-select-standard"
-                                                value={type}
-                                                onChange={(e) => setType(e.target.value)}
-                                            >
-                                                <MenuItem value={"เจ้าหนี้ขนส่ง"}>เจ้าหนี้ขนส่ง</MenuItem>
-                                                <MenuItem value={"เจ้าหนี้น้ำมัน"}>เจ้าหนี้น้ำมัน</MenuItem>
-                                            </Select>
-                                        </FormControl>
+                                    <TextField fullWidth variant="standard" value={email} onChange={(e) => setEmail(e.target.value)}/>
+                                    // <FormControl variant="standard" fullWidth>
+                                    //         <Select
+                                    //             labelId="demo-simple-select-standard-label"
+                                    //             id="demo-simple-select-standard"
+                                    //             value={type}
+                                    //             onChange={(e) => setType(e.target.value)}
+                                    //         >
+                                    //             <MenuItem value={"เจ้าหนี้ขนส่ง"}>เจ้าหนี้ขนส่ง</MenuItem>
+                                    //             <MenuItem value={"เจ้าหนี้น้ำมัน"}>เจ้าหนี้น้ำมัน</MenuItem>
+                                    //         </Select>
+                                    //     </FormControl>
                                 }
                             </Grid>
                             <Grid item xs={1.5}>

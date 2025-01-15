@@ -36,6 +36,7 @@ import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import dayjs from 'dayjs';
+import Cookies from 'js-cookie';
 import 'dayjs/locale/th';
 import SettingA from "./SettingA";
 import ReceiveOil from "./ReceiveOil";
@@ -148,6 +149,7 @@ const GasStationA = () => {
                         console.log("User logged out");
                         // Cookies.remove('token');
                         navigate("/");
+                        Cookies.remove('email');
                     })
                     .catch(() => {
                         console.error("Error logging out:");

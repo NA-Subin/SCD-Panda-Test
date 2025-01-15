@@ -16,6 +16,7 @@ import Creditor from "./components/creditor/Creditor";
 import './App.css';
 import theme from "./theme/theme";
 import GasStationA from "./components/attendant/GasStationA";
+import TradePayable from "./components/payable/TradePayable";
 
 function App() {
 
@@ -26,6 +27,7 @@ function App() {
         <Route path="/" element={<Login />} />
         {/* <Route path="/:email/*" element={ */}
         <Route path="/gasstation-attendant" element={<GasStationA />} />
+        <Route path="/trade-payable" element={<TradePayable />} />
         <Route
           path="/*"
           element={

@@ -43,17 +43,33 @@ const Login = () => {
 
 // ตั้งค่า Token
 
-  // useEffect(() => {
-  //   const token = Cookies.get('email'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
-  //   if (token) {
-  //     if (token){
-  //       navigate('/dashboard');
-  //     }
-  //     else{
-  //       navigate('/');
-  //     }
-  //   }
-  // }, []);
+  useEffect(() => {
+    const token = Cookies.get('email'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
+    if (token) {
+      if (token){
+        database
+              .ref("/employee/officers")
+              .orderByChild("Email")
+              .equalTo(token)
+              .on("value", (snapshot) => {
+                const datas = snapshot.val();
+                const dataList = [];
+                for (let id in datas) {
+                    if(datas[id].Position === "พนักงานขายหน้าลาน"){
+                      navigate("/gasstation-attendant", { 
+                        state: { Employee: datas[id] } 
+                      });
+                    }else{
+                      navigate("/dashboard");
+                    }
+                }
+              });
+      }
+      else{
+        navigate('/');
+      }
+    }
+  }, []);
 
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -98,42 +114,97 @@ const Login = () => {
       signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             database
-              .ref("/employee/officers")
-              .orderByChild("Email")
-              .equalTo(email)
-              .on("value", (snapshot) => {
-                const datas = snapshot.val();
-                const dataList = [];
-                for (let id in datas) {
-                  dataList.push({ id, ...datas[id] });
-                  if(datas[id].Password === password){
-                    Cookies.set('email', email, {
-                      expires: 30,
-                      secure: true,
-                      sameSite: 'Lax',
-                    });
-                    
-                    Cookies.set('sessionToken', email.split("@")[0]+"$"+datas[id].id, {
-                      expires: 30,
-                      secure: true,
-                      sameSite: 'Lax',
-                    });
-                  
-                    // // ดึงค่าคุกกี้เพื่อตรวจสอบ
-                    // const token = Cookies.get('sessionToken');
-                    // console.log(token); // แสดง JWT Token ในคอนโซล
-                    if(datas[id].Position === "พนักงานขายหน้าลาน"){
-                      navigate("/gasstation-attendant", { 
-                        state: { Employee: datas[id] } 
-                      });
-                    }else{
-                      navigate("/dashboard");
-                    }
-                  }else{
-                    ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
-                  }
-                }
-              });
+  .ref("/employee/officers")
+  .orderByChild("Email")
+  .equalTo(email)
+  .once("value")
+  .then((snapshot) => {
+    const datas = snapshot.val();
+    if (datas) {
+      // พบข้อมูลใน "/employee/officers"
+      const dataList = [];
+      for (let id in datas) {
+        dataList.push({ id, ...datas[id] });
+        if (datas[id].Password === password) {
+          Cookies.set("email", email, {
+            expires: 30,
+            secure: true,
+            sameSite: "Lax",
+          });
+
+          Cookies.set(
+            "sessionToken",
+            email.split("@")[0] + "$" + datas[id].id,
+            {
+              expires: 30,
+              secure: true,
+              sameSite: "Lax",
+            }
+          );
+
+          if (datas[id].Position === "พนักงานขายหน้าลาน") {
+            navigate("/gasstation-attendant", {
+              state: { Employee: datas[id] },
+            });
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+        }
+      }
+    } else {
+      // ไม่พบข้อมูลใน "/employee/officers"
+      return database
+        .ref("/employee/creditors")
+        .orderByChild("Email")
+        .equalTo(email)
+        .once("value");
+    }
+  })
+  .then((snapshot) => {
+    if (snapshot) {
+      const datas = snapshot.val();
+      if (datas) {
+        // พบข้อมูลใน "/employee/creditor"
+        const dataList = [];
+        for (let id in datas) {
+          dataList.push({ id, ...datas[id] });
+          if (datas[id].Password === password) {
+            Cookies.set("email", email, {
+              expires: 30,
+              secure: true,
+              sameSite: "Lax",
+            });
+
+            Cookies.set(
+              "sessionToken",
+              email.split("@")[0] + "$" + datas[id].id,
+              {
+                expires: 30,
+                secure: true,
+                sameSite: "Lax",
+              }
+            );
+
+            // ตัวอย่างเพิ่มเติมเงื่อนไขอื่น
+            navigate("/trade-payable", {
+              state: { Creditor: datas[id] },
+            });
+          } else {
+            ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+          }
+        }
+      } else {
+        // ไม่พบข้อมูลในทั้งสองฐานข้อมูล
+        ShowError("ไม่พบ Email ในระบบ กรุณาตรวจสอบข้อมูลอีกครั้ง");
+      }
+    }
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+    ShowError("เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล");
+  });
           })
           .catch((error) => {
             ShowError("Email หรือ Pasword ไม่ถูกต้อง");

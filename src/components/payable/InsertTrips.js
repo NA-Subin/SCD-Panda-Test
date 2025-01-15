@@ -42,7 +42,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 
-const InsertTrips = () => {
+const InsertTrips = (props) => {
+    const {creditor} = props;
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [code, setCode] = React.useState("");
@@ -106,7 +107,7 @@ const InsertTrips = () => {
             const datas = snapshot.val();
             const dataRegHead = [];
             for (let id in datas) {
-                if(datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี"){
+                if(datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง"){
                     dataRegHead.push({ id, ...datas[id] })
                 }
             }
@@ -375,7 +376,8 @@ const InsertTrips = () => {
             .child(trips)
             .update({
                 Depot: depots,
-                Status: "รออนุมัติ"
+                Status: "รออนุมัติ",
+                Creditor: creditor
             })
             .then(() => {
                 database
