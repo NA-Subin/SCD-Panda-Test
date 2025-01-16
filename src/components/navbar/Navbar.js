@@ -350,52 +350,58 @@ export default function Navbar() {
         {
         isMobileSM ? (
       // แสดงเฉพาะ IconButton สำหรับจอโทรศัพท์
-      <>
-      <ButtonGroup
-      variant="text"
-      color="inherit"
-      size="large"
-      fullWidth
-      aria-label="Basic button group"
-      sx={{
-        "& .MuiButtonGroup-grouped:not(:last-of-type)": {
-          borderColor: "white", // กำหนดสีของเส้นแบ่ง
-          borderWidth: 2,       // กำหนดความหนาของเส้นแบ่ง
-          borderRightStyle: "solid", // รูปแบบเส้น
-        },
-        flexGrow: 1,
-        marginTop: 1,
-        height: 50
-      }}
+      <Box
+  width="100%"
+  sx={{
+    display: 'flex',
+    overflowX: 'auto', // Enable horizontal scrolling if the content overflows
+    whiteSpace: 'nowrap', // Prevent wrapping of buttons to the next line
+  }}
+>
+  <ButtonGroup
+    variant="text"
+    color="inherit"
+    size="large"
+    fullWidth
+    aria-label="Basic button group"
+    sx={{
+      flexGrow: 1,
+      marginTop: 1,
+      height: 50,
+    }}
+  >
+    {[
+      { to: "/dashboard", icon: <HomeIcon fontSize="medium" /> },
+      { to: "/employee", icon: <AccountCircleIcon fontSize="medium" /> },
+      { to: "/trucks", icon: <LocalShippingIcon fontSize="medium" /> },
+      { to: "/selling", icon: <ListAltIcon fontSize="medium" /> },
+      { to: "/depots", icon: <StoreMallDirectoryIcon /> },
+      { to: "/customer", icon: <GroupsIcon fontSize="medium" /> },
+      { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="medium" /> },
+      { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
+    ].map((item, index) => (
+      <Button
+        key={index}
+        component={Link}
+        to={item.to}
+        onClick={() => handleButtonClick(index)}
+        sx={{
+          backgroundColor: activeButton === index ? "white" : "inherit",
+          color: activeButton === index ? "info.main" : "inherit",
+          fontWeight: activeButton === index ? "bold" : "normal",
+          paddingLeft: 4,
+          paddingRight: 4
+        }}
       >
-        {[
-        { to: "/dashboard", icon: <HomeIcon fontSize="small"/> },
-        { to: "/employee", icon: <AccountCircleIcon fontSize="small"/> },
-        { to: "/trucks", icon: <LocalShippingIcon fontSize="small"/> },
-        { to: "/selling", icon: <ListAltIcon fontSize="small"/> },
-        { to: "/depots", icon: <StoreMallDirectoryIcon /> },
-        { to: "/customer", icon: <GroupsIcon fontSize="small"/> },
-        { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="small"/> },
-        { to: "/setting", icon: <SettingsIcon fontSize="small"/> },
-      ].map((item, index) => (
-        <Button
-          key={index}
-          component={Link}
-          to={item.to}
-          onClick={() => handleButtonClick(index)}
-          sx={{
-            backgroundColor: activeButton === index ? "white" : "inherit",
-            color: activeButton === index ? "info.main" : "inherit",
-            fontWeight: activeButton === index ? "bold" : "normal",
-          }}
-        >
-          {item.icon}
-        </Button>
-      ))}
-        <Button onClick={UserSignOut}><MeetingRoomIcon /></Button>
-      </ButtonGroup>
-      </>
-      
+        {item.icon}
+      </Button>
+    ))}
+    <Button sx={{ paddingLeft: 4,
+          paddingRight: 4 }} onClick={UserSignOut}>
+      <MeetingRoomIcon />
+    </Button>
+  </ButtonGroup>
+</Box>
     ) 
     : isMobileMD ? ( 
       <>

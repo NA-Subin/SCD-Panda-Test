@@ -55,7 +55,7 @@ const Wholesale = () => {
             const datas = snapshot.val();
             const dataTrip = [];
             for (let id in datas) {
-                if(datas[id].id !== 1){
+                if (datas[id].id !== 1) {
                     dataTrip.push({ id, ...datas[id] })
                 }
             }
@@ -68,25 +68,25 @@ const Wholesale = () => {
     }, []);
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-          
-            // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-            useEffect(() => {
-              const handleResize = () => {
-                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-              };
-          
-              window.addEventListener('resize', handleResize); // เพิ่ม event listener
-          
-              // ลบ event listener เมื่อ component ถูกทำลาย
-              return () => {
-                window.removeEventListener('resize', handleResize);
-              };
-            }, []);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
 
     return (
         <React.Fragment>
-            <Grid container spacing={2} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-150) : windowWidth <= 600 ? (windowWidth-50) : (windowWidth-300) }}>
+            <Grid container spacing={2} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 150) : windowWidth <= 600 ? (windowWidth - 50) : (windowWidth - 300) }}>
                 <Grid item xs={12}>
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                         รายการขายน้ำมัน
@@ -157,24 +157,35 @@ const Wholesale = () => {
                                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                         น้ำหนักรวม
                                     </TablecellHeader>
-                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100,position: "sticky",
-      right: "200px", // ติดซ้ายสุด
-      zIndex: 4, }}>
+                                    <TablecellHeader sx={{
+                                        textAlign: "center", fontSize: 16, width: 100, position: "sticky",
+                                        right: windowWidth <= 900 ? 0 : "200px", // ติดซ้ายสุด
+                                        zIndex: windowWidth <= 900 ? 2 : 4,
+                                    }}>
                                         สถานะ
                                     </TablecellHeader>
                                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
                                         เพิ่มเที่ยววิ่งโดย
                                     </TablecellHeader>
-                                    <TablecellHeader sx={{ width: 200,position: "sticky",
-      right: 0, // ระยะที่ชิดซ้ายต่อจากเซลล์ก่อนหน้า
-      backgroundColor: theme.palette.panda.light, // ใส่พื้นหลังเพื่อไม่ให้โปร่งใส
-      zIndex: 2, }}/>
+                                    <TablecellHeader sx={
+                                        windowWidth <= 900 ?
+                                        {
+                                            width: 200,
+                                        }
+                                        :
+                                        {
+                                        width: 200, position: "sticky",
+                                        right: 0, // ระยะที่ชิดซ้ายต่อจากเซลล์ก่อนหน้า
+                                        backgroundColor: theme.palette.panda.light, // ใส่พื้นหลังเพื่อไม่ให้โปร่งใส
+                                        zIndex: 2,
+                                    }
+                                    } />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {
                                     trip.map((row) => (
-                                        <TripsDetail key={row.id} trips={row} />
+                                        <TripsDetail key={row.id} trips={row} windowWidth={windowWidth} />
                                     ))
                                 }
                             </TableBody>
@@ -182,6 +193,7 @@ const Wholesale = () => {
                     </TableContainer>
                 </Grid>
             </Grid>
+            
         </React.Fragment>
 
     );

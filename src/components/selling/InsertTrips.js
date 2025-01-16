@@ -57,7 +57,7 @@ const InsertTrips = () => {
     const [showTrips, setShowTrips] = React.useState(true);
     const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
     const [depots, setDepots] = React.useState("");
-    const [status,setStatus] = React.useState("");
+    const [status, setStatus] = React.useState("");
 
     const handleDateChange = (newValue) => {
         if (newValue) {
@@ -106,7 +106,7 @@ const InsertTrips = () => {
             const datas = snapshot.val();
             const dataRegHead = [];
             for (let id in datas) {
-                if(datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี"){
+                if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี") {
                     dataRegHead.push({ id, ...datas[id] })
                 }
             }
@@ -241,6 +241,20 @@ const InsertTrips = () => {
                                 }
                                 setTicketsOrder(dataTicket);
                             });
+
+                            database
+                                .ref("truck/registration/")
+                                .child((registration.split(":")[0]) - 1)
+                                .update({
+                                    Status: "GT:" + ticket
+                                })
+                                .then(() => {
+                                    console.log("Data pushed successfully");
+
+                                })
+                                .catch((error) => {
+                                    console.error("Error pushing data:", error);
+                                });
                         })
                         .catch((error) => {
                             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -280,7 +294,7 @@ const InsertTrips = () => {
                             const datas = snapshot.val();
                             const dataOrder = [];
                             for (let id in datas) {
-                                if(datas[id].Trip === trip.length){
+                                if (datas[id].Trip === trip.length) {
                                     dataOrder.push({ id, ...datas[id] })
                                 }
                             }
@@ -299,7 +313,7 @@ const InsertTrips = () => {
                                     database.ref("/customer").on("value", (snapshot) => {
                                         const customer = snapshot.val();
                                         for (let T in customer) {
-                                            if(customer[T].Name === TicketName){
+                                            if (customer[T].Name === TicketName) {
                                                 dataT.push({ T, ...customer[T] })
                                             }
                                         }
@@ -317,7 +331,7 @@ const InsertTrips = () => {
                                     database.ref("/customer").on("value", (snapshot) => {
                                         const customer = snapshot.val();
                                         for (let A in customer) {
-                                            if(customer[A].Name !== TicketName){
+                                            if (customer[A].Name !== TicketName) {
                                                 dataA.push({ A, ...customer[A] })
                                             }
                                         }
@@ -378,27 +392,85 @@ const InsertTrips = () => {
                 Status: "รออนุมัติ"
             })
             .then(() => {
-                database
-            .ref("truck/registration/")
-            .child((registration.split(":")[0])-1)
-            .update({
-                Status: (trips-1)
-            })
-            .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
+                database
+                    .ref("truck/registration/")
+                    .child((registration.split(":")[0]) - 1)
+                    .update({
+                        Status: "TR:" + trips
+                    })
+                    .then(() => {
+                        setOpen(false);
+                        console.log("Data pushed successfully");
 
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
     };
+
+    const handleCancle = () => {
+        if (showTickers === false) {
+            if (showTrips === false) {
+                database
+                    .ref("trip/")
+                    .child(trips)
+                    .update({
+                        Status: "ยกเลิก"
+                    })
+                    .then(() => {
+                        ShowSuccess("ยกเลิกสำเร็จ");
+                        console.log("Data pushed successfully");
+                        database
+                            .ref("truck/registration/")
+                            .child((registration.split(":")[0]) - 1)
+                            .update({
+                                Status: "ว่าง"
+                            })
+                            .then(() => {
+                                console.log("Data pushed successfully");
+                                setOpen(false);
+                                setShowTickers(true);
+                                setShowTrips(true)
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+            } else {
+                database
+                    .ref("truck/registration/")
+                    .child((registration.split(":")[0]) - 1)
+                    .update({
+                        Status: "ว่าง"
+                    })
+                    .then(() => {
+                        ShowSuccess("ยกเลิกข้อมูลสำเร็จ");
+                        console.log("Data pushed successfully");
+                        setOpen(false);
+                        setShowTickers(true);
+                    })
+                    .catch((error) => {
+                        ShowError("ยกเลิกข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+            }
+        } else {
+            setOpen(false);
+        }
+    }
 
     const handleCustomer = () => {
         database
@@ -489,7 +561,7 @@ const InsertTrips = () => {
             <Dialog
                 open={open}
                 keepMounted
-                onClose={handleClose}
+                onClose={handleCancle}
                 sx={{
                     "& .MuiDialog-paper": {
                         width: "1500px", // กำหนดความกว้างแบบ Fixed
@@ -504,7 +576,7 @@ const InsertTrips = () => {
                             <Typography variant="h6" fontWeight="bold" color="white" >บันทึกข้อมูลขนส่งของการขายส่งน้ำมัน</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
-                            <IconButtonError onClick={handleClose}>
+                            <IconButtonError onClick={handleCancle}>
                                 <CancelIcon />
                             </IconButtonError>
                         </Grid>
@@ -516,49 +588,49 @@ const InsertTrips = () => {
                             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>วันที่รับ</Typography>
                         </Grid>
                         <Grid item sm={4} xs={9} textAlign="right">
-                                    <Paper
-                                        component="form">
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker
-                                                openTo="day"
-                                                views={["year", "month", "day"]}
-                                                value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
-                                                format="DD/MM/YYYY"
-                                                onChange={handleDateChange}
-                                                slotProps={{ textField: { size: "small", fullWidth: true } }}
-                                                disabled={showTickers ? false : true}
-                                            />
-                                        </LocalizationProvider>
-                                    </Paper>
-                                </Grid>
-                                <Grid item sm={1.5} xs={3} marginTop={1}>
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
-                                </Grid>
-                                <Grid item sm={5.5} xs={9}>
-                                    <Paper
-                                        component="form">
-                                        <Select
-                                            id="demo-simple-select"
-                                            value={registration}
-                                            size="small"
-                                            sx={{ textAlign: "left" }}
-                                            onChange={(e) => setRegistration(e.target.value)}
-                                            fullWidth
-                                            disabled={showTickers ? false : true}
-                                        >
-                                            <MenuItem value={"0:0:0"}>
-                                                กรุณาเลือกผู้ขับ/ป้ายทะเบียน
-                                            </MenuItem>
-                                            {
-                                                regHead.map((row) => (
-                                                    <MenuItem value={row.id+":"+row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
-                                                ))
-                                            }
-                                        </Select>
-                                    </Paper>
-                                </Grid>
+                            <Paper
+                                component="form">
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                        openTo="day"
+                                        views={["year", "month", "day"]}
+                                        value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                        format="DD/MM/YYYY"
+                                        onChange={handleDateChange}
+                                        slotProps={{ textField: { size: "small", fullWidth: true } }}
+                                        disabled={showTickers ? false : true}
+                                    />
+                                </LocalizationProvider>
+                            </Paper>
                         </Grid>
-                        <Grid container spacing={1} marginTop={2}>
+                        <Grid item sm={1.5} xs={3} marginTop={1}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                        </Grid>
+                        <Grid item sm={5.5} xs={9}>
+                            <Paper
+                                component="form">
+                                <Select
+                                    id="demo-simple-select"
+                                    value={registration}
+                                    size="small"
+                                    sx={{ textAlign: "left" }}
+                                    onChange={(e) => setRegistration(e.target.value)}
+                                    fullWidth
+                                    disabled={showTickers ? false : true}
+                                >
+                                    <MenuItem value={"0:0:0"}>
+                                        กรุณาเลือกผู้ขับ/ป้ายทะเบียน
+                                    </MenuItem>
+                                    {
+                                        regHead.map((row) => (
+                                            <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
+                                        ))
+                                    }
+                                </Select>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={1} marginTop={2}>
                         {
                             showTickers ?
                                 <Grid item xs={12} marginTop={1} marginBottom={1}>
@@ -590,7 +662,7 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={80} sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
                                                                 รหัสตั๋ว
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={500} sx={{ textAlign: "center"}} rowSpan={2}>
+                                                            <TablecellHeader width={500} sx={{ textAlign: "center" }} rowSpan={2}>
                                                                 ตั๋ว
                                                             </TablecellHeader>
                                                             <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
@@ -852,7 +924,7 @@ const InsertTrips = () => {
                                                         :
                                                         regHead.map((row) => (
                                                             row.RegHead === registration.split(":")[1] ?
-                                                                <Grid item sm={3.5} xs={9}  key={row.id}>
+                                                                <Grid item sm={3.5} xs={9} key={row.id}>
                                                                     <Paper
                                                                         component="form">
                                                                         <TextField size="small" type="number" fullWidth sx={{ borderRadius: 10 }}
@@ -869,7 +941,7 @@ const InsertTrips = () => {
                                                                 null
                                                         ))
                                                 }
-                                                <Grid item sm={0.5} xs={3}  marginTop={1} >
+                                                <Grid item sm={0.5} xs={3} marginTop={1} >
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
                                                 </Grid>
                                                 <Grid item sm={2.5} xs={9} >
@@ -907,251 +979,251 @@ const InsertTrips = () => {
                             ""
                             :
                             <>
-                            <Grid container spacing={1} marginTop={1} marginBottom={1}>
-                                <Grid item sm={1} xs={3} textAlign="right" marginTop={1}>
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>วันที่ส่ง</Typography>
-                                </Grid>
-                                <Grid item sm={11} xs={9} textAlign="right">
-                                            <Paper
-                                                component="form">
-                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                    <DatePicker
-                                                        openTo="day"
-                                                        views={["year", "month", "day"]}
-                                                        value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
-                                                        format="DD/MM/YYYY"
-                                                        onChange={handleDateChange}
-                                                        slotProps={{ textField: { size: "small", fullWidth: true } }}
-                                                    />
-                                                </LocalizationProvider>
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item sm={1.5} xs={3} marginTop={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
-                                        </Grid>
-                                        <Grid item sm={7} xs={9}>
-                                            <Paper
-                                                component="form">
-                                                <Select
-                                                    id="demo-simple-select"
-                                                    value={registration}
-                                                    size="small"
-                                                    sx={{ textAlign: "left" }}
-                                                    onChange={(e) => setRegistration(e.target.value)}
-                                                    fullWidth
-                                                >
-                                                    <MenuItem value={"0:0:0"}>
-                                                        กรุณาเลือกผู้ขับ/ป้ายทะเบียน
-                                                    </MenuItem>
-                                                    {
-                                                        regHead.map((row) => (
-                                                            <MenuItem value={row.id+":"+row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
-                                                        ))
-                                                    }
-                                                </Select>
-                                            </Paper>
-                                        </Grid>
+                                <Grid container spacing={1} marginTop={1} marginBottom={1}>
+                                    <Grid item sm={1} xs={3} textAlign="right" marginTop={1}>
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>วันที่ส่ง</Typography>
+                                    </Grid>
+                                    <Grid item sm={11} xs={9} textAlign="right">
+                                        <Paper
+                                            component="form">
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                    openTo="day"
+                                                    views={["year", "month", "day"]}
+                                                    value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                                    format="DD/MM/YYYY"
+                                                    onChange={handleDateChange}
+                                                    slotProps={{ textField: { size: "small", fullWidth: true } }}
+                                                />
+                                            </LocalizationProvider>
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item sm={1.5} xs={3} marginTop={1}>
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                    </Grid>
+                                    <Grid item sm={7} xs={9}>
+                                        <Paper
+                                            component="form">
+                                            <Select
+                                                id="demo-simple-select"
+                                                value={registration}
+                                                size="small"
+                                                sx={{ textAlign: "left" }}
+                                                onChange={(e) => setRegistration(e.target.value)}
+                                                fullWidth
+                                            >
+                                                <MenuItem value={"0:0:0"}>
+                                                    กรุณาเลือกผู้ขับ/ป้ายทะเบียน
+                                                </MenuItem>
+                                                {
+                                                    regHead.map((row) => (
+                                                        <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
+                                                    ))
+                                                }
+                                            </Select>
+                                        </Paper>
+                                    </Grid>
                                 </Grid>
                                 <Grid container spacing={1} marginTop={1} marginBottom={1}>
-                                <Grid item xs={1} textAlign="right">
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ขายน้ำมัน</Typography>
-                                </Grid>
-                                <Grid item xs={11} textAlign="right" >
-                                    <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
-                                        <TableContainer
-                                            component={Paper}
-                                            style={{ height: "40vh" }}
-                                            sx={{
-                                                maxWidth: '100%',
-                                                overflowX: 'auto',  // ทำให้สามารถเลื่อนได้ในแนวนอน
-                                            }}
-                                        >
-                                            <Table stickyHeader size="small" sx={{ tableLayout: 'fixed' }}>
-                                                <TableHead>
-                                                    <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.error.main }}>
-                                                        <TablecellHeader width={60} sx={{ textAlign: "center" }} rowSpan={2}>
-                                                            ลำดับ
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={200} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
-                                                            ลูกค้า
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={250} sx={{ textAlign: "center"}} rowSpan={2}>
-                                                            ตั๋ว
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
-                                                            เลขที่ออเดอร์
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={200} sx={{ textAlign: "center" }} rowSpan={2}>
-                                                            ค่าบรรทุก
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            G95
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            G91
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            B7(D)
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            B95
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            B10
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            B20
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            E20
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            E85
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={230} sx={{ textAlign: "center" }}>
-                                                            PWD
-                                                        </TablecellHeader>
-                                                        <TablecellHeader width={180} sx={{ textAlign: "center" }} rowSpan={2} />
-                                                    </TableRow>
-                                                    <TableRow sx={{ position: "sticky", top: 35, zIndex: 2, backgroundColor: theme.palette.error.main }}>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                    <Grid item xs={1} textAlign="right">
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ขายน้ำมัน</Typography>
+                                    </Grid>
+                                    <Grid item xs={11} textAlign="right" >
+                                        <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
+                                            <TableContainer
+                                                component={Paper}
+                                                style={{ height: "40vh" }}
+                                                sx={{
+                                                    maxWidth: '100%',
+                                                    overflowX: 'auto',  // ทำให้สามารถเลื่อนได้ในแนวนอน
+                                                }}
+                                            >
+                                                <Table stickyHeader size="small" sx={{ tableLayout: 'fixed' }}>
+                                                    <TableHead>
+                                                        <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.error.main }}>
+                                                            <TablecellHeader width={60} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                                ลำดับ
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={200} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
+                                                                ลูกค้า
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={250} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                                ตั๋ว
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                                เลขที่ออเดอร์
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={200} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                                ค่าบรรทุก
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                G95
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                G91
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                B7(D)
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                B95
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                B10
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                B20
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                E20
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                E85
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                                PWD
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={180} sx={{ textAlign: "center" }} rowSpan={2} />
+                                                        </TableRow>
+                                                        <TableRow sx={{ position: "sticky", top: 35, zIndex: 2, backgroundColor: theme.palette.error.main }}>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={1}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                                    </Grid>
                                                                 </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={1}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }}>
-                                                            <Grid container spacing={2}>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                </Grid>
-                                                                <Grid item xs={4}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </TablecellHeader>
-                                                        <TablecellHeader sx={{ textAlign: "center" }} />
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {
-                                                        orders === undefined || orders === null ?
-                                                            ""
-                                                            :
-                                                            orders.map((row) => (
-                                                                <SellingDetail key={row.id} detail={row} orders={orders.length} ticketsTrip={ticketsTrip} customers={customers}/>
-                                                            ))
-                                                    }
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
-                                        <Grid container spacing={1} marginTop={1}>
-                                            <Grid item sm={5} xs={12}>
-                                                <Paper
-                                                    component="form"
-                                                >
-                                                    <Grid container>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }} />
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {
+                                                            orders === undefined || orders === null ?
+                                                                ""
+                                                                :
+                                                                orders.map((row) => (
+                                                                    <SellingDetail key={row.id} detail={row} orders={orders.length} ticketsTrip={ticketsTrip} customers={customers} />
+                                                                ))
+                                                        }
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                            <Grid container spacing={1} marginTop={1}>
+                                                <Grid item sm={5} xs={12}>
+                                                    <Paper
+                                                        component="form"
+                                                    >
+                                                        <Grid container>
                                                             <Grid item sm={1.5} xs={2}>
                                                                 <Paper
                                                                     component="form">
@@ -1159,39 +1231,39 @@ const InsertTrips = () => {
                                                                 </Paper>
                                                             </Grid>
                                                             <Grid item sm={8} xs={7}>
-                                                            <Select
-                                                                id="demo-simple-select"
-                                                                value={customers}
-                                                                size="small"
-                                                                sx={{ textAlign: "left" }}
-                                                                onChange={(e) => setCustomers(e.target.value)}
-                                                                fullWidth
-                                                            >
-                                                                <MenuItem value={"0:0"}>
-                                                                    เลือกลูกค้าที่ต้องการเพิ่ม
-                                                                </MenuItem>
-                                                                {
-                                                                    combinedOrder.map((row, index) => (
-                                                                        codes === "A" ?
-                                                                        <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                            {`${row.type}:${row.Name}`}
-                                                                        </MenuItem>
-                                                                        : codes === "PS" ?
-                                                                        <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                            {`${row.type}:${row.Name}`}
-                                                                        </MenuItem>
-                                                                        : codes === "T" ?
-                                                                        <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                            {`${row.type}:${row.Name}`}
-                                                                        </MenuItem>
-                                                                        : codes === "" ?
-                                                                        <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                            {`${row.type}:${row.Name}`}
-                                                                        </MenuItem>
-                                                                        : ""
-                                                                    ))
-                                                                }
-                                                                {/* {
+                                                                <Select
+                                                                    id="demo-simple-select"
+                                                                    value={customers}
+                                                                    size="small"
+                                                                    sx={{ textAlign: "left" }}
+                                                                    onChange={(e) => setCustomers(e.target.value)}
+                                                                    fullWidth
+                                                                >
+                                                                    <MenuItem value={"0:0"}>
+                                                                        เลือกลูกค้าที่ต้องการเพิ่ม
+                                                                    </MenuItem>
+                                                                    {
+                                                                        combinedOrder.map((row, index) => (
+                                                                            codes === "A" ?
+                                                                                <MenuItem key={index} value={`${row.type}:${row.Name}`}>
+                                                                                    {`${row.type}:${row.Name}`}
+                                                                                </MenuItem>
+                                                                                : codes === "PS" ?
+                                                                                    <MenuItem key={index} value={`${row.type}:${row.Name}`}>
+                                                                                        {`${row.type}:${row.Name}`}
+                                                                                    </MenuItem>
+                                                                                    : codes === "T" ?
+                                                                                        <MenuItem key={index} value={`${row.type}:${row.Name}`}>
+                                                                                            {`${row.type}:${row.Name}`}
+                                                                                        </MenuItem>
+                                                                                        : codes === "" ?
+                                                                                            <MenuItem key={index} value={`${row.type}:${row.Name}`}>
+                                                                                                {`${row.type}:${row.Name}`}
+                                                                                            </MenuItem>
+                                                                                            : ""
+                                                                        ))
+                                                                    }
+                                                                    {/* {
                                                                         filteredOptions.map((row) => (
                                                                             <MenuItem value={row.Code + ":" + row.Name}>{row.Code + " : " + row.Name}</MenuItem>
                                                                         ))
@@ -1199,57 +1271,57 @@ const InsertTrips = () => {
                                                                     {filteredOptions.length === 0 && (
                                                                         <MenuItem disabled>No results found</MenuItem>
                                                                     )} */}
-                                                            </Select>
+                                                                </Select>
+                                                            </Grid>
+                                                            <Grid item sm={2.5} xs={3} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
+                                                                <Button variant="contained" color="info" fullWidth onClick={handleCustomer}>เพิ่มออเดอร์</Button>
+                                                            </Grid>
                                                         </Grid>
-                                                        <Grid item sm={2.5} xs={3} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
-                                                            <Button variant="contained" color="info" fullWidth onClick={handleCustomer}>เพิ่มออเดอร์</Button>
-                                                        </Grid>
-                                                    </Grid>
-                                                </Paper>
-                                            </Grid>
-                                            <Grid item sm={1} xs={3} marginTop={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ค่าเที่ยว</Typography>
-                                            </Grid>
-                                            <Grid item sm={2} xs={9}>
-                                                <Paper
-                                                    component="form">
-                                                    <TextField size="small" fullWidth sx={{ borderRadius: 10 }} />
-                                                </Paper>
-                                            </Grid>
-                                            <Grid item sm={0.5} xs={3} marginTop={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>คลัง</Typography>
-                                            </Grid>
-                                            <Grid item sm={3.5} xs={9}>
-                                                <Paper
-                                                    component="form">
-                                                    <Select
-                                                        id="demo-simple-select"
-                                                        value={depots}
-                                                        size="small"
-                                                        sx={{ textAlign: "left" }}
-                                                        onChange={(e) => setDepots(e.target.value)}
-                                                        fullWidth
-                                                    >
-                                                        <MenuItem value={0}>
-                                                            กรุณาเลือกคลัง
-                                                        </MenuItem>
-                                                        {
-                                                            depot.map((row) => (
-                                                                <MenuItem value={row.Name}>{row.Name}</MenuItem>
-                                                            ))
-                                                        }
-                                                    </Select>
-                                                </Paper>
-                                            </Grid>
-                                        </Grid></Paper>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item sm={1} xs={3} marginTop={1}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ค่าเที่ยว</Typography>
+                                                </Grid>
+                                                <Grid item sm={2} xs={9}>
+                                                    <Paper
+                                                        component="form">
+                                                        <TextField size="small" fullWidth sx={{ borderRadius: 10 }} />
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item sm={0.5} xs={3} marginTop={1}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>คลัง</Typography>
+                                                </Grid>
+                                                <Grid item sm={3.5} xs={9}>
+                                                    <Paper
+                                                        component="form">
+                                                        <Select
+                                                            id="demo-simple-select"
+                                                            value={depots}
+                                                            size="small"
+                                                            sx={{ textAlign: "left" }}
+                                                            onChange={(e) => setDepots(e.target.value)}
+                                                            fullWidth
+                                                        >
+                                                            <MenuItem value={0}>
+                                                                กรุณาเลือกคลัง
+                                                            </MenuItem>
+                                                            {
+                                                                depot.map((row) => (
+                                                                    <MenuItem value={row.Name}>{row.Name}</MenuItem>
+                                                                ))
+                                                            }
+                                                        </Select>
+                                                    </Paper>
+                                                </Grid>
+                                            </Grid></Paper>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
                             </>
                     }
                 </DialogContent>
                 <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
                     <Button onClick={handleSubmit} variant="contained" color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
+                    <Button onClick={handleCancle} variant="contained" color="error">ยกเลิก</Button>
                 </DialogActions>
 
             </Dialog>
