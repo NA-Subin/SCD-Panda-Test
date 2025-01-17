@@ -111,15 +111,22 @@ const UpdateGasStations = (props) => {
             .sort(([keyA, valueA], [keyB, valueB]) =>
                 valueA?.ProductName?.localeCompare(valueB?.ProductName || "") || 0
             )
-            .map(([key, value]) => {
-                const existingValue = values.find((val) => val.ProductName === value.ProductName);
+            .map(([, value], index) => {
                 return {
-                    ...value,
-                    Squeeze: existingValue?.Squeeze ?? value?.Squeeze ?? squeeze, // ใช้ค่าเดิมถ้ามี
-                    Delivered: existingValue?.Delivered ?? value?.Delivered ?? 0, // ใช้ค่าเดิมถ้ามี
-                    Pending1: existingValue?.Pending1 ?? value?.Pending1 ?? 0, // ใช้ค่าเดิมถ้ามี
-                    Pending2: existingValue?.Pending2 ?? value?.Pending2 ?? 0, // ใช้ค่าเดิมถ้ามี
-                    EstimateSell: existingValue?.EstimateSell ?? value?.EstimateSell ?? 0, // ใช้ค่าเดิมถ้ามี
+                    ProductName: value?.ProductName || "",
+                    Capacity: value?.Capacity || 0,
+                    Color: value?.Color || "",
+                    Volume: value?.Volume || 0,
+                    Squeeze: values[index]?.Squeeze || value?.Squeeze || 0, // ใช้ค่าจาก state ถ้ามี
+                    Delivered: values[index]?.Delivered || value?.Delivered || 0,
+                    Pending1: values[index]?.Pending1 || value?.Pending1 || 0,
+                    Pending2: values[index]?.Pending2 || value?.Pending2 || 0,
+                    EstimateSell: values[index]?.EstimateSell || value?.EstimateSell || 0, // ใช้ค่าจาก state ถ้ามี
+                    Period: value?.Period || 0,
+                    DownHole: value?.DownHole || 0,
+                    YesterDay: value?.YesterDay || 0,
+                    Sell: value?.Sell || 0,
+                    TotalVolume: value?.TotalVolume || 0
                 };
             })
             : stock.map((row) => {
@@ -153,12 +160,11 @@ const UpdateGasStations = (props) => {
     
         updatedValues.forEach((row) => {
             row.Period = calculatePeriod(row);
-            row.Sell = calculateSell(row);
+            // row.Sell = calculateSell(row);
             row.DownHole = calculateDownHole(row);
             row.TotalVolume = calculateTotalVolume(row);
         });
-    
-        // เพิ่มเงื่อนไขการอัปเดต state ถ้าข้อมูลมีการเปลี่ยนแปลงจริงๆ
+
         const hasChanged = updatedValues.some((newRow, index) => {
             const existingRow = values[index] || {};
             return (
@@ -171,23 +177,47 @@ const UpdateGasStations = (props) => {
             );
         });
         
-        // หากข้อมูลเปลี่ยนแปลงจึงอัปเดต state
+        // อัปเดต state หากข้อมูลเปลี่ยนแปลง
         if (hasChanged) {
-            setValues((prevValues) =>
-                updatedValues.map((newRow) => {
-                    const prevRow = prevValues.find((row) => row.ProductName === newRow.ProductName) || {};
-                    return {
-                        ...newRow,
-                        // คงค่าฟิลด์ที่แก้ไขไว้
-                        Squeeze: prevRow.Squeeze ?? newRow.Squeeze ?? squeeze, // ค่าเริ่มต้นคือ 800
-                        Delivered: prevRow.Delivered ?? newRow.Delivered ?? 0, // ค่าเริ่มต้นคือ 0
-                        Pending1: prevRow.Pending1 ?? newRow.Pending1 ?? 0, // ค่าเริ่มต้นคือ 0
-                        Pending2: prevRow.Pending2 ?? newRow.Pending2 ?? 0, // ค่าเริ่มต้นคือ 0
-                        EstimateSell: prevRow.EstimateSell ?? newRow.EstimateSell ?? 0, // ค่าเริ่มต้นคือ 0
-                    };
-                })
-            );
+            setValues(prevValues => {
+                return updatedValues.map((newRow, index) => ({
+                    ...prevValues[index],  // เก็บค่าที่กรอกไว้ก่อนหน้า
+                    ...newRow             // อัปเดตค่าใหม่ที่ต้องการ
+                }));
+            });
+        
         }
+    
+        // เพิ่มเงื่อนไขการอัปเดต state ถ้าข้อมูลมีการเปลี่ยนแปลงจริงๆ
+        // const hasChanged = updatedValues.some((newRow, index) => {
+        //     const existingRow = values[index] || {};
+        //     return (
+        //         newRow.ProductName !== existingRow.ProductName ||
+        //         newRow.Squeeze !== existingRow.Squeeze ||
+        //         newRow.Delivered !== existingRow.Delivered ||
+        //         newRow.Pending1 !== existingRow.Pending1 ||
+        //         newRow.Pending2 !== existingRow.Pending2 ||
+        //         newRow.EstimateSell !== existingRow.EstimateSell
+        //     );
+        // });
+        
+        // // หากข้อมูลเปลี่ยนแปลงจึงอัปเดต state
+        // if (hasChanged) {
+        //     setValues((prevValues) =>
+        //         updatedValues.map((newRow) => {
+        //             const prevRow = prevValues.find((row) => row.ProductName === newRow.ProductName) || {};
+        //             return {
+        //                 ...newRow,
+        //                 // คงค่าฟิลด์ที่แก้ไขไว้
+        //                 Squeeze: prevRow.Squeeze ?? newRow.Squeeze ?? squeeze, // ค่าเริ่มต้นคือ 800
+        //                 Delivered: prevRow.Delivered ?? newRow.Delivered ?? 0, // ค่าเริ่มต้นคือ 0
+        //                 Pending1: prevRow.Pending1 ?? newRow.Pending1 ?? 0, // ค่าเริ่มต้นคือ 0
+        //                 Pending2: prevRow.Pending2 ?? newRow.Pending2 ?? 0, // ค่าเริ่มต้นคือ 0
+        //                 EstimateSell: prevRow.EstimateSell ?? newRow.EstimateSell ?? 0, // ค่าเริ่มต้นคือ 0
+        //             };
+        //         })
+        //     );
+        // }
         
     }, [stock, selectedDate, gasStation, squeeze, gasStationOil, downHole]);  // เพิ่ม values ใน dependencies
     
@@ -220,9 +250,11 @@ const UpdateGasStations = (props) => {
                 TotalVolume: 0
             };
         }
+
+        // updatedValues[index][field] = value === "" ? 0 : parseFloat(value);
     
-        const newValue = value === "" || isNaN(value) ? 0 : parseFloat(value);
-        updatedValues[index][field] = newValue;
+        // const newValue = value === "" || isNaN(value) ? 0 : parseFloat(value);
+        updatedValues[index][field] = value;
     
         // ตรวจสอบว่า DownHole ถูกตั้งค่าแล้วหรือยัง
         const downHoleValue = downHole
@@ -231,13 +263,17 @@ const UpdateGasStations = (props) => {
     
         updatedValues[index].Period = calculatePeriod(updatedValues[index]);
         updatedValues[index].DownHole = downHoleValue; // ใช้ค่าจากการตรวจสอบ
-        updatedValues[index].Sell = calculateSell(updatedValues[index]);
+        // updatedValues[index].Sell = calculateSell(updatedValues[index]);
         updatedValues[index].DownHole = calculateDownHole(updatedValues[index]);
         updatedValues[index].TotalVolume = calculateTotalVolume(updatedValues[index]);
 
-        console.log("After update:", updatedValues[index]);
-    
-        setValues(updatedValues);
+        console.log("Updated value:", updatedValues[index]);
+
+        setValues(prevValues => {
+            const newValues = [...prevValues];
+            newValues[index] = updatedValues[index];
+            return newValues;
+        });
     };
     
     // ฟังก์ชันคำนวณผลรวม
@@ -392,35 +428,32 @@ const UpdateGasStations = (props) => {
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 100 }}>
                                 หักบีบไม่ขึ้น
                             </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 400 }}>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 300 }}>
                                 {
                                     update ?
                                         <Grid container>
-                                            <Grid item xs={2.5}>
+                                            <Grid item xs={4}>
                                                 ลงจริงไปแล้ว
                                             </Grid>
                                             <Grid item xs={0.5}>
                                                 |
                                             </Grid>
-                                            <Grid item xs={2.5}>
+                                            <Grid item xs={3.5}>
                                                 ที่มาจะลง
                                             </Grid>
                                             <Grid item xs={0.5}>
                                                 |
                                             </Grid>
-                                            <Grid item xs={2.5}>
+                                            <Grid item xs={3.5}>
                                                 ที่มาจะลง
-                                            </Grid>
-                                            <Grid item xs={0.5}>
-                                                |
-                                            </Grid>
-                                            <Grid item xs={2.5}>
-                                                ขาย/วัน
                                             </Grid>
                                         </Grid>
                                         :
                                         "ประมาณการรับเข้า/วัน"
                                 }
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 100 }}>
+                                ขาย/วัน
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main }}>
                                 หมด
@@ -487,30 +520,24 @@ const UpdateGasStations = (props) => {
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Squeeze)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Grid container>
-                                                            <Grid item xs={2.5}>
-                                                                {new Intl.NumberFormat("en-US").format(value.Delivered)}
-                                                            </Grid>
-                                                            <Grid item xs={0.5}>
-                                                                |
-                                                            </Grid>
-                                                            <Grid item xs={2.5}>
-                                                                {new Intl.NumberFormat("en-US").format(value.Pending1)}
-                                                            </Grid>
-                                                            <Grid item xs={0.5}>
-                                                                |
-                                                            </Grid>
-                                                            <Grid item xs={2.5}>
-                                                                {new Intl.NumberFormat("en-US").format(value.Pending2)}
-                                                            </Grid>
-                                                            <Grid item xs={0.5}>
-                                                                |
-                                                            </Grid>
-                                                            <Grid item xs={2.5}>
-                                                                {new Intl.NumberFormat("en-US").format(value.EstimateSell)}
-                                                            </Grid>
-                                                            <Grid item xs={0.5} />
+                                                        <Grid item xs={4}>
+                                                        {new Intl.NumberFormat("en-US").format(value.Delivered)}
+                                            </Grid>
+                                            <Grid item xs={0.5}>
+                                                |
+                                            </Grid>
+                                            <Grid item xs={3.5}>
+                                            {new Intl.NumberFormat("en-US").format(value.Pending1)}
+                                            </Grid>
+                                            <Grid item xs={0.5}>
+                                                |
+                                            </Grid>
+                                            <Grid item xs={3.5}>
+                                            {new Intl.NumberFormat("en-US").format(value.Pending2)}
+                                            </Grid>
                                                         </Grid>
                                                     </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.EstimateSell)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Period)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity-value.DownHole)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.YesterDay)}</TableCell>
@@ -541,31 +568,25 @@ const UpdateGasStations = (props) => {
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
-                                                                <Grid container>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5} />
-                                                                </Grid>
+                                                            <Grid container>
+                                            <Grid item xs={4}>
+                                                0
+                                            </Grid>
+                                            <Grid item xs={0.5}>
+                                                |
+                                            </Grid>
+                                            <Grid item xs={3.5}>
+                                                0
+                                            </Grid>
+                                            <Grid item xs={0.5}>
+                                                |
+                                            </Grid>
+                                            <Grid item xs={3.5}>
+                                                0
+                                            </Grid>
+                                        </Grid>
                                                             </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
@@ -601,31 +622,25 @@ const UpdateGasStations = (props) => {
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
-                                                                <Grid container>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={2.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5} />
-                                                                </Grid>
+                                                            <Grid container>
+                                            <Grid item xs={4}>
+                                                0
+                                            </Grid>
+                                            <Grid item xs={0.5}>
+                                                |
+                                            </Grid>
+                                            <Grid item xs={3.5}>
+                                                0
+                                            </Grid>
+                                            <Grid item xs={0.5}>
+                                                |
+                                            </Grid>
+                                            <Grid item xs={3.5}>
+                                                0
+                                            </Grid>
+                                        </Grid>
                                                             </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
@@ -801,7 +816,9 @@ const UpdateGasStations = (props) => {
                                                             }}
                                                             fullWidth
                                                         />
-                                                        <TextField
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    <TextField
                                                             size="small"
                                                             type="number"
                                                             // InputProps={{

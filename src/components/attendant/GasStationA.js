@@ -140,6 +140,23 @@ const GasStationA = () => {
         getStockOil(selectedDate); // ส่ง selectedDate เข้าไปในฟังก์ชัน
     }, [selectedDate]);
 
+    const [showButton, setShowButton] = useState(false);
+
+    useEffect(() => {
+        const checkTime = () => {
+            const now = dayjs(); // เวลาปัจจุบัน
+            const start = dayjs().hour(17).minute(0).second(0); // 17:00
+            const end = dayjs().hour(20).minute(8).second(0); // 20:00
+            setShowButton(now.isAfter(start) && now.isBefore(end)); // อัปเดตสถานะปุ่มตามช่วงเวลา
+        };
+
+        checkTime(); // ตรวจสอบครั้งแรกเมื่อคอมโพเนนต์โหลด
+        const interval = setInterval(checkTime, 1000); // ตรวจสอบทุก 1 วินาที
+        console.log("HI");
+
+        return () => clearInterval(interval); // ล้าง interval เมื่อคอมโพเนนต์ถูกทำลาย
+    }, []);
+
     const handleLogout = () => {
         ShowConfirm(
             "ต้องการออกจากระบบใช่หรือไม่",
@@ -408,7 +425,7 @@ const GasStationA = () => {
                             :
                             <Grid container spacing={5} marginTop={1}>
                                 <Grid item xs={1} />
-                                <Grid item xs={5}>
+                                <Grid item xs={showButton ? 5 : 10}>
                                     <Button
                                         variant="contained"
                                         color="info"
@@ -425,6 +442,7 @@ const GasStationA = () => {
                                         {isMobile ? <PostAddIcon style={{ fontSize: "50px" }}/> : "รับน้ำมัน"}
                                     </Button>
                                 </Grid>
+                                {showButton && (
                                 <Grid item xs={5}>
                                     <Button
                                         variant="contained"
@@ -439,9 +457,10 @@ const GasStationA = () => {
                                         onClick={() => setOpenOil(false)}
                                         startIcon={isMobile ? "" : <AttachMoneyIcon style={{ fontSize: "50px" }}/>} // กำหนดขนาดไอคอน
                                         >
-                                            {isMobile ? <AttachMoneyIcon style={{ fontSize: "50px" }}/> : "ขายน้ำมัน"}
+                                            {isMobile ? <AttachMoneyIcon style={{ fontSize: "50px" }}/> : "ปิดยอดสต็อก"}
                                     </Button>
                                 </Grid>
+                                )}
                                 <Grid item xs={1} />
                             </Grid>
                         )

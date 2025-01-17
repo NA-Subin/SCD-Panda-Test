@@ -79,10 +79,10 @@ const SellingOil = (props) => {
                         ProductName: key,
                         Capacity: matchingStock.Capacity,
                         Color: matchingStock.Color,
-                        TotalVolume: Number(value) - Number(delivered[key]),
+                        TotalVolume: Number(value || 0) - Number(delivered[key] || 0),
                         Volume: Number(value),
                         Delivered: 0,
-                        EstimateSell: Number(delivered[key] || 0),
+                        Sell: Number(delivered[key] || 0),
                     };
                 }
                 return null;
@@ -140,7 +140,7 @@ const SellingOil = (props) => {
                     TotalVolume: Number(row.TotalVolume) - Number(updateVolumes[row.ProductName] || 0),
                     Volume: row.Volume,
                     Delivered: row.Delivered,
-                    EstimateSell: Number(row.EstimateSell) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
+                    Sell: Number(row.Sell) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
                 };
             
         })
@@ -272,7 +272,7 @@ const SellingOil = (props) => {
                                                                             size="small"
                                                                             type="text"
                                                                             fullWidth
-                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Volume))) : (new Intl.NumberFormat("en-US").format((Number(row.Volume)-(Number(row.EstimateSell)) + Number(updateVolumes[row.ProductName] || 0))))}
+                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Volume))) : (new Intl.NumberFormat("en-US").format((Number(row.Volume)-(Number(row.Sell)) + Number(updateVolumes[row.ProductName] || 0))))}
                                                                             disabled
                                                                         />
                                                                     </Paper>
@@ -283,7 +283,7 @@ const SellingOil = (props) => {
                                                                         <TextField
                                                                             size="small"
                                                                             fullWidth
-                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.EstimateSell))) : (new Intl.NumberFormat("en-US").format(Number(row.EstimateSell) + Number(updateVolumes[row.ProductName] || 0)))}
+                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Sell))) : (new Intl.NumberFormat("en-US").format(Number(row.Sell) + Number(updateVolumes[row.ProductName] || 0)))}
                                                                             onChange={(e) => handleUpdateVolumeChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
                                                                             disabled
                                                                         />

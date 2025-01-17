@@ -79,11 +79,11 @@ const ReceiveOil = (props) => {
                         ProductName: key,
                         Capacity: matchingStock.Capacity,
                         Color: matchingStock.Color,
-                        TotalVolume: Number(value) + Number(delivered[key]),
+                        TotalVolume: Number(value || 0) + Number(delivered[key] || 0),
                         // Volume: Number(value) + Number(delivered[key] || 0),
                         Volume: Number(value),
                         Delivered: Number(delivered[key] || 0),
-                        EstimateSell: 0
+                        Sell: 0
                     };
                 }
                 return null;
@@ -142,7 +142,7 @@ const ReceiveOil = (props) => {
                 // Volume: Number(row.OldVolume) + Number(updateVolumes[row.ProductName] || 0), // คำนวณจากค่าใหม่
                 Volume: row.Volume,
                 Delivered: Number(row.Delivered) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
-                EstimateSell: row.EstimateSell
+                Sell: row.Sell
             };
         })
         : []
