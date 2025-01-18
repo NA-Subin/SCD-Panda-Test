@@ -112,27 +112,32 @@ const UpdateGasStations = (props) => {
                 valueA?.ProductName?.localeCompare(valueB?.ProductName || "") || 0
             )
             .map(([, value], index) => {
+                const yesterdayEntry = Object.values(yesterdayData || {}).find(
+                    (entry) => entry?.ProductName === value?.ProductName
+                ) || { Volume: 0 };
+    
                 return {
                     ProductName: value?.ProductName || "",
                     Capacity: value?.Capacity || 0,
                     Color: value?.Color || "",
-                    Volume: value?.Volume || 0,
-                    Squeeze: values[index]?.Squeeze || value?.Squeeze || 0, // ใช้ค่าจาก state ถ้ามี
+                    Volume: value?.Volume || 0, // ใช้ข้อมูลของวันที่เลือก
+                    Squeeze: values[index]?.Squeeze || value?.Squeeze || 0,
                     Delivered: values[index]?.Delivered || value?.Delivered || 0,
                     Pending1: values[index]?.Pending1 || value?.Pending1 || 0,
                     Pending2: values[index]?.Pending2 || value?.Pending2 || 0,
-                    EstimateSell: values[index]?.EstimateSell || value?.EstimateSell || 0, // ใช้ค่าจาก state ถ้ามี
+                    EstimateSell: values[index]?.EstimateSell || value?.EstimateSell || 0,
                     Period: value?.Period || 0,
                     DownHole: value?.DownHole || 0,
-                    YesterDay: value?.YesterDay || 0,
+                    YesterDay: yesterdayEntry?.Volume || 0, // ใช้ข้อมูลวันก่อนหน้า
                     Sell: value?.Sell || 0,
-                    TotalVolume: value?.TotalVolume || 0
+                    TotalVolume: value?.TotalVolume || 0,
+                    OilBalance: value?.OilBalance || 0
                 };
             })
             : stock.map((row) => {
                 const yesterdayEntry = Object.values(yesterdayData || {}).find(
                     (entry) => entry?.ProductName === row?.ProductName
-                );
+                ) || { OilBalance: 0 };
     
                 const downHoleValue = downHole
                     ? (downHole.find((item) => item?.ProductName === row?.ProductName)?.DownHole || gasStation?.Products?.[row?.ProductName] || 0)
@@ -152,15 +157,22 @@ const UpdateGasStations = (props) => {
                     EstimateSell: 0,
                     Period: 0,
                     DownHole: downHoleValue,
-                    YesterDay: yesterdayEntry?.TotalVolume || 0,
+                    YesterDay: yesterdayEntry?.Volume || 0,
                     Sell: 0,
-                    TotalVolume: 0
+                    TotalVolume: 0,
+                    OilBalance: 0
                 };
             });
+
+            console.log("Selected Date:", selectedDate);
+    console.log("Formatted Date:", formattedDate);
+    console.log("Yesterday Date:", yesterdayDate);
+    console.log("Report Data:", reportData);
+    console.log("Yesterday Data:", yesterdayData);
     
         updatedValues.forEach((row) => {
             row.Period = calculatePeriod(row);
-            // row.Sell = calculateSell(row);
+            row.Sell = calculateSell(row);
             row.DownHole = calculateDownHole(row);
             row.TotalVolume = calculateTotalVolume(row);
         });
@@ -173,19 +185,19 @@ const UpdateGasStations = (props) => {
                 newRow.Delivered !== existingRow.Delivered ||
                 newRow.Pending1 !== existingRow.Pending1 ||
                 newRow.Pending2 !== existingRow.Pending2 ||
-                newRow.EstimateSell !== existingRow.EstimateSell
+                newRow.EstimateSell !== existingRow.EstimateSell ||
+                newRow.Volume !== existingRow.Volume // เพิ่มเงื่อนไข
             );
         });
         
         // อัปเดต state หากข้อมูลเปลี่ยนแปลง
         if (hasChanged) {
-            setValues(prevValues => {
-                return updatedValues.map((newRow, index) => ({
-                    ...prevValues[index],  // เก็บค่าที่กรอกไว้ก่อนหน้า
-                    ...newRow             // อัปเดตค่าใหม่ที่ต้องการ
-                }));
-            });
-        
+            setValues((prevValues) =>
+                updatedValues.map((newRow, index) => ({
+                    ...prevValues[index], // เก็บค่าที่กรอกไว้ก่อนหน้า
+                    ...newRow,            // อัปเดตค่าใหม่ที่ต้องการ
+                }))
+            );
         }
     
         // เพิ่มเงื่อนไขการอัปเดต state ถ้าข้อมูลมีการเปลี่ยนแปลงจริงๆ
@@ -247,7 +259,8 @@ const UpdateGasStations = (props) => {
                 DownHole: 0, 
                 YesterDay: 0,
                 Sell: 0,
-                TotalVolume: 0
+                TotalVolume: 0,
+                OilBalance: 0
             };
         }
 
@@ -263,7 +276,7 @@ const UpdateGasStations = (props) => {
     
         updatedValues[index].Period = calculatePeriod(updatedValues[index]);
         updatedValues[index].DownHole = downHoleValue; // ใช้ค่าจากการตรวจสอบ
-        // updatedValues[index].Sell = calculateSell(updatedValues[index]);
+        updatedValues[index].Sell = calculateSell(updatedValues[index]);
         updatedValues[index].DownHole = calculateDownHole(updatedValues[index]);
         updatedValues[index].TotalVolume = calculateTotalVolume(updatedValues[index]);
 

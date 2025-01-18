@@ -35,13 +35,13 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PostAddIcon from '@mui/icons-material/PostAdd';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import dayjs from 'dayjs';
 import Cookies from 'js-cookie';
 import 'dayjs/locale/th';
 import SettingA from "./SettingA";
 import ReceiveOil from "./ReceiveOil";
-import SellingOil from "./SellingOil";
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import OilBalance from "./OilBalance";
 
 const GasStationA = () => {
 
@@ -52,12 +52,16 @@ const GasStationA = () => {
     const [stock, setStock] = useState([]);
     const [newVolume, setNewVolume] = React.useState(0);
     const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
+    const today = dayjs(new Date());
+
     const handleDateChange = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
             setSelectedDate(formattedDate);
         }
     };
+
+    const isToday = selectedDate.isSame(today, "day"); // เปรียบเทียบเฉพาะวันที่
 
     const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
@@ -145,7 +149,7 @@ const GasStationA = () => {
     useEffect(() => {
         const checkTime = () => {
             const now = dayjs(); // เวลาปัจจุบัน
-            const start = dayjs().hour(17).minute(0).second(0); // 17:00
+            const start = dayjs().hour(10).minute(20).second(0); // 17:00
             const end = dayjs().hour(20).minute(8).second(0); // 20:00
             setShowButton(now.isAfter(start) && now.isBefore(end)); // อัปเดตสถานะปุ่มตามช่วงเวลา
         };
@@ -235,7 +239,7 @@ const GasStationA = () => {
                         {
                             open ? (
                                 openOil === true ? "รับน้ำมัน"
-                                : openOil === false ? "ขายน้ำมัน"
+                                : openOil === false ? "ปิดยอดสต็อก"
                                 : "ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน"
                             ) : "ตั้งค่าบัญชีผู้ใช้"
                         }
@@ -412,15 +416,17 @@ const GasStationA = () => {
                                 gasStationReport={gasStationReport}
                                 selectedDate={selectedDate}
                                 gasStationOil={gasStationOil}
+                                isToday={isToday}
                             />
                             : openOil === false ? 
-                            <SellingOil 
+                            <OilBalance 
                                 stock={stock}
                                 gasStationID={gasStationID}
                                 report={report}
                                 gasStationReport={gasStationReport}
                                 selectedDate={selectedDate}
                                 gasStationOil={gasStationOil}
+                                isToday={isToday}
                             />
                             :
                             <Grid container spacing={5} marginTop={1}>
@@ -455,9 +461,9 @@ const GasStationA = () => {
                                             fontWeight: "bold"
                                         }}
                                         onClick={() => setOpenOil(false)}
-                                        startIcon={isMobile ? "" : <AttachMoneyIcon style={{ fontSize: "50px" }}/>} // กำหนดขนาดไอคอน
+                                        startIcon={isMobile ? "" : <FactCheckIcon style={{ fontSize: "50px" }}/>} // กำหนดขนาดไอคอน
                                         >
-                                            {isMobile ? <AttachMoneyIcon style={{ fontSize: "50px" }}/> : "ปิดยอดสต็อก"}
+                                            {isMobile ? <FactCheckIcon style={{ fontSize: "50px" }}/> : "ปิดยอดสต็อก"}
                                     </Button>
                                 </Grid>
                                 )}

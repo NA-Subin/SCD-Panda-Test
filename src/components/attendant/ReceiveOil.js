@@ -39,7 +39,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/th';
 
 const ReceiveOil = (props) => {
-    const {stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate} = props;
+    const {stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate, isToday} = props;
 
     const [delivered, setDelivered] = useState({});
     const [setting, setSetting] = React.useState(true);
@@ -83,7 +83,7 @@ const ReceiveOil = (props) => {
                         // Volume: Number(value) + Number(delivered[key] || 0),
                         Volume: Number(value),
                         Delivered: Number(delivered[key] || 0),
-                        Sell: 0
+                        OilBalance: 0
                     };
                 }
                 return null;
@@ -142,7 +142,7 @@ const ReceiveOil = (props) => {
                 // Volume: Number(row.OldVolume) + Number(updateVolumes[row.ProductName] || 0), // คำนวณจากค่าใหม่
                 Volume: row.Volume,
                 Delivered: Number(row.Delivered) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
-                Sell: row.Sell
+                OilBalance: row.OilBalance
             };
         })
         : []
@@ -310,7 +310,12 @@ const ReceiveOil = (props) => {
                 }
             </Grid>
             <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
+            <Button variant="contained" color="success" onClick={saveProduct}>
+                            บันทึก
+                        </Button>
                 {
+                    isToday &&
+                    (
                     report === 0 || gasStationReport.length === 0 ?
                         <Button variant="contained" color="success" onClick={saveProduct}>
                             บันทึก
@@ -331,6 +336,7 @@ const ReceiveOil = (props) => {
                                     </Button>
                                 </>
                         )
+                    )
                 }
             </Box>
         </React.Fragment>

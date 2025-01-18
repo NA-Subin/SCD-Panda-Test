@@ -38,8 +38,8 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/th';
 
-const SellingOil = (props) => {
-    const {stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate} = props;
+const OilBalance = (props) => {
+    const { stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate, isToday } = props;
 
     const [delivered, setDelivered] = useState({});
     const [setting, setSetting] = React.useState(true);
@@ -79,10 +79,10 @@ const SellingOil = (props) => {
                         ProductName: key,
                         Capacity: matchingStock.Capacity,
                         Color: matchingStock.Color,
-                        TotalVolume: Number(value || 0) - Number(delivered[key] || 0),
-                        Volume: Number(value),
+                        TotalVolume: Number(value || 0),
+                        Volume: Number(value || 0),
                         Delivered: 0,
-                        Sell: Number(delivered[key] || 0),
+                        OilBalance: Number(delivered[key] || 0),
                     };
                 }
                 return null;
@@ -130,32 +130,40 @@ const SellingOil = (props) => {
     };
 
     const updateProduct = () => {
-        const updatedProducts = 
+        const updatedProducts =
             gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
-            ? gasStationReport.map((row) => {
-            return {
-                    ProductName: row.ProductName,
-                    Capacity: row.Capacity,
-                    Color: row.Color,
-                    TotalVolume: Number(row.TotalVolume) - Number(updateVolumes[row.ProductName] || 0),
-                    Volume: row.Volume,
-                    Delivered: row.Delivered,
-                    Sell: Number(row.Sell) + Number(updateVolumes[row.ProductName] || 0), // ใช้ค่าใหม่ที่เก็บไว้ใน state
-                };
-            
-        })
-        : []
+                ? gasStationReport.map((row) => {
+                    return {
+                        ProductName: row.ProductName,
+                        Capacity: row.Capacity,
+                        Color: row.Color,
+                        Volume: row.Volume,
+                        Squeeze: row.Squeeze, // ใช้ค่าจาก state ถ้ามี
+                        Delivered: row.Delivered,
+                        Pending1: row.Pending1,
+                        Pending2: row.Pending2,
+                        EstimateSell: row.EstimateSell, // ใช้ค่าจาก state ถ้ามี
+                        Period: row.Period,
+                        DownHole: row.DownHole,
+                        YesterDay: row.YesterDay,
+                        Sell: row.Sell,
+                        TotalVolume: row.TotalVolume,
+                        OilBalance: Number(updateVolumes[row.ProductName] || row.Volume)
+                    };
 
-        const updatedVolumes = 
-        gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
-        ? gasStationReport.reduce((acc, row) => {
-            const updatedVolume =
-              Number(row.TotalVolume) - Number(updateVolumes[row.ProductName] || 0);
-          
-            acc[row.ProductName] = updatedVolume; // เก็บค่าใน key ที่ตรงกับ ProductName
-            return acc;
-          }, {})
-          : []
+                })
+                : []
+
+        const updatedVolumes =
+            gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+                ? gasStationReport.reduce((acc, row) => {
+                    const updatedVolume =
+                        Number(updateVolumes[row.ProductName] || row.Volume);
+
+                    acc[row.ProductName] = updatedVolume; // เก็บค่าใน key ที่ตรงกับ ProductName
+                    return acc;
+                }, {})
+                : []
 
         // อัปเดตข้อมูลในฐานข้อมูล Firebase
         database
@@ -172,7 +180,7 @@ const SellingOil = (props) => {
                 console.error("Error pushing data:", error);
             });
 
-            database
+        database
             .ref("/depot/gasStations/" + (gasStationID - 1))
             .child("/Products")
             .update(updatedVolumes)
@@ -222,7 +230,7 @@ const SellingOil = (props) => {
                                         </Box>
                                     </Grid>
                                     <Grid item xs={3.5} md={2} lg={1.5}>
-                                        <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom >ปริมาณรวม</Typography>
+                                        <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom >ปริมาณ</Typography>
                                         <Paper component="form" sx={{ marginTop: -1 }}>
                                             <TextField
                                                 size="small"
@@ -234,7 +242,7 @@ const SellingOil = (props) => {
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={3.5} md={2} lg={1.5}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom >ขายไป</Typography>
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom >สต็อกคงเหลือ</Typography>
                                         <Paper component="form" sx={{ marginTop: -1 }}>
                                             <TextField size="small" type="number" fullWidth
                                                 value={delivered[key] || ""} // ดึงค่า newVolume ตาม ProductName
@@ -264,77 +272,69 @@ const SellingOil = (props) => {
                                         <Typography variant="h5" fontWeight="bold" gutterBottom>{row.ProductName}</Typography>
                                     </Box>
                                 </Grid>
-
                                 <Grid item xs={setting ? 3.5 : 3} md={setting ? 2 : 1.5} lg={setting ? 1.5 : 1}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom>ปริมาณรวม</Typography>
-                                                                    <Paper component="form" sx={{ marginTop: -1 }}>
-                                                                        <TextField
-                                                                            size="small"
-                                                                            type="text"
-                                                                            fullWidth
-                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Volume))) : (new Intl.NumberFormat("en-US").format((Number(row.Volume)-(Number(row.Sell)) + Number(updateVolumes[row.ProductName] || 0))))}
-                                                                            disabled
-                                                                        />
-                                                                    </Paper>
-                                                                </Grid>
-                                                                <Grid item xs={setting ? 3.5 : 3} md={setting ? 2 : 1.5} lg={setting ? 1.5 : 1}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom>รวมขายไป</Typography>
-                                                                    <Paper component="form" sx={{ marginTop: -1 }}>
-                                                                        <TextField
-                                                                            size="small"
-                                                                            fullWidth
-                                                                            value={setting ? (new Intl.NumberFormat("en-US").format(Number(row.Sell))) : (new Intl.NumberFormat("en-US").format(Number(row.Sell) + Number(updateVolumes[row.ProductName] || 0)))}
-                                                                            onChange={(e) => handleUpdateVolumeChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
-                                                                            disabled
-                                                                        />
-                                                                    </Paper>
-                                                                </Grid>
-                                                                {
-                                                                    setting ? "" :
-                                                                    <Grid item xs={3} md={1.5} lg={1}>
-                                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ขายไป</Typography>
-                                                                    <Paper component="form" sx={{ marginTop: -1 }}>
-                                                                        <TextField
-                                                                            size="small"
-                                                                            type={setting ? "" : "number"}
-                                                                            fullWidth
-                                                                            value={updateVolumes[row.ProductName] || 0}
-                                                                            onChange={(e) => handleUpdateVolumeChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
-                                                                            disabled={setting ? true : false}
-                                                                        />
-                                                                    </Paper>
-                                                                </Grid>
-                                                                }
+                                    <Typography variant="subtitle2" fontWeight="bold" color="textDisabled" gutterBottom>ปริมาณ</Typography>
+                                    <Paper component="form" sx={{ marginTop: -1 }}>
+                                        <TextField
+                                            size="small"
+                                            type="text"
+                                            fullWidth
+                                            value={(new Intl.NumberFormat("en-US").format(Number(row.Volume)))}
+                                            disabled
+                                        />
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={setting ? 3.5 : 3} md={setting ? 2 : 1.5} lg={setting ? 1.5 : 1}>
+                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>สต็อกคงเหลือ</Typography>
+                                            <Paper component="form" sx={{ marginTop: -1 }}>
+                                                <TextField
+                                                    size="small"
+                                                    type={setting ? "" : "number"}
+                                                    fullWidth
+                                                    value={updateVolumes[row.ProductName] || row.Volume}
+                                                    onChange={(e) => handleUpdateVolumeChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
+                                                />
+                                            </Paper>
+                                        </Grid>
                             </React.Fragment>
                         ))
                 }
             </Grid>
             <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-                {
-                    report === 0 || gasStationReport.length === 0 ?
-                        <Button variant="contained" color="success" onClick={saveProduct}>
-                            บันทึก
-                        </Button>
-                        :
-                        (
-                            setting ?
-                                <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
-                                    แก้ไข
-                                </Button>
-                                :
-                                <>
-                                    <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>
-                                        ยกเลิก
-                                    </Button>
-                                    <Button variant="contained" color="success" onClick={updateProduct}>
+            <Button variant="contained" color="success" onClick={updateProduct}>
                                         บันทึก
                                     </Button>
-                                </>
-                        )
+                {
+                    isToday &&
+                    (
+                        <Button variant="contained" color="success" onClick={updateProduct}>
+                                        บันทึก
+                                    </Button>
+                    // report === 0 || gasStationReport.length === 0 ?
+                    //     <Button variant="contained" color="success" onClick={saveProduct}>
+                    //         บันทึก
+                    //     </Button>
+                    //     :
+                    //     (
+                    //         setting ?
+                    //             <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
+                    //                 แก้ไข
+                    //             </Button>
+                    //             :
+                    //             <>
+                    //                 <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>
+                    //                     ยกเลิก
+                    //                 </Button>
+                    //                 <Button variant="contained" color="success" onClick={updateProduct}>
+                    //                     บันทึก
+                    //                 </Button>
+                    //             </>
+                    //     )
+                    )
                 }
             </Box>
         </React.Fragment>
     );
 };
 
-export default SellingOil;
+export default OilBalance;
