@@ -44,12 +44,12 @@ const Login = () => {
 // ตั้งค่า Token
 
   useEffect(() => {
-    const token = Cookies.get('email'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
+    const token = Cookies.get('user'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
     if (token) {
       if (token){
         database
-              .ref("/employee/officers")
-              .orderByChild("Email")
+              .ref("/employee/officers/")
+              .orderByChild("User")
               .equalTo(token)
               .on("value", (snapshot) => {
                 const datas = snapshot.val();
@@ -72,11 +72,11 @@ const Login = () => {
   }, []);
 
   const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState("");
+  const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
 
   // const handleSubmit = async () => {
-  //   await HTTP.get("/employee?Email="+email)
+  //   await HTTP.get("/employee?Email="+user)
   //       .then(res => {
   //           if(res.data.length <= 0 || res.data === undefined){
   //           console.log("ไม่มีข้อมูล");
@@ -86,7 +86,7 @@ const Login = () => {
   //             row.Password === password ?
   //             (
   //               Cookies.set('token', row.Email.split('@')[0]+"#"+dayjs(new Date())+"?"+row.Position, { expires: 7 }),
-  //               // navigate("/"+email.split('@')[0]+"/dashboard/")
+  //               // navigate("/"+user.split('@')[0]+"/dashboard/")
   //               navigate("/choose")
   //             )
   //             : ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง")
@@ -110,13 +110,13 @@ const Login = () => {
   // ฟังก์ชันสำหรับเข้าสู่ระบบด้วย Email และ Password
   const loginUser = async (event) => {
     event.preventDefault();
-    if(email !== "" && password !== ""){
-      signInWithEmailAndPassword(auth, email, password)
+    if(user !== "" && password !== ""){
+      signInWithEmailAndPassword(auth, (user+"@gmail.com"), password)
           .then((userCredential) => {
             database
   .ref("/employee/officers")
-  .orderByChild("Email")
-  .equalTo(email)
+  .orderByChild("User")
+  .equalTo(user)
   .once("value")
   .then((snapshot) => {
     const datas = snapshot.val();
@@ -126,7 +126,7 @@ const Login = () => {
       for (let id in datas) {
         dataList.push({ id, ...datas[id] });
         if (datas[id].Password === password) {
-          Cookies.set("email", email, {
+          Cookies.set("user", user, {
             expires: 30,
             secure: true,
             sameSite: "Lax",
@@ -134,7 +134,7 @@ const Login = () => {
 
           Cookies.set(
             "sessionToken",
-            email.split("@")[0] + "$" + datas[id].id,
+            user + "$" + datas[id].id,
             {
               expires: 30,
               secure: true,
@@ -157,8 +157,8 @@ const Login = () => {
       // ไม่พบข้อมูลใน "/employee/officers"
       return database
         .ref("/employee/creditors")
-        .orderByChild("Email")
-        .equalTo(email)
+        .orderByChild("User")
+        .equalTo(user)
         .once("value");
     }
   })
@@ -171,7 +171,7 @@ const Login = () => {
         for (let id in datas) {
           dataList.push({ id, ...datas[id] });
           if (datas[id].Password === password) {
-            Cookies.set("email", email, {
+            Cookies.set("user", user, {
               expires: 30,
               secure: true,
               sameSite: "Lax",
@@ -179,7 +179,7 @@ const Login = () => {
 
             Cookies.set(
               "sessionToken",
-              email.split("@")[0] + "$" + datas[id].id,
+              user.split("@")[0] + "$" + datas[id].id,
               {
                 expires: 30,
                 secure: true,
@@ -197,7 +197,7 @@ const Login = () => {
         }
       } else {
         // ไม่พบข้อมูลในทั้งสองฐานข้อมูล
-        ShowError("ไม่พบ Email ในระบบ กรุณาตรวจสอบข้อมูลอีกครั้ง");
+        ShowError("ไม่พบ User ในระบบ กรุณาตรวจสอบข้อมูลอีกครั้ง");
       }
     }
   })
@@ -207,18 +207,18 @@ const Login = () => {
   });
           })
           .catch((error) => {
-            ShowError("Email หรือ Pasword ไม่ถูกต้อง");
+            ShowError("User หรือ Pasword ไม่ถูกต้อง");
             console.log(error);
           })
     }
     else{
-      ShowWarning("กรุณากรอก Email และ Password");
+      ShowWarning("กรุณากรอก User และ Password");
     }
   };
 
-  // const loginUser = async (email, password) => {
+  // const loginUser = async (user, password) => {
   //   try {
-  //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  //     const userCredential = await signInWithEmailAndPassword(auth, user, password);
   //     const user = userCredential.user;
 
   //     // ดึงตำแหน่ง (Position) ของพนักงานจาก Realtime Database
@@ -235,11 +235,11 @@ const Login = () => {
   //       // ตรวจสอบสิทธิ์การเข้าถึง
   //       if (position === "1") {
   //         console.log('User is admin. Can view and edit data.');
-  //         Cookies.set('token', email.split('@')[0]+"#"+dayjs(new Date())+"?"+position, { expires: 7 }),
+  //         Cookies.set('token', user.split('@')[0]+"#"+dayjs(new Date())+"?"+position, { expires: 7 }),
   //         navigate("/choose")
   //       } else {
   //         console.log('User is regular employee. Can only view data.');
-  //         Cookies.set('token', email.split('@')[0]+"#"+dayjs(new Date())+"?"+position, { expires: 7 }),
+  //         Cookies.set('token', user.split('@')[0]+"#"+dayjs(new Date())+"?"+position, { expires: 7 }),
   //         navigate("/choose")
   //       }
 
@@ -331,13 +331,13 @@ const Login = () => {
       onSubmit={loginUser}>
             <Grid item xs={12}>
               <TextField
-                label="Email"
+                label="User"
                 size="small"
-                type="email"
+                type="user"
                 variant="filled"
                 fullWidth
-                defaultValue={email}
-                onChange={(e) => setEmail(e.target.value)}
+                defaultValue={user}
+                onChange={(e) => setUser(e.target.value)}
                 sx={{ backgroundColor: theme.palette.primary.contrastText }}
                 InputProps={{
                   startAdornment: (

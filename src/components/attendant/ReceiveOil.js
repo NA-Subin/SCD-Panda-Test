@@ -310,9 +310,9 @@ const ReceiveOil = (props) => {
                 }
             </Grid>
             <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-            <Button variant="contained" color="success" onClick={saveProduct}>
+            {/* <Button variant="contained" color="success" onClick={saveProduct}>
                             บันทึก
-                        </Button>
+                        </Button> */}
                 {
                     isToday &&
                     (

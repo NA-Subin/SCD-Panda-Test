@@ -90,7 +90,7 @@ const Creditor = () => {
         เจ้าหนี้การค้า
       </Typography>
       <Divider sx={{ marginBottom: 1 }}/>
-      <Grid container spacing={3} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-85) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-220) }}>
+      <Grid container spacing={3} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
         <Grid item xs={12} textAlign="right" marginTop={-10} marginBottom={4} marginRight={5}>
           <InsertCreditor/>
         </Grid>
@@ -104,7 +104,7 @@ const Creditor = () => {
                               style={{ maxHeight: "70vh" }}
                               sx={{ marginBottom: 2}}
                           >
-                              <Table stickyHeader size="small" sx={{ width: "1200px" }}>
+                              <Table stickyHeader size="small" sx={{ width: "1250px" }}>
                   <TableHead sx={{ height: "7vh" }}>
                     <TableRow>
                       <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -120,7 +120,7 @@ const Creditor = () => {
                         เบอร์โทร
                       </TablecellHeader>
                       <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                        Email
+                        User
                       </TablecellHeader>
                       <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                         ระยะเครดิต
@@ -136,7 +136,7 @@ const Creditor = () => {
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
-                          <TableCell sx={{ textAlign: "center" }}>{row.Email}</TableCell>
+                          <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Credit}</TableCell>
                           <UpdateCreditor key={row.id} employee={row}/>
                         </TableRow>

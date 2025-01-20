@@ -65,7 +65,7 @@ const InsertCreditor = () => {
     const [province, setProvince] = React.useState("");
     const [zipCode, setZipCode] = React.useState("");
     const [creditTime, setCreditTime] = React.useState("");
-    const [email, setEmail] = React.useState("");
+    const [user, setUser] = React.useState("");
     const [lat,setLat] = React.useState("");
     const [lng,setLng] = React.useState("");
 
@@ -102,7 +102,7 @@ const InsertCreditor = () => {
                 lat: lat,
                 lng: lng,
                 Credit: creditTime,
-                Email: email,
+                User: user,
                 Password: "1234567",
                 IDCard: idCard,
                 Phone: phone
@@ -191,12 +191,12 @@ const InsertCreditor = () => {
                             </Paper>
                         </Grid>
                         <Grid item sm={2} xs={3}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>Email</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
                         </Grid>
                         <Grid item sm={4} xs={9}>
                             <Paper
                                 component="form">
-                                    <TextField size="small" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
+                                    <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
                                 {/* <Select
                                     id="demo-simple-select"
                                     value={creditorType}

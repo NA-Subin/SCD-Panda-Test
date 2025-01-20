@@ -301,9 +301,9 @@ const OilBalance = (props) => {
                 }
             </Grid>
             <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-            <Button variant="contained" color="success" onClick={updateProduct}>
+            {/* <Button variant="contained" color="success" onClick={updateProduct}>
                                         บันทึก
-                                    </Button>
+                                    </Button> */}
                 {
                     isToday &&
                     (

@@ -69,6 +69,30 @@ const InsertTruck = (props) => {
     const [registration, setRegistration] = React.useState("");
     const [regTail, setRegTail] = React.useState("");
 
+    const [fields, setFields] = useState([]); // เก็บค่าของแต่ละช่องกรอก
+
+  // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงใน cap
+  const handleCapChange = (e) => {
+    const value = parseInt(e.target.value) || 0; // แปลงค่าจาก TextField เป็นตัวเลข
+    setCap(value);
+
+    // สร้าง array ของช่องกรอกข้อมูล
+    const newFields = Array.from({ length: value }, (_, index) => ({
+      id: index + 1, // id เริ่มจาก 1
+      value: 0, // ค่าเริ่มต้นเป็นค่าว่าง
+    }));
+    setFields(newFields);
+  };
+
+  // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงในแต่ละช่อง
+  const handleFieldChange = (id, value) => {
+    setFields((prevFields) =>
+      prevFields.map((field) =>
+        field.id === id ? { ...field, value } : field
+      )
+    );
+  };
+
     const getCompany = async () => {
         database.ref("/company").on("value", (snapshot) => {
             const datas = snapshot.val();
@@ -162,6 +186,11 @@ const InsertTruck = (props) => {
                 console.error("Error pushing data:", error);
             });
         }else if(menu === 2){
+            const capFields = fields.reduce((acc, field) => {
+                acc[`Cap${field.id}`] = field.value || 0; // หากไม่มีค่าให้ใส่เป็น 0
+                return acc;
+              }, {}); 
+
             database
             .ref("/truck/registrationTail/")
             .child(regTailLength)
@@ -174,6 +203,7 @@ const InsertTruck = (props) => {
                 Insurance: "-",
                 Status: "ยังไม่เชื่อมต่อทะเบียนหัว",
                 Driver: "ไม่มี",
+                ...capFields, // เพิ่ม capFields ที่แปลงแล้วเข้าไป
                 VehicleRegistration: licenseSmallTruck === "มี" ? vehicleRegistration : "ไม่มี",
                 VehExpirationDate: licenseSmallTruck === "มี" ? dateEnd: "ไม่มี",
                 VehPicture: "ไม่มี"
@@ -441,9 +471,25 @@ const InsertTruck = (props) => {
                                         </Grid>
                                         <Grid item sm={4} xs={8}>
                                             <Paper component="form">
-                                                <TextField size="small" fullWidth value={cap} onChange={(e) => setCap(e.target.value)} />
+                                                <TextField size="small" fullWidth value={cap} onChange={handleCapChange} />
                                             </Paper>
                                         </Grid>
+                                        {
+                                            cap !== "" && cap !== 0 && cap !== null &&
+                                            <Grid item xs={12}>
+                                                {fields.map((field) => (
+                                                    <Box key={field.id} sx={{ marginTop: 2 }}>
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        label={`ช่องที่ ${field.id}`}
+                                                        value={field.value}
+                                                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                                                    />
+                                                    </Box>
+                                                ))}
+                                            </Grid>
+                                        }
                                         <Grid item sm={2} xs={4}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>น้ำหนัก</Typography>
                                         </Grid>

@@ -38,20 +38,20 @@ const SellingDetail = (props) => {
     const [SellingG95, setSellingG95] = React.useState(0);
     const [SellingB7, setSellingB7] = React.useState(0);
     const [SellingB95, setSellingB95] = React.useState(0);
-    const [SellingB10, setSellingB10] = React.useState(0);
-    const [SellingB20, setSellingB20] = React.useState(0);
+    // const [SellingB10, setSellingB10] = React.useState(0);
+    // const [SellingB20, setSellingB20] = React.useState(0);
     const [SellingE20, setSellingE20] = React.useState(0);
-    const [SellingE85, setSellingE85] = React.useState(0);
+    // const [SellingE85, setSellingE85] = React.useState(0);
     const [SellingPWD, setSellingPWD] = React.useState(0);
 
     const [VolumeG91, setVolumeG91] = React.useState(0);
     const [VolumeG95, setVolumeG95] = React.useState(0);
     const [VolumeB7, setVolumeB7] = React.useState(0);
     const [VolumeB95, setVolumeB95] = React.useState(0);
-    const [VolumeB10, setVolumeB10] = React.useState(0);
-    const [VolumeB20, setVolumeB20] = React.useState(0);
+    // const [VolumeB10, setVolumeB10] = React.useState(0);
+    // const [VolumeB20, setVolumeB20] = React.useState(0);
     const [VolumeE20, setVolumeE20] = React.useState(0);
-    const [VolumeE85, setVolumeE85] = React.useState(0);
+    // const [VolumeE85, setVolumeE85] = React.useState(0);
     const [VolumePWD, setVolumePWD] = React.useState(0);
 
     const [orderDetail, setOrderDetail] = React.useState(true);
@@ -59,10 +59,10 @@ const SellingDetail = (props) => {
     const [G95, setG95] = React.useState([]);
     const [B7, setB7] = React.useState([]);
     const [B95, setB95] = React.useState([]);
-    const [B10, setB10] = React.useState([]);
-    const [B20, setB20] = React.useState([]);
+    // const [B10, setB10] = React.useState([]);
+    // const [B20, setB20] = React.useState([]);
     const [E20, setE20] = React.useState([]);
-    const [E85, setE85] = React.useState([]);
+    // const [E85, setE85] = React.useState([]);
     const [PWD, setPWD] = React.useState([]);
     const [order, setOrder] = React.useState([]);
 
@@ -70,10 +70,10 @@ const SellingDetail = (props) => {
     const [orderG95, setOrderG95] = React.useState([]);
     const [orderB7, setOrderB7] = React.useState([]);
     const [orderB95, setOrderB95] = React.useState([]);
-    const [orderB10, setOrderB10] = React.useState([]);
-    const [orderB20, setOrderB20] = React.useState([]);
+    // const [orderB10, setOrderB10] = React.useState([]);
+    // const [orderB20, setOrderB20] = React.useState([]);
     const [orderE20, setOrderE20] = React.useState([]);
-    const [orderE85, setOrderE85] = React.useState([]);
+    // const [orderE85, setOrderE85] = React.useState([]);
     const [orderPWD, setOrderPWD] = React.useState([]);
 
     const [ticketT,setTicketsT] = React.useState(0);
@@ -111,26 +111,26 @@ const SellingDetail = (props) => {
                         setB95(datas);
                         setVolumeB95(datas.Volume)
                     });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB10(datas);
-                        setVolumeB10(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB20(datas);
-                        setVolumeB20(datas.Volume)
-                    });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setB10(datas);
+                    //     setVolumeB10(datas.Volume)
+                    // });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setB20(datas);
+                    //     setVolumeB20(datas.Volume)
+                    // });
                     database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setE20(datas);
                         setVolumeE20(datas.Volume)
                     });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setE85(datas);
-                        setVolumeE85(datas.Volume)
-                    });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setE85(datas);
+                    //     setVolumeE85(datas.Volume)
+                    // });
                     database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setPWD(datas);
@@ -160,26 +160,26 @@ const SellingDetail = (props) => {
                         setB95(datas);
                         setVolumeB95(datas.Volume)
                     });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB10(datas);
-                        setVolumeB10(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB20(datas);
-                        setVolumeB20(datas.Volume)
-                    });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setB10(datas);
+                    //     setVolumeB10(datas.Volume)
+                    // });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setB20(datas);
+                    //     setVolumeB20(datas.Volume)
+                    // });
                     database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setE20(datas);
                         setVolumeE20(datas.Volume)
                     });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setE85(datas);
-                        setVolumeE85(datas.Volume)
-                    });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setE85(datas);
+                    //     setVolumeE85(datas.Volume)
+                    // });
                     database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setPWD(datas);
@@ -208,26 +208,26 @@ const SellingDetail = (props) => {
                         setB95(datas);
                         setVolumeB95(datas.Volume)
                     });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB10(datas);
-                        setVolumeB10(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB20(datas);
-                        setVolumeB20(datas.Volume)
-                    });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setB10(datas);
+                    //     setVolumeB10(datas.Volume)
+                    // });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setB20(datas);
+                    //     setVolumeB20(datas.Volume)
+                    // });
                     database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setE20(datas);
                         setVolumeE20(datas.Volume)
                     });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setE85(datas);
-                        setVolumeE85(datas.Volume)
-                    });
+                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setE85(datas);
+                    //     setVolumeE85(datas.Volume)
+                    // });
                     database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setPWD(datas);
@@ -268,22 +268,22 @@ const SellingDetail = (props) => {
                         const datas = snapshot.val();
                         setOrderB95(datas);
                     });
-                    database.ref("order/" + (detail.id - 1) + "/Product/B10").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setOrderB10(datas);
-                    });
-                    database.ref("order/" + (detail.id - 1) + "/Product/B20").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setOrderB20(datas);
-                    });
+                    // database.ref("order/" + (detail.id - 1) + "/Product/B10").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setOrderB10(datas);
+                    // });
+                    // database.ref("order/" + (detail.id - 1) + "/Product/B20").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setOrderB20(datas);
+                    // });
                     database.ref("order/" + (detail.id - 1) + "/Product/E20").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setOrderE20(datas);
                     });
-                    database.ref("order/" + (detail.id - 1) + "/Product/E85").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setOrderE85(datas);
-                    });
+                    // database.ref("order/" + (detail.id - 1) + "/Product/E85").on("value", (snapshot) => {
+                    //     const datas = snapshot.val();
+                    //     setOrderE85(datas);
+                    // });
                     database.ref("order/" + (detail.id - 1) + "/Product/PWD").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setOrderPWD(datas);
@@ -304,10 +304,10 @@ const SellingDetail = (props) => {
     const totalG91 = (G91.Volume === "-" ? G91.Volume : (parseFloat(G91.Volume) - parseFloat(VolumeG91)));
     const totalB7 = (B7.Volume === "-" ? B7.Volume : (parseFloat(B7.Volume) - parseFloat(VolumeB7)));
     const totalB95 = (B95.Volume === "-" ? B95.Volume : (parseFloat(B95.Volume) - parseFloat(VolumeB95)));
-    const totalB10 = (B10.Volume === "-" ? B10.Volume : (parseFloat(B10.Volume) - parseFloat(VolumeB10)));
-    const totalB20 = (B20.Volume === "-" ? B20.Volume : (parseFloat(B20.Volume) - parseFloat(VolumeB20)));
+    // const totalB10 = (B10.Volume === "-" ? B10.Volume : (parseFloat(B10.Volume) - parseFloat(VolumeB10)));
+    // const totalB20 = (B20.Volume === "-" ? B20.Volume : (parseFloat(B20.Volume) - parseFloat(VolumeB20)));
     const totalE20 = (E20.Volume === "-" ? E20.Volume : (parseFloat(E20.Volume) - parseFloat(VolumeE20)));
-    const totalE85 = (E85.Volume === "-" ? E85.Volume : (parseFloat(E85.Volume) - parseFloat(VolumeE85)));
+    // const totalE85 = (E85.Volume === "-" ? E85.Volume : (parseFloat(E85.Volume) - parseFloat(VolumeE85)));
     const totalPWD = (PWD.Volume === "-" ? PWD.Volume : (parseFloat(PWD.Volume) - parseFloat(VolumePWD)));
 
         database
@@ -517,92 +517,92 @@ const SellingDetail = (props) => {
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/B10")
-            .update({
-                Cost: B10.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? B10.Volume : VolumeB10,
-                Selling: B10.Volume === 0 || B10.Volume === "-" ? "-" : SellingB10
-            })
-            .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/B10")
-                    .update({
-                        Volume: totalB10,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/B10")
-                    .update({
-                        Volume: totalB10,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+        // database
+        //     .ref("order/" + (detail.id - 1))
+        //     .child("/Product/B10")
+        //     .update({
+        //         Cost: B10.Cost,
+        //         Volume: detail.TicketName.split(":")[0] === "T" ? B10.Volume : VolumeB10,
+        //         Selling: B10.Volume === 0 || B10.Volume === "-" ? "-" : SellingB10
+        //     })
+        //     .then(() => {
+        //         if (detail.TicketName.split(":")[0] === "PS") {
+        //             database
+        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+        //             .child("/Product/B10")
+        //             .update({
+        //                 Volume: totalB10,
+        //             })
+        //             .then(() => {
+        //                 console.log("Data pushed successfully");
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error pushing data:", error);
+        //             });
+        //         }else if(detail.TicketName.split(":")[0] === "A"){
+        //             database
+        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+        //             .child("/Product/B10")
+        //             .update({
+        //                 Volume: totalB10,
+        //             })
+        //             .then(() => {
+        //                 console.log("Data pushed successfully");
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error pushing data:", error);
+        //             });
+        //         }else{
 
-                }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/B20")
-            .update({
-                Cost: B20.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? B20.Volume : VolumeB20,
-                Selling: B20.Volume === 0 || B20.Volume === "-" ? "-" : SellingB20
-            })
-            .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/B20")
-                    .update({
-                        Volume: totalB20,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/B20")
-                    .update({
-                        Volume: totalB20,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+        //         }
+        //         console.log("Data pushed successfully");
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error pushing data:", error);
+        //     });
+        // database
+        //     .ref("order/" + (detail.id - 1))
+        //     .child("/Product/B20")
+        //     .update({
+        //         Cost: B20.Cost,
+        //         Volume: detail.TicketName.split(":")[0] === "T" ? B20.Volume : VolumeB20,
+        //         Selling: B20.Volume === 0 || B20.Volume === "-" ? "-" : SellingB20
+        //     })
+        //     .then(() => {
+        //         if (detail.TicketName.split(":")[0] === "PS") {
+        //             database
+        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+        //             .child("/Product/B20")
+        //             .update({
+        //                 Volume: totalB20,
+        //             })
+        //             .then(() => {
+        //                 console.log("Data pushed successfully");
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error pushing data:", error);
+        //             });
+        //         }else if(detail.TicketName.split(":")[0] === "A"){
+        //             database
+        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+        //             .child("/Product/B20")
+        //             .update({
+        //                 Volume: totalB20,
+        //             })
+        //             .then(() => {
+        //                 console.log("Data pushed successfully");
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error pushing data:", error);
+        //             });
+        //         }else{
 
-                }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
+        //         }
+        //         console.log("Data pushed successfully");
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error pushing data:", error);
+        //     });
         database
             .ref("order/" + (detail.id - 1))
             .child("/Product/E20")
@@ -646,49 +646,49 @@ const SellingDetail = (props) => {
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/E85")
-            .update({
-                Cost: E85.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? E85.Volume : VolumeE85,
-                Selling: E85.Volume === 0 || E85.Volume === "-" ? "-" : SellingE85
-            })
-            .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/E85")
-                    .update({
-                        Volume: totalE85,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/E85")
-                    .update({
-                        Volume: totalE85,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+        // database
+        //     .ref("order/" + (detail.id - 1))
+        //     .child("/Product/E85")
+        //     .update({
+        //         Cost: E85.Cost,
+        //         Volume: detail.TicketName.split(":")[0] === "T" ? E85.Volume : VolumeE85,
+        //         Selling: E85.Volume === 0 || E85.Volume === "-" ? "-" : SellingE85
+        //     })
+        //     .then(() => {
+        //         if (detail.TicketName.split(":")[0] === "PS") {
+        //             database
+        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+        //             .child("/Product/E85")
+        //             .update({
+        //                 Volume: totalE85,
+        //             })
+        //             .then(() => {
+        //                 console.log("Data pushed successfully");
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error pushing data:", error);
+        //             });
+        //         }else if(detail.TicketName.split(":")[0] === "A"){
+        //             database
+        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+        //             .child("/Product/E85")
+        //             .update({
+        //                 Volume: totalE85,
+        //             })
+        //             .then(() => {
+        //                 console.log("Data pushed successfully");
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error pushing data:", error);
+        //             });
+        //         }else{
 
-                }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
+        //         }
+        //         console.log("Data pushed successfully");
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error pushing data:", error);
+        //     });
         database
             .ref("order/" + (detail.id - 1))
             .child("/Product/PWD")
@@ -1275,7 +1275,7 @@ const SellingDetail = (props) => {
                             </Grid>
                     }
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
+                {/* <TableCell sx={{ textAlign: "center" }}>
                 {
                         detail.TicketName.split(":")[0] === "T" ?
                             <Grid container spacing={1}>
@@ -1528,7 +1528,7 @@ const SellingDetail = (props) => {
                                 }
                             </Grid>
                     }
-                </TableCell>
+                </TableCell> */}
                 <TableCell sx={{ textAlign: "center" }}>
                 {
                         detail.TicketName.split(":")[0] === "T" ?
@@ -1656,7 +1656,7 @@ const SellingDetail = (props) => {
                             </Grid>
                     }
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
+                {/* <TableCell sx={{ textAlign: "center" }}>
                 {
                         detail.TicketName.split(":")[0] === "T" ?
                             <Grid container spacing={1}>
@@ -1782,7 +1782,7 @@ const SellingDetail = (props) => {
                                 }
                             </Grid>
                     }
-                </TableCell>
+                </TableCell> */}
                 <TableCell sx={{ textAlign: "center" }}>
                 {
                         detail.TicketName.split(":")[0] === "T" ?

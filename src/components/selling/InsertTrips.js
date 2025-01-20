@@ -683,18 +683,18 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 B95
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={150} sx={{ textAlign: "center" }}>
+                                                            {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 B10
                                                             </TablecellHeader>
                                                             <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 B20
-                                                            </TablecellHeader>
+                                                            </TablecellHeader> */}
                                                             <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 E20
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={150} sx={{ textAlign: "center" }}>
+                                                            {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 E85
-                                                            </TablecellHeader>
+                                                            </TablecellHeader> */}
                                                             <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 PWD
                                                             </TablecellHeader>
@@ -1068,18 +1068,18 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={230} sx={{ textAlign: "center" }}>
                                                                 B95
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            {/* <TablecellHeader width={230} sx={{ textAlign: "center" }}>
                                                                 B10
                                                             </TablecellHeader>
                                                             <TablecellHeader width={230} sx={{ textAlign: "center" }}>
                                                                 B20
-                                                            </TablecellHeader>
+                                                            </TablecellHeader> */}
                                                             <TablecellHeader width={230} sx={{ textAlign: "center" }}>
                                                                 E20
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            {/* <TablecellHeader width={230} sx={{ textAlign: "center" }}>
                                                                 E85
-                                                            </TablecellHeader>
+                                                            </TablecellHeader> */}
                                                             <TablecellHeader width={230} sx={{ textAlign: "center" }}>
                                                                 PWD
                                                             </TablecellHeader>

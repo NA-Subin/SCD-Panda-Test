@@ -103,7 +103,7 @@ const TradePayable = () => {
                         console.log("User logged out");
                         // Cookies.remove('token');
                         navigate("/");
-                        Cookies.remove('email');
+                        Cookies.remove('user');
                     })
                     .catch(() => {
                         console.error("Error logging out:");

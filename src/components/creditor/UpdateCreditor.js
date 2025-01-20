@@ -45,7 +45,7 @@ const UpdateCreditor = (props) => {
     const [idCard,setIDCard] = React.useState(employee.IDCard);
     const [phone,setPhone] = React.useState(employee.Phone);
     const [credit,setCredit] = React.useState(employee.Credit);
-    const [email,setEmail] = React.useState(employee.Email);
+    const [email,setUser] = React.useState(employee.User);
     const [no, setNo] = React.useState(employee.Address.split(",")[0] === undefined ? "-" : employee.Address.split(",")[0]);
     const [village, setVillage] = React.useState(employee.Address.split(",")[1] === undefined ? "-" : employee.Address.split(",")[1]);
     const [subDistrict, setSubDistrict] = React.useState(employee.Address.split(",")[2] === undefined ? "-" : employee.Address.split(",")[2]);
@@ -81,7 +81,7 @@ const UpdateCreditor = (props) => {
                 lng: lng,
                 IDCard: idCard,
                 Credit: credit,
-                Email: email,
+                User: email,
                 Phone: phone
             })
             .then(() => {
@@ -154,14 +154,14 @@ const UpdateCreditor = (props) => {
                                 <TextField fullWidth variant="standard" value={credit} disabled={update ? true : false} onChange={(e) => setCredit(e.target.value)}/>
                             </Grid>
                             <Grid item xs={2}>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>Email</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>User</Typography>
                             </Grid>
                             <Grid item xs={3.5}>
                                 {
                                     update ?
-                                    <TextField fullWidth variant="standard" value={email} disabled onChange={(e) => setEmail(e.target.value)}/>
+                                    <TextField fullWidth variant="standard" value={email} disabled onChange={(e) => setUser(e.target.value)}/>
                                     :
-                                    <TextField fullWidth variant="standard" value={email} onChange={(e) => setEmail(e.target.value)}/>
+                                    <TextField fullWidth variant="standard" value={email} onChange={(e) => setUser(e.target.value)}/>
                                     // <FormControl variant="standard" fullWidth>
                                     //         <Select
                                     //             labelId="demo-simple-select-standard-label"

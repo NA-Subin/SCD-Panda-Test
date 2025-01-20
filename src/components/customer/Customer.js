@@ -82,7 +82,7 @@ const Customer = () => {
       >
         ลูกค้า
       </Typography>
-      <Grid container spacing={3} marginTop={1} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-85) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-220) }}>
+      <Grid container spacing={3} marginTop={1} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-240) }}>
         <Grid item xs={12} textAlign="right" marginTop={-12} marginBottom={4} marginRight={5}>
           <InsertCustomer />
         </Grid>
@@ -103,7 +103,7 @@ const Customer = () => {
                                       style={{ maxHeight: "70vh" }}
                                       sx={{ marginBottom: 2}}
                                   >
-                                      <Table stickyHeader size="small" sx={{ width: "1200px" }}>
+                                      <Table stickyHeader size="small" sx={{ width: "1250px" }}>
             <TableHead sx={{ height: "7vh" }}>
               <TableRow>
                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16,

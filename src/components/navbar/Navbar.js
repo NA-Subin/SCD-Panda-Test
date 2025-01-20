@@ -135,8 +135,8 @@ export default function Navbar() {
   const navigate = useNavigate();
   // const { state } = useLocation();
   // console.log(state.Position);
-  // const { email } = useParams();
-  // console.log(email);
+  // const { user } = useParams();
+  // console.log(user);
   // const token = Cookies.get('token');
 
   let position = "";
@@ -166,7 +166,7 @@ export default function Navbar() {
   };
 
   // data.map((row) => (
-  //   row.Email.split('@')[0] === email && (position = row.Position)
+  //   row.Email.split('@')[0] === user && (position = row.Position)
   // ))
 
   useEffect(() => {
@@ -285,7 +285,7 @@ export default function Navbar() {
             .then(() => {
               navigate("/");
               Swal.fire("ออกจากระบบเรียบร้อย", "", "success");
-              Cookies.remove('email');
+              Cookies.remove('user');
             })
             .catch((error) => {
               Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");
@@ -334,7 +334,7 @@ export default function Navbar() {
         sx={{ backgroundColor: theme.palette.panda.dark, height: 70,zIndex: 900 }}
       >
         <Box textAlign="right" marginBottom={-3.5} marginRight={2}>
-        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>เข้าสู่ระบบโดย {Cookies.get('email')}</Typography>
+        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>เข้าสู่ระบบโดย {Cookies.get('user')}</Typography>
         </Box>
         <Toolbar variant="dense"
         sx={{

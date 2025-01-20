@@ -42,14 +42,14 @@ const OrderDetail = (props) => {
     const [VolumeB7, setVolumeB7] = React.useState(0);
     const [CostB95, setCostB95] = React.useState(0);
     const [VolumeB95, setVolumeB95] = React.useState(0);
-    const [CostB10, setCostB10] = React.useState(0);
-    const [VolumeB10, setVolumeB10] = React.useState(0);
-    const [CostB20, setCostB20] = React.useState(0);
-    const [VolumeB20, setVolumeB20] = React.useState(0);
+    // const [CostB10, setCostB10] = React.useState(0);
+    // const [VolumeB10, setVolumeB10] = React.useState(0);
+    // const [CostB20, setCostB20] = React.useState(0);
+    // const [VolumeB20, setVolumeB20] = React.useState(0);
     const [CostE20, setCostE20] = React.useState(0);
     const [VolumeE20, setVolumeE20] = React.useState(0);
-    const [CostE85, setCostE85] = React.useState(0);
-    const [VolumeE85, setVolumeE85] = React.useState(0);
+    // const [CostE85, setCostE85] = React.useState(0);
+    // const [VolumeE85, setVolumeE85] = React.useState(0);
     const [CostPWD, setCostPWD] = React.useState(0);
     const [VolumePWD, setVolumePWD] = React.useState(0);
     const [orderDetail, setOrderDetail] = React.useState(true);
@@ -58,10 +58,10 @@ const OrderDetail = (props) => {
     const [G95, setG95] = React.useState([]);
     const [B7, setB7] = React.useState([]);
     const [B95, setB95] = React.useState([]);
-    const [B10, setB10] = React.useState([]);
-    const [B20, setB20] = React.useState([]);
+    // const [B10, setB10] = React.useState([]);
+    // const [B20, setB20] = React.useState([]);
     const [E20, setE20] = React.useState([]);
-    const [E85, setE85] = React.useState([]);
+    // const [E85, setE85] = React.useState([]);
     const [PWD, setPWD] = React.useState([]);
     const [weightOil, setWeightOil] = React.useState(0);
     const [orderID,setOrderID] = React.useState("");
@@ -83,22 +83,22 @@ const OrderDetail = (props) => {
             const datas = snapshot.val();
             setB95(datas);
         });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B10").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setB10(datas);
-        });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B20").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setB20(datas);
-        });
+        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B10").on("value", (snapshot) => {
+        //     const datas = snapshot.val();
+        //     setB10(datas);
+        // });
+        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B20").on("value", (snapshot) => {
+        //     const datas = snapshot.val();
+        //     setB20(datas);
+        // });
         database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/E20").on("value", (snapshot) => {
             const datas = snapshot.val();
             setE20(datas);
         });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/E85").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setE85(datas);
-        });
+        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/E85").on("value", (snapshot) => {
+        //     const datas = snapshot.val();
+        //     setE85(datas);
+        // });
         database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/PWD").on("value", (snapshot) => {
             const datas = snapshot.val();
             setPWD(datas);
@@ -109,9 +109,9 @@ const OrderDetail = (props) => {
         getData();
     }, []);
 
-    const handleTotalWeight = (newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeB10, newVolumeB20, newVolumeE20, newVolumeE85, newVolumePWD) => {
+    const handleTotalWeight = (newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD) => {
 
-        const total = newVolumeG91 + newVolumeG95 + newVolumeB7 + newVolumeB95 + newVolumeB10 + newVolumeB20 + newVolumeE20 + newVolumeE85 + newVolumePWD;
+        const total = newVolumeG91 + newVolumeG95 + newVolumeB7 + newVolumeB95 + newVolumeE20 + newVolumePWD;
         // parseFloat(newVolumeG91 || 0) +
         // parseFloat(newVolumeG95 || 0) +
         // parseFloat(newVolumeB7 || 0) +
@@ -193,32 +193,32 @@ const OrderDetail = (props) => {
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
-        database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
-            .child("/Product/B10")
-            .update({
-                Cost: CostB10 === 0 ? "-" : CostB10,
-                Volume: VolumeB10 === 0 ? "-" : VolumeB10
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
-            .child("/Product/B20")
-            .update({
-                Cost: CostB20 === 0 ? "-" : CostB20,
-                Volume: VolumeB20 === 0 ? "-" : VolumeB20
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
+        // database
+        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+        //     .child("/Product/B10")
+        //     .update({
+        //         Cost: CostB10 === 0 ? "-" : CostB10,
+        //         Volume: VolumeB10 === 0 ? "-" : VolumeB10
+        //     })
+        //     .then(() => {
+        //         console.log("Data pushed successfully");
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error pushing data:", error);
+        //     });
+        // database
+        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+        //     .child("/Product/B20")
+        //     .update({
+        //         Cost: CostB20 === 0 ? "-" : CostB20,
+        //         Volume: VolumeB20 === 0 ? "-" : VolumeB20
+        //     })
+        //     .then(() => {
+        //         console.log("Data pushed successfully");
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error pushing data:", error);
+        //     });
         database
             .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
             .child("/Product/E20")
@@ -232,19 +232,19 @@ const OrderDetail = (props) => {
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
-        database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
-            .child("/Product/E85")
-            .update({
-                Cost: CostE85 === 0 ? "-" : CostE85,
-                Volume: VolumeE85 === 0 ? "-" : VolumeE85
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
+        // database
+        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+        //     .child("/Product/E85")
+        //     .update({
+        //         Cost: CostE85 === 0 ? "-" : CostE85,
+        //         Volume: VolumeE85 === 0 ? "-" : VolumeE85
+        //     })
+        //     .then(() => {
+        //         console.log("Data pushed successfully");
+        //     })
+        //     .catch((error) => {
+        //         console.error("Error pushing data:", error);
+        //     });
         database
             .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
             .child("/Product/PWD")
@@ -266,10 +266,10 @@ const OrderDetail = (props) => {
             let G91 = 0;
             let B7 = 0;
             let B95 = 0;
-            let B10 = 0;
-            let B20 = 0;
+            // let B10 = 0;
+            // let B20 = 0;
             let E20 = 0;
-            let E85 = 0;
+            // let E85 = 0;
             let PWD = 0;
 
             for (let id in datas) {
@@ -286,18 +286,18 @@ const OrderDetail = (props) => {
                     case "B95":
                         B95 = (VolumeB95 * datas[id].SG) * 1000;
                         break;
-                    case "B10":
-                        B10 = (VolumeB10 * datas[id].SG) * 1000;
-                        break;
-                    case "B20":
-                        B20 = (VolumeB20 * datas[id].SG) * 1000;
-                        break;
+                    // case "B10":
+                    //     B10 = (VolumeB10 * datas[id].SG) * 1000;
+                    //     break;
+                    // case "B20":
+                    //     B20 = (VolumeB20 * datas[id].SG) * 1000;
+                    //     break;
                     case "E20":
                         E20 = (VolumeE20 * datas[id].SG) * 1000;
                         break;
-                    case "E85":
-                        E85 = (VolumeE85 * datas[id].SG) * 1000;
-                        break;
+                    // case "E85":
+                    //     E85 = (VolumeE85 * datas[id].SG) * 1000;
+                    //     break;
                     case "PWD":
                         PWD = (VolumePWD * datas[id].SG) * 1000;
                         break;
@@ -305,7 +305,7 @@ const OrderDetail = (props) => {
                         break;
                 }
             }
-            handleTotalWeight(G91, G95, B7, B95, B10, B20, E20, E85, PWD);
+            handleTotalWeight(G91, G95, B7, B95, E20, PWD);
         });
         setOrderDetail(false);
     }
@@ -531,7 +531,7 @@ const OrderDetail = (props) => {
                                     </Grid>
                                 </Grid>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center" }}>
+                            {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
@@ -614,7 +614,7 @@ const OrderDetail = (props) => {
                                         </Paper>
                                     </Grid>
                                 </Grid>
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
@@ -657,7 +657,7 @@ const OrderDetail = (props) => {
                                     </Grid>
                                 </Grid>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center" }}>
+                            {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
@@ -698,7 +698,7 @@ const OrderDetail = (props) => {
                                         </Paper>
                                     </Grid>
                                 </Grid>
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
@@ -794,7 +794,7 @@ const OrderDetail = (props) => {
                                     </Grid>
                                 </Grid>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center" }}>
+                            {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6}>
                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B10.Cost}</Typography>
@@ -803,8 +803,8 @@ const OrderDetail = (props) => {
                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B10.Volume}</Typography>
                                     </Grid>
                                 </Grid>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center" }}>
+                            </TableCell> */}
+                            {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6}>
                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B20.Cost}</Typography>
@@ -813,7 +813,7 @@ const OrderDetail = (props) => {
                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B20.Volume}</Typography>
                                     </Grid>
                                 </Grid>
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6}>
@@ -824,7 +824,7 @@ const OrderDetail = (props) => {
                                     </Grid>
                                 </Grid>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center" }}>
+                            {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6}>
                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E85.Cost}</Typography>
@@ -833,7 +833,7 @@ const OrderDetail = (props) => {
                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E85.Volume}</Typography>
                                     </Grid>
                                 </Grid>
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={6}>

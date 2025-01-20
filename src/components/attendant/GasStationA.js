@@ -149,8 +149,8 @@ const GasStationA = () => {
     useEffect(() => {
         const checkTime = () => {
             const now = dayjs(); // เวลาปัจจุบัน
-            const start = dayjs().hour(10).minute(20).second(0); // 17:00
-            const end = dayjs().hour(20).minute(8).second(0); // 20:00
+            const start = dayjs().hour(17).minute(0).second(0); // 17:00
+            const end = dayjs().hour(20).minute(0).second(0); // 20:00
             setShowButton(now.isAfter(start) && now.isBefore(end)); // อัปเดตสถานะปุ่มตามช่วงเวลา
         };
 
@@ -170,7 +170,7 @@ const GasStationA = () => {
                         console.log("User logged out");
                         // Cookies.remove('token');
                         navigate("/");
-                        Cookies.remove('email');
+                        Cookies.remove('user');
                     })
                     .catch(() => {
                         console.error("Error logging out:");

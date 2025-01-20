@@ -49,7 +49,7 @@ const InsertEmployee = () => {
     const [prefix, setPrefix] = React.useState('');
     const [name, setName] = React.useState('');
     const [lastname, setLastname] = React.useState('');
-    const [email, setEmail] = React.useState('');
+    const [user, setUser] = React.useState('');
     const [idCard, setIDCard] = React.useState('');
     const [trucks, setTrucks] = React.useState(0);
 
@@ -141,7 +141,7 @@ const InsertEmployee = () => {
 
     const handlePost = () => {
         if (menu === 1) {
-            createUserWithEmailAndPassword(auth, email, password).then(
+            createUserWithEmailAndPassword(auth, (user+"@gmail.com"), password).then(
                 (userCredential) => {
                     database
                         .ref("employee/officers/")
@@ -149,7 +149,7 @@ const InsertEmployee = () => {
                         .update({
                             id: officer + 1,
                             Name: prefix + name + " " + lastname,
-                            Email: email,
+                            User: user,
                             Password: password,
                             Position: position,
                             Phone: phone,
@@ -269,11 +269,11 @@ const InsertEmployee = () => {
                             menu === 1 ?
                                 <>
                                     <Grid item md={2.5} sm={2} xs={2}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>Email</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
                                     </Grid>
                                     <Grid item md={3.5} sm={4} xs={10}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
+                                            <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
                                         </Paper>
                                     </Grid>
                                 </>
