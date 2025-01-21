@@ -377,6 +377,7 @@ export default function Navbar() {
       { to: "/selling", icon: <ListAltIcon fontSize="medium" /> },
       { to: "/depots", icon: <StoreMallDirectoryIcon /> },
       { to: "/customer", icon: <GroupsIcon fontSize="medium" /> },
+      { to: "/ticket", icon: <BookOnlineIcon fontSize="medium" sx={{ transform: "rotate(90deg)" }}/> },
       { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="medium" /> },
       { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
     ].map((item, index) => (
@@ -990,7 +991,7 @@ export default function Navbar() {
                   ) : index === 2 ? (
                     <GroupsIcon />
                   ) : index === 3 ? (
-                    <BookOnlineIcon />
+                    <BookOnlineIcon sx={{ transform: "rotate(90deg)" }}/>
                   ) : (
                     <CurrencyExchangeIcon />
                   )}
