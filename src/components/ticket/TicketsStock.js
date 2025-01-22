@@ -25,6 +25,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
+import InsertTicketsStock from "./InsertTicketsStock";
 
 const TicketsStock = () => {
   const [update, setUpdate] = React.useState(true);
@@ -42,7 +43,7 @@ const TicketsStock = () => {
                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ตั๋วขายย่อย</Typography>
                     </Grid>
                     <Grid item xs={2} marginTop={-2}>
-                        <Button variant="contained" color="info" startIcon={<BookOnlineIcon sx={{ transform: "rotate(90deg)" }}/>} fullWidth>เพิ่มตั๋วขายย่อย</Button>
+                        <InsertTicketsStock />
                     </Grid>
                     <Grid item xs={2} marginTop={-2}>
                         <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} fullWidth>แก้ไขตั๋วขายย่อย</Button>

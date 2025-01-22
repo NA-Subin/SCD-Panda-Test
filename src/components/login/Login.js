@@ -28,6 +28,7 @@ import {
 } from "firebase/auth";
 import { auth, database, googleProvider } from "../../server/firebase";
 import Cookies from 'js-cookie';
+import UpdateDatabase from "../dashboard/test";
 
 function createData(No, Email, Password, Position) {
   return {
@@ -390,6 +391,7 @@ const Login = () => {
           }}
         />
       </Paper>
+      {/* <UpdateDatabase /> */}
     </Container>
   );
 };
