@@ -46,9 +46,11 @@ const InsertTrips = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [code, setCode] = React.useState("");
+    const [codeCustomer, setCodeCustomer] = React.useState("");
     const [codes, setCodes] = React.useState("");
     const [tickets, setTickets] = React.useState("0:0");
     const [customers, setCustomers] = React.useState("0:0");
+    const [customer, setCustomer] = React.useState("0:0");
     const [selectedValue, setSelectedValue] = useState('');
     const [registration, setRegistration] = React.useState("0:0:0");
     const [weight, setWeight] = React.useState(0);
@@ -172,11 +174,22 @@ const InsertTrips = () => {
 
         database.ref("/customer").on("value", (snapshot) => {
             const datas = snapshot.val();
+            const dataTicket = [];
+            for (let id in datas) {
+                if (datas[id].Status === "ตั๋ว" || datas[id].Status === "ตั๋ว/ผู้รับ")
+                    dataTicket.push({ id, ...datas[id] })
+            }
+            setTicketsT(dataTicket);
+        });
+
+        database.ref("/customer").on("value", (snapshot) => {
+            const datas = snapshot.val();
             const dataCustomer = [];
             for (let id in datas) {
-                dataCustomer.push({ id, ...datas[id] })
+                if (datas[id].Status === "ผู้รับ" || datas[id].Status === "ตั๋ว/ผู้รับ")
+                    dataCustomer.push({ id, ...datas[id] })
             }
-            setTicketsT(dataCustomer);
+            setCustomer(dataCustomer);
         });
 
         database.ref("/depot/gasStations").on("value", (snapshot) => {
@@ -188,7 +201,7 @@ const InsertTrips = () => {
             setTicketsPS(dataGasStations);
         });
 
-        database.ref("/depot/stock").on("value", (snapshot) => {
+        database.ref("/ticket-stock").on("value", (snapshot) => {
             const datas = snapshot.val();
             const dataStock = [];
             for (let id in datas) {
@@ -376,6 +389,7 @@ const InsertTrips = () => {
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
+                setCode("");
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -811,7 +825,7 @@ const InsertTrips = () => {
                                                             <Grid item sm={1.5} xs={2}>
                                                                 <Paper
                                                                     component="form">
-                                                                    <TextField size="small" fullWidth sx={{ borderRadius: 10 }} value={code} onChange={(e) => setCode(e.target.value)} />
+                                                                    <TextField size="small" fullWidth sx={{ borderRadius: 10 }} value={codeCustomer} onChange={(e) => setCodeCustomer(e.target.value)} />
                                                                 </Paper>
                                                             </Grid>
                                                             <Grid item sm={8} xs={7}>
@@ -827,25 +841,43 @@ const InsertTrips = () => {
                                                                         เลือกตั๋วที่ต้องการเพิ่ม
                                                                     </MenuItem>
                                                                     {
-                                                                        code === "PS" || code === "ps" ?
+                                                                        codeCustomer === "PS" || codeCustomer === "ps" ? (
                                                                             ticketsPS.map((row) => (
-                                                                                <MenuItem value={"PS:" + row.Name}>{"PS: " + row.Name}</MenuItem>
+                                                                                <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
+                                                                                    {`PS:${row.id}:${row.Name}`}
+                                                                                </MenuItem>
                                                                             ))
-                                                                            : code === "A" || code === "a" ?
-                                                                                ticketsA.map((row) => (
-                                                                                    <MenuItem value={"A:" + row.Name}>{"A: " + row.Name}</MenuItem>
-                                                                                ))
-                                                                                : code === "T" || code === "t" ?
-                                                                                    ticketsT.map((row) => (
-                                                                                        <MenuItem value={"T:" + row.Name}>{"T: " + row.Name}</MenuItem>
-                                                                                    ))
-                                                                                    : code === "" ?
-                                                                                        combinedTickets.map((row, index) => (
-                                                                                            <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                                                {`${row.type}:${row.Name}`}
-                                                                                            </MenuItem>
-                                                                                        ))
-                                                                                        : ""
+                                                                        ) : codeCustomer === "T" || codeCustomer === "t" ? (
+                                                                            ticketsT.map((row) => (
+                                                                                <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
+                                                                                    {`T:${row.id}:${row.Name}`}
+                                                                                </MenuItem>
+                                                                            ))
+                                                                        ) : codeCustomer === "A" || codeCustomer === "a" ? (
+                                                                            ticketsA.map((row) => (
+                                                                                <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
+                                                                                    {`${row.TicketsCode}:${row.TicketsName}`}
+                                                                                </MenuItem>
+                                                                            ))
+                                                                        ) : codeCustomer === "" ? (
+                                                                            <>
+                                                                                {ticketsPS.map((row) => (
+                                                                                    <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
+                                                                                        {`PS:${row.id}:${row.Name}`}
+                                                                                    </MenuItem>
+                                                                                ))}
+                                                                                {ticketsT.map((row) => (
+                                                                                    <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
+                                                                                        {`T:${row.id}:${row.Name}`}
+                                                                                    </MenuItem>
+                                                                                ))}
+                                                                                {ticketsA.map((row) => (
+                                                                                    <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
+                                                                                        {`${row.TicketsCode}:${row.TicketsName}`}
+                                                                                    </MenuItem>
+                                                                                ))}
+                                                                            </>
+                                                                        ) : null
                                                                     }
                                                                     {/* {
                                                                         filteredOptions.map((row) => (
@@ -1243,6 +1275,45 @@ const InsertTrips = () => {
                                                                         เลือกลูกค้าที่ต้องการเพิ่ม
                                                                     </MenuItem>
                                                                     {
+                                                                        code === "PS" || code === "ps" ? (
+                                                                            ticketsPS.map((row) => (
+                                                                                <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
+                                                                                    {`PS:${row.id}:${row.Name}`}
+                                                                                </MenuItem>
+                                                                            ))
+                                                                        ) : code === "T" || code === "t" ? (
+                                                                            customer.map((row) => (
+                                                                                <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
+                                                                                    {`T:${row.id}:${row.Name}`}
+                                                                                </MenuItem>
+                                                                            ))
+                                                                        ) : code === "A" || code === "a" ? (
+                                                                            ticketsA.map((row) => (
+                                                                                <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
+                                                                                    {`${row.TicketsCode}:${row.TicketsName}`}
+                                                                                </MenuItem>
+                                                                            ))
+                                                                        ) : code === "" ? (
+                                                                            <>
+                                                                                {ticketsPS.map((row) => (
+                                                                                    <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
+                                                                                        {`PS:${row.id}:${row.Name}`}
+                                                                                    </MenuItem>
+                                                                                ))}
+                                                                                {customer.map((row) => (
+                                                                                    <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
+                                                                                        {`T:${row.id}:${row.Name}`}
+                                                                                    </MenuItem>
+                                                                                ))}
+                                                                                {ticketsA.map((row) => (
+                                                                                    <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
+                                                                                        {`${row.TicketsCode}:${row.TicketsName}`}
+                                                                                    </MenuItem>
+                                                                                ))}
+                                                                            </>
+                                                                        ) : null
+                                                                    }
+                                                                    {/* {
                                                                         combinedOrder.map((row, index) => (
                                                                             codes === "A" ?
                                                                                 <MenuItem key={index} value={`${row.type}:${row.Name}`}>
@@ -1262,7 +1333,7 @@ const InsertTrips = () => {
                                                                                             </MenuItem>
                                                                                             : ""
                                                                         ))
-                                                                    }
+                                                                    } */}
                                                                     {/* {
                                                                         filteredOptions.map((row) => (
                                                                             <MenuItem value={row.Code + ":" + row.Name}>{row.Code + " : " + row.Name}</MenuItem>

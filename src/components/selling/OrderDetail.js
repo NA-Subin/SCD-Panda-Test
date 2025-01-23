@@ -320,7 +320,7 @@ const OrderDetail = (props) => {
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]}</Typography>
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[1]}</Typography>
+                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[2]}</Typography>
                 </TableCell>
                 {
                     orderDetail ?
