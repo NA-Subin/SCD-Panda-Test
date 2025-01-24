@@ -34,24 +34,24 @@ import theme from "../../theme/theme";
 
 const OrderDetail = (props) => {
     const { detail, ticketsTrip, onSendBack, total } = props;
-    const [CostG91, setCostG91] = React.useState(0);
-    const [VolumeG91, setVolumeG91] = React.useState(0);
-    const [CostG95, setCostG95] = React.useState(0);
-    const [VolumeG95, setVolumeG95] = React.useState(0);
-    const [CostB7, setCostB7] = React.useState(0);
-    const [VolumeB7, setVolumeB7] = React.useState(0);
-    const [CostB95, setCostB95] = React.useState(0);
-    const [VolumeB95, setVolumeB95] = React.useState(0);
+    const [CostG91, setCostG91] = React.useState(parseFloat(0).toFixed(3));
+    const [VolumeG91, setVolumeG91] = React.useState(parseFloat(0).toFixed(3));
+    const [CostG95, setCostG95] = React.useState(parseFloat(0).toFixed(3));
+    const [VolumeG95, setVolumeG95] = React.useState(parseFloat(0).toFixed(3));
+    const [CostB7, setCostB7] = React.useState(parseFloat(0).toFixed(3));
+    const [VolumeB7, setVolumeB7] = React.useState(parseFloat(0).toFixed(3));
+    const [CostB95, setCostB95] = React.useState(parseFloat(0).toFixed(3));
+    const [VolumeB95, setVolumeB95] = React.useState(parseFloat(0).toFixed(3));
     // const [CostB10, setCostB10] = React.useState(0);
     // const [VolumeB10, setVolumeB10] = React.useState(0);
     // const [CostB20, setCostB20] = React.useState(0);
     // const [VolumeB20, setVolumeB20] = React.useState(0);
-    const [CostE20, setCostE20] = React.useState(0);
-    const [VolumeE20, setVolumeE20] = React.useState(0);
+    const [CostE20, setCostE20] = React.useState(parseFloat(0).toFixed(3));
+    const [VolumeE20, setVolumeE20] = React.useState(parseFloat(0).toFixed(3));
     // const [CostE85, setCostE85] = React.useState(0);
     // const [VolumeE85, setVolumeE85] = React.useState(0);
-    const [CostPWD, setCostPWD] = React.useState(0);
-    const [VolumePWD, setVolumePWD] = React.useState(0);
+    const [CostPWD, setCostPWD] = React.useState(parseFloat(0).toFixed(3));
+    const [VolumePWD, setVolumePWD] = React.useState(parseFloat(0).toFixed(3));
     const [orderDetail, setOrderDetail] = React.useState(true);
     const [rate, setRate] = React.useState(detail.Rate);
     const [G91, setG91] = React.useState([]);
@@ -380,7 +380,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostG95}
-                                                onChange={(e) => setCostG95(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setCostG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(CostG95) || 0;
+                                                    setCostG95(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -399,7 +407,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeG95}
-                                                onChange={(e) => setVolumeG95(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setVolumeG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(VolumeG95) || 0;
+                                                    setVolumeG95(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -422,7 +438,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostG91}
-                                                onChange={(e) => setCostG91(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setCostG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(CostG91) || 0;
+                                                    setCostG91(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -441,7 +465,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeG91}
-                                                onChange={(e) => setVolumeG91(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setVolumeG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(VolumeG91) || 0;
+                                                    setVolumeG91(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -464,7 +496,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostB7}
-                                                onChange={(e) => setCostB7(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setCostB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(CostB7) || 0;
+                                                    setCostB7(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -483,7 +523,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeB7}
-                                                onChange={(e) => setVolumeB7(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setVolumeB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(VolumeB7) || 0;
+                                                    setVolumeB7(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -506,7 +554,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostB95}
-                                                onChange={(e) => setCostB95(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setCostB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(CostB95) || 0;
+                                                    setCostB95(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -525,7 +581,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeB95}
-                                                onChange={(e) => setVolumeB95(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setVolumeB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(VolumeB95) || 0;
+                                                    setVolumeB95(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -632,7 +696,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostE20}
-                                                onChange={(e) => setCostE20(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setCostE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(CostE20) || 0;
+                                                    setCostE20(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -651,7 +723,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeE20}
-                                                onChange={(e) => setVolumeE20(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setVolumeE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(VolumeE20) || 0;
+                                                    setVolumeE20(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -716,7 +796,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostPWD}
-                                                onChange={(e) => setCostPWD(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setCostPWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(CostPWD) || 0;
+                                                    setCostPWD(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -735,7 +823,15 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumePWD}
-                                                onChange={(e) => setVolumePWD(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                    setVolumePWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                  }}
+                                                  onBlur={() => {
+                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                    const value = parseFloat(VolumePWD) || 0;
+                                                    setVolumePWD(value.toFixed(3));
+                                                  }}
                                             />
                                         </Paper>
                                     </Grid>
