@@ -421,13 +421,21 @@ const InsertTruck = (props) => {
                                                 <Grid item sm={2} xs={4}>
                                                     <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่</Typography>
                                                 </Grid>
-                                                <Grid item sm={4} xs={8}>
+                                                <Grid item sm={10} xs={8}>
                                                     <Paper component="form" >
                                                         <TextField size="small" fullWidth value={vehicleRegistration} onChange={(e) => setVehicleRegistration(e.target.value)} />
                                                     </Paper>
                                                 </Grid>
                                                 <Grid item sm={2} xs={4}>
-                                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
+                                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุภาษี</Typography>
+                                                </Grid>
+                                                <Grid item sm={4} xs={8}>
+                                                    <Paper component="form" >
+                                                        <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item sm={2} xs={4}>
+                                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุประกัน</Typography>
                                                 </Grid>
                                                 <Grid item sm={4} xs={8}>
                                                     <Paper component="form" >

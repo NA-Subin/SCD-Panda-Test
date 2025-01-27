@@ -117,12 +117,17 @@ const TicketsTransport = () => {
                         </TableHead>
                         <TableBody>
                             {
+                                transport === null || transport === undefined ?
+                                <TableRow>
+                                    <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
+                                </TableRow>
+                                :
                                 transport.map((row) => (
                                     <TableRow key={row.id}>
                                         <TableCell sx={{ textAlign: "center" }}>
                                             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                                                 {
-                                                    row.Status.includes("ตั๋ว") ? "T:" : ""
+                                                    row.Status !== "ตั๋ว" || row.Status !== "ตั๋ว/ผู้รับ" ? "" : (row.Status.includes("ตั๋ว") ? "T:" : "")
                                                 }
                                                 {Number(row.id) + 1}
                                             </Typography>

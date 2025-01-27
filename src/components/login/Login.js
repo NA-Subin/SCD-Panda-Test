@@ -61,7 +61,7 @@ const Login = () => {
                         state: { Employee: datas[id] } 
                       });
                     }else{
-                      navigate("/dashboard");
+                      navigate("/choose");
                     }
                 }
               });
@@ -148,7 +148,7 @@ const Login = () => {
               state: { Employee: datas[id] },
             });
           } else {
-            navigate("/dashboard");
+            navigate("/choose");
           }
         } else {
           ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");

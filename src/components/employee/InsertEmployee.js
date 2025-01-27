@@ -226,12 +226,11 @@ const InsertEmployee = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
-                        <Grid item md={2.5} sm={2} xs={4}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>คำนำหน้าชื่อ</Typography>
-                        </Grid>
-                        <Grid item md={2.5} sm={10} xs={8}>
+                        <Grid item md={3} sm={4} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap",marginRight: 1 }} gutterBottom>คำนำหน้าชื่อ</Typography>
                             <Paper
-                                component="form">
+                                component="form" sx={{ width: "100%" }}>
                                 <Select
                                     id="demo-simple-select"
                                     value={prefix}
@@ -248,33 +247,34 @@ const InsertEmployee = () => {
                                     <MenuItem value={"นางสาว"}>นางสาว</MenuItem>
                                 </Select>
                             </Paper>
+                            </Box>
                         </Grid>
-                        <Grid item md={0.5} sm={2} xs={2}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อ</Typography>
-                        </Grid>
-                        <Grid item md={3} sm={4} xs={10}>
+                        <Grid item md={4.5} sm={6} xs={12}>
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap",marginRight: 1 }} gutterBottom>ชื่อ</Typography>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                             </Paper>
+                        </Box>
                         </Grid>
-                        <Grid item md={0.5} sm={2} xs={2}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>สกุล</Typography>
-                        </Grid>
-                        <Grid item md={3} sm={4} xs={10}>
+                        <Grid item md={4.5} sm={6} xs={12}>
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight:1 }} gutterBottom>สกุล</Typography>
                             <Paper component="form">
                                 <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
                             </Paper>
+                        </Box>
                         </Grid>
                         {
                             menu === 1 ?
                                 <>
-                                    <Grid item md={2.5} sm={2} xs={2}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
-                                    </Grid>
-                                    <Grid item md={3.5} sm={4} xs={10}>
+                                    <Grid item md={6} sm={6} xs={12}>
+                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap",marginRight:1 }} gutterBottom>User</Typography>
                                         <Paper component="form">
                                             <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
                                         </Paper>
+                                    </Box>
                                     </Grid>
                                 </>
                                 :
@@ -482,7 +482,7 @@ const InsertEmployee = () => {
                                             </Paper>
                                         </Grid>
                                         <Grid item md={2} sm={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>สวัสดิการ</Typography>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าโทรศัพท์</Typography>
                                         </Grid>
                                         <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">

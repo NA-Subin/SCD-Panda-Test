@@ -17,6 +17,8 @@ import './App.css';
 import theme from "./theme/theme";
 import GasStationA from "./components/attendant/GasStationA";
 import TradePayable from "./components/payable/TradePayable";
+import Choose from "./components/login/Choose";
+import GasStationAdmin from "./components/login/attendant/GasStationA";
 
 function App() {
 
@@ -28,6 +30,8 @@ function App() {
         {/* <Route path="/:email/*" element={ */}
         <Route path="/gasstation-attendant" element={<GasStationA />} />
         <Route path="/trade-payable" element={<TradePayable />} />
+        <Route path="/choose" element={<Choose />} />
+        <Route path="/gasStation-admin" element={<GasStationAdmin />} />
         <Route
           path="/*"
           element={
