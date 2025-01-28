@@ -263,7 +263,7 @@ const Trucks = () => {
                 </Tooltip>
               </Grid>
               <Grid item xs={12} marginBottom={-7}>
-                <InsertTruck />
+                <InsertTruck openMenu={openMenu} />
               </Grid>
               <Grid item xs={12}>
               {

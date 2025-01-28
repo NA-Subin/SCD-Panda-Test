@@ -158,7 +158,13 @@ const InsertEmployee = () => {
                         .then(() => {
                             ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                             console.log("Data pushed successfully");
-                            setOpen(false);
+                            setPrefix("");
+                            setName("");
+                            setLastname("");
+                            setUser("");
+                            setPosition("");
+                            setPhone("");
+                            setGasStations("");
                         })
                         .catch((error) => {
                             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -192,7 +198,22 @@ const InsertEmployee = () => {
                 .then(() => {
                     ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                     console.log("Data pushed successfully");
-                    setOpen(false);
+                    setPrefix("");
+                    setName("");
+                    setLastname("");
+                    setRegTruck("");
+                    setBankID("");
+                    setBank("");
+                    setIDCard("");
+                    setSalary("");
+                    setTripCost("");
+                    setPointCost("");
+                    setSecurity("");
+                    setTrucks("");
+                    setDeposit("");
+                    setLoan("");
+                    setDrivingLicense("");
+                    setExpiration("")
                 })
                 .catch((error) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");

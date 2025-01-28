@@ -41,7 +41,12 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const InsertTruck = (props) => {
     const { openMenu } = props;
-    const [menu, setMenu] = React.useState(0);
+    const [menu, setMenu] = React.useState(Number(openMenu));
+    
+      React.useEffect(() => {
+        setMenu(Number(openMenu)); // อัปเดต check เมื่อ openMenu เปลี่ยนแปลง
+      }, [openMenu]); 
+
     const [open, setOpen] = React.useState(false);
     const [licenseRegHead, setLicenseRegHead] = React.useState(true);
     const [licenseRegTail, setLicenseRegTail] = React.useState(true);
@@ -65,6 +70,8 @@ const InsertTruck = (props) => {
     const [cap, setCap] = React.useState("");
     const [weight, setWeight] = React.useState("");
     const [vehicleRegistration, setVehicleRegistration] = React.useState("");
+    const [dateEndTax, setDateEndTax] = React.useState("");
+    const [dateEndInsurance, setDateEndInsurance] = React.useState("");
     const [dateEnd, setDateEnd] = React.useState("");
     const [registration, setRegistration] = React.useState("");
     const [regTail, setRegTail] = React.useState("");
@@ -84,13 +91,23 @@ const InsertTruck = (props) => {
     setFields(newFields);
   };
 
+  const [tailWeight,setTailWeight] = React.useState(0);
+
   // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงในแต่ละช่อง
   const handleFieldChange = (id, value) => {
-    setFields((prevFields) =>
-      prevFields.map((field) =>
-        field.id === id ? { ...field, value } : field
-      )
-    );
+    setFields((prevFields) => {
+      const updatedFields = prevFields.map((field) =>
+        field.id === id ? { ...field, value: parseFloat(value) || 0 } : field
+      );
+  
+      // คำนวณผลรวมของ value จาก updatedFields
+      const totalValue = updatedFields.reduce((sum, field) => sum + field.value, 0);
+  
+      // อัปเดต TailWeight ด้วยผลรวม
+      setTailWeight(totalValue);
+  
+      return updatedFields;
+    });
   };
 
     const getCompany = async () => {
@@ -167,19 +184,22 @@ const InsertTruck = (props) => {
                 Act: "-",
                 Status: "ว่าง",
                 Driver: "ไม่มี",
-                VehicleRegistration: licenseSmallTruck === "มี" ? vehicleRegistration : "ไม่มี",
-                VehExpirationDate: licenseSmallTruck === "มี" ? dateEnd: "ไม่มี",
+                VehicleRegistration: licenseRegHead === "มี" ? vehicleRegistration : "ไม่มี",
+                DateEndTax: licenseRegHead === "มี" ? dateEndTax : "ไม่มี",
+                DateEndInsurance: licenseRegHead === "มี" ? dateEndInsurance : "ไม่มี",
                 VehPicture: "ไม่มี"
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
-                setOpen(false);
                 setCompanies("");
                 setRegHead("");
                 setTail("");
                 setWeight("");
                 setLicenseRegHead("");
+                setVehicleRegistration("");
+                setDateEndTax("");
+                setDateEndInsurance("");
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -204,18 +224,23 @@ const InsertTruck = (props) => {
                 Status: "ยังไม่เชื่อมต่อทะเบียนหัว",
                 Driver: "ไม่มี",
                 ...capFields, // เพิ่ม capFields ที่แปลงแล้วเข้าไป
-                VehicleRegistration: licenseSmallTruck === "มี" ? vehicleRegistration : "ไม่มี",
-                VehExpirationDate: licenseSmallTruck === "มี" ? dateEnd: "ไม่มี",
+                VehicleRegistration: licenseRegTail === "มี" ? vehicleRegistration : "ไม่มี",
+                DateEndTax: licenseRegTail === "มี" ? dateEndTax : "ไม่มี",
+                DateEndInsurance: licenseRegTail === "มี" ? dateEndInsurance : "ไม่มี",
                 VehPicture: "ไม่มี"
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
-                setOpen(false);
                 setCompanies("");
                 setRegTail("");
                 setWeight("");
+                setCap("");
+                setTailWeight(0);
                 setLicenseRegTail("");
+                setVehicleRegistration("");
+                setDateEndTax("");
+                setDateEndInsurance("");
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -236,17 +261,20 @@ const InsertTruck = (props) => {
                 Status: "ว่าง",
                 Driver: "ไม่มี",
                 VehicleRegistration: licenseSmallTruck === "มี" ? vehicleRegistration : "ไม่มี",
-                VehExpirationDate: licenseSmallTruck === "มี" ? dateEnd: "ไม่มี",
+                DateEndTax: licenseSmallTruck === "มี" ? dateEndTax : "ไม่มี",
+                DateEndInsurance: licenseSmallTruck === "มี" ? dateEndInsurance : "ไม่มี",
                 VehPicture: "ไม่มี"
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
-                setOpen(false);
                 setCompanies("");
                 setWeight("");
                 setRegistration("");
                 setLicenseSmallTruck("");
+                setVehicleRegistration("");
+                setDateEndTax("");
+                setDateEndInsurance("");
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -431,7 +459,7 @@ const InsertTruck = (props) => {
                                                 </Grid>
                                                 <Grid item sm={4} xs={8}>
                                                     <Paper component="form" >
-                                                        <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
+                                                        <TextField size="small" fullWidth value={dateEndTax} onChange={(e) => setDateEndTax(e.target.value)} />
                                                     </Paper>
                                                 </Grid>
                                                 <Grid item sm={2} xs={4}>
@@ -439,7 +467,7 @@ const InsertTruck = (props) => {
                                                 </Grid>
                                                 <Grid item sm={4} xs={8}>
                                                     <Paper component="form" >
-                                                        <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
+                                                        <TextField size="small" fullWidth value={dateEndInsurance} onChange={(e) => setDateEndInsurance(e.target.value)} />
                                                     </Paper>
                                                 </Grid>
                                                 <Grid item sm={12} xs={12}>
@@ -482,30 +510,33 @@ const InsertTruck = (props) => {
                                                 <TextField size="small" fullWidth value={cap} onChange={handleCapChange} />
                                             </Paper>
                                         </Grid>
-                                        {
-                                            cap !== "" && cap !== 0 && cap !== null &&
-                                            <Grid item xs={12}>
-                                                {fields.map((field) => (
-                                                    <Box key={field.id} sx={{ marginTop: 2 }}>
-                                                    <TextField
-                                                        size="small"
-                                                        fullWidth
-                                                        label={`ช่องที่ ${field.id}`}
-                                                        value={field.value}
-                                                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                                                    />
-                                                    </Box>
-                                                ))}
-                                            </Grid>
-                                        }
                                         <Grid item sm={2} xs={4}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>น้ำหนัก</Typography>
                                         </Grid>
                                         <Grid item sm={4} xs={8}>
                                             <Paper component="form">
-                                                <TextField size="small" fullWidth value={weight} onChange={(e) => setWeight(e.target.value)} />
+                                                <TextField size="small" fullWidth value={tailWeight} disabled />
                                             </Paper>
                                         </Grid>
+                                        {
+                                            cap !== "" && cap !== 0 && cap !== null &&
+                                                fields.map((field) => (
+                                                    <React.Fragment key={field.id}>
+                                                    <Grid item sm={1} xs={12}/>
+                                                    <Grid item sm={2} xs={2}>
+                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" sx={{ marginTop: 1 }} gutterBottom>{`ช่องที่ ${field.id}`}</Typography>
+                                                    </Grid>
+                                                    <Grid item sm={8} xs={10}>
+                                                        <TextField
+                                                            size="small"
+                                                            fullWidth
+                                                            value={field.value}
+                                                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item sm={1} xs={12}/>
+                                                    </React.Fragment>
+                                                ))}
                                         {
                                             licenseRegTail === "มี" ?
                                                 <>

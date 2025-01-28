@@ -51,8 +51,8 @@ const InsertTicketsStock = () => {
         const [lng,setLng] = React.useState("");
         const [zipCode, setZipCode] = React.useState("");
         const [ticket,setTicket] = React.useState(0);
-        const [ticketsCode,setTicketCode] = React.useState("");
-        const [ticketsName,setTicketName] = React.useState("");
+        const [ticketsCode,setTicketsCode] = React.useState("");
+        const [ticketsName,setTicketsName] = React.useState("");
         const [rate,setRate] = React.useState("");
         const [bill,setBill] = React.useState("");
         const [code,setCode] = React.useState("");
@@ -103,7 +103,21 @@ const InsertTicketsStock = () => {
                 .then(() => {
                     ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                     console.log("Data pushed successfully");
-                    setOpen(false);
+                    setTicketsCode("")
+                    setTicketsName("")
+                    setRate("")
+                    setBill("")
+                    setCode("")
+                    setCompanyName("")
+                    setCodeID("")
+                    setNo("")
+                    setVillage("")
+                    setSubDistrict("")
+                    setDistrict("")
+                    setProvince("")
+                    setZipCode("")
+                    setLat("")
+                    setLng("")
                 })
                 .catch((error) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -136,11 +150,11 @@ const InsertTicketsStock = () => {
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
                         <Grid item xs={2.5} display="flex" justifyContent="center" alignItems="center">
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>รหัสตั๋ว</Typography>
-                            <TextField size="small" fullWidth value={ticketsCode} onChange={(e) => setTicketCode(e.target.value)} />
+                            <TextField size="small" fullWidth value={ticketsCode} onChange={(e) => setTicketsCode(e.target.value)} />
                         </Grid>
                         <Grid item xs={9.5} display="flex" justifyContent="center" alignItems="center">
                         <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>ชื่อตั๋ว</Typography>
-                        <TextField size="small" fullWidth  value={ticketsName} onChange={(e) => setTicketName(e.target.value)}/>
+                        <TextField size="small" fullWidth  value={ticketsName} onChange={(e) => setTicketsName(e.target.value)}/>
                         </Grid>
                         <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
                         <Checkbox sx={{ marginRight: 1 }} onChange={() => setCheck(!check)}/>

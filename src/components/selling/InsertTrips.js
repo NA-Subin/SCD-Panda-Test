@@ -386,6 +386,9 @@ const InsertTrips = () => {
     };
 
     const handlePost = () => {
+        if (registration === "0:0:0") {
+                    ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
+                } else {
         database
             .ref("tickets/" + ticketsTrip + "/ticketOrder")
             .child(ticketsOrder.length)
@@ -418,6 +421,7 @@ const InsertTrips = () => {
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
+        }
     };
 
     const handleSubmit = () => {
@@ -594,17 +598,21 @@ const InsertTrips = () => {
 
     const getTickets = () => {
         if (codeCustomer === "") {
-          // ถ้า codeCustomer เป็น "", ให้แสดงข้อมูลทั้งหมด
-          return [...ticketsPS, ...ticketsT, ...ticketsA];
+            // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
+            return [
+                ...ticketsPS.map((item) => ({ ...item, type: "PS" })),
+                ...ticketsT.map((item) => ({ ...item, type: "T" })),
+                ...ticketsA.map((item) => ({ ...item, type: "A" })),
+            ];
         } else if (codeCustomer === "PS") {
-          return ticketsPS;
+            return ticketsPS.map((item) => ({ ...item, type: "PS" }));
         } else if (codeCustomer === "T") {
-          return ticketsT;
+            return ticketsT.map((item) => ({ ...item, type: "T" }));
         } else if (codeCustomer === "A") {
-          return ticketsA;
+            return ticketsA.map((item) => ({ ...item, type: "A" }));
         }
-        return [];  // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
-      };
+        return []; // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
+    };
 
     return (
         <React.Fragment>
@@ -719,19 +727,19 @@ const InsertTrips = () => {
                                                 <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     เลขที่ออเดอร์
                                                 </TablecellHeader>
-                                                <TablecellHeader width={200} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                <TablecellHeader width={150} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ค่าบรรทุก
                                                 </TablecellHeader>
-                                                <TablecellHeader width={200} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     G95
                                                 </TablecellHeader>
-                                                <TablecellHeader width={200} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     G91
                                                 </TablecellHeader>
-                                                <TablecellHeader width={200} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     B7(D)
                                                 </TablecellHeader>
-                                                <TablecellHeader width={200} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     B95
                                                 </TablecellHeader>
                                                 {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
@@ -740,13 +748,13 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 B20
                                                             </TablecellHeader> */}
-                                                <TablecellHeader width={200} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     E20
                                                 </TablecellHeader>
                                                 {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 E85
                                                             </TablecellHeader> */}
-                                                <TablecellHeader width={200} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     PWD
                                                 </TablecellHeader>
                                                 <TablecellHeader width={180} sx={{ textAlign: "center" }} rowSpan={2} />
@@ -866,68 +874,27 @@ const InsertTrips = () => {
                                                     </Paper>
                                                 </Grid>
                                                 <Grid item sm={8} xs={7}>
-                                                <Select
-  value={tickets}
-  onChange={(e) => setTickets(e.target.value)}
-  fullWidth
->
-  <MenuItem value={"0:0"}>เลือกตั๋วที่ต้องการเพิ่ม</MenuItem>
-  {getTickets().map((row) => (
-    <MenuItem key={row.id || row.TicketsCode} value={`${row.type || "T"}:${row.id || row.TicketsCode}:${row.Name || row.TicketsName}`}>
-      {`${row.type || "T"}:${row.id || row.TicketsCode}:${row.Name || row.TicketsName}`}
-    </MenuItem>
-  ))}
-                                                {/* <Select
-    id="demo-simple-select"
-    value={tickets}
-    size="small"
-    sx={{ textAlign: "left" }}
-    onChange={(e) => setTickets(e.target.value)}
-    fullWidth
->
-    <MenuItem value={"0:0"}>
-        เลือกตั๋วที่ต้องการเพิ่ม
-    </MenuItem>
-    {
-        codeCustomer === "PS" || codeCustomer === "ps" ? (
-            ticketsPS.map((row) => (
-                <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
-                    {`PS:${row.id}:${row.Name}`}
-                </MenuItem>
-            ))
-        ) : codeCustomer === "T" || codeCustomer === "t" ? (
-            ticketsT.map((row) => (
-                <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
-                    {`T:${row.id}:${row.Name}`}
-                </MenuItem>
-            ))
-        ) : codeCustomer === "A" || codeCustomer === "a" ? (
-            ticketsA.map((row) => (
-                <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
-                    {`${row.TicketsCode}:${row.TicketsName}`}
-                </MenuItem>
-            ))
-        ) : codeCustomer === "" ? (
-            <>
-                {ticketsPS.map((row) => (
-                    <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
-                        {`PS:${row.id}:${row.Name}`}
-                    </MenuItem>
-                ))}
-                {ticketsT.map((row) => (
-                    <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
-                        {`T:${row.id}:${row.Name}`}
-                    </MenuItem>
-                ))}
-                {ticketsA.map((row) => (
-                    <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
-                        {`${row.TicketsCode}:${row.TicketsName}`}
-                    </MenuItem>
-                ))}
-            </>
-        ) : null
-    } */}
+                                                    <Select
+                                                        id="demo-simple-select"
+                                                        value={tickets}
+                                                        size="small"
+                                                        sx={{ textAlign: "left" }}
+                                                        onChange={(e) => setTickets(e.target.value)}
+                                                        fullWidth
+                                                    >
+                                                        <MenuItem value={"0:0"}>เลือกตั๋วที่ต้องการเพิ่ม</MenuItem>
+                                                        {getTickets().map((row) => {
+                                                            // ตรวจสอบประเภทของข้อมูลเพื่อกำหนด prefix ที่เหมาะสม
+                                                            const prefix = row.type || codeCustomer;
+                                                            const id = row.id || row.TicketsCode;
+                                                            const name = row.Name || row.TicketsName;
 
+                                                            return (
+                                                                <MenuItem key={id} value={`${prefix}:${id}:${name}`}>
+                                                                    {`${prefix}:${id}:${name}`}
+                                                                </MenuItem>
+                                                            );
+                                                        })}
                                                         {/* {
                                                                         filteredOptions.map((row) => (
                                                                             <MenuItem value={row.Code + ":" + row.Name}>{row.Code + " : " + row.Name}</MenuItem>
@@ -1062,46 +1029,46 @@ const InsertTrips = () => {
                             <>
                                 <Grid container spacing={1} marginTop={1} marginBottom={1}>
                                     <Grid item sm={4} xs={9} textAlign="right">
-                        <Box display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle2" fontWeight="bold" sx={{ marginRight: 1,whiteSpace: 'nowrap' }} gutterBottom>วันที่ส่ง</Typography>
-                        <Paper
-                                            component="form">
-                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                <DatePicker
-                                                    openTo="day"
-                                                    views={["year", "month", "day"]}
-                                                    value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
-                                                    format="DD/MM/YYYY"
-                                                    onChange={handleDateChange}
-                                                    slotProps={{ textField: { size: "small", fullWidth: true } }}
-                                                />
-                                            </LocalizationProvider>
-                                        </Paper>
-                        </Box>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography variant="subtitle2" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: 'nowrap' }} gutterBottom>วันที่ส่ง</Typography>
+                                            <Paper
+                                                component="form">
+                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                    <DatePicker
+                                                        openTo="day"
+                                                        views={["year", "month", "day"]}
+                                                        value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                                        format="DD/MM/YYYY"
+                                                        onChange={handleDateChange}
+                                                        slotProps={{ textField: { size: "small", fullWidth: true } }}
+                                                    />
+                                                </LocalizationProvider>
+                                            </Paper>
+                                        </Box>
                                     </Grid>
                                     <Grid item sm={8} xs={9}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ marginRight: 1,whiteSpace: 'nowrap' }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
-                                        <Paper
-                                            component="form">
-                                            <Select
-                                                id="demo-simple-select"
-                                                value={registration}
-                                                size="small"
-                                                sx={{ textAlign: "left" }}
-                                                onChange={(e) => setRegistration(e.target.value)}
-                                                fullWidth
-                                            >
-                                                <MenuItem value={"0:0:0"}>
-                                                    กรุณาเลือกผู้ขับ/ป้ายทะเบียน
-                                                </MenuItem>
-                                                {
-                                                    regHead.map((row) => (
-                                                        <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
-                                                    ))
-                                                }
-                                            </Select>
-                                        </Paper>
+                                            <Typography variant="subtitle2" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: 'nowrap' }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                            <Paper
+                                                component="form">
+                                                <Select
+                                                    id="demo-simple-select"
+                                                    value={registration}
+                                                    size="small"
+                                                    sx={{ textAlign: "left" }}
+                                                    onChange={(e) => setRegistration(e.target.value)}
+                                                    fullWidth
+                                                >
+                                                    <MenuItem value={"0:0:0"}>
+                                                        กรุณาเลือกผู้ขับ/ป้ายทะเบียน
+                                                    </MenuItem>
+                                                    {
+                                                        regHead.map((row) => (
+                                                            <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
+                                                        ))
+                                                    }
+                                                </Select>
+                                            </Paper>
                                         </Box>
                                     </Grid>
                                 </Grid>

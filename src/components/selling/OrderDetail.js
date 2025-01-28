@@ -346,7 +346,7 @@ const OrderDetail = (props) => {
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                    <TextField size="small" fullWidth label="ค่าบรรทุก"
+                                    <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
                                             sx: {
@@ -367,7 +367,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -380,21 +380,22 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostG95}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setCostG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(CostG95) || 0;
-                                                    setCostG95(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setCostG95(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setCostG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(CostG95) || 0;
+                                                //     setCostG95(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -407,15 +408,16 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeG95}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setVolumeG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(VolumeG95) || 0;
-                                                    setVolumeG95(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setVolumeG95(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setVolumeG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(VolumeG95) || 0;
+                                                //     setVolumeG95(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -425,7 +427,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -438,21 +440,22 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostG91}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setCostG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(CostG91) || 0;
-                                                    setCostG91(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setCostG91(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setCostG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(CostG91) || 0;
+                                                //     setCostG91(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -465,15 +468,16 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeG91}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setVolumeG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(VolumeG91) || 0;
-                                                    setVolumeG91(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setVolumeG91(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setVolumeG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(VolumeG91) || 0;
+                                                //     setVolumeG91(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -483,7 +487,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -496,21 +500,22 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostB7}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setCostB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(CostB7) || 0;
-                                                    setCostB7(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setCostB7(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setCostB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(CostB7) || 0;
+                                                //     setCostB7(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -523,15 +528,16 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeB7}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setVolumeB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(VolumeB7) || 0;
-                                                    setVolumeB7(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setVolumeB7(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setVolumeB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(VolumeB7) || 0;
+                                                //     setVolumeB7(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -541,7 +547,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -554,21 +560,22 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostB95}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setCostB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(CostB95) || 0;
-                                                    setCostB95(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setCostB95(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setCostB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(CostB95) || 0;
+                                                //     setCostB95(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -581,15 +588,16 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeB95}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setVolumeB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(VolumeB95) || 0;
-                                                    setVolumeB95(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setVolumeB95(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setVolumeB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(VolumeB95) || 0;
+                                                //     setVolumeB95(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -599,7 +607,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -618,7 +626,7 @@ const OrderDetail = (props) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -641,7 +649,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -660,7 +668,7 @@ const OrderDetail = (props) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -683,7 +691,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -696,21 +704,22 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostE20}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setCostE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(CostE20) || 0;
-                                                    setCostE20(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setCostE20(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setCostE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(CostE20) || 0;
+                                                //     setCostE20(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -723,15 +732,16 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumeE20}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setVolumeE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(VolumeE20) || 0;
-                                                    setVolumeE20(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setVolumeE20(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setVolumeE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(VolumeE20) || 0;
+                                                //     setVolumeE20(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
@@ -741,7 +751,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -760,7 +770,7 @@ const OrderDetail = (props) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -783,7 +793,7 @@ const OrderDetail = (props) => {
                                 <Grid container spacing={1}>
                                     <Grid item xs={6} paddingRight={1}>
                                         <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ต้นทุน"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -796,21 +806,22 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={CostPWD}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setCostPWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(CostPWD) || 0;
-                                                    setCostPWD(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setCostPWD(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setCostPWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(CostPWD) || 0;
+                                                //     setCostPWD(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth label="ปริมาณ"
+                                            <TextField size="small" fullWidth
                                                 type="number"
                                                 InputLabelProps={{
                                                     sx: {
@@ -823,15 +834,16 @@ const OrderDetail = (props) => {
                                                     },
                                                 }}
                                                 value={VolumePWD}
-                                                onChange={(e) => {
-                                                    const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                    setVolumePWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                  }}
-                                                  onBlur={() => {
-                                                    // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                    const value = parseFloat(VolumePWD) || 0;
-                                                    setVolumePWD(value.toFixed(3));
-                                                  }}
+                                                onChange={(e) => setVolumePWD(e.target.value)}
+                                                // onChange={(e) => {
+                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                                //     setVolumePWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                                //   }}
+                                                //   onBlur={() => {
+                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                                //     const value = parseFloat(VolumePWD) || 0;
+                                                //     setVolumePWD(value.toFixed(3));
+                                                //   }}
                                             />
                                         </Paper>
                                     </Grid>

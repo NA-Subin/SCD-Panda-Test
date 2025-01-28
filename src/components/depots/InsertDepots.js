@@ -50,8 +50,13 @@ import InsertGasStations from "./gasstations/InsertGasStations";
 import InsertStock from "./stock/InsertStock";
 
 const InserDepots = (props) => {
-    const { show,depot,stock,gasStation } = props;
-    const [check, setCheck] = React.useState(show);
+    const { openMenu,depot,stock,gasStation } = props;
+    const [check, setCheck] = React.useState(Number(openMenu));
+
+  React.useEffect(() => {
+    setCheck(Number(openMenu)); // อัปเดต check เมื่อ openMenu เปลี่ยนแปลง
+  }, [openMenu]); 
+  
     const [menu, setMenu] = React.useState(0);
         const [open, setOpen] = React.useState(false);
     
@@ -62,7 +67,9 @@ const InserDepots = (props) => {
         const handleClose = () => {
             setOpen(false);
         };
-    
+
+        console.log("openMenu", openMenu);
+        console.log("check", check);
         // console.log("จำนวนปั้ม "+gasStation);
         // console.log("จำนวนคลังสต็อกน้ำมัน "+stock);
         // console.log("จำนวนคลังรับน้ำมัน "+depot);
@@ -71,12 +78,12 @@ const InserDepots = (props) => {
         <React.Fragment>
             <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} 
             endIcon={
-                show === 1 ? <LocalGasStationIcon/>
-                : show === 2 ? <WaterDropIcon />
+                check === 1 ? <LocalGasStationIcon/>
+                : check === 2 ? <WaterDropIcon />
                 : <OilBarrelIcon/>
             }>
                 {
-                    show === 1 ? "เพิ่มปั้มน้ำมัน" : show === 2 ? "เพิ่มคลังสต็อกน้ำมัน" : "เพิ่มคลังรับน้ำมัน"
+                    check === 1 ? "เพิ่มปั้มน้ำมัน" : check === 2 ? "เพิ่มคลังสต็อกน้ำมัน" : "เพิ่มคลังรับน้ำมัน"
                 }
             </Button>
             <Dialog
@@ -90,7 +97,7 @@ const InserDepots = (props) => {
                     <Grid container spacing={2}>
                         <Grid item xs={10}>
                             <Typography variant="h6" fontWeight="bold" color="white" >{
-                                show === 1 ? "เพิ่มปั้มน้ำมัน" : show === 2 ? "เพิ่มคลังสต็อกน้ำมัน" : "เพิ่มคลังรับน้ำมัน"
+                                check === 1 ? "เพิ่มปั้มน้ำมัน" : check === 2 ? "เพิ่มคลังสต็อกน้ำมัน" : "เพิ่มคลังรับน้ำมัน"
                             }</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">

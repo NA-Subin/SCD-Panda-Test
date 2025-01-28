@@ -33,7 +33,7 @@ import { database } from "../../server/firebase";
 import GasStationsDetail from "./gasstations/GasStationsDetail";
 import DepotDetail from "./depot/DepotDetail";
 import StockDetail from "./stock/StockDetail";
-import InserDepots from "./InsertDepots";
+import InsertDepots from "./InsertDepots";
 
 const Depots = () => {
   const [openMenu, setOpenMenu] = React.useState(1);
@@ -79,7 +79,7 @@ const Depots = () => {
         {openMenu === 1 ? "ปั้มน้ำมัน" : openMenu === 2 ? "คลังสต็อกน้ำมัน" : "คลังรับน้ำมัน"}
       </Typography>
       <Box display="flex" justifyContent="right" alignItems="center" marginRight={3} marginTop={-8} marginBottom={3}>
-        <InserDepots show={openMenu} depot={depot} stock={stock.length} gasStation={gasStation} />
+        <InsertDepots openMenu={openMenu} depot={depot} stock={stock.length} gasStation={gasStation} />
       </Box>
       <Divider />
       <Grid container spacing={5} marginTop={0.5} marginBottom={2}>
