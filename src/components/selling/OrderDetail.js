@@ -34,24 +34,24 @@ import theme from "../../theme/theme";
 
 const OrderDetail = (props) => {
     const { detail, ticketsTrip, onSendBack, total } = props;
-    const [CostG91, setCostG91] = React.useState(parseFloat(0).toFixed(3));
-    const [VolumeG91, setVolumeG91] = React.useState(parseFloat(0).toFixed(3));
-    const [CostG95, setCostG95] = React.useState(parseFloat(0).toFixed(3));
-    const [VolumeG95, setVolumeG95] = React.useState(parseFloat(0).toFixed(3));
-    const [CostB7, setCostB7] = React.useState(parseFloat(0).toFixed(3));
-    const [VolumeB7, setVolumeB7] = React.useState(parseFloat(0).toFixed(3));
-    const [CostB95, setCostB95] = React.useState(parseFloat(0).toFixed(3));
-    const [VolumeB95, setVolumeB95] = React.useState(parseFloat(0).toFixed(3));
+    const [CostG91, setCostG91] = React.useState(0);
+    const [VolumeG91, setVolumeG91] = React.useState(0);
+    const [CostG95, setCostG95] = React.useState(0);
+    const [VolumeG95, setVolumeG95] = React.useState(0);
+    const [CostB7, setCostB7] = React.useState(0);
+    const [VolumeB7, setVolumeB7] = React.useState(0);
+    const [CostB95, setCostB95] = React.useState(0);
+    const [VolumeB95, setVolumeB95] = React.useState(0);
     // const [CostB10, setCostB10] = React.useState(0);
     // const [VolumeB10, setVolumeB10] = React.useState(0);
     // const [CostB20, setCostB20] = React.useState(0);
     // const [VolumeB20, setVolumeB20] = React.useState(0);
-    const [CostE20, setCostE20] = React.useState(parseFloat(0).toFixed(3));
-    const [VolumeE20, setVolumeE20] = React.useState(parseFloat(0).toFixed(3));
+    const [CostE20, setCostE20] = React.useState(0);
+    const [VolumeE20, setVolumeE20] = React.useState(0);
     // const [CostE85, setCostE85] = React.useState(0);
     // const [VolumeE85, setVolumeE85] = React.useState(0);
-    const [CostPWD, setCostPWD] = React.useState(parseFloat(0).toFixed(3));
-    const [VolumePWD, setVolumePWD] = React.useState(parseFloat(0).toFixed(3));
+    const [CostPWD, setCostPWD] = React.useState(0);
+    const [VolumePWD, setVolumePWD] = React.useState(0);
     const [orderDetail, setOrderDetail] = React.useState(true);
     const [rate, setRate] = React.useState(detail.Rate);
     const [G91, setG91] = React.useState([]);
@@ -64,22 +64,22 @@ const OrderDetail = (props) => {
     // const [E85, setE85] = React.useState([]);
     const [PWD, setPWD] = React.useState([]);
     const [weightOil, setWeightOil] = React.useState(0);
-    const [orderID,setOrderID] = React.useState("");
+    const [orderID, setOrderID] = React.useState("");
 
     const getData = async () => {
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/G91").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/G91").on("value", (snapshot) => {
             const datas = snapshot.val();
             setG91(datas);
         });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/G95").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/G95").on("value", (snapshot) => {
             const datas = snapshot.val();
             setG95(datas);
         });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B7").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/B7").on("value", (snapshot) => {
             const datas = snapshot.val();
             setB7(datas);
         });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B95").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/B95").on("value", (snapshot) => {
             const datas = snapshot.val();
             setB95(datas);
         });
@@ -91,7 +91,7 @@ const OrderDetail = (props) => {
         //     const datas = snapshot.val();
         //     setB20(datas);
         // });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/E20").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/E20").on("value", (snapshot) => {
             const datas = snapshot.val();
             setE20(datas);
         });
@@ -99,7 +99,7 @@ const OrderDetail = (props) => {
         //     const datas = snapshot.val();
         //     setE85(datas);
         // });
-        database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/PWD").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/PWD").on("value", (snapshot) => {
             const datas = snapshot.val();
             setPWD(datas);
         });
@@ -112,6 +112,7 @@ const OrderDetail = (props) => {
     const handleTotalWeight = (newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD) => {
 
         const total = newVolumeG91 + newVolumeG95 + newVolumeB7 + newVolumeB95 + newVolumeE20 + newVolumePWD;
+        const totalVolume = Number(VolumeG91) + Number(VolumeG95) + Number(VolumeB7) + Number(VolumeB95) + Number(VolumeE20) + Number(VolumePWD);
         // parseFloat(newVolumeG91 || 0) +
         // parseFloat(newVolumeG95 || 0) +
         // parseFloat(newVolumeB7 || 0) +
@@ -123,7 +124,7 @@ const OrderDetail = (props) => {
         // parseFloat(newVolumePWD || 0);
 
         if (onSendBack) {
-            onSendBack(total); // เรียกฟังก์ชันที่ส่งมาจาก Page 1
+            onSendBack(total, totalVolume); // เรียกฟังก์ชันที่ส่งมาจาก Page 1
         }
     };
 
@@ -142,7 +143,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
             .child("/Product/G91")
             .update({
                 Cost: CostG91 === 0 ? "-" : CostG91,
@@ -155,7 +156,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
             .child("/Product/G95")
             .update({
                 Cost: CostG95 === 0 ? "-" : CostG95,
@@ -168,7 +169,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
             .child("/Product/B7")
             .update({
                 Cost: CostB7 === 0 ? "-" : CostB7,
@@ -181,7 +182,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
             .child("/Product/B95")
             .update({
                 Cost: CostB95 === 0 ? "-" : CostB95,
@@ -220,7 +221,7 @@ const OrderDetail = (props) => {
         //         console.error("Error pushing data:", error);
         //     });
         database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
             .child("/Product/E20")
             .update({
                 Cost: CostE20 === 0 ? "-" : CostE20,
@@ -246,7 +247,7 @@ const OrderDetail = (props) => {
         //         console.error("Error pushing data:", error);
         //     });
         database
-            .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
             .child("/Product/PWD")
             .update({
                 Cost: CostPWD === 0 ? "-" : CostPWD,
@@ -316,7 +317,7 @@ const OrderDetail = (props) => {
                 <TablecellHeader sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.id}</Typography>
                 </TablecellHeader>
-                <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light}}>
+                <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]}</Typography>
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
@@ -364,244 +365,228 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6} paddingRight={1}>
-                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={CostG95}
-                                                onChange={(e) => setCostG95(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setCostG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(CostG95) || 0;
-                                                //     setCostG95(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={VolumeG95}
-                                                onChange={(e) => setVolumeG95(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setVolumeG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(VolumeG95) || 0;
-                                                //     setVolumeG95(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                </Grid>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={CostG95}
+                                        onChange={(e) => setCostG95(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setCostG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(CostG95) || 0;
+                                    //     setCostG95(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6} paddingRight={1}>
-                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={CostG91}
-                                                onChange={(e) => setCostG91(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setCostG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(CostG91) || 0;
-                                                //     setCostG91(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={VolumeG91}
-                                                onChange={(e) => setVolumeG91(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setVolumeG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(VolumeG91) || 0;
-                                                //     setVolumeG91(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                </Grid>
+                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={VolumeG95}
+                                        onChange={(e) => setVolumeG95(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setVolumeG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(VolumeG95) || 0;
+                                    //     setVolumeG95(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6} paddingRight={1}>
-                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={CostB7}
-                                                onChange={(e) => setCostB7(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setCostB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(CostB7) || 0;
-                                                //     setCostB7(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={VolumeB7}
-                                                onChange={(e) => setVolumeB7(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setVolumeB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(VolumeB7) || 0;
-                                                //     setVolumeB7(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                </Grid>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={CostG91}
+                                        onChange={(e) => setCostG91(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setCostG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(CostG91) || 0;
+                                    //     setCostG91(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6} paddingRight={1}>
-                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={CostB95}
-                                                onChange={(e) => setCostB95(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setCostB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(CostB95) || 0;
-                                                //     setCostB95(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={VolumeB95}
-                                                onChange={(e) => setVolumeB95(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setVolumeB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(VolumeB95) || 0;
-                                                //     setVolumeB95(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                </Grid>
+                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={VolumeG91}
+                                        onChange={(e) => setVolumeG91(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setVolumeG91(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(VolumeG91) || 0;
+                                    //     setVolumeG91(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={CostB7}
+                                        onChange={(e) => setCostB7(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setCostB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(CostB7) || 0;
+                                    //     setCostB7(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={VolumeB7}
+                                        onChange={(e) => setVolumeB7(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setVolumeB7(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(VolumeB7) || 0;
+                                    //     setVolumeB7(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={CostB95}
+                                        onChange={(e) => setCostB95(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setCostB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(CostB95) || 0;
+                                    //     setCostB95(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={VolumeB95}
+                                        onChange={(e) => setVolumeB95(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setVolumeB95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(VolumeB95) || 0;
+                                    //     setVolumeB95(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
                             </TableCell>
                             {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
@@ -688,64 +673,60 @@ const OrderDetail = (props) => {
                                 </Grid>
                             </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6} paddingRight={1}>
-                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={CostE20}
-                                                onChange={(e) => setCostE20(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setCostE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(CostE20) || 0;
-                                                //     setCostE20(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={VolumeE20}
-                                                onChange={(e) => setVolumeE20(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setVolumeE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(VolumeE20) || 0;
-                                                //     setVolumeE20(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                </Grid>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={CostE20}
+                                        onChange={(e) => setCostE20(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setCostE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(CostE20) || 0;
+                                    //     setCostE20(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={VolumeE20}
+                                        onChange={(e) => setVolumeE20(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setVolumeE20(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(VolumeE20) || 0;
+                                    //     setVolumeE20(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
                             </TableCell>
                             {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
@@ -790,64 +771,60 @@ const OrderDetail = (props) => {
                                 </Grid>
                             </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6} paddingRight={1}>
-                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={CostPWD}
-                                                onChange={(e) => setCostPWD(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setCostPWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(CostPWD) || 0;
-                                                //     setCostPWD(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Paper component="form" sx={{ marginRight: -1 }}>
-                                            <TextField size="small" fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    sx: {
-                                                        fontSize: '14px'
-                                                    },
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        height: '30px', // ปรับความสูงของ TextField
-                                                    },
-                                                }}
-                                                value={VolumePWD}
-                                                onChange={(e) => setVolumePWD(e.target.value)}
-                                                // onChange={(e) => {
-                                                //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                                //     setVolumePWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                                //   }}
-                                                //   onBlur={() => {
-                                                //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                                //     const value = parseFloat(VolumePWD) || 0;
-                                                //     setVolumePWD(value.toFixed(3));
-                                                //   }}
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                </Grid>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={CostPWD}
+                                        onChange={(e) => setCostPWD(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setCostPWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(CostPWD) || 0;
+                                    //     setCostPWD(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                    <TextField size="small" fullWidth
+                                        type="number"
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px'
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '30px', // ปรับความสูงของ TextField
+                                            },
+                                        }}
+                                        value={VolumePWD}
+                                        onChange={(e) => setVolumePWD(e.target.value)}
+                                    // onChange={(e) => {
+                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
+                                    //     setVolumePWD(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
+                                    //   }}
+                                    //   onBlur={() => {
+                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
+                                    //     const value = parseFloat(VolumePWD) || 0;
+                                    //     setVolumePWD(value.toFixed(3));
+                                    //   }}
+                                    />
+                                </Paper>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
                                 <Button variant="contained" color="error" size="small" sx={{ width: 30, marginRight: 1 }}>ยกเลิก</Button>
@@ -863,44 +840,28 @@ const OrderDetail = (props) => {
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{rate}</Typography>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Volume}</Typography>
-                                    </Grid>
-                                </Grid>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Volume}</Typography>
-                                    </Grid>
-                                </Grid>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Volume}</Typography>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Volume}</Typography>
-                                    </Grid>
-                                </Grid>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Volume}</Typography>
-                                    </Grid>
-                                </Grid>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Volume}</Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Volume}</Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Volume}</Typography>
                             </TableCell>
                             {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
@@ -923,14 +884,10 @@ const OrderDetail = (props) => {
                                 </Grid>
                             </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Volume}</Typography>
-                                    </Grid>
-                                </Grid>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Volume}</Typography>
                             </TableCell>
                             {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Grid container spacing={1}>
@@ -943,14 +900,10 @@ const OrderDetail = (props) => {
                                 </Grid>
                             </TableCell> */}
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={1}>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Volume}</Typography>
-                                    </Grid>
-                                </Grid>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Volume}</Typography>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
                                 <Button variant="contained" color="warning" size="small" sx={{ width: 30 }}>แก้ไข</Button>

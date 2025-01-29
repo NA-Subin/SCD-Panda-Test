@@ -22,6 +22,7 @@ import {
     TableBody,
     TableCell,
     TableContainer,
+    TableFooter,
     TableHead,
     TableRow,
     TextField,
@@ -91,12 +92,19 @@ const InsertTrips = () => {
     };
 
     const [weightOil, setWeightOil] = React.useState([]);
-    const total = weightOil.reduce((sum, value) => sum + value, 0);
-    const [heavyOil, setHeavyOil] = React.useState(total);
+    const [volume, setVolume] = React.useState([]);
 
-    const handleSendBack = (newData) => {
-        setWeightOil((prev) => [...prev, newData]);
+    const total = weightOil.reduce((sum, value) => sum + value, 0);
+    const totalVolume = volume.reduce((sum, value) => sum + value, 0);
+
+    const [heavyOil, setHeavyOil] = React.useState(total);
+    const [volumeT, setVolumeT] = React.useState(totalVolume);
+
+    const handleSendBack = (newTotal, newTotalVolume) => {
+        setWeightOil((prev) => [...prev, newTotal]);  // ✅ เก็บค่า total
+        setVolume((prev) => [...prev, newTotalVolume]); // ✅ เก็บค่า totalVolume
     };
+
 
     const [orders, setOrders] = useState([]);
     const [data, setData] = useState([]);
@@ -323,6 +331,24 @@ const InsertTrips = () => {
                             setOrders(dataOrder);
                         });
 
+                        database
+                            .ref("tickets/")
+                            .child(ticketsTrip)
+                            .update({
+                                id: ticket + 1,
+                                DateStart: dayjs(selectedDate).format('DD/MM/YYYY'),
+                                Registration: registration.split(":")[1],
+                                Driver: registration.split(":")[2],
+                                WeightTruck: weight
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+
                         database.ref("/tickets/" + ticketsTrip + "/ticketOrder").on("value", (snapshot) => {
                             const datas = snapshot.val();
                             const dataT = []; // สร้าง array สำหรับเก็บข้อมูล
@@ -387,40 +413,40 @@ const InsertTrips = () => {
 
     const handlePost = () => {
         if (registration === "0:0:0") {
-                    ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
-                } else {
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder")
-            .child(ticketsOrder.length)
-            .update({
-                id: ticketsOrder.length + 1,
-                TicketName: tickets,
-                Rate: 0.75,
-                OrderID: ""
-            })
-            .then(() => {
-                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                console.log("Data pushed successfully");
-                setCode("");
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
+            ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
+        } else {
+            database
+                .ref("tickets/" + ticketsTrip + "/ticketOrder")
+                .child(ticketsOrder.length)
+                .update({
+                    id: ticketsOrder.length + 1,
+                    TicketName: tickets,
+                    Rate: 0.75,
+                    OrderID: ""
+                })
+                .then(() => {
+                    ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                    console.log("Data pushed successfully");
+                    setCode("");
+                })
+                .catch((error) => {
+                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                    console.error("Error pushing data:", error);
+                });
 
-        database
-            .ref("truck/registration/")
-            .child((registration.split(":")[0]) - 1)
-            .update({
-                Status: "GT:" + ticketsTrip
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
+            database
+                .ref("truck/registration/")
+                .child((registration.split(":")[0]) - 1)
+                .update({
+                    Status: "GT:" + ticketsTrip
+                })
+                .then(() => {
+                    console.log("Data pushed successfully");
 
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
+                })
+                .catch((error) => {
+                    console.error("Error pushing data:", error);
+                });
         }
     };
 
@@ -601,13 +627,39 @@ const InsertTrips = () => {
             // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
             return [
                 ...ticketsPS.map((item) => ({ ...item, type: "PS" })),
-                ...ticketsT.map((item) => ({ ...item, type: "T" })),
+                ...ticketsT
+                    .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                    .map((item) => ({ ...item, type: "T" })),
                 ...ticketsA.map((item) => ({ ...item, type: "A" })),
             ];
         } else if (codeCustomer === "PS") {
             return ticketsPS.map((item) => ({ ...item, type: "PS" }));
         } else if (codeCustomer === "T") {
-            return ticketsT.map((item) => ({ ...item, type: "T" }));
+            return ticketsT
+                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .map((item) => ({ ...item, type: "T" }));
+        } else if (codeCustomer === "A") {
+            return ticketsA.map((item) => ({ ...item, type: "A" }));
+        }
+        return []; // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
+    };
+
+    const getCustomers = () => {
+        if (codeCustomer === "") {
+            // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
+            return [
+                ...ticketsPS.map((item) => ({ ...item, type: "PS" })),
+                ...ticketsT
+                    .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+                    .map((item) => ({ ...item, type: "T" })),
+                ...ticketsA.map((item) => ({ ...item, type: "A" })),
+            ];
+        } else if (codeCustomer === "PS") {
+            return ticketsPS.map((item) => ({ ...item, type: "PS" }));
+        } else if (codeCustomer === "T") {
+            return ticketsT
+                .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+                .map((item) => ({ ...item, type: "T" }));
         } else if (codeCustomer === "A") {
             return ticketsA.map((item) => ({ ...item, type: "A" }));
         }
@@ -706,19 +758,19 @@ const InsertTrips = () => {
                             <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
                                 <TableContainer
                                     component={Paper}
-                                    style={{ height: "40vh" }}
+                                    style={{ height: "55vh", position: "relative", }}
                                     sx={{
                                         maxWidth: '100%',
                                         overflowX: 'auto',  // ทำให้สามารถเลื่อนได้ในแนวนอน
                                     }}
                                 >
-                                    <Table stickyHeader size="small" sx={{ tableLayout: 'fixed' }}>
+                                    <Table stickyHeader size="small" sx={{ tableLayout: 'fixed', }}>
                                         <TableHead >
-                                            <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.error.main }}>
+                                            <TableRow sx={{ top: 0, zIndex: 3, backgroundColor: theme.palette.error.main }}>
                                                 <TablecellHeader width={80} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ลำดับ
                                                 </TablecellHeader>
-                                                <TablecellHeader width={80} sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
+                                                <TablecellHeader width={80} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light }} rowSpan={2}>
                                                     รหัสตั๋ว
                                                 </TablecellHeader>
                                                 <TablecellHeader width={500} sx={{ textAlign: "center" }} rowSpan={2}>
@@ -730,16 +782,16 @@ const InsertTrips = () => {
                                                 <TablecellHeader width={150} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ค่าบรรทุก
                                                 </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     G95
                                                 </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     G91
                                                 </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     B7(D)
                                                 </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     B95
                                                 </TablecellHeader>
                                                 {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
@@ -748,108 +800,30 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 B20
                                                             </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     E20
                                                 </TablecellHeader>
                                                 {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
                                                                 E85
                                                             </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     PWD
                                                 </TablecellHeader>
-                                                <TablecellHeader width={180} sx={{ textAlign: "center" }} rowSpan={2} />
+                                                <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
                                             </TableRow>
                                             <TableRow sx={{ position: "sticky", top: 20, zIndex: 2, backgroundColor: theme.palette.panda.light }}>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5} >
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>
-                                                    <Grid container spacing={1} marginLeft={-4} marginTop={-2.5} marginBottom={-2.5}>
-                                                        <Grid item xs={8} borderRight={"1px solid white"} paddingRight={1} >
-                                                            <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={4}>
-                                                            <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -859,6 +833,241 @@ const InsertTrips = () => {
                                                 ))
                                             }
                                         </TableBody>
+                                        <TableFooter>
+                                            <TableRow
+                                                sx={{
+                                                    position: "absolute",  // ✅ ทำให้แถวรวมลอยอยู่ด้านล่างของ TableContainer
+                                                    bottom: 0,
+                                                    width: "2790px"
+                                                }}
+                                            >
+                                                <TablecellHeader width={1110} sx={{ textAlign: "right" }}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมข้อมูลทั้งหมด</Typography>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                            value={volumeT}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                                <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
+                                                    <Paper component="form" sx={{ marginRight: -1 }}>
+                                                        <TextField size="small" fullWidth
+                                                            type="number"
+                                                            InputLabelProps={{
+                                                                sx: {
+                                                                    fontSize: '14px'
+                                                                },
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    height: '30px', // ปรับความสูงของ TextField
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Paper>
+                                                </TablecellHeader>
+                                            </TableRow>
+                                        </TableFooter>
                                     </Table>
                                 </TableContainer>
                                 <Grid container spacing={1} marginTop={1}>
@@ -1032,7 +1241,7 @@ const InsertTrips = () => {
                                         <Box display="flex" justifyContent="center" alignItems="center">
                                             <Typography variant="subtitle2" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: 'nowrap' }} gutterBottom>วันที่ส่ง</Typography>
                                             <Paper
-                                                component="form">
+                                                component="form" sx={{ width: "100%" }}>
                                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                     <DatePicker
                                                         openTo="day"
@@ -1050,7 +1259,7 @@ const InsertTrips = () => {
                                         <Box display="flex" justifyContent="center" alignItems="center">
                                             <Typography variant="subtitle2" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: 'nowrap' }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                             <Paper
-                                                component="form">
+                                                component="form" sx={{ width: "100%" }}>
                                                 <Select
                                                     id="demo-simple-select"
                                                     value={registration}
@@ -1080,7 +1289,7 @@ const InsertTrips = () => {
                                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
                                             <TableContainer
                                                 component={Paper}
-                                                style={{ height: "40vh" }}
+                                                style={{ height: "55vh", position: "relative", }}
                                                 sx={{
                                                     maxWidth: '100%',
                                                     overflowX: 'auto',  // ทำให้สามารถเลื่อนได้ในแนวนอน
@@ -1095,163 +1304,96 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={200} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
                                                                 ลูกค้า
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={250} sx={{ textAlign: "center" }} rowSpan={2}>
-                                                                ตั๋ว
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }} rowSpan={2}>
                                                                 เลขที่ออเดอร์
                                                             </TablecellHeader>
                                                             <TablecellHeader width={200} sx={{ textAlign: "center" }} rowSpan={2}>
                                                                 ค่าบรรทุก
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 G95
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 G91
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 B7(D)
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 B95
                                                             </TablecellHeader>
-                                                            {/* <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            {/* <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 B10
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 B20
                                                             </TablecellHeader> */}
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 E20
                                                             </TablecellHeader>
-                                                            {/* <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            {/* <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 E85
                                                             </TablecellHeader> */}
-                                                            <TablecellHeader width={230} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 PWD
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={180} sx={{ textAlign: "center" }} rowSpan={2} />
+                                                            <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
                                                         </TableRow>
                                                         <TableRow sx={{ position: "sticky", top: 35, zIndex: 2, backgroundColor: theme.palette.error.main }}>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={1}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
                                                             </TablecellHeader>
                                                             <TablecellHeader sx={{ textAlign: "center" }}>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4} borderRight={"1px solid white"} paddingRight={2}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
                                                             </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }} />
+                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
+                                                            </TablecellHeader>
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
@@ -1264,6 +1406,342 @@ const InsertTrips = () => {
                                                                 ))
                                                         }
                                                     </TableBody>
+                                                    <TableFooter>
+                                                        <TableRow
+                                                            sx={{
+                                                                position: "absolute",  // ✅ ทำให้แถวรวมลอยอยู่ด้านล่างของ TableContainer
+                                                                bottom: 0,
+                                                                width: "3265px"
+                                                            }}
+                                                        >
+                                                            <TablecellHeader width={835} sx={{ textAlign: "right" }}>
+                                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมข้อมูลทั้งหมด</Typography>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                            <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
+                                                                <Paper component="form" sx={{ marginRight: -1 }}>
+                                                                    <TextField size="small" fullWidth
+                                                                        type="number"
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px'
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </TablecellHeader>
+                                                        </TableRow>
+                                                    </TableFooter>
                                                 </Table>
                                             </TableContainer>
                                             <Grid container spacing={1} marginTop={1}>
@@ -1290,45 +1768,18 @@ const InsertTrips = () => {
                                                                     <MenuItem value={"0:0"}>
                                                                         เลือกลูกค้าที่ต้องการเพิ่ม
                                                                     </MenuItem>
-                                                                    {
-                                                                        code === "PS" || code === "ps" ? (
-                                                                            ticketsPS.map((row) => (
-                                                                                <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
-                                                                                    {`PS:${row.id}:${row.Name}`}
-                                                                                </MenuItem>
-                                                                            ))
-                                                                        ) : code === "T" || code === "t" ? (
-                                                                            customer.map((row) => (
-                                                                                <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
-                                                                                    {`T:${row.id}:${row.Name}`}
-                                                                                </MenuItem>
-                                                                            ))
-                                                                        ) : code === "A" || code === "a" ? (
-                                                                            ticketsA.map((row) => (
-                                                                                <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
-                                                                                    {`${row.TicketsCode}:${row.TicketsName}`}
-                                                                                </MenuItem>
-                                                                            ))
-                                                                        ) : code === "" ? (
-                                                                            <>
-                                                                                {ticketsPS.map((row) => (
-                                                                                    <MenuItem key={row.id} value={`PS:${row.id}:${row.Name}`}>
-                                                                                        {`PS:${row.id}:${row.Name}`}
-                                                                                    </MenuItem>
-                                                                                ))}
-                                                                                {customer.map((row) => (
-                                                                                    <MenuItem key={row.id} value={`T:${row.id}:${row.Name}`}>
-                                                                                        {`T:${row.id}:${row.Name}`}
-                                                                                    </MenuItem>
-                                                                                ))}
-                                                                                {ticketsA.map((row) => (
-                                                                                    <MenuItem key={row.TicketsCode} value={`${row.TicketsCode}:${row.TicketsName}`}>
-                                                                                        {`${row.TicketsCode}:${row.TicketsName}`}
-                                                                                    </MenuItem>
-                                                                                ))}
-                                                                            </>
-                                                                        ) : null
-                                                                    }
+                                                                    {getCustomers().map((row) => {
+                                                                        // ตรวจสอบประเภทของข้อมูลเพื่อกำหนด prefix ที่เหมาะสม
+                                                                        const prefix = row.type || codeCustomer;
+                                                                        const id = row.id || row.TicketsCode;
+                                                                        const name = row.Name || row.TicketsName;
+
+                                                                        return (
+                                                                            <MenuItem key={id} value={`${prefix}:${id}:${name}`}>
+                                                                                {`${prefix}:${id}:${name}`}
+                                                                            </MenuItem>
+                                                                        );
+                                                                    })}
                                                                     {/* {
                                                                         combinedOrder.map((row, index) => (
                                                                             codes === "A" ?
