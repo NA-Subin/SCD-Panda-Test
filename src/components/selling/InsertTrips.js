@@ -91,18 +91,66 @@ const InsertTrips = () => {
         setShowTrips(true)
     };
 
-    const [weightOil, setWeightOil] = React.useState([]);
-    const [volume, setVolume] = React.useState([]);
+    const [weightOil, setWeightOil] = React.useState(0);
+    const [volume, setVolume] = React.useState(0);
+    const [cost, setCost] = React.useState(0);
+    const [costG91, setCostG91] = React.useState(0);
+    const [costG95, setCostG95] = React.useState(0);
+    const [costB7, setCostB7] = React.useState(0);
+    const [costB95, setCostB95] = React.useState(0);
+    const [costE20, setCostE20] = React.useState(0);
+    const [costPWD, setCostPWD] = React.useState(0);
+    const [volumeG91, setVolumeG91] = React.useState(0);
+    const [volumeG95, setVolumeG95] = React.useState(0);
+    const [volumeB7, setVolumeB7] = React.useState(0);
+    const [volumeB95, setVolumeB95] = React.useState(0);
+    const [volumeE20, setVolumeE20] = React.useState(0);
+    const [volumePWD, setVolumePWD] = React.useState(0);
 
-    const total = weightOil.reduce((sum, value) => sum + value, 0);
-    const totalVolume = volume.reduce((sum, value) => sum + value, 0);
+    // const total = weightOil.reduce((sum, value) => sum + value, 0);
+    // const totalVolume = volume.reduce((sum, value) => sum + value, 0);
+    // const totalCost = cost.reduce((sum, value) => sum + value, 0);
 
-    const [heavyOil, setHeavyOil] = React.useState(total);
-    const [volumeT, setVolumeT] = React.useState(totalVolume);
+    // console.log("แสดงน้ำหนักรวมทั้งหมด",weightOil);
+    // console.log("แสดงต้นทุนรวม G91",costG91);
+    // console.log("แสดงปริมาณรวม G91",volumeG91);
+    // console.log("แสดงต้นทุนรวม G95",costG95);
+    // console.log("แสดงปริมาณรวม G95",volumeG95);
+    // console.log("แสดงต้นทุนรวม B7",costB7);
+    // console.log("แสดงปริมาณรวม B7",volumeB7);
+    // console.log("แสดงต้นทุนรวม B95",costB95);
+    // console.log("แสดงปริมาณรวม B95",volumeB95);
+    // console.log("แสดงต้นทุนรวม E20",costE20);
+    // console.log("แสดงปริมาณรวม E20",volumeE20);
+    // console.log("แสดงต้นทุนรวม PWD",costPWD);
+    // console.log("แสดงปริมาณรวม PWD",volumePWD);
+    // console.log("แสดงต้นทุนรวม",cost);
+    // console.log("แสดงปริมาณรวม",volume);
 
-    const handleSendBack = (newTotal, newTotalVolume) => {
-        setWeightOil((prev) => [...prev, newTotal]);  // ✅ เก็บค่า total
-        setVolume((prev) => [...prev, newTotalVolume]); // ✅ เก็บค่า totalVolume
+    const [heavyOil, setHeavyOil] = React.useState(weightOil);
+
+    // const handleSendBack = (newTotal, newTotalCost, newTotalVolume) => {
+    //     setWeightOil((prev) => [...prev, newTotal]);  // ✅ เก็บค่า total
+    //     setCost((prev) => [...prev, newTotalCost]); // ✅ เก็บค่า totalVolume
+    //     setVolume((prev) => [...prev, newTotalVolume]); // ✅ เก็บค่า totalVolume
+    // };
+
+    const handleSendBack = (newTotal, newTotalCost, newTotalVolume, newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD, newCostG91, newCostG95, newCostB7, newCostB95, newCostE20, newCostPWD) => {
+        setWeightOil((prev) => prev + newTotal);
+        setCost((prev) => prev + newTotalCost);
+        setVolume((prev) => prev + newTotalVolume);
+        setVolumeG91((prev) => prev + newVolumeG91);
+        setVolumeG95((prev) => prev + newVolumeG95);
+        setVolumeB7((prev) => prev + newVolumeB7);
+        setVolumeB95((prev) => prev + newVolumeB95);
+        setVolumeE20((prev) => prev + newVolumeE20);
+        setVolumePWD((prev) => prev + newVolumePWD);
+        setCostG91((prev) => prev + newCostG91);
+        setCostG95((prev) => prev + newCostG95);
+        setCostB7((prev) => prev + newCostB7);
+        setCostB95((prev) => prev + newCostB95);
+        setCostE20((prev) => prev + newCostE20);
+        setCostPWD((prev) => prev + newCostPWD);
     };
 
 
@@ -165,6 +213,8 @@ const InsertTrips = () => {
         });
     };
 
+    const [productT, setProductT] = React.useState([]);
+
     const getTrip = async () => {
         database.ref("/trip").on("value", (snapshot) => {
             const datas = snapshot.val();
@@ -175,6 +225,8 @@ const InsertTrips = () => {
             setTrip(dataTrip);
         });
     };
+
+    console.log("แสดงข้อมูลทั้งหมด", productT);
 
     const [ticketsT, setTicketsT] = React.useState([]);
     const [ticketsPS, setTicketsPS] = React.useState([]);
@@ -314,11 +366,103 @@ const InsertTrips = () => {
                         Registration: registration.split(":")[1],
                         Driver: registration.split(":")[2],
                         WeightTruck: weight,
-                        WeightOil: total,
-                        Ticketsnumber: ticketsTrip
+                        WeightOil: weightOil.toFixed(3),
+                        Ticketsnumber: ticketsTrip,
                     })
                     .then(() => {
                         ShowSuccess("สร้างเที่ยววิ่งเรียบร้อย");
+
+                        database
+                            .ref("trip/" + trip.length + "/ProductT")
+                            .child("/G91")
+                            .update({
+                                Name: "G91",
+                                TotalCost: costG91,
+                                TotalVolume: volumeG91,
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                        database
+                            .ref("trip/" + trip.length + "/ProductT")
+                            .child("/G95")
+                            .update({
+                                Name: "G95",
+                                TotalCost: costG95,
+                                TotalVolume: volumeG95,
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                        database
+                            .ref("trip/" + trip.length + "/ProductT")
+                            .child("/B7")
+                            .update({
+                                Name: "B7",
+                                TotalCost: costB7,
+                                TotalVolume: volumeB7,
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                        database
+                            .ref("trip/" + trip.length + "/ProductT")
+                            .child("/B95")
+                            .update({
+                                Name: "B95",
+                                TotalCost: costB95,
+                                TotalVolume: volumeB95,
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                        database
+                            .ref("trip/" + trip.length + "/ProductT")
+                            .child("/E20")
+                            .update({
+                                Name: "E20",
+                                TotalCost: costE20,
+                                TotalVolume: volumeE20,
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                        database
+                            .ref("trip/" + trip.length + "/ProductT")
+                            .child("/PWD")
+                            .update({
+                                Name: "PWD",
+                                TotalCost: costPWD,
+                                TotalVolume: volumePWD,
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+
                         setTrips(trip.length);
                         database.ref("/order").on("value", (snapshot) => {
                             const datas = snapshot.val();
@@ -329,6 +473,15 @@ const InsertTrips = () => {
                                 }
                             }
                             setOrders(dataOrder);
+                        });
+
+                        database.ref("/trip/" + trip.length + "/ProductT").on("value", (snapshot) => {
+                            const datas = snapshot.val();
+                            const dataProductT = [];
+                            for (let id in datas) {
+                                dataProductT.push({ id, ...datas[id] })
+                            }
+                            setProductT(dataProductT);
                         });
 
                         database
@@ -411,6 +564,22 @@ const InsertTrips = () => {
         );
     };
 
+    const findProduct = (id) => Object.values(productT).find(product => product.id === id) ?? { Name: id, TotalCost: 0, TotalVolume: 0 };
+
+    const productTG91 = findProduct('G91');
+    const productTG95 = findProduct('G95');
+    const productTB7 = findProduct('B7');
+    const productTB95 = findProduct('B95');
+    const productTE20 = findProduct('E20');
+    const productTPWD = findProduct('PWD');
+
+    // console.log("G91 : ", productTG91.TotalVolume);
+    // console.log("G95 : ", productTG95.TotalVolume);
+    // console.log("B7 : ", productTB7.TotalVolume);
+    // console.log("B95 : ", productTB95.TotalVolume);
+    // console.log("E20 : ", productTE20.TotalVolume);
+    // console.log("PWD : ", productTPWD.TotalVolume);
+
     const handlePost = () => {
         if (registration === "0:0:0") {
             ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
@@ -421,8 +590,6 @@ const InsertTrips = () => {
                 .update({
                     id: ticketsOrder.length + 1,
                     TicketName: tickets,
-                    Rate: 0.75,
-                    OrderID: ""
                 })
                 .then(() => {
                     ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -752,7 +919,7 @@ const InsertTrips = () => {
                                 :
                                 <> */}
                         <Grid item xs={1} textAlign="right">
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ราคาบรรทุกน้ำมัน</Typography>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>จัดการตั๋ว</Typography>
                         </Grid>
                         <Grid item xs={11} textAlign="right" >
                             <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
@@ -809,7 +976,7 @@ const InsertTrips = () => {
                                                 <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     PWD
                                                 </TablecellHeader>
-                                                <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
+                                                <TablecellHeader width={500} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
                                             </TableRow>
                                             <TableRow sx={{ position: "sticky", top: 20, zIndex: 2, backgroundColor: theme.palette.panda.light }}>
                                                 <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
@@ -829,7 +996,7 @@ const InsertTrips = () => {
                                         <TableBody>
                                             {
                                                 ticketsOrder.map((row) => (
-                                                    <OrderDetail key={row.id} detail={row} ticketsTrip={ticketsTrip} onSendBack={handleSendBack} total={total} />
+                                                    <OrderDetail key={row.id} detail={row} ticketsTrip={ticketsTrip} onSendBack={handleSendBack} total={weightOil} />
                                                 ))
                                             }
                                         </TableBody>
@@ -838,7 +1005,7 @@ const InsertTrips = () => {
                                                 sx={{
                                                     position: "absolute",  // ✅ ทำให้แถวรวมลอยอยู่ด้านล่างของ TableContainer
                                                     bottom: 0,
-                                                    width: "2790px"
+                                                    width: "3110px"
                                                 }}
                                             >
                                                 <TablecellHeader width={1110} sx={{ textAlign: "right" }}>
@@ -858,7 +1025,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
-                                                            value={volumeT}
+                                                            // value={costG95}
+                                                            value={showTrips ? costG95 : (productTG95.TotalCost || 0)}
+                                                            disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -876,6 +1045,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            value={showTrips ? volumeG95 : (productTG95.TotalVolume  || 0)}
+                                                            disabled={showTrips ? false : true}
+                                                        // value={volumeG95}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -893,6 +1065,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            // value={costG91}
+                                                            value={showTrips ? costG91 : (productTG91.TotalCost || 0)}
+                                                            disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -910,6 +1085,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            value={showTrips ? volumeG91 : (productTG91.TotalVolume || 0)}
+                                                            disabled={showTrips ? false : true}
+                                                        // value={volumeG91}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -927,6 +1105,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            // value={costB7}
+                                                            value={showTrips ? costB7 : (productTB7.TotalCost || 0)}
+                                                            disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -944,6 +1125,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            value={showTrips ? volumeB7 : (productTB7.TotalVolume || 0)}
+                                                            disabled={showTrips ? false : true}
+                                                        // value={volumeB7}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -961,6 +1145,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            // value={costB95}
+                                                            value={showTrips ? costB95 : (productTB95.TotalCost || 0)}
+                                                            disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -978,6 +1165,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            value={showTrips ? volumeB95 : (productTB95.TotalVolume || 0)}
+                                                            disabled={showTrips ? false : true}
+                                                        // value={volumeB95}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -995,6 +1185,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            // value={costE20}
+                                                            value={showTrips ? costE20 : (productTE20.TotalCost || 0)}
+                                                            disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -1012,6 +1205,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            value={showTrips ? volumeE20 : (productTE20.TotalVolume || 0)}
+                                                            disabled={showTrips ? false : true}
+                                                        // value={volumeE20}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -1029,6 +1225,9 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            // value={costPWD}
+                                                            value={showTrips ? costPWD : (productTPWD.TotalCost || 0)}
+                                                            disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
@@ -1046,25 +1245,52 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
+                                                            value={showTrips ? volumePWD : (productTPWD.TotalVolume || 0)}
+                                                            disabled={showTrips ? false : true}
+                                                        // value={volumePWD}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
-                                                    <Paper component="form" sx={{ marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                        />
-                                                    </Paper>
+                                                <TablecellHeader width={500} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1 }} gutterBottom>ต้นทุนรวม</Typography>
+                                                        <Paper component="form">
+                                                            <TextField size="small" fullWidth
+                                                                type="number"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '14px'
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '30px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                }}
+                                                                // value={cost}
+                                                                value={showTrips ? cost : ((productTG91.TotalCost || 0) + (productTG95.TotalCost || 0) + (productTB7.TotalCost || 0) + (productTB95.TotalCost || 0) + (productTE20.TotalCost || 0) + (productTPWD.TotalCost || 0))}
+                                                                disabled={showTrips ? false : true}
+                                                            />
+                                                        </Paper>
+                                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1, marginLeft: 1 }} gutterBottom>ปริมาณรวม</Typography>
+                                                        <Paper component="form">
+                                                            <TextField size="small" fullWidth
+                                                                type="number"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '14px'
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '30px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                }}
+                                                                value={showTrips ? volume : ((productTG91.TotalVolume || 0) + (productTG95.TotalVolume || 0) + (productTB7.TotalVolume || 0) + (productTB95.TotalVolume || 0) + (productTE20.TotalVolume || 0) + (productTPWD.TotalVolume || 0))}
+                                                                disabled={showTrips ? false : true}
+                                                            />
+                                                        </Paper>
+                                                    </Box>
                                                 </TablecellHeader>
                                             </TableRow>
                                         </TableFooter>
@@ -1079,7 +1305,7 @@ const InsertTrips = () => {
                                                 <Grid item sm={1.5} xs={2}>
                                                     <Paper
                                                         component="form">
-                                                        <TextField size="small" fullWidth sx={{ borderRadius: 10 }} value={codeCustomer} onChange={(e) => setCodeCustomer(e.target.value)} />
+                                                        <TextField size="small" fullWidth sx={{ borderRadius: 10 }} value={codeCustomer} onChange={(e) => setCodeCustomer(e.target.value)} disabled={showTrips ? false : true} />
                                                     </Paper>
                                                 </Grid>
                                                 <Grid item sm={8} xs={7}>
@@ -1090,6 +1316,7 @@ const InsertTrips = () => {
                                                         sx={{ textAlign: "left" }}
                                                         onChange={(e) => setTickets(e.target.value)}
                                                         fullWidth
+                                                        disabled={showTrips ? false : true}
                                                     >
                                                         <MenuItem value={"0:0"}>เลือกตั๋วที่ต้องการเพิ่ม</MenuItem>
                                                         {getTickets().map((row) => {
@@ -1115,7 +1342,9 @@ const InsertTrips = () => {
                                                     </Select>
                                                 </Grid>
                                                 <Grid item sm={2.5} xs={3} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
-                                                    <Button variant="contained" color="info" fullWidth onClick={handlePost}>เพิ่มตั๋ว</Button>
+                                                    {
+                                                        showTrips && <Button variant="contained" color="info" fullWidth onClick={handlePost}>เพิ่มตั๋ว</Button>
+                                                    }
                                                 </Grid>
                                             </Grid>
                                         </Paper>
@@ -1151,7 +1380,7 @@ const InsertTrips = () => {
                                             component="form">
                                             <TextField size="small" type="number" fullWidth
                                                 sx={{ borderRadius: 10 }}
-                                                value={total.toFixed(2)}
+                                                value={weightOil.toFixed(2)}
                                                 onChange={handleChangeHeavyOil}
                                                 InputProps={{
                                                     endAdornment: <InputAdornment position="end">กิโลกรัม</InputAdornment>, // เพิ่ม endAdornment ที่นี่
@@ -1206,7 +1435,7 @@ const InsertTrips = () => {
                                             component="form">
                                             <TextField size="small" fullWidth
                                                 sx={{ borderRadius: 10 }}
-                                                value={parseFloat(total) + parseFloat(weight)}
+                                                value={parseFloat(weightOil) + parseFloat(weight)}
                                                 InputProps={{
                                                     endAdornment: <InputAdornment position="end">กิโลกรัม</InputAdornment>, // เพิ่ม endAdornment ที่นี่
                                                 }}
@@ -1218,7 +1447,7 @@ const InsertTrips = () => {
                             </Paper>
                         </Grid>
                         {
-                            total !== 0 && showTrips ?
+                            weightOil !== 0 && showTrips ?
                                 <Grid item xs={12} marginTop={1} marginBottom={1}>
                                     <Divider>
                                         <Button variant="contained" color="info" size="small" onClick={handleTrip} sx={{ borderRadius: 20 }}>จัดเที่ยววิ่ง</Button>
@@ -1402,7 +1631,19 @@ const InsertTrips = () => {
                                                                 ""
                                                                 :
                                                                 orders.map((row) => (
-                                                                    <SellingDetail key={row.id} detail={row} orders={orders.length} ticketsTrip={ticketsTrip} customers={customers} />
+                                                                    <SellingDetail
+                                                                        key={row.id}
+                                                                        detail={row}
+                                                                        orders={orders.length}
+                                                                        ticketsTrip={ticketsTrip}
+                                                                        customers={customers}
+                                                                        checkG95={volumeG95}
+                                                                        checkG91={volumeG91}
+                                                                        checkB7={volumeB7}
+                                                                        checkB95={volumeB95}
+                                                                        checkE20={volumeE20}
+                                                                        checkPWD={volumePWD}
+                                                                    />
                                                                 ))
                                                         }
                                                     </TableBody>
@@ -1431,6 +1672,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={costG95}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1465,6 +1707,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={volumeG95}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1482,6 +1725,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={costG91}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1516,6 +1760,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={volumeG91}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1533,6 +1778,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={costB7}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1567,6 +1813,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={volumeB7}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1584,6 +1831,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={costB95}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1618,6 +1866,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={volumeB95}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1635,6 +1884,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={costE20}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1669,6 +1919,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={volumeE20}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1686,6 +1937,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={costPWD}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
@@ -1720,6 +1972,7 @@ const InsertTrips = () => {
                                                                                 height: '30px', // ปรับความสูงของ TextField
                                                                             },
                                                                         }}
+                                                                        value={volumePWD}
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>

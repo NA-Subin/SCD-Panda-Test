@@ -33,7 +33,18 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
 
 const SellingDetail = (props) => {
-    const { detail, ticketsTrip, orders, customers } = props;
+    const { 
+        detail, 
+        ticketsTrip, 
+        orders, 
+        customers,
+        checkG95,
+        checkG91,
+        checkB7,
+        checkB95,
+        checkE20,
+        checkPWD,
+     } = props;
     const [SellingG91, setSellingG91] = React.useState(0);
     const [SellingG95, setSellingG95] = React.useState(0);
     const [SellingB7, setSellingB7] = React.useState(0);
@@ -747,1043 +758,371 @@ const SellingDetail = (props) => {
                 <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.Customer}</Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center", position: "sticky", left: 20, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light }}>
-                    {
-                        orderDetail ?
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                            {
-                                customers.split(":")[0] === "PS" ? ticketNamePS
-                                : customers.split(":")[0] === "A" ? ticketNameA 
-                                : ticketNameT
-                            }
-                            </Typography>
-                            :
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName}</Typography>
-                        }
-                </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.OrderId}</Typography>
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.Rate}</Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                G95.Volume === "-" || G95.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingG95}
-                                                            onChange={(e) => setSellingG95(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    G95.Volume === "-" || G95.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingG95}
-                                                                onChange={(e) => setSellingG95(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    G95.Volume === "-" || G95.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeG95}
-                                                                onChange={(e) => setVolumeG95(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
                 {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                G91.Volume === "-" || G91.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingG91}
-                                                            onChange={(e) => setSellingG91(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    G91.Volume === "-" || G91.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingG91}
-                                                                onChange={(e) => setSellingG91(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    G91.Volume === "-" || G91.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeG91}
-                                                                onChange={(e) => setVolumeG91(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                B7.Volume === "-" || B7.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingB7}
-                                                            onChange={(e) => setSellingB7(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    B7.Volume === "-" || B7.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingB7}
-                                                                onChange={(e) => setSellingB7(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    B7.Volume === "-" || B7.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeB7}
-                                                                onChange={(e) => setVolumeB7(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                B95.Volume === "-" || B95.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingB95}
-                                                            onChange={(e) => setSellingB95(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    B95.Volume === "-" || B95.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingB95}
-                                                                onChange={(e) => setSellingB95(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    B95.Volume === "-" || B95.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeB95}
-                                                                onChange={(e) => setVolumeB95(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell>
+                    orderDetail ?
+                    <>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                G95.Volume === "-" || G95.Volume === 0 && checkG95 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={SellingG95}
+                                            onChange={(e) => setSellingG95(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                G95.Volume === "-" || G95.Volume === 0 && checkG95 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={VolumeG95}
+                                            onChange={(e) => setVolumeG95(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                G91.Volume === "-" || G91.Volume === 0 && checkG91 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={SellingG91}
+                                            onChange={(e) => setSellingG91(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                G91.Volume === "-" || G91.Volume === 0 && checkG91 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ปริมาณ"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={VolumeG91}
+                                            onChange={(e) => setVolumeG91(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                B7.Volume === "-" || B7.Volume === 0 && checkB7 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ขาย"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={SellingB7}
+                                            onChange={(e) => setSellingB7(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                B7.Volume === "-" || B7.Volume === 0 && checkB7 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ปริมาณ"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={VolumeB7}
+                                            onChange={(e) => setVolumeB7(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                B95.Volume === "-" || B95.Volume === 0 && checkB95 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ขาย"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={SellingB95}
+                                            onChange={(e) => setSellingB95(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                B95.Volume === "-" || B95.Volume === 0 && checkB95 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ปริมาณ"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={VolumeB95}
+                                            onChange={(e) => setVolumeB95(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                E20.Volume === "-" || E20.Volume === 0 && checkE20 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ขาย"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={SellingE20}
+                                            onChange={(e) => setSellingE20(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                E20.Volume === "-" || E20.Volume === 0 && checkE20 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ปริมาณ"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={VolumeE20}
+                                            onChange={(e) => setVolumeE20(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                PWD.Volume === "-" || PWD.Volume === 0 && checkPWD === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ขาย"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={SellingPWD}
+                                            onChange={(e) => setSellingPWD(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            {
+                                PWD.Volume === "-" || PWD.Volume === 0 && checkPWD === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form"sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth label="ปริมาณ"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={VolumePWD}
+                                            onChange={(e) => setVolumePWD(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
+                        </TableCell>
+                    </>
+                    :
+                    <>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Selling}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG95.Volume}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Selling}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderG91.Volume}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Selling}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB7.Volume}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Selling}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB95.Volume}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Selling}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Volume}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Cost}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Selling}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Volume}</Typography>
+                        </TableCell>
+                    </>
+                }
+                
+                
                 {/* <TableCell sx={{ textAlign: "center" }}>
-                {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B10.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                B10.Volume === "-" || B10.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingB10}
-                                                            onChange={(e) => setSellingB10(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B10.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B10.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB10.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB10.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB10.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B10.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    B10.Volume === "-" || B10.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingB10}
-                                                                onChange={(e) => setSellingB10(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    B10.Volume === "-" || B10.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeB10}
-                                                                onChange={(e) => setVolumeB10(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB10.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB10.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB10.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B20.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                B20.Volume === "-" || B20.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingB20}
-                                                            onChange={(e) => setSellingB20(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B20.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B20.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB20.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB20.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB20.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B20.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    B20.Volume === "-" || B20.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingB20}
-                                                                onChange={(e) => setSellingB20(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    B20.Volume === "-" || B20.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeB20}
-                                                                onChange={(e) => setVolumeB20(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB20.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB20.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderB20.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell> */}
-                <TableCell sx={{ textAlign: "center" }}>
-                {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                E20.Volume === "-" || E20.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingE20}
-                                                            onChange={(e) => setSellingE20(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    E20.Volume === "-" || E20.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingE20}
-                                                                onChange={(e) => setSellingE20(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    E20.Volume === "-" || E20.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeE20}
-                                                                onChange={(e) => setVolumeE20(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE20.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell>
-                {/* <TableCell sx={{ textAlign: "center" }}>
-                {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E85.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                E85.Volume === "-" || E85.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingE85}
-                                                            onChange={(e) => setSellingE85(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E85.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E85.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE85.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE85.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE85.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E85.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    E85.Volume === "-" || E85.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingE85}
-                                                                onChange={(e) => setSellingE85(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    E85.Volume === "-" || E85.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumeE85}
-                                                                onChange={(e) => setVolumeE85(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE85.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE85.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderE85.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell> */}
-                <TableCell sx={{ textAlign: "center" }}>
                 {
                         detail.TicketName.split(":")[0] === "T" ?
                             <Grid container spacing={1}>
@@ -1909,7 +1248,7 @@ const SellingDetail = (props) => {
                                 }
                             </Grid>
                     }
-                </TableCell>
+                </TableCell> */}
                 <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
                     {
                         orderDetail ?
