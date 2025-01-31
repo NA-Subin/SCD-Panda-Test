@@ -44,25 +44,28 @@ const SellingDetail = (props) => {
         checkB95,
         checkE20,
         checkPWD,
+        onSendBack
      } = props;
+
+    const [CostG91, setCostG91] = React.useState(0);
+    const [CostG95, setCostG95] = React.useState(0);
+    const [CostB7, setCostB7] = React.useState(0);
+    const [CostB95, setCostB95] = React.useState(0);
+    const [CostE20, setCostE20] = React.useState(0);
+    const [CostPWD, setCostPWD] = React.useState(0);
+
     const [SellingG91, setSellingG91] = React.useState(0);
     const [SellingG95, setSellingG95] = React.useState(0);
     const [SellingB7, setSellingB7] = React.useState(0);
     const [SellingB95, setSellingB95] = React.useState(0);
-    // const [SellingB10, setSellingB10] = React.useState(0);
-    // const [SellingB20, setSellingB20] = React.useState(0);
     const [SellingE20, setSellingE20] = React.useState(0);
-    // const [SellingE85, setSellingE85] = React.useState(0);
     const [SellingPWD, setSellingPWD] = React.useState(0);
 
     const [VolumeG91, setVolumeG91] = React.useState(0);
     const [VolumeG95, setVolumeG95] = React.useState(0);
     const [VolumeB7, setVolumeB7] = React.useState(0);
     const [VolumeB95, setVolumeB95] = React.useState(0);
-    // const [VolumeB10, setVolumeB10] = React.useState(0);
-    // const [VolumeB20, setVolumeB20] = React.useState(0);
     const [VolumeE20, setVolumeE20] = React.useState(0);
-    // const [VolumeE85, setVolumeE85] = React.useState(0);
     const [VolumePWD, setVolumePWD] = React.useState(0);
 
     const [orderDetail, setOrderDetail] = React.useState(true);
@@ -70,10 +73,7 @@ const SellingDetail = (props) => {
     const [G95, setG95] = React.useState([]);
     const [B7, setB7] = React.useState([]);
     const [B95, setB95] = React.useState([]);
-    // const [B10, setB10] = React.useState([]);
-    // const [B20, setB20] = React.useState([]);
     const [E20, setE20] = React.useState([]);
-    // const [E85, setE85] = React.useState([]);
     const [PWD, setPWD] = React.useState([]);
     const [order, setOrder] = React.useState([]);
 
@@ -81,10 +81,7 @@ const SellingDetail = (props) => {
     const [orderG95, setOrderG95] = React.useState([]);
     const [orderB7, setOrderB7] = React.useState([]);
     const [orderB95, setOrderB95] = React.useState([]);
-    // const [orderB10, setOrderB10] = React.useState([]);
-    // const [orderB20, setOrderB20] = React.useState([]);
     const [orderE20, setOrderE20] = React.useState([]);
-    // const [orderE85, setOrderE85] = React.useState([]);
     const [orderPWD, setOrderPWD] = React.useState([]);
 
     const [ticketT,setTicketsT] = React.useState(0);
@@ -95,172 +92,127 @@ const SellingDetail = (props) => {
     const [ticketNameA,setTicketsNameA] = React.useState(0);
     const [ticketNamePS,setTicketsNamePS] = React.useState(0);
 
-    const getData = async () => {
-        database.ref("tickets/" + ticketsTrip + "/ticketOrder/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            for (let ticket in datas) {
-                if (datas[ticket].TicketName === customers && customers.split(":")[0] === "T") {
-                    setTicketsT(datas[ticket].id - 1);
-                    setTicketsNameT(customers);
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G91").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setG91(datas);
-                        setVolumeG91(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G95").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setG95(datas);
-                        setVolumeG95(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B7").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB7(datas);
-                        setVolumeB7(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B95").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB95(datas);
-                        setVolumeB95(datas.Volume)
-                    });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setB10(datas);
-                    //     setVolumeB10(datas.Volume)
-                    // });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setB20(datas);
-                    //     setVolumeB20(datas.Volume)
-                    // });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setE20(datas);
-                        setVolumeE20(datas.Volume)
-                    });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setE85(datas);
-                    //     setVolumeE85(datas.Volume)
-                    // });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setPWD(datas);
-                        setVolumePWD(datas.Volume)
-                    });
-                }
-                else if (datas[ticket].TicketName.split(":")[0] === "PS" && customers.split(":")[0] === "PS") {
-                    setTicketsPS(datas[ticket].id - 1);
-                    setTicketsNamePS(datas[ticket].TicketName);
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G91").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setG91(datas);
-                        setVolumeG91(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G95").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setG95(datas);
-                        setVolumeG95(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B7").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB7(datas);
-                        setVolumeB7(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B95").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB95(datas);
-                        setVolumeB95(datas.Volume)
-                    });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setB10(datas);
-                    //     setVolumeB10(datas.Volume)
-                    // });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setB20(datas);
-                    //     setVolumeB20(datas.Volume)
-                    // });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setE20(datas);
-                        setVolumeE20(datas.Volume)
-                    });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setE85(datas);
-                    //     setVolumeE85(datas.Volume)
-                    // });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setPWD(datas);
-                        setVolumePWD(datas.Volume)
-                    });
-                } else if (datas[ticket].TicketName.split(":")[0] === "A" && customers.split(":")[0] === "A") {
-                    setTicketsA(datas[ticket].id - 1);
-                    setTicketsNameA(datas[ticket].TicketName);
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G91").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setG91(datas);
-                        setVolumeG91(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G95").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setG95(datas);
-                        setVolumeG95(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B7").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB7(datas);
-                        setVolumeB7(datas.Volume)
-                    });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B95").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setB95(datas);
-                        setVolumeB95(datas.Volume)
-                    });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B10").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setB10(datas);
-                    //     setVolumeB10(datas.Volume)
-                    // });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B20").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setB20(datas);
-                    //     setVolumeB20(datas.Volume)
-                    // });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setE20(datas);
-                        setVolumeE20(datas.Volume)
-                    });
-                    // database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E85").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setE85(datas);
-                    //     setVolumeE85(datas.Volume)
-                    // });
-                    database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
-                        const datas = snapshot.val();
-                        setPWD(datas);
-                        setVolumePWD(datas.Volume)
-                    });
-                } else {
+    // const getData = async () => {
+    //     database.ref("tickets/" + ticketsTrip + "/ticketOrder/").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         for (let ticket in datas) {
+    //             if (datas[ticket].TicketName === customers && customers.split(":")[0] === "T") {
+    //                 setTicketsT(datas[ticket].id - 1);
+    //                 setTicketsNameT(customers);
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G91").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setG91(datas);
+    //                     setVolumeG91(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G95").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setG95(datas);
+    //                     setVolumeG95(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B7").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setB7(datas);
+    //                     setVolumeB7(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B95").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setB95(datas);
+    //                     setVolumeB95(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setE20(datas);
+    //                     setVolumeE20(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setPWD(datas);
+    //                     setVolumePWD(datas.Volume)
+    //                 });
+    //             }
+    //             else if (datas[ticket].TicketName.split(":")[0] === "PS" && customers.split(":")[0] === "PS") {
+    //                 setTicketsPS(datas[ticket].id - 1);
+    //                 setTicketsNamePS(datas[ticket].TicketName);
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G91").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setG91(datas);
+    //                     setVolumeG91(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G95").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setG95(datas);
+    //                     setVolumeG95(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B7").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setB7(datas);
+    //                     setVolumeB7(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B95").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setB95(datas);
+    //                     setVolumeB95(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setE20(datas);
+    //                     setVolumeE20(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setPWD(datas);
+    //                     setVolumePWD(datas.Volume)
+    //                 });
+    //             } else if (datas[ticket].TicketName.split(":")[0] === "A" && customers.split(":")[0] === "A") {
+    //                 setTicketsA(datas[ticket].id - 1);
+    //                 setTicketsNameA(datas[ticket].TicketName);
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G91").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setG91(datas);
+    //                     setVolumeG91(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/G95").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setG95(datas);
+    //                     setVolumeG95(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B7").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setB7(datas);
+    //                     setVolumeB7(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/B95").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setB95(datas);
+    //                     setVolumeB95(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/E20").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setE20(datas);
+    //                     setVolumeE20(datas.Volume)
+    //                 });
+    //                 database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (datas[ticket].id - 1) + "/Product/PWD").on("value", (snapshot) => {
+    //                     const datas = snapshot.val();
+    //                     setPWD(datas);
+    //                     setVolumePWD(datas.Volume)
+    //                 });
+    //             } else {
 
-                }
+    //             }
 
-            }
-        });
-        // database.ref("/order").on("value", (snapshot) => {
-        //             const datas = snapshot.val();
-        //             const dataOrder = [];
-        //             for (let id in datas) {
-        //                 datas[id].Trip === trips ?
-        //                 dataOrder.push({ id, ...datas[id] })
-        //                 : ""
-        //             }
-        //             setOrder(dataOrder);
-        //         });
-    };
+    //         }
+    //     });
+    //     // database.ref("/order").on("value", (snapshot) => {
+    //     //             const datas = snapshot.val();
+    //     //             const dataOrder = [];
+    //     //             for (let id in datas) {
+    //     //                 datas[id].Trip === trips ?
+    //     //                 dataOrder.push({ id, ...datas[id] })
+    //     //                 : ""
+    //     //             }
+    //     //             setOrder(dataOrder);
+    //     //         });
+    // };
 
     const getOrder = async () => {
                     database.ref("order/" + (detail.id - 1) + "/Product/G91").on("value", (snapshot) => {
@@ -279,22 +231,10 @@ const SellingDetail = (props) => {
                         const datas = snapshot.val();
                         setOrderB95(datas);
                     });
-                    // database.ref("order/" + (detail.id - 1) + "/Product/B10").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setOrderB10(datas);
-                    // });
-                    // database.ref("order/" + (detail.id - 1) + "/Product/B20").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setOrderB20(datas);
-                    // });
                     database.ref("order/" + (detail.id - 1) + "/Product/E20").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setOrderE20(datas);
                     });
-                    // database.ref("order/" + (detail.id - 1) + "/Product/E85").on("value", (snapshot) => {
-                    //     const datas = snapshot.val();
-                    //     setOrderE85(datas);
-                    // });
                     database.ref("order/" + (detail.id - 1) + "/Product/PWD").on("value", (snapshot) => {
                         const datas = snapshot.val();
                         setOrderPWD(datas);
@@ -302,24 +242,27 @@ const SellingDetail = (props) => {
     };
 
     useEffect(() => {
-        getData();
+        // getData();
         getOrder();
+
     }, []);
 
     const SubmitOrder = () => {
-    //     console.log("PS :"+ticketPS+":"+ticketNamePS);
-    // console.log("A :"+ticketA+":"+ticketNameA);
-    // console.log("G95 : "+(G95.Volume === "-" ? G95.Volume : (parseFloat(G95.Volume) - parseFloat(VolumeG95))));
-    // console.log("G91 : "+(G91.Volume === "-" ? G91.Volume : (parseFloat(G91.Volume) - parseFloat(VolumeG91))));
-    const totalG95 = (G95.Volume === "-" ? G95.Volume : (parseFloat(G95.Volume) - parseFloat(VolumeG95)));
-    const totalG91 = (G91.Volume === "-" ? G91.Volume : (parseFloat(G91.Volume) - parseFloat(VolumeG91)));
-    const totalB7 = (B7.Volume === "-" ? B7.Volume : (parseFloat(B7.Volume) - parseFloat(VolumeB7)));
-    const totalB95 = (B95.Volume === "-" ? B95.Volume : (parseFloat(B95.Volume) - parseFloat(VolumeB95)));
-    // const totalB10 = (B10.Volume === "-" ? B10.Volume : (parseFloat(B10.Volume) - parseFloat(VolumeB10)));
-    // const totalB20 = (B20.Volume === "-" ? B20.Volume : (parseFloat(B20.Volume) - parseFloat(VolumeB20)));
-    const totalE20 = (E20.Volume === "-" ? E20.Volume : (parseFloat(E20.Volume) - parseFloat(VolumeE20)));
-    // const totalE85 = (E85.Volume === "-" ? E85.Volume : (parseFloat(E85.Volume) - parseFloat(VolumeE85)));
-    const totalPWD = (PWD.Volume === "-" ? PWD.Volume : (parseFloat(PWD.Volume) - parseFloat(VolumePWD)));
+
+    // const totalG95 = (G95.Volume === "-" ? G95.Volume : (parseFloat(G95.Volume) - parseFloat(checkG95)));
+    // const totalG91 = (G91.Volume === "-" ? G91.Volume : (parseFloat(G91.Volume) - parseFloat(checkG91)));
+    // const totalB7 = (B7.Volume === "-" ? B7.Volume : (parseFloat(B7.Volume) - parseFloat(checkB7)));
+    // const totalB95 = (B95.Volume === "-" ? B95.Volume : (parseFloat(B95.Volume) - parseFloat(checkB95)));
+    // const totalE20 = (E20.Volume === "-" ? E20.Volume : (parseFloat(E20.Volume) - parseFloat(checkE20)));
+    // const totalPWD = (PWD.Volume === "-" ? PWD.Volume : (parseFloat(PWD.Volume) - parseFloat(checkPWD)));
+
+    if (onSendBack) {
+        console.log("Values Sent to Parent:", VolumeG91, VolumeG95, VolumeB7, VolumeB95, VolumeE20, VolumePWD);
+
+        onSendBack(
+            Number(VolumeG91), Number(VolumeG95), Number(VolumeB7), Number(VolumeB95), Number(VolumeE20), Number(VolumePWD)
+        );
+    }
 
         database
             .ref("trip/")
@@ -333,6 +276,7 @@ const SellingDetail = (props) => {
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
+            
             database
             .ref("order/")
             .child((detail.id - 1))
@@ -349,51 +293,51 @@ const SellingDetail = (props) => {
             .ref("order/" + (detail.id - 1))
             .child("/Product/G91")
             .update({
-                Cost: G91.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? G91.Volume : VolumeG91,
-                Selling: G91.Volume === 0 || G91.Volume === "-" ? "-" : SellingG91
+                Cost: CostG91 === 0 ? "-" : CostG91,
+                Volume: VolumeG91 === 0 ? "-" : VolumeG91,
+                Selling: SellingG91 === 0 ? "-" : SellingG91
             })
             .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/G91")
-                    .update({
-                        Volume: totalG91,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/G91")
-                    .update({
-                        Volume: totalG91,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName === customers && detail.TicketName.split(":")[0] === "T"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketT)
-                    .child("/Product/G91")
-                    .update({
-                        Volume: totalG91,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }
+                // if (detail.TicketName.split(":")[0] === "PS") {
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+                //     .child("/Product/G91")
+                //     .update({
+                //         Volume: totalG91,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else if(detail.TicketName.split(":")[0] === "A"){
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+                //     .child("/Product/G91")
+                //     .update({
+                //         Volume: totalG91,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else if(detail.TicketName === customers && detail.TicketName.split(":")[0] === "T"){
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketT)
+                //     .child("/Product/G91")
+                //     .update({
+                //         Volume: totalG91,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }
                 console.log("Data pushed successfully");
             })
             .catch((error) => {
@@ -403,40 +347,40 @@ const SellingDetail = (props) => {
             .ref("order/" + (detail.id - 1))
             .child("/Product/G95")
             .update({
-                Cost: G95.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? G95.Volume : VolumeG95,
-                Selling: G95.Volume === 0 || G95.Volume === "-" ? "-" : SellingG95
+                Cost: CostG95 === 0 ? "-" : CostG95,
+                Volume: VolumeG95 === 0 ? "-" : VolumeG95,
+                Selling: SellingG95 === 0 ? "-" : SellingG95
             })
             .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/G95")
-                    .update({
-                        Volume: totalG95,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/G95")
-                    .update({
-                        Volume: totalG95,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+                // if (detail.TicketName.split(":")[0] === "PS") {
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+                //     .child("/Product/G95")
+                //     .update({
+                //         Volume: totalG95,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else if(detail.TicketName.split(":")[0] === "A"){
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+                //     .child("/Product/G95")
+                //     .update({
+                //         Volume: totalG95,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else{
 
-                }
+                // }
                 console.log("Data pushed successfully");
             })
             .catch((error) => {
@@ -446,40 +390,40 @@ const SellingDetail = (props) => {
             .ref("order/" + (detail.id - 1))
             .child("/Product/B7")
             .update({
-                Cost: B7.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? B7.Volume : VolumeB7,
-                Selling: B7.Volume === 0 || B7.Volume === "-" ? "-" : SellingB7
+                Cost: CostB7 === 0 ? "-" : CostB7,
+                Volume: VolumeB7 === 0 ? "-" : VolumeB7,
+                Selling: SellingB7 === 0 ? "-" : SellingB7
             })
             .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/B7")
-                    .update({
-                        Volume: totalB7
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/B7")
-                    .update({
-                        Volume: totalB7
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+                // if (detail.TicketName.split(":")[0] === "PS") {
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+                //     .child("/Product/B7")
+                //     .update({
+                //         Volume: totalB7
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else if(detail.TicketName.split(":")[0] === "A"){
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+                //     .child("/Product/B7")
+                //     .update({
+                //         Volume: totalB7
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else{
 
-                }
+                // }
                 console.log("Data pushed successfully");
             })
             .catch((error) => {
@@ -489,255 +433,126 @@ const SellingDetail = (props) => {
             .ref("order/" + (detail.id - 1))
             .child("/Product/B95")
             .update({
-                Cost: B95.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? B95.Volume : VolumeB95,
-                Selling: B95.Volume === 0 || B95.Volume === "-" ? "-" : SellingB95
+                Cost: CostB95 === 0 ? "-" : CostB95,
+                Volume: VolumeB95 === 0 ? "-" : VolumeB95,
+                Selling: SellingB95 === 0 ? "-" : SellingB95
             })
             .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/B95")
-                    .update({
-                        Volume: totalB95,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/B95")
-                    .update({
-                        Volume: totalB95,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+                // if (detail.TicketName.split(":")[0] === "PS") {
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+                //     .child("/Product/B95")
+                //     .update({
+                //         Volume: totalB95,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else if(detail.TicketName.split(":")[0] === "A"){
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+                //     .child("/Product/B95")
+                //     .update({
+                //         Volume: totalB95,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else{
 
-                }
+                // }
                 console.log("Data pushed successfully");
             })
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
-        // database
-        //     .ref("order/" + (detail.id - 1))
-        //     .child("/Product/B10")
-        //     .update({
-        //         Cost: B10.Cost,
-        //         Volume: detail.TicketName.split(":")[0] === "T" ? B10.Volume : VolumeB10,
-        //         Selling: B10.Volume === 0 || B10.Volume === "-" ? "-" : SellingB10
-        //     })
-        //     .then(() => {
-        //         if (detail.TicketName.split(":")[0] === "PS") {
-        //             database
-        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-        //             .child("/Product/B10")
-        //             .update({
-        //                 Volume: totalB10,
-        //             })
-        //             .then(() => {
-        //                 console.log("Data pushed successfully");
-        //             })
-        //             .catch((error) => {
-        //                 console.error("Error pushing data:", error);
-        //             });
-        //         }else if(detail.TicketName.split(":")[0] === "A"){
-        //             database
-        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-        //             .child("/Product/B10")
-        //             .update({
-        //                 Volume: totalB10,
-        //             })
-        //             .then(() => {
-        //                 console.log("Data pushed successfully");
-        //             })
-        //             .catch((error) => {
-        //                 console.error("Error pushing data:", error);
-        //             });
-        //         }else{
-
-        //         }
-        //         console.log("Data pushed successfully");
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error pushing data:", error);
-        //     });
-        // database
-        //     .ref("order/" + (detail.id - 1))
-        //     .child("/Product/B20")
-        //     .update({
-        //         Cost: B20.Cost,
-        //         Volume: detail.TicketName.split(":")[0] === "T" ? B20.Volume : VolumeB20,
-        //         Selling: B20.Volume === 0 || B20.Volume === "-" ? "-" : SellingB20
-        //     })
-        //     .then(() => {
-        //         if (detail.TicketName.split(":")[0] === "PS") {
-        //             database
-        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-        //             .child("/Product/B20")
-        //             .update({
-        //                 Volume: totalB20,
-        //             })
-        //             .then(() => {
-        //                 console.log("Data pushed successfully");
-        //             })
-        //             .catch((error) => {
-        //                 console.error("Error pushing data:", error);
-        //             });
-        //         }else if(detail.TicketName.split(":")[0] === "A"){
-        //             database
-        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-        //             .child("/Product/B20")
-        //             .update({
-        //                 Volume: totalB20,
-        //             })
-        //             .then(() => {
-        //                 console.log("Data pushed successfully");
-        //             })
-        //             .catch((error) => {
-        //                 console.error("Error pushing data:", error);
-        //             });
-        //         }else{
-
-        //         }
-        //         console.log("Data pushed successfully");
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error pushing data:", error);
-        //     });
         database
             .ref("order/" + (detail.id - 1))
             .child("/Product/E20")
             .update({
-                Cost: E20.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? E20.Volume : VolumeE20,
-                Selling: E20.Volume === 0 || E20.Volume === "-" ? "-" : SellingE20
+                Cost: CostE20 === 0 ? "-" : CostE20,
+                Volume: VolumeE20 === 0 ? "-" : VolumeE20,
+                Selling: SellingE20 === 0 ? "-" : SellingE20
             })
             .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/E20")
-                    .update({
-                        Volume: totalE20,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/E20")
-                    .update({
-                        Volume: totalE20,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+                // if (detail.TicketName.split(":")[0] === "PS") {
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+                //     .child("/Product/E20")
+                //     .update({
+                //         Volume: totalE20,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else if(detail.TicketName.split(":")[0] === "A"){
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+                //     .child("/Product/E20")
+                //     .update({
+                //         Volume: totalE20,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else{
 
-                }
+                // }
                 console.log("Data pushed successfully");
             })
             .catch((error) => {
                 console.error("Error pushing data:", error);
             });
-        // database
-        //     .ref("order/" + (detail.id - 1))
-        //     .child("/Product/E85")
-        //     .update({
-        //         Cost: E85.Cost,
-        //         Volume: detail.TicketName.split(":")[0] === "T" ? E85.Volume : VolumeE85,
-        //         Selling: E85.Volume === 0 || E85.Volume === "-" ? "-" : SellingE85
-        //     })
-        //     .then(() => {
-        //         if (detail.TicketName.split(":")[0] === "PS") {
-        //             database
-        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-        //             .child("/Product/E85")
-        //             .update({
-        //                 Volume: totalE85,
-        //             })
-        //             .then(() => {
-        //                 console.log("Data pushed successfully");
-        //             })
-        //             .catch((error) => {
-        //                 console.error("Error pushing data:", error);
-        //             });
-        //         }else if(detail.TicketName.split(":")[0] === "A"){
-        //             database
-        //             .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-        //             .child("/Product/E85")
-        //             .update({
-        //                 Volume: totalE85,
-        //             })
-        //             .then(() => {
-        //                 console.log("Data pushed successfully");
-        //             })
-        //             .catch((error) => {
-        //                 console.error("Error pushing data:", error);
-        //             });
-        //         }else{
-
-        //         }
-        //         console.log("Data pushed successfully");
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error pushing data:", error);
-        //     });
         database
             .ref("order/" + (detail.id - 1))
             .child("/Product/PWD")
             .update({
-                Cost: PWD.Cost,
-                Volume: detail.TicketName.split(":")[0] === "T" ? PWD.Volume : VolumePWD,
-                Selling: PWD.Volume === 0 || PWD.Volume === "-" ? "-" : SellingPWD
+                Cost: CostPWD === 0 ? "-" : CostPWD,
+                Volume: VolumePWD === 0 ? "-" : VolumePWD,
+                Selling: SellingPWD === 0 ? "-" : SellingPWD
             })
             .then(() => {
-                if (detail.TicketName.split(":")[0] === "PS") {
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                    .child("/Product/PWD")
-                    .update({
-                        Volume: totalPWD,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(detail.TicketName.split(":")[0] === "A"){
-                    database
-                    .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                    .child("/Product/PWD")
-                    .update({
-                        Volume: totalPWD,
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+                // if (detail.TicketName.split(":")[0] === "PS") {
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
+                //     .child("/Product/PWD")
+                //     .update({
+                //         Volume: totalPWD,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else if(detail.TicketName.split(":")[0] === "A"){
+                //     database
+                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
+                //     .child("/Product/PWD")
+                //     .update({
+                //         Volume: totalPWD,
+                //     })
+                //     .then(() => {
+                //         console.log("Data pushed successfully");
+                //     })
+                //     .catch((error) => {
+                //         console.error("Error pushing data:", error);
+                //     });
+                // }else{
 
-                }
+                // }
                 console.log("Data pushed successfully");
                 ShowSuccess("เพิ่มข้อมูลเรียบร้อย")
             })
@@ -768,11 +583,31 @@ const SellingDetail = (props) => {
                     orderDetail ?
                     <>
                         <TableCell sx={{ textAlign: "center" }}>
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
+                        {
+                                checkG95 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={CostG95}
+                                            onChange={(e) => setCostG95(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                G95.Volume === "-" || G95.Volume === 0 && checkG95 === 0 ?
+                                checkG95 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -795,7 +630,7 @@ const SellingDetail = (props) => {
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                G95.Volume === "-" || G95.Volume === 0 && checkG95 === 0 ?
+                                checkG95 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -817,11 +652,31 @@ const SellingDetail = (props) => {
                             }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
+                        {
+                                checkG91 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={CostG91}
+                                            onChange={(e) => setCostG91(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                G91.Volume === "-" || G91.Volume === 0 && checkG91 === 0 ?
+                                checkG91 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -844,7 +699,7 @@ const SellingDetail = (props) => {
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                G91.Volume === "-" || G91.Volume === 0 && checkG91 === 0 ?
+                                checkG91 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -866,11 +721,31 @@ const SellingDetail = (props) => {
                             }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
+                        {
+                                checkB7 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={CostB7}
+                                            onChange={(e) => setCostB7(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                B7.Volume === "-" || B7.Volume === 0 && checkB7 === 0 ?
+                                checkB7 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -893,7 +768,7 @@ const SellingDetail = (props) => {
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                B7.Volume === "-" || B7.Volume === 0 && checkB7 === 0 ?
+                                checkB7 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -915,11 +790,31 @@ const SellingDetail = (props) => {
                             }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
+                        {
+                                checkB95 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={CostB95}
+                                            onChange={(e) => setCostB95(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                B95.Volume === "-" || B95.Volume === 0 && checkB95 === 0 ?
+                                checkB95 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -942,7 +837,7 @@ const SellingDetail = (props) => {
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                B95.Volume === "-" || B95.Volume === 0 && checkB95 === 0 ?
+                                checkB95 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -964,11 +859,31 @@ const SellingDetail = (props) => {
                             }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
+                        {
+                                checkE20 === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={CostE20}
+                                            onChange={(e) => setCostE20(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                E20.Volume === "-" || E20.Volume === 0 && checkE20 === 0 ?
+                                checkE20 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -991,7 +906,7 @@ const SellingDetail = (props) => {
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                E20.Volume === "-" || E20.Volume === 0 && checkE20 === 0 ?
+                                checkE20 === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -1013,11 +928,31 @@ const SellingDetail = (props) => {
                             }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
+                        {
+                                checkPWD === 0 ?
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                                    :
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px'
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                            }}
+                                            value={CostPWD}
+                                            onChange={(e) => setCostPWD(e.target.value)}
+                                        />
+                                    </Paper>
+                            }
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                PWD.Volume === "-" || PWD.Volume === 0 && checkPWD === 0 ?
+                                checkPWD === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -1040,7 +975,7 @@ const SellingDetail = (props) => {
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
-                                PWD.Volume === "-" || PWD.Volume === 0 && checkPWD === 0 ?
+                                checkPWD === 0 ?
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
                                     :
                                     <Paper component="form"sx={{ width: "100%" }}>
@@ -1120,135 +1055,6 @@ const SellingDetail = (props) => {
                         </TableCell>
                     </>
                 }
-                
-                
-                {/* <TableCell sx={{ textAlign: "center" }}>
-                {
-                        detail.TicketName.split(":")[0] === "T" ?
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-
-                                            {
-                                                PWD.Volume === "-" || PWD.Volume === 0 ?
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                    :
-                                                    <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            value={SellingPWD}
-                                                            onChange={(e) => setSellingPWD(e.target.value)}
-                                                        />
-                                                    </Paper>
-                                            }
-
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Volume}</Typography>
-                                        </Grid>
-                                    </>
-                                        :
-                                        <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Cost}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4} paddingRight={1}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Selling}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Volume}</Typography>
-                                        </Grid>
-                                        </>
-                                }
-                            </Grid>
-                            :
-                            <Grid container spacing={1}>
-                                {
-                                    orderDetail ?
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                {
-                                                    PWD.Volume === "-" || PWD.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ขาย"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={SellingPWD}
-                                                                onChange={(e) => setSellingPWD(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                {
-                                                    PWD.Volume === "-" || PWD.Volume === 0 ?
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                                        :
-                                                        <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                                            <TextField size="small" fullWidth label="ปริมาณ"
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '14px'
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                }}
-                                                                value={VolumePWD}
-                                                                onChange={(e) => setVolumePWD(e.target.value)}
-                                                            />
-                                                        </Paper>
-                                                }
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Cost}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4} paddingRight={1}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Selling}</Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Volume}</Typography>
-                                            </Grid>
-                                        </>
-                                }
-                            </Grid>
-                    }
-                </TableCell> */}
                 <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
                     {
                         orderDetail ?

@@ -112,7 +112,7 @@ const OrderDetail = (props) => {
     const handleTotalWeight = (newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD) => {
 
         const total = newVolumeG91 + newVolumeG95 + newVolumeB7 + newVolumeB95 + newVolumeE20 + newVolumePWD;
-        const totalCost = Number(CostG91) + Number(CostG95) + Number(CostB7) + Number(CostB95) + Number(CostE20) + Number(CostPWD);
+        // const totalCost = Number(CostG91) + Number(CostG95) + Number(CostB7) + Number(CostB95) + Number(CostE20) + Number(CostPWD);
         const totalVolume = Number(VolumeG91) + Number(VolumeG95) + Number(VolumeB7) + Number(VolumeB95) + Number(VolumeE20) + Number(VolumePWD);
         // parseFloat(newVolumeG91 || 0) +
         // parseFloat(newVolumeG95 || 0) +
@@ -125,7 +125,7 @@ const OrderDetail = (props) => {
         // parseFloat(newVolumePWD || 0);
 
         if (onSendBack) {
-            onSendBack(total, totalCost, totalVolume, Number(VolumeG91), Number(VolumeG95), Number(VolumeB7), Number(VolumeB95), Number(VolumeE20), Number(VolumePWD), Number(CostG91), Number(CostG95), Number(CostB7), Number(CostB95), Number(CostE20), Number(CostPWD)); // เรียกฟังก์ชันที่ส่งมาจาก Page 1
+            onSendBack(total, totalVolume, Number(VolumeG91), Number(VolumeG95), Number(VolumeB7), Number(VolumeB95), Number(VolumeE20), Number(VolumePWD), Number(CostG91), Number(CostG95), Number(CostB7), Number(CostB95), Number(CostE20), Number(CostPWD)); // เรียกฟังก์ชันที่ส่งมาจาก Page 1
         }
     };
 

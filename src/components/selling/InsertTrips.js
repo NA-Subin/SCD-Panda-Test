@@ -135,9 +135,8 @@ const InsertTrips = () => {
     //     setVolume((prev) => [...prev, newTotalVolume]); // ✅ เก็บค่า totalVolume
     // };
 
-    const handleSendBack = (newTotal, newTotalCost, newTotalVolume, newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD, newCostG91, newCostG95, newCostB7, newCostB95, newCostE20, newCostPWD) => {
+    const handleSendBack = (newTotal, newTotalVolume, newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD) => {
         setWeightOil((prev) => prev + newTotal);
-        setCost((prev) => prev + newTotalCost);
         setVolume((prev) => prev + newTotalVolume);
         setVolumeG91((prev) => prev + newVolumeG91);
         setVolumeG95((prev) => prev + newVolumeG95);
@@ -145,12 +144,35 @@ const InsertTrips = () => {
         setVolumeB95((prev) => prev + newVolumeB95);
         setVolumeE20((prev) => prev + newVolumeE20);
         setVolumePWD((prev) => prev + newVolumePWD);
-        setCostG91((prev) => prev + newCostG91);
-        setCostG95((prev) => prev + newCostG95);
-        setCostB7((prev) => prev + newCostB7);
-        setCostB95((prev) => prev + newCostB95);
-        setCostE20((prev) => prev + newCostE20);
-        setCostPWD((prev) => prev + newCostPWD);
+        // setCostG91((prev) => prev + newCostG91);
+        // setCostG95((prev) => prev + newCostG95);
+        // setCostB7((prev) => prev + newCostB7);
+        // setCostB95((prev) => prev + newCostB95);
+        // setCostE20((prev) => prev + newCostE20);
+        // setCostPWD((prev) => prev + newCostPWD);
+    };
+
+    const handleSendBackSell = (
+        newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD
+    ) => {
+        console.log("Before Update:", { volumeG91, volumeG95, volumeB7, volumeB95, volumeE20, volumePWD });
+        console.log("Received Values:", { newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD });
+    
+        setVolumeG91(prev => prev - newVolumeG91);
+        setVolumeG95(prev => prev - newVolumeG95);
+        setVolumeB7(prev => prev - newVolumeB7);
+        setVolumeB95(prev => prev - newVolumeB95);
+        setVolumeE20(prev => prev - newVolumeE20);
+        setVolumePWD(prev => prev - newVolumePWD);
+        
+        // setCostG91(prev => prev - newCostG91);
+        // setCostG95(prev => prev - newCostG95);
+        // setCostB7(prev => prev - newCostB7);
+        // setCostB95(prev => prev - newCostB95);
+        // setCostE20(prev => prev - newCostE20);
+        // setCostPWD(prev => prev - newCostPWD);
+    
+        console.log("After Update:", { volumeG91, volumeG95, volumeB7, volumeB95, volumeE20, volumePWD });
     };
 
 
@@ -371,97 +393,115 @@ const InsertTrips = () => {
                     })
                     .then(() => {
                         ShowSuccess("สร้างเที่ยววิ่งเรียบร้อย");
+                        database
+                            .ref("trip/" + trip.length)
+                            .child("/ProductT")
+                            .update({
+                                G91: volumeG91,
+                                G95: volumeG95,
+                                B7: volumeB7,
+                                B95: volumeB95,
+                                E20: volumeE20,
+                                PWD: volumePWD,
+                            })
+                            .then(() => {
+                                console.log("pushing data success:");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
 
-                        database
-                            .ref("trip/" + trip.length + "/ProductT")
-                            .child("/G91")
-                            .update({
-                                Name: "G91",
-                                TotalCost: costG91,
-                                TotalVolume: volumeG91,
-                            })
-                            .then(() => {
-                                console.log("pushing data success:");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
-                        database
-                            .ref("trip/" + trip.length + "/ProductT")
-                            .child("/G95")
-                            .update({
-                                Name: "G95",
-                                TotalCost: costG95,
-                                TotalVolume: volumeG95,
-                            })
-                            .then(() => {
-                                console.log("pushing data success:");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
-                        database
-                            .ref("trip/" + trip.length + "/ProductT")
-                            .child("/B7")
-                            .update({
-                                Name: "B7",
-                                TotalCost: costB7,
-                                TotalVolume: volumeB7,
-                            })
-                            .then(() => {
-                                console.log("pushing data success:");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
-                        database
-                            .ref("trip/" + trip.length + "/ProductT")
-                            .child("/B95")
-                            .update({
-                                Name: "B95",
-                                TotalCost: costB95,
-                                TotalVolume: volumeB95,
-                            })
-                            .then(() => {
-                                console.log("pushing data success:");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
-                        database
-                            .ref("trip/" + trip.length + "/ProductT")
-                            .child("/E20")
-                            .update({
-                                Name: "E20",
-                                TotalCost: costE20,
-                                TotalVolume: volumeE20,
-                            })
-                            .then(() => {
-                                console.log("pushing data success:");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
-                        database
-                            .ref("trip/" + trip.length + "/ProductT")
-                            .child("/PWD")
-                            .update({
-                                Name: "PWD",
-                                TotalCost: costPWD,
-                                TotalVolume: volumePWD,
-                            })
-                            .then(() => {
-                                console.log("pushing data success:");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
+                        // database
+                        //     .ref("trip/" + trip.length + "/ProductT")
+                        //     .child("/G91")
+                        //     .update({
+                        //         Name: "G91",
+                        //         TotalCost: costG91,
+                        //         TotalVolume: volumeG91,
+                        //     })
+                        //     .then(() => {
+                        //         console.log("pushing data success:");
+                        //     })
+                        //     .catch((error) => {
+                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        //         console.error("Error pushing data:", error);
+                        //     });
+                        // database
+                        //     .ref("trip/" + trip.length + "/ProductT")
+                        //     .child("/G95")
+                        //     .update({
+                        //         Name: "G95",
+                        //         TotalCost: costG95,
+                        //         TotalVolume: volumeG95,
+                        //     })
+                        //     .then(() => {
+                        //         console.log("pushing data success:");
+                        //     })
+                        //     .catch((error) => {
+                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        //         console.error("Error pushing data:", error);
+                        //     });
+                        // database
+                        //     .ref("trip/" + trip.length + "/ProductT")
+                        //     .child("/B7")
+                        //     .update({
+                        //         Name: "B7",
+                        //         TotalCost: costB7,
+                        //         TotalVolume: volumeB7,
+                        //     })
+                        //     .then(() => {
+                        //         console.log("pushing data success:");
+                        //     })
+                        //     .catch((error) => {
+                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        //         console.error("Error pushing data:", error);
+                        //     });
+                        // database
+                        //     .ref("trip/" + trip.length + "/ProductT")
+                        //     .child("/B95")
+                        //     .update({
+                        //         Name: "B95",
+                        //         TotalCost: costB95,
+                        //         TotalVolume: volumeB95,
+                        //     })
+                        //     .then(() => {
+                        //         console.log("pushing data success:");
+                        //     })
+                        //     .catch((error) => {
+                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        //         console.error("Error pushing data:", error);
+                        //     });
+                        // database
+                        //     .ref("trip/" + trip.length + "/ProductT")
+                        //     .child("/E20")
+                        //     .update({
+                        //         Name: "E20",
+                        //         TotalCost: costE20,
+                        //         TotalVolume: volumeE20,
+                        //     })
+                        //     .then(() => {
+                        //         console.log("pushing data success:");
+                        //     })
+                        //     .catch((error) => {
+                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        //         console.error("Error pushing data:", error);
+                        //     });
+                        // database
+                        //     .ref("trip/" + trip.length + "/ProductT")
+                        //     .child("/PWD")
+                        //     .update({
+                        //         Name: "PWD",
+                        //         TotalCost: costPWD,
+                        //         TotalVolume: volumePWD,
+                        //     })
+                        //     .then(() => {
+                        //         console.log("pushing data success:");
+                        //     })
+                        //     .catch((error) => {
+                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        //         console.error("Error pushing data:", error);
+                        //     });
 
                         setTrips(trip.length);
                         database.ref("/order").on("value", (snapshot) => {
@@ -477,11 +517,7 @@ const InsertTrips = () => {
 
                         database.ref("/trip/" + trip.length + "/ProductT").on("value", (snapshot) => {
                             const datas = snapshot.val();
-                            const dataProductT = [];
-                            for (let id in datas) {
-                                dataProductT.push({ id, ...datas[id] })
-                            }
-                            setProductT(dataProductT);
+                            setProductT(datas);
                         });
 
                         database
@@ -564,14 +600,16 @@ const InsertTrips = () => {
         );
     };
 
-    const findProduct = (id) => Object.values(productT).find(product => product.id === id) ?? { Name: id, TotalCost: 0, TotalVolume: 0 };
+    console.log("Order : ",orders);
 
-    const productTG91 = findProduct('G91');
-    const productTG95 = findProduct('G95');
-    const productTB7 = findProduct('B7');
-    const productTB95 = findProduct('B95');
-    const productTE20 = findProduct('E20');
-    const productTPWD = findProduct('PWD');
+    // const findProduct = (id) => Object.values(productT).find(product => product.id === id) ?? { Name: id, TotalCost: 0, TotalVolume: 0 };
+
+    // const [productTG91,setProductTG91] = React.useState(productT.G91);
+    // const [productTG95,setProductTG95] = React.useState(productT.G95);
+    // const [productTB7,setProductTB7] = React.useState(productT.B7);
+    // const [productTB95,setProductTB95] = React.useState(productT.B95);
+    // const [productTE20,setProductTE20] = React.useState(productT.E20);
+    // const [productTPWD,setProductTPWD] = React.useState(productT.PWD);
 
     // console.log("G91 : ", productTG91.TotalVolume);
     // console.log("G95 : ", productTG95.TotalVolume);
@@ -727,6 +765,8 @@ const InsertTrips = () => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+
+
     };
 
     const handleTotalWeight = (newHeavyOil, newWeight) => {
@@ -976,7 +1016,7 @@ const InsertTrips = () => {
                                                 <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     PWD
                                                 </TablecellHeader>
-                                                <TablecellHeader width={500} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
+                                                <TablecellHeader width={300} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
                                             </TableRow>
                                             <TableRow sx={{ position: "sticky", top: 20, zIndex: 2, backgroundColor: theme.palette.panda.light }}>
                                                 <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
@@ -1005,13 +1045,13 @@ const InsertTrips = () => {
                                                 sx={{
                                                     position: "absolute",  // ✅ ทำให้แถวรวมลอยอยู่ด้านล่างของ TableContainer
                                                     bottom: 0,
-                                                    width: "3110px"
+                                                    width: "2910px"
                                                 }}
                                             >
                                                 <TablecellHeader width={1110} sx={{ textAlign: "right" }}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมข้อมูลทั้งหมด</Typography>
+                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1030,8 +1070,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                </TablecellHeader> */}
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1045,13 +1085,13 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
-                                                            value={showTrips ? volumeG95 : (productTG95.TotalVolume  || 0)}
+                                                            value={showTrips ? volumeG95 : productT.G95}
                                                             disabled={showTrips ? false : true}
                                                         // value={volumeG95}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1070,8 +1110,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                </TablecellHeader> */}
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1085,13 +1125,13 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
-                                                            value={showTrips ? volumeG91 : (productTG91.TotalVolume || 0)}
+                                                            value={showTrips ? volumeG91 : productT.G91}
                                                             disabled={showTrips ? false : true}
                                                         // value={volumeG91}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1110,8 +1150,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                </TablecellHeader> */}
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1125,13 +1165,13 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
-                                                            value={showTrips ? volumeB7 : (productTB7.TotalVolume || 0)}
+                                                            value={showTrips ? volumeB7 : productT.B7}
                                                             disabled={showTrips ? false : true}
                                                         // value={volumeB7}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1150,8 +1190,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                </TablecellHeader> */}
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1165,13 +1205,13 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
-                                                            value={showTrips ? volumeB95 : (productTB95.TotalVolume || 0)}
+                                                            value={showTrips ? volumeB95 : productT.B95}
                                                             disabled={showTrips ? false : true}
                                                         // value={volumeB95}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1190,8 +1230,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                </TablecellHeader> */}
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1205,13 +1245,13 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
-                                                            value={showTrips ? volumeE20 : (productTE20.TotalVolume || 0)}
+                                                            value={showTrips ? volumeE20 : productT.E20}
                                                             disabled={showTrips ? false : true}
                                                         // value={volumeE20}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1230,8 +1270,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                </TablecellHeader> */}
+                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1245,15 +1285,15 @@ const InsertTrips = () => {
                                                                     height: '30px', // ปรับความสูงของ TextField
                                                                 },
                                                             }}
-                                                            value={showTrips ? volumePWD : (productTPWD.TotalVolume || 0)}
+                                                            value={showTrips ? volumePWD : productT.PWD}
                                                             disabled={showTrips ? false : true}
                                                         // value={volumePWD}
                                                         />
                                                     </Paper>
                                                 </TablecellHeader>
-                                                <TablecellHeader width={500} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
+                                                <TablecellHeader width={300} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
                                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1 }} gutterBottom>ต้นทุนรวม</Typography>
+                                                        {/* <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1 }} gutterBottom>ต้นทุนรวม</Typography>
                                                         <Paper component="form">
                                                             <TextField size="small" fullWidth
                                                                 type="number"
@@ -1271,8 +1311,8 @@ const InsertTrips = () => {
                                                                 value={showTrips ? cost : ((productTG91.TotalCost || 0) + (productTG95.TotalCost || 0) + (productTB7.TotalCost || 0) + (productTB95.TotalCost || 0) + (productTE20.TotalCost || 0) + (productTPWD.TotalCost || 0))}
                                                                 disabled={showTrips ? false : true}
                                                             />
-                                                        </Paper>
-                                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1, marginLeft: 1 }} gutterBottom>ปริมาณรวม</Typography>
+                                                        </Paper> */}
+                                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1, marginLeft: 1 }} gutterBottom>ปริมาณรวมทั้งหมด</Typography>
                                                         <Paper component="form">
                                                             <TextField size="small" fullWidth
                                                                 type="number"
@@ -1286,7 +1326,7 @@ const InsertTrips = () => {
                                                                         height: '30px', // ปรับความสูงของ TextField
                                                                     },
                                                                 }}
-                                                                value={showTrips ? volume : ((productTG91.TotalVolume || 0) + (productTG95.TotalVolume || 0) + (productTB7.TotalVolume || 0) + (productTB95.TotalVolume || 0) + (productTE20.TotalVolume || 0) + (productTPWD.TotalVolume || 0))}
+                                                                value={showTrips ? volume : (productT.G91 + productT.G95 + productT.B7 + productT.B95 + productT.E20 + productT.PWD)}
                                                                 disabled={showTrips ? false : true}
                                                             />
                                                         </Paper>
@@ -1643,6 +1683,7 @@ const InsertTrips = () => {
                                                                         checkB95={volumeB95}
                                                                         checkE20={volumeE20}
                                                                         checkPWD={volumePWD}
+                                                                        onSendBack={handleSendBackSell}
                                                                     />
                                                                 ))
                                                         }
@@ -1658,42 +1699,7 @@ const InsertTrips = () => {
                                                             <TablecellHeader width={835} sx={{ textAlign: "right" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมข้อมูลทั้งหมด</Typography>
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                        value={costG95}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1711,42 +1717,7 @@ const InsertTrips = () => {
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                        value={costG91}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1764,42 +1735,7 @@ const InsertTrips = () => {
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                        value={costB7}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1817,42 +1753,7 @@ const InsertTrips = () => {
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                        value={costB95}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1870,42 +1771,7 @@ const InsertTrips = () => {
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                        value={costE20}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1923,42 +1789,7 @@ const InsertTrips = () => {
                                                                     />
                                                                 </Paper>
                                                             </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                        value={costPWD}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
-                                                                <Paper component="form" sx={{ marginRight: -1 }}>
-                                                                    <TextField size="small" fullWidth
-                                                                        type="number"
-                                                                        InputLabelProps={{
-                                                                            sx: {
-                                                                                fontSize: '14px'
-                                                                            },
-                                                                        }}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                height: '30px', // ปรับความสูงของ TextField
-                                                                            },
-                                                                        }}
-                                                                    />
-                                                                </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={125} sx={{ textAlign: "center" }}>
+                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -2017,6 +1848,9 @@ const InsertTrips = () => {
                                                                     sx={{ textAlign: "left" }}
                                                                     onChange={(e) => setCustomers(e.target.value)}
                                                                     fullWidth
+                                                                    disabled={
+                                                                        (volumeG95+volumeG91+volumeB7+volumeB95+volumeE20+volumePWD) === 0 ? true : false
+                                                                    }
                                                                 >
                                                                     <MenuItem value={"0:0"}>
                                                                         เลือกลูกค้าที่ต้องการเพิ่ม
@@ -2033,39 +1867,12 @@ const InsertTrips = () => {
                                                                             </MenuItem>
                                                                         );
                                                                     })}
-                                                                    {/* {
-                                                                        combinedOrder.map((row, index) => (
-                                                                            codes === "A" ?
-                                                                                <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                                    {`${row.type}:${row.Name}`}
-                                                                                </MenuItem>
-                                                                                : codes === "PS" ?
-                                                                                    <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                                        {`${row.type}:${row.Name}`}
-                                                                                    </MenuItem>
-                                                                                    : codes === "T" ?
-                                                                                        <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                                            {`${row.type}:${row.Name}`}
-                                                                                        </MenuItem>
-                                                                                        : codes === "" ?
-                                                                                            <MenuItem key={index} value={`${row.type}:${row.Name}`}>
-                                                                                                {`${row.type}:${row.Name}`}
-                                                                                            </MenuItem>
-                                                                                            : ""
-                                                                        ))
-                                                                    } */}
-                                                                    {/* {
-                                                                        filteredOptions.map((row) => (
-                                                                            <MenuItem value={row.Code + ":" + row.Name}>{row.Code + " : " + row.Name}</MenuItem>
-                                                                        ))
-                                                                    }
-                                                                    {filteredOptions.length === 0 && (
-                                                                        <MenuItem disabled>No results found</MenuItem>
-                                                                    )} */}
                                                                 </Select>
                                                             </Grid>
                                                             <Grid item sm={2.5} xs={3} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
-                                                                <Button variant="contained" color="info" fullWidth onClick={handleCustomer}>เพิ่มออเดอร์</Button>
+                                                                {
+                                                                    (volumeG95+volumeG91+volumeB7+volumeB95+volumeE20+volumePWD) !== 0 && <Button variant="contained" color="info" fullWidth onClick={handleCustomer}>เพิ่มออเดอร์</Button>
+                                                                }
                                                             </Grid>
                                                         </Grid>
                                                     </Paper>

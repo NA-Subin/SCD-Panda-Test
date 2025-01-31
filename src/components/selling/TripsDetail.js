@@ -81,14 +81,14 @@ const TripsDetail = (props) => {
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateStart}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Depot}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Driver}/{trips.Registration}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order1 === undefined ? "-" : trips.Order1.split(":")[2]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order2 === undefined ? "-" : trips.Order2.split(":")[2]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order3 === undefined ? "-" : trips.Order3.split(":")[2]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order4 === undefined ? "-" : trips.Order4.split(":")[2]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order5 === undefined ? "-" : trips.Order5.split(":")[2]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order6 === undefined ? "-" : trips.Order6.split(":")[2]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order7 === undefined ? "-" : trips.Order7.split(":")[2]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order8 === undefined ? "-" : trips.Order8.split(":")[2]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order1 === undefined ? "-" : trips.Order1.split(":")[3]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order2 === undefined ? "-" : trips.Order2.split(":")[3]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order3 === undefined ? "-" : trips.Order3.split(":")[3]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order4 === undefined ? "-" : trips.Order4.split(":")[3]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order5 === undefined ? "-" : trips.Order5.split(":")[3]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order6 === undefined ? "-" : trips.Order6.split(":")[3]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order7 === undefined ? "-" : trips.Order7.split(":")[3]}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order8 === undefined ? "-" : trips.Order8.split(":")[3]}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.WeightOil}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.WeightTruck}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{parseFloat(trips.WeightOil) + parseFloat(trips.WeightTruck)}</TableCell>
