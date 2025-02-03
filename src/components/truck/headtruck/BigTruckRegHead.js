@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
@@ -14,6 +14,7 @@ import {
   Grid,
   IconButton,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Paper,
   Popover,
@@ -46,11 +47,16 @@ import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import RegHeadDetail from "./RegHeadDetail";
 
 const BigTruckRegHead = (props) => {
-  const { truck, repair } = props;
+  const { truck, repair, loading } = props;
 
   const [openTab, setOpenTab] = React.useState(true);
   const [setting, setSetting] = React.useState("0:0");
   const [tail, setTail] = React.useState(0);
+
+  const truckData = useMemo(() => {
+    if (loading || !truck) return [];
+    return Object.entries(truck);
+  }, [loading, truck]);
 
   const isMobile = useMediaQuery("(max-width:1100px)");
     
@@ -71,31 +77,6 @@ const BigTruckRegHead = (props) => {
           setOpenTab((prevOpen) => !prevOpen);
         }
       };
-
-  const toggleDrawer = (newOpen) => () => {
-    setOpenTab(newOpen);
-  };
-
-  const [registrationTail, setRegistrationTail] = React.useState([]);
-  const [regTailLength, setRegTailLength] = React.useState("");
-
-  const getRegitrationTail = async () => {
-    database.ref("/truck/registrationTail/").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataRegistrationTail = [];
-      for (let id in datas) {
-        if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว"){
-          dataRegistrationTail.push({ id, ...datas[id] })
-        }
-      }
-      setRegTailLength(datas.length);
-      setRegistrationTail(dataRegistrationTail);
-    });
-  };
-
-  useEffect(() => {
-    getRegitrationTail();
-  }, []);
 
   const handlePost = () => {
     database
@@ -152,7 +133,7 @@ const BigTruckRegHead = (props) => {
               </Box>
             </Paper>
             {
-              repair === 0 ?
+              repair.length === 0 ?
                 <Paper sx={{ height: "20vh", paddingLeft: 3, marginTop: 2, paddingTop: 4, backgroundColor: theme.palette.success.main, color: "white", borderRadius: 2 }}>
                   <Typography variant="subtitle2" fontWeight="bold" marginLeft={3} gutterBottom>ตรวจสภาพรถ</Typography>
                   <Typography variant="h2" fontWeight="bold" marginTop={-3} gutterBottom>ครบ</Typography>
@@ -163,7 +144,7 @@ const BigTruckRegHead = (props) => {
                   <Typography variant="subtitle2" fontWeight="bold" marginLeft={3} gutterBottom>ไม่ตรวจ</Typography>
                   <Typography variant="h5" fontWeight="bold" marginTop={-2} gutterBottom>สภาพรถ</Typography>
                   <Box display="flex" justifyContent="center" alignItems="center" marginTop={-2}>
-                    <Typography variant="h2" fontWeight="bold" gutterBottom>{repair}</Typography>
+                    <Typography variant="h2" fontWeight="bold" gutterBottom>{repair.length}</Typography>
                     <Typography variant="h6" fontWeight="bold" gutterBottom>คัน</Typography>
                   </Box>
                 </Paper>
@@ -196,7 +177,7 @@ const BigTruckRegHead = (props) => {
             <Divider sx={{ marginBottom: 1 }} />
             <TableContainer
               component={Paper}
-              style={{ maxHeight: "90vh" }}
+              style={{ maxHeight: "58vh" }}
               sx={{ marginTop: 2 }}
             >
               <Table stickyHeader size="small" sx={{ width: "1080px" }}>
@@ -231,8 +212,13 @@ const BigTruckRegHead = (props) => {
                 </TableHead>
                 <TableBody>
                   {
-                    truck.map((row) => (
-                      <RegHeadDetail key={row.id} truck={row}/>
+                    loading ?
+                      <Box sx={{ width: '100%' }}>
+                        <LinearProgress />
+                      </Box>
+                    :
+                    truckData.map(([id, row]) => (
+                      <RegHeadDetail key={row.RegHead} truck={row}/>
                     ))
                   }
                 </TableBody>

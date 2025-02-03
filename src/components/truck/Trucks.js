@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
@@ -44,15 +44,26 @@ import BigTruckRegHead from "./headtruck/BigTruckRegHead";
 import BigTruckRegTail from "./tailtruck/BigTruckRegTail";
 import { SmallTruckIconBlack, SmallTruckIconWhite, TailTruckIconBlack, TailTruckIconWhite, TruckIconBlack, TruckIconWhite } from "../../theme/icon";
 import RepairTruck from "./RepairTruck";
+import { fetchRealtimeData } from "../../server/data";
 
 const Trucks = () => {
   const [open, setOpen] = useState(1);
   const [openTab, setOpenTab] = React.useState(true);
   const [openMenu, setOpenMenu] = React.useState(1);
+  const [loading, setLoading] = useState(true);
 
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
   };
+
+  const [data, setData] = useState({ reghead: {}, regtail: {}, small: {} });
+    
+        useEffect(() => {
+            fetchRealtimeData((newData) => {
+            setData(newData);
+            setLoading(false); // ปิด loading เมื่อดึงข้อมูลเสร็จ
+        });
+        }, []);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
       
@@ -70,61 +81,23 @@ const Trucks = () => {
           };
         }, []);
 
-  const [smallTruck, setSmallTruck] = React.useState([]);
-  const [regHead, setRegHead] = React.useState([]);
-  const [regTail, setRegTail] = React.useState([]);
-  const [repairSmallTruck, setRepairSmallTruck] = React.useState([]);
-  const [repairRegHead, setRepairRegHead] = React.useState([]);
-  const [status, setStatus] = React.useState([]);
   const [repair, setRepair] = React.useState(false);
 
-  const getTruck = async () => {
-    database.ref("/truck/registration/").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataRegHead = [];
-      const dataRepair = [];
-      for (let id in datas) {
-        dataRegHead.push({ id, ...datas[id] })
-        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
-          dataRepair.push({ id, ...datas[id] })
-        }
-      }
-      setRegHead(dataRegHead);
-      setRepairRegHead(dataRepair.length);
-    });
+  const repairRegHead = useMemo(() => {
+    return Object.entries(data.reghead).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
+}, [data.reghead]);
 
-    database.ref("/truck/registrationTail/").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataRegTail = [];
-      const dataStatus = [];
-      for (let id in datas) {
-        dataRegTail.push({ id, ...datas[id] })
-        if(datas[id].Status !== "เชื่อมทะเบียนหัวแล้ว"){
-          dataStatus.push({ id, ...datas[id] })
-        }
-      }
-      setRegTail(dataRegTail);
-      setStatus(dataStatus.length);
-    });
+const status = useMemo(() => {
+  return Object.entries(data.regtail).filter(([id, emp]) => emp.Status !== "เชื่อมทะเบียนหัวแล้ว");
+}, [data.regtail]);
 
-    database.ref("/truck/small/").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataSmallTruck = [];
-      const dataRepair = [];
-      for (let id in datas) {
-        dataSmallTruck.push({ id, ...datas[id] })
-        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
-          dataRepair.push({ id, ...datas[id] })
-        }
-      }
-      setSmallTruck(dataSmallTruck);
-      setRepairSmallTruck(dataRepair.length);
-    });
-  };
-  
-  useEffect(() => {
-    getTruck();
-  }, []);
+const repairSmallTruck = useMemo(() => {
+  return Object.entries(data.small).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
+}, [data.small]);
+
+  console.log("repairRegHead : ",repairRegHead);
+  console.log("status : ",status);
+  console.log("repairSmallTruck : ",repairSmallTruck);
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -169,7 +142,7 @@ const Trucks = () => {
                     startIcon={openMenu === 1 ? <TruckIconWhite /> : <TruckIconBlack />}
                   >
                     <Badge
-                      badgeContent={regHead.length}
+                      badgeContent={data.reghead.length}
                       sx={{
                         "& .MuiBadge-badge": {
                           fontSize: 20, // ขนาดตัวเลขใน Badge
@@ -203,7 +176,7 @@ const Trucks = () => {
                     startIcon={openMenu === 2 ? <TailTruckIconWhite /> : <TailTruckIconBlack />}
                   >
                     <Badge
-                      badgeContent={regTail.length}
+                      badgeContent={data.regtail.length}
                       sx={{
                         "& .MuiBadge-badge": {
                           fontSize: 20, // ขนาดตัวเลขใน Badge
@@ -239,7 +212,7 @@ const Trucks = () => {
                     }
                   >
                     <Badge
-                      badgeContent={smallTruck.length}
+                      badgeContent={data.small.length}
                       sx={{
                         "& .MuiBadge-badge": {
                           fontSize: 20, // ขนาดตัวเลขใน Badge
@@ -267,9 +240,9 @@ const Trucks = () => {
               </Grid>
               <Grid item xs={12}>
               {
-                openMenu === 1 ? <BigTruckRegHead truck={regHead} repair={repairRegHead} />
-                  : openMenu === 2 ? <BigTruckRegTail truck={regTail} status={status} />
-                    : <SmallTruck truck={smallTruck} repair={repairSmallTruck} />
+                openMenu === 1 ? <BigTruckRegHead truck={data.reghead} repair={repairRegHead} loading={loading} />
+                  : openMenu === 2 ? <BigTruckRegTail truck={data.regtail} status={status} />
+                    : <SmallTruck truck={data.small} repair={repairSmallTruck} />
 
               }
               </Grid>

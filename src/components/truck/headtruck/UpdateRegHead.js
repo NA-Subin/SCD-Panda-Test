@@ -105,7 +105,7 @@ const UpdateRegHead = (props) => {
     const [companies, setCompanies] = React.useState(truck.Company);
     const [driver, setDriver] = React.useState("0:"+truck.Driver);
     const [regHead, setRegHead] = React.useState(truck.RegHead);
-    const [regTail, setRegTail] = React.useState(truck.RegTail);
+    const [regTail, setRegTail] = React.useState("0:"+truck.RegTail);
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
     const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration);
@@ -117,7 +117,7 @@ const UpdateRegHead = (props) => {
             .child(truck.id - 1)
             .update({
                 RegHead: regHead,
-                RegTail: regTail,
+                RegTail: regTail.split(":")[1],
                 Weight: weight,
                 Insurance: insurance,
                 VehicleRegistration: vehicleRegistration,
@@ -126,6 +126,19 @@ const UpdateRegHead = (props) => {
                 Driver: driver.split(":")[1]
             })
             .then(() => {
+                database
+                                              .ref("/truck/registrationTail/")
+                                              .child(regTail.split(":")[0] - 1)
+                                              .update({
+                                                Status: "เชื่อมทะเบียนหัวแล้ว",
+                                              })
+                                              .then(() => {
+                                                console.log("Data pushed successfully");
+                                              })
+                                              .catch((error) => {
+                                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                                console.error("Error pushing data:", error);
+                                              });
                 database
                     .ref("/employee/drivers/")
                     .child(driver.split(":")[0] - 1)
@@ -221,7 +234,7 @@ const UpdateRegHead = (props) => {
                             <Grid item xs={1.5}>
                                 {
                                     update ?
-                                    <TextField fullWidth variant="standard" value={regTail} disabled />
+                                    <TextField fullWidth variant="standard" value={regTail.split(":")[1]} disabled />
                                     :
                                     <FormControl variant="standard" fullWidth>
                                     <Select
@@ -242,11 +255,11 @@ const UpdateRegHead = (props) => {
                                       fullWidth
                                     >
                                       <MenuItem value={regTail}>
-                                      {regTail}
+                                      {regTail.split(":")[1]}
                                       </MenuItem>
                                       {
                                         registrationTail.map((row) => (
-                                          <MenuItem value={row.RegTail}>{row.RegTail}</MenuItem>
+                                          <MenuItem value={row.id + ":" + row.RegTail}>{row.RegTail}</MenuItem>
                                         ))
                                       }
                                     </Select>

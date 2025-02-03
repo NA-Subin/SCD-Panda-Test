@@ -43,10 +43,16 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
-const InsertEmployee = () => {
-    const [menu, setMenu] = React.useState(0);
+const InsertEmployee = (props) => {
+    const { type } = props;
+    const [menu, setMenu] = React.useState(type);
+
+    React.useEffect(() => {
+        setMenu(type);  // อัปเดต state เมื่อ props.type เปลี่ยน
+    }, [type]);
+
     const [open, setOpen] = React.useState(false);
-    const [prefix, setPrefix] = React.useState('');
+    const [prefix, setPrefix] = React.useState(0);
     const [name, setName] = React.useState('');
     const [lastname, setLastname] = React.useState('');
     const [user, setUser] = React.useState('');
@@ -78,8 +84,8 @@ const InsertEmployee = () => {
     const [security, setSecurity] = React.useState("");
     const [deposit, setDeposit] = React.useState("");
     const [loan, setLoan] = React.useState("");
-    const [drivingLicense,setDrivingLicense] = React.useState("");
-    const [expiration,setExpiration] = React.useState("");
+    const [drivingLicense, setDrivingLicense] = React.useState("");
+    const [expiration, setExpiration] = React.useState("");
     const [truck, setTruck] = useState([]);
     const [smallTruck, setSmallTruck] = useState([]);
     const [gasStation, setGasStation] = useState([]);
@@ -90,7 +96,7 @@ const InsertEmployee = () => {
             const datas = snapshot.val();
             const dataTruck = [];
             for (let id in datas) {
-                if(datas[id].Driver === "ไม่มี"){
+                if (datas[id].Driver === "ไม่มี") {
                     dataTruck.push({ id, ...datas[id] })
                 }
             }
@@ -101,7 +107,7 @@ const InsertEmployee = () => {
             const datas = snapshot.val();
             const dataSmallTruck = [];
             for (let id in datas) {
-                if(datas[id].Driver === "ไม่มี"){
+                if (datas[id].Driver === "ไม่มี") {
                     dataSmallTruck.push({ id, ...datas[id] })
                 }
             }
@@ -141,7 +147,7 @@ const InsertEmployee = () => {
 
     const handlePost = () => {
         if (menu === 1) {
-            createUserWithEmailAndPassword(auth, (user+"@gmail.com"), password).then(
+            createUserWithEmailAndPassword(auth, (user + "@gmail.com"), password).then(
                 (userCredential) => {
                     database
                         .ref("employee/officers/")
@@ -248,8 +254,6 @@ const InsertEmployee = () => {
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
                         <Grid item md={3} sm={4} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap",marginRight: 1 }} gutterBottom>คำนำหน้าชื่อ</Typography>
                             <Paper
                                 component="form" sx={{ width: "100%" }}>
                                 <Select
@@ -261,76 +265,75 @@ const InsertEmployee = () => {
                                     fullWidth
                                 >
                                     <MenuItem value={0}>
-                                        กรุณาเลือกคำนำหน้า
+                                        เลือกคำนำหน้าชื่อ
                                     </MenuItem>
                                     <MenuItem value={"นาย"}>นาย</MenuItem>
                                     <MenuItem value={"นาง"}>นาง</MenuItem>
                                     <MenuItem value={"นางสาว"}>นางสาว</MenuItem>
                                 </Select>
                             </Paper>
+                        </Grid>
+                        <Grid item md={4.5} sm={6} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ชื่อ</Typography>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+                                </Paper>
                             </Box>
                         </Grid>
                         <Grid item md={4.5} sm={6} xs={12}>
-                        <Box display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap",marginRight: 1 }} gutterBottom>ชื่อ</Typography>
-                            <Paper component="form">
-                                <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
-                            </Paper>
-                        </Box>
-                        </Grid>
-                        <Grid item md={4.5} sm={6} xs={12}>
-                        <Box display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight:1 }} gutterBottom>สกุล</Typography>
-                            <Paper component="form">
-                                <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
-                            </Paper>
-                        </Box>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>สกุล</Typography>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
+                                </Paper>
+                            </Box>
                         </Grid>
                         {
                             menu === 1 ?
                                 <>
                                     <Grid item md={6} sm={6} xs={12}>
-                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap",marginRight:1 }} gutterBottom>User</Typography>
-                                        <Paper component="form">
-                                            <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
-                                        </Paper>
-                                    </Box>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>User</Typography>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
+                                            </Paper>
+                                        </Box>
                                     </Grid>
                                 </>
                                 :
                                 <>
-                                    <Grid item md={2.5} sm={3} xs={6}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขประจำตัวผู้เสียภาษี</Typography>
-                                    </Grid>
-                                    <Grid item md={3.5} sm={3} xs={6}>
-                                        <Paper component="form">
-                                            <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} />
-                                        </Paper>
+                                    <Grid item md={6} sm={6} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เลขประจำตัวผู้เสียภาษี</Typography>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} />
+                                            </Paper>
+                                        </Box>
                                     </Grid>
                                 </>
                         }
-                        <Grid item md={2} sm={2} xs={4}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทพนักงาน</Typography>
-                        </Grid>
-                        <Grid item md={4} sm={4} xs={8}>
-                            <Paper
-                                component="form">
-                                <Select
-                                    id="demo-simple-select"
-                                    value={menu}
-                                    size="small"
-                                    sx={{ textAlign: "left" }}
-                                    onChange={(e) => setMenu(e.target.value)}
-                                    fullWidth
-                                >
-                                    <MenuItem value={0}>
-                                        กรุณาเลือกประเภทพนักงาน
-                                    </MenuItem>
-                                    <MenuItem value={1}>พนักงานทั่วไป</MenuItem>
-                                    <MenuItem value={2}>พนักงานขับรถ</MenuItem>
-                                </Select>
-                            </Paper>
+                        <Grid item md={6} sm={6} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ประเภทพนักงาน</Typography>
+                                <Paper
+                                    component="form" sx={{ width: "100%" }}>
+                                    <Select
+                                        id="demo-simple-select"
+                                        value={menu}
+                                        size="small"
+                                        sx={{ textAlign: "left" }}
+                                        onChange={(e) => setMenu(e.target.value)}
+                                        fullWidth
+                                    >
+                                        <MenuItem value={0}>
+                                            กรุณาเลือกประเภทพนักงาน
+                                        </MenuItem>
+                                        <MenuItem value={1}>พนักงานทั่วไป</MenuItem>
+                                        <MenuItem value={2}>พนักงานขับรถ</MenuItem>
+                                    </Select>
+                                </Paper>
+                            </Box>
                         </Grid>
                         {
                             menu === 1 ?
@@ -340,63 +343,63 @@ const InsertEmployee = () => {
                                             <Chip label="พนักงานทั่วไป" size="small" />
                                         </Divider>
                                     </Grid>
-                                    <Grid item md={2} sm={2} xs={2}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ตำแหน่ง</Typography>
+                                    <Grid item md={6} sm={6} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ตำแหน่ง</Typography>
+                                            <Paper
+                                                component="form" sx={{ width: "100%" }} >
+                                                <Select
+                                                    id="demo-simple-select"
+                                                    value={position}
+                                                    size="small"
+                                                    sx={{ textAlign: "left" }}
+                                                    onChange={(e) => setPosition(e.target.value)}
+                                                    fullWidth
+                                                >
+                                                    <MenuItem value={0}>
+                                                        กรุณาเลือกตำแหน่ง
+                                                    </MenuItem>
+                                                    <MenuItem value={"แอดมิน"}>แอดมิน</MenuItem>
+                                                    <MenuItem value={"พนักงานขายหน้าลาน"}>พนักงานขายหน้าลาน</MenuItem>
+                                                </Select>
+                                            </Paper>
+                                        </Box>
                                     </Grid>
-                                    <Grid item md={4} sm={4} xs={10}>
-                                    <Paper
-                                component="form">
-                                <Select
-                                    id="demo-simple-select"
-                                    value={position}
-                                    size="small"
-                                    sx={{ textAlign: "left" }}
-                                    onChange={(e) => setPosition(e.target.value)}
-                                    fullWidth
-                                >
-                                    <MenuItem value={0}>
-                                        กรุณาเลือกตำแหน่ง
-                                    </MenuItem>
-                                    <MenuItem value={"แอดมิน"}>แอดมิน</MenuItem>
-                                    <MenuItem value={"พนักงานขายหน้าลาน"}>พนักงานขายหน้าลาน</MenuItem>
-                                </Select>
-                            </Paper>
-                                    </Grid>
-                                    <Grid item md={2} sm={2} xs={3}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
-                                    </Grid>
-                                    <Grid item md={4} sm={4} xs={9}>
-                                        <Paper component="form">
-                                            <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
-                                        </Paper>
+                                    <Grid item md={6} sm={6} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เบอร์โทร</Typography>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                            </Paper>
+                                        </Box>
                                     </Grid>
                                     {
                                         position === "พนักงานขายหน้าลาน" &&
                                         <>
-                                            <Grid item md={2} sm={2} xs={2}>
-                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ปั้ม</Typography>
-                                            </Grid>
-                                            <Grid item md={4} sm={4} xs={10}>
-                                                <Paper
-                                                    component="form">
-                                                    <Select
-                                                        id="demo-simple-select"
-                                                        value={gasStations}
-                                                        size="small"
-                                                        sx={{ textAlign: "left" }}
-                                                        onChange={(e) => setGasStations(e.target.value)}
-                                                        fullWidth
-                                                    >
-                                                        <MenuItem value={""}>
-                                                            กรุณาเลือกปั้ม
-                                                        </MenuItem>
-                                                        {
-                                                            gasStation.map((row) => (
-                                                                <MenuItem value={row.Name}>{row.Name}</MenuItem>
-                                                            ))
-                                                        }
-                                                    </Select>
-                                                </Paper>
+                                            <Grid item md={6} sm={6} xs={12}>
+                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ปั้ม</Typography>
+                                                    <Paper
+                                                        component="form" sx={{ width: "100%" }}>
+                                                        <Select
+                                                            id="demo-simple-select"
+                                                            value={gasStations}
+                                                            size="small"
+                                                            sx={{ textAlign: "left" }}
+                                                            onChange={(e) => setGasStations(e.target.value)}
+                                                            fullWidth
+                                                        >
+                                                            <MenuItem value={""}>
+                                                                กรุณาเลือกปั้ม
+                                                            </MenuItem>
+                                                            {
+                                                                gasStation.map((row) => (
+                                                                    <MenuItem value={row.Name}>{row.Name}</MenuItem>
+                                                                ))
+                                                            }
+                                                        </Select>
+                                                    </Paper>
+                                                </Box>
                                             </Grid>
                                         </>
                                     }
@@ -446,11 +449,11 @@ const InsertEmployee = () => {
                                                     {
                                                         trucks === "รถใหญ่" ?
                                                             truck.map((row) => (
-                                                                <MenuItem value={row.id+":"+row.RegHead}>{row.RegHead}</MenuItem>
+                                                                <MenuItem value={row.id + ":" + row.RegHead}>{row.RegHead}</MenuItem>
                                                             ))
                                                             : trucks === "รถเล็ก" ?
                                                                 smallTruck.map((row) => (
-                                                                    <MenuItem value={row.id+":"+row.Registration}>{row.Registration}</MenuItem>
+                                                                    <MenuItem value={row.id + ":" + row.Registration}>{row.Registration}</MenuItem>
                                                                 ))
                                                                 : ""
                                                     }

@@ -198,7 +198,7 @@ const InsertTrips = () => {
             const datas = snapshot.val();
             const dataRegHead = [];
             for (let id in datas) {
-                if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี") {
+                if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง") {
                     dataRegHead.push({ id, ...datas[id] })
                 }
             }

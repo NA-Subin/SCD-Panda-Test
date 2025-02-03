@@ -221,8 +221,6 @@ const TruckRepair = (props) => {
     });
   };
 
-  console.log(inspection.Employee);
-
   useEffect(() => {
     getInspection();
     getTruck();

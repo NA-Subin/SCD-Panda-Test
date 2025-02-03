@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
@@ -44,6 +44,7 @@ import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import UpdateRegHead from "./UpdateRegHead";
 import TruckRepair from "./TruckRepair";
+import { fetchRealtimeData } from "../../../server/data";
 
 const RegHeadDetail = (props) => {
   const { truck } = props;
@@ -56,26 +57,38 @@ const RegHeadDetail = (props) => {
     setOpenTab(newOpen);
   };
 
-  const [registrationTail, setRegistrationTail] = React.useState([]);
+  // const [registrationTail, setRegistrationTail] = React.useState([]);
   const [regTailLength, setRegTailLength] = React.useState("");
 
-  const getRegitrationTail = async () => {
-    database.ref("/truck/registrationTail/").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataRegistrationTail = [];
-      for (let id in datas) {
-        if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && datas[id].Company === truck.Company){
-          dataRegistrationTail.push({ id, ...datas[id] })
-        }
-      }
-      setRegTailLength(datas.length);
-      setRegistrationTail(dataRegistrationTail);
-    });
-  };
+  // const getRegitrationTail = async () => {
+  //   database.ref("/truck/registrationTail/").on("value", (snapshot) => {
+  //     const datas = snapshot.val();
+  //     const dataRegistrationTail = [];
+  //     for (let id in datas) {
+  //       if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && datas[id].Company === truck.Company){
+  //         dataRegistrationTail.push({ id, ...datas[id] })
+  //       }
+  //     }
+  //     setRegTailLength(datas.length);
+  //     setRegistrationTail(dataRegistrationTail);
+  //   });
+  // };
 
-  useEffect(() => {
-    getRegitrationTail();
-  }, []);
+  const [data, setData] = useState({ regtail: {} });
+      
+          useEffect(() => {
+              fetchRealtimeData((newData) => {
+              setData(newData);
+          });
+          }, []);
+
+  const registrationTail = useMemo(() => {
+    return Object.entries(data.regtail).filter(([id, emp]) => emp.Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && emp.Company === truck.Company );
+  }, [data.regtail,truck.Company]);
+
+  // useEffect(() => {
+  //   getRegitrationTail();
+  // }, []);
 
   const handlePost = () => {
     database
@@ -109,7 +122,7 @@ const RegHeadDetail = (props) => {
 
   return (
     <React.Fragment>
-                      <TableRow>
+                      <TableRow key={truck.id}>
                         <TableCell sx={{ textAlign: "center" }}>{truck.id}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.RegHead}</TableCell>
                         {
@@ -171,7 +184,7 @@ const RegHeadDetail = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{truck.Company}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.Driver}</TableCell>
                         <UpdateRegHead key={truck.id} truck={truck}/>
-                        <TruckRepair key={truck.id} row={truck} />
+                        <TruckRepair key={truck.RepairTruck.split(":")[1]} row={truck} />
                       </TableRow>
     </React.Fragment>
   );

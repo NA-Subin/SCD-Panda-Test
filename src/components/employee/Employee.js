@@ -43,6 +43,7 @@ import InsertEmployee from "./InsertEmployee";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import UpdateDriver from "./UpdateDriver";
 import UpdateEmployee from "./UpdateEmployee";
+import { fetchRealtimeData } from "../../server/data";
 
 const Employee = () => {
   const [update, setUpdate] = React.useState(true);
@@ -52,6 +53,12 @@ const Employee = () => {
   const handleClose = () => {
     setOpenOfficeDetail(false);
   };
+
+  const [data, setData] = useState({ officers: {}, drivers: {}, creditors: {} });
+  
+      useEffect(() => {
+          fetchRealtimeData(setData);
+      }, []);
 
   const [openTab, setOpenTab] = React.useState(true);
 
@@ -215,7 +222,7 @@ const Employee = () => {
       <Divider sx={{ marginBottom: 2 }} />
       <Grid container spacing={3} marginTop={1} marginLeft={-7} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230) }}>
         <Grid item xs={12}>
-          <InsertEmployee />
+          <InsertEmployee type={open} />
         </Grid>
         {shouldDrawerOpen ? (
           <Grid item xs={1.5}>
@@ -245,7 +252,7 @@ const Employee = () => {
               sx={{ marginBottom: 1.3 }}
             >
               <Badge
-                badgeContent={office.length}
+                badgeContent={data.officers.length}
                 sx={{
                   "& .MuiBadge-badge": {
                     fontSize: 11, // ขนาดตัวเลขใน Badge
@@ -273,7 +280,7 @@ const Employee = () => {
               sx={{ marginBottom: 1.3 }}
             >
               <Badge
-                badgeContent={driver.length}
+                badgeContent={data.drivers.length}
                 sx={{
                   "& .MuiBadge-badge": {
                     fontSize: 11, // ขนาดตัวเลขใน Badge
@@ -296,7 +303,7 @@ const Employee = () => {
               <Typography variant="subtitle2" fontWeight="bold" marginLeft={3} gutterBottom>พนักงาน</Typography>
               <Typography variant="h5" fontWeight="bold" marginTop={-2} gutterBottom>ทั้งหมด</Typography>
               <Box display="flex" justifyContent="center" alignItems="center" marginTop={-2}>
-                <Typography variant="h2" fontWeight="bold" gutterBottom>{office.length + driver.length}</Typography>
+                <Typography variant="h2" fontWeight="bold" gutterBottom>{data.officers.length + data.drivers.length}</Typography>
                 <Typography variant="h6" fontWeight="bold" gutterBottom>คน</Typography>
               </Box>
             </Paper>
@@ -329,7 +336,7 @@ const Employee = () => {
                 onClick={() => setOpen(1)}
               >
                 <Badge
-                  badgeContent={office.length}
+                  badgeContent={data.officers.length}
                   sx={{
                     "& .MuiBadge-badge": {
                       fontSize: 12, // ขนาดตัวเลขใน Badge
@@ -354,7 +361,7 @@ const Employee = () => {
                 onClick={() => setOpen(2)}
               >
                 <Badge
-                  badgeContent={driver.length}
+                  badgeContent={data.drivers.length}
                   sx={{
                     "& .MuiBadge-badge": {
                       fontSize: 12, // ขนาดตัวเลขใน Badge
@@ -412,8 +419,8 @@ const Employee = () => {
                   </TableHead>
                   <TableBody>
                     {
-                      office.map((row) => (
-                        <TableRow>
+                      Object.entries(data.officers).map(([id, row]) => (
+                        <TableRow key={id}>
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
@@ -472,8 +479,8 @@ const Employee = () => {
                   </TableHead>
                   <TableBody>
                     {
-                      driver.map((row) => (
-                        <TableRow>
+                      Object.entries(data.drivers).map(([id, row]) => (
+                        <TableRow key={id} >
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>

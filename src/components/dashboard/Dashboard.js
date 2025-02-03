@@ -25,6 +25,7 @@ import Logo from "../../theme/img/logoPanda.jpg";
 import { borderRadius, keyframes, width } from "@mui/system";
 import { database } from "../../server/firebase";
 import { BarChart, PieChart, SparkLineChart } from "@mui/x-charts";
+import { fetchRealtimeData } from "../../server/data";
 
 const slideOutRight = keyframes`
   0% {
@@ -46,65 +47,25 @@ const Dashboard = () => {
   const token = Cookies.get("token");
   const [slideOut, setSlideOut] = useState(true);
 
+  const [data, setData] = useState({ officers: {}, drivers: {}, creditors: {}, order: {}, trip: {}, tickets: {} });
+
+    useEffect(() => {
+        fetchRealtimeData(setData);
+    }, []);
+
+    console.log("officers : ",data.officers.length);
+    console.log("drivers : ",data.drivers.length);
+    console.log("creditors : ",data.creditors.length);
+    console.log("order : ",data.order.length);
+    console.log("trip : ",data.trip.length);
+    console.log("tickets : ",data.tickets.length);
+
   const pieParams = {
     width: 290,
     height: 160,
     margin: { right: 5 },
     slotProps: { legend: { hidden: true } },
   };
-
-  const [office, setOffice] = useState([]);
-  const [driver, setDriver] = useState([]);
-  const [creditor, setCreditor] = useState([]);
-
-  const getEmployee = async () => {
-    database.ref("/employee/officers").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setOffice(datas);
-    });
-  };
-
-  const getDriver = async () => {
-    database.ref("/employee/drivers").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setDriver(datas);
-    });
-  };
-
-  const getCreditor = async () => {
-    database.ref("/employee/creditors").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setCreditor(datas);
-    });
-  };
-
-  const [order,setOrder] = React.useState([]);
-  const [trip,setTrip] = React.useState([]);
-  const [tickets,setTickets] = React.useState([]);
-
-  const getOrder = async () => {
-    database.ref("/order").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setOrder(datas);
-    });
-
-    database.ref("/trip").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setTrip(datas);
-    });
-
-    database.ref("/tickets").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setTickets(datas);
-    });
-  };
-
-  useEffect(() => {
-    getEmployee();
-    getOrder();
-    getDriver();
-    getCreditor()
-  }, []);
 
   // useEffect(() => {
   //     const token = Cookies.get('token'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
@@ -196,7 +157,7 @@ const Dashboard = () => {
               </Typography>
               <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
               <Typography variant="h2" gutterBottom>
-                {trip.length}
+                {data.trip.length}
               </Typography>
             </Box>
           {/* <Box
@@ -250,7 +211,7 @@ const Dashboard = () => {
               </Typography>
               <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
               <Typography variant="h2" gutterBottom>
-                {order.length}
+                {data.order.length}
               </Typography>
             </Box>
           {/* <Box
@@ -307,7 +268,7 @@ const Dashboard = () => {
               </Typography>
               <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
               <Typography variant="h2" gutterBottom>
-                {tickets.length}
+                {data.tickets.length}
               </Typography>
             </Box>
           {/* <Box
@@ -347,16 +308,16 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} lg={3}>
           <Paper sx={{ height: "30vh",backgroundColor: theme.palette.panda.contrastText,borderRadius:5 }}>
             <Box sx={{ backgroundColor: theme.palette.panda.main, borderTopLeftRadius: 15, borderTopRightRadius: 15, color: "white" }}>
-              <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>จำนวนพนักงาน( ทั้งหมด {office.length+driver.length+creditor.length} คน)</Typography> 
+              <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>จำนวนพนักงาน( ทั้งหมด {data.officers.length+data.drivers.length+data.creditors.length} คน)</Typography> 
             </Box>
             <Box sx={{ backgroundColor: "white",marginTop: -0.5, marginLeft: 0.5, marginRight:0.5 , paddingBottom: 0.5 }}>
             <PieChart
               series={[
                 {
                   data: [
-                    { id: 0, value: office.length, label: 'พนักงานบริษัท',color: theme.palette.success.main },
-                    { id: 1, value: driver.length, label: 'พนักงานขับรถ',color: theme.palette.primary.main },
-                    { id: 2, value: creditor.length, label: 'เจ้าหนี้การค้า',color: theme.palette.warning.main },
+                    { id: 0, value: data.officers.length, label: 'พนักงานบริษัท',color: theme.palette.success.main },
+                    { id: 1, value: data.drivers.length, label: 'พนักงานขับรถ',color: theme.palette.primary.main },
+                    { id: 2, value: data.creditors.length, label: 'เจ้าหนี้การค้า',color: theme.palette.warning.main },
                   ],
                   innerRadius: 30,
                 },

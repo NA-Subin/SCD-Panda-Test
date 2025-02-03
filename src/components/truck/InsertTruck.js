@@ -65,7 +65,7 @@ const InsertTruck = (props) => {
     const [registrationTail, setRegistrationTail] = useState([]);
     const [drivers, setDrivers] = useState(0);
     const [companies, setCompanies] = useState(0);
-    const [tail, setTail] = useState("ไม่มี: ");
+    const [tail, setTail] = useState("ไม่มี:::");
     const [regHead, setRegHead] = React.useState("");
     const [cap, setCap] = React.useState("");
     const [weight, setWeight] = React.useState("");
@@ -177,7 +177,7 @@ const InsertTruck = (props) => {
                 id: regHeadLength + 1,
                 Company: companies,
                 RegHead: regHead,
-                RegTail: tail.split(":")[0],
+                RegTail: tail.split(":")[1],
                 RepairTruck: "00/00/0000:ยังไม่ตรวจสอบสภาพรถ",
                 Weight: weight,
                 Insurance: "-",
@@ -190,6 +190,21 @@ const InsertTruck = (props) => {
                 VehPicture: "ไม่มี"
             })
             .then(() => {
+                if(tail.split(":")[1] !== "ไม่มี"){
+                    database
+                              .ref("/truck/registrationTail/")
+                              .child(tail.split(":")[0] - 1)
+                              .update({
+                                Status: "เชื่อมทะเบียนหัวแล้ว",
+                              })
+                              .then(() => {
+                                console.log("Data pushed successfully");
+                              })
+                              .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                              });
+                }
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
                 setCompanies("");
@@ -218,7 +233,7 @@ const InsertTruck = (props) => {
                 id: regTailLength + 1,
                 Company: companies,
                 RegTail: regTail,
-                Weight: weight,
+                Weight: tailWeight,
                 Cap: cap,
                 Insurance: "-",
                 Status: "ยังไม่เชื่อมต่อทะเบียนหัว",
@@ -374,6 +389,14 @@ const InsertTruck = (props) => {
                                         </Paper>
                                     </Grid>
                                     <Grid item sm={2} xs={4}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>น้ำหนัก</Typography>
+                                    </Grid>
+                                    <Grid item sm={4} xs={8}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={weight} onChange={(e) => setWeight(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item sm={2} xs={4}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" gutterBottom marginTop={1}>ใบจดทะเบียนหัว</Typography>
                                     </Grid>
                                     <Grid item sm={4} xs={8}>
@@ -402,16 +425,16 @@ const InsertTruck = (props) => {
                                                 onChange={(e) => setTail(e.target.value)}
                                                 fullWidth
                                             >
-                                                <MenuItem value={"ไม่มี: "}>
+                                                <MenuItem value={"ไม่มี:::"}>
                                                     กรุณาเลือกทะเบียนหาง
                                                 </MenuItem>
-                                                <MenuItem value={"ไม่มี:0"}>
+                                                <MenuItem value={"0:ไม่มี:0:0"}>
                                                     ไม่มี
                                                 </MenuItem>
                                                 {
                                                     registrationTail.map((row) => (
                                                         row.Company === companies &&
-                                                        <MenuItem value={row.RegTail + ":" + row.Cap}>{row.RegTail}</MenuItem>
+                                                        <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
@@ -423,10 +446,10 @@ const InsertTruck = (props) => {
                                     <Grid item sm={4} xs={8}>
                                         <Paper component="form">
                                             {
-                                                tail === "ไม่มี" ?
+                                                tail.split(":")[1] === "ไม่มี" ?
                                                     <TextField size="small" fullWidth disabled value={0} onChange={(e) => setCap(e.target.value)} sx={{ backgroundColor: "lightgray" }} />
                                                     :
-                                                    <TextField size="small" fullWidth disabled value={tail.split(":")[1]} onChange={(e) => setCap(e.target.value)} sx={{ backgroundColor: "lightgray" }} />
+                                                    <TextField size="small" fullWidth disabled value={tail.split(":")[2]} onChange={(e) => setCap(e.target.value)} sx={{ backgroundColor: "lightgray" }} />
                                             }
                                         </Paper>
                                     </Grid>
@@ -435,7 +458,7 @@ const InsertTruck = (props) => {
                                     </Grid>
                                     <Grid item sm={4} xs={8}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={weight} onChange={(e) => setWeight(e.target.value)} />
+                                            <TextField size="small" disabled fullWidth value={Number(weight)+Number(tail.split(":")[3])}  sx={{ backgroundColor: "lightgray" }} />
                                         </Paper>
                                     </Grid>
                                     {

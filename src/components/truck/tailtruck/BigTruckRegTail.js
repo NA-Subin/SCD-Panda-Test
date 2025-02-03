@@ -125,7 +125,7 @@ const BigTruckRegTail = (props) => {
               </Box>
             </Paper>
             {
-              status === 0 ?
+              status.length === 0 ?
                 <Paper sx={{ height: "20vh", paddingLeft: 3, marginTop: 2, paddingTop: 4, backgroundColor: theme.palette.success.main, color: "white", borderRadius: 2 }}>
                   <Typography variant="subtitle2" fontWeight="bold" gutterBottom>เชื่อมต่อทะเบียนหัว</Typography>
                   <Typography variant="h2" fontWeight="bold" marginTop={-3} gutterBottom>ครบ</Typography>
@@ -136,7 +136,7 @@ const BigTruckRegTail = (props) => {
                   <Typography variant="subtitle2" fontWeight="bold" marginLeft={1} gutterBottom>ไม่มี</Typography>
                   <Typography variant="h5" fontWeight="bold" marginTop={-2} gutterBottom>ทะเบียนหัว</Typography>
                   <Box display="flex" justifyContent="center" alignItems="center" marginTop={-2}>
-                    <Typography variant="h2" fontWeight="bold" gutterBottom>{status}</Typography>
+                    <Typography variant="h2" fontWeight="bold" gutterBottom>{status.length}</Typography>
                     <Typography variant="h6" fontWeight="bold" gutterBottom>หาง</Typography>
                   </Box>
                 </Paper>
@@ -169,7 +169,7 @@ const BigTruckRegTail = (props) => {
             <Divider sx={{ marginBottom: 1 }} />
             <TableContainer
               component={Paper}
-              style={{ maxHeight: "90vh" }}
+              style={{ maxHeight: "58vh" }}
               sx={{ marginTop: 2 }}
             >
               <Table stickyHeader size="small"  sx={{ width: "1080pxpx" }}>
@@ -198,8 +198,8 @@ const BigTruckRegTail = (props) => {
                 </TableHead>
                 <TableBody>
                   {
-                    truck.map((row) => (
-                      <TableRow>
+                    Object.entries(truck).map(([id, row]) => (
+                      <TableRow key={id} >
                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.RegTail}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Cap}</TableCell>

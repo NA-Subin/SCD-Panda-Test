@@ -136,7 +136,7 @@ const SmallTruck = (props) => {
               </Box>
             </Paper>
             {
-              repair === 0 ?
+              repair.length === 0 ?
               <Paper sx={{ height: "20vh", paddingLeft: 3, marginTop: 2, paddingTop: 4, backgroundColor: theme.palette.success.main, color: "white", borderRadius: 2 }}>
             <Typography variant="subtitle2" fontWeight="bold" marginLeft={3} gutterBottom>ตรวจสภาพรถ</Typography>
             <Typography variant="h2" fontWeight="bold" marginTop={-3} gutterBottom>ครบ</Typography>
@@ -147,7 +147,7 @@ const SmallTruck = (props) => {
               <Typography variant="subtitle2" fontWeight="bold" marginLeft={3} gutterBottom>ไม่ตรวจ</Typography>
               <Typography variant="h5" fontWeight="bold" marginTop={-2} gutterBottom>สภาพรถ</Typography>
               <Box display="flex" justifyContent="center" alignItems="center" marginTop={-2}>
-                <Typography variant="h2" fontWeight="bold" gutterBottom>{repair}</Typography>
+                <Typography variant="h2" fontWeight="bold" gutterBottom>{repair.length}</Typography>
                 <Typography variant="h6" fontWeight="bold" gutterBottom>คัน</Typography>
               </Box>
             </Paper>
@@ -180,7 +180,7 @@ const SmallTruck = (props) => {
               <Divider sx={{ marginBottom: 1 }} />
               <TableContainer
                 component={Paper}
-                style={{ maxHeight: "90vh" }}
+                style={{ maxHeight: "58vh" }}
                 sx={{ marginTop: 2 }}
               >
                 <Table stickyHeader size="small" sx={{ width: "1080pxpx" }}>
@@ -212,8 +212,8 @@ const SmallTruck = (props) => {
                   </TableHead>
                   <TableBody>
                     {
-                      truck.map((row) => (
-                        <TableRow>
+                      Object.entries(truck).map(([id, row]) => (
+                        <TableRow key={id} >
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.VehicleRegistration}</TableCell>
