@@ -26,6 +26,7 @@ import { borderRadius, keyframes, width } from "@mui/system";
 import { database } from "../../server/firebase";
 import { BarChart, PieChart, SparkLineChart } from "@mui/x-charts";
 import { fetchRealtimeData } from "../../server/data";
+import { useData } from "../../server/path";
 
 const slideOutRight = keyframes`
   0% {
@@ -53,12 +54,9 @@ const Dashboard = () => {
         fetchRealtimeData(setData);
     }, []);
 
-    console.log("officers : ",data.officers.length);
-    console.log("drivers : ",data.drivers.length);
-    console.log("creditors : ",data.creditors.length);
-    console.log("order : ",data.order.length);
-    console.log("trip : ",data.trip.length);
-    console.log("tickets : ",data.tickets.length);
+    const { order } = useData();
+    const orderList = Object.values(order); 
+    console.log("order : ", orderList);
 
   const pieParams = {
     width: 290,

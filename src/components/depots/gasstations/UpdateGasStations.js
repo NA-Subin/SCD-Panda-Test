@@ -44,6 +44,7 @@ const UpdateGasStations = (props) => {
 
     const [setting, setSetting] = React.useState(true);
     const [name, setName] = React.useState(gasStation.Name);
+    const [shortName, setShortName] = React.useState(gasStation.ShortName);
     const [number, setNumber] = React.useState(gasStation.OilWellNumber);
     const [stockOil, setStockOil] = React.useState(gasStation.Stock);
     const [squeeze, setSqueeze] = React.useState(Squeeze);
@@ -93,58 +94,58 @@ const UpdateGasStations = (props) => {
         const isFirstStation = (gasStationOil?.[0]?.Name === gasStation?.Name) || false;
         const formattedDate = dayjs(selectedDate).format("DD-MM-YYYY");
         const reportData = gasStation?.Report?.[formattedDate];
-    
+
         const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
         const yesterdayData = gasStation?.Report?.[yesterdayDate];
-    
+
         let sharedDownHole = 0;
-    
+
         if (isFirstStation && reportData) {
             const firstProductWithDownHole = Object.values(reportData).find(
                 (entry) => entry?.DownHole
             );
             sharedDownHole = firstProductWithDownHole?.DownHole || 0;
         }
-    
+
         const updatedValues = reportData
             ? Object.entries(reportData)
-            .sort(([keyA, valueA], [keyB, valueB]) =>
-                valueA?.ProductName?.localeCompare(valueB?.ProductName || "") || 0
-            )
-            .map(([, value], index) => {
-                const yesterdayEntry = Object.values(yesterdayData || {}).find(
-                    (entry) => entry?.ProductName === value?.ProductName
-                ) || { Volume: 0 };
-    
-                return {
-                    ProductName: value?.ProductName || "",
-                    Capacity: value?.Capacity || 0,
-                    Color: value?.Color || "",
-                    Volume: value?.Volume || 0, // ใช้ข้อมูลของวันที่เลือก
-                    Squeeze: values[index]?.Squeeze || value?.Squeeze || 0,
-                    Delivered: values[index]?.Delivered || value?.Delivered || 0,
-                    Pending1: values[index]?.Pending1 || value?.Pending1 || 0,
-                    Pending2: values[index]?.Pending2 || value?.Pending2 || 0,
-                    EstimateSell: values[index]?.EstimateSell || value?.EstimateSell || 0,
-                    Period: value?.Period || 0,
-                    DownHole: value?.DownHole || 0,
-                    YesterDay: yesterdayEntry?.Volume || 0, // ใช้ข้อมูลวันก่อนหน้า
-                    Sell: value?.Sell || 0,
-                    TotalVolume: value?.TotalVolume || 0,
-                    OilBalance: value?.OilBalance || 0
-                };
-            })
+                .sort(([keyA, valueA], [keyB, valueB]) =>
+                    valueA?.ProductName?.localeCompare(valueB?.ProductName || "") || 0
+                )
+                .map(([, value], index) => {
+                    const yesterdayEntry = Object.values(yesterdayData || {}).find(
+                        (entry) => entry?.ProductName === value?.ProductName
+                    ) || { Volume: 0 };
+
+                    return {
+                        ProductName: value?.ProductName || "",
+                        Capacity: value?.Capacity || 0,
+                        Color: value?.Color || "",
+                        Volume: value?.Volume || 0, // ใช้ข้อมูลของวันที่เลือก
+                        Squeeze: values[index]?.Squeeze || value?.Squeeze || 0,
+                        Delivered: values[index]?.Delivered || value?.Delivered || 0,
+                        Pending1: values[index]?.Pending1 || value?.Pending1 || 0,
+                        Pending2: values[index]?.Pending2 || value?.Pending2 || 0,
+                        EstimateSell: values[index]?.EstimateSell || value?.EstimateSell || 0,
+                        Period: value?.Period || 0,
+                        DownHole: value?.DownHole || 0,
+                        YesterDay: yesterdayEntry?.Volume || 0, // ใช้ข้อมูลวันก่อนหน้า
+                        Sell: value?.Sell || 0,
+                        TotalVolume: value?.TotalVolume || 0,
+                        OilBalance: value?.OilBalance || 0
+                    };
+                })
             : stock.map((row) => {
                 const yesterdayEntry = Object.values(yesterdayData || {}).find(
                     (entry) => entry?.ProductName === row?.ProductName
                 ) || { OilBalance: 0 };
-    
+
                 const downHoleValue = downHole
                     ? (downHole.find((item) => item?.ProductName === row?.ProductName)?.DownHole || gasStation?.Products?.[row?.ProductName] || 0)
                     : (isFirstStation
                         ? gasStation?.Products?.[row?.ProductName] || 0
                         : sharedDownHole || 0);
-    
+
                 return {
                     ProductName: row?.ProductName || "",
                     Capacity: row?.Capacity || 0,
@@ -164,12 +165,12 @@ const UpdateGasStations = (props) => {
                 };
             });
 
-            console.log("Selected Date:", selectedDate);
-    console.log("Formatted Date:", formattedDate);
-    console.log("Yesterday Date:", yesterdayDate);
-    console.log("Report Data:", reportData);
-    console.log("Yesterday Data:", yesterdayData);
-    
+        console.log("Selected Date:", selectedDate);
+        console.log("Formatted Date:", formattedDate);
+        console.log("Yesterday Date:", yesterdayDate);
+        console.log("Report Data:", reportData);
+        console.log("Yesterday Data:", yesterdayData);
+
         updatedValues.forEach((row) => {
             row.Period = calculatePeriod(row);
             row.Sell = calculateSell(row);
@@ -189,7 +190,7 @@ const UpdateGasStations = (props) => {
                 newRow.Volume !== existingRow.Volume // เพิ่มเงื่อนไข
             );
         });
-        
+
         // อัปเดต state หากข้อมูลเปลี่ยนแปลง
         if (hasChanged) {
             setValues((prevValues) =>
@@ -199,7 +200,7 @@ const UpdateGasStations = (props) => {
                 }))
             );
         }
-    
+
         // เพิ่มเงื่อนไขการอัปเดต state ถ้าข้อมูลมีการเปลี่ยนแปลงจริงๆ
         // const hasChanged = updatedValues.some((newRow, index) => {
         //     const existingRow = values[index] || {};
@@ -212,7 +213,7 @@ const UpdateGasStations = (props) => {
         //         newRow.EstimateSell !== existingRow.EstimateSell
         //     );
         // });
-        
+
         // // หากข้อมูลเปลี่ยนแปลงจึงอัปเดต state
         // if (hasChanged) {
         //     setValues((prevValues) =>
@@ -230,17 +231,17 @@ const UpdateGasStations = (props) => {
         //         })
         //     );
         // }
-        
+
     }, [stock, selectedDate, gasStation, squeeze, gasStationOil, downHole]);  // เพิ่ม values ใน dependencies
-    
+
     const deepEqual = (obj1, obj2) => {
         return JSON.stringify(obj1) === JSON.stringify(obj2);
     };
-    
+
     const handleInputChange = (index, field, value) => {
         console.log("Before update:", { index, field, value, currentValue: values[index]?.[field] });
         const updatedValues = [...values];
-    
+
         // ตรวจสอบการเพิ่มข้อมูลครั้งแรก
         if (!updatedValues[index]) {
             updatedValues[index] = {
@@ -256,7 +257,7 @@ const UpdateGasStations = (props) => {
                 EstimateSell: 0,
                 Period: 0,
                 // ใช้ค่า DownHole เริ่มต้นจาก gasStation ถ้าค่าใน downHole ไม่มี
-                DownHole: 0, 
+                DownHole: 0,
                 YesterDay: 0,
                 Sell: 0,
                 TotalVolume: 0,
@@ -265,15 +266,15 @@ const UpdateGasStations = (props) => {
         }
 
         // updatedValues[index][field] = value === "" ? 0 : parseFloat(value);
-    
+
         // const newValue = value === "" || isNaN(value) ? 0 : parseFloat(value);
         updatedValues[index][field] = value;
-    
+
         // ตรวจสอบว่า DownHole ถูกตั้งค่าแล้วหรือยัง
         const downHoleValue = downHole
             ? downHole.find(item => item?.ProductName === updatedValues[index]?.ProductName)?.DownHole
             : gasStation?.Products?.[updatedValues[index]?.ProductName] || 0;
-    
+
         updatedValues[index].Period = calculatePeriod(updatedValues[index]);
         updatedValues[index].DownHole = downHoleValue; // ใช้ค่าจากการตรวจสอบ
         updatedValues[index].Sell = calculateSell(updatedValues[index]);
@@ -288,7 +289,7 @@ const UpdateGasStations = (props) => {
             return newValues;
         });
     };
-    
+
     // ฟังก์ชันคำนวณผลรวม
     const calculatePeriod = (row) => {
         const estimateSell = parseFloat(row.EstimateSell) || 0;
@@ -312,14 +313,14 @@ const UpdateGasStations = (props) => {
         const Pending2 = parseFloat(row.Pending2) || 0;
         const downHole = parseFloat(row.DownHole) || 0;
         const volume = parseFloat(row.Volume) || 0;
-        
+
         // console.log("downHole :",downHole);
         // console.log("value :",value);
         // return ((value + Delivered + Pending1 + Pending2)).toFixed(2);
-        if(downHole !== 0){
+        if (downHole !== 0) {
             return ((volume + Delivered + Pending1 + Pending2)).toFixed(2);
         }
-        else{
+        else {
             return ((volume + Delivered + Pending1 + Pending2 + downHole)).toFixed(2);
         }
     };
@@ -356,24 +357,30 @@ const UpdateGasStations = (props) => {
 
     return (
         <React.Fragment>
-            <Grid container marginBottom={1}>
-                <Grid item xs={6.5} sm={5} md={3} display="flex" justifyContent="center" alignItems="center">
-                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ชื่อปั้ม</Typography>
+            {/* <Grid container marginBottom={1}>
+                <Grid item xs={6.5} sm={9} md={6} display="flex" justifyContent="center" alignItems="center">
+                    <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>{name + " / " + shortName}</Typography>
+
                     <TextField
                         fullWidth
                         variant="standard"
-                        value={name}
+                        value={name + " / " + shortName}
                         InputProps={{
                             sx: {
                                 textAlign: "center", // จัดข้อความให้อยู่กึ่งกลางแนวนอน
+                                color: "#000", // สีดำ
+                                fontWeight: "bold", // ทำให้ตัวหนังสือหนา
                             },
                             inputProps: {
                                 style: {
                                     textAlign: "center", // จัดข้อความให้อยู่กึ่งกลางแนวนอน
+                                    color: "#000", // สีดำเข้ม
+                                    fontWeight: "bold", // ทำให้ตัวหนังสือหนา
+                                    fontSize: "16px", // ปรับขนาดตัวอักษร
                                 },
                             },
                         }}
-                        disabled />
+                    />
                 </Grid>
                 <Grid item xs={5.5} sm={3} md={2} display="flex" justifyContent="center" alignItems="center">
                     <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>จำนวนหลุม</Typography>
@@ -384,14 +391,19 @@ const UpdateGasStations = (props) => {
                         InputProps={{
                             sx: {
                                 textAlign: "center", // จัดข้อความให้อยู่กึ่งกลางแนวนอน
+                                color: "#000", // สีดำ
+                                fontWeight: "bold", // ทำให้ตัวหนังสือหนา
                             },
                             inputProps: {
                                 style: {
                                     textAlign: "center", // จัดข้อความให้อยู่กึ่งกลางแนวนอน
+                                    color: "#000", // สีดำเข้ม
+                                    fontWeight: "bold", // ทำให้ตัวหนังสือหนา
+                                    fontSize: "16px", // ปรับขนาดตัวอักษร
                                 },
                             },
                         }}
-                        disabled />
+                        />
                 </Grid>
                 <Grid item xs={12} sm={4} md={3} display="flex" justifyContent="center" alignItems="center">
                     <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>คลังสต็อก</Typography>
@@ -413,13 +425,35 @@ const UpdateGasStations = (props) => {
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} display="flex" justifyContent="center" alignItems="center">
                     <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ที่อยู่</Typography>
-                    <TextField fullWidth variant="standard" value={gasStation.Address} disabled />
+                    <TextField 
+                    fullWidth 
+                    variant="standard" 
+                    value={gasStation.Address} 
+                    InputProps={{
+                        sx: {
+                            textAlign: "center", // จัดข้อความให้อยู่กึ่งกลางแนวนอน
+                            color: "#000", // สีดำ
+                            fontWeight: "bold", // ทำให้ตัวหนังสือหนา
+                        },
+                        inputProps: {
+                            style: {
+                                textAlign: "center", // จัดข้อความให้อยู่กึ่งกลางแนวนอน
+                                color: "#000", // สีดำเข้ม
+                                fontWeight: "bold", // ทำให้ตัวหนังสือหนา
+                                fontSize: "16px", // ปรับขนาดตัวอักษร
+                            },
+                        },
+                    }}
+                    />
                 </Grid>
-            </Grid>
+            </Grid> */}
+            <Box textAlign="center">
+            <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ fontSize: 18, marginRight: 2 }} gutterBottom>{name + " / " + shortName + " มีทั้งหมด "+ number + " หลุม" + "ที่อยู่ " + gasStation.Address}</Typography>
+            </Box>
             <TableContainer
                 component={Paper}
                 style={{ maxHeight: "70vh" }}
-                sx={{ marginBottom: 2}}
+                sx={{ marginBottom: 2 }}
             >
                 <Table stickyHeader size="small" sx={{ width: 1200 }}>
                     <TableHead>
@@ -516,43 +550,43 @@ const UpdateGasStations = (props) => {
                                             )
                                             .map(([key, value]) => (
                                                 <TableRow key={key}>
-                                                    <TablecellHeader 
-                                                        sx={{ 
-                                                            backgroundColor: value.Color, 
-                                                            width: 50, 
+                                                    <TablecellHeader
+                                                        sx={{
+                                                            backgroundColor: value.Color,
+                                                            width: 50,
                                                             color: "black",
                                                             position: "sticky",
                                                             left: 0,
                                                             zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน
-                                                            }}
-                                                        >
-                                                            {value.ProductName}
-                                                        </TablecellHeader>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity )}</TableCell>
+                                                        }}
+                                                    >
+                                                        {value.ProductName}
+                                                    </TablecellHeader>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Volume)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Squeeze)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Grid container>
-                                                        <Grid item xs={4}>
-                                                        {new Intl.NumberFormat("en-US").format(value.Delivered)}
-                                            </Grid>
-                                            <Grid item xs={0.5}>
-                                                |
-                                            </Grid>
-                                            <Grid item xs={3.5}>
-                                            {new Intl.NumberFormat("en-US").format(value.Pending1)}
-                                            </Grid>
-                                            <Grid item xs={0.5}>
-                                                |
-                                            </Grid>
-                                            <Grid item xs={3.5}>
-                                            {new Intl.NumberFormat("en-US").format(value.Pending2)}
-                                            </Grid>
+                                                            <Grid item xs={4}>
+                                                                {new Intl.NumberFormat("en-US").format(value.Delivered)}
+                                                            </Grid>
+                                                            <Grid item xs={0.5}>
+                                                                |
+                                                            </Grid>
+                                                            <Grid item xs={3.5}>
+                                                                {new Intl.NumberFormat("en-US").format(value.Pending1)}
+                                                            </Grid>
+                                                            <Grid item xs={0.5}>
+                                                                |
+                                                            </Grid>
+                                                            <Grid item xs={3.5}>
+                                                                {new Intl.NumberFormat("en-US").format(value.Pending2)}
+                                                            </Grid>
                                                         </Grid>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.EstimateSell)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Period)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity-value.DownHole)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity - value.DownHole)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.YesterDay)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Sell)}</TableCell>
                                                 </TableRow>
@@ -565,10 +599,10 @@ const UpdateGasStations = (props) => {
                                                     stock.map((row, index) => (
                                                         row.ProductName === key &&
                                                         <TableRow key={row.id}>
-                                                            <TablecellHeader 
-                                                                sx={{ 
-                                                                    backgroundColor: row.Color, 
-                                                                    width: 50, 
+                                                            <TablecellHeader
+                                                                sx={{
+                                                                    backgroundColor: row.Color,
+                                                                    width: 50,
                                                                     color: "black",
                                                                     position: "sticky",
                                                                     left: 0,
@@ -581,23 +615,23 @@ const UpdateGasStations = (props) => {
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
-                                                            <Grid container>
-                                            <Grid item xs={4}>
-                                                0
-                                            </Grid>
-                                            <Grid item xs={0.5}>
-                                                |
-                                            </Grid>
-                                            <Grid item xs={3.5}>
-                                                0
-                                            </Grid>
-                                            <Grid item xs={0.5}>
-                                                |
-                                            </Grid>
-                                            <Grid item xs={3.5}>
-                                                0
-                                            </Grid>
-                                        </Grid>
+                                                                <Grid container>
+                                                                    <Grid item xs={4}>
+                                                                        0
+                                                                    </Grid>
+                                                                    <Grid item xs={0.5}>
+                                                                        |
+                                                                    </Grid>
+                                                                    <Grid item xs={3.5}>
+                                                                        0
+                                                                    </Grid>
+                                                                    <Grid item xs={0.5}>
+                                                                        |
+                                                                    </Grid>
+                                                                    <Grid item xs={3.5}>
+                                                                        0
+                                                                    </Grid>
+                                                                </Grid>
                                                             </TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
@@ -619,15 +653,15 @@ const UpdateGasStations = (props) => {
                                                     stock.map((row, index) => (
                                                         row.ProductName === key &&
                                                         <TableRow key={row.id}>
-                                                            <TablecellHeader 
-                                                                sx={{ 
-                                                                    backgroundColor: row.Color, 
-                                                                    width: 50, 
+                                                            <TablecellHeader
+                                                                sx={{
+                                                                    backgroundColor: row.Color,
+                                                                    width: 50,
                                                                     color: "black",
                                                                     position: "sticky",
                                                                     left: 0,
                                                                     zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
-                                                                    }}
+                                                                }}
                                                             >
                                                                 {row.ProductName}
                                                             </TablecellHeader>
@@ -635,23 +669,23 @@ const UpdateGasStations = (props) => {
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
-                                                            <Grid container>
-                                            <Grid item xs={4}>
-                                                0
-                                            </Grid>
-                                            <Grid item xs={0.5}>
-                                                |
-                                            </Grid>
-                                            <Grid item xs={3.5}>
-                                                0
-                                            </Grid>
-                                            <Grid item xs={0.5}>
-                                                |
-                                            </Grid>
-                                            <Grid item xs={3.5}>
-                                                0
-                                            </Grid>
-                                        </Grid>
+                                                                <Grid container>
+                                                                    <Grid item xs={4}>
+                                                                        0
+                                                                    </Grid>
+                                                                    <Grid item xs={0.5}>
+                                                                        |
+                                                                    </Grid>
+                                                                    <Grid item xs={3.5}>
+                                                                        0
+                                                                    </Grid>
+                                                                    <Grid item xs={0.5}>
+                                                                        |
+                                                                    </Grid>
+                                                                    <Grid item xs={3.5}>
+                                                                        0
+                                                                    </Grid>
+                                                                </Grid>
                                                             </TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>0</TableCell>
@@ -672,15 +706,15 @@ const UpdateGasStations = (props) => {
                                             stock.map((row, index) => (
                                                 row.ProductName === key &&
                                                 <TableRow key={row.id}>
-                                                    <TablecellHeader 
-                                                        sx={{ 
-                                                            backgroundColor: values[index]?.Color || 0, 
-                                                            width: 50, 
+                                                    <TablecellHeader
+                                                        sx={{
+                                                            backgroundColor: values[index]?.Color || 0,
+                                                            width: 50,
                                                             color: "black",
                                                             position: "sticky",
                                                             left: 0,
                                                             zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
-                                                            }}
+                                                        }}
                                                     >
                                                         {values[index]?.ProductName || 0}
                                                     </TablecellHeader>
@@ -831,7 +865,7 @@ const UpdateGasStations = (props) => {
                                                         />
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                    <TextField
+                                                        <TextField
                                                             size="small"
                                                             type="number"
                                                             // InputProps={{
@@ -864,7 +898,7 @@ const UpdateGasStations = (props) => {
                                                         />
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format((values[index]?.Capacity || 0)-(values[index]?.DownHole || 0))}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format((values[index]?.Capacity || 0) - (values[index]?.DownHole || 0))}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <TextField
                                                             size="small"

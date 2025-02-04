@@ -55,7 +55,7 @@ const GasStationAdmin = () => {
     const [gasStationOil, setGasStationsOil] = useState([]);
     const [stock, setStock] = useState([]);
     const [newVolume, setNewVolume] = React.useState(0);
-    const [gasStation, setGasStation] = React.useState(0);
+    const [gasStation, setGasStation] = React.useState("0:0");
     const [gasStations, setGasStations] = React.useState([]);
     const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
     const today = dayjs(new Date());
@@ -105,7 +105,7 @@ const GasStationAdmin = () => {
             const dataListG = [];
             for (let idG in datasG) {
                 console.log("datasG[idG].Name : ",datasG[idG].Name);
-                if (datasG[idG].Name === DataGasStation) {
+                if (datasG[idG].ShortName === DataGasStation.split(":")[1]) {
                     dataListG.push({ idG, ...datasG[idG] });
                     database.ref("/depot/stock").on("value", (snapshot) => {
                         const datasS = snapshot.val();
@@ -297,10 +297,10 @@ const GasStationAdmin = () => {
                                     onChange={handleGasStationChange}
                                     fullWidth
                                 >
-                                    <MenuItem value={0}>กรุณาเลือกปั้ม</MenuItem>
+                                    <MenuItem value={"0:0"}>กรุณาเลือกปั้ม</MenuItem>
                                     {
                                         gasStations.map((row) => (
-                                            <MenuItem value={row.Name}>{row.Name}</MenuItem>
+                                            <MenuItem value={row.Name+":"+row.ShortName}>{row.Name+" / "+ row.ShortName}</MenuItem>
                                         ))
                                     }
                                 </Select>
@@ -313,7 +313,7 @@ const GasStationAdmin = () => {
                         </Grid>
                     </Grid>
                     {
-                        gasStation !== 0 ?
+                        gasStation !== "0:0" ?
                         (
                             openOil === true ?
                             <ReceiveOil

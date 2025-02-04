@@ -45,6 +45,7 @@ import BigTruckRegTail from "./tailtruck/BigTruckRegTail";
 import { SmallTruckIconBlack, SmallTruckIconWhite, TailTruckIconBlack, TailTruckIconWhite, TruckIconBlack, TruckIconWhite } from "../../theme/icon";
 import RepairTruck from "./RepairTruck";
 import { fetchRealtimeData } from "../../server/data";
+import { useData } from "../../server/path";
 
 const Trucks = () => {
   const [open, setOpen] = useState(1);
@@ -56,14 +57,10 @@ const Trucks = () => {
     setOpenTab(newOpen);
   };
 
-  const [data, setData] = useState({ reghead: {}, regtail: {}, small: {} });
-    
-        useEffect(() => {
-            fetchRealtimeData((newData) => {
-            setData(newData);
-            setLoading(false); // ปิด loading เมื่อดึงข้อมูลเสร็จ
-        });
-        }, []);
+        const { reghead,regtail,small } = useData();
+        const datareghead = Object.values(reghead); 
+        const dataregtail = Object.values(regtail); 
+        const datasmall = Object.values(small); 
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
       
@@ -83,21 +80,21 @@ const Trucks = () => {
 
   const [repair, setRepair] = React.useState(false);
 
-  const repairRegHead = useMemo(() => {
-    return Object.entries(data.reghead).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
-}, [data.reghead]);
+  const repairRegHead = datareghead.filter(row => row.RepairTruck && row.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
+  const status = dataregtail.filter(row => row.Status && row.Status !== "เชื่อมทะเบียนหัวแล้ว");
+  const repairSmallTruck = datasmall.filter(row => row.RepairTruck && row.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
 
-const status = useMemo(() => {
-  return Object.entries(data.regtail).filter(([id, emp]) => emp.Status !== "เชื่อมทะเบียนหัวแล้ว");
-}, [data.regtail]);
+//   const repairRegHead = useMemo(() => {
+//     return Object.entries(reghead).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
+// }, [reghead]);
 
-const repairSmallTruck = useMemo(() => {
-  return Object.entries(data.small).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
-}, [data.small]);
+// const status = useMemo(() => {
+//   return Object.entries(regtail).filter(([id, emp]) => emp.Status !== "เชื่อมทะเบียนหัวแล้ว");
+// }, [regtail]);
 
-  console.log("repairRegHead : ",repairRegHead);
-  console.log("status : ",status);
-  console.log("repairSmallTruck : ",repairSmallTruck);
+// const repairSmallTruck = useMemo(() => {
+//   return Object.entries(small).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
+// }, [small]);
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -142,7 +139,7 @@ const repairSmallTruck = useMemo(() => {
                     startIcon={openMenu === 1 ? <TruckIconWhite /> : <TruckIconBlack />}
                   >
                     <Badge
-                      badgeContent={data.reghead.length}
+                      badgeContent={datareghead.length}
                       sx={{
                         "& .MuiBadge-badge": {
                           fontSize: 20, // ขนาดตัวเลขใน Badge
@@ -176,7 +173,7 @@ const repairSmallTruck = useMemo(() => {
                     startIcon={openMenu === 2 ? <TailTruckIconWhite /> : <TailTruckIconBlack />}
                   >
                     <Badge
-                      badgeContent={data.regtail.length}
+                      badgeContent={dataregtail.length}
                       sx={{
                         "& .MuiBadge-badge": {
                           fontSize: 20, // ขนาดตัวเลขใน Badge
@@ -212,7 +209,7 @@ const repairSmallTruck = useMemo(() => {
                     }
                   >
                     <Badge
-                      badgeContent={data.small.length}
+                      badgeContent={datasmall.length}
                       sx={{
                         "& .MuiBadge-badge": {
                           fontSize: 20, // ขนาดตัวเลขใน Badge
@@ -240,9 +237,9 @@ const repairSmallTruck = useMemo(() => {
               </Grid>
               <Grid item xs={12}>
               {
-                openMenu === 1 ? <BigTruckRegHead truck={data.reghead} repair={repairRegHead} loading={loading} />
-                  : openMenu === 2 ? <BigTruckRegTail truck={data.regtail} status={status} />
-                    : <SmallTruck truck={data.small} repair={repairSmallTruck} />
+                openMenu === 1 ? <BigTruckRegHead truck={datareghead} repair={repairRegHead} loading={loading} />
+                  : openMenu === 2 ? <BigTruckRegTail truck={dataregtail} status={status} />
+                    : <SmallTruck truck={datasmall} repair={repairSmallTruck} />
 
               }
               </Grid>

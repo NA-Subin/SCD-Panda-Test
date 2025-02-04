@@ -53,11 +53,6 @@ const BigTruckRegHead = (props) => {
   const [setting, setSetting] = React.useState("0:0");
   const [tail, setTail] = React.useState(0);
 
-  const truckData = useMemo(() => {
-    if (loading || !truck) return [];
-    return Object.entries(truck);
-  }, [loading, truck]);
-
   const isMobile = useMediaQuery("(max-width:1100px)");
     
       const shouldDrawerOpen = React.useMemo(() => {
@@ -212,12 +207,12 @@ const BigTruckRegHead = (props) => {
                 </TableHead>
                 <TableBody>
                   {
-                    loading ?
-                      <Box sx={{ width: '100%' }}>
-                        <LinearProgress />
-                      </Box>
-                    :
-                    truckData.map(([id, row]) => (
+                    // loading ?
+                    //   <Box sx={{ width: '100%' }}>
+                    //     <LinearProgress />
+                    //   </Box>
+                    // :
+                    truck.map((row) => (
                       <RegHeadDetail key={row.RegHead} truck={row}/>
                     ))
                   }

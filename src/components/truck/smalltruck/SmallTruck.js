@@ -47,12 +47,6 @@ const SmallTruck = (props) => {
   const { truck,repair } = props;
   const [openTab, setOpenTab] = React.useState(true);
   const [openMenu, setOpenMenu] = React.useState(false);
-  const [update, setUpdate] = React.useState(true);
-  const [open, setOpen] = useState(false);
-  const [companies,setCompanies] = React.useState(0);
-  const [company,setCompany] = React.useState([]);
-  const [employees, setEmployees] = React.useState(0);
-  const [employee, setEmployee] = React.useState([]);
 
    const isMobile = useMediaQuery("(max-width:1100px)");
       
@@ -85,31 +79,6 @@ const SmallTruck = (props) => {
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
   };
-
-  const getCompany = async () => {
-    database.ref("/company").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataCompany = [];
-      for (let id in datas) {
-          dataCompany.push({ id, ...datas[id] })
-      }
-      setCompany(dataCompany);
-    });
-
-    database.ref("/employee/driver").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataRegistration = [];
-      for (let id in datas) {
-          datas[id].Registration === "ไม่มี" && datas[id].TruckType === "รถเล็ก" &&
-          dataRegistration.push({ id, ...datas[id] })
-      }
-      setEmployee(dataRegistration);
-    });
-  };
-
-  useEffect(() => {
-    getCompany();
-  }, []);
 
   return (
     <React.Fragment>
@@ -212,8 +181,8 @@ const SmallTruck = (props) => {
                   </TableHead>
                   <TableBody>
                     {
-                      Object.entries(truck).map(([id, row]) => (
-                        <TableRow key={id} >
+                      truck.map((row) => (
+                        <TableRow >
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.VehicleRegistration}</TableCell>

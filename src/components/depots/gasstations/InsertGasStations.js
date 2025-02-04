@@ -50,6 +50,8 @@ const InsertGasStations = (props) => {
     };
 
     const [name, setName] = React.useState("");
+    const [code, setCode] = React.useState("");
+    const [shortName,setShortName] = React.useState("");
     const [oilWell, setOilWell] = React.useState(0);
     const [no, setNo] = React.useState("");
     const [village, setVillage] = React.useState("");
@@ -147,6 +149,8 @@ const InsertGasStations = (props) => {
             .update({
                 id: gasStation + 1,
                 Name: name,
+                ShortName: shortName,
+                Code: code,
                 OilWellNumber: oilWell,
                 Products: volumeData.reduce((acc, row) => {
                     if (row.CheckBox === true || row.CheckBox === "true") {
@@ -180,10 +184,22 @@ const InsertGasStations = (props) => {
     return (
         <React.Fragment>
             <Grid item sm={1} xs={3}>
+                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>รหัส</Typography>
+            </Grid>
+            <Grid item sm={2} xs={9}>
+                <TextField size="small" fullWidth value={code} onChange={(e) => setCode(e.target.value)} />
+            </Grid>
+            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อปั้ม</Typography>
             </Grid>
-            <Grid item sm={3.5} xs={9}>
+            <Grid item sm={8} xs={9}>
                 <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+            </Grid>
+            <Grid item sm={1} xs={3}>
+                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อย่อ</Typography>
+            </Grid>
+            <Grid item sm={3.5} xs={9}>
+                <TextField size="small" fullWidth value={shortName} onChange={(e) => setShortName(e.target.value)} />
             </Grid>
             <Grid item sm={1.5} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>จำนวนหลุม</Typography>

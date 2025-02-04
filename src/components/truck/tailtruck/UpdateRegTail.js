@@ -42,6 +42,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
+import { useData } from "../../../server/path";
 
 const UpdateRegTail = (props) => {
     const { truck } = props;
@@ -60,44 +61,13 @@ const UpdateRegTail = (props) => {
     const [openMenu, setOpenMenu] = React.useState(false);
     const [setting, setSetting] = React.useState("0:0");
     const [tail, setTail] = React.useState(0);
-    const [company, setCompany] = React.useState([]);
 
     const toggleDrawer = (newOpen) => () => {
         setOpenTab(newOpen);
     };
 
-    const [registrationTail, setRegistrationTail] = React.useState([]);
-    const [regTailLength, setRegTailLength] = React.useState("");
-
-    const getRegitrationTail = async () => {
-        database.ref("/truck/registrationTail/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataRegistrationTail = [];
-            for (let id in datas) {
-                if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว"){
-                    dataRegistrationTail.push({ id, ...datas[id] })
-                }
-            }
-            setRegTailLength(datas.length);
-            setRegistrationTail(dataRegistrationTail);
-        });
-    };
-
-    const getCompany = async () => {
-        database.ref("/company").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataCompany = [];
-            for (let id in datas) {
-                dataCompany.push({ id, ...datas[id] })
-            }
-            setCompany(dataCompany);
-        });
-    };
-
-    useEffect(() => {
-        getRegitrationTail();
-        getCompany();
-    }, []);
+    const { company } = useData();
+                const dataCompany = Object.values(company); 
 
     const [companies, setCompanies] = React.useState(truck.Company);
     const [regTail, setRegTail] = React.useState(truck.RegTail);
@@ -198,7 +168,7 @@ const UpdateRegTail = (props) => {
                                             >
                                                 <MenuItem value={companies}>{companies}</MenuItem>
                                                 {
-                                                    company.map((truck) => (
+                                                    dataCompany.map((truck) => (
                                                         <MenuItem value={truck.Name}>{truck.Name}</MenuItem>
                                                     ))
                                                 }

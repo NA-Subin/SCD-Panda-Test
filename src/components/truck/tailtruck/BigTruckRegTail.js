@@ -46,12 +46,7 @@ import UpdateRegTail from "./UpdateRegTail";
 const BigTruckRegTail = (props) => {
   const { truck, status } = props;
   const [openTab, setOpenTab] = React.useState(true);
-  const [interconnect, setInterconnect] = React.useState(2);
-  const [openMenu, setOpenMenu] = React.useState(false);
-  const [update, setUpdate] = React.useState(true);
   const [open, setOpen] = useState(false);
-  const [companies,setCompanies] = React.useState(0);
-  const [company,setCompany] = React.useState([]);
 
   const isMobile = useMediaQuery("(max-width:1100px)");
         
@@ -84,21 +79,6 @@ const BigTruckRegTail = (props) => {
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
   };
-
-  const getCompany = async () => {
-    database.ref("/company").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataCompany = [];
-      for (let id in datas) {
-          dataCompany.push({ id, ...datas[id] })
-      }
-      setCompany(dataCompany);
-    });
-  };
-
-  useEffect(() => {
-    getCompany();
-  }, []);
 
   return (
     <React.Fragment>
@@ -198,8 +178,8 @@ const BigTruckRegTail = (props) => {
                 </TableHead>
                 <TableBody>
                   {
-                    Object.entries(truck).map(([id, row]) => (
-                      <TableRow key={id} >
+                    truck.map((row) => (
+                      <TableRow >
                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.RegTail}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Cap}</TableCell>

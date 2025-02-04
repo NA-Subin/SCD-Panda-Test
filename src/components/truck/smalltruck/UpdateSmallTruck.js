@@ -42,6 +42,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
+import { useData } from "../../../server/path";
 
 const UpdateSmallTruck = (props) => {
     const { truck } = props;
@@ -57,58 +58,15 @@ const UpdateSmallTruck = (props) => {
     };
 
     const [openTab, setOpenTab] = React.useState(true);
-    const [openMenu, setOpenMenu] = React.useState(false);
-    const [setting, setSetting] = React.useState("0:0");
-    const [tail, setTail] = React.useState(0);
-    const [company, setCompany] = React.useState([]);
-    const [employee, setEmployee] = React.useState([]);
+
+    const { company, drivers } = useData();
+    const dataCompany = Object.values(company); 
+    const dataDrivers = Object.values(drivers);
+    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "ไม่มี" && row.TruckType === "รถเล็ก");
 
     const toggleDrawer = (newOpen) => () => {
         setOpenTab(newOpen);
     };
-
-    const [registrationTail, setRegistrationTail] = React.useState([]);
-    const [regTailLength, setRegTailLength] = React.useState("");
-
-    const getRegitrationTail = async () => {
-        database.ref("/truck/registrationTail/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataRegistrationTail = [];
-            for (let id in datas) {
-                if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว"){
-                    dataRegistrationTail.push({ id, ...datas[id] })
-                }
-            }
-            setRegTailLength(datas.length);
-            setRegistrationTail(dataRegistrationTail);
-        });
-    };
-
-    const getCompany = async () => {
-        database.ref("/company").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataCompany = [];
-            for (let id in datas) {
-                dataCompany.push({ id, ...datas[id] })
-            }
-            setCompany(dataCompany);
-        });
-
-        database.ref("/employee/driver").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataRegistration = [];
-            for (let id in datas) {
-                datas[id].Registration === "ไม่มี" && datas[id].TruckType === "รถเล็ก" &&
-                    dataRegistration.push({ id, ...datas[id] })
-            }
-            setEmployee(dataRegistration);
-        });
-    };
-
-    useEffect(() => {
-        getRegitrationTail();
-        getCompany();
-    }, []);
 
     const [companies, setCompanies] = React.useState(truck.Company);
     const [driver, setDriver] = React.useState("0:"+truck.Driver);
@@ -207,7 +165,7 @@ const UpdateSmallTruck = (props) => {
                                             >
                                                 <MenuItem value={driver}>{driver.split(":")[1]}</MenuItem>
                                                 {
-                                                    employee.map((row) => (
+                                                    employees.map((row) => (
                                                         <MenuItem value={row.id + ":" + row.Name}>{row.Name}</MenuItem>
                                                     ))
                                                 }
@@ -250,7 +208,7 @@ const UpdateSmallTruck = (props) => {
                                             >
                                                 <MenuItem value={companies}>{companies}</MenuItem>
                                                 {
-                                                    company.map((row) => (
+                                                    dataCompany.map((row) => (
                                                         <MenuItem value={row.Name}>{row.Name}</MenuItem>
                                                     ))
                                                 }

@@ -45,6 +45,7 @@ import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import UpdateRegHead from "./UpdateRegHead";
 import TruckRepair from "./TruckRepair";
 import { fetchRealtimeData } from "../../../server/data";
+import { useData } from "../../../server/path";
 
 const RegHeadDetail = (props) => {
   const { truck } = props;
@@ -74,17 +75,9 @@ const RegHeadDetail = (props) => {
   //   });
   // };
 
-  const [data, setData] = useState({ regtail: {} });
-      
-          useEffect(() => {
-              fetchRealtimeData((newData) => {
-              setData(newData);
-          });
-          }, []);
-
-  const registrationTail = useMemo(() => {
-    return Object.entries(data.regtail).filter(([id, emp]) => emp.Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && emp.Company === truck.Company );
-  }, [data.regtail,truck.Company]);
+  const { regtail } = useData();
+        const dataregtail = Object.values(regtail); 
+  const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && row.Company === truck.Company);
 
   // useEffect(() => {
   //   getRegitrationTail();

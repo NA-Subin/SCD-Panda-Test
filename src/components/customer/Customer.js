@@ -34,6 +34,7 @@ import InsertCustomer from "./InsertData";
 import { Inventory } from "@mui/icons-material";
 import { database } from "../../server/firebase";
 import UpdateCustomer from "./UpdateCustomer";
+import { useData } from "../../server/path";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -55,6 +56,10 @@ const Customer = () => {
   useEffect(() => {
     getData();
   }, []);
+
+  const { customer } = useData();
+      const customerList = Object.values(customer); 
+      console.log("customer : ", customerList);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
       
@@ -167,14 +172,14 @@ const Customer = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data === "ไม่มีข้อมูล" ? (
+              {customerList === "ไม่มีข้อมูล" ? (
                 <TablecellNoData colSpan={11}>
                   <Inventory />
                   <br />
                   ไม่มีออเดอร์
                 </TablecellNoData>
               ) : (
-                data.map((row) =>
+                customerList.map((row) =>
                   <TableRow>
                     <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>

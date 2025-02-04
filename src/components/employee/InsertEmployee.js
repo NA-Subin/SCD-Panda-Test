@@ -44,7 +44,7 @@ import { auth, database } from "../../server/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const InsertEmployee = (props) => {
-    const { type } = props;
+    const { type, driver } = props;
     const [menu, setMenu] = React.useState(type);
 
     React.useEffect(() => {
@@ -75,7 +75,7 @@ const InsertEmployee = (props) => {
         });
     };
 
-    const [regTruck, setRegTruck] = React.useState(0);
+    const [regTruck, setRegTruck] = React.useState("0:ไม่มี");
     const [bank, setBank] = React.useState("");
     const [bankID, setBankID] = React.useState("");
     const [salary, setSalary] = React.useState("");
@@ -126,19 +126,19 @@ const InsertEmployee = (props) => {
         });
     };
 
-    const [driver, setDriver] = useState([]);
-    const getDriver = async () => {
-        database.ref("/employee/drivers/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setDriver(datas.length);
-        });
-    };
+    // const [driver, setDriver] = useState([]);
+    // const getDriver = async () => {
+    //     database.ref("/employee/drivers/").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         setDriver(datas.length);
+    //     });
+    // };
 
     useEffect(() => {
         getGasStation();
         getTruck();
         getOfficer();
-        getDriver();
+        // getDriver();
     }, []);
 
     const [position, setPosition] = React.useState("");
@@ -181,9 +181,9 @@ const InsertEmployee = (props) => {
         } else {
             database
                 .ref("employee/drivers/")
-                .child(driver)
+                .child(driver.length)
                 .update({
-                    id: driver + 1,
+                    id: driver.length + 1,
                     Name: prefix + name + " " + lastname,
                     Registration: regTruck,
                     BankID: bankID,
@@ -202,6 +202,39 @@ const InsertEmployee = (props) => {
                     DrivingLicensePicture: "ไม่มี"
                 })
                 .then(() => {
+                    if(trucks === "รถใหญ่" && regTruck !== "0:ไม่มี"){
+                                        database
+                                        .ref("/truck/registration/")
+                                        .child(regTruck.split(":")[0] - 1)
+                                        .update({
+                                            Driver: prefix + name + " " + lastname,
+                                        })
+                                        .then(() => {
+                                            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                            console.log("Data pushed successfully");
+                                        })
+                                        .catch((error) => {
+                                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                            console.error("Error pushing data:", error);
+                                        });
+                                    }else if(trucks === "รถเล็ก" && regTruck !== "0:ไม่มี"){
+                                        database
+                                        .ref("/truck/registrationTail/")
+                                        .child(regTruck.split(":")[0] - 1)
+                                        .update({
+                                            Driver: prefix + name + " " + lastname,
+                                        })
+                                        .then(() => {
+                                            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                            console.log("Data pushed successfully");
+                                        })
+                                        .catch((error) => {
+                                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                            console.error("Error pushing data:", error);
+                                        });
+                                    }else{
+                    
+                                    }
                     ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                     console.log("Data pushed successfully");
                     setPrefix("");
@@ -445,7 +478,7 @@ const InsertEmployee = (props) => {
                                                     <MenuItem value={0}>
                                                         กรุณาเลือกทะเบียนรถ
                                                     </MenuItem>
-                                                    <MenuItem value={"ไม่มี"}>ไม่มี</MenuItem>
+                                                    <MenuItem value={"0:ไม่มี"}>ไม่มี</MenuItem>
                                                     {
                                                         trucks === "รถใหญ่" ?
                                                             truck.map((row) => (

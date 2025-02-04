@@ -44,6 +44,7 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import UpdateDriver from "./UpdateDriver";
 import UpdateEmployee from "./UpdateEmployee";
 import { fetchRealtimeData } from "../../server/data";
+import { useData } from "../../server/path";
 
 const Employee = () => {
   const [update, setUpdate] = React.useState(true);
@@ -54,11 +55,14 @@ const Employee = () => {
     setOpenOfficeDetail(false);
   };
 
-  const [data, setData] = useState({ officers: {}, drivers: {}, creditors: {} });
-  
-      useEffect(() => {
-          fetchRealtimeData(setData);
-      }, []);
+  const { officers, drivers, reghead, small } = useData();
+          const dataofficers = Object.values(officers); 
+          const datadrivers = Object.values(drivers); 
+          const datareghead = Object.values(reghead);
+          const datasmall = Object.values(small);
+
+          const registrationHead = datareghead.filter(row => row.Driver && row.Driver === "ไม่มี");
+          const registrationSmallTruck = datasmall.filter(row => row.Driver && row.Driver === "ไม่มี");
 
   const [openTab, setOpenTab] = React.useState(true);
 
@@ -86,62 +90,8 @@ const Employee = () => {
     setOpenTab(newOpen);
   };
 
-  const [office, setOffice] = useState([]);
-  const [driver, setDriver] = useState([]);
   const [setting, setSetting] = React.useState("");
   const [truck, setTruck] = React.useState("0:ไม่มี:ไม่มี");
-
-  const getEmployee = async () => {
-    database.ref("/employee/officers").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataOffice = [];
-      for (let id in datas) {
-        dataOffice.push({ id, ...datas[id] })
-      }
-      setOffice(dataOffice);
-    });
-
-    database.ref("/employee/drivers").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataDriver = [];
-      for (let id in datas) {
-        dataDriver.push({ id, ...datas[id] });
-      }
-      setDriver(dataDriver);
-    });
-  };
-
-  const [registrationHead, setRegistrationHead] = React.useState([]);
-  const [registrationSmallTruck, setRegistrationSmallTruck] = React.useState([]);
-
-  const getRegitration = async () => {
-    database.ref("/truck/registration/").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataRegistration = [];
-      for (let id in datas) {
-        if(datas[id].Driver === "ไม่มี"){
-          dataRegistration.push({ id, ...datas[id] })
-        }
-      }
-      setRegistrationHead(dataRegistration);
-    });
-
-    database.ref("/truck/small/").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataRegistration = [];
-      for (let id in datas) {
-        if(datas[id].Driver === "ไม่มี"){
-          dataRegistration.push({ id, ...datas[id] })
-        }
-      }
-      setRegistrationSmallTruck(dataRegistration);
-    });
-  };
-
-  useEffect(() => {
-    getEmployee();
-    getRegitration();
-  }, []);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
       
@@ -222,7 +172,7 @@ const Employee = () => {
       <Divider sx={{ marginBottom: 2 }} />
       <Grid container spacing={3} marginTop={1} marginLeft={-7} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230) }}>
         <Grid item xs={12}>
-          <InsertEmployee type={open} />
+          <InsertEmployee type={open} driver={datadrivers}/>
         </Grid>
         {shouldDrawerOpen ? (
           <Grid item xs={1.5}>
@@ -252,7 +202,7 @@ const Employee = () => {
               sx={{ marginBottom: 1.3 }}
             >
               <Badge
-                badgeContent={data.officers.length}
+                badgeContent={dataofficers.length}
                 sx={{
                   "& .MuiBadge-badge": {
                     fontSize: 11, // ขนาดตัวเลขใน Badge
@@ -280,7 +230,7 @@ const Employee = () => {
               sx={{ marginBottom: 1.3 }}
             >
               <Badge
-                badgeContent={data.drivers.length}
+                badgeContent={datadrivers.length}
                 sx={{
                   "& .MuiBadge-badge": {
                     fontSize: 11, // ขนาดตัวเลขใน Badge
@@ -303,7 +253,7 @@ const Employee = () => {
               <Typography variant="subtitle2" fontWeight="bold" marginLeft={3} gutterBottom>พนักงาน</Typography>
               <Typography variant="h5" fontWeight="bold" marginTop={-2} gutterBottom>ทั้งหมด</Typography>
               <Box display="flex" justifyContent="center" alignItems="center" marginTop={-2}>
-                <Typography variant="h2" fontWeight="bold" gutterBottom>{data.officers.length + data.drivers.length}</Typography>
+                <Typography variant="h2" fontWeight="bold" gutterBottom>{dataofficers.length + datadrivers.length}</Typography>
                 <Typography variant="h6" fontWeight="bold" gutterBottom>คน</Typography>
               </Box>
             </Paper>
@@ -336,7 +286,7 @@ const Employee = () => {
                 onClick={() => setOpen(1)}
               >
                 <Badge
-                  badgeContent={data.officers.length}
+                  badgeContent={dataofficers.length}
                   sx={{
                     "& .MuiBadge-badge": {
                       fontSize: 12, // ขนาดตัวเลขใน Badge
@@ -361,7 +311,7 @@ const Employee = () => {
                 onClick={() => setOpen(2)}
               >
                 <Badge
-                  badgeContent={data.drivers.length}
+                  badgeContent={datadrivers.length}
                   sx={{
                     "& .MuiBadge-badge": {
                       fontSize: 12, // ขนาดตัวเลขใน Badge
@@ -419,8 +369,8 @@ const Employee = () => {
                   </TableHead>
                   <TableBody>
                     {
-                      Object.entries(data.officers).map(([id, row]) => (
-                        <TableRow key={id}>
+                      dataofficers.map((row) => (
+                        <TableRow>
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
@@ -479,8 +429,8 @@ const Employee = () => {
                   </TableHead>
                   <TableBody>
                     {
-                      Object.entries(data.drivers).map(([id, row]) => (
-                        <TableRow key={id} >
+                      datadrivers.map((row) => (
+                        <TableRow >
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>

@@ -46,11 +46,11 @@ const TicketsGasStation = () => {
             const dataList = [];
             for (let id in datas) {
                 // const { Name, Stock, OilWellNumber } = datas[id];
-                const { Name, Stock, OilWellNumber } = datas[id]; // ดึงเฉพาะ Name, Stock, OilWellNumber
+                const { Name, Stock, OilWellNumber, Code } = datas[id]; // ดึงเฉพาะ Name, Stock, OilWellNumber
                 // console.log("Name :", Name);
                 // console.log("Stock :", Stock);
                 // console.log("OilWellNumber :", OilWellNumber);
-                dataList.push({ id, Name, Stock, OilWellNumber }); // push เฉพาะค่าที่ต้องการ
+                dataList.push({ id, Name, Stock, OilWellNumber, Code }); // push เฉพาะค่าที่ต้องการ
             }
             setGasStation(dataList);
         });
@@ -97,7 +97,7 @@ const TicketsGasStation = () => {
                             {
                                 gasStation.map((row) => (
                                     <TableRow key={row.id}>
-                                        <TableCell sx={{ textAlign: "center" }}>PS:{Number(row.id) + 1}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.Code}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Stock}</TableCell>
                                     </TableRow>
