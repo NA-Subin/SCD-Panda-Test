@@ -27,6 +27,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
 
@@ -46,11 +47,11 @@ const TicketsGasStation = () => {
             const dataList = [];
             for (let id in datas) {
                 // const { Name, Stock, OilWellNumber } = datas[id];
-                const { Name, Stock, OilWellNumber, Code } = datas[id]; // ดึงเฉพาะ Name, Stock, OilWellNumber
+                const { Name, ShortName, OilWellNumber, Code } = datas[id]; // ดึงเฉพาะ Name, ShortName, OilWellNumber
                 // console.log("Name :", Name);
-                // console.log("Stock :", Stock);
+                // console.log("ShortName :", ShortName);
                 // console.log("OilWellNumber :", OilWellNumber);
-                dataList.push({ id, Name, Stock, OilWellNumber, Code }); // push เฉพาะค่าที่ต้องการ
+                dataList.push({ id, Name, ShortName, OilWellNumber, Code }); // push เฉพาะค่าที่ต้องการ
             }
             setGasStation(dataList);
         });
@@ -88,7 +89,7 @@ const TicketsGasStation = () => {
                                     ชื่อปั้ม
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                    คลังสต็อก
+                                    ชื่อย่อ
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ width: 50 }} />
                             </TableRow>
@@ -99,7 +100,8 @@ const TicketsGasStation = () => {
                                     <TableRow key={row.id}>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Code}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.Stock}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.ShortName}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}><IconButton color="warning"><BorderColorIcon/></IconButton></TableCell>
                                     </TableRow>
                                 ))
                             }

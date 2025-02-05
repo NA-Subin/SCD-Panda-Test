@@ -19,6 +19,7 @@ import GasStationA from "./components/attendant/GasStationA";
 import TradePayable from "./components/payable/TradePayable";
 import Choose from "./components/login/Choose";
 import GasStationAdmin from "./components/login/attendant/GasStationA";
+import Editfirebase from "./components/navbar/editefirebase";
 
 function App() {
 
@@ -49,6 +50,9 @@ function App() {
                 </Routes>
                 <Routes>
                   <Route path="/setting" element={<Setting />} />
+                </Routes>
+                <Routes>
+                  <Route path="/edit-firebase" element={<Editfirebase />} />
                 </Routes>
                 <Routes>
                   <Route path="/selling" element={<Selling />} />

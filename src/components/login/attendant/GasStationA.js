@@ -46,12 +46,13 @@ import Cookies from 'js-cookie';
 import 'dayjs/locale/th';
 import ReceiveOil from "./ReceiveOil";
 import OilBalance from "./OilBalance";
+import GasStationDetail from "./GasStationDetail";
 
 const GasStationAdmin = () => {
 
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(true);
-    const [openOil, setOpenOil] = React.useState("");
+    const [openOil, setOpenOil] = React.useState(true);
     const [gasStationOil, setGasStationsOil] = useState([]);
     const [stock, setStock] = useState([]);
     const [newVolume, setNewVolume] = React.useState(0);
@@ -59,11 +60,65 @@ const GasStationAdmin = () => {
     const [gasStations, setGasStations] = React.useState([]);
     const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
     const today = dayjs(new Date());
+    const isToday = selectedDate.isSame(today, "day"); // เปรียบเทียบเฉพาะวันที่
+
+    const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
+    const [gasStationID, setGasStationID] = React.useState(0);
+    const [newVolumes, setNewVolumes] = useState({});
+    const [products, setProducts] = useState([]);
+    const [report, setReport] = React.useState([]);
+    const [setting, setSetting] = React.useState(true);
+    const [gasStationReport, setGasStationReport] = React.useState([]);
 
     const handleDateChange = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
             setSelectedDate(formattedDate);
+            database.ref("/depot/gasStations").on("value", (snapshot) => {
+                const datasG = snapshot.val();
+                const dataListG = [];
+                for (let idG in datasG) {
+                    console.log("datasG[idG].Name : ",datasG[idG].Name);
+                    if (datasG[idG].ShortName === gasStation.split(":")[1]) {
+                        dataListG.push({ idG, ...datasG[idG] });
+                        database.ref("/depot/stock").on("value", (snapshot) => {
+                            const datasS = snapshot.val();
+                            const productsList = [];
+                            const dataListReport = [];
+    
+                            for (let idS in datasS) {
+                                if (datasS[idS].Name === datasG[idG].Stock) {
+                                    // ดึงเฉพาะ Products และบันทึกลง productsList
+                                    const products = datasS[idS].Products || {};
+                                    productsList.push(...Object.values(products)); // รวม Products ทั้งหมดเข้าใน array
+    
+                                    const report = datasG[idG].Report || {};
+                                    dataListReport.push(...Object.values(report));
+    
+                                    // ตั้งค่า GasStationID
+                                    setGasStationID(datasG[idG].id);
+                                    database.ref("depot/gasStations/" + (datasG[idG].id - 1) + "/Report/" + dayjs(formattedDate).format("DD-MM-YYYY")).on("value", (snapshot) => {
+                                        const datas = snapshot.val();
+                                        const dataList = [];
+                                        for (let id in datas) {
+                                            dataList.push({ id, ...datas[id] });
+                                        }
+                                        setGasStationReport(dataList);
+                                    });
+                                }
+                            }
+                            if (dataListReport.length === 0) {
+                                setReport(0); // ถ้าไม่มีข้อมูลใน dataListReport ให้ตั้งค่าเป็น 0
+                            } else {
+                                setReport(dataListReport); // ถ้ามีข้อมูลให้บันทึกลง state
+                            }
+                            setStock(productsList);
+                        })
+                    }
+                }
+                setGasStationsOil(dataListG);
+            });
         }
     };
 
@@ -81,17 +136,6 @@ const GasStationAdmin = () => {
     useEffect(() => {
         getGasStations();
     }, []);
-
-    const isToday = selectedDate.isSame(today, "day"); // เปรียบเทียบเฉพาะวันที่
-
-    const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
-
-    const [gasStationID, setGasStationID] = React.useState(0);
-    const [newVolumes, setNewVolumes] = useState({});
-    const [products, setProducts] = useState([]);
-    const [report, setReport] = React.useState([]);
-    const [setting, setSetting] = React.useState(true);
-    const [gasStationReport, setGasStationReport] = React.useState([]);
 
     const handleBack = () => {
         navigate("/choose");
@@ -287,7 +331,7 @@ const GasStationAdmin = () => {
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={7} md={5} lg={7} display="flex" justifyContent="center" alignItems="center">
+                        <Grid item xs={12} md={9} lg={9} display="flex" justifyContent="center" alignItems="center">
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ชื่อปั้ม</Typography>
                             <FormControl variant="standard" sx={{ m: 1, width: "100%" }}>
                                 <Select
@@ -306,15 +350,24 @@ const GasStationAdmin = () => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={5} md={3} lg={2} textAlign="right">
+                        {/* <Grid item xs={5} md={3} lg={2} textAlign="right">
                             {
                                 openOil === true || openOil === false ? <Button variant="contained" color="error" onClick={() => setOpenOil("")}>ย้อนกลับ</Button> : ""
                             }
-                        </Grid>
+                        </Grid> */}
                     </Grid>
-                    {
-                        gasStation !== "0:0" ?
-                        (
+                    <GasStationDetail
+                                    stock={stock}
+                                    gasStationID={gasStationID}
+                                    report={report}
+                                    gasStationReport={gasStationReport}
+                                    selectedDate={selectedDate}
+                                    gasStationOil={gasStationOil}
+                                    isToday={isToday}
+                                />
+                    {/* {
+                        // gasStation !== "0:0" ?
+                        // (
                             openOil === true ?
                             <ReceiveOil
                                 stock={stock}
@@ -374,14 +427,14 @@ const GasStationAdmin = () => {
                                         </Grid>
                                     <Grid item xs={1} />
                                 </Grid>
-                        )
-                        :
-                        <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3, borderRadius: 5 }}>
-                            <Grid item xs={12}>
-                                <Typography variant="h4" fontWeight="bold" textAlign="center" color="gray" gutterBottom>กรุณาเลือกปั้มให้เรียบร้อย</Typography>
-                            </Grid>
-                        </Grid>
-                    }
+                        // )
+                        // :
+                        // <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3, borderRadius: 5 }}>
+                        //     <Grid item xs={12}>
+                        //         <Typography variant="h4" fontWeight="bold" textAlign="center" color="gray" gutterBottom>กรุณาเลือกปั้มให้เรียบร้อย</Typography>
+                        //     </Grid>
+                        // </Grid>
+                    } */}
                 </Box>
                 <Box
                     height={50}

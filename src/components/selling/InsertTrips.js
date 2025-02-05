@@ -833,14 +833,14 @@ const InsertTrips = () => {
         if (codeCustomer === "") {
             // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
             return [
-                ...ticketsPS.map((item) => ({ ...item, type: "PS" })),
+                ...ticketsPS.map((item) => ({ ...item, type: item.Code })),
                 ...ticketsT
                     .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
                     .map((item) => ({ ...item, type: "T" })),
                 ...ticketsA.map((item) => ({ ...item, type: "A" })),
             ];
         } else if (codeCustomer === "PS") {
-            return ticketsPS.map((item) => ({ ...item, type: "PS" }));
+            return ticketsPS.map((item) => ({ ...item, type: item.Code }));
         } else if (codeCustomer === "T") {
             return ticketsT
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")

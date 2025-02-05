@@ -68,14 +68,6 @@ const SmallTruck = (props) => {
           }
         };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
   };

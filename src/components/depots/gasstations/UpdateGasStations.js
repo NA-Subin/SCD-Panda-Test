@@ -41,6 +41,7 @@ import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
 const UpdateGasStations = (props) => {
     const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport } = props;
+    const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
     const [setting, setSetting] = React.useState(true);
     const [name, setName] = React.useState(gasStation.Name);
@@ -80,7 +81,14 @@ const UpdateGasStations = (props) => {
                         }
                     });
             }
-            dataStock.sort((a, b) => a.ProductName.localeCompare(b.ProductName));
+            dataStock.sort((a, b) => {
+                // หาลำดับใน customOrder ของแต่ละ ProductName
+                const indexA = customOrder.indexOf(a.ProductName);
+                const indexB = customOrder.indexOf(b.ProductName);
+                
+                // เรียงตามลำดับที่กำหนดใน customOrder
+                return indexA - indexB;
+              });
             setStock(dataStock);
         });
     };
@@ -109,9 +117,12 @@ const UpdateGasStations = (props) => {
 
         const updatedValues = reportData
             ? Object.entries(reportData)
-                .sort(([keyA, valueA], [keyB, valueB]) =>
-                    valueA?.ProductName?.localeCompare(valueB?.ProductName || "") || 0
-                )
+            .sort(([keyA, valueA], [keyB, valueB]) => {
+                // เปรียบเทียบตาม customOrder
+                const indexA = customOrder.indexOf(valueA?.ProductName);
+                const indexB = customOrder.indexOf(valueB?.ProductName);
+                return indexA - indexB;
+              })
                 .map(([, value], index) => {
                     const yesterdayEntry = Object.values(yesterdayData || {}).find(
                         (entry) => entry?.ProductName === value?.ProductName
@@ -164,6 +175,11 @@ const UpdateGasStations = (props) => {
                     OilBalance: 0
                 };
             });
+            // .sort((a, b) => {
+            //     const indexA = customOrder.indexOf(a.ProductName);
+            //     const indexB = customOrder.indexOf(b.ProductName);
+            //     return indexA - indexB;
+            //   });
 
         console.log("Selected Date:", selectedDate);
         console.log("Formatted Date:", formattedDate);
@@ -448,7 +464,7 @@ const UpdateGasStations = (props) => {
                 </Grid>
             </Grid> */}
             <Box textAlign="center">
-            <Typography variant="subtitle1" textAlign="right" fontWeight="bold" sx={{ fontSize: 18, marginRight: 2 }} gutterBottom>{name + " / " + shortName + " มีทั้งหมด "+ number + " หลุม" + "ที่อยู่ " + gasStation.Address}</Typography>
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ fontSize: 18, marginRight: 2 }} gutterBottom>{name + " / " + shortName + " มีทั้งหมด "+ number + " หลุม" + "ที่อยู่ " + gasStation.Address}</Typography>
             </Box>
             <TableContainer
                 component={Paper}
@@ -545,9 +561,12 @@ const UpdateGasStations = (props) => {
                                 gasStation.Report ?
                                     (gasStation.Report[dayjs(selectedDate).format("DD-MM-YYYY")] ?
                                         Object.entries(gasStation.Report[dayjs(selectedDate).format("DD-MM-YYYY")])
-                                            .sort(([keyA, valueA], [keyB, valueB]) =>
-                                                valueA.ProductName.localeCompare(valueB.ProductName)
-                                            )
+                                        .sort(([keyA, valueA], [keyB, valueB]) => {
+                                            // เปรียบเทียบตาม customOrder
+                                            const indexA = customOrder.indexOf(valueA?.ProductName);
+                                            const indexB = customOrder.indexOf(valueB?.ProductName);
+                                            return indexA - indexB;
+                                          })
                                             .map(([key, value]) => (
                                                 <TableRow key={key}>
                                                     <TablecellHeader
@@ -593,7 +612,14 @@ const UpdateGasStations = (props) => {
                                             ))
                                         :
                                         gasStation.Products &&
-                                        Object.entries(gasStation.Products).map(([key, value], index) => (
+                                        Object.entries(gasStation.Products)
+                                            .sort(([keyA], [keyB]) => {
+                                            // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
+                                            const indexA = customOrder.indexOf(keyA);
+                                            const indexB = customOrder.indexOf(keyB);
+                                            return indexA - indexB;  // เรียงลำดับจาก customOrder
+                                            })
+                                            .map(([key, value], index) => (
                                             <React.Fragment key={index}>
                                                 {
                                                     stock.map((row, index) => (
@@ -647,7 +673,14 @@ const UpdateGasStations = (props) => {
                                     :
                                     (
                                         gasStation.Products &&
-                                        Object.entries(gasStation.Products).map(([key, value], index) => (
+                                        Object.entries(gasStation.Products)
+                                        .sort(([keyA], [keyB]) => {
+                                        // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
+                                        const indexA = customOrder.indexOf(keyA);
+                                        const indexB = customOrder.indexOf(keyB);
+                                        return indexA - indexB;  // เรียงลำดับจาก customOrder
+                                        })
+                                        .map(([key, value], index) => (
                                             <React.Fragment key={index}>
                                                 {
                                                     stock.map((row, index) => (
@@ -700,7 +733,13 @@ const UpdateGasStations = (props) => {
                                     )
                                 :
                                 gasStation.Products &&
-                                Object.entries(gasStation.Products).map(([key, value], index) => (
+                                Object.entries(gasStation.Products)
+                                .sort(([keyA], [keyB]) => {
+                                    // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
+                                    const indexA = customOrder.indexOf(keyA);
+                                    const indexB = customOrder.indexOf(keyB);
+                                    return indexA - indexB;  // เรียงลำดับจาก customOrder
+                                    }).map(([key, value], index) => (
                                     <React.Fragment key={index}>
                                         {
                                             stock.map((row, index) => (
