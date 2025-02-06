@@ -81,7 +81,7 @@ const GasStationDetail = (props) => {
     console.log("gasStation :", gasStationID);
     console.log("Report: ", report);
     console.log("gasStationReport: ", gasStationReport.length);
-    console.log("Date : ",dayjs(selectedDates).format('DD-MM-YYYY'));
+    console.log("Date : ", dayjs(selectedDates).format('DD-MM-YYYY'));
 
 
     const saveProduct = () => {
@@ -206,27 +206,27 @@ const GasStationDetail = (props) => {
     };
 
     // ✅ ลำดับที่ต้องการเรียง
-const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
+    const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
-// ✅ แปลง Object เป็น Array
-const gasStationReports = Object.values(gasStationReport);
+    // ✅ แปลง Object เป็น Array
+    const gasStationReports = Object.values(gasStationReport);
 
-// ✅ เรียงลำดับตาม customOrder
-const sortedReport = gasStationReports.sort((a, b) => {
-  return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
-});
+    // ✅ เรียงลำดับตาม customOrder
+    const sortedReport = gasStationReports.sort((a, b) => {
+        return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
+    });
 
-const gasStationNotReports = gasStationOil.flatMap((row) =>
-    Object.entries(row.Products).map(([key, value]) => ({
-      ...value, 
-      key: key
-    }))
-  );
-  
-  // ✅ เรียงลำดับตาม `customOrder`
-  const sortedNotReport = gasStationNotReports.sort((a, b) => {
-    return customOrder.indexOf(a.key) - customOrder.indexOf(b.key);
-  });
+    const gasStationNotReports = gasStationOil.flatMap((row) =>
+        Object.entries(row.Products).map(([key, value]) => ({
+            ...value,
+            key: key
+        }))
+    );
+
+    // ✅ เรียงลำดับตาม `customOrder`
+    const sortedNotReport = gasStationNotReports.sort((a, b) => {
+        return customOrder.indexOf(a.key) - customOrder.indexOf(b.key);
+    });
 
     return (
         <React.Fragment>
@@ -237,56 +237,90 @@ const gasStationNotReports = gasStationOil.flatMap((row) =>
                 {
                     report === 0 || gasStationReport.length === 0 ?
                         sortedNotReport.map((row, index) => (
-                                <React.Fragment key={index}>
-                                    <Grid item xs={5} md={2} lg={1}>
-                                        <Box
-                                            sx={{
-                                                backgroundColor: (row.key === "G91" ? "#92D050" :
-                                                    row.key === "G95" ? "#FFC000" :
-                                                        row.key === "B7" ? "#FFFF99" :
-                                                            row.key === "B95" ? "#B7DEE8" :
-                                                                row.key === "B10" ? "#32CD32" :
-                                                                    row.key === "B20" ? "#228B22" :
-                                                                        row.key === "E20" ? "#C4BD97" :
-                                                                            row.key === "E85" ? "#0000FF" :
-                                                                                row.key === "PWD" ? "#F141D8" :
-                                                                                    "#FFFF99"),
-                                                borderRadius: 3,
-                                                textAlign: "center",
-                                                paddingTop: 2,
-                                                paddingBottom: 1
+                            <React.Fragment key={index}>
+                                <Grid item xs={5} md={2} lg={1}>
+                                    <Box
+                                        sx={{
+                                            backgroundColor: (row.key === "G91" ? "#92D050" :
+                                                row.key === "G95" ? "#FFC000" :
+                                                    row.key === "B7" ? "#FFFF99" :
+                                                        row.key === "B95" ? "#B7DEE8" :
+                                                            row.key === "B10" ? "#32CD32" :
+                                                                row.key === "B20" ? "#228B22" :
+                                                                    row.key === "E20" ? "#C4BD97" :
+                                                                        row.key === "E85" ? "#0000FF" :
+                                                                            row.key === "PWD" ? "#F141D8" :
+                                                                                "#FFFF99"),
+                                            borderRadius: 3,
+                                            textAlign: "center",
+                                            paddingTop: 2,
+                                            paddingBottom: 1
+                                        }}
+                                        disabled
+                                    >
+                                        <Typography variant="h5" fontWeight="bold" gutterBottom>{row.key}</Typography>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={3.5} md={2} lg={1.5}>
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom >รับเข้า</Typography>
+                                    <Paper component="form" sx={{ marginTop: -1 }}>
+                                        <TextField
+                                            size="small"
+                                            type="number"
+                                            fullWidth
+                                            value={volumes[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            onChange={(e) => {
+                                                let newValue = e.target.value;
+
+                                                // ตรวจสอบว่าเป็นค่าว่างหรือไม่
+                                                if (newValue === "") {
+                                                    handleNewVolumeChange(row.key, ""); // ให้เป็นค่าว่างชั่วคราว
+                                                } else {
+                                                    handleNewVolumeChange(row.key, newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                }
                                             }}
-                                            disabled
-                                        >
-                                            <Typography variant="h5" fontWeight="bold" gutterBottom>{row.key}</Typography>
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={3.5} md={2} lg={1.5}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom >รับเข้า</Typography>
-                                        <Paper component="form" sx={{ marginTop: -1 }}>
-                                            <TextField
-                                                size="small"
-                                                type="number"
-                                                fullWidth
-                                                value={volumes[row.key] || 0} // ดึงค่า newVolume ตาม ProductName
-                                                onChange={(e) =>
-                                                    handleNewVolumeChange(row.key, e.target.value)
+                                            onFocus={(e) => {
+                                                if (e.target.value === "0") {
+                                                    handleNewVolumeChange(row.key, ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                 }
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={3.5} md={2} lg={1.5}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom >ปิดยอดสต็อก</Typography>
-                                        <Paper component="form" sx={{ marginTop: -1 }}>
-                                            <TextField size="small" type="number" fullWidth
-                                                value={stocks[row.key] || 0} // ดึงค่า newVolume ตาม ProductName
-                                                onChange={(e) =>
-                                                    handleNewStockChange(row.key, e.target.value)
+                                            }}
+                                            onBlur={(e) => {
+                                                if (e.target.value === "") {
+                                                    handleNewVolumeChange(row.key, 0); // ถ้าค่าว่างให้เป็น 0
                                                 }
-                                            />
-                                        </Paper>
-                                    </Grid>
-                                </React.Fragment>
+                                            }}
+                                        />
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={3.5} md={2} lg={1.5}>
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom >ปิดยอดสต็อก</Typography>
+                                    <Paper component="form" sx={{ marginTop: -1 }}>
+                                        <TextField size="small" type="number" fullWidth
+                                            value={stocks[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            onChange={(e) => {
+                                                let newValue = e.target.value;
+                                        
+                                                // ตรวจสอบว่าเป็นค่าว่างหรือไม่
+                                                if (newValue === "") {
+                                                    handleNewStockChange(row.key, ""); // ให้เป็นค่าว่างชั่วคราว
+                                                } else {
+                                                    handleNewStockChange(row.key, newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                }
+                                            }}
+                                            onFocus={(e) => {
+                                                if (e.target.value === "0") {
+                                                    handleNewStockChange(row.key, ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                if (e.target.value === "") {
+                                                    handleNewStockChange(row.key, 0); // ถ้าค่าว่างให้เป็น 0
+                                                }
+                                            }}
+                                        />
+                                    </Paper>
+                                </Grid>
+                            </React.Fragment>
                         ))
                         :
                         sortedReport.map((row, index) => (
@@ -306,7 +340,7 @@ const gasStationNotReports = gasStationOil.flatMap((row) =>
                                     </Box>
                                 </Grid>
                                 <Grid item xs={3.5} md={2} lg={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold" color={ setting && "textDisabled"} gutterBottom>รับเข้า</Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" color={setting && "textDisabled"} gutterBottom>รับเข้า</Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                         <TextField
                                             size="small"
@@ -314,29 +348,29 @@ const gasStationNotReports = gasStationOil.flatMap((row) =>
                                             fullWidth
                                             value={updateVolumes[row.ProductName] || row.Delivered}
                                             onChange={(e) => handleUpdateVolumeChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
-                                            disabled={setting ? true : false }
+                                            disabled={setting ? true : false}
                                         />
                                     </Paper>
                                 </Grid>
                                 <Grid item xs={3.5} md={2} lg={1.5}>
-                                            <Typography variant="subtitle2" fontWeight="bold" color={ setting && "textDisabled"} gutterBottom>ปิดยอดสต็อก</Typography>
-                                            <Paper component="form" sx={{ marginTop: -1 }}>
-                                                <TextField
-                                                    size="small"
-                                                    type={setting ? "text" : "number"}
-                                                    fullWidth
-                                                    value={updateStocks[row.ProductName] || row.OilBalance}
-                                                    onChange={(e) => handleUpdateStockChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
-                                                    disabled={setting ? true : false }
-                                                />
-                                            </Paper>
-                                        </Grid>
+                                    <Typography variant="subtitle2" fontWeight="bold" color={setting && "textDisabled"} gutterBottom>ปิดยอดสต็อก</Typography>
+                                    <Paper component="form" sx={{ marginTop: -1 }}>
+                                        <TextField
+                                            size="small"
+                                            type={setting ? "text" : "number"}
+                                            fullWidth
+                                            value={updateStocks[row.ProductName] || row.OilBalance}
+                                            onChange={(e) => handleUpdateStockChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
+                                            disabled={setting ? true : false}
+                                        />
+                                    </Paper>
+                                </Grid>
                             </React.Fragment>
                         ))
                 }
             </Grid>
             <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-            {/* <Button variant="contained" color="success" onClick={saveProduct}>
+                {/* <Button variant="contained" color="success" onClick={saveProduct}>
                                         บันทึก
                                     </Button> */}
                 {/* {

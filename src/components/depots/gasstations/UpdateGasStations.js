@@ -85,10 +85,10 @@ const UpdateGasStations = (props) => {
                 // หาลำดับใน customOrder ของแต่ละ ProductName
                 const indexA = customOrder.indexOf(a.ProductName);
                 const indexB = customOrder.indexOf(b.ProductName);
-                
+
                 // เรียงตามลำดับที่กำหนดใน customOrder
                 return indexA - indexB;
-              });
+            });
             setStock(dataStock);
         });
     };
@@ -104,7 +104,10 @@ const UpdateGasStations = (props) => {
         const reportData = gasStation?.Report?.[formattedDate];
 
         const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+        const twoDaysAgoDate = dayjs(selectedDate).subtract(2, "day").format("DD-MM-YYYY");
+
         const yesterdayData = gasStation?.Report?.[yesterdayDate];
+        const twoDaysAgoData = gasStation?.Report?.[twoDaysAgoDate];
 
         let sharedDownHole = 0;
 
@@ -117,22 +120,27 @@ const UpdateGasStations = (props) => {
 
         const updatedValues = reportData
             ? Object.entries(reportData)
-            .sort(([keyA, valueA], [keyB, valueB]) => {
-                // เปรียบเทียบตาม customOrder
-                const indexA = customOrder.indexOf(valueA?.ProductName);
-                const indexB = customOrder.indexOf(valueB?.ProductName);
-                return indexA - indexB;
-              })
+                .sort(([keyA, valueA], [keyB, valueB]) => {
+                    // เปรียบเทียบตาม customOrder
+                    const indexA = customOrder.indexOf(valueA?.ProductName);
+                    const indexB = customOrder.indexOf(valueB?.ProductName);
+                    return indexA - indexB;
+                })
                 .map(([, value], index) => {
+
                     const yesterdayEntry = Object.values(yesterdayData || {}).find(
                         (entry) => entry?.ProductName === value?.ProductName
-                    ) || { Volume: 0 };
+                    ) || { OilBalance: 0 };
+
+                    const twoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(
+                        (entry) => entry?.ProductName === value?.ProductName
+                    ) || { OilBalance: 0 };
 
                     return {
                         ProductName: value?.ProductName || "",
                         Capacity: value?.Capacity || 0,
                         Color: value?.Color || "",
-                        Volume: value?.Volume || 0, // ใช้ข้อมูลของวันที่เลือก
+                        Volume: yesterdayEntry?.OilBalance || 0, // ใช้ข้อมูลของวันที่เลือก
                         Squeeze: values[index]?.Squeeze || value?.Squeeze || 0,
                         Delivered: values[index]?.Delivered || value?.Delivered || 0,
                         Pending1: values[index]?.Pending1 || value?.Pending1 || 0,
@@ -140,7 +148,7 @@ const UpdateGasStations = (props) => {
                         EstimateSell: values[index]?.EstimateSell || value?.EstimateSell || 0,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,
-                        YesterDay: yesterdayEntry?.Volume || 0, // ใช้ข้อมูลวันก่อนหน้า
+                        YesterDay: twoDaysAgoEntry?.OilBalance || 0, // ใช้ข้อมูลวันก่อนหน้า
                         Sell: value?.Sell || 0,
                         TotalVolume: value?.TotalVolume || 0,
                         OilBalance: value?.OilBalance || 0
@@ -148,6 +156,10 @@ const UpdateGasStations = (props) => {
                 })
             : stock.map((row) => {
                 const yesterdayEntry = Object.values(yesterdayData || {}).find(
+                    (entry) => entry?.ProductName === row?.ProductName
+                ) || { OilBalance: 0 };
+                
+                const twoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(
                     (entry) => entry?.ProductName === row?.ProductName
                 ) || { OilBalance: 0 };
 
@@ -161,7 +173,7 @@ const UpdateGasStations = (props) => {
                     ProductName: row?.ProductName || "",
                     Capacity: row?.Capacity || 0,
                     Color: row?.Color || "",
-                    Volume: 0,
+                    Volume: yesterdayEntry?.OilBalance || 0,
                     Squeeze: squeeze,
                     Delivered: 0,
                     Pending1: 0,
@@ -169,17 +181,17 @@ const UpdateGasStations = (props) => {
                     EstimateSell: 0,
                     Period: 0,
                     DownHole: downHoleValue,
-                    YesterDay: yesterdayEntry?.Volume || 0,
+                    YesterDay: twoDaysAgoEntry?.OilBalance || 0,
                     Sell: 0,
                     TotalVolume: 0,
                     OilBalance: 0
                 };
             });
-            // .sort((a, b) => {
-            //     const indexA = customOrder.indexOf(a.ProductName);
-            //     const indexB = customOrder.indexOf(b.ProductName);
-            //     return indexA - indexB;
-            //   });
+        // .sort((a, b) => {
+        //     const indexA = customOrder.indexOf(a.ProductName);
+        //     const indexB = customOrder.indexOf(b.ProductName);
+        //     return indexA - indexB;
+        //   });
 
         console.log("Selected Date:", selectedDate);
         console.log("Formatted Date:", formattedDate);
@@ -202,8 +214,7 @@ const UpdateGasStations = (props) => {
                 newRow.Delivered !== existingRow.Delivered ||
                 newRow.Pending1 !== existingRow.Pending1 ||
                 newRow.Pending2 !== existingRow.Pending2 ||
-                newRow.EstimateSell !== existingRow.EstimateSell ||
-                newRow.Volume !== existingRow.Volume // เพิ่มเงื่อนไข
+                newRow.EstimateSell !== existingRow.EstimateSell 
             );
         });
 
@@ -463,8 +474,22 @@ const UpdateGasStations = (props) => {
                     />
                 </Grid>
             </Grid> */}
-            <Box textAlign="center">
-            <Typography variant="subtitle1" fontWeight="bold" sx={{ fontSize: 18, marginRight: 2 }} gutterBottom>{name + " / " + shortName + " มีทั้งหมด "+ number + " หลุม" + "ที่อยู่ " + gasStation.Address}</Typography>
+            <Box textAlign="center" 
+                sx={{ 
+                    backgroundColor: 
+                        gasStation.Stock === "แม่โจ้" ? "#92D050"
+                        : gasStation.Stock === "สันกลาง" ? "#B1A0C7"
+                        : gasStation.Stock === "สันทราย" ? "#B7DEE8"
+                        : gasStation.Stock === "บ้านโฮ่ง" ? "#FABF8F"
+                        : gasStation.Stock === "ป่าแดด" ? "#B1A0C7"
+                        : ""
+                        , 
+                    paddingTop: 1, 
+                    paddingBottom: 1,
+                    borderTopLeftRadius:10 ,
+                    borderTopRightRadius: 10 
+                    }}>
+                <Typography variant="subtitle1" fontWeight="bold" sx={{ fontSize: 18, marginRight: 2 }} gutterBottom>{name + " / " + shortName + " มีทั้งหมด " + number + " หลุม" + "ที่อยู่ " + gasStation.Address}</Typography>
             </Box>
             <TableContainer
                 component={Paper}
@@ -561,12 +586,12 @@ const UpdateGasStations = (props) => {
                                 gasStation.Report ?
                                     (gasStation.Report[dayjs(selectedDate).format("DD-MM-YYYY")] ?
                                         Object.entries(gasStation.Report[dayjs(selectedDate).format("DD-MM-YYYY")])
-                                        .sort(([keyA, valueA], [keyB, valueB]) => {
-                                            // เปรียบเทียบตาม customOrder
-                                            const indexA = customOrder.indexOf(valueA?.ProductName);
-                                            const indexB = customOrder.indexOf(valueB?.ProductName);
-                                            return indexA - indexB;
-                                          })
+                                            .sort(([keyA, valueA], [keyB, valueB]) => {
+                                                // เปรียบเทียบตาม customOrder
+                                                const indexA = customOrder.indexOf(valueA?.ProductName);
+                                                const indexB = customOrder.indexOf(valueB?.ProductName);
+                                                return indexA - indexB;
+                                            })
                                             .map(([key, value]) => (
                                                 <TableRow key={key}>
                                                     <TablecellHeader
@@ -614,363 +639,367 @@ const UpdateGasStations = (props) => {
                                         gasStation.Products &&
                                         Object.entries(gasStation.Products)
                                             .sort(([keyA], [keyB]) => {
-                                            // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
-                                            const indexA = customOrder.indexOf(keyA);
-                                            const indexB = customOrder.indexOf(keyB);
-                                            return indexA - indexB;  // เรียงลำดับจาก customOrder
+                                                // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
+                                                const indexA = customOrder.indexOf(keyA);
+                                                const indexB = customOrder.indexOf(keyB);
+                                                return indexA - indexB;  // เรียงลำดับจาก customOrder
                                             })
                                             .map(([key, value], index) => (
-                                            <React.Fragment key={index}>
-                                                {
-                                                    stock.map((row, index) => (
-                                                        row.ProductName === key &&
-                                                        <TableRow key={row.id}>
-                                                            <TablecellHeader
-                                                                sx={{
-                                                                    backgroundColor: row.Color,
-                                                                    width: 50,
-                                                                    color: "black",
-                                                                    position: "sticky",
-                                                                    left: 0,
-                                                                    zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
-                                                                }}
-                                                            >
-                                                                {row.ProductName}
-                                                            </TablecellHeader>
-                                                            <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Grid container>
-                                                                    <Grid item xs={4}>
-                                                                        0
+                                                <React.Fragment key={index}>
+                                                    {
+                                                        stock.map((row, index) => (
+                                                            row.ProductName === key &&
+                                                            <TableRow key={row.id}>
+                                                                <TablecellHeader
+                                                                    sx={{
+                                                                        backgroundColor: row.Color,
+                                                                        width: 50,
+                                                                        color: "black",
+                                                                        position: "sticky",
+                                                                        left: 0,
+                                                                        zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
+                                                                    }}
+                                                                >
+                                                                    {row.ProductName}
+                                                                </TablecellHeader>
+                                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>
+                                                                    <Grid container>
+                                                                        <Grid item xs={4}>
+                                                                            0
+                                                                        </Grid>
+                                                                        <Grid item xs={0.5}>
+                                                                            |
+                                                                        </Grid>
+                                                                        <Grid item xs={3.5}>
+                                                                            0
+                                                                        </Grid>
+                                                                        <Grid item xs={0.5}>
+                                                                            |
+                                                                        </Grid>
+                                                                        <Grid item xs={3.5}>
+                                                                            0
+                                                                        </Grid>
                                                                     </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={3.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={3.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                }
-                                            </React.Fragment>
-                                        ))
+                                                                </TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    }
+                                                </React.Fragment>
+                                            ))
                                     )
                                     :
                                     (
                                         gasStation.Products &&
                                         Object.entries(gasStation.Products)
-                                        .sort(([keyA], [keyB]) => {
-                                        // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
-                                        const indexA = customOrder.indexOf(keyA);
-                                        const indexB = customOrder.indexOf(keyB);
-                                        return indexA - indexB;  // เรียงลำดับจาก customOrder
-                                        })
-                                        .map(([key, value], index) => (
-                                            <React.Fragment key={index}>
-                                                {
-                                                    stock.map((row, index) => (
-                                                        row.ProductName === key &&
-                                                        <TableRow key={row.id}>
-                                                            <TablecellHeader
-                                                                sx={{
-                                                                    backgroundColor: row.Color,
-                                                                    width: 50,
-                                                                    color: "black",
-                                                                    position: "sticky",
-                                                                    left: 0,
-                                                                    zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
-                                                                }}
-                                                            >
-                                                                {row.ProductName}
-                                                            </TablecellHeader>
-                                                            <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Grid container>
-                                                                    <Grid item xs={4}>
-                                                                        0
+                                            .sort(([keyA], [keyB]) => {
+                                                // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
+                                                const indexA = customOrder.indexOf(keyA);
+                                                const indexB = customOrder.indexOf(keyB);
+                                                return indexA - indexB;  // เรียงลำดับจาก customOrder
+                                            })
+                                            .map(([key, value], index) => (
+                                                <React.Fragment key={index}>
+                                                    {
+                                                        stock.map((row, index) => (
+                                                            row.ProductName === key &&
+                                                            <TableRow key={row.id}>
+                                                                <TablecellHeader
+                                                                    sx={{
+                                                                        backgroundColor: row.Color,
+                                                                        width: 50,
+                                                                        color: "black",
+                                                                        position: "sticky",
+                                                                        left: 0,
+                                                                        zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
+                                                                    }}
+                                                                >
+                                                                    {row.ProductName}
+                                                                </TablecellHeader>
+                                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Capacity)}</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>
+                                                                    <Grid container>
+                                                                        <Grid item xs={4}>
+                                                                            0
+                                                                        </Grid>
+                                                                        <Grid item xs={0.5}>
+                                                                            |
+                                                                        </Grid>
+                                                                        <Grid item xs={3.5}>
+                                                                            0
+                                                                        </Grid>
+                                                                        <Grid item xs={0.5}>
+                                                                            |
+                                                                        </Grid>
+                                                                        <Grid item xs={3.5}>
+                                                                            0
+                                                                        </Grid>
                                                                     </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={3.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                    <Grid item xs={0.5}>
-                                                                        |
-                                                                    </Grid>
-                                                                    <Grid item xs={3.5}>
-                                                                        0
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                }
-                                            </React.Fragment>
-                                        ))
+                                                                </TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    }
+                                                </React.Fragment>
+                                            ))
                                     )
                                 :
                                 gasStation.Products &&
                                 Object.entries(gasStation.Products)
-                                .sort(([keyA], [keyB]) => {
-                                    // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
-                                    const indexA = customOrder.indexOf(keyA);
-                                    const indexB = customOrder.indexOf(keyB);
-                                    return indexA - indexB;  // เรียงลำดับจาก customOrder
+                                    .sort(([keyA], [keyB]) => {
+                                        // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
+                                        const indexA = customOrder.indexOf(keyA);
+                                        const indexB = customOrder.indexOf(keyB);
+                                        return indexA - indexB;  // เรียงลำดับจาก customOrder
                                     }).map(([key, value], index) => (
-                                    <React.Fragment key={index}>
-                                        {
-                                            stock.map((row, index) => (
-                                                row.ProductName === key &&
-                                                <TableRow key={row.id}>
-                                                    <TablecellHeader
-                                                        sx={{
-                                                            backgroundColor: values[index]?.Color || 0,
-                                                            width: 50,
-                                                            color: "black",
-                                                            position: "sticky",
-                                                            left: 0,
-                                                            zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
-                                                        }}
-                                                    >
-                                                        {values[index]?.ProductName || 0}
-                                                    </TablecellHeader>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || 0)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Volume || 0)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
-                                                        <TextField
-                                                            style={{ display: 'none' }}
-                                                            inputProps={{ readOnly: true }}
-                                                            value={values[index]?.Volume || 0}
-                                                        />
-                                                        <TextField
-                                                            style={{ display: 'none' }}
-                                                            inputProps={{ readOnly: true }}
-                                                            value={values[index]?.Color || ""}
-                                                        />
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            value={values[index]?.Squeeze || squeeze}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Squeeze", e.target.value)
-                                                            }
+                                        <React.Fragment key={index}>
+                                            {
+                                                stock.map((row, index) => (
+                                                    row.ProductName === key &&
+                                                    <TableRow key={row.id}>
+                                                        <TablecellHeader
                                                             sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
+                                                                backgroundColor: values[index]?.Color || 0,
+                                                                width: 50,
+                                                                color: "black",
+                                                                position: "sticky",
+                                                                left: 0,
+                                                                zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
                                                             }}
-                                                            fullWidth
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell
-                                                        sx={{
-                                                            display: "flex",
-                                                            justifyContent: "center",
-                                                            alignItems: "center",
-                                                            gap: 1, // เพิ่มระยะห่างระหว่าง TextField
-                                                        }}
-                                                    >
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label="ลงจริงไปแล้ว"
-                                                            value={values[index]?.Delivered || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Delivered", e.target.value)
-                                                            }
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
+                                                        >
+                                                            {values[index]?.ProductName || 0}
+                                                        </TablecellHeader>
+                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || 0)}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Volume || 0)}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            <TextField
+                                                                style={{ display: 'none' }}
+                                                                inputProps={{ readOnly: true }}
+                                                                value={values[index]?.Volume || 0}
+                                                            />
+                                                            <TextField
+                                                                style={{ display: 'none' }}
+                                                                inputProps={{ readOnly: true }}
+                                                                value={values[index]?.Color || ""}
+                                                            />
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                value={values[index]?.Squeeze || 0} // ถ้าค่าว่างให้เป็น 0
+                                                                onChange={(e) => handleInputChange(index, "Squeeze", e.target.value)}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        handleInputChange(index, "Squeeze", ""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        handleInputChange(index, "Squeeze", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+
+                                                        </TableCell>
+                                                        <TableCell
                                                             sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
+                                                                display: "flex",
+                                                                justifyContent: "center",
+                                                                alignItems: "center",
+                                                                gap: 1, // เพิ่มระยะห่างระหว่าง TextField
                                                             }}
-                                                            fullWidth
-                                                        />
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label="ที่จะมาลง"
-                                                            value={values[index]?.Pending1 || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Pending1", parseFloat(e.target.value) || 0)
-                                                            }
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label="ที่จะมาลง"
-                                                            value={values[index]?.Pending2 || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Pending2", e.target.value)
-                                                            }
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">ขาย</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            value={values[index]?.EstimateSell || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "EstimateSell", e.target.value)
-                                                            }
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format((values[index]?.Capacity || 0) - (values[index]?.DownHole || 0))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            value={values[index]?.YesterDay || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "YesterDay", e.target.value)
-                                                            }
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Sell || 0)}</TableCell>
-                                                </TableRow>
-                                            ))
-                                        }
-                                    </React.Fragment>
-                                ))
+                                                        >
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">สต็อก</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label="ลงจริงไปแล้ว"
+                                                                value={values[index]?.Delivered || 0}
+                                                                onChange={(e) =>
+                                                                    handleInputChange(index, "Delivered", e.target.value)
+                                                                }
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">สต็อก</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label="ที่จะมาลง"
+                                                                value={values[index]?.Pending1 || 0}
+                                                                onChange={(e) =>
+                                                                    handleInputChange(index, "Pending1", parseFloat(e.target.value) || 0)
+                                                                }
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">สต็อก</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label="ที่จะมาลง"
+                                                                value={values[index]?.Pending2 || 0}
+                                                                onChange={(e) =>
+                                                                    handleInputChange(index, "Pending2", e.target.value)
+                                                                }
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">ขาย</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label="ขาย"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                value={values[index]?.EstimateSell || 0}
+                                                                onChange={(e) =>
+                                                                    handleInputChange(index, "EstimateSell", e.target.value)
+                                                                }
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format((values[index]?.Capacity || 0) - (values[index]?.DownHole || 0))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                value={values[index]?.YesterDay || 0}
+                                                                onChange={(e) =>
+                                                                    handleInputChange(index, "YesterDay", e.target.value)
+                                                                }
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Sell || 0)}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            }
+                                        </React.Fragment>
+                                    ))
                         }
                     </TableBody>
                 </Table>

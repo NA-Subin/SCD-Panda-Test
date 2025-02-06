@@ -251,11 +251,12 @@ const GasStationAdmin = () => {
                         color={theme.palette.panda.main}
                         gutterBottom
                     >
-                        {
+                        ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน
+                        {/* {
                             openOil === true ? "รับน้ำมัน"
                                 : openOil === false ? "ปิดยอดสต็อก"
                                     : "ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน"
-                        }
+                        } */}
                     </Typography>
                     <Box
                         display="flex"
