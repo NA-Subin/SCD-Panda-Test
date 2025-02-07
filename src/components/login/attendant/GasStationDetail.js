@@ -36,6 +36,8 @@ const GasStationDetail = (props) => {
 
     useEffect(() => {
         setSelectedDates(dayjs(selectedDate));
+        setVolumes({}); // รีเซ็ตค่า Volume เป็นค่าเริ่มต้น
+        setStocks({});
     }, [selectedDate]);
 
     const [volumes, setVolumes] = useState({});
@@ -268,7 +270,7 @@ const GasStationDetail = (props) => {
                                             size="small"
                                             type="number"
                                             fullWidth
-                                            value={volumes[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            value={ volumes[row.key] === "" ? "" : volumes[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
 
@@ -296,7 +298,7 @@ const GasStationDetail = (props) => {
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom >ปิดยอดสต็อก</Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                         <TextField size="small" type="number" fullWidth
-                                            value={stocks[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            value={ stocks[row.key] === "" ? "" : stocks[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
                                         

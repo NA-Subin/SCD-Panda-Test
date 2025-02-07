@@ -34,7 +34,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { IconButtonError, RateOils, TablecellSelling } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import { database } from "../../server/firebase";
@@ -973,64 +973,64 @@ const InsertTrips = () => {
                                 >
                                     <Table stickyHeader size="small" sx={{ tableLayout: 'fixed', }}>
                                         <TableHead >
-                                            <TableRow sx={{ top: 0, zIndex: 3, backgroundColor: theme.palette.error.main }}>
-                                                <TablecellHeader width={80} sx={{ textAlign: "center" }} rowSpan={2}>
+                                            <TableRow sx={{ top: 0, zIndex: 3, backgroundColor: theme.palette.info.main }}>
+                                                <TablecellSelling width={80} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ลำดับ
-                                                </TablecellHeader>
-                                                <TablecellHeader width={80} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light }} rowSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={80} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.info.main }} rowSpan={2}>
                                                     รหัสตั๋ว
-                                                </TablecellHeader>
-                                                <TablecellHeader width={500} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={500} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ตั๋ว
-                                                </TablecellHeader>
-                                                <TablecellHeader width={300} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={300} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     เลขที่ออเดอร์
-                                                </TablecellHeader>
-                                                <TablecellHeader width={150} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ค่าบรรทุก
-                                                </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     G95
-                                                </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     G91
-                                                </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     B7(D)
-                                                </TablecellHeader>
-                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     B95
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={150} sx={{ textAlign: "center" }}>
                                                                 B10
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={150} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={150} sx={{ textAlign: "center" }}>
                                                                 B20
-                                                            </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                            </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     E20
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={150} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={150} sx={{ textAlign: "center" }}>
                                                                 E85
-                                                            </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                            </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
                                                     PWD
-                                                </TablecellHeader>
-                                                <TablecellHeader width={300} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
+                                                </TablecellSelling>
+                                                <TablecellSelling width={300} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
                                             </TableRow>
                                             <TableRow sx={{ position: "sticky", top: 20, zIndex: 2, backgroundColor: theme.palette.panda.light }}>
-                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center" }}>ปริมาณ</TablecellHeader>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -1048,10 +1048,10 @@ const InsertTrips = () => {
                                                     width: "2910px"
                                                 }}
                                             >
-                                                <TablecellHeader width={1110} sx={{ textAlign: "right" }}>
+                                                <TablecellSelling width={1110} sx={{ textAlign: "right" }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1070,8 +1070,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1090,8 +1090,8 @@ const InsertTrips = () => {
                                                         // value={volumeG95}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1110,8 +1110,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1130,8 +1130,8 @@ const InsertTrips = () => {
                                                         // value={volumeG91}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1150,8 +1150,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1170,8 +1170,8 @@ const InsertTrips = () => {
                                                         // value={volumeB7}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1190,8 +1190,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1210,8 +1210,8 @@ const InsertTrips = () => {
                                                         // value={volumeB95}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1230,8 +1230,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1250,8 +1250,8 @@ const InsertTrips = () => {
                                                         // value={volumeE20}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                {/* <TablecellHeader width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                </TablecellSelling>
+                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1270,8 +1270,8 @@ const InsertTrips = () => {
                                                             disabled={showTrips ? false : true}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader> */}
-                                                <TablecellHeader width={250} sx={{ textAlign: "center" }}>
+                                                </TablecellSelling> */}
+                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1290,8 +1290,8 @@ const InsertTrips = () => {
                                                         // value={volumePWD}
                                                         />
                                                     </Paper>
-                                                </TablecellHeader>
-                                                <TablecellHeader width={300} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
+                                                </TablecellSelling>
+                                                <TablecellSelling width={300} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
                                                     <Box display="flex" justifyContent="center" alignItems="center">
                                                         {/* <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1 }} gutterBottom>ต้นทุนรวม</Typography>
                                                         <Paper component="form">
@@ -1331,7 +1331,7 @@ const InsertTrips = () => {
                                                             />
                                                         </Paper>
                                                     </Box>
-                                                </TablecellHeader>
+                                                </TablecellSelling>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -1567,102 +1567,102 @@ const InsertTrips = () => {
                                                 <Table stickyHeader size="small" sx={{ tableLayout: 'fixed' }}>
                                                     <TableHead>
                                                         <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.error.main }}>
-                                                            <TablecellHeader width={60} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                            <TablecellSelling width={60} sx={{ textAlign: "center" }} rowSpan={2}>
                                                                 ลำดับ
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={200} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={200} sx={{ textAlign: "center", left: 0, zIndex: 5, backgroundColor: theme.palette.panda.light, borderRight: "1px solid white" }} rowSpan={2}>
                                                                 ลูกค้า
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }} rowSpan={2}>
                                                                 เลขที่ออเดอร์
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={200} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={200} sx={{ textAlign: "center" }} rowSpan={2}>
                                                                 ค่าบรรทุก
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 G95
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 G91
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 B7(D)
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 B95
-                                                            </TablecellHeader>
-                                                            {/* <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            {/* <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 B10
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 B20
-                                                            </TablecellHeader> */}
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
+                                                            </TablecellSelling> */}
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 E20
-                                                            </TablecellHeader>
-                                                            {/* <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            {/* <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 E85
-                                                            </TablecellHeader> */}
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
+                                                            </TablecellSelling> */}
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={3}>
                                                                 PWD
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
                                                         </TableRow>
                                                         <TableRow sx={{ position: "sticky", top: 35, zIndex: 2, backgroundColor: theme.palette.error.main }}>
-                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                            <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ต้นทุน</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ขาย</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold">ปริมาณ</Typography>
-                                                            </TablecellHeader>
+                                                            </TablecellSelling>
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
@@ -1696,10 +1696,10 @@ const InsertTrips = () => {
                                                                 width: "3265px"
                                                             }}
                                                         >
-                                                            <TablecellHeader width={835} sx={{ textAlign: "right" }}>
+                                                            <TablecellSelling width={835} sx={{ textAlign: "right" }}>
                                                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมข้อมูลทั้งหมด</Typography>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1716,8 +1716,8 @@ const InsertTrips = () => {
                                                                         value={volumeG95}
                                                                     />
                                                                 </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1734,8 +1734,8 @@ const InsertTrips = () => {
                                                                         value={volumeG91}
                                                                     />
                                                                 </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1752,8 +1752,8 @@ const InsertTrips = () => {
                                                                         value={volumeB7}
                                                                     />
                                                                 </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1770,8 +1770,8 @@ const InsertTrips = () => {
                                                                         value={volumeB95}
                                                                     />
                                                                 </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1788,8 +1788,8 @@ const InsertTrips = () => {
                                                                         value={volumeE20}
                                                                     />
                                                                 </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={375} sx={{ textAlign: "center" }}>
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={375} sx={{ textAlign: "center" }}>
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1806,8 +1806,8 @@ const InsertTrips = () => {
                                                                         value={volumePWD}
                                                                     />
                                                                 </Paper>
-                                                            </TablecellHeader>
-                                                            <TablecellHeader width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
+                                                            </TablecellSelling>
+                                                            <TablecellSelling width={180} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
                                                                 <Paper component="form" sx={{ marginRight: -1 }}>
                                                                     <TextField size="small" fullWidth
                                                                         type="number"
@@ -1823,7 +1823,7 @@ const InsertTrips = () => {
                                                                         }}
                                                                     />
                                                                 </Paper>
-                                                            </TablecellHeader>
+                                                            </TablecellSelling>
                                                         </TableRow>
                                                     </TableFooter>
                                                 </Table>

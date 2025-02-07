@@ -19,6 +19,15 @@ const TablecellHeader = styled(TableCell)(({ theme }) => ({
   fontWeight: "bold",
 }));
 
+const TablecellSelling = styled(TableCell)(({ theme }) => ({
+  backgroundColor: theme.palette.panda.main,
+  color: theme.palette.primary.contrastText,
+  textAlign: "center",
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
 const RateOils = styled(Paper)(({ theme }) => ({
   height: 150,
   color: theme.palette.primary.contrastText,
@@ -119,4 +128,5 @@ export {
   IconButtonWarning,
   IconButtonSuccess,
   IconButtonInfo,
+  TablecellSelling
 };

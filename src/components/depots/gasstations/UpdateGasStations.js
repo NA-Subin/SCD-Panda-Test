@@ -54,6 +54,9 @@ const UpdateGasStations = (props) => {
     const [estimateStock, setEstimateStock] = React.useState(0);
     const [show, setShow] = React.useState(true);
     const [update, setUpdate] = React.useState(true);
+    const [yesTerDayData,setYesterdayData] = React.useState("");
+    const [twoDaysAgoData,setTwoDaysAgoData] = React.useState("");
+    const [formattedDate,setFormattedDate] = React.useState("");
 
     const [stock, setStock] = React.useState([]);
     const [values, setValues] = useState([]);
@@ -67,6 +70,7 @@ const UpdateGasStations = (props) => {
 
     // console.log(gasStation.id+" แสดงค่า : ",downHole);
     console.log(gasStation.id + " แสดงค่า : ", downHole);
+    console.log("selectedDate : ",dayjs(selectedDate).format("DD-MM-YYYY"));
 
     const getStock = async () => {
         database.ref("depot/stock").on("value", (snapshot) => {
@@ -109,6 +113,10 @@ const UpdateGasStations = (props) => {
         const yesterdayData = gasStation?.Report?.[yesterdayDate];
         const twoDaysAgoData = gasStation?.Report?.[twoDaysAgoDate];
 
+        setYesterdayData(yesterdayData);
+        setTwoDaysAgoData(twoDaysAgoData);
+        setFormattedDate(formattedDate);
+
         let sharedDownHole = 0;
 
         if (isFirstStation && reportData) {
@@ -136,11 +144,19 @@ const UpdateGasStations = (props) => {
                         (entry) => entry?.ProductName === value?.ProductName
                     ) || { OilBalance: 0 };
 
+                    const valueyesterdayEntry = Object.values(yesterdayData || {}).find(
+                        (entry) => entry?.ProductName === values[index]?.ProductName
+                    ) || { OilBalance: 0 };
+
+                    const valuetwoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(
+                        (entry) => entry?.ProductName === values[index]?.ProductName
+                    ) || { OilBalance: 0 };
+
                     return {
                         ProductName: value?.ProductName || "",
                         Capacity: value?.Capacity || 0,
                         Color: value?.Color || "",
-                        Volume: yesterdayEntry?.OilBalance || 0, // ใช้ข้อมูลของวันที่เลือก
+                        Volume: valueyesterdayEntry?.OilBalance || yesterdayEntry?.OilBalance || 0, // ใช้ข้อมูลของวันที่เลือก
                         Squeeze: values[index]?.Squeeze || value?.Squeeze || 0,
                         Delivered: values[index]?.Delivered || value?.Delivered || 0,
                         Pending1: values[index]?.Pending1 || value?.Pending1 || 0,
@@ -148,7 +164,7 @@ const UpdateGasStations = (props) => {
                         EstimateSell: values[index]?.EstimateSell || value?.EstimateSell || 0,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,
-                        YesterDay: twoDaysAgoEntry?.OilBalance || 0, // ใช้ข้อมูลวันก่อนหน้า
+                        YesterDay: (valuetwoDaysAgoEntry?.OilBalance + valueyesterdayEntry?.Delivered) || (twoDaysAgoEntry?.OilBalance + yesterdayEntry?.Delivered) || 0, // ใช้ข้อมูลวันก่อนหน้า
                         Sell: value?.Sell || 0,
                         TotalVolume: value?.TotalVolume || 0,
                         OilBalance: value?.OilBalance || 0
@@ -181,7 +197,7 @@ const UpdateGasStations = (props) => {
                     EstimateSell: 0,
                     Period: 0,
                     DownHole: downHoleValue,
-                    YesterDay: twoDaysAgoEntry?.OilBalance || 0,
+                    YesterDay: (twoDaysAgoEntry?.OilBalance + yesterdayEntry?.Delivered) || 0,
                     Sell: 0,
                     TotalVolume: 0,
                     OilBalance: 0
@@ -264,6 +280,97 @@ const UpdateGasStations = (props) => {
     const deepEqual = (obj1, obj2) => {
         return JSON.stringify(obj1) === JSON.stringify(obj2);
     };
+
+    const handleEditVolume = () => {
+        const isFirstStation = (gasStationOil?.[0]?.Name === gasStation?.Name) || false;
+        const reportData = gasStation?.Report?.[formattedDate];
+
+        let sharedDownHole = 0;
+
+        if (isFirstStation && reportData) {
+            const firstProductWithDownHole = Object.values(reportData).find(
+                (entry) => entry?.DownHole
+            );
+            sharedDownHole = firstProductWithDownHole?.DownHole || 0;
+        }
+
+        if (reportData) {
+            const updatedValues = Object.entries(reportData)
+                .sort(([keyA, valueA], [keyB, valueB]) => {
+                    const indexA = customOrder.indexOf(valueA?.ProductName);
+                    const indexB = customOrder.indexOf(valueB?.ProductName);
+                    return indexA - indexB;
+                })
+                .map(([, value], index) => {
+                    const yesterdayEntry = Object.values(yesTerDayData || {}).find(
+                        (entry) => entry?.ProductName === value?.ProductName
+                    ) || { OilBalance: 0 };
+    
+                    const twoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(
+                        (entry) => entry?.ProductName === value?.ProductName
+                    ) || { OilBalance: 0 };
+    
+                    return {
+                        ProductName: value?.ProductName || "",
+                        Capacity: value?.Capacity || 0,
+                        Color: value?.Color || "",
+                        Volume: yesterdayEntry?.OilBalance || 0,
+                        Squeeze: value?.Squeeze || 0,
+                        Delivered: value?.Delivered || 0,
+                        Pending1: value?.Pending1 || 0,
+                        Pending2: value?.Pending2 || 0,
+                        EstimateSell: value?.EstimateSell || 0,
+                        Period: value?.Period || 0,
+                        DownHole: value?.DownHole || 0,
+                        YesterDay: (twoDaysAgoEntry?.OilBalance + yesterdayEntry?.Delivered) || 0,
+                        Sell: value?.Sell || 0,
+                        TotalVolume: value?.TotalVolume || 0,
+                        OilBalance: value?.OilBalance || 0
+                    };
+                });
+    
+            setValues(updatedValues);
+        }else{
+            const updatedValues = stock.map((row) => {
+                const yesterdayEntry = Object.values(yesTerDayData || {}).find(
+                    (entry) => entry?.ProductName === row?.ProductName
+                ) || { OilBalance: 0 };
+                
+                const twoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(
+                    (entry) => entry?.ProductName === row?.ProductName
+                ) || { OilBalance: 0 };
+
+                console.log("yesterdayEntry : ",yesterdayEntry.OilBalance);
+                console.log("twoDaysAgoEntry : ",twoDaysAgoEntry.OilBalance);
+
+                const downHoleValue = downHole
+                    ? (downHole.find((item) => item?.ProductName === row?.ProductName)?.DownHole || gasStation?.Products?.[row?.ProductName] || 0)
+                    : (isFirstStation
+                        ? gasStation?.Products?.[row?.ProductName] || 0
+                        : sharedDownHole || 0);
+
+                return {
+                    ProductName: row?.ProductName || "",
+                    Capacity: row?.Capacity || 0,
+                    Color: row?.Color || "",
+                    Volume: yesterdayEntry.OilBalance || 0,
+                    Squeeze: squeeze,
+                    Delivered: 0,
+                    Pending1: 0,
+                    Pending2: 0,
+                    EstimateSell: 0,
+                    Period: 0,
+                    DownHole: downHoleValue,
+                    YesterDay: (twoDaysAgoEntry.OilBalance + yesterdayEntry.Delivered) || 0,
+                    Sell: 0,
+                    TotalVolume: 0,
+                    OilBalance: 0
+                };
+            });
+            setValues(updatedValues);
+        }
+        setUpdate(false);
+    };    
 
     const handleInputChange = (index, field, value) => {
         console.log("Before update:", { index, field, value, currentValue: values[index]?.[field] });
@@ -559,7 +666,7 @@ const UpdateGasStations = (props) => {
                                 <Paper component="form" sx={{ height: "25px", paddingTop: -0.5 }}>
                                     {
                                         update ?
-                                            <IconButton color="inherit" size="small" fullWidth onClick={(e) => setUpdate(false)}>
+                                            <IconButton color="inherit" size="small" fullWidth onClick={handleEditVolume}>
                                                 <DriveFileRenameOutlineIcon fontSize="small" color="warning" />
                                             </IconButton>
                                             :
@@ -607,7 +714,7 @@ const UpdateGasStations = (props) => {
                                                         {value.ProductName}
                                                     </TablecellHeader>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Volume)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",color: value.Volume < 0 ? "red" : "black", fontWeight: "bold", }}>{new Intl.NumberFormat("en-US").format(value.Volume)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Squeeze)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Grid container>
@@ -629,10 +736,10 @@ const UpdateGasStations = (props) => {
                                                         </Grid>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.EstimateSell)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Period)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Capacity - value.DownHole)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.YesterDay)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(value.Sell)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",backgroundColor: "#81d4fa", color: value.Period < 0 ? "red" : "black",fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value.Period)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",backgroundColor: "#a5d6a7", color: (value.Capacity - value.DownHole) < 0 ? "red" : "black",fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(value.Capacity - value.DownHole)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",color: value.YesterDay < 0 ? "red" : "black", fontWeight: "bold", }}>{new Intl.NumberFormat("en-US").format(value.YesterDay)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",color: value.Sell < 0 ? "red" : "black", fontWeight: "bold", }}>{new Intl.NumberFormat("en-US").format(value.Sell)}</TableCell>
                                                 </TableRow>
                                             ))
                                         :
@@ -685,8 +792,8 @@ const UpdateGasStations = (props) => {
                                                                     </Grid>
                                                                 </TableCell>
                                                                 <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#81d4fa",fontWeight: "bold" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#a5d6a7",fontWeight: "bold" }}>0</TableCell>
                                                                 <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                                 <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             </TableRow>
@@ -746,8 +853,8 @@ const UpdateGasStations = (props) => {
                                                                     </Grid>
                                                                 </TableCell>
                                                                 <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
-                                                                <TableCell sx={{ textAlign: "center" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#81d4fa",fontWeight: "bold" }}>0</TableCell>
+                                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#a5d6a7",fontWeight: "bold" }}>0</TableCell>
                                                                 <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                                 <TableCell sx={{ textAlign: "center" }}>0</TableCell>
                                                             </TableRow>
@@ -783,7 +890,7 @@ const UpdateGasStations = (props) => {
                                                             {values[index]?.ProductName || 0}
                                                         </TablecellHeader>
                                                         <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || 0)}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Volume || 0)}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center",color: values[index]?.Volume < 0 ? "red" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Volume || 0)}</TableCell>
                                                         <TableCell sx={{ textAlign: "center" }}>
                                                             <TextField
                                                                 style={{ display: 'none' }}
@@ -965,9 +1072,9 @@ const UpdateGasStations = (props) => {
                                                                 fullWidth
                                                             />
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format((values[index]?.Capacity || 0) - (values[index]?.DownHole || 0))}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                        <TableCell sx={{ textAlign: "center",backgroundColor: "#81d4fa", color: values[index]?.Period < 0 ? "red" : "black",fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center",backgroundColor: "#a5d6a7", color: values[index]?.Capacity < 0 ? "red" : "black",fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format((values[index]?.Capacity || 0) - (values[index]?.DownHole || 0))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center",color: values[index]?.YesterDay < 0 ? "red" : "black", fontWeight: "bold" }}>
                                                             <TextField
                                                                 size="small"
                                                                 type="number"
@@ -994,7 +1101,7 @@ const UpdateGasStations = (props) => {
                                                                 fullWidth
                                                             />
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Sell || 0)}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center",color: values[index]?.Sell < 0 ? "red" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Sell || 0)}</TableCell>
                                                     </TableRow>
                                                 ))
                                             }

@@ -175,7 +175,7 @@ const BigTruckRegHead = (props) => {
               style={{ maxHeight: "58vh" }}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small" sx={{ width: "1080px" }}>
+              <Table stickyHeader size="small" sx={{ width: "1380px" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
