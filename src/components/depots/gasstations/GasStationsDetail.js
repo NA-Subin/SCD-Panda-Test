@@ -3,6 +3,7 @@ import {
     Badge,
     Box,
     Button,
+    Checkbox,
     Chip,
     Container,
     Dialog,
@@ -10,6 +11,8 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    FormControlLabel,
+    FormGroup,
     Grid,
     IconButton,
     InputAdornment,
@@ -40,6 +43,8 @@ const GasStationsDetail = (props) => {
     const { gasStation } = props;
     const [open, setOpen] = useState("แม่โจ้");
     const [openTab, setOpenTab] = React.useState(true);
+    const [checkStock, setCheckStock] = useState("ทั้งหมด");
+
     const toggleDrawer = (newOpen) => () => {
         setOpenTab(newOpen);
     };
@@ -74,20 +79,20 @@ const GasStationsDetail = (props) => {
     };
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
-      // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-      useEffect(() => {
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
         const handleResize = () => {
-          setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
         };
-    
+
         window.addEventListener('resize', handleResize); // เพิ่ม event listener
-    
+
         // ลบ event listener เมื่อ component ถูกทำลาย
         return () => {
-          window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', handleResize);
         };
-      }, []);
+    }, []);
 
     const [name, setName] = React.useState("");
     const [no, setNo] = React.useState("");
@@ -190,11 +195,35 @@ const GasStationsDetail = (props) => {
                         </Paper>
                     </Grid>
                     <Grid item sm={6} lg={8}>
-
+                        <FormGroup row>
+                            <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={checkStock === "ทั้งหมด"}
+                                            onChange={() => setCheckStock("ทั้งหมด")}
+                                        />
+                                    }
+                                    label="ทั้งหมด"
+                            />
+                            {stocks.map((row) => (
+                                <FormControlLabel
+                                key={row.Name}
+                                control={
+                                    <Checkbox
+                                        checked={checkStock === row.Name}
+                                        onChange={() => setCheckStock(row.Name)}
+                                    />
+                                }
+                                label={row.Name}
+                            />
+                            ))}
+                        </FormGroup>
                     </Grid>
                     <Grid item xs={12}>
                         {
+                            checkStock === "ทั้งหมด" ?
                             stocks.map((stock, index) => {
+
                                 let lastReport = null; // เก็บค่า row.Report ของรายการก่อนหน้า
                                 let matchCount = 0;
                                 return (
@@ -205,7 +234,7 @@ const GasStationsDetail = (props) => {
                                             border: '2px solid lightgray', // เพิ่มขอบเข้ม
                                             borderRadius: 3, // เพิ่มความมน (ค่าในหน่วย px)
                                             boxShadow: 1, // เพิ่มเงาเพื่อความสวยงาม
-                                            width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-125) : windowWidth <= 600 ? (windowWidth-65) : (windowWidth-275), overflowY: 'auto'
+                                            width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) : windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275), overflowY: 'auto'
                                         }}
                                         key={stock.id || index}
                                     >
@@ -215,7 +244,7 @@ const GasStationsDetail = (props) => {
                                                 matchCount++; // เพิ่มตัวนับเมื่อเงื่อนไขเป็นจริง
 
                                                 console.log(
-                                                    `Match ${matchCount}: stock.Name = ${stock.Name}, row.Stock = ${row.Stock}`,matchCount
+                                                    `Match ${matchCount}: stock.Name = ${stock.Name}, row.Stock = ${row.Stock}`, matchCount
                                                 );
 
                                                 if (!row.Report) {
@@ -230,7 +259,7 @@ const GasStationsDetail = (props) => {
                                                 }
                                                 // อัปเดต lastReport เป็น currentReport
                                                 lastReport = currentReport;
-                            
+
                                                 // ส่งค่าไปยัง <UpdateGasStations />
                                                 return (
                                                     <UpdateGasStations
@@ -248,7 +277,59 @@ const GasStationsDetail = (props) => {
                                         })}
                                     </Paper>
                                 );
-                            })                            
+                            })
+                            :
+                                    <Paper
+                                        sx={{
+                                            p: 2,
+                                            marginBottom: 2,
+                                            border: '2px solid lightgray', // เพิ่มขอบเข้ม
+                                            borderRadius: 3, // เพิ่มความมน (ค่าในหน่วย px)
+                                            boxShadow: 1, // เพิ่มเงาเพื่อความสวยงาม
+                                            width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) : windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275), overflowY: 'auto'
+                                        }}
+                                    >
+                                        {
+                                        gasStationOil.map((row, rowIndex) => {
+                                            let lastReport = null; // เก็บค่า row.Report ของรายการก่อนหน้า
+                                            let matchCount = 0;
+                                            let currentReport = row.Report; // ค่า row.Report ปัจจุบัน
+                                            if (checkStock === row.Stock) {
+                                                matchCount++; // เพิ่มตัวนับเมื่อเงื่อนไขเป็นจริง
+
+                                                console.log(
+                                                    `Match ${matchCount}: checkStock = ${checkStock}, row.Stock = ${row.Stock}`, matchCount
+                                                );
+
+                                                if (!row.Report) {
+                                                    // ถ้าไม่มี row.Report
+                                                    if (rowIndex === 0) {
+                                                        // loop แรก
+                                                        currentReport = null; // ไม่มีค่าให้ไปที่ <UpdateGasStations />
+                                                    } else {
+                                                        // loop ถัดไป
+                                                        currentReport = lastReport; // ใช้ค่าจากรายการก่อนหน้า
+                                                    }
+                                                }
+                                                // อัปเดต lastReport เป็น currentReport
+                                                lastReport = currentReport;
+
+                                                // ส่งค่าไปยัง <UpdateGasStations />
+                                                return (
+                                                    <UpdateGasStations
+                                                        key={row.id}
+                                                        gasStation={row}
+                                                        gasStationOil={gasStationOil}
+                                                        selectedDate={selectedDate}
+                                                        Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
+                                                        currentReport={currentReport} // ส่งค่า Report ที่ตรวจสอบแล้ว
+                                                        onSendBack={handleSendBack}
+                                                    />
+                                                );
+                                            }
+                                            return null; // ไม่แสดงอะไรถ้าเงื่อนไขไม่ตรง
+                                        })}
+                                    </Paper>
                         }
                     </Grid>
                 </Grid>
