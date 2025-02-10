@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
     Badge,
     Box,
@@ -10,6 +10,7 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    FormControl,
     Grid,
     IconButton,
     InputAdornment,
@@ -57,6 +58,10 @@ const UpdateGasStations = (props) => {
     const [yesTerDayData, setYesterdayData] = React.useState("");
     const [twoDaysAgoData, setTwoDaysAgoData] = React.useState("");
     const [formattedDate, setFormattedDate] = React.useState("");
+    const [driversData, setDriversData] = useState([]);
+
+    const [products, setProducts] = React.useState('');
+    const [volumeProduct, setVolumeProduct] = React.useState(0);
 
     const [stock, setStock] = React.useState([]);
     const [values, setValues] = useState([]);
@@ -111,6 +116,13 @@ const UpdateGasStations = (props) => {
                 }
             }
             setTruckDriver(dataTruck);
+            setDriversData(
+                dataTruck.map((driver) => ({
+                    driverName: driver.Driver, // แยกชื่อ
+                    product: "",
+                    volume: 0,
+                }))
+            );
         });
     };
 
@@ -119,7 +131,54 @@ const UpdateGasStations = (props) => {
         getTruck();
     }, []);
 
-    console.log("truckDriver : ", truckDriver);
+    // ฟังก์ชันอัปเดตค่าของสินค้าและปริมาณ
+    const handleChange = (index, field, value) => {
+        setDriversData((prev) =>
+            prev.map((data, i) => (i === index ? { ...data, [field]: value } : data))
+        );
+    };
+
+    const allProducts = gasStation.Products
+        ? Object.keys(gasStation.Products).sort((keyA, keyB) => {
+            const indexA = customOrder.indexOf(keyA);
+            const indexB = customOrder.indexOf(keyB);
+            return indexA - indexB;
+        })
+        : [];
+
+    // คำนวณผลรวมของสินค้าทั้งหมด
+    const totalVolumes = allProducts.reduce((acc, product) => {
+        const total = driversData
+            .filter((driver) => driver.product === product)
+            .reduce((sum, driver) => sum + (parseFloat(driver.volume) || 0), 0);
+
+        acc[product] = total; // ถ้าไม่มีข้อมูล จะให้เป็น 0 โดยอัตโนมัติ
+        return acc;
+    }, {});
+
+    // ใช้ useRef เพื่อเก็บค่า totalVolumes ล่าสุดที่ใช้ไปแล้ว
+const prevTotalVolumesRef = useRef({});
+
+// ✅ ตรวจสอบก่อนอัปเดตค่า Pending2
+useEffect(() => {
+    // แปลง totalVolumes เป็น JSON string เพื่อเปรียบเทียบ
+    const prevTotalVolumesString = JSON.stringify(prevTotalVolumesRef.current);
+    const currentTotalVolumesString = JSON.stringify(totalVolumes);
+
+    // ถ้า totalVolumes ไม่เปลี่ยนแปลง ไม่ต้องอัปเดต
+    if (prevTotalVolumesString === currentTotalVolumesString) return;
+
+    // อัปเดตค่าของ totalVolumes ที่ใช้ไปล่าสุด
+    prevTotalVolumesRef.current = totalVolumes;
+
+    setValues(prevValues =>
+        prevValues.map(row => ({
+            ...row,
+            Pending2: totalVolumes[row.ProductName] ?? 0, // อัปเดต Pending2 ตาม totalVolumes ล่าสุด
+            Period: calculatePeriod({ ...row, Pending2: totalVolumes[row.ProductName] ?? 0 }), // คำนวณใหม่
+        }))
+    );
+}, [totalVolumes]); // รันเมื่อ totalVolumes เปลี่ยนแปลง
 
     const updateValuesForDate = () => {
         const isFirstStation = (gasStationOil?.[0]?.Name === gasStation?.Name) || false;
@@ -162,7 +221,7 @@ const UpdateGasStations = (props) => {
                         Delivered: value?.Delivered || 0,
                         Pending1: value?.Pending1 || 0,
                         Pending2: value?.Pending2 || 0,
-                        EstimateSell: values[index]?.EstimateSell !== undefined ? values[index]?.EstimateSell : yesterdayEntry?.EstimateSell || 0,
+                        EstimateSell: value?.EstimateSell || yesterdayEntry?.EstimateSell,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,
                         YesterDay: (Number(twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
@@ -174,7 +233,6 @@ const UpdateGasStations = (props) => {
             : stock.map((row, index) => {
                 const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === row?.ProductName) || { OilBalance: 0 };
                 const twoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(entry => entry?.ProductName === row?.ProductName) || { OilBalance: 0 };
-
                 return {
                     ProductName: row?.ProductName || "",
                     Capacity: row?.Capacity || 0,
@@ -183,7 +241,7 @@ const UpdateGasStations = (props) => {
                     Squeeze: squeeze,
                     Delivered: 0,
                     Pending1: 0,
-                    Pending2: 0,
+                    Pending2: totalVolumes[row?.ProductName],
                     EstimateSell: values[index]?.EstimateSell !== undefined ? values[index]?.EstimateSell : yesterdayEntry?.EstimateSell || 0,
                     Period: 0,
                     DownHole: sharedDownHole || 0,
@@ -340,6 +398,10 @@ const UpdateGasStations = (props) => {
             ? downHole.find(item => item?.ProductName === updatedValues[index]?.ProductName)?.DownHole
             : gasStation?.Products?.[updatedValues[index]?.ProductName] || 0;
 
+        // กำหนด Pending2 ใหม่ตามค่า totalVolumes
+        const productName = updatedValues[index]?.ProductName;
+        updatedValues[index].Pending2 = totalVolumes[productName] ?? 0;
+
         updatedValues[index].Period = calculatePeriod(updatedValues[index]);
         updatedValues[index].DownHole = downHoleValue; // ใช้ค่าจากการตรวจสอบ
         updatedValues[index].Sell = calculateSell(updatedValues[index]);
@@ -360,9 +422,12 @@ const UpdateGasStations = (props) => {
         const estimateSell = parseFloat(row.EstimateSell) || 0;
         const Delivered = parseFloat(row.Delivered) || 0;
         const Pending1 = parseFloat(row.Pending1) || 0;
-        const Pending2 = parseFloat(row.Pending2) || 0;
+        const Pending2 = parseFloat(row.Pending2) || (totalVolumes[row.ProductName] ?? 0);
         const squeezeoil = parseFloat(row.Squeeze) || squeeze;
         const volume = parseFloat(row.Volume) || 0;
+
+        console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
+
         if (estimateSell === 0) {
             return ((volume + Delivered + Pending1 + Pending2) - squeezeoil).toFixed(2);
         } else {
@@ -375,13 +440,16 @@ const UpdateGasStations = (props) => {
 
         const Delivered = parseFloat(row.Delivered) || 0;
         const Pending1 = parseFloat(row.Pending1) || 0;
-        const Pending2 = parseFloat(row.Pending2) || 0;
+        const Pending2 = parseFloat(row.Pending2) || (totalVolumes[row.ProductName] ?? 0);
         const downHole = parseFloat(row.DownHole) || 0;
         const volume = parseFloat(row.Volume) || 0;
 
         // console.log("downHole :",downHole);
         // console.log("value :",value);
         // return ((value + Delivered + Pending1 + Pending2)).toFixed(2);
+
+        console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
+
         if (downHole !== 0) {
             return ((volume + Delivered + Pending1 + Pending2)).toFixed(2);
         }
@@ -419,6 +487,10 @@ const UpdateGasStations = (props) => {
                 console.error("Error pushing data:", error);
             });
     }
+
+    console.log("driversData : ", driversData);
+    console.log("truckDriver : ", truckDriver);
+    console.log("totalVolumes : ", totalVolumes);
 
     return (
         <React.Fragment>
@@ -538,8 +610,8 @@ const UpdateGasStations = (props) => {
                     <TableHead>
                         <TableRow sx={{ height: 28 }}>
                             <TablecellHeader sx={{ padding: "2px 8px", lineHeight: 1 }} colSpan={11}>
-                                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                    {truckDriver.map((row, index) => (
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    {driversData.map((row, index) => (
                                         <Paper
                                             key={index}
                                             component="form"
@@ -550,16 +622,60 @@ const UpdateGasStations = (props) => {
                                             }}
                                         >
                                             <Grid container>
-                                                <Grid item xs={6} sx={{ borderRight: "2px solid "+theme.palette.panda.light }}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ fontSize: 14, whiteSpace: "nowrap"}}>{row.Driver.split("นาย")[1]?.split(" ")[0]}</Typography>
+                                                <Grid item xs={5} sx={{ borderRight: "2px solid " + theme.palette.panda.light }}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ fontSize: 14, whiteSpace: "nowrap" }}>{row.driverName.split("นาย")[1]?.split(" ")[0]}</Typography>
                                                 </Grid>
-                                                <Grid item xs={6}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ fontSize: 14, whiteSpace: "nowrap" }}>0</Typography>
+                                                <Grid item xs={3.5}>
+                                                    <FormControl variant="standard" fullWidth>
+                                                        <Select
+                                                            labelId="demo-simple-select-standard-label"
+                                                            id="demo-simple-select-standard"
+                                                            value={row.product}
+                                                            onChange={(e) => handleChange(index, "product", e.target.value)}
+                                                            label="สินค้า"
+                                                            fullWidth
+                                                            sx={{
+                                                                fontSize: "12px",
+                                                                fontWeight: "bold",
+                                                                backgroundColor: row.product === "G91" ? "#92D050" :
+                                                                    row.product === "G95" ? "#FFC000" :
+                                                                        row.product === "B7" ? "#FFFF99" :
+                                                                            row.product === "B95" ? "#B7DEE8" :
+                                                                                row.product === "B10" ? "#32CD32" :
+                                                                                    row.product === "B20" ? "#228B22" :
+                                                                                        row.product === "E20" ? "#C4BD97" :
+                                                                                            row.product === "E85" ? "#0000FF" :
+                                                                                                row.product === "PWD" ? "#F141D8" :
+                                                                                                    "#FFFFFF"
+                                                            }}
+                                                        >
+                                                            {
+                                                                gasStation.Products &&
+                                                                Object.entries(gasStation.Products)
+                                                                    .sort(([keyA], [keyB]) => {
+                                                                        // เปรียบเทียบ key ของแต่ละข้อมูลตามลำดับใน customOrder
+                                                                        const indexA = customOrder.indexOf(keyA);
+                                                                        const indexB = customOrder.indexOf(keyB);
+                                                                        return indexA - indexB;  // เรียงลำดับจาก customOrder
+                                                                    }).map(([key, value], index) => (
+                                                                        stock.map((row, index) => (
+                                                                            row.ProductName === key &&
+                                                                            <MenuItem value={row.ProductName} sx={{ fontSize: "12px", fontWeight: "bold", minWidth: "50px", backgroundColor: row.Color }}>{row.ProductName}</MenuItem>
+                                                                        ))
+                                                                    ))
+                                                            }
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={3.5}>
+                                                    <TextField variant="standard" type="number" InputProps={{
+                                                        sx: { fontSize: "12px", fontWeight: "bold", width: "50px", marginLeft: 0.5 } // ปรับขนาดตัวอักษรและ padding ภายในช่องป้อนข้อมูล
+                                                    }} fullWidth value={row.volume} onChange={(e) => handleChange(index, "volume", e.target.value)} />
                                                 </Grid>
                                             </Grid>
                                         </Paper>
-                                        ))}
-                                    </Box>
+                                    ))}
+                                </Box>
                             </TablecellHeader>
                         </TableRow>
                         <TableRow>
@@ -964,37 +1080,38 @@ const UpdateGasStations = (props) => {
                                                             }}
                                                             fullWidth
                                                         />
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label="ที่จะมาลง"
-                                                            value={values[index]?.Pending2 || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Pending2", e.target.value)
-                                                            }
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">สต็อก</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label="ที่จะมาลง"
+                                                                value={values[index]?.Pending2 || totalVolumes[row.ProductName]}
+                                                                onChange={(e) =>
+                                                                    handleInputChange(index, "Pending2", e.target.value)
+                                                                }
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                                disabled
+                                                            />
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <TextField
