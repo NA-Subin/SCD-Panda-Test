@@ -79,8 +79,7 @@ const GasStationAdmin = () => {
                 const datasG = snapshot.val();
                 const dataListG = [];
                 for (let idG in datasG) {
-                    console.log("datasG[idG].Name : ",datasG[idG].Name);
-                    if (datasG[idG].ShortName === gasStation.split(":")[1]) {
+                    if (datasG[idG].Name === gasStation.split(":")[0]) {
                         dataListG.push({ idG, ...datasG[idG] });
                         database.ref("/depot/stock").on("value", (snapshot) => {
                             const datasS = snapshot.val();
@@ -148,8 +147,7 @@ const GasStationAdmin = () => {
             const datasG = snapshot.val();
             const dataListG = [];
             for (let idG in datasG) {
-                console.log("datasG[idG].Name : ",datasG[idG].Name);
-                if (datasG[idG].ShortName === DataGasStation.split(":")[1]) {
+                if (datasG[idG].Name === DataGasStation.split(":")[0]) {
                     dataListG.push({ idG, ...datasG[idG] });
                     database.ref("/depot/stock").on("value", (snapshot) => {
                         const datasS = snapshot.val();
@@ -357,15 +355,21 @@ const GasStationAdmin = () => {
                             }
                         </Grid> */}
                     </Grid>
-                    <GasStationDetail
-                                    stock={stock}
-                                    gasStationID={gasStationID}
-                                    report={report}
-                                    gasStationReport={gasStationReport}
-                                    selectedDate={selectedDate}
-                                    gasStationOil={gasStationOil}
-                                    isToday={isToday}
-                                />
+                    {
+                        gasStationOil.map((row, index) => (
+                            <GasStationDetail
+                            key={index}
+                        stock={stock}
+                        gasStationID={gasStationID}
+                        report={report}
+                        gasStationReport={gasStationReport}
+                        selectedDate={selectedDate}
+                        gasStationOil={gasStationOil}
+                        isToday={isToday}
+                        gas={row}
+                    />
+                        ))
+                    }
                     {/* {
                         // gasStation !== "0:0" ?
                         // (

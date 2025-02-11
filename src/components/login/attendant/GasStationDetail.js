@@ -31,7 +31,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/th';
 
 const GasStationDetail = (props) => {
-    const { stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate, isToday } = props;
+    const { stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate, gas } = props;
     const [selectedDates, setSelectedDates] = React.useState(dayjs(selectedDate));
 
     useEffect(() => {
@@ -82,38 +82,43 @@ const GasStationDetail = (props) => {
     console.log("show :", stock);
     console.log("gasStation :", gasStationID);
     console.log("Report: ", report);
-    console.log("gasStationReport: ", gasStationReport.length);
+    console.log("gasStationOil::: :", gasStationOil);
+    console.log("gas ::: :", gas);
+    console.log("shortName: ", gas.ShortName);
+    console.log("product: ", gas.Products);
+    const formattedDate = dayjs(selectedDates).format('DD-MM-YYYY');
+    const dataReport = gas.Report ? gas.Report[formattedDate] : [];
+    console.log("report: ", dataReport);
     console.log("Date : ", dayjs(selectedDates).format('DD-MM-YYYY'));
 
 
     const saveProduct = () => {
-        const updatedProducts = gasStationOil.flatMap((row) =>
-            Object.entries(row.Products).map(([key, value]) => {
-                const matchingStock = stock.find((s) => s.ProductName === key);
-                if (matchingStock) {
-                    return {
-                        ProductName: key,
-                        Capacity: matchingStock.Capacity,
-                        Color: matchingStock.Color,
-                        TotalVolume: Number(value || 0),
-                        Volume: Number(value || 0),
-                        Delivered: Number(volumes[key] || 0),
-                        OilBalance: Number(stocks[key] || 0),
-                    };
-                }
-                return null;
-            })
-        ).filter(Boolean);
+        const updatedProducts = Object.entries(gas.Products)
+    .map(([key, value]) => {
+        const matchingStock = stock.find((s) => s.ProductName === key);
+        if (!matchingStock) return null; // ถ้าไม่มีข้อมูล ให้ return null (แต่ filter ทิ้งภายหลัง)
 
-        const updatedVolume = gasStationOil.reduce((acc, row) => {
-            Object.entries(row.Products).forEach(([key, value]) => {
+        return {
+            ProductName: key,
+            Capacity: matchingStock.Capacity ?? 0,
+            Color: matchingStock.Color ?? "",
+            TotalVolume: Number(value ?? 0),
+            Volume: Number(value ?? 0),
+            Delivered: Number(volumes?.[key] ?? 0),
+            OilBalance: Number(stocks.find(s => s.ProductName === key)?.OilBalance ?? 0),
+        };
+    })
+    .filter(Boolean); // กรองค่าที่เป็น null ออกไป
+
+
+            const updatedVolume = Object.entries(gas.Products).reduce((acc, [key, value]) => {
                 const matchingStock = stock.find((s) => s.ProductName === key);
                 if (matchingStock) {
-                    acc[key] = Number(stocks[key] || 0);
+                    acc[key] = Number(matchingStock.Volume || 0); // ใช้ `matchingStock.Volume` แทน `stocks[key]`
                 }
-            });
-            return acc;
-        }, {});
+                return acc;
+            }, {}); // เริ่มต้นเป็น object ว่าง
+            
 
         // อัปเดตข้อมูลในฐานข้อมูล
         database
@@ -145,8 +150,8 @@ const GasStationDetail = (props) => {
 
     const updateProduct = () => {
         const updatedProducts =
-            gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
-                ? gasStationReport.map((row) => {
+        dataReport && dataReport !== undefined // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+                ? dataReport.map((row) => {
                     return {
                         ProductName: row.ProductName,
                         Capacity: row.Capacity,
@@ -156,6 +161,8 @@ const GasStationDetail = (props) => {
                         Delivered: Number(updateVolumes[row.ProductName] || row.Delivered),
                         Pending1: row.Pending1 || 0,
                         Pending2: row.Pending2 || 0,
+                        Driver1: row.Driver1 || "",
+                        Driver2: row.Driver2 || "",
                         EstimateSell: row.EstimateSell || 0, // ใช้ค่าจาก state ถ้ามี
                         Period: row.Period || 0,
                         DownHole: row.DownHole || 0,
@@ -169,8 +176,8 @@ const GasStationDetail = (props) => {
                 : []
 
         const updatedVolumes =
-            gasStationReport && gasStationReport.length > 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
-                ? gasStationReport.reduce((acc, row) => {
+        dataReport && dataReport !== undefined // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+                ? dataReport.reduce((acc, row) => {
                     const updatedVolume =
                         Number(updateStocks[row.ProductName] || row.OilBalance);
 
@@ -210,48 +217,50 @@ const GasStationDetail = (props) => {
     // ✅ ลำดับที่ต้องการเรียง
     const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
-    // ✅ แปลง Object เป็น Array
-    const gasStationReports = Object.values(gasStationReport);
+    const reportArray = Object.values(dataReport);
 
-    // ✅ เรียงลำดับตาม customOrder
-    const sortedReport = gasStationReports.sort((a, b) => {
+// สร้าง `gasStationNotReports` โดยใช้ `ProductName`
+const gasStationNotReports = Object.entries(gas.Products).map(([key, value]) => ({
+    ProductName: key,  // ใช้ key เป็นชื่อของสินค้า
+    Volume: value      // ใช้ value เป็นค่าของสินค้า
+}));
+
+// ✅ เรียงลำดับ `gasStationNotReports` ตาม `customOrder`
+const sortedNotReport = [...gasStationNotReports].sort((a, b) => {
+    return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
+});
+
+// ✅ ตรวจสอบว่า `dataReport` เป็น array ก่อนใช้ `.sort()`
+const sortedReport = dataReport !== undefined
+    ? dataReport.sort((a, b) => {
         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
-    });
+    })
+    : sortedNotReport;
 
-    const gasStationNotReports = gasStationOil.flatMap((row) =>
-        Object.entries(row.Products).map(([key, value]) => ({
-            ...value,
-            key: key
-        }))
-    );
-
-    // ✅ เรียงลำดับตาม `customOrder`
-    const sortedNotReport = gasStationNotReports.sort((a, b) => {
-        return customOrder.indexOf(a.key) - customOrder.indexOf(b.key);
-    });
+console.log("sortedReport : ",sortedReport);
 
     return (
         <React.Fragment>
             <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3, borderRadius: 5 }}>
                 <Grid item xs={12} marginBottom={-2} marginTop={-3}>
-                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ผลิตภัณฑ์</Typography>
+                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ผลิตภัณฑ์ของ {gas.ShortName}</Typography>
                 </Grid>
                 {
-                    report === 0 || gasStationReport.length === 0 ?
+                    report === 0 || dataReport === undefined ?
                         sortedNotReport.map((row, index) => (
                             <React.Fragment key={index}>
                                 <Grid item xs={5} md={2} lg={1}>
                                     <Box
                                         sx={{
-                                            backgroundColor: (row.key === "G91" ? "#92D050" :
-                                                row.key === "G95" ? "#FFC000" :
-                                                    row.key === "B7" ? "#FFFF99" :
-                                                        row.key === "B95" ? "#B7DEE8" :
-                                                            row.key === "B10" ? "#32CD32" :
-                                                                row.key === "B20" ? "#228B22" :
-                                                                    row.key === "E20" ? "#C4BD97" :
-                                                                        row.key === "E85" ? "#0000FF" :
-                                                                            row.key === "PWD" ? "#F141D8" :
+                                            backgroundColor: (row.ProductName === "G91" ? "#92D050" :
+                                                row.ProductName === "G95" ? "#FFC000" :
+                                                    row.ProductName === "B7" ? "#FFFF99" :
+                                                        row.ProductName === "B95" ? "#B7DEE8" :
+                                                            row.ProductName === "B10" ? "#32CD32" :
+                                                                row.ProductName === "B20" ? "#228B22" :
+                                                                    row.ProductName === "E20" ? "#C4BD97" :
+                                                                        row.ProductName === "E85" ? "#0000FF" :
+                                                                            row.ProductName === "PWD" ? "#F141D8" :
                                                                                 "#FFFF99"),
                                             borderRadius: 3,
                                             textAlign: "center",
@@ -260,7 +269,7 @@ const GasStationDetail = (props) => {
                                         }}
                                         disabled
                                     >
-                                        <Typography variant="h5" fontWeight="bold" gutterBottom>{row.key}</Typography>
+                                        <Typography variant="h5" fontWeight="bold" gutterBottom>{row.ProductName}</Typography>
                                     </Box>
                                 </Grid>
                                 <Grid item xs={3.5} md={2} lg={1.5}>
@@ -270,25 +279,25 @@ const GasStationDetail = (props) => {
                                             size="small"
                                             type="number"
                                             fullWidth
-                                            value={ volumes[row.key] === "" ? "" : volumes[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            value={ volumes[row.ProductName] === "" ? "" : volumes[row.ProductName] || 0} // ถ้าค่าว่างให้แสดง 0
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
 
                                                 // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                 if (newValue === "") {
-                                                    handleNewVolumeChange(row.key, ""); // ให้เป็นค่าว่างชั่วคราว
+                                                    handleNewVolumeChange(row.ProductName, ""); // ให้เป็นค่าว่างชั่วคราว
                                                 } else {
-                                                    handleNewVolumeChange(row.key, newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                    handleNewVolumeChange(row.ProductName, newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
                                                 }
                                             }}
                                             onFocus={(e) => {
                                                 if (e.target.value === "0") {
-                                                    handleNewVolumeChange(row.key, ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                    handleNewVolumeChange(row.ProductName, ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                 }
                                             }}
                                             onBlur={(e) => {
                                                 if (e.target.value === "") {
-                                                    handleNewVolumeChange(row.key, 0); // ถ้าค่าว่างให้เป็น 0
+                                                    handleNewVolumeChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
                                                 }
                                             }}
                                         />
@@ -298,25 +307,25 @@ const GasStationDetail = (props) => {
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom >ปิดยอดสต็อก</Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                         <TextField size="small" type="number" fullWidth
-                                            value={ stocks[row.key] === "" ? "" : stocks[row.key] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            value={ stocks[row.ProductName] === "" ? "" : stocks[row.ProductName] || 0} // ถ้าค่าว่างให้แสดง 0
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
                                         
                                                 // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                 if (newValue === "") {
-                                                    handleNewStockChange(row.key, ""); // ให้เป็นค่าว่างชั่วคราว
+                                                    handleNewStockChange(row.ProductName, ""); // ให้เป็นค่าว่างชั่วคราว
                                                 } else {
-                                                    handleNewStockChange(row.key, newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                    handleNewStockChange(row.ProductName, newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
                                                 }
                                             }}
                                             onFocus={(e) => {
                                                 if (e.target.value === "0") {
-                                                    handleNewStockChange(row.key, ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                    handleNewStockChange(row.ProductName, ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                 }
                                             }}
                                             onBlur={(e) => {
                                                 if (e.target.value === "") {
-                                                    handleNewStockChange(row.key, 0); // ถ้าค่าว่างให้เป็น 0
+                                                    handleNewStockChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
                                                 }
                                             }}
                                         />
@@ -382,7 +391,7 @@ const GasStationDetail = (props) => {
                                         บันทึก
                                     </Button>
                 */}{
-                    report === 0 || gasStationReport.length === 0 ?
+                    report === 0 || dataReport === undefined ?
                         <Button variant="contained" color="success" onClick={saveProduct}>
                             บันทึก
                         </Button>
