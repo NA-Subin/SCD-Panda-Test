@@ -56,7 +56,7 @@ const GasStationAdmin = () => {
     const [gasStationOil, setGasStationsOil] = useState([]);
     const [stock, setStock] = useState([]);
     const [newVolume, setNewVolume] = React.useState(0);
-    const [gasStation, setGasStation] = React.useState("0:0");
+    const [gasStation, setGasStation] = React.useState(0);
     const [gasStations, setGasStations] = React.useState([]);
     const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
     const today = dayjs(new Date());
@@ -79,22 +79,22 @@ const GasStationAdmin = () => {
                 const datasG = snapshot.val();
                 const dataListG = [];
                 for (let idG in datasG) {
-                    if (datasG[idG].Name === gasStation.split(":")[0]) {
+                    if (datasG[idG].Name === gasStation) {
                         dataListG.push({ idG, ...datasG[idG] });
                         database.ref("/depot/stock").on("value", (snapshot) => {
                             const datasS = snapshot.val();
                             const productsList = [];
                             const dataListReport = [];
-    
+
                             for (let idS in datasS) {
                                 if (datasS[idS].Name === datasG[idG].Stock) {
                                     // ดึงเฉพาะ Products และบันทึกลง productsList
                                     const products = datasS[idS].Products || {};
                                     productsList.push(...Object.values(products)); // รวม Products ทั้งหมดเข้าใน array
-    
+
                                     const report = datasG[idG].Report || {};
                                     dataListReport.push(...Object.values(report));
-    
+
                                     // ตั้งค่า GasStationID
                                     setGasStationID(datasG[idG].id);
                                     database.ref("depot/gasStations/" + (datasG[idG].id - 1) + "/Report/" + dayjs(formattedDate).format("DD-MM-YYYY")).on("value", (snapshot) => {
@@ -123,12 +123,12 @@ const GasStationAdmin = () => {
 
     const getGasStations = async () => {
         database.ref("/depot/gasStations").on("value", (snapshot) => {
-          const datas = snapshot.val();
-          const dataList = [];
-          for (let id in datas) {
-              dataList.push({ id, ...datas[id] })
-          }
-          setGasStations(dataList);
+            const datas = snapshot.val();
+            const dataList = [];
+            for (let id in datas) {
+                dataList.push({ id, ...datas[id] })
+            }
+            setGasStations(dataList);
         });
     };
 
@@ -147,7 +147,7 @@ const GasStationAdmin = () => {
             const datasG = snapshot.val();
             const dataListG = [];
             for (let idG in datasG) {
-                if (datasG[idG].Name === DataGasStation.split(":")[0]) {
+                if (datasG[idG].Name === DataGasStation) {
                     dataListG.push({ idG, ...datasG[idG] });
                     database.ref("/depot/stock").on("value", (snapshot) => {
                         const datasS = snapshot.val();
@@ -204,8 +204,8 @@ const GasStationAdmin = () => {
     //     return () => clearInterval(interval); // ล้าง interval เมื่อคอมโพเนนต์ถูกทำลาย
     // }, []);
 
-    console.log("GasStation :",gasStation);
-    console.log("GasStationOil :",gasStationOil);
+    console.log("GasStation :", gasStation);
+    console.log("GasStationOil ::", gasStationOil);
 
     return (
         <Container sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: { xs: "lg", sm: "lg", md: "lg" } }}>
@@ -340,12 +340,13 @@ const GasStationAdmin = () => {
                                     onChange={handleGasStationChange}
                                     fullWidth
                                 >
-                                    <MenuItem value={"0:0"}>กรุณาเลือกปั้ม</MenuItem>
+                                    <MenuItem value={0}>กรุณาเลือกปั้ม</MenuItem>
                                     {
-                                        gasStations.map((row) => (
-                                            <MenuItem value={row.Name+":"+row.ShortName}>{row.Name+" / "+ row.ShortName}</MenuItem>
+                                        [...new Set(gasStations.map(row => row.Name))].map((name) => (
+                                            <MenuItem key={name} value={name}>{name}</MenuItem>
                                         ))
                                     }
+
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -355,21 +356,127 @@ const GasStationAdmin = () => {
                             }
                         </Grid> */}
                     </Grid>
-                    {
-                        gasStationOil.map((row, index) => (
-                            <GasStationDetail
-                            key={index}
-                        stock={stock}
-                        gasStationID={gasStationID}
-                        report={report}
-                        gasStationReport={gasStationReport}
-                        selectedDate={selectedDate}
-                        gasStationOil={gasStationOil}
-                        isToday={isToday}
-                        gas={row}
-                    />
-                        ))
-                    }
+                    {gasStationOil.map((row, index) => {
+                        const prevIndex = index - 1; // index ก่อนหน้า
+                        const prevGas = gasStationOil[prevIndex] || {};
+                        const latestGas = gasStationOil[index] || {};
+
+                        const selectedDateKey = dayjs(selectedDate).format("DD-MM-YYYY");
+
+                        const prevReport = [...(prevGas.Report?.[selectedDateKey] || [])];
+                        const latestReport = [...(latestGas.Report?.[selectedDateKey] || [])];
+
+                        console.log("Before : ", prevReport);
+                        console.log("After : ", latestReport);
+
+                        // รวมข้อมูล prevReport และ latestReport โดยเช็ค ProductName
+                        const reportOilBalance = prevReport.map((latestItem) => {
+                            const matchingPrevItem = latestReport.find(
+                                (prevItem) => prevItem.ProductName === latestItem.ProductName
+                            );
+
+                            return {
+                                ProductName: latestItem.ProductName,
+                                Color: latestItem.Color,
+                                prevOilBalance: latestItem.OilBalance,
+                                latestOilBalance: matchingPrevItem ? matchingPrevItem.OilBalance : 0,
+                            };
+                        });
+
+                        console.log("reportOilBalance: ", reportOilBalance);
+
+                        return (
+                            <React.Fragment key={index}>
+                                <GasStationDetail
+                                    stock={stock}
+                                    gasStationID={gasStationID}
+                                    report={report}
+                                    gasStationReport={gasStationReport}
+                                    selectedDate={selectedDate}
+                                    gasStationOil={gasStationOil}
+                                    isToday={isToday}
+                                    gas={row}
+                                    gasID={index}
+                                />
+                                {index === 1 && ( // แสดง <Box> เมื่อถึงข้อมูลลำดับที่ 2
+                                    <React.Fragment>
+                                        {
+                                            console.log("index : ", index)
+                                        }
+                                        <Box sx={{
+                                            backgroundColor:
+                                                prevGas.Stock === "แม่โจ้" ? "#92D050"
+                                                    : prevGas.Stock === "สันกลาง" ? "#B1A0C7"
+                                                        : prevGas.Stock === "สันทราย" ? "#B7DEE8"
+                                                            : prevGas.Stock === "บ้านโฮ่ง" ? "#FABF8F"
+                                                                : prevGas.Stock === "ป่าแดด" ? "#B1A0C7"
+                                                                    : "", marginTop: 2, p: 2, borderRadius: 5, marginLeft: -2, marginBottom: -5
+                                        }}>
+                                            <Typography variant="subtitle1" textAlign="center" fontWeight="bold" fontSize="24px" >คำนวณ</Typography>
+                                        </Box>
+                                        <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3 }}>
+                                            {reportOilBalance.map((item, i) => (
+                                                <React.Fragment key={i}>
+                                                    <Grid item xs={5} md={2} lg={1}>
+                                                        <Box
+                                                            sx={{
+                                                                backgroundColor: item.Color,
+                                                                borderRadius: 3,
+                                                                textAlign: "center",
+                                                                paddingTop: 2,
+                                                                paddingBottom: 1
+                                                            }}
+                                                            disabled
+                                                        >
+                                                            <Typography variant="h5" fontWeight="bold" gutterBottom>
+                                                                {item.ProductName}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={3.5} md={2} lg={1.5}>
+                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                                                            ปิดยอด {prevGas.ShortName || "N/A"}
+                                                        </Typography>
+                                                        <Paper component="form" sx={{ marginTop: -1 }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                fullWidth
+                                                                value={item.prevOilBalance}
+                                                            />
+                                                        </Paper>
+                                                    </Grid>
+                                                    <Grid item xs={3.5} md={2} lg={1.5}>
+                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                                                            ปิดยอด {latestGas.ShortName || "N/A"}
+                                                        </Typography>
+                                                        <Paper component="form" sx={{ marginTop: -1 }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                fullWidth
+                                                                value={item.latestOilBalance}
+                                                            />
+                                                        </Paper>
+                                                    </Grid>
+                                                </React.Fragment>
+                                            ))}
+                                        </Grid>
+                                        <Box sx={{
+                                            backgroundColor:
+                                                prevGas.Stock === "แม่โจ้" ? "#92D050"
+                                                    : prevGas.Stock === "สันกลาง" ? "#B1A0C7"
+                                                        : prevGas.Stock === "สันทราย" ? "#B7DEE8"
+                                                            : prevGas.Stock === "บ้านโฮ่ง" ? "#FABF8F"
+                                                                : prevGas.Stock === "ป่าแดด" ? "#B1A0C7"
+                                                                    : "", marginTop: -1, p: 2, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, marginLeft: -2
+                                        }}></Box>
+                                    </React.Fragment>
+                                )}
+                            </React.Fragment>
+                        );
+                    })}
+
                     {/* {
                         // gasStation !== "0:0" ?
                         // (

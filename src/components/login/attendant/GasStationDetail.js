@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     Box,
     Button,
@@ -31,14 +31,41 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/th';
 
 const GasStationDetail = (props) => {
-    const { stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate, gas } = props;
-    const [selectedDates, setSelectedDates] = React.useState(dayjs(selectedDate));
+    const { stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate, gas, gasID } = props;
+    // const [selectedDates, setSelectedDates] = React.useState(dayjs(selectedDate));
+    const [product, setProduct] = React.useState([]);
+    const [reports, setReports] = React.useState([]);
+    const [oilBalanceFirstLoop, setOilBalanceFirstLoop] = useState([]);
+    const [oilBalanceSecondLoop, setOilBalanceSecondLoop] = useState([]);
+
+    const getGasStations = async () => {
+        database.ref("/depot/gasStations/" + (gas.id - 1)).on("value", (snapshot) => {
+            const datas = snapshot.val();
+            setProduct(datas.Products);
+        });
+
+        database.ref("/depot/gasStations/" + (gas.id - 1) + "/Report/" + dayjs(selectedDate).format('DD-MM-YYYY')).on("value", (snapshot) => {
+            const datas = snapshot.val();
+            const dataReport = [];
+
+            for (let id in datas) {
+                dataReport.push({ id, ...datas[id] });
+            }
+
+            setReports(dataReport);
+        });
+    };
 
     useEffect(() => {
-        setSelectedDates(dayjs(selectedDate));
-        setVolumes({}); // รีเซ็ตค่า Volume เป็นค่าเริ่มต้น
-        setStocks({});
+        // setSelectedDates(dayjs(selectedDate));
+        getGasStations();
+        // setVolumes({}); // รีเซ็ตค่า Volume เป็นค่าเริ่มต้น
+        // setStocks({});
     }, [selectedDate]);
+
+    console.log("Date : ", dayjs(selectedDate).format('DD-MM-YYYY'));
+    console.log("ShowProduct : ", product);
+    console.log("ShowReport : ", reports);
 
     const [volumes, setVolumes] = useState({});
     const [stocks, setStocks] = useState({});
@@ -79,51 +106,50 @@ const GasStationDetail = (props) => {
         }));
     };
 
-    console.log("show :", stock);
-    console.log("gasStation :", gasStationID);
-    console.log("Report: ", report);
-    console.log("gasStationOil::: :", gasStationOil);
-    console.log("gas ::: :", gas);
-    console.log("shortName: ", gas.ShortName);
-    console.log("product: ", gas.Products);
-    const formattedDate = dayjs(selectedDates).format('DD-MM-YYYY');
-    const dataReport = gas.Report ? gas.Report[formattedDate] : [];
-    console.log("report: ", dataReport);
-    console.log("Date : ", dayjs(selectedDates).format('DD-MM-YYYY'));
+    // console.log("show :", stock);
+    // console.log("gasStation :", gasStationID);
+    // console.log("Report: ", report);
+    // console.log("gasStationOil::: :", gasStationOil);
+    // console.log("gas ::: :", gas);
+    // console.log("shortName: ", gas.ShortName);
+    // console.log("product: ", gas.Products);
+    // const formattedDate = dayjs(selectedDates).format('DD-MM-YYYY');
+    // const dataReport = gas.Report ? gas.Report[formattedDate] : [];
+    // console.log("report: ", dataReport);
 
 
     const saveProduct = () => {
-        const updatedProducts = Object.entries(gas.Products)
-    .map(([key, value]) => {
-        const matchingStock = stock.find((s) => s.ProductName === key);
-        if (!matchingStock) return null; // ถ้าไม่มีข้อมูล ให้ return null (แต่ filter ทิ้งภายหลัง)
-
-        return {
-            ProductName: key,
-            Capacity: matchingStock.Capacity ?? 0,
-            Color: matchingStock.Color ?? "",
-            TotalVolume: Number(value ?? 0),
-            Volume: Number(value ?? 0),
-            Delivered: Number(volumes?.[key] ?? 0),
-            OilBalance: Number(stocks.find(s => s.ProductName === key)?.OilBalance ?? 0),
-        };
-    })
-    .filter(Boolean); // กรองค่าที่เป็น null ออกไป
-
-
-            const updatedVolume = Object.entries(gas.Products).reduce((acc, [key, value]) => {
+        const updatedProducts = Object.entries(product)
+            .map(([key, value]) => {
                 const matchingStock = stock.find((s) => s.ProductName === key);
-                if (matchingStock) {
-                    acc[key] = Number(matchingStock.Volume || 0); // ใช้ `matchingStock.Volume` แทน `stocks[key]`
-                }
-                return acc;
-            }, {}); // เริ่มต้นเป็น object ว่าง
-            
+                if (!matchingStock) return null; // ถ้าไม่มีข้อมูล ให้ return null (แต่ filter ทิ้งภายหลัง)
+
+                return {
+                    ProductName: key,
+                    Capacity: matchingStock.Capacity ?? 0,
+                    Color: matchingStock.Color ?? "",
+                    TotalVolume: Number(value ?? 0),
+                    Volume: Number(value ?? 0),
+                    Delivered: Number(volumes?.[key] ?? 0),
+                    OilBalance: Number(stocks.find(s => s.ProductName === key)?.OilBalance ?? 0),
+                };
+            })
+            .filter(Boolean); // กรองค่าที่เป็น null ออกไป
+
+
+        const updatedVolume = Object.entries(product).reduce((acc, [key, value]) => {
+            const matchingStock = stock.find((s) => s.ProductName === key);
+            if (matchingStock) {
+                acc[key] = Number(matchingStock.Volume || 0); // ใช้ `matchingStock.Volume` แทน `stocks[key]`
+            }
+            return acc;
+        }, {}); // เริ่มต้นเป็น object ว่าง
+
 
         // อัปเดตข้อมูลในฐานข้อมูล
         database
             .ref("/depot/gasStations/" + (gasStationID - 1) + "/Report")
-            .child(dayjs(selectedDates).format("DD-MM-YYYY"))
+            .child(dayjs(selectedDate).format("DD-MM-YYYY"))
             .update(updatedProducts)
             .then(() => {
                 ShowSuccess("บันทึกข้อมูลสำเร็จ");
@@ -150,8 +176,8 @@ const GasStationDetail = (props) => {
 
     const updateProduct = () => {
         const updatedProducts =
-        dataReport && dataReport !== undefined // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
-                ? dataReport.map((row) => {
+            reports !== 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+                ? reports.map((row) => {
                     return {
                         ProductName: row.ProductName,
                         Capacity: row.Capacity,
@@ -176,8 +202,8 @@ const GasStationDetail = (props) => {
                 : []
 
         const updatedVolumes =
-        dataReport && dataReport !== undefined // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
-                ? dataReport.reduce((acc, row) => {
+            reports !== 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+                ? reports.reduce((acc, row) => {
                     const updatedVolume =
                         Number(updateStocks[row.ProductName] || row.OilBalance);
 
@@ -189,7 +215,7 @@ const GasStationDetail = (props) => {
         // อัปเดตข้อมูลในฐานข้อมูล Firebase
         database
             .ref("/depot/gasStations/" + (gasStationID - 1) + "/Report")
-            .child(dayjs(selectedDates).format("DD-MM-YYYY"))
+            .child(dayjs(selectedDate).format("DD-MM-YYYY"))
             .update(updatedProducts)
             .then(() => {
                 ShowSuccess("บันทึกข้อมูลสำเร็จ");
@@ -217,36 +243,51 @@ const GasStationDetail = (props) => {
     // ✅ ลำดับที่ต้องการเรียง
     const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
-    const reportArray = Object.values(dataReport);
+    const reportArray = Object.values(reports);
 
-// สร้าง `gasStationNotReports` โดยใช้ `ProductName`
-const gasStationNotReports = Object.entries(gas.Products).map(([key, value]) => ({
-    ProductName: key,  // ใช้ key เป็นชื่อของสินค้า
-    Volume: value      // ใช้ value เป็นค่าของสินค้า
-}));
+    // สร้าง `gasStationNotReports` โดยใช้ `ProductName`
+    const gasStationNotReports = Object.entries(product).map(([key, value]) => ({
+        ProductName: key,  // ใช้ key เป็นชื่อของสินค้า
+        Volume: value      // ใช้ value เป็นค่าของสินค้า
+    }));
 
-// ✅ เรียงลำดับ `gasStationNotReports` ตาม `customOrder`
-const sortedNotReport = [...gasStationNotReports].sort((a, b) => {
-    return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
-});
-
-// ✅ ตรวจสอบว่า `dataReport` เป็น array ก่อนใช้ `.sort()`
-const sortedReport = dataReport !== undefined
-    ? dataReport.sort((a, b) => {
+    // ✅ เรียงลำดับ `gasStationNotReports` ตาม `customOrder`
+    const sortedNotReport = gasStationNotReports.sort((a, b) => {
         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
-    })
-    : sortedNotReport;
+    });
 
-console.log("sortedReport : ",sortedReport);
+    // ✅ ตรวจสอบว่า `dataReport` เป็น array ก่อนใช้ `.sort()`
+    // const sortedReport = reportArray !== undefined
+    //     ? reportArray.sort((a, b) => {
+    //         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
+    //     })
+    //     : sortedNotReport;
+    
+        const sortedReport = reports.length > 0
+        ? reports.sort((a, b) => customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName))
+        : [];
+
+    console.log("sortedReport : ", sortedReport.length);
 
     return (
         <React.Fragment>
-            <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3, borderRadius: 5 }}>
+            <Box sx={{
+                backgroundColor:
+                    gas.Stock === "แม่โจ้" ? "#92D050"
+                        : gas.Stock === "สันกลาง" ? "#B1A0C7"
+                            : gas.Stock === "สันทราย" ? "#B7DEE8"
+                                : gas.Stock === "บ้านโฮ่ง" ? "#FABF8F"
+                                    : gas.Stock === "ป่าแดด" ? "#B1A0C7"
+                                        : "", marginTop: 2, p: 2, borderRadius: 5, marginLeft: -2, marginBottom: -5
+            }}>
+                <Typography variant="subtitle1" textAlign="center" fontWeight="bold" fontSize="24px" >{gas.ShortName}</Typography>
+            </Box>
+            <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3 }}>
                 <Grid item xs={12} marginBottom={-2} marginTop={-3}>
-                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ผลิตภัณฑ์ของ {gas.ShortName}</Typography>
+                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ผลิตภัณฑ์</Typography>
                 </Grid>
                 {
-                    report === 0 || dataReport === undefined ?
+                    reports.length === 0 ?
                         sortedNotReport.map((row, index) => (
                             <React.Fragment key={index}>
                                 <Grid item xs={5} md={2} lg={1}>
@@ -279,7 +320,7 @@ console.log("sortedReport : ",sortedReport);
                                             size="small"
                                             type="number"
                                             fullWidth
-                                            value={ volumes[row.ProductName] === "" ? "" : volumes[row.ProductName] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            value={volumes[row.ProductName] === "" ? "" : volumes[row.ProductName] || 0} // ถ้าค่าว่างให้แสดง 0
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
 
@@ -307,10 +348,10 @@ console.log("sortedReport : ",sortedReport);
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom >ปิดยอดสต็อก</Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                         <TextField size="small" type="number" fullWidth
-                                            value={ stocks[row.ProductName] === "" ? "" : stocks[row.ProductName] || 0} // ถ้าค่าว่างให้แสดง 0
+                                            value={stocks[row.ProductName] === "" ? "" : stocks[row.ProductName] || 0} // ถ้าค่าว่างให้แสดง 0
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
-                                        
+
                                                 // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                 if (newValue === "") {
                                                     handleNewStockChange(row.ProductName, ""); // ให้เป็นค่าว่างชั่วคราว
@@ -334,8 +375,9 @@ console.log("sortedReport : ",sortedReport);
                             </React.Fragment>
                         ))
                         :
-                        sortedReport.map((row, index) => (
-                            <React.Fragment key={index}>
+                        sortedReport.map((row) => (
+                            <React.Fragment>
+                                {console.log("Show ::: ", row.ProductName)}
                                 <Grid item xs={5} md={2} lg={1}>
                                     <Box
                                         sx={{
@@ -379,41 +421,52 @@ console.log("sortedReport : ",sortedReport);
                             </React.Fragment>
                         ))
                 }
-            </Grid>
-            <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-                {/* <Button variant="contained" color="success" onClick={saveProduct}>
+                <Grid item xs={12}>
+                    <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
+                        {/* <Button variant="contained" color="success" onClick={saveProduct}>
                                         บันทึก
                                     </Button> */}
-                {/* {
+                        {/* {
                     isToday &&
                     (
                         <Button variant="contained" color="success" onClick={updateProduct}>
                                         บันทึก
                                     </Button>
                 */}{
-                    report === 0 || dataReport === undefined ?
-                        <Button variant="contained" color="success" onClick={saveProduct}>
-                            บันทึก
-                        </Button>
-                        :
-                        (
-                            setting ?
-                                <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
-                                    แก้ไข
+                            reports.length === 0 ?
+                                <Button variant="contained" color="success" onClick={saveProduct}>
+                                    บันทึก
                                 </Button>
                                 :
-                                <>
-                                    <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>
-                                        ยกเลิก
-                                    </Button>
-                                    <Button variant="contained" color="success" onClick={updateProduct}>
-                                        บันทึก
-                                    </Button>
-                                </>
-                        )
-                    //)
-                }
-            </Box>
+                                (
+                                    setting ?
+                                        <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
+                                            แก้ไข
+                                        </Button>
+                                        :
+                                        <>
+                                            <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>
+                                                ยกเลิก
+                                            </Button>
+                                            <Button variant="contained" color="success" onClick={updateProduct}>
+                                                บันทึก
+                                            </Button>
+                                        </>
+                                )
+                            //)
+                        }
+                    </Box>
+                </Grid>
+            </Grid>
+            <Box sx={{
+                backgroundColor:
+                    gas.Stock === "แม่โจ้" ? "#92D050"
+                        : gas.Stock === "สันกลาง" ? "#B1A0C7"
+                            : gas.Stock === "สันทราย" ? "#B7DEE8"
+                                : gas.Stock === "บ้านโฮ่ง" ? "#FABF8F"
+                                    : gas.Stock === "ป่าแดด" ? "#B1A0C7"
+                                        : "", marginTop: -1, p: 2, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, marginLeft: -2
+            }}></Box>
         </React.Fragment>
     );
 };
