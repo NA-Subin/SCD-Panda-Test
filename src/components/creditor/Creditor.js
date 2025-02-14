@@ -87,7 +87,7 @@ const Creditor = () => {
         textAlign="center"
         gutterBottom
       >
-        เจ้าหนี้การค้า
+        เจ้าหนี้น้ำมัน
       </Typography>
       <Divider sx={{ marginBottom: 1 }}/>
       <Grid container spacing={3} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
@@ -96,7 +96,7 @@ const Creditor = () => {
         </Grid>
         <Grid item xs={12}>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
-                รายชื่อเจ้าหนี้การค้า
+                รายชื่อเจ้าหนี้น้ำมัน
               </Typography>
               <Divider sx={{ marginBottom: 1 }} />
               <TableContainer

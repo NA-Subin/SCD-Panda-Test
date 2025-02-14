@@ -22,6 +22,7 @@ import EngineeringIcon from "@mui/icons-material/Engineering";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import {
   Alert,
   Avatar,
@@ -192,6 +193,7 @@ export default function Navbar() {
   const [setting, setSetting] = React.useState(false);
   const [show1, setShow1] = React.useState(false);
   const [show2, setShow2] = React.useState(false);
+  const [show3, setShow3] = React.useState(false);
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
   const [activeButton, setActiveButton] = useState(null); // เก็บสถานะของปุ่มที่ถูกคลิก
@@ -229,6 +231,7 @@ export default function Navbar() {
     setSetting(true);
     setShow1(null);
     setShow2(null);
+    setShow3(null);
     navigate("/setting");
   };
 
@@ -381,8 +384,10 @@ export default function Navbar() {
                     { to: "/trucks", icon: <LocalShippingIcon fontSize="medium" /> },
                     { to: "/selling", icon: <ListAltIcon fontSize="medium" /> },
                     { to: "/depots", icon: <StoreMallDirectoryIcon /> },
-                    { to: "/customer", icon: <GroupsIcon fontSize="medium" /> },
-                    { to: "/ticket", icon: <BookOnlineIcon fontSize="medium" sx={{ transform: "rotate(90deg)" }} /> },
+                    { to: "/gasstations", icon: <LocalGasStationIcon fontSize="medium" /> },
+                    { to: "/transports", icon: <BookOnlineIcon fontSize="medium" sx={{ transform: "rotate(90deg)" }} /> },
+                    { to: "/customer-bigtrucks", icon: <GroupsIcon fontSize="medium" /> },
+                    { to: "/customer-smalltrucks", icon: <GroupsIcon fontSize="medium" /> },
                     { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="medium" /> },
                     { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
                   ].map((item, index) => (
@@ -879,9 +884,16 @@ export default function Navbar() {
             }
           </Typography> */}
             </Box>
+            {
+              !open ?
+              <Divider sx={{ border: 1, color: theme.palette.primary.contrastText }}/>
+            :
             <Divider
-              sx={!open ? { border: 1, color: theme.palette.primary.contrastText } : {}}
-            />
+              sx={{marginBottom:-2, marginTop: -1}}
+            >
+              <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" fontSize="12px" gutterBottom>พนักงาน</Typography>
+            </Divider>
+            }
             <List
               sx={
                 !open ? {
@@ -897,20 +909,21 @@ export default function Navbar() {
                   disablePadding
                   sx={{
                     backgroundColor: show1 === index && theme.palette.panda.dark,
+                    paddingTop:-1,
+                    paddingBottom: -1
                   }}
                 >
                   <ListItemButton
                     component={Link}
                     to={
-                      index === 0
-                        ? "/dashboard"
+                      index === 0 ? "/dashboard"
                         : index === 1 ? "/employee"
                           : index === 2 ? "/trucks"
                             : "/trucks"
                     }
                     onClick={() => (setShow1(index), setSetting(false))}
                     onMouseUp={() => (setShow1(index), setSetting(false))}
-                    onMouseDown={() => setShow2(null)}
+                    onMouseDown={() => (setShow2(null),setShow3(null))}
                   >
                     <ListItemIcon
                       sx={
@@ -941,9 +954,16 @@ export default function Navbar() {
                 </ListItem>
               ))}
             </List>
+            {
+              !open ?
+              <Divider sx={{ border: 1, color: theme.palette.primary.contrastText }}/>
+            :
             <Divider
-              sx={!open ? { border: 2, color: theme.palette.primary.contrastText } : {}}
-            />
+              sx={{marginBottom:-2, marginTop: -1}}
+            >
+              <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" fontSize="12px" gutterBottom>ขายน้ำมัน</Typography>
+            </Divider>
+            }
             <List
               sx={
                 !open ? {
@@ -954,29 +974,25 @@ export default function Navbar() {
               }
             >
               {/* {[position === 'แอดมิน' && 'พนักงาน', 'สินค้า', 'ลูกค้า', 'พนักงานขับรถ', 'รถบรรทุก',position !== 'เซลล์' && 'หนี้สิน'].map((text, index) => ( */}
-              {["ขายน้ำมัน", "คลัง", "ลูกค้า", "ตั๋วน้ำมัน", "เจ้าหนี้การค้า"].map((text, index) => (
+              {["ขายน้ำมัน", "คลัง"].map((text, index) => (
                 <ListItem
                   key={text}
                   disablePadding
                   sx={{
                     backgroundColor: show2 === index && theme.palette.panda.dark,
+                    paddingTop:-1,
+                    paddingBottom: -1
                   }}
                 >
                   <ListItemButton
                     component={Link}
                     onClick={() => (setShow2(index), setSetting(false))}
                     onMouseUp={() => (setShow2(index), setSetting(false))}
-                    onMouseDown={() => setShow1(null)}
+                    onMouseDown={() => (setShow1(null),setShow3(null))}
                     to={
                       index === 0
                         ? "/selling"
-                        : index === 1
-                          ? "/depots"
-                          : index === 2
-                            ? "/customer"
-                            : index === 3
-                              ? "/ticket"
-                              : "/creditor"
+                        : "/depots"
                     }
                   >
                     <ListItemIcon
@@ -987,14 +1003,85 @@ export default function Navbar() {
                       }
                     >
                       {/* {position === 'แอดมิน' && index === 0 ? <AccountCircleIcon /> : index === 1 ? <StoreMallDirectoryIcon /> : index === 2 ? <GroupsIcon/> : index === 3 ? <EngineeringIcon/> :index === 4 ? <LocalShippingIcon/> : position !== 'เซลล์' && index === 5 ? <AttachMoneyIcon/> : ""} */}
+                      {index === 0 ? <ListAltIcon />
+                       : <StoreMallDirectoryIcon />
+                      }
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={text}
+                      sx={
+                        show2 === index && {
+                          color: theme.palette.primary.contrastText,
+                        }
+                      }
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+            {
+              !open ?
+              <Divider sx={{ border: 1, color: theme.palette.primary.contrastText }}/>
+            :
+            <Divider
+              sx={{marginBottom:-2, marginTop: -1}}
+            >
+              <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" fontSize="12px" gutterBottom>ตั๋วน้ำมัน</Typography>
+            </Divider>
+            }
+            <List
+              sx={
+                !open ? {
+                  backgroundColor: theme.palette.panda.main,
+                  color: theme.palette.primary.contrastText,
+                }
+                  : {}
+              }
+            >
+              {/* {[position === 'แอดมิน' && 'พนักงาน', 'สินค้า', 'ลูกค้า', 'พนักงานขับรถ', 'รถบรรทุก',position !== 'เซลล์' && 'หนี้สิน'].map((text, index) => ( */}
+              {["ปั้มน้ำมัน", "รับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
+                <ListItem
+                  key={text}
+                  disablePadding
+                  sx={{
+                    backgroundColor: show3 === index && theme.palette.panda.dark,
+                    paddingTop:-1,
+                    paddingBottom: -1
+                  }}
+                >
+                  <ListItemButton
+                    component={Link}
+                    onClick={() => (setShow3(index), setSetting(false))}
+                    onMouseUp={() => (setShow3(index), setSetting(false))}
+                    onMouseDown={() => (setShow1(null),setShow2(null))}
+                    to={
+                      index === 0
+                        ? "/gasstations"
+                        : index === 1
+                          ? "/transports"
+                          : index === 2
+                            ? "/customer-bigtrucks"
+                            : index === 3
+                              ? "/customer-smalltrucks"
+                              : "/creditor"
+                    }
+                  >
+                    <ListItemIcon
+                      sx={
+                        !open || show3 === index
+                          ? { color: theme.palette.primary.contrastText }
+                          : { color: theme.palette.dark }
+                      }
+                    >
+                      {/* {position === 'แอดมิน' && index === 0 ? <AccountCircleIcon /> : index === 1 ? <StoreMallDirectoryIcon /> : index === 2 ? <GroupsIcon/> : index === 3 ? <EngineeringIcon/> :index === 4 ? <LocalShippingIcon/> : position !== 'เซลล์' && index === 5 ? <AttachMoneyIcon/> : ""} */}
                       {index === 0 ? (
-                        <ListAltIcon />
+                        <LocalGasStationIcon />
                       ) : index === 1 ? (
-                        <StoreMallDirectoryIcon />
+                        <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
                       ) : index === 2 ? (
                         <GroupsIcon />
                       ) : index === 3 ? (
-                        <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
+                        <GroupsIcon />
                       ) : (
                         <CurrencyExchangeIcon />
                       )}
@@ -1002,7 +1089,7 @@ export default function Navbar() {
                     <ListItemText
                       primary={text}
                       sx={
-                        show2 === index && {
+                        show3 === index && {
                           color: theme.palette.primary.contrastText,
                         }
                       }

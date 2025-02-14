@@ -35,6 +35,22 @@ const TicketsGasStation = () => {
     const [update, setUpdate] = React.useState(true);
     const [open, setOpen] = useState(1);
 
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+                    
+                      // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+                      useEffect(() => {
+                        const handleResize = () => {
+                          setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+                        };
+                    
+                        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+                    
+                        // ลบ event listener เมื่อ component ถูกทำลาย
+                        return () => {
+                          window.removeEventListener('resize', handleResize);
+                        };
+                      }, []);
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -64,12 +80,20 @@ const TicketsGasStation = () => {
     //   console.log("gasstation :",gasStation);
 
     return (
-        <React.Fragment>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ตั๋วปั้ม</Typography>
-                    </Grid>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+              <Typography
+                                            variant="h3"
+                                            fontWeight="bold"
+                                            textAlign="center"
+                                            gutterBottom
+                                          >
+                                            ปั้มน้ำมัน
+                                          </Typography>
+                                          <Divider sx={{ marginBottom: 1 }}/>
+                                            <Grid container spacing={3} sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
+                                  <Grid item xs={10}>
+                                      <Typography variant="h6" fontWeight="bold" gutterBottom>ปั้มน้ำมัน</Typography>
+                                  </Grid>
                     <Grid item xs={12} marginTop={-2}>
                         <Divider />
                     </Grid>
@@ -108,8 +132,7 @@ const TicketsGasStation = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Paper>
-        </React.Fragment>
+        </Container>
     );
 };
 

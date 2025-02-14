@@ -20,6 +20,10 @@ import TradePayable from "./components/payable/TradePayable";
 import Choose from "./components/login/Choose";
 import GasStationAdmin from "./components/login/attendant/GasStationA";
 import Editfirebase from "./components/navbar/editefirebase";
+import TicketsGasStation from "./components/ticket/TicketsGasStation";
+import TicketsTransport from "./components/ticket/TicketsTransport";
+import TicketsBigTruck from "./components/ticket/TicketsBigTruck";
+import TicketSmallTruck from "./components/ticket/TicketsSmallTruck";
 
 function App() {
 
@@ -74,6 +78,18 @@ function App() {
                 </Routes>
                 <Routes>
                   <Route path="/trucks" element={<Trucks />} />
+                </Routes>
+                <Routes>
+                  <Route path="/gasstations" element={<TicketsGasStation />} />
+                </Routes>
+                <Routes>
+                  <Route path="/transports" element={<TicketsTransport />} />
+                </Routes>
+                <Routes>
+                  <Route path="/customer-bigtrucks" element={<TicketsBigTruck />} />
+                </Routes>
+                <Routes>
+                  <Route path="/customer-smalltrucks" element={<TicketSmallTruck />} />
                 </Routes>
               </Box>
             </Box>

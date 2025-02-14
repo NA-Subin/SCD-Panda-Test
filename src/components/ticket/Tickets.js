@@ -29,9 +29,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
-import TicketsTransport from "./TicketsTransport";
-import TicketsStock from "./TicketsStock";
-import TicketsGasStation from "./TicketsGasStation";
 
 const Tickets = () => {
   const [update, setUpdate] = React.useState(true);
@@ -76,15 +73,6 @@ const Tickets = () => {
           {
             open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
           }
-        </Grid>
-        <Grid item xs={12} sx={{ marginTop: -6 }}>
-
-          {
-            open === 1 ? <TicketsTransport/>
-            : open === 2 ? <TicketsStock/>
-            : <TicketsGasStation/>
-          }
-
         </Grid>
       </Grid>
     </Container>

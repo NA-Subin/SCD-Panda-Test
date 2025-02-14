@@ -229,7 +229,7 @@ const UpdateGasStations = (props) => {
                         ProductName: value?.ProductName || "",
                         Capacity: value?.Capacity || 0,
                         Color: value?.Color || "",
-                        Volume: yesterdayEntry?.OilBalance || 0,
+                        Volume: (yesterdayEntry?.Difference || yesterdayEntry?.OilBalance) || 0,
                         Squeeze: value?.Squeeze || 0,
                         Delivered: value?.Delivered || 0,
                         Pending1: value?.Pending1 || 0,
@@ -237,10 +237,11 @@ const UpdateGasStations = (props) => {
                         EstimateSell: value?.EstimateSell || yesterdayEntry?.EstimateSell,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,
-                        YesterDay: (Number(twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
+                        YesterDay: (Number(twoDaysAgoEntry?.Difference || twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
                         Sell: value?.Sell || 0,
                         TotalVolume: value?.TotalVolume || 0,
-                        OilBalance: value?.OilBalance || 0
+                        OilBalance: value?.OilBalance || 0,
+                        Difference: value?.Difference || 0
                     };
                 })
             : stock.map((row, index) => {
@@ -250,7 +251,7 @@ const UpdateGasStations = (props) => {
                     ProductName: row?.ProductName || "",
                     Capacity: row?.Capacity || 0,
                     Color: row?.Color || "",
-                    Volume: yesterdayEntry?.OilBalance || 0,
+                    Volume: (yesterdayEntry?.Difference || yesterdayEntry?.OilBalance) || 0,
                     Squeeze: squeeze,
                     Delivered: 0,
                     Pending1: 0,
@@ -258,10 +259,11 @@ const UpdateGasStations = (props) => {
                     EstimateSell: values[index]?.EstimateSell !== undefined ? values[index]?.EstimateSell : yesterdayEntry?.EstimateSell || 0,
                     Period: 0,
                     DownHole: sharedDownHole || 0,
-                    YesterDay: (Number(twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
+                    YesterDay: (Number(yesterdayEntry?.Difference || twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
                     Sell: 0,
                     TotalVolume: 0,
-                    OilBalance: 0
+                    OilBalance: 0,
+                    Difference: 0
                 };
             });
 
@@ -489,25 +491,25 @@ const UpdateGasStations = (props) => {
 
     const handleUpdate = () => {
         // อัพเดทค่า Driver1 และ Driver2 ใน values
-    const updatedValues = values.map((item, index) => ({
-        ...item,
-        Driver1: driver1,
-        Driver2: driver2
-    }));
+        const updatedValues = values.map((item, index) => ({
+            ...item,
+            Driver1: driver1,
+            Driver2: driver2
+        }));
 
-    database
-        .ref("/depot/gasStations/" + (gasStation.id - 1) + "/Report")
-        .child(dayjs(selectedDate).format("DD-MM-YYYY"))
-        .update(updatedValues) // อัพเดท values ทั้งหมด
-        .then(() => {
-            ShowSuccess("บันทึกข้อมูลสำเร็จ");
-            console.log("Data updated successfully");
-            setUpdate(true);
-        })
-        .catch((error) => {
-            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-            console.error("Error updating data:", error);
-        });
+        database
+            .ref("/depot/gasStations/" + (gasStation.id - 1) + "/Report")
+            .child(dayjs(selectedDate).format("DD-MM-YYYY"))
+            .update(updatedValues) // อัพเดท values ทั้งหมด
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลสำเร็จ");
+                console.log("Data updated successfully");
+                setUpdate(true);
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
     }
 
     console.log("driversData : ", driversData);
@@ -754,7 +756,7 @@ const UpdateGasStations = (props) => {
                                                     />
                                                 )}
                                                 ListboxProps={{
-                                                    sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px",marginLeft: -1.5 },
+                                                    sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px", marginLeft: -1.5 },
                                                 }}
                                             />
                                         </Paper>
@@ -790,7 +792,7 @@ const UpdateGasStations = (props) => {
                                                     />
                                                 )}
                                                 ListboxProps={{
-                                                    sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px",marginLeft: -1.5 },
+                                                    sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px", marginLeft: -1.5 },
                                                 }}
                                             />
                                         </Paper>
@@ -1034,14 +1036,33 @@ const UpdateGasStations = (props) => {
                                                             color: "black",
                                                             position: "sticky",
                                                             left: 0,
-                                                            zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน 
+                                                            zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน
+                                                            borderBottom: "2px solid white" 
                                                         }}
                                                     >
                                                         {values[index]?.ProductName || row.ProductName}
                                                     </TablecellHeader>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || row.Capacity)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", color: values[index]?.Volume < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.Volume || 0))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    <TableCell sx={{
+                                                        textAlign: "center",
+                                                        backgroundColor: values[index]?.Color
+                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`,
+                                                        fontWeight: "bold",
+                                                        borderBottom: "2px solid white"
+                                                    }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || row.Capacity)}</TableCell>
+                                                    <TableCell sx={{
+                                                        textAlign: "center", backgroundColor: values[index]?.Color
+                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`, color: values[index]?.Volume < 0 ? "#d50000" : "black", 
+                                                            fontWeight: "bold",
+                                                            borderBottom: "2px solid white"
+                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.Volume || 0))}</TableCell>
+                                                    <TableCell sx={{
+                                                        textAlign: "center", backgroundColor: values[index]?.Color
+                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`,
+                                                            borderBottom: "2px solid white"
+                                                    }}>
                                                         <TextField
                                                             style={{ display: 'none' }}
                                                             inputProps={{ readOnly: true }}
@@ -1052,40 +1073,41 @@ const UpdateGasStations = (props) => {
                                                             inputProps={{ readOnly: true }}
                                                             value={values[index]?.Color || ""}
                                                         />
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            value={values[index]?.Squeeze || squeeze} // ถ้าค่าว่างให้เป็น 0
-                                                            onChange={(e) => handleInputChange(index, "Squeeze", e.target.value)}
-                                                            onFocus={(e) => {
-                                                                if (e.target.value === "0") {
-                                                                    handleInputChange(index, "Squeeze", ""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                                                }
-                                                            }}
-                                                            onBlur={(e) => {
-                                                                if (e.target.value === "") {
-                                                                    handleInputChange(index, "Squeeze", 0); // ถ้าค่าว่างให้เป็น 0
-                                                                }
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
-
+                                                        <Paper sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                value={values[index]?.Squeeze || squeeze} // ถ้าค่าว่างให้เป็น 0
+                                                                onChange={(e) => handleInputChange(index, "Squeeze", e.target.value)}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        handleInputChange(index, "Squeeze", ""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        handleInputChange(index, "Squeeze", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </Paper>
                                                     </TableCell>
                                                     <TableCell
                                                         sx={{
@@ -1093,137 +1115,297 @@ const UpdateGasStations = (props) => {
                                                             justifyContent: "center",
                                                             alignItems: "center",
                                                             gap: 1, // เพิ่มระยะห่างระหว่าง TextField
+                                                            backgroundColor: values[index]?.Color
+                                                                ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                                : `${row.Color}4A`,
+                                                                borderBottom: "2px solid white"
                                                         }}
                                                     >
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label="ลงจริงไปแล้ว"
-                                                            value={values[index]?.Delivered || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Delivered", e.target.value)
-                                                            }
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label={driver1}
-                                                            value={values[index]?.Pending1 || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Pending1", parseFloat(e.target.value) || 0)
-                                                            }
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">สต็อก</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label={driver2}
-                                                            value={values[index]?.Pending2 || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "Pending2", e.target.value)
-                                                            }
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
+                                                        <Paper sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">สต็อก</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label="ลงจริงไปแล้ว"
+                                                                value={values[index]?.Delivered === "" ? "" : values[index]?.Delivered || 0}
+                                                                onChange={(e) => {
+                                                                    let newValue = e.target.value;
+
+                                                                    // ตรวจสอบว่าเป็นค่าว่างหรือไม่
+                                                                    if (newValue === "") {
+                                                                        handleInputChange(index, "Delivered", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                    } else {
+                                                                        handleInputChange(index, "Delivered", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                    }
+                                                                }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        handleInputChange(index, "Delivered", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        handleInputChange(index, "Delivered", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    let currentValue = parseInt(values[index]?.Delivered || 0, 10);
+
+                                                                    if (e.key === "ArrowUp") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "Delivered", currentValue + 1000);
+                                                                    } else if (e.key === "ArrowDown") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "Delivered", Math.max(0, currentValue - 1000));
+                                                                    }
+                                                                }}
+                                                                InputProps={{
+                                                                    inputProps: {
+                                                                        min: 0,
+                                                                        step: 1000, // ทำให้ปุ่มลูกศรเพิ่มลดทีละ 1000
+                                                                    },
+                                                                }}
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                        fontWeight: "bold"
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </Paper>
+                                                        <Paper sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">สต็อก</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label={driver1}
+                                                                value={values[index]?.Pending1 === "" ? "" : values[index]?.Pending1 || 0}
+                                                                // onChange={(e) =>
+                                                                //     handleInputChange(index, "Pending1", parseFloat(e.target.value) || 0)
+                                                                // }
+                                                                onChange={(e) => {
+                                                                    let newValue = e.target.value;
+
+                                                                    // ตรวจสอบว่าเป็นค่าว่างหรือไม่
+                                                                    if (newValue === "") {
+                                                                        handleInputChange(index, "Pending1", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                    } else {
+                                                                        handleInputChange(index, "Pending1", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                    }
+                                                                }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        handleInputChange(index, "Pending1", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        handleInputChange(index, "Pending1", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    let currentValue = parseInt(values[index]?.Pending1 || 0, 10);
+
+                                                                    if (e.key === "ArrowUp") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "Pending1", currentValue + 1000);
+                                                                    } else if (e.key === "ArrowDown") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "Pending1", Math.max(0, currentValue - 1000));
+                                                                    }
+                                                                }}
+                                                                InputProps={{
+                                                                    inputProps: {
+                                                                        min: 0,
+                                                                        step: 1000, // ทำให้ปุ่มลูกศรเพิ่มลดทีละ 1000
+                                                                    },
+                                                                }}
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                        fontWeight: "bold"
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </Paper>
+                                                        <Paper sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">สต็อก</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label={driver2}
+                                                                value={values[index]?.Pending2 === "" ? "" : values[index]?.Pending2 || 0}
+                                                                onChange={(e) => {
+                                                                    let newValue = e.target.value;
+
+                                                                    // ตรวจสอบว่าเป็นค่าว่างหรือไม่
+                                                                    if (newValue === "") {
+                                                                        handleInputChange(index, "Pending2", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                    } else {
+                                                                        handleInputChange(index, "Pending2", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                    }
+                                                                }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        handleInputChange(index, "Pending2", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        handleInputChange(index, "Pending2", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    let currentValue = parseInt(values[index]?.Pending2 || 0, 10);
+
+                                                                    if (e.key === "ArrowUp") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "Pending2", currentValue + 1000);
+                                                                    } else if (e.key === "ArrowDown") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "Pending2", Math.max(0, currentValue - 1000));
+                                                                    }
+                                                                }}
+                                                                InputProps={{
+                                                                    inputProps: {
+                                                                        min: 0,
+                                                                        step: 1000, // ทำให้ปุ่มลูกศรเพิ่มลดทีละ 1000
+                                                                    },
+                                                                }}
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                        fontWeight: "bold"
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </Paper>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            // InputProps={{
-                                                            //     startAdornment: (
-                                                            //         <InputAdornment position="start">ขาย</InputAdornment>
-                                                            //     ),
-                                                            // }}
-                                                            label="ขาย"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '12px',
-                                                                },
-                                                            }}
-                                                            value={values[index]?.EstimateSell || 0}
-                                                            onChange={(e) =>
-                                                                handleInputChange(index, "EstimateSell", e.target.value)
-                                                            }
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '25px', // ปรับความสูงของ TextField
-                                                                },
-                                                                '& .MuiInputBase-input': {
-                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                    fontWeight: 'bold',
-                                                                    padding: '4px 8px', // ปรับ padding ภายใน input
-                                                                    textAlign: "center",
-                                                                },
-                                                            }}
-                                                            fullWidth
-                                                        />
+                                                    <TableCell sx={{
+                                                        textAlign: "center", backgroundColor: values[index]?.Color
+                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`,
+                                                            borderBottom: "2px solid white"
+                                                    }}>
+                                                        <Paper sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                // InputProps={{
+                                                                //     startAdornment: (
+                                                                //         <InputAdornment position="start">ขาย</InputAdornment>
+                                                                //     ),
+                                                                // }}
+                                                                label="ขาย"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                        fontWeight: "bold"
+                                                                    },
+                                                                }}
+                                                                value={values[index]?.EstimateSell === "" ? "" : values[index]?.EstimateSell || 0}
+                                                                onChange={(e) => {
+                                                                    let newValue = e.target.value;
+
+                                                                    // ตรวจสอบว่าเป็นค่าว่างหรือไม่
+                                                                    if (newValue === "") {
+                                                                        handleInputChange(index, "EstimateSell", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                    } else {
+                                                                        handleInputChange(index, "EstimateSell", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                    }
+                                                                }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        handleInputChange(index, "EstimateSell", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        handleInputChange(index, "EstimateSell", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    let currentValue = parseInt(values[index]?.EstimateSell || 0, 10);
+
+                                                                    if (e.key === "ArrowUp") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "EstimateSell", currentValue + 1000);
+                                                                    } else if (e.key === "ArrowDown") {
+                                                                        e.preventDefault();
+                                                                        handleInputChange(index, "EstimateSell", Math.max(0, currentValue - 1000));
+                                                                    }
+                                                                }}
+                                                                InputProps={{
+                                                                    inputProps: {
+                                                                        min: 0,
+                                                                        step: 1000, // ทำให้ปุ่มลูกศรเพิ่มลดทีละ 1000
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '25px', // ปรับความสูงของ TextField
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '4px 8px', // ปรับ padding ภายใน input
+                                                                        textAlign: "center",
+                                                                    },
+                                                                }}
+                                                                fullWidth
+                                                            />
+                                                        </Paper>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: "#92CDDC", color: values[index]?.Period < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: "#a5d6a7", color: values[index]?.Capacity < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(Math.round((values[index]?.Capacity || 0)) - Math.round((values[index]?.DownHole || 0)))}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#92CDDC", color: values[index]?.Period < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#a5d6a7", color: values[index]?.Capacity < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(Math.round((values[index]?.Capacity || 0)) - Math.round((values[index]?.DownHole || 0)))}</TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center",color: values[index]?.YesterDay < 0 ? "#d50000" : "black", fontWeight: "bold" }}>
                                                             <TextField
                                                                 size="small"
@@ -1251,8 +1433,20 @@ const UpdateGasStations = (props) => {
                                                                 fullWidth
                                                             />
                                                         </TableCell> */}
-                                                    <TableCell sx={{ textAlign: "center", color: values[index]?.YesterDay < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.YesterDay || 0))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", color: values[index]?.Sell < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.Sell || 0))}</TableCell>
+                                                    <TableCell sx={{
+                                                        textAlign: "center", backgroundColor: values[index]?.Color
+                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`, color: values[index]?.YesterDay < 0 ? "#d50000" : "black",
+                                                            fontWeight: "bold",
+                                                            borderBottom: "2px solid white"
+                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.YesterDay || 0))}</TableCell>
+                                                    <TableCell sx={{
+                                                        textAlign: "center", backgroundColor: values[index]?.Color
+                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`, color: values[index]?.Sell < 0 ? "#d50000" : "black",
+                                                            fontWeight: "bold",
+                                                            borderBottom: "2px solid white"
+                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.Sell || 0))}</TableCell>
                                                     {/* ถ้าเป็นแถวแรก (index === 0) ให้เพิ่ม rowSpan, แถวอื่นไม่ต้องแสดง cell นี้ */}
                                                     {index === 0 ? (
                                                         <TableCell rowSpan={productsLength}>

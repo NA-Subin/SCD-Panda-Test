@@ -30,18 +30,33 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/th';
 
+const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
+
 const GasStationDetail = (props) => {
-    const { stock, gasStationOil, gasStationID, report, gasStationReport, selectedDate, gas, gasID } = props;
+    const { stock, gasStationID, selectedDate, gas, gasID, first, last, reportOilBalance, oilBalance } = props;
     // const [selectedDates, setSelectedDates] = React.useState(dayjs(selectedDate));
     const [product, setProduct] = React.useState([]);
+    const [notReport, setNotReport] = React.useState([]);
     const [reports, setReports] = React.useState([]);
-    const [oilBalanceFirstLoop, setOilBalanceFirstLoop] = useState([]);
-    const [oilBalanceSecondLoop, setOilBalanceSecondLoop] = useState([]);
 
     const getGasStations = async () => {
         database.ref("/depot/gasStations/" + (gas.id - 1)).on("value", (snapshot) => {
             const datas = snapshot.val();
             setProduct(datas.Products);
+            if (datas && datas.Products) {
+                const sortedProducts = Object.entries(datas.Products)
+                    .map(([key, value]) => ({
+                        ProductName: key,
+                        Volume: value
+                    }))
+                    .sort((a, b) => {
+                        return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
+                    });
+
+                setNotReport(sortedProducts);
+            } else {
+                setNotReport([]);
+            }
         });
 
         database.ref("/depot/gasStations/" + (gas.id - 1) + "/Report/" + dayjs(selectedDate).format('DD-MM-YYYY')).on("value", (snapshot) => {
@@ -59,18 +74,24 @@ const GasStationDetail = (props) => {
     useEffect(() => {
         // setSelectedDates(dayjs(selectedDate));
         getGasStations();
-        // setVolumes({}); // รีเซ็ตค่า Volume เป็นค่าเริ่มต้น
-        // setStocks({});
-    }, [selectedDate]);
+        setVolumes({}); // รีเซ็ตค่า Volume เป็นค่าเริ่มต้น
+        setStocks({});
+    }, [selectedDate, gas.id]);
 
     console.log("Date : ", dayjs(selectedDate).format('DD-MM-YYYY'));
+    console.log("Name : ", gas.ShortName);
     console.log("ShowProduct : ", product);
     console.log("ShowReport : ", reports);
+    console.log("reportOilBalance: ", gasID === 1 && reportOilBalance);
 
     const [volumes, setVolumes] = useState({});
     const [stocks, setStocks] = useState({});
+    const [difference, setDifference] = useState({});
     const [setting, setSetting] = React.useState(true);
     let showSingleButton = true;
+
+    console.log("Update Volume : ", volumes);
+    console.log("Update Stock : ", stocks);
 
     // ฟังก์ชันอัปเดตค่า newVolume
     const handleNewVolumeChange = (key, value) => {
@@ -116,31 +137,30 @@ const GasStationDetail = (props) => {
     // const formattedDate = dayjs(selectedDates).format('DD-MM-YYYY');
     // const dataReport = gas.Report ? gas.Report[formattedDate] : [];
     // console.log("report: ", dataReport);
-
+    const [save, setSave] = React.useState(true);
 
     const saveProduct = () => {
-        const updatedProducts = Object.entries(product)
-            .map(([key, value]) => {
-                const matchingStock = stock.find((s) => s.ProductName === key);
+        const updatedProducts = notReport
+            .map(({ ProductName, Volume }) => { // ✅ ใช้ destructuring ถูกต้อง
+                const matchingStock = stock.find((s) => s.ProductName === ProductName);
                 if (!matchingStock) return null; // ถ้าไม่มีข้อมูล ให้ return null (แต่ filter ทิ้งภายหลัง)
-
+                console.log("differenceAdd : ", (difference[ProductName] ?? 0))
                 return {
-                    ProductName: key,
+                    ProductName,
                     Capacity: matchingStock.Capacity ?? 0,
                     Color: matchingStock.Color ?? "",
-                    TotalVolume: Number(value ?? 0),
-                    Volume: Number(value ?? 0),
-                    Delivered: Number(volumes?.[key] ?? 0),
-                    OilBalance: Number(stocks.find(s => s.ProductName === key)?.OilBalance ?? 0),
+                    TotalVolume: Number(Volume ?? 0),
+                    Volume: Number(Volume ?? 0),
+                    Delivered: Number(volumes?.[ProductName] ?? 0),
+                    OilBalance: Number(stocks?.[ProductName] ?? 0),
                 };
             })
             .filter(Boolean); // กรองค่าที่เป็น null ออกไป
 
-
-        const updatedVolume = Object.entries(product).reduce((acc, [key, value]) => {
-            const matchingStock = stock.find((s) => s.ProductName === key);
+        const updatedVolume = notReport.reduce((acc, { ProductName, Volume }) => { // ✅ ใช้ destructuring ถูกต้อง
+            const matchingStock = stock.find((s) => s.ProductName === ProductName);
             if (matchingStock) {
-                acc[key] = Number(matchingStock.Volume || 0); // ใช้ `matchingStock.Volume` แทน `stocks[key]`
+                acc[ProductName] = Number(matchingStock.Volume || 0);
             }
             return acc;
         }, {}); // เริ่มต้นเป็น object ว่าง
@@ -148,7 +168,7 @@ const GasStationDetail = (props) => {
 
         // อัปเดตข้อมูลในฐานข้อมูล
         database
-            .ref("/depot/gasStations/" + (gasStationID - 1) + "/Report")
+            .ref("/depot/gasStations/" + (gas.id - 1) + "/Report")
             .child(dayjs(selectedDate).format("DD-MM-YYYY"))
             .update(updatedProducts)
             .then(() => {
@@ -161,7 +181,7 @@ const GasStationDetail = (props) => {
             });
 
         database
-            .ref("/depot/gasStations/" + (gasStationID - 1))
+            .ref("/depot/gasStations/" + (gas.id - 1))
             .child("/Products")
             .update(updatedVolume)
             .then(() => {
@@ -172,12 +192,15 @@ const GasStationDetail = (props) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+
+        console.log("Update Difference : ", difference);
     };
 
     const updateProduct = () => {
         const updatedProducts =
-            reports !== 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+            reports.length !== 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
                 ? reports.map((row) => {
+                    console.log("differenceUpdates : ", (difference[row.ProductName] ?? 0))
                     return {
                         ProductName: row.ProductName,
                         Capacity: row.Capacity,
@@ -195,14 +218,15 @@ const GasStationDetail = (props) => {
                         YesterDay: row.YesterDay || 0,
                         Sell: row.Sell || 0,
                         TotalVolume: row.TotalVolume || 0,
-                        OilBalance: Number(updateStocks[row.ProductName] || row.OilBalance)
+                        OilBalance: Number(updateStocks[row.ProductName] || row.OilBalance),
+                        Difference: row.Difference || 0,
                     };
 
                 })
                 : []
 
         const updatedVolumes =
-            reports !== 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
+            reports.length !== 0 // ตรวจสอบว่ามีข้อมูลใน gasStationReport หรือไม่
                 ? reports.reduce((acc, row) => {
                     const updatedVolume =
                         Number(updateStocks[row.ProductName] || row.OilBalance);
@@ -214,7 +238,7 @@ const GasStationDetail = (props) => {
 
         // อัปเดตข้อมูลในฐานข้อมูล Firebase
         database
-            .ref("/depot/gasStations/" + (gasStationID - 1) + "/Report")
+            .ref("/depot/gasStations/" + (gas.id - 1) + "/Report")
             .child(dayjs(selectedDate).format("DD-MM-YYYY"))
             .update(updatedProducts)
             .then(() => {
@@ -227,7 +251,7 @@ const GasStationDetail = (props) => {
             });
 
         database
-            .ref("/depot/gasStations/" + (gasStationID - 1))
+            .ref("/depot/gasStations/" + (gas.id - 1))
             .child("/Products")
             .update(updatedVolumes)
             .then(() => {
@@ -238,12 +262,29 @@ const GasStationDetail = (props) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+
+        setSetting(true);
+        setSave(true);
     };
 
-    // ✅ ลำดับที่ต้องการเรียง
-    const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
+    const handleSave = () => {
+        console.log("latestGas ::::::: ", first.id);
+        console.log("✅ reportOilBalance " + `${gasID}:`, oilBalance);
+        database
+            .ref("/depot/gasStations/" + (first.id - 1) + "/Report")
+            .child(dayjs(selectedDate).format("DD-MM-YYYY"))
+            .update(oilBalance)
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+                setSave(false);
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
 
-    const reportArray = Object.values(reports);
+    }
 
     // สร้าง `gasStationNotReports` โดยใช้ `ProductName`
     const gasStationNotReports = Object.entries(product).map(([key, value]) => ({
@@ -256,18 +297,22 @@ const GasStationDetail = (props) => {
         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
     });
 
-    // ✅ ตรวจสอบว่า `dataReport` เป็น array ก่อนใช้ `.sort()`
-    // const sortedReport = reportArray !== undefined
-    //     ? reportArray.sort((a, b) => {
-    //         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
-    //     })
-    //     : sortedNotReport;
-    
-        const sortedReport = reports.length > 0
+    const sortedReport = reports.length !== 0
         ? reports.sort((a, b) => customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName))
         : [];
 
-    console.log("sortedReport : ", sortedReport.length);
+
+    const sortedOilBalance = reportOilBalance.sort((a, b) => {
+        return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
+    });
+
+    // useEffect(() => {
+    //     const newDifference = sortedOilBalance.reduce((acc, item) => {
+    //         acc[item.ProductName] = item.prevOilBalance - item.latestOilBalance;
+    //         return acc;
+    //     }, {});
+    //     setDifference(newDifference); // ✅ อัปเดตค่าทันทีหลังโหลด
+    // }, [sortedOilBalance]); // ✅ อัปเดตเมื่อ `sortedOilBalance` เปลี่ยน
 
     return (
         <React.Fragment>
@@ -288,7 +333,7 @@ const GasStationDetail = (props) => {
                 </Grid>
                 {
                     reports.length === 0 ?
-                        sortedNotReport.map((row, index) => (
+                        notReport.map((row, index) => (
                             <React.Fragment key={index}>
                                 <Grid item xs={5} md={2} lg={1}>
                                     <Box
@@ -377,7 +422,7 @@ const GasStationDetail = (props) => {
                         :
                         sortedReport.map((row) => (
                             <React.Fragment>
-                                {console.log("Show ::: ", row.ProductName)}
+                                {/* {row.Difference === 0 || row.Difference === undefined && setSave(false)} */}
                                 <Grid item xs={5} md={2} lg={1}>
                                     <Box
                                         sx={{
@@ -467,6 +512,102 @@ const GasStationDetail = (props) => {
                                     : gas.Stock === "ป่าแดด" ? "#B1A0C7"
                                         : "", marginTop: -1, p: 2, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, marginLeft: -2
             }}></Box>
+            {gasID === 1 && ( // แสดง <Box> เมื่อถึงข้อมูลลำดับที่ 2
+                <React.Fragment>
+                    <Box sx={{
+                        backgroundColor:
+                            first.Stock === "แม่โจ้" ? "#92D050"
+                                : first.Stock === "สันกลาง" ? "#B1A0C7"
+                                    : first.Stock === "สันทราย" ? "#B7DEE8"
+                                        : first.Stock === "บ้านโฮ่ง" ? "#FABF8F"
+                                            : first.Stock === "ป่าแดด" ? "#B1A0C7"
+                                                : "", marginTop: 2, p: 2, borderRadius: 5, marginLeft: -2, marginBottom: -5
+                    }}>
+                        <Typography variant="subtitle1" textAlign="center" fontWeight="bold" fontSize="24px" >คำนวณ</Typography>
+                    </Box>
+                    <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3 }}>
+                        {sortedOilBalance.map((item, i) => (
+                            <React.Fragment key={i}>
+                                <Grid item xs={3} md={1.5}>
+                                    <Box
+                                        sx={{
+                                            backgroundColor: item.Color,
+                                            borderRadius: 3,
+                                            textAlign: "center",
+                                            paddingTop: 2,
+                                            paddingBottom: 1
+                                        }}
+                                        disabled
+                                    >
+                                        <Typography variant="h5" fontWeight="bold" gutterBottom>
+                                            {item.ProductName}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={3} md={1.5}>
+                                    <Typography variant="subtitle2" fontWeight="bold" color={!save && "textDisabled"} gutterBottom>
+                                        {first.ShortName || "N/A"}
+                                    </Typography>
+                                    <Paper component="form" sx={{ marginTop: -1 }}>
+                                        <TextField
+                                            size="small"
+                                            type="text"
+                                            fullWidth
+                                            value={new Intl.NumberFormat("en-US").format(item.PrevOilBalance)}
+                                            disabled={save ? false : true}
+                                        />
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={3} md={1.5}>
+                                    <Typography variant="subtitle2" fontWeight="bold" color={!save && "textDisabled"} gutterBottom>
+                                        {last.ShortName || "N/A"}
+                                    </Typography>
+                                    <Paper component="form" sx={{ marginTop: -1 }}>
+                                        <TextField
+                                            size="small"
+                                            type="text"
+                                            fullWidth
+                                            value={new Intl.NumberFormat("en-US").format(item.LatestOilBalance)}
+                                            disabled={save ? false : true}
+                                        />
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={3} md={1.5}>
+                                    <Typography variant="subtitle2" fontWeight="bold" color={!save && "textDisabled"} gutterBottom>
+                                        ผลลัพธ์
+                                    </Typography>
+                                    <Paper component="form" sx={{ marginTop: -1 }}>
+                                        <TextField
+                                            size="small"
+                                            type="text"
+                                            fullWidth
+                                            value={new Intl.NumberFormat("en-US").format(item.Difference)}
+                                            disabled={save ? false : true}
+                                        />
+                                    </Paper>
+                                </Grid>
+                            </React.Fragment>
+                        ))}
+                        {
+                            save &&
+                            <Grid item xs={12} textAlign="center">
+                                <Button variant="contained" color="success" onClick={handleSave}>
+                                    บันทึก
+                                </Button>
+                            </Grid>
+                        }
+                    </Grid>
+                    <Box sx={{
+                        backgroundColor:
+                            first.Stock === "แม่โจ้" ? "#92D050"
+                                : first.Stock === "สันกลาง" ? "#B1A0C7"
+                                    : first.Stock === "สันทราย" ? "#B7DEE8"
+                                        : first.Stock === "บ้านโฮ่ง" ? "#FABF8F"
+                                            : first.Stock === "ป่าแดด" ? "#B1A0C7"
+                                                : "", marginTop: -1, p: 2, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, marginLeft: -2
+                    }}></Box>
+                </React.Fragment>
+            )}
         </React.Fragment>
     );
 };

@@ -948,21 +948,7 @@ const InsertTrips = () => {
                             </Box>
                         </Grid>
                     </Grid>
-                    <Grid container spacing={1} marginTop={2}>
-                        {/* {
-                            showTickers ?
-                                <Grid item xs={12} marginTop={1} marginBottom={1}>
-                                    <Divider>
-                                        <Button variant="contained" color="info" size="small" onClick={handleTickets} sx={{ borderRadius: 20 }}>จัดการตั๋ว</Button>
-                                    </Divider>
-                                </Grid>
-                                :
-                                <> */}
-                        <Grid item xs={1} textAlign="right">
-                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>จัดการตั๋ว</Typography>
-                        </Grid>
-                        <Grid item xs={11} textAlign="right" >
-                            <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
+                            <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1, marginTop: 0.5 }}>
                                 <TableContainer
                                     component={Paper}
                                     style={{ height: "55vh", position: "relative", }}
@@ -983,54 +969,45 @@ const InsertTrips = () => {
                                                 <TablecellSelling width={500} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ตั๋ว
                                                 </TablecellSelling>
-                                                <TablecellSelling width={300} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                <TablecellSelling width={200} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     เลขที่ออเดอร์
                                                 </TablecellSelling>
-                                                <TablecellSelling width={150} sx={{ textAlign: "center" }} rowSpan={2}>
+                                                <TablecellSelling width={100} sx={{ textAlign: "center" }} rowSpan={2}>
                                                     ค่าบรรทุก
                                                 </TablecellSelling>
-                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#FFC000",color: "black" }} colSpan={2}>
                                                     G95
                                                 </TablecellSelling>
-                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#92D050",color: "black" }} colSpan={2}>
                                                     G91
                                                 </TablecellSelling>
-                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#FFFF99",color: "black" }} colSpan={2}>
                                                     B7(D)
                                                 </TablecellSelling>
-                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#B7DEE8",color: "black" }} colSpan={2}>
                                                     B95
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={150} sx={{ textAlign: "center" }}>
-                                                                B10
-                                                            </TablecellSelling>
-                                                            <TablecellSelling width={150} sx={{ textAlign: "center" }}>
-                                                                B20
-                                                            </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#C4BD97",color: "black" }} colSpan={2}>
                                                     E20
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={150} sx={{ textAlign: "center" }}>
-                                                                E85
-                                                            </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center", borderLeft: "3px solid white" }} colSpan={2}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#F141D8",color: "black" }} colSpan={2}>
                                                     PWD
                                                 </TablecellSelling>
                                                 <TablecellSelling width={300} sx={{ textAlign: "center", borderLeft: "3px solid white" }} rowSpan={2} />
                                             </TableRow>
                                             <TableRow sx={{ position: "sticky", top: 20, zIndex: 2, backgroundColor: theme.palette.panda.light }}>
-                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white" }}>ต้นทุน</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#FFC000",color: "black" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center",backgroundColor: "#FFC000",color: "black" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#92D050",color: "black" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center",backgroundColor: "#92D050",color: "black" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#FFFF99",color: "black" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center",backgroundColor: "#FFFF99",color: "black" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#B7DEE8",color: "black" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center",backgroundColor: "#B7DEE8",color: "black" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#C4BD97",color: "black" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center",backgroundColor: "#C4BD97",color: "black" }}>ปริมาณ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#F141D8",color: "black" }}>ต้นทุน</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center",backgroundColor: "#F141D8",color: "black" }}>ปริมาณ</TablecellSelling>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -1045,33 +1022,13 @@ const InsertTrips = () => {
                                                 sx={{
                                                     position: "absolute",  // ✅ ทำให้แถวรวมลอยอยู่ด้านล่างของ TableContainer
                                                     bottom: 0,
-                                                    width: "2910px"
+                                                    width: "2160px"
                                                 }}
                                             >
-                                                <TablecellSelling width={1110} sx={{ textAlign: "right" }}>
+                                                <TablecellSelling width={960} sx={{ textAlign: "right" }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                    <Paper component="form" sx={{ marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            // value={costG95}
-                                                            value={showTrips ? costG95 : (productTG95.TotalCost || 0)}
-                                                            disabled={showTrips ? false : true}
-                                                        />
-                                                    </Paper>
-                                                </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#FFC000",Color: "black" }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1091,27 +1048,7 @@ const InsertTrips = () => {
                                                         />
                                                     </Paper>
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                    <Paper component="form" sx={{ marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            // value={costG91}
-                                                            value={showTrips ? costG91 : (productTG91.TotalCost || 0)}
-                                                            disabled={showTrips ? false : true}
-                                                        />
-                                                    </Paper>
-                                                </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#92D050",Color: "black"  }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1131,27 +1068,7 @@ const InsertTrips = () => {
                                                         />
                                                     </Paper>
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                    <Paper component="form" sx={{ marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            // value={costB7}
-                                                            value={showTrips ? costB7 : (productTB7.TotalCost || 0)}
-                                                            disabled={showTrips ? false : true}
-                                                        />
-                                                    </Paper>
-                                                </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#FFFF99",Color: "black"  }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1171,27 +1088,7 @@ const InsertTrips = () => {
                                                         />
                                                     </Paper>
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                    <Paper component="form" sx={{ marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            // value={costB95}
-                                                            value={showTrips ? costB95 : (productTB95.TotalCost || 0)}
-                                                            disabled={showTrips ? false : true}
-                                                        />
-                                                    </Paper>
-                                                </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#B7DEE8",Color: "black"  }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1211,27 +1108,7 @@ const InsertTrips = () => {
                                                         />
                                                     </Paper>
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                    <Paper component="form" sx={{ marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            // value={costE20}
-                                                            value={showTrips ? costE20 : (productTE20.TotalCost || 0)}
-                                                            disabled={showTrips ? false : true}
-                                                        />
-                                                    </Paper>
-                                                </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#C4BD97",Color: "black"  }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1251,27 +1128,7 @@ const InsertTrips = () => {
                                                         />
                                                     </Paper>
                                                 </TablecellSelling>
-                                                {/* <TablecellSelling width={125} sx={{ textAlign: "center", borderLeft: "3px solid white" }}>
-                                                    <Paper component="form" sx={{ marginRight: -1 }}>
-                                                        <TextField size="small" fullWidth
-                                                            type="number"
-                                                            InputLabelProps={{
-                                                                sx: {
-                                                                    fontSize: '14px'
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': {
-                                                                    height: '30px', // ปรับความสูงของ TextField
-                                                                },
-                                                            }}
-                                                            // value={costPWD}
-                                                            value={showTrips ? costPWD : (productTPWD.TotalCost || 0)}
-                                                            disabled={showTrips ? false : true}
-                                                        />
-                                                    </Paper>
-                                                </TablecellSelling> */}
-                                                <TablecellSelling width={250} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={150} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: "#F141D8",Color: "black"  }}>
                                                     <Paper component="form" sx={{ marginRight: -1 }}>
                                                         <TextField size="small" fullWidth
                                                             type="number"
@@ -1485,20 +1342,18 @@ const InsertTrips = () => {
                                     </Grid>
                                 </Grid>
                             </Paper>
-                        </Grid>
                         {
                             weightOil !== 0 && showTrips ?
-                                <Grid item xs={12} marginTop={1} marginBottom={1}>
+                                <Box>
                                     <Divider>
                                         <Button variant="contained" color="info" size="small" onClick={handleTrip} sx={{ borderRadius: 20 }}>จัดเที่ยววิ่ง</Button>
                                     </Divider>
-                                </Grid>
+                                </Box>
                                 :
                                 ""
                         }
                         {/* </>
                         } */}
-                    </Grid>
                     <Divider sx={{ marginTop: 2, marginBottom: 1 }} />
                     {
                         showTrips ?

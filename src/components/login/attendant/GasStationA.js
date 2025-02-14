@@ -358,121 +358,92 @@ const GasStationAdmin = () => {
                     </Grid>
                     {gasStationOil.map((row, index) => {
                         const prevIndex = index - 1; // index ก่อนหน้า
-                        const prevGas = gasStationOil[prevIndex] || {};
-                        const latestGas = gasStationOil[index] || {};
-
+                        const prevGas = gasStationOil[prevIndex] || {}; // ✅ ใช้ {} แทน []
+                        const latestGas = gasStationOil[index] || {}; // ✅ ใช้ {} แทน []
+                    
                         const selectedDateKey = dayjs(selectedDate).format("DD-MM-YYYY");
-
-                        const prevReport = [...(prevGas.Report?.[selectedDateKey] || [])];
-                        const latestReport = [...(latestGas.Report?.[selectedDateKey] || [])];
-
-                        console.log("Before : ", prevReport);
-                        console.log("After : ", latestReport);
-
-                        // รวมข้อมูล prevReport และ latestReport โดยเช็ค ProductName
-                        const reportOilBalance = prevReport.map((latestItem) => {
-                            const matchingPrevItem = latestReport.find(
-                                (prevItem) => prevItem.ProductName === latestItem.ProductName
+                    
+                        // ตรวจสอบว่ามีค่าเป็นอาร์เรย์ก่อนใช้ spread operator
+                        const prevReport = Array.isArray(prevGas.Report?.[selectedDateKey]) ? [...prevGas.Report[selectedDateKey]] : [];
+                        const latestReport = Array.isArray(latestGas.Report?.[selectedDateKey]) ? [...latestGas.Report[selectedDateKey]] : [];
+                    
+                        // ตรวจสอบข้อมูลซ้ำ
+                        const reportOilBalance = prevReport.map((prevItem) => {
+                            const matchingLatestItem = latestReport.find(
+                                (latestItem) => latestItem.ProductName === prevItem.ProductName
                             );
-
+                    
                             return {
-                                ProductName: latestItem.ProductName,
-                                Color: latestItem.Color,
-                                prevOilBalance: latestItem.OilBalance,
-                                latestOilBalance: matchingPrevItem ? matchingPrevItem.OilBalance : 0,
+                                ProductName: prevItem.ProductName,
+                                    Color: prevItem.Color,
+                                    PrevOilBalance: prevItem.OilBalance,
+                                    LatestOilBalance: matchingLatestItem ? matchingLatestItem.OilBalance : 0,
+                                    Difference: Number(prevItem.OilBalance) - Number(matchingLatestItem ? matchingLatestItem.OilBalance : 0) 
                             };
                         });
 
-                        console.log("reportOilBalance: ", reportOilBalance);
+                        const oilBalance = prevReport.map((prevItem) => {
+                            const matchingLatestItem = latestReport.find(
+                                (latestItem) => latestItem.ProductName === prevItem.ProductName
+                            );
+                    
+                            return {
+                                    ProductName: prevItem.ProductName || "",
+                                    Capacity: prevItem.Capacity || 0,
+                                    Color: prevItem.Color || "",
+                                    Volume: prevItem.Volume || 0,
+                                    Squeeze: prevItem.Squeeze || 0,
+                                    Delivered: prevItem.Delivered || 0,
+                                    Pending1: prevItem.Pending1 || 0,
+                                    Pending2: prevItem.Pending2 || 0,
+                                    Driver1: prevItem.Driver1 || 0,
+                                    Driver2: prevItem.Driver2 || 0,
+                                    EstimateSell: prevItem.EstimateSell || 0,
+                                    Period: prevItem.Period || 0,
+                                    DownHole: prevItem.DownHole || 0,
+                                    YesterDay: prevItem.YesterDay || 0,
+                                    Sell: prevItem.Sell || 0,
+                                    TotalVolume: prevItem.TotalVolume || 0,
+                                    OilBalance: prevItem.OilBalance || 0,
+                                    Difference: Number(prevItem.OilBalance) - Number(matchingLatestItem ? matchingLatestItem.OilBalance : 0) 
+                            };
+                        });
+
+                        // const handleSave = () => {
+                        //     console.log("latestGas ::::::: ",prevGas.id);
+                        //     console.log("✅ reportOilBalance "+`${index}:`, oilBalance);
+                        //     database
+                        //         .ref("/depot/gasStations/" + (prevGas.id - 1) + "/Report")
+                        //         .child(dayjs(selectedDate).format("DD-MM-YYYY"))
+                        //         .update(oilBalance)
+                        //         .then(() => {
+                        //             ShowSuccess("บันทึกข้อมูลสำเร็จ");
+                        //             console.log("Data pushed successfully");
+                        //         })
+                        //         .catch((error) => {
+                        //             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        //             console.error("Error pushing data:", error);
+                        //         });
+                                
+                        // }
 
                         return (
                             <React.Fragment key={index}>
                                 <GasStationDetail
                                     stock={stock}
                                     gasStationID={gasStationID}
-                                    report={report}
-                                    gasStationReport={gasStationReport}
+                                    // report={report}
+                                    // gasStationReport={gasStationReport}
                                     selectedDate={selectedDate}
-                                    gasStationOil={gasStationOil}
+                                    // gasStationOil={gasStationOil}
                                     isToday={isToday}
                                     gas={row}
                                     gasID={index}
+                                    first={prevGas}
+                                    last={latestGas}
+                                    reportOilBalance={reportOilBalance}
+                                    oilBalance={oilBalance}
                                 />
-                                {index === 1 && ( // แสดง <Box> เมื่อถึงข้อมูลลำดับที่ 2
-                                    <React.Fragment>
-                                        {
-                                            console.log("index : ", index)
-                                        }
-                                        <Box sx={{
-                                            backgroundColor:
-                                                prevGas.Stock === "แม่โจ้" ? "#92D050"
-                                                    : prevGas.Stock === "สันกลาง" ? "#B1A0C7"
-                                                        : prevGas.Stock === "สันทราย" ? "#B7DEE8"
-                                                            : prevGas.Stock === "บ้านโฮ่ง" ? "#FABF8F"
-                                                                : prevGas.Stock === "ป่าแดด" ? "#B1A0C7"
-                                                                    : "", marginTop: 2, p: 2, borderRadius: 5, marginLeft: -2, marginBottom: -5
-                                        }}>
-                                            <Typography variant="subtitle1" textAlign="center" fontWeight="bold" fontSize="24px" >คำนวณ</Typography>
-                                        </Box>
-                                        <Grid container spacing={2} sx={{ backgroundColor: "#eeeeee", marginTop: 2, p: 3 }}>
-                                            {reportOilBalance.map((item, i) => (
-                                                <React.Fragment key={i}>
-                                                    <Grid item xs={5} md={2} lg={1}>
-                                                        <Box
-                                                            sx={{
-                                                                backgroundColor: item.Color,
-                                                                borderRadius: 3,
-                                                                textAlign: "center",
-                                                                paddingTop: 2,
-                                                                paddingBottom: 1
-                                                            }}
-                                                            disabled
-                                                        >
-                                                            <Typography variant="h5" fontWeight="bold" gutterBottom>
-                                                                {item.ProductName}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={3.5} md={2} lg={1.5}>
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                            ปิดยอด {prevGas.ShortName || "N/A"}
-                                                        </Typography>
-                                                        <Paper component="form" sx={{ marginTop: -1 }}>
-                                                            <TextField
-                                                                size="small"
-                                                                type="number"
-                                                                fullWidth
-                                                                value={item.prevOilBalance}
-                                                            />
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={3.5} md={2} lg={1.5}>
-                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                            ปิดยอด {latestGas.ShortName || "N/A"}
-                                                        </Typography>
-                                                        <Paper component="form" sx={{ marginTop: -1 }}>
-                                                            <TextField
-                                                                size="small"
-                                                                type="number"
-                                                                fullWidth
-                                                                value={item.latestOilBalance}
-                                                            />
-                                                        </Paper>
-                                                    </Grid>
-                                                </React.Fragment>
-                                            ))}
-                                        </Grid>
-                                        <Box sx={{
-                                            backgroundColor:
-                                                prevGas.Stock === "แม่โจ้" ? "#92D050"
-                                                    : prevGas.Stock === "สันกลาง" ? "#B1A0C7"
-                                                        : prevGas.Stock === "สันทราย" ? "#B7DEE8"
-                                                            : prevGas.Stock === "บ้านโฮ่ง" ? "#FABF8F"
-                                                                : prevGas.Stock === "ป่าแดด" ? "#B1A0C7"
-                                                                    : "", marginTop: -1, p: 2, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, marginLeft: -2
-                                        }}></Box>
-                                    </React.Fragment>
-                                )}
                             </React.Fragment>
                         );
                     })}

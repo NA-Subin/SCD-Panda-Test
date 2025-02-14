@@ -23,6 +23,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import theme from "../../theme/theme";
 import { TablecellHeader } from "../../theme/style";
+import InsertTicketsTransport from "./InsertTicketsTransport";
 
 const TicketsTransport = () => {
     const [transport, setTransport] = useState([]);
@@ -31,6 +32,22 @@ const TicketsTransport = () => {
     const [recipientChecked, setRecipientChecked] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState(null); // จับ ID ของแถวที่ต้องการแก้ไข
     const [typeCustomer, setTypeCuster] = React.useState(0);
+
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+            
+              // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+              useEffect(() => {
+                const handleResize = () => {
+                  setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+                };
+            
+                window.addEventListener('resize', handleResize); // เพิ่ม event listener
+            
+                // ลบ event listener เมื่อ component ถูกทำลาย
+                return () => {
+                  window.removeEventListener('resize', handleResize);
+                };
+              }, []);
 
     // ดึงข้อมูลจาก Firebase
     const getTransport = async () => {
@@ -82,11 +99,22 @@ const TicketsTransport = () => {
     };
 
     return (
-        <React.Fragment>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ตั๋วขายส่ง</Typography>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+              <Typography
+                variant="h3"
+                fontWeight="bold"
+                textAlign="center"
+                gutterBottom
+              >
+                รับจ้างขนส่ง
+              </Typography>
+              <Divider sx={{ marginBottom: 1 }}/>
+                <Grid container spacing={3} sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
+                    <Grid item xs={10}>
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>รับจ้างขนส่ง</Typography>
+                    </Grid>
+                    <Grid item xs={2} marginTop={-2}>
+                        <InsertTicketsTransport />
                     </Grid>
                     <Grid item xs={12} marginTop={-2}>
                         <Divider />
@@ -224,8 +252,7 @@ const TicketsTransport = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Paper>
-        </React.Fragment>
+        </Container>
     );
 };
 
