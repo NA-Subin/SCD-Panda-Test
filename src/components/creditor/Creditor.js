@@ -90,15 +90,19 @@ const Creditor = () => {
         เจ้าหนี้น้ำมัน
       </Typography>
       <Divider sx={{ marginBottom: 1 }}/>
-      <Grid container spacing={3} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
-        <Grid item xs={12} textAlign="right" marginTop={-10} marginBottom={4} marginRight={5}>
-          <InsertCreditor/>
-        </Grid>
-        <Grid item xs={12}>
+      <Grid container spacing={2} sx={{ marginTop: 1 ,width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
+        <Grid item xs={10}>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
                 รายชื่อเจ้าหนี้น้ำมัน
               </Typography>
-              <Divider sx={{ marginBottom: 1 }} />
+        </Grid>
+        <Grid item xs={2}>
+        <InsertCreditor/>
+        </Grid>
+        <Grid item xs={12}>
+        <Divider/>
+        </Grid>
+        <Grid item xs={12}>
               <TableContainer
                               component={Paper}
                               style={{ maxHeight: "70vh" }}

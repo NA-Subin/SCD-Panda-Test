@@ -25,6 +25,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
+import InsertCustomerBigTruck from "./InsertCustomerBigTruck";
 
 const TicketsBigTruck = () => {
     const [update, setUpdate] = React.useState("");
@@ -32,22 +33,22 @@ const TicketsBigTruck = () => {
     const [ticket, setTicket] = React.useState([]);
     const [open, setOpen] = useState(1);
     const [setting, setSetting] = React.useState(false);
-    
+
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-                        
-                          // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-                          useEffect(() => {
-                            const handleResize = () => {
-                              setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-                            };
-                        
-                            window.addEventListener('resize', handleResize); // เพิ่ม event listener
-                        
-                            // ลบ event listener เมื่อ component ถูกทำลาย
-                            return () => {
-                              window.removeEventListener('resize', handleResize);
-                            };
-                          }, []);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -83,38 +84,43 @@ const TicketsBigTruck = () => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
-              <Typography
-                                                          variant="h3"
-                                                          fontWeight="bold"
-                                                          textAlign="center"
-                                                          gutterBottom
-                                                        >
-                                                          ลูกค้ารถใหญ่
-                                                        </Typography>
-                                                        <Divider sx={{ marginBottom: 1 }}/>
-                                                        <Grid container spacing={2} marginTop={1}>
-        <Grid item xs={6}>
-          <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 &&  "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>เชียงใหม่</Button>
-        </Grid>
-        <Grid item xs={6}>
-          <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 &&  "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>เชียงราย</Button>
-        </Grid>
-        <Grid item xs={6} sx={{ marginTop: -3 }}>
-          {
-            open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
-          }
-        </Grid>
-        <Grid item xs={6} sx={{ marginTop: -3 }}>
-          {
-            open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
-          }
-        </Grid>
-      </Grid>
-      <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light,marginTop: -2.5 }}>
-        <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>{open === 1 ? "เชียงใหม่" : "เชียงราย"}</Typography>
-            <Divider />
-        </Box>
+            <Typography
+                variant="h3"
+                fontWeight="bold"
+                textAlign="center"
+                gutterBottom
+            >
+                ลูกค้ารถใหญ่
+            </Typography>
+            <Divider sx={{ marginBottom: 1 }} />
+            <Grid container spacing={2} marginTop={1}>
+                <Grid item xs={6}>
+                    <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>เชียงใหม่</Button>
+                </Grid>
+                <Grid item xs={6}>
+                    <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>เชียงราย</Button>
+                </Grid>
+                <Grid item xs={6} sx={{ marginTop: -3 }}>
+                    {
+                        open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+                    }
+                </Grid>
+                <Grid item xs={6} sx={{ marginTop: -3 }}>
+                    {
+                        open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+                    }
+                </Grid>
+            </Grid>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5 }}>
+                <Grid container spacing={2}>
+                    <Grid item xs={9}>
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>ลูกค้าของ{open === 1 ? "เชียงใหม่" : "เชียงราย"}</Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <InsertCustomerBigTruck show={open}/>
+                    </Grid>
+                </Grid>
+                <Divider sx={{ marginBottom: 1,marginTop: 2 }} />
                 <TableContainer
                     component={Paper}
                     style={{ maxHeight: "70vh" }}
@@ -159,16 +165,16 @@ const TicketsBigTruck = () => {
                                             {row.Address}
                                         </TableCell>
                                         <TableCell sx={{ width: 50 }} >
-                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                            {
-                                                !setting ?
-                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} onClick={() => handleSetting(row.id, row.TicketsName)}>แก้ไข</Button>
-                                                    :
-                                                    <>
-                                                        <Button variant="contained" color="error" onClick={() => setSetting(false)} sx={{ marginRight: 1 }}>ยกเลิก</Button>
-                                                        <Button variant="contained" color="success" onClick={handleSave}>บันทึก</Button>
-                                                    </>
-                                            }
+                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                {
+                                                    !setting ?
+                                                        <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} onClick={() => handleSetting(row.id, row.TicketsName)}>แก้ไข</Button>
+                                                        :
+                                                        <>
+                                                            <Button variant="contained" color="error" onClick={() => setSetting(false)} sx={{ marginRight: 1 }}>ยกเลิก</Button>
+                                                            <Button variant="contained" color="success" onClick={handleSave}>บันทึก</Button>
+                                                        </>
+                                                }
                                             </Box>
                                         </TableCell>
                                     </TableRow>
@@ -177,7 +183,7 @@ const TicketsBigTruck = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                </Paper>
+            </Paper>
         </Container>
     );
 };

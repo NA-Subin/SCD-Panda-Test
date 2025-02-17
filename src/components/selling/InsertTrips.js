@@ -618,42 +618,181 @@ const InsertTrips = () => {
     // console.log("E20 : ", productTE20.TotalVolume);
     // console.log("PWD : ", productTPWD.TotalVolume);
 
-    const handlePost = () => {
-        if (registration === "0:0:0") {
-            ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
-        } else {
-            database
-                .ref("tickets/" + ticketsTrip + "/ticketOrder")
-                .child(ticketsOrder.length)
-                .update({
-                    id: ticketsOrder.length + 1,
-                    TicketName: tickets,
-                })
-                .then(() => {
-                    ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                    console.log("Data pushed successfully");
-                    setCode("");
-                })
-                .catch((error) => {
-                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                    console.error("Error pushing data:", error);
-                });
+    // const handlePost = (event) => {
+    //     setTickets(event.target.value)
+    //     const ticketName = event.target.value;
+    //     if (registration === "0:0:0") {
+    //         ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
+    //     } else {
+    //         database
+    //             .ref("tickets/" + ticketsTrip + "/ticketOrder")
+    //             .child(ticketsOrder.length)
+    //             .update({
+    //                 id: ticketsOrder.length + 1,
+    //                 TicketName: ticketName,
+    //             })
+    //             .then(() => {
+    //                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+    //                 console.log("Data pushed successfully");
+    //                 setCode("");
+    //             })
+    //             .catch((error) => {
+    //                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+    //                 console.error("Error pushing data:", error);
+    //             });
 
-            database
-                .ref("truck/registration/")
-                .child((registration.split(":")[0]) - 1)
-                .update({
-                    Status: "GT:" + ticketsTrip
-                })
-                .then(() => {
-                    console.log("Data pushed successfully");
+    //         database
+    //             .ref("truck/registration/")
+    //             .child((registration.split(":")[0]) - 1)
+    //             .update({
+    //                 Status: "GT:" + ticketsTrip
+    //             })
+    //             .then(() => {
+    //                 console.log("Data pushed successfully");
 
-                })
-                .catch((error) => {
-                    console.error("Error pushing data:", error);
-                });
-        }
+    //             })
+    //             .catch((error) => {
+    //                 console.error("Error pushing data:", error);
+    //             });
+    //     }
+    // };
+
+    const [ordersTickets, setOrdersTickets] = React.useState({});
+    const [volumeT,setVolumeT] = React.useState({});
+
+    const handlePost = (event) => {
+        const ticketValue = event.target.value;
+        setTickets(ticketValue);
+    
+        if (ticketValue === "0:0") return;
+    
+        setOrdersTickets((prev) => {
+            const newIndex = Object.keys(prev).length;
+            return {
+                ...prev,
+                [newIndex]: {
+                    TicketName: ticketValue,
+                    id: newIndex,
+                    Rate: 0.75,
+                    OrderID: "",
+                    Product: {} // เพิ่ม Product ไว้เป็น Object ว่าง
+                }
+            };
+        });
     };
+
+    const handleUpdateDriver = (ticketIndex, value) => {
+        setOrdersTickets((prev) => {
+            return {
+                ...prev,
+                [ticketIndex]: {
+                    ...prev[ticketIndex],
+                    Driver: value, // ✅ อัปเดตค่าผู้ขับใน tickets
+                    Date: dayjs(selectedDate).format("DD/MM/YYYY")
+                }
+            };
+        });
+    };
+    
+
+    const handleUpdateOrderID = (ticketIndex, field, value) => {
+        setOrdersTickets((prev) => {
+            return {
+                ...prev,
+                [ticketIndex]: {
+                    ...prev[ticketIndex],
+                    [field]: value
+                }
+            };
+        });
+    };
+    
+    const handleAddProduct = (ticketIndex, productName, field, value) => {
+        setOrdersTickets((prev) => {
+            const newValue = value === "" ? "" : Number(value);
+    
+            // คัดลอกโครงสร้างข้อมูลปัจจุบัน
+            const updatedTicket = { ...prev[ticketIndex] };
+            if (!updatedTicket.Product) updatedTicket.Product = {};
+            if (!updatedTicket.Product[productName]) updatedTicket.Product[productName] = {};
+    
+            // อัปเดตค่าฟิลด์
+            updatedTicket.Product[productName][field] = newValue;
+    
+            // ตรวจสอบว่า Volume และ Cost เป็น 0 หรือไม่
+            const cost = updatedTicket.Product[productName]?.Cost || 0;
+            const volume = updatedTicket.Product[productName]?.Volume || 0;
+    
+            if (cost === 0 && volume === 0) {
+                delete updatedTicket.Product[productName]; // ลบ productName ออกถ้าทั้งคู่เป็น 0
+            }
+    
+            // อัปเดตค่า VolumeT
+            const updatedOrders = { ...prev, [ticketIndex]: updatedTicket };
+    
+            // คำนวณค่า Volume รวมของแต่ละ productName
+            let totalG95 = 0;
+            let totalG91 = 0;
+            let totalB7 = 0;
+            let totalB95 = 0;
+            let totalE20 = 0;
+            let totalPWD = 0;
+    
+            // วนลูปหาค่า Volume รวมของแต่ละ productName
+            Object.values(updatedOrders).forEach((ticket) => {
+                if (ticket.Product) {
+                    totalG95 += ticket.Product?.G95?.Volume || 0;
+                    totalG91 += ticket.Product?.G91?.Volume || 0;
+                    totalB7 += ticket.Product?.B7?.Volume || 0;
+                    totalB95 += ticket.Product?.B95?.Volume || 0;
+                    totalE20 += ticket.Product?.E20?.Volume || 0;
+                    totalPWD += ticket.Product?.PWD?.Volume || 0;
+                }
+            });
+
+            setVolumeT({
+            G91: totalG91,
+            G95: totalG95,
+            B7: totalB7,
+            B95: totalB95,
+            E20: totalE20,
+            PWD: totalPWD
+            });
+    
+            // อัปเดตค่า State ของแต่ละ productName
+            setVolumeG95(totalG95);
+            setVolumeG91(totalG91);
+            setVolumeB7(totalB7);
+            setVolumeB95(totalB95);
+            setVolumeE20(totalE20);
+            setVolumePWD(totalPWD);
+    
+            return updatedOrders;
+        });
+    };
+    
+      
+
+    const handleDelete = (indexToDelete) => {
+        setOrdersTickets((prev) => {
+            const newOrder = {};
+            let newIndex = 0;
+
+            Object.keys(prev).forEach((key) => {
+                if (parseInt(key) !== indexToDelete) {
+                    // กำหนดค่า id ใหม่ให้ตรงกับ key ใหม่
+                    newOrder[newIndex] = { ...prev[key], id: newIndex };
+                    newIndex++;
+                }
+            });
+
+            return newOrder;
+        });
+    };
+
+
+    console.log(" Tickets Order : ",ordersTickets);
+    console.log(" VolumeT: ",volumeT);
 
     const handleSubmit = () => {
         database
@@ -931,7 +1070,14 @@ const InsertTrips = () => {
                                         value={registration}
                                         size="small"
                                         sx={{ textAlign: "left" }}
-                                        onChange={(e) => setRegistration(e.target.value)}
+                                        onChange={(e) => {
+                                            setRegistration(e.target.value);
+                                    
+                                            // ✅ อัปเดตค่า Driver ใน ordersTickets
+                                            Object.keys(ordersTickets).forEach((key) => {
+                                                handleUpdateDriver(parseInt(key), e.target.value);
+                                            });
+                                        }}
                                         fullWidth
                                         disabled={showTickers ? false : true}
                                     >
@@ -940,7 +1086,7 @@ const InsertTrips = () => {
                                         </MenuItem>
                                         {
                                             regHead.map((row) => (
-                                                <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
+                                                <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead+"/"+ row.RegTail}</MenuItem>
                                             ))
                                         }
                                     </Select>
@@ -1012,10 +1158,43 @@ const InsertTrips = () => {
                                         </TableHead>
                                         <TableBody>
                                             {
-                                                ticketsOrder.map((row) => (
-                                                    <OrderDetail key={row.id} detail={row} ticketsTrip={ticketsTrip} onSendBack={handleSendBack} total={weightOil} />
+                                                Object.keys(ordersTickets).map((key) => (
+                                                    <OrderDetail 
+                                                        key={ordersTickets[key].id} 
+                                                        detail={ordersTickets[key]} 
+                                                        ticketsTrip={ticketsTrip} 
+                                                        total={weightOil}
+                                                        onSendBack={handleSendBack}  
+                                                        onDelete={() => handleDelete(parseInt(key))}
+                                                        onAddProduct={(productName, field, value) =>
+                                                            handleAddProduct(parseInt(key), productName, field, value)
+                                                        }
+                                                        onUpdateOrderID={(field, value) =>
+                                                            handleUpdateOrderID(parseInt(key), field, value) // ✅ ฟังก์ชันอัปเดต orderID
+                                                        }
+                                                        />
                                                 ))
                                             }
+                                            {/* <TableRow>
+                                                <TableCell colSpan={12}>
+                                                <Grid item xs={12}>
+                {Object.keys(ordersTickets).map((key) => (
+                    <div key={key} style={{ display: "flex", alignItems: "center", marginBottom: 5 }}>
+                        <span>{ordersTickets[key].TicketName}</span>
+                        <Button
+                            size="small"
+                            variant="contained"
+                            color="error"
+                            onClick={() => handleDelete(parseInt(key))}
+                            style={{ marginLeft: 10 }}
+                        >
+                            ลบ
+                        </Button>
+                    </div>
+                ))}
+            </Grid>
+                                                </TableCell>
+                                            </TableRow> */}
                                         </TableBody>
                                         <TableFooter>
                                             <TableRow
@@ -1211,7 +1390,7 @@ const InsertTrips = () => {
                                                         value={tickets}
                                                         size="small"
                                                         sx={{ textAlign: "left" }}
-                                                        onChange={(e) => setTickets(e.target.value)}
+                                                        onChange={handlePost}
                                                         fullWidth
                                                         disabled={showTrips ? false : true}
                                                     >
@@ -1397,7 +1576,7 @@ const InsertTrips = () => {
                                                     </MenuItem>
                                                     {
                                                         regHead.map((row) => (
-                                                            <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead}</MenuItem>
+                                                            <MenuItem value={row.id + ":" + row.RegHead + ":" + row.Driver}>{row.Driver + " : " + row.RegHead+"/"+ row.RegTail}</MenuItem>
                                                         ))
                                                     }
                                                 </Select>

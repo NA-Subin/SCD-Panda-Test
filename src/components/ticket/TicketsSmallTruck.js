@@ -25,6 +25,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
+import InsertCustomerSmallTruck from "./InsertCustomerSmallTruck";
 
 const TicketSmallTruck = () => {
     const [update, setUpdate] = React.useState("");
@@ -97,7 +98,7 @@ const TicketSmallTruck = () => {
                         <Typography variant="h6" fontWeight="bold" gutterBottom>ลูกค้ารถเล็ก</Typography>
                     </Grid>
                     <Grid item xs={2} marginTop={-2}>
-                         
+                        <InsertCustomerSmallTruck />
                     </Grid>
                     <Grid item xs={12} marginTop={-2}>
                         <Divider />

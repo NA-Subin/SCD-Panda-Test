@@ -33,7 +33,7 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
 
 const OrderDetail = (props) => {
-    const { detail, ticketsTrip, onSendBack, total } = props;
+    const { detail, ticketsTrip, onSendBack, total, onDelete, onAddProduct, onUpdateOrderID } = props;
     const [CostG91, setCostG91] = React.useState(0);
     const [VolumeG91, setVolumeG91] = React.useState(0);
     const [CostG95, setCostG95] = React.useState(0);
@@ -67,39 +67,39 @@ const OrderDetail = (props) => {
     const [orderID, setOrderID] = React.useState("");
 
     const getData = async () => {
-        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/G91").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id) + "/Product/G91").on("value", (snapshot) => {
             const datas = snapshot.val();
             setG91(datas);
         });
-        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/G95").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id) + "/Product/G95").on("value", (snapshot) => {
             const datas = snapshot.val();
             setG95(datas);
         });
-        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/B7").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id) + "/Product/B7").on("value", (snapshot) => {
             const datas = snapshot.val();
             setB7(datas);
         });
-        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/B95").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id) + "/Product/B95").on("value", (snapshot) => {
             const datas = snapshot.val();
             setB95(datas);
         });
-        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B10").on("value", (snapshot) => {
+        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id) + "/Product/B10").on("value", (snapshot) => {
         //     const datas = snapshot.val();
         //     setB10(datas);
         // });
-        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/B20").on("value", (snapshot) => {
+        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id) + "/Product/B20").on("value", (snapshot) => {
         //     const datas = snapshot.val();
         //     setB20(datas);
         // });
-        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/E20").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id) + "/Product/E20").on("value", (snapshot) => {
             const datas = snapshot.val();
             setE20(datas);
         });
-        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1) + "/Product/E85").on("value", (snapshot) => {
+        // database.ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id) + "/Product/E85").on("value", (snapshot) => {
         //     const datas = snapshot.val();
         //     setE85(datas);
         // });
-        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1) + "/Product/PWD").on("value", (snapshot) => {
+        database.ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id) + "/Product/PWD").on("value", (snapshot) => {
             const datas = snapshot.val();
             setPWD(datas);
         });
@@ -132,8 +132,10 @@ const OrderDetail = (props) => {
     const SubmitOrder = () => {
         database
             .ref("tickets/" + ticketsTrip + "/ticketOrder/")
-            .child(detail.id - 1)
+            .child(detail.id)
             .update({
+                id: detail.id,
+                TicketName: detail.TicketName,
                 Rate: rate,
                 OrderID: orderID
             })
@@ -144,7 +146,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
             .child("/Product/G91")
             .update({
                 Cost: CostG91 === 0 ? "-" : CostG91,
@@ -157,7 +159,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
             .child("/Product/G95")
             .update({
                 Cost: CostG95 === 0 ? "-" : CostG95,
@@ -170,7 +172,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
             .child("/Product/B7")
             .update({
                 Cost: CostB7 === 0 ? "-" : CostB7,
@@ -183,7 +185,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
             .child("/Product/B95")
             .update({
                 Cost: CostB95 === 0 ? "-" : CostB95,
@@ -196,7 +198,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         // database
-        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id))
         //     .child("/Product/B10")
         //     .update({
         //         Cost: CostB10 === 0 ? "-" : CostB10,
@@ -209,7 +211,7 @@ const OrderDetail = (props) => {
         //         console.error("Error pushing data:", error);
         //     });
         // database
-        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id))
         //     .child("/Product/B20")
         //     .update({
         //         Cost: CostB20 === 0 ? "-" : CostB20,
@@ -222,7 +224,7 @@ const OrderDetail = (props) => {
         //         console.error("Error pushing data:", error);
         //     });
         database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
             .child("/Product/E20")
             .update({
                 Cost: CostE20 === 0 ? "-" : CostE20,
@@ -235,7 +237,7 @@ const OrderDetail = (props) => {
                 console.error("Error pushing data:", error);
             });
         // database
-        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id - 1))
+        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id))
         //     .child("/Product/E85")
         //     .update({
         //         Cost: CostE85 === 0 ? "-" : CostE85,
@@ -248,7 +250,7 @@ const OrderDetail = (props) => {
         //         console.error("Error pushing data:", error);
         //     });
         database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id - 1))
+            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
             .child("/Product/PWD")
             .update({
                 Cost: CostPWD === 0 ? "-" : CostPWD,
@@ -277,31 +279,22 @@ const OrderDetail = (props) => {
             for (let id in datas) {
                 switch (datas[id].Product_name) {
                     case "G95":
-                        G95 = (VolumeG95 * datas[id].SG) * 1000;
+                        G95 = (detail.Product?.G95?.Cost * datas[id].SG) * 1000;
                         break;
                     case "G91":
-                        G91 = (VolumeG91 * datas[id].SG) * 1000;
+                        G91 = (detail.Product?.G91?.Cost * datas[id].SG) * 1000;
                         break;
                     case "B7":
-                        B7 = (VolumeB7 * datas[id].SG) * 1000;
+                        B7 = (detail.Product?.B7?.Cost * datas[id].SG) * 1000;
                         break;
                     case "B95":
-                        B95 = (VolumeB95 * datas[id].SG) * 1000;
+                        B95 = (detail.Product?.B95?.Cost * datas[id].SG) * 1000;
                         break;
-                    // case "B10":
-                    //     B10 = (VolumeB10 * datas[id].SG) * 1000;
-                    //     break;
-                    // case "B20":
-                    //     B20 = (VolumeB20 * datas[id].SG) * 1000;
-                    //     break;
                     case "E20":
-                        E20 = (VolumeE20 * datas[id].SG) * 1000;
+                        E20 = (detail.Product?.E20?.Cost * datas[id].SG) * 1000;
                         break;
-                    // case "E85":
-                    //     E85 = (VolumeE85 * datas[id].SG) * 1000;
-                    //     break;
                     case "PWD":
-                        PWD = (VolumePWD * datas[id].SG) * 1000;
+                        PWD = (detail.Product?.PWD?.Cost * datas[id].SG) * 1000;
                         break;
                     default:
                         break;
@@ -316,7 +309,7 @@ const OrderDetail = (props) => {
         <React.Fragment>
             <TableRow>
                 <TablecellSelling sx={{ textAlign: "center" }}>
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.id}</Typography>
+                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.id + 1}</Typography>
                 </TablecellSelling>
                 <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.main }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]}</Typography>
@@ -347,26 +340,16 @@ const OrderDetail = (props) => {
                                                 paddingLeft: 2
                                             },
                                         }}
-                                        value={orderID === "" ? "" : orderID}
+                                        value={detail.OrderID ?? ""}
                                         onChange={(e) => {
                                             let newValue = e.target.value;
-
-                                            // ตรวจสอบว่าเป็นค่าว่างหรือไม่
-                                            if (newValue === "") {
-                                                setOrderID(""); // ให้เป็นค่าว่างชั่วคราว
-                                            } else {
-                                                setOrderID(newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
-                                            }
+                                            onUpdateOrderID("OrderID", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
                                         }}
                                         onFocus={(e) => {
-                                            if (e.target.value === "0") {
-                                                setOrderID(""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
-                                            }
+                                            if (e.target.value === "0") onUpdateOrderID("OrderID", "");
                                         }}
                                         onBlur={(e) => {
-                                            if (e.target.value === "") {
-                                                setOrderID(0); // ถ้าค่าว่างให้เป็น 0
-                                            }
+                                            if (e.target.value === "") onUpdateOrderID("OrderID", 0);
                                         }}
                                     />
                                 </Paper>
@@ -391,137 +374,387 @@ const OrderDetail = (props) => {
                                                 paddingLeft: 2
                                             },
                                         }}
-                                        value={rate === "" ? "" : rate}
+                                        value={detail.Rate ?? 0.75}
                                         onChange={(e) => {
                                             let newValue = e.target.value;
-
-                                            // ตรวจสอบว่าเป็นค่าว่างหรือไม่
-                                            if (newValue === "") {
-                                                setRate(""); // ให้เป็นค่าว่างชั่วคราว
-                                            } else {
-                                                setRate(newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
-                                            }
+                                            onUpdateOrderID("Rate", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
                                         }}
                                         onFocus={(e) => {
-                                            if (e.target.value === "0") {
-                                                setRate(""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
-                                            }
+                                            if (e.target.value === "0") onUpdateOrderID("Rate", "");
                                         }}
                                         onBlur={(e) => {
-                                            if (e.target.value === "") {
-                                                setRate(0); // ถ้าค่าว่างให้เป็น 0
-                                            }
+                                            if (e.target.value === "") onUpdateOrderID("Rate", 0.75);
                                         }}
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#FFC000" }}>
+                            {/* ช่องกรอกราคา Cost G95*/}
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#FFC000" }}>
                                 <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
-                                    <TextField size="small" fullWidth
+                                    <TextField
+                                        size="small"
+                                        fullWidth
                                         type="number"
-                                        InputLabelProps={{
-                                            sx: {
-                                                fontSize: '14px',
-                                            },
-                                        }}
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '30px', // ปรับความสูงของ TextField
-                                            },
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                fontSize: '14px',
                                                 fontWeight: 'bold',
-                                                padding: '4px 8px', // ปรับ padding ภายใน input
-                                                paddingLeft: 2
-                                            },
+                                                padding: '2px 6px',
+                                            }
                                         }}
-                                        value={CostG95 === "" ? "" : CostG95}
+                                        value={detail.Product?.G95?.Cost || ""}
                                         onChange={(e) => {
                                             let newValue = e.target.value;
-
-                                            // ตรวจสอบว่าเป็นค่าว่างหรือไม่
-                                            if (newValue === "") {
-                                                setCostG95(""); // ให้เป็นค่าว่างชั่วคราว
-                                            } else {
-                                                setCostG95(newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
-                                            }
+                                            onAddProduct("G95", "Cost", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
                                         }}
                                         onFocus={(e) => {
-                                            if (e.target.value === "0") {
-                                                setCostG95(""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
-                                            }
+                                            if (e.target.value === "0") onAddProduct("G95", "Cost", "");
                                         }}
                                         onBlur={(e) => {
-                                            if (e.target.value === "") {
-                                                setCostG95(0); // ถ้าค่าว่างให้เป็น 0
-                                            }
+                                            if (e.target.value === "") onAddProduct("G95", "Cost", 0);
                                         }}
-                                    // onChange={(e) => {
-                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                    //     setCostG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                    //   }}
-                                    //   onBlur={() => {
-                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                    //     const value = parseFloat(CostG95) || 0;
-                                    //     setCostG95(value.toFixed(3));
-                                    //   }}
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#FFC000" }}>
-                                <Paper component="form" sx={{ marginLeft: -1, marginRight: -1 }}>
-                                    <TextField size="small" fullWidth
+
+                            {/* ช่องกรอกปริมาณ Volume G95 */}
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
                                         type="number"
-                                        InputLabelProps={{
-                                            sx: {
-                                                fontSize: '14px',
-                                            },
-                                        }}
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '30px', // ปรับความสูงของ TextField
-                                            },
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                fontSize: '14px',
                                                 fontWeight: 'bold',
-                                                padding: '4px 8px', // ปรับ padding ภายใน input
-                                                paddingLeft: 2
-                                            },
+                                                padding: '2px 6px',
+                                            }
                                         }}
-                                        value={VolumeG95 === "" ? "" : VolumeG95}
+                                        value={detail.Product?.G95?.Volume || ""}
                                         onChange={(e) => {
                                             let newValue = e.target.value;
-
-                                            // ตรวจสอบว่าเป็นค่าว่างหรือไม่
-                                            if (newValue === "") {
-                                                setVolumeG95(""); // ให้เป็นค่าว่างชั่วคราว
-                                            } else {
-                                                setVolumeG95(newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
-                                            }
+                                            onAddProduct("G95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
                                         }}
                                         onFocus={(e) => {
-                                            if (e.target.value === "0") {
-                                                setVolumeG95(""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
-                                            }
+                                            if (e.target.value === "0") onAddProduct("G95", "Volume", "");
                                         }}
                                         onBlur={(e) => {
-                                            if (e.target.value === "") {
-                                                setVolumeG95(0); // ถ้าค่าว่างให้เป็น 0
-                                            }
+                                            if (e.target.value === "") onAddProduct("G95", "Volume", 0);
                                         }}
-                                    // onChange={(e) => {
-                                    //     const value = parseFloat(e.target.value) || 0; // แปลงค่าที่ป้อนเป็นตัวเลข
-                                    //     setVolumeG95(value.toFixed(3)); // เก็บค่าในรูปแบบทศนิยม 3 ตำแหน่ง
-                                    //   }}
-                                    //   onBlur={() => {
-                                    //     // จัดการให้ค่าแสดงทศนิยม 3 ตำแหน่งเมื่อออกจากช่อง
-                                    //     const value = parseFloat(VolumeG95) || 0;
-                                    //     setVolumeG95(value.toFixed(3));
-                                    //   }}
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#92D050" }}>
+                            {/* ช่องกรอกราคา Cost G91 */}
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#92D050" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.G91?.Cost || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("G91", "Cost", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("G91", "Cost", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("G91", "Cost", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+
+                            {/* ช่องกรอกปริมาณ Volume G95 */}
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.G91?.Volume || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("G91", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("G91", "Volume", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("G91", "Volume", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            {/* ช่องกรอกราคา Cost B7 */}
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#FFFF99" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.B7?.Cost || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("B7", "Cost", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("B7", "Cost", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("B7", "Cost", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+
+                            {/* ช่องกรอกปริมาณ Volume  B7 */}
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.B7?.Volume || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("B7", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("B7", "Volume", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("B7", "Volume", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            {/* ช่องกรอกราคา Cost B95 */}
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#B7DEE8" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.B95?.Cost || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("B95", "Cost", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("B95", "Cost", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("B95", "Cost", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+
+                            {/* ช่องกรอกปริมาณ Volume  B95 */}
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.B95?.Volume || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("B95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("B95", "Volume", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("B95", "Volume", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            {/* ช่องกรอกราคา Cost E20 */}
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#C4BD97" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.E20?.Cost || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("E20", "Cost", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("E20", "Cost", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("E20", "Cost", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+
+                            {/* ช่องกรอกปริมาณ Volume  E20 */}
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.E20?.Volume || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("E20", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("E20", "Volume", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("E20", "Volume", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            {/* ช่องกรอกราคา Cost PWD */}
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#F141D8" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.PWD?.Cost || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("PWD", "Cost", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("PWD", "Cost", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("PWD", "Cost", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+
+                            {/* ช่องกรอกปริมาณ Volume  PWD */}
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
+                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        type="number"
+                                        InputLabelProps={{ sx: { fontSize: "14px" } }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                            }
+                                        }}
+                                        value={detail.Product?.PWD?.Volume || ""}
+                                        onChange={(e) => {
+                                            let newValue = e.target.value;
+                                            onAddProduct("PWD", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        }}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") onAddProduct("PWD", "Volume", "");
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") onAddProduct("PWD", "Volume", 0);
+                                        }}
+                                    />
+                                </Paper>
+                            </TableCell>
+                            {/* <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#92D050" }}>
                                 <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -626,8 +859,8 @@ const OrderDetail = (props) => {
                                     //   }}
                                     />
                                 </Paper>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#FFFF99" }}>
+                            </TableCell> */}
+                            {/* <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#FFFF99" }}>
                                 <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -680,7 +913,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#FFFF99" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
                                 <Paper component="form" sx={{ marginLeft: -1, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -733,7 +966,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#B7DEE8" }}>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#B7DEE8" }}>
                                 <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -786,7 +1019,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#B7DEE8" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
                                 <Paper component="form" sx={{ marginLeft: -1, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -839,7 +1072,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#C4BD97" }}>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#C4BD97" }}>
                                 <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -892,7 +1125,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#C4BD97" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
                                 <Paper component="form" sx={{ marginLeft: -1, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -945,7 +1178,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#F141D8" }}>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#F141D8" }}>
                                 <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -998,7 +1231,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#F141D8" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
                                 <Paper component="form" sx={{ marginLeft: -1, marginRight: -1 }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -1050,9 +1283,9 @@ const OrderDetail = (props) => {
                                     //   }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
-                                <Button variant="contained" color="error" size="small" sx={{ width: 30, marginRight: 1 }}>ยกเลิก</Button>
+                                <Button variant="contained" color="error" size="small" sx={{ width: 30, marginRight: 1 }} onClick={onDelete}>ยกเลิก</Button>
                                 <Button variant="contained" color="success" size="small" sx={{ width: 30 }} onClick={SubmitOrder}>บันทึก</Button>
                             </TableCell>
                         </>
@@ -1064,40 +1297,40 @@ const OrderDetail = (props) => {
                             <TableCell sx={{ textAlign: "center" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{rate}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#FFC000" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#FFC000" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Volume}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#92D050" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#92D050" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Volume}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#FFFF99" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#FFFF99" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Volume}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#B7DEE8" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#B7DEE8" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Volume}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#C4BD97" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#C4BD97" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Volume}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#F141D8" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center",backgroundColor: "#F141D8" }}>
+                            <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
                                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Volume}</Typography>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
