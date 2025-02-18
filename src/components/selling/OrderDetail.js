@@ -27,7 +27,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { IconButtonError, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
+import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD, TablecellSelling } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
@@ -317,11 +317,8 @@ const OrderDetail = (props) => {
                 <TableCell sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[2]}</Typography>
                 </TableCell>
-                {
-                    orderDetail ?
-                        <>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
@@ -355,7 +352,7 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
@@ -389,8 +386,8 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCell>
                             {/* ช่องกรอกราคา Cost G95*/}
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#FFC000" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellG95 sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -417,11 +414,11 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellG95>
 
                             {/* ช่องกรอกปริมาณ Volume G95 */}
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellG95 sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -448,10 +445,10 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellG95>
                             {/* ช่องกรอกราคา Cost G91 */}
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#92D050" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellG91 sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -478,11 +475,11 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellG91>
 
-                            {/* ช่องกรอกปริมาณ Volume G95 */}
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            {/* ช่องกรอกปริมาณ Volume G91 */}
+                            <TableCellG91 sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -509,10 +506,10 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellG91>
                             {/* ช่องกรอกราคา Cost B7 */}
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#FFFF99" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellB7 sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -539,11 +536,11 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellB7>
 
                             {/* ช่องกรอกปริมาณ Volume  B7 */}
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellB7 sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -570,10 +567,10 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellB7>
                             {/* ช่องกรอกราคา Cost B95 */}
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#B7DEE8" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellB95 sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -600,11 +597,11 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellB95>
 
                             {/* ช่องกรอกปริมาณ Volume  B95 */}
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellB95 sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -631,10 +628,10 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellB95>
                             {/* ช่องกรอกราคา Cost E20 */}
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#C4BD97" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellE20 sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -661,11 +658,11 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellE20>
 
                             {/* ช่องกรอกปริมาณ Volume  E20 */}
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellE20 sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -692,10 +689,10 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellE20>
                             {/* ช่องกรอกราคา Cost PWD */}
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#F141D8" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellPWD sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -722,11 +719,11 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellPWD>
 
                             {/* ช่องกรอกปริมาณ Volume  PWD */}
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCellPWD sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
                                         fullWidth
@@ -753,9 +750,9 @@ const OrderDetail = (props) => {
                                         }}
                                     />
                                 </Paper>
-                            </TableCell>
+                            </TableCellPWD>
                             {/* <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#92D050" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
@@ -860,8 +857,8 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell> */}
-                            {/* <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#FFFF99" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            {/* <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
@@ -966,8 +963,8 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#B7DEE8" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
@@ -1072,8 +1069,8 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#C4BD97" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
@@ -1178,8 +1175,8 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell>
-                            <TableCell sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: "#F141D8" }}>
-                                <Paper component="form" sx={{ marginLeft: -1.5, marginRight: -1 }}>
+                            <TableCell sx={{ textAlign: "center" }}>
+                                <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
                                         InputLabelProps={{
@@ -1286,58 +1283,58 @@ const OrderDetail = (props) => {
                             </TableCell> */}
                             <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
                                 <Button variant="contained" color="error" size="small" sx={{ width: 30, marginRight: 1 }} onClick={onDelete}>ยกเลิก</Button>
-                                <Button variant="contained" color="success" size="small" sx={{ width: 30 }} onClick={SubmitOrder}>บันทึก</Button>
+                                {/* <Button variant="contained" color="success" size="small" sx={{ width: 30 }} onClick={SubmitOrder}>บันทึก</Button> */}
                             </TableCell>
-                        </>
-                        :
-                        <>
-                            <TableCell sx={{ textAlign: "center" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderID}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{rate}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Volume}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Volume}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Volume}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Volume}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Volume}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
-                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Volume}</Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
-                                <Button variant="contained" color="warning" size="small" sx={{ width: 30 }}>แก้ไข</Button>
-                            </TableCell>
-                        </>
-                }
+                        {/* </>
+                        // :
+                        // <>
+                        //     <TableCell sx={{ textAlign: "center" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderID}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{rate}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Cost}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#FFC000" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G95.Volume}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Cost}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#92D050" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{G91.Volume}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Cost}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#FFFF99" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B7.Volume}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Cost}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#B7DEE8" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{B95.Volume}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Cost}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#C4BD97" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{E20.Volume}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Cost}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", backgroundColor: "#F141D8" }}>
+                        //         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{PWD.Volume}</Typography>
+                        //     </TableCell>
+                        //     <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
+                        //         <Button variant="contained" color="warning" size="small" sx={{ width: 30 }}>แก้ไข</Button>
+                        //     </TableCell>
+                        // </>
+                } */}
             </TableRow>
         </React.Fragment>
 

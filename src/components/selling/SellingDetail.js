@@ -27,7 +27,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
@@ -571,23 +571,13 @@ const SellingDetail = (props) => {
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.id}</Typography>
                 </TablecellHeader>
                 <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light }}>
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.Customer}</Typography>
-                </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.OrderId}</Typography>
+                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName}</Typography>
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.Rate}</Typography>
                 </TableCell>
-                {
-                    orderDetail ?
-                    <>
-                        <TableCell sx={{ textAlign: "center" }}>
-                        {
-                                checkG95 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        <TableCellG95 sx={{ textAlign: "center" }}>
+                        {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -604,13 +594,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkG95 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellG95>
+                        <TableCellG95 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -627,13 +613,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkG95 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellG95>
+                        <TableCellG95 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -650,13 +632,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                        {
-                                checkG91 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellG95>
+                        <TableCellG91 sx={{ textAlign: "center" }}>
+                        {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -673,13 +651,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkG91 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellG91>
+                        <TableCellG91 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -696,13 +670,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkG91 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellG91>
+                        <TableCellG91 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ปริมาณ"
                                             InputLabelProps={{
                                                 sx: {
@@ -719,13 +689,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                        {
-                                checkB7 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellG91>
+                        <TableCellB7 sx={{ textAlign: "center" }}>
+                        {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -742,13 +708,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkB7 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellB7>
+                        <TableCellB7 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ขาย"
                                             InputLabelProps={{
                                                 sx: {
@@ -765,13 +727,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkB7 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellB7>
+                        <TableCellB7 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ปริมาณ"
                                             InputLabelProps={{
                                                 sx: {
@@ -788,13 +746,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                        {
-                                checkB95 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellB7>
+                        <TableCellB95 sx={{ textAlign: "center" }}>
+                        {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -811,13 +765,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkB95 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellB95>
+                        <TableCellB95 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ขาย"
                                             InputLabelProps={{
                                                 sx: {
@@ -834,13 +784,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkB95 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellB95>
+                        <TableCellB95 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ปริมาณ"
                                             InputLabelProps={{
                                                 sx: {
@@ -857,13 +803,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                        {
-                                checkE20 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellB95>
+                        <TableCellE20 sx={{ textAlign: "center" }}>
+                        {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -880,13 +822,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkE20 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellE20>
+                        <TableCellE20 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ขาย"
                                             InputLabelProps={{
                                                 sx: {
@@ -903,13 +841,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkE20 === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellE20>
+                        <TableCellE20 sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ปริมาณ"
                                             InputLabelProps={{
                                                 sx: {
@@ -926,13 +860,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                        {
-                                checkPWD === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                        </TableCellE20>
+                        <TableCellPWD sx={{ textAlign: "center" }}>
+                        {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             InputLabelProps={{
                                                 sx: {
@@ -949,13 +879,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkPWD === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellPWD>
+                        <TableCellPWD sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ขาย"
                                             InputLabelProps={{
                                                 sx: {
@@ -972,13 +898,9 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
-                            {
-                                checkPWD === 0 ?
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
-                                    :
-                                    <Paper component="form"sx={{ width: "100%" }}>
+                        </TableCellPWD>
+                        <TableCellPWD sx={{ textAlign: "center" }}>
+                            {       <Paper component="form"sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth label="ปริมาณ"
                                             InputLabelProps={{
                                                 sx: {
@@ -995,8 +917,8 @@ const SellingDetail = (props) => {
                                         />
                                     </Paper>
                             }
-                        </TableCell>
-                    </>
+                        </TableCellPWD>
+                    {/* </>
                     :
                     <>
                         <TableCell sx={{ textAlign: "center" }}>
@@ -1054,7 +976,7 @@ const SellingDetail = (props) => {
                             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{orderPWD.Volume}</Typography>
                         </TableCell>
                     </>
-                }
+                } */}
                 <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }} >
                     {
                         orderDetail ?
