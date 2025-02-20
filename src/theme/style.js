@@ -22,7 +22,6 @@ const TablecellHeader = styled(TableCell)(({ theme }) => ({
 const TablecellSelling = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.panda.main,
   color: theme.palette.primary.contrastText,
-  textAlign: "center",
   borderRightColor: theme.palette.primary.contrastText,
   borderLeft: "1px solid " + theme.palette.primary.contrastText,
   fontWeight: "bold",
@@ -30,7 +29,6 @@ const TablecellSelling = styled(TableCell)(({ theme }) => ({
 
 const TableCellG95 = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#FFC000",
-  textAlign: "center",
   borderRightColor: theme.palette.primary.contrastText,
   borderLeft: "3px solid white",
   fontWeight: "bold",
@@ -38,7 +36,6 @@ const TableCellG95 = styled(TableCell)(({ theme }) => ({
 
 const TableCellG91 = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#92D050",
-  textAlign: "center",
   borderRightColor: theme.palette.primary.contrastText,
   borderLeft: "3px solid white",
   fontWeight: "bold",
@@ -46,7 +43,6 @@ const TableCellG91 = styled(TableCell)(({ theme }) => ({
 
 const TableCellB7 = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#FFFF99",
-  textAlign: "center",
   borderRightColor: theme.palette.primary.contrastText,
   borderLeft: "3px solid white",
   fontWeight: "bold",
@@ -54,7 +50,6 @@ const TableCellB7 = styled(TableCell)(({ theme }) => ({
 
 const TableCellB95 = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#B7DEE8",
-  textAlign: "center",
   borderRightColor: theme.palette.primary.contrastText,
   borderLeft: "3px solid white",
   fontWeight: "bold",
@@ -62,7 +57,6 @@ const TableCellB95 = styled(TableCell)(({ theme }) => ({
 
 const TableCellE20 = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#C4BD97",
-  textAlign: "center",
   borderRightColor: theme.palette.primary.contrastText,
   borderLeft: "3px solid white",
   fontWeight: "bold",
@@ -70,7 +64,6 @@ const TableCellE20 = styled(TableCell)(({ theme }) => ({
 
 const TableCellPWD = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#F141D8",
-  textAlign: "center",
   borderRightColor: theme.palette.primary.contrastText,
   borderLeft: "3px solid white",
   fontWeight: "bold",
