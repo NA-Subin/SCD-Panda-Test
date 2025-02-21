@@ -64,7 +64,7 @@ const InsertCustomerBigTruck = (props) => {
     const [checked2,setChecked2] = React.useState(show);
 
     const getTicket = async () => {
-        database.ref("/ticket-stock/").on("value", (snapshot) => {
+        database.ref("/customers/bigtruck").on("value", (snapshot) => {
             const datas = snapshot.val();
             if (datas === null || datas === undefined) {
                 setTicket(0);

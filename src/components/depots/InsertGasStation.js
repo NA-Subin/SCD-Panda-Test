@@ -45,11 +45,10 @@ import OilBarrelIcon from "@mui/icons-material/OilBarrel";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import { database } from "../../server/firebase";
-import InsertDepot from "./depot/InsertDepot";
 import InsertGasStations from "./gasstations/InsertGasStations";
 import InsertStock from "./stock/InsertStock";
 
-const InserDepots = (props) => {
+const InsertGasStation = (props) => {
     const { openMenu,depot,stock,gasStation } = props;
     const [check, setCheck] = React.useState(Number(openMenu));
 
@@ -79,11 +78,10 @@ const InserDepots = (props) => {
             <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} 
             endIcon={
                 check === 1 ? <LocalGasStationIcon/>
-                : check === 2 ? <WaterDropIcon />
-                : <OilBarrelIcon/>
+                : <WaterDropIcon />
             }>
                 {
-                    check === 1 ? "เพิ่มปั้มน้ำมัน" : check === 2 ? "เพิ่มคลังสต็อกน้ำมัน" : "เพิ่มคลังรับน้ำมัน"
+                    check === 1 ? "เพิ่มปั้มน้ำมัน" : "เพิ่มคลังสต็อกน้ำมัน"
                 }
             </Button>
             <Dialog
@@ -97,7 +95,7 @@ const InserDepots = (props) => {
                     <Grid container spacing={2}>
                         <Grid item xs={10}>
                             <Typography variant="h6" fontWeight="bold" color="white" >{
-                                check === 1 ? "เพิ่มปั้มน้ำมัน" : check === 2 ? "เพิ่มคลังสต็อกน้ำมัน" : "เพิ่มคลังรับน้ำมัน"
+                                check === 1 ? "เพิ่มปั้มน้ำมัน" : "เพิ่มคลังสต็อกน้ำมัน"
                             }</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
@@ -139,29 +137,12 @@ const InserDepots = (props) => {
                                             fontWeight: "bold"
                                         },
                                     }} />
-                                    <Divider orientation="vertical" flexItem sx={{ marginRight: 2, height: 30 }} />
-                                    <FormControlLabel control={<Checkbox onClick={() => setCheck(3)} checked={check === 3 ? true : false}
-                                    sx={{
-                                        "& .MuiSvgIcon-root": {
-                                            fontSize: 20, // ปรับขนาด Checkbox
-                                        },
-                                    }} />}
-                                    label="คลังรับน้ำมัน"
-                                    sx={{
-                                        "& .MuiFormControlLabel-label": {
-                                            fontSize: "14px",
-                                            fontWeight: "bold"
-                                        },
-                                    }} />
                             </FormGroup>
                         </Grid>
                         {
                             check === 1 ?
                             <InsertGasStations gasStation={gasStation} />
-                            : check === 2 ?
-                            <InsertStock stock={stock} />
-                            :
-                            <InsertDepot depot={depot} />
+                            : <InsertStock stock={stock} />
                         }
                     </Grid>
                 </DialogContent>
@@ -171,4 +152,4 @@ const InserDepots = (props) => {
     );
 };
 
-export default InserDepots;
+export default InsertGasStation;

@@ -25,7 +25,6 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
-import InsertTicketsStock from "./InsertTicketsStock";
 
 const TicketsStock = () => {
     const [update, setUpdate] = React.useState("");
@@ -74,7 +73,7 @@ const TicketsStock = () => {
                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ตั๋วขายย่อย</Typography>
                     </Grid>
                     <Grid item xs={2} marginTop={-2}>
-                        <InsertTicketsStock />
+                        
                     </Grid>
                     <Grid item xs={12} marginTop={-2}>
                         <Divider />

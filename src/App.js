@@ -7,7 +7,7 @@ import Navbar from "./components/navbar/Navbar";
 import { ThemeProvider } from "@mui/material";
 import Selling from "./components/selling/Selling";
 import Employee from "./components/employee/Employee";
-import Depots from "./components/depots/Depots";
+import GasStations from "./components/depots/GasStations";
 import Customer from "./components/customer/Customer";
 import Tickets from "./components/ticket/Tickets";
 import Setting from "./components/setting/Setting";
@@ -24,6 +24,7 @@ import TicketsGasStation from "./components/ticket/TicketsGasStation";
 import TicketsTransport from "./components/ticket/TicketsTransport";
 import TicketsBigTruck from "./components/ticket/TicketsBigTruck";
 import TicketSmallTruck from "./components/ticket/TicketsSmallTruck";
+import Depots from "./components/depots/depot/Depots";
 
 function App() {
 
@@ -71,7 +72,7 @@ function App() {
                   <Route path="/creditor" element={<Creditor />} />
                 </Routes>
                 <Routes>
-                  <Route path="/depots" element={<Depots />} />
+                  <Route path="/gasstations" element={<GasStations />} />
                 </Routes>
                 <Routes>
                   <Route path="/customer" element={<Customer />} />
@@ -80,7 +81,7 @@ function App() {
                   <Route path="/trucks" element={<Trucks />} />
                 </Routes>
                 <Routes>
-                  <Route path="/gasstations" element={<TicketsGasStation />} />
+                  <Route path="/depots" element={<Depots />} />
                 </Routes>
                 <Routes>
                   <Route path="/transports" element={<TicketsTransport />} />

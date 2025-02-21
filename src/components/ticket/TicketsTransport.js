@@ -21,17 +21,21 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import { database } from "../../server/firebase";
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 import theme from "../../theme/theme";
 import { TablecellHeader } from "../../theme/style";
 import InsertTicketsTransport from "./InsertTicketsTransport";
+import InsertTicketsGasStations from "./InsertTicketsGasStations";
 
 const TicketsTransport = () => {
     const [transport, setTransport] = useState([]);
+    const [gasStation, setGasStation] = React.useState([]);
     const [setting, setSetting] = useState(false);
     const [ticketChecked, setTicketChecked] = useState(false);
     const [recipientChecked, setRecipientChecked] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState(null); // จับ ID ของแถวที่ต้องการแก้ไข
     const [typeCustomer, setTypeCuster] = React.useState(0);
+    const [open, setOpen] = useState(1);
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
             
@@ -51,19 +55,38 @@ const TicketsTransport = () => {
 
     // ดึงข้อมูลจาก Firebase
     const getTransport = async () => {
-        database.ref("/customer/").on("value", (snapshot) => {
+        database.ref("/customers/transports/").on("value", (snapshot) => {
             const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                const { Name, Phone, Status, TypeCustomer} = datas[id];
-                dataList.push({ id, Name, Phone, Status, TypeCustomer });
+            if(datas === null || datas === undefined){
+                setTransport([]);
+            }else{
+                const dataList = [];
+                for (let id in datas) {
+                    dataList.push({ id, ...datas[id] })
+                }
+                setTransport(dataList);
             }
-            setTransport(dataList);
         });
     };
+    
+        const getGasStation = async () => {
+            database.ref("/customers/gasstations/").on("value", (snapshot) => {
+                const datas = snapshot.val();
+                if(datas === null || datas === undefined){
+                    setGasStation([]);
+                }else{
+                    const dataList = [];
+                    for (let id in datas) {
+                        dataList.push({ id, ...datas[id] })
+                    }
+                    setGasStation(dataList);
+                }
+            });
+        };
 
     useEffect(() => {
         getTransport();
+        getGasStation();
     }, []);
 
     // เปิด/ปิดโหมดการแก้ไข
@@ -100,27 +123,48 @@ const TicketsTransport = () => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
-              <Typography
+            <Typography
                 variant="h3"
                 fontWeight="bold"
                 textAlign="center"
                 gutterBottom
-              >
-                รับจ้างขนส่ง
-              </Typography>
-              <Divider sx={{ marginBottom: 1 }}/>
-                <Grid container spacing={3} sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
-                    <Grid item xs={10}>
-                        <Typography variant="h6" fontWeight="bold" gutterBottom>รับจ้างขนส่ง</Typography>
+            >
+                {open === 1 ? "ลูกค้ารับจ้างขนส่ง" : "ปั้มน้ำมัน" }
+            </Typography>
+            <Divider sx={{ marginBottom: 1 }} />
+            <Grid container spacing={2} marginTop={1}>
+                <Grid item xs={6}>
+                    <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ลูกค้ารับจ้างขนส่ง</Button>
+                </Grid>
+                <Grid item xs={6}>
+                    <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ปั้มน้ำมัน</Button>
+                </Grid>
+                <Grid item xs={6} sx={{ marginTop: -3 }}>
+                    {
+                        open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+                    }
+                </Grid>
+                <Grid item xs={6} sx={{ marginTop: -3 }}>
+                    {
+                        open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+                    }
+                </Grid>
+            </Grid>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5 }}>
+                <Grid container spacing={2}>
+                    <Grid item xs={9}>
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>{open === 1 ? "ลูกค้ารับจ้างขนส่ง" : "ปั้มน้ำมัน"}</Typography>
                     </Grid>
-                    <Grid item xs={2} marginTop={-2}>
-                        <InsertTicketsTransport />
-                    </Grid>
-                    <Grid item xs={12} marginTop={-2}>
-                        <Divider />
+                    <Grid item xs={3}>
+                        {
+                            open === 1 ? <InsertTicketsTransport show={open}/> : <InsertTicketsGasStations show={open} />
+                        }
                     </Grid>
                 </Grid>
-                <TableContainer
+                <Divider sx={{ marginBottom: 1,marginTop: 2 }} />
+                {
+                    open === 1 ?
+                    <TableContainer
                     component={Paper}
                     style={{ maxHeight: "70vh" }}
                     sx={{ marginTop: 2 }}
@@ -252,6 +296,55 @@ const TicketsTransport = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                :
+                <TableContainer
+                    component={Paper}
+                    style={{ maxHeight: "70vh" }}
+                    sx={{ marginTop: 2 }}
+                >
+                    <Table stickyHeader size="small">
+                        <TableHead sx={{ height: "7vh" }}>
+                            <TableRow>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                    ลำดับ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                    ชื่อตั๋ว
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                    เรทคลังลำปาง
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                    เรทคลังพิจิตร
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                    เรทคลังสระบุรี/บางปะอิน/IR
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                    สถานะ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ width: 50 }} />
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {
+                                gasStation.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.Rate1}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.Rate2}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.Rate3}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}><IconButton color="warning"><BorderColorIcon/></IconButton></TableCell>
+                                    </TableRow>
+                                ))
+                            }
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                }
+            </Paper>
         </Container>
     );
 };

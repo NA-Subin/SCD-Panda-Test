@@ -1492,13 +1492,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeT.G95}
+                                                                value={volumeT.G95 || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeG95}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G95}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G95 || 0}</Typography>
                                                 }
                                             </TableCellG95>
                                             <TableCellG91 width={60} sx={{ textAlign: "center",backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1523,13 +1523,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeT.G91}
+                                                                value={volumeT.G91 || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeG95}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G91}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G91 || 0}</Typography>
                                                 }
                                             </TableCellG91>
                                             <TableCellB7 width={60} sx={{ textAlign: "center",backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1554,13 +1554,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeT.B7}
+                                                                value={volumeT.B7 || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeB7}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G95}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.B7 || 0}</Typography>
                                                 }
                                             </TableCellB7>
                                             <TableCellB95 width={60} sx={{ textAlign: "center",backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1585,13 +1585,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeT.B95}
+                                                                value={volumeT.B95 || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeB95}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.B95}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.B95 || 0}</Typography>
                                                 }
                                             </TableCellB95>
                                             <TableCellE20 width={60} sx={{ textAlign: "center",backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1616,13 +1616,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeT.E20}
+                                                                value={volumeT.E20 || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeE20}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.E20}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.E20 || 0}</Typography>
                                                 }
                                             </TableCellE20>
                                             <TableCellPWD width={60} sx={{ textAlign: "center",backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1647,13 +1647,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeT.PWD}
+                                                                value={volumeT.PWD || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumePWD}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.PWD}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.PWD || 0}</Typography>
                                                 }
                                             </TableCellPWD>
                                             <TablecellSelling width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: editMode ? "" : "lightgray" }} >
@@ -1699,13 +1699,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD}
+                                                                value={(volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD) || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeG95}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" fontWeight="bold" color="black" gutterBottom>{volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" fontWeight="bold" color="black" gutterBottom>{(volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD) || 0}</Typography>
                                                 }
                                                 </Box>
                                             </TablecellSelling>
@@ -2103,22 +2103,22 @@ const InsertTrips = () => {
                                                 รวม
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black",fontWeight: "bold",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
-                                                {volumeS.G95}
+                                                {volumeS.G95 || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black",fontWeight: "bold",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
-                                                {volumeS.G91}
+                                                {volumeS.G91 || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black",fontWeight: "bold",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
-                                                {volumeS.B7}
+                                                {volumeS.B7 || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black",fontWeight: "bold",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
-                                                {volumeS.B95}
+                                                {volumeS.B95 || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black",fontWeight: "bold",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
-                                                {volumeS.E20}
+                                                {volumeS.E20 || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black",fontWeight: "bold",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
-                                                {volumeS.PWD}
+                                                {volumeS.PWD || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
                                             {
@@ -2142,13 +2142,13 @@ const InsertTrips = () => {
                                                                         paddingLeft: 2
                                                                     },
                                                                 }}
-                                                                value={volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD}
+                                                                value={(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeG95}
                                                             />
                                                         </Paper>
                                                     :
-                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD}</Typography>
+                                                        <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}</Typography>
                                                 }
                                             </TablecellSelling>
                                         </TableRow>
@@ -2177,22 +2177,22 @@ const InsertTrips = () => {
                                                 คงเหลือ
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black", height: "35px",fontWeight: "bold",backgroundColor: (Number(volumeT.G95)-Number(volumeS.G95)) < 0 ? "red" : (Number(volumeT.G95)-Number(volumeS.G95)) > 0 ? "yellow" : "lightgray",borderLeft: "2px solid white" }}>
-                                                {Number(volumeT.G95)-Number(volumeS.G95)}
+                                                {(Number(volumeT.G95)-Number(volumeS.G95)) || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black", height: "35px",fontWeight: "bold",backgroundColor: (Number(volumeT.G91)-Number(volumeS.G91)) < 0 ? "red" : (Number(volumeT.G91)-Number(volumeS.G91)) > 0 ? "yellow" : "lightgray",borderLeft: "2px solid white" }}>
-                                                {Number(volumeT.G91)-Number(volumeS.G91)}
+                                                {(Number(volumeT.G91)-Number(volumeS.G91)) || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black", height: "35px",fontWeight: "bold",backgroundColor: Number(volumeT.B7)-Number(volumeS.B7) < 0 ? "red" : Number(volumeT.B7)-Number(volumeS.B7) > 0 ? "yellow" : "lightgray",borderLeft: "2px solid white" }}>
-                                                {Number(volumeT.B7)-Number(volumeS.B7)}
+                                                {(Number(volumeT.B7)-Number(volumeS.B7)) || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black", height: "35px",fontWeight: "bold",backgroundColor: (Number(volumeT.B95)-Number(volumeS.B95)) < 0 ? "red" : (Number(volumeT.B95)-Number(volumeS.B95)) > 0 ? "yellow" : "lightgray",borderLeft: "2px solid white" }}>
-                                                {Number(volumeT.B95)-Number(volumeS.B95)}
+                                                {(Number(volumeT.B95)-Number(volumeS.B95)) || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black", height: "35px",fontWeight: "bold",backgroundColor: Number(volumeT.E20)-Number(volumeS.E20) < 0 ? "red" : Number(volumeT.E20)-Number(volumeS.E20) > 0 ? "yellow" : "lightgray",borderLeft: "2px solid white" }}>
-                                                {Number(volumeT.E20)-Number(volumeS.E20)}
+                                                {(Number(volumeT.E20)-Number(volumeS.E20)) || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={60} sx={{ textAlign: "center",color: "black", height: "35px",fontWeight: "bold",backgroundColor: Number(volumeT.PWD)-Number(volumeS.PWD) < 0 ? "red" : Number(volumeT.PWD)-Number(volumeS.PWD) > 0 ? "yellow" : "lightgray",borderLeft: "2px solid white" }}>
-                                                {Number(volumeT.PWD)-Number(volumeS.PWD)}
+                                                {(Number(volumeT.PWD)-Number(volumeS.PWD)) || 0}
                                             </TablecellSelling>
                                             <TablecellSelling width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center",backgroundColor: "lightgray",borderLeft: "2px solid white" }}>
                                             {
@@ -2217,12 +2217,12 @@ const InsertTrips = () => {
                                                                     },
                                                                 }}
                                                                 value={
-                                                                    Number(volumeT.G95)-Number(volumeS.G95) + 
+                                                                    (Number(volumeT.G95)-Number(volumeS.G95) + 
                                                                     Number(volumeT.G91)-Number(volumeS.G91) + 
                                                                     Number(volumeT.B7)-Number(volumeS.B7) + 
                                                                     Number(volumeT.B95)-Number(volumeS.B95) + 
                                                                     Number(volumeT.E20)-Number(volumeS.E20) + 
-                                                                    Number(volumeT.PWD)-Number(volumeS.PWD)
+                                                                    Number(volumeT.PWD)-Number(volumeS.PWD)) || 0
                                                                 }
                                                                 disabled={showTrips ? false : true}
                                                             // value={volumeG95}
@@ -2231,12 +2231,12 @@ const InsertTrips = () => {
                                                     :
                                                         <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>
                                                             {
-                                                                Number(volumeT.G95)-Number(volumeS.G95) + 
+                                                                (Number(volumeT.G95)-Number(volumeS.G95) + 
                                                                 Number(volumeT.G91)-Number(volumeS.G91) + 
                                                                 Number(volumeT.B7)-Number(volumeS.B7) + 
                                                                 Number(volumeT.B95)-Number(volumeS.B95) + 
                                                                 Number(volumeT.E20)-Number(volumeS.E20) + 
-                                                                Number(volumeT.PWD)-Number(volumeS.PWD)
+                                                                Number(volumeT.PWD)-Number(volumeS.PWD)) || 0
                                                             }
                                                         </Typography>
                                                 }

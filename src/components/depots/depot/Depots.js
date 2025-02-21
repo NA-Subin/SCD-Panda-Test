@@ -33,11 +33,23 @@ import { IconButtonError, RateOils, TablecellHeader } from "../../../theme/style
 import { database } from "../../../server/firebase";
 import UpdateDepot from "./UpdateDepot";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
+import InserDepot from "./InsertDepot";
 
-const DepotDetail = (props) => {
-    const {depot} = props;
+const Depots = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
+    const [depot, setDepot] = useState(0);
+
+    const getDepot = async () => {
+        database.ref("/depot/oils").on("value", (snapshot) => {
+        const datas = snapshot.val();
+        setDepot(datas.length);
+        });
+    };
+
+    useEffect(() => {
+        getDepot();
+    }, []);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -102,15 +114,20 @@ const DepotDetail = (props) => {
     };
 
     return (
-        <React.Fragment>
-            <Paper
-                sx={{
-                    p: 2,
-                    height: "70vh"
-                }}
-            >
-                <Grid container spacing={2}>
-                    <Grid item xs={8} marginTop={1}>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+              <Typography
+                variant="h3"
+                fontWeight="bold"
+                textAlign="center"
+                gutterBottom
+              >
+                คลังรับน้ำมัน
+              </Typography>
+              <Box textAlign="right" marginRight={3} marginTop={-10}>
+                <InserDepot />
+              </Box>
+                <Grid container spacing={2} marginTop={1}>
+                    <Grid item xs={8}>
                         <Typography variant="h6" fontWeight="bold" gutterBottom>
                             คลังรับน้ำมัน
                         </Typography>
@@ -135,6 +152,9 @@ const DepotDetail = (props) => {
                                     ที่อยู่
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                    โซน
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                                     Latitude (ละติจูด)
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
@@ -150,6 +170,7 @@ const DepotDetail = (props) => {
                                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                                         <TableCell>{row.Address}</TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>{row.Zone}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.lat}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.lng}</TableCell>
                                         <UpdateDepot key={row.id} depot={row}/>
@@ -159,10 +180,8 @@ const DepotDetail = (props) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Paper>
-        </React.Fragment>
-
+        </Container>
     );
 };
 
-export default DepotDetail;
+export default Depots;

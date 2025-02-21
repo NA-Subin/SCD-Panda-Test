@@ -29,9 +29,12 @@ import {
     Typography,
 } from "@mui/material";
 import "dayjs/locale/th";
+import CancelIcon from '@mui/icons-material/Cancel';
+import OilBarrelIcon from "@mui/icons-material/OilBarrel";
 import theme from "../../../theme/theme";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
+import { IconButtonError } from "../../../theme/style";
 
 const InsertDepot = (props) => {
     const { depot } = props;
@@ -55,6 +58,7 @@ const InsertDepot = (props) => {
     const [zipCode, setZipCode] = React.useState("");
     const [lat, setLat] = React.useState("");
     const [lng, setLng] = React.useState("");
+    const [zone, setZone] = React.useState("-");
 
     const handlePost = () => {
         database
@@ -63,16 +67,17 @@ const InsertDepot = (props) => {
             .update({
                 id: depot + 1,
                 Name: name,
-                Address: 
-                (no === "-" ? "-" : no)+
-                (village === "-" ? "" : ","+village)+
-                (subDistrict === "-" ? "" : ","+subDistrict)+
-                (district === "-" ? "" : ","+district)+
-                (province === "-" ? "" : ","+province)+
-                (zipCode === "-" ? "" : ","+zipCode)
+                Address:
+                    (no === "-" ? "-" : no) +
+                    (village === "-" ? "" : "," + village) +
+                    (subDistrict === "-" ? "" : "," + subDistrict) +
+                    (district === "-" ? "" : "," + district) +
+                    (province === "-" ? "" : "," + province) +
+                    (zipCode === "-" ? "" : "," + zipCode)
                 ,
                 lat: lat,
-                lng: lng
+                lng: lng,
+                Zone: zone
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -87,11 +92,55 @@ const InsertDepot = (props) => {
 
     return (
         <React.Fragment>
-                        <Grid item sm={1}  xs={3}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อคลัง</Typography>
+            <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }}
+                endIcon={<OilBarrelIcon />}>
+                เพิ่มคลังรับน้ำมัน
+            </Button>
+            <Dialog
+                open={open}
+                keepMounted
+                onClose={handleClose}
+                maxWidth="md"
+                sx={{ zIndex: 1000 }}
+            >
+                <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={10}>
+                            <Typography variant="h6" fontWeight="bold" color="white" >เพิ่มคลังรับน้ำมัน</Typography>
                         </Grid>
-                        <Grid item sm={11} xs={9}>
+                        <Grid item xs={2} textAlign="right">
+                            <IconButtonError onClick={handleClose}>
+                                <CancelIcon />
+                            </IconButtonError>
+                        </Grid>
+                    </Grid>
+                </DialogTitle>
+                <DialogContent>
+                    <Grid container spacing={2} marginTop={2}>
+                        <Grid item sm={8} xs={12} display="flex" justifyContent="left" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" whiteSpace="nowrap" marginTop={1} marginRight={1} gutterBottom>ชื่อคลัง</Typography>
                             <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+                        </Grid>
+                        <Grid item sm={4} xs={12} display="flex" justifyContent="left" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" whiteSpace="nowrap" marginTop={1} marginRight={1} gutterBottom>โซน</Typography>
+                            <Paper
+                                component="form" sx={{ width: "100%" }}>
+                                <Select
+                                    id="demo-simple-select"
+                                    value={zone}
+                                    size="small"
+                                    sx={{ textAlign: "left" }}
+                                    onChange={(e) => setZone(e.target.value)}
+                                    fullWidth
+                                >
+                                    <MenuItem value={"-"}>
+                                        เลือกโซน
+                                    </MenuItem>
+                                    <MenuItem value={"คลังลำปาง"}>คลังลำปาง</MenuItem>
+                                    <MenuItem value={"คลังพิจิตร"}>คลังพิจิตร</MenuItem>
+                                    <MenuItem value={"คลังสระบุรี/บางปะอิน/IR"}>คลังสระบุรี/บางปะอิน/IR</MenuItem>
+                                </Select>
+                            </Paper>
                         </Grid>
                         <Grid item sm={12} xs={12}>
                             <Divider>
@@ -152,12 +201,15 @@ const InsertDepot = (props) => {
                             <TextField size="small" fullWidth value={lng} onChange={(e) => setLng(e.target.value)} />
                         </Grid>
                         <Grid item sm={12} xs={12} marginTop={1} marginBottom={1}>
-                            <Divider sx={{ border: "1px solid "+theme.palette.panda.dark }}/>
+                            <Divider sx={{ border: "1px solid " + theme.palette.panda.dark }} />
                         </Grid>
                         <Grid item sm={12} xs={12} display="flex" justifyContent="center" alignItems="center">
                             <Button onClick={handlePost} variant="contained" color="success" sx={{ marginRight: 1 }}>บันทึก</Button>
                             <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
                         </Grid>
+                    </Grid>
+                </DialogContent>
+            </Dialog>
         </React.Fragment>
     );
 };

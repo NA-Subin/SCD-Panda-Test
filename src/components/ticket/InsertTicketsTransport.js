@@ -52,16 +52,17 @@ const InsertTicketsTransport = () => {
     const [lng, setLng] = React.useState("");
     const [zipCode, setZipCode] = React.useState("");
     const [ticket, setTicket] = React.useState(0);
-    const [ticketsCode, setTicketsCode] = React.useState("");
     const [ticketsName, setTicketsName] = React.useState("");
-    const [rate, setRate] = React.useState("");
+    const [rate1, setRate1] = React.useState("");
+    const [rate2, setRate2] = React.useState("");
+    const [rate3, setRate3] = React.useState("");
     const [bill, setBill] = React.useState("");
     const [code, setCode] = React.useState("");
     const [companyName, setCompanyName] = React.useState("");
     const [codeID, setCodeID] = React.useState("");
 
     const getTicket = async () => {
-        database.ref("/ticket-stock/").on("value", (snapshot) => {
+        database.ref("/customers/transports/").on("value", (snapshot) => {
             const datas = snapshot.val();
             if (datas === null || datas === undefined) {
                 setTicket(0);
@@ -78,8 +79,56 @@ const InsertTicketsTransport = () => {
     console.log("tickket:", ticket);
 
     const handlePost = () => {
-       
-    };
+                database
+                    .ref("/customers/transports/")
+                    .child(ticket)
+                    .update({
+                        id: ticket + 1,
+                        TicketsName: ticketsName,
+                        Status: "ตั๋ว/ผู้รับ",
+                        Rate1: rate1,
+                        Rate2: rate2,
+                        Rate2: rate2,
+                        Bill: bill,
+                        Code: code,
+                        companyName: companyName,
+                        CodeID: codeID,
+                        Address: 
+                            (no === "-" ? "-" : no)+
+                            (village === "-" ? "" : ","+village)+
+                            (subDistrict === "-" ? "" : ","+subDistrict)+
+                            (district === "-" ? "" : ","+district)+
+                            (province === "-" ? "" : ","+province)+
+                            (zipCode === "-" ? "" : ","+zipCode)
+                        ,
+                        lat: lat,
+                        lng: lng,
+                    })
+                    .then(() => {
+                        ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                        console.log("Data pushed successfully");
+                        setTicketsName("")
+                        setRate1("")
+                        setRate2("")
+                        setRate3("")
+                        setBill("")
+                        setCode("")
+                        setCompanyName("")
+                        setCodeID("")
+                        setNo("")
+                        setVillage("")
+                        setSubDistrict("")
+                        setDistrict("")
+                        setProvince("")
+                        setZipCode("")
+                        setLat("")
+                        setLng("")
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+            };
 
     return (
         <React.Fragment>
@@ -104,73 +153,92 @@ const InsertTicketsTransport = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
-                        <Grid item xs={2.5} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รหัสตั๋ว</Typography>
-                            <TextField size="small" fullWidth value={ticketsCode} onChange={(e) => setTicketsCode(e.target.value)} />
-                        </Grid>
-                        <Grid item xs={9.5} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ชื่อลูกค้า</Typography>
-                            <TextField size="small" fullWidth value={ticketsName} onChange={(e) => setTicketsName(e.target.value)} />
-                        </Grid>
-                        <Grid item xs={6} display="flex" justifyContent="left" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" marginRight={1}>สถานะตั๋ว :</Typography>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        // checked={ticketChecked}
-                                        // onChange={(e) => setTicketChecked(e.target.checked)}
-                                        size="small"
+                        <Grid item xs={7} display="flex" justifyContent="center" alignItems="center">
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ชื่อ</Typography>
+                                    <TextField size="small" fullWidth value={ticketsName} onChange={(e) => setTicketsName(e.target.value)} />
+                                </Grid>
+                                <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รอบการวางบิล</Typography>
+                                    <TextField size="small" fullWidth value={bill} onChange={(e) => setBill(e.target.value)} />
+                                </Grid>
+                                <Grid item xs={12} display="flex" justifyContent="left" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" marginRight={1}>สถานะตั๋ว :</Typography>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                // checked={ticketChecked}
+                                                // onChange={(e) => setTicketChecked(e.target.checked)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="ตั๋ว"
                                     />
-                                }
-                                label="ตั๋ว"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        // checked={recipientChecked}
-                                        // onChange={(e) => setRecipientChecked(e.target.checked)}
-                                        size="small"
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                // checked={recipientChecked}
+                                                // onChange={(e) => setRecipientChecked(e.target.checked)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="ผู้รับ"
                                     />
-                                }
-                                label="ผู้รับ"
-                            />
-                        </Grid>
-                        <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" marginRight={1}>ประเภทรถ :</Typography>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        // checked={ticketChecked}
-                                        // onChange={(e) => setTicketChecked(e.target.checked)}
-                                        size="small"
+                                </Grid>
+                                {/* <Grid item xs={12} display="flex" justifyContent="left" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" marginRight={1}>ประเภทรถ :</Typography>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                // checked={ticketChecked}
+                                                // onChange={(e) => setTicketChecked(e.target.checked)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="รถใหญ่"
                                     />
-                                }
-                                label="รถใหญ่"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        // checked={recipientChecked}
-                                        // onChange={(e) => setRecipientChecked(e.target.checked)}
-                                        size="small"
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                // checked={recipientChecked}
+                                                // onChange={(e) => setRecipientChecked(e.target.checked)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="รถเล็ก"
                                     />
-                                }
-                                label="รถเล็ก"
-                            />
+                                </Grid> */}
+                            </Grid>
                         </Grid>
-                        <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
-                            <Checkbox sx={{ marginRight: 1 }} onChange={() => setCheck(!check)} />
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง</Typography>
-                            <TextField size="small" fullWidth disabled={check ? true : false} sx={{ backgroundColor: check ? "lightgray" : "white" }} value={rate} onChange={(e) => setRate(e.target.value)} />
-                        </Grid>
-                        <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รอบการวางบิล</Typography>
-                            <TextField size="small" fullWidth value={bill} onChange={(e) => setBill(e.target.value)} />
+                        <Grid item xs={5}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
+                                    <TextField size="small" fullWidth label={"คลังลำปาง"} value={rate1} onChange={(e) => setRate1(e.target.value)} />
+                                </Grid>
+                                <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
+                                    <TextField size="small" fullWidth label={"คลังพิจิตร"} value={rate2} onChange={(e) => setRate2(e.target.value)} />
+                                </Grid>
+                                <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
+                                    <TextField size="small" fullWidth label={"คลังสระบุรี/บางปะอิน/IR"} value={rate3} onChange={(e) => setRate3(e.target.value)} />
+                                </Grid>
+                            </Grid>
                         </Grid>
                         <Grid item xs={12}>
                             <Divider>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ใบวางบิล/ใบแจ้งหนี้</Typography>
                             </Divider>
+                        </Grid>
+                        <Grid item xs={3} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รหัส</Typography>
+                            <TextField size="small" fullWidth value={code} onChange={(e) => setCode(e.target.value)} />
+                        </Grid>
+                        <Grid item xs={9} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ชื่อบริษัท</Typography>
+                            <TextField size="small" fullWidth value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>บ้านเลขที่</Typography>

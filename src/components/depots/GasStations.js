@@ -31,11 +31,10 @@ import OilBarrelIcon from "@mui/icons-material/OilBarrel";
 import theme from "../../theme/theme";
 import { database } from "../../server/firebase";
 import GasStationsDetail from "./gasstations/GasStationsDetail";
-import DepotDetail from "./depot/DepotDetail";
 import StockDetail from "./stock/StockDetail";
-import InsertDepots from "./InsertDepots";
+import InsertGasStation from "./InsertGasStation";
 
-const Depots = () => {
+const GasStations = () => {
   const [openMenu, setOpenMenu] = React.useState(1);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
@@ -76,14 +75,14 @@ const Depots = () => {
         textAlign="center"
         gutterBottom
       >
-        {openMenu === 1 ? "ปั้มน้ำมัน" : openMenu === 2 ? "คลังสต็อกน้ำมัน" : "คลังรับน้ำมัน"}
+        {openMenu === 1 ? "ปั้มน้ำมัน" : "คลังสต็อกน้ำมัน"}
       </Typography>
       <Box display="flex" justifyContent="right" alignItems="center" marginRight={3} marginTop={-8} marginBottom={3}>
-        <InsertDepots openMenu={openMenu} depot={depot} stock={stock.length} gasStation={gasStation} />
+        <InsertGasStation openMenu={openMenu} depot={depot} stock={stock.length} gasStation={gasStation} />
       </Box>
       <Divider />
       <Grid container spacing={5} marginTop={0.5} marginBottom={2}>
-        <Grid item xs={openMenu === 1 ? 6 : 3} sm={openMenu === 1 ? 8 : 2} lg={openMenu === 1 ? 10 : 1}>
+        <Grid item xs={openMenu === 1 ? 9 : 3} sm={openMenu === 1 ? 10 : 2} lg={openMenu === 1 ? 11 : 1}>
           <Tooltip title="ปั้มน้ำมัน" placement="top">
             {
               isMobile ? 
@@ -149,7 +148,7 @@ const Depots = () => {
             }
           </Tooltip>
         </Grid>
-        <Grid item xs={openMenu === 2 ? 6 : 3} sm={openMenu === 2 ? 8 : 2} lg={openMenu === 2 ? 10 : 1}>
+        <Grid item xs={openMenu === 2 ? 9 : 3} sm={openMenu === 2 ? 10 : 2} lg={openMenu === 2 ? 11 : 1}>
           <Tooltip title="คลังสต็อกน้ำมัน" placement="top">
             {
               isMobile ? 
@@ -215,84 +214,17 @@ const Depots = () => {
             }
           </Tooltip>
         </Grid>
-        <Grid item xs={openMenu === 3 ? 6 : 3} sm={openMenu === 3 ? 8 : 2} lg={openMenu === 3 ? 10 : 1}>
-          <Tooltip title="คลังรับน้ำมัน" placement="top">
-            {
-              isMobile ? 
-              <Button
-              variant="contained"
-              color={openMenu === 3 ? "info" : "inherit"}
-              fullWidth
-              onClick={() => setOpenMenu(3)}
-              sx={{ height: "10vh", fontSize: openMenu === 3 ? 40 : 16, paddingLeft: openMenu === 3 ? 0 : 3.5 }}
-            >
-              <Badge
-              badgeContent={depot}
-              sx={{
-                "& .MuiBadge-badge": {
-                  fontSize: 20, // ขนาดตัวเลขใน Badge
-                  minWidth: 30, // ความกว้างของ Badge
-                  height: 30, // ความสูงของ Badge
-                  top: openMenu === 3 ? 35 : -10,
-                  right: openMenu === 3 ? -30 : -10,
-                  color: openMenu === 3 ? theme.palette.info.main : "white",
-                  backgroundColor: openMenu === 3 ? "white" : theme.palette.info.main,
-                  fontWeight: "bold",
-                },
-                fontWeight: "bold",
-              }}
-            >
-              <OilBarrelIcon sx={{ width: '3em', height: '3em' }} />
-            </Badge>
-            </Button>
-            :
-            <Button
-            variant="contained"
-            color={openMenu === 3 ? "info" : "inherit"}
-            fullWidth
-            onClick={() => setOpenMenu(3)}
-            sx={{ height: "10vh", fontSize: openMenu === 3 ? 40 : 16, paddingLeft: openMenu === 3 ? 0 : 3.5 }}
-            startIcon={
-              <OilBarrelIcon sx={{ width: '3em', height: '3em' }} />
-            }
-          >
-            <Badge
-              badgeContent={depot}
-              sx={{
-                "& .MuiBadge-badge": {
-                  fontSize: 20, // ขนาดตัวเลขใน Badge
-                  minWidth: 30, // ความกว้างของ Badge
-                  height: 30, // ความสูงของ Badge
-                  top: openMenu === 3 ? 35 : -40,
-                  right: openMenu === 3 ? -30 : -5,
-                  color: openMenu === 3 ? theme.palette.info.main : "white",
-                  backgroundColor: openMenu === 3 ? "white" : theme.palette.info.main,
-                  fontWeight: "bold",
-                },
-                fontWeight: "bold",
-              }}
-            >
-              {openMenu === 3 ? "คลังรับน้ำมัน" : ""}
-            </Badge>
-          </Button>
-            }
-            {
-              openMenu === 3 && <Divider orientation="vertical" flexItem sx={{ border: "1px solid lightgray", marginTop: 2 }} />
-            }
-          </Tooltip>
-        </Grid>
       </Grid>
       {
         openMenu === 1 ?
           <GasStationsDetail gasStation={gasStation} />
-          : openMenu === 2 ?
+          : 
             stock.map((st) => (
               <StockDetail key={st.id} stock={st} />
             ))
-            : <DepotDetail depot={depot} />
       }
     </Container>
   );
 };
 
-export default Depots;
+export default GasStations;

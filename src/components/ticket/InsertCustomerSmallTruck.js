@@ -61,7 +61,7 @@ const InsertCustomerSmallTruck = () => {
     const [codeID, setCodeID] = React.useState("");
 
     const getTicket = async () => {
-        database.ref("/ticket-stock/").on("value", (snapshot) => {
+        database.ref("/customers/smalltruck").on("value", (snapshot) => {
             const datas = snapshot.val();
             if (datas === null || datas === undefined) {
                 setTicket(0);
