@@ -30,109 +30,155 @@ import InfoIcon from '@mui/icons-material/Info';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
+import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const TicketsGasStation = () => {
+const TicketsGasStation = (props) => {
+    const { row } = props;
     const [update, setUpdate] = React.useState(true);
-    const [open, setOpen] = useState(1);
+    const [name, setName] = React.useState(row.TicketsName);
+    const [rate1, setRate1] = React.useState(row.Rate1);
+    const [rate2, setRate2] = React.useState(row.Rate2);
+    const [rate3, setRate3] = React.useState(row.Rate3);
+    const [status, setStatus] = React.useState(row.Status);
+    const [open, setOpen] = useState(false);
 
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-                    
-                      // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-                      useEffect(() => {
-                        const handleResize = () => {
-                          setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-                        };
-                    
-                        window.addEventListener('resize', handleResize); // เพิ่ม event listener
-                    
-                        // ลบ event listener เมื่อ component ถูกทำลาย
-                        return () => {
-                          window.removeEventListener('resize', handleResize);
-                        };
-                      }, []);
-
-    const handleClickOpen = () => {
-        setOpen(true);
+    const handleUpdate = () => {
+        database
+                    .ref("/customers/gasstations/")
+                    .child(row.id-1)
+                    .update({
+                    Rate1: rate1,
+                    Rate2: rate2,
+                    Rate3: rate3,
+                    }) // อัพเดท values ทั้งหมด
+                    .then(() => {
+                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                        console.log("Data updated successfully");
+                        setOpen(false);
+                    })
+                    .catch((error) => {
+                        ShowError("แก้ไขข้อมูลไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
     };
-
-    const [gasStation, setGasStation] = React.useState([]);
-
-    const getGasStation = async () => {
-        database.ref("/depot/gasStations/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                // const { Name, Stock, OilWellNumber } = datas[id];
-                const { Name, ShortName, OilWellNumber, Code } = datas[id]; // ดึงเฉพาะ Name, ShortName, OilWellNumber
-                // console.log("Name :", Name);
-                // console.log("ShortName :", ShortName);
-                // console.log("OilWellNumber :", OilWellNumber);
-                dataList.push({ id, Name, ShortName, OilWellNumber, Code }); // push เฉพาะค่าที่ต้องการ
-            }
-            setGasStation(dataList);
-        });
-    };
-
-    useEffect(() => {
-        getGasStation();
-    }, []);
-
-    //   console.log("gasstation :",gasStation);
 
     return (
-        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
-              <Typography
-                                            variant="h3"
-                                            fontWeight="bold"
-                                            textAlign="center"
-                                            gutterBottom
-                                          >
-                                            ปั้มน้ำมัน
-                                          </Typography>
-                                          <Divider sx={{ marginBottom: 1 }}/>
-                                            <Grid container spacing={3} sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth-10) : (windowWidth-235) }}>
-                                  <Grid item xs={10}>
-                                      <Typography variant="h6" fontWeight="bold" gutterBottom>ปั้มน้ำมัน</Typography>
-                                  </Grid>
-                    <Grid item xs={12} marginTop={-2}>
-                        <Divider />
-                    </Grid>
-                </Grid>
-                <TableContainer
-                    component={Paper}
-                    style={{ maxHeight: "70vh" }}
-                    sx={{ marginTop: 2 }}
-                >
-                    <Table stickyHeader size="small">
-                        <TableHead sx={{ height: "7vh" }}>
-                            <TableRow>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                    รหัสตั๋ว
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                    ชื่อปั้ม
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                    ชื่อย่อ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ width: 50 }} />
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
+        <React.Fragment>
+            {
+                !open ?
+                    <TableRow key={row.id}>
+                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{name}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{rate1}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{rate2}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{rate3}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{status}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <IconButton color="warning" onClick={() => setOpen(true)}>
+                                <BorderColorIcon />
+                            </IconButton>
+                        </TableCell>
+                    </TableRow>
+                    :
+                    <TableRow key={row.id}>
+                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{name}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '14px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '30px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={rate1 || 0}
+                                    onChange={(e) => setRate1(e.target.value)}
+                                />
+                            </Paper>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                        <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '14px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '30px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={rate2 || 0}
+                                    onChange={(e) => setRate2(e.target.value)}
+                                />
+                            </Paper>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                        <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '14px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '30px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={rate3 || 0}
+                                    onChange={(e) => setRate3(e.target.value)}
+                                />
+                            </Paper>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
                             {
-                                gasStation.map((row) => (
-                                    <TableRow key={row.id}>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.Code}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.ShortName}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}><IconButton color="warning"><BorderColorIcon/></IconButton></TableCell>
-                                    </TableRow>
-                                ))
+                                !open ?
+                                <IconButton color="warning" size="small" onClick={() => setOpen(true)}>
+                                <BorderColorIcon fontSize="small"/>
+                            </IconButton>
+                            :
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                            <IconButton color="error" size="small" onClick={() => setOpen(false)}>
+                                <BorderColorIcon fontSize="small"/>
+                            </IconButton>
+                            <IconButton color="success" size="small" onClick={handleUpdate}>
+                                <BorderColorIcon fontSize="small"/>
+                            </IconButton>
+                            </Box>
                             }
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-        </Container>
+                        </TableCell>
+                    </TableRow>
+            }
+        </React.Fragment>
     );
 };
 

@@ -315,7 +315,11 @@ const OrderDetail = (props) => {
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]+detail.TicketName.split(":")[1]}</Typography>
                 </TableCell> */}
                 <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px",width: 350 }}>
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{detail.TicketName.split(":")[2]}</Typography>
+                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>
+                        {detail.TicketName.includes("/")
+                            ? detail.TicketName.split("/")[1]
+                            : detail.TicketName}
+                    </Typography>
                 </TableCell>
                             <TableCell sx={{ textAlign: "center", height: "20px",width: 150 }}>
                                 {

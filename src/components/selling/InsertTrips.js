@@ -305,7 +305,8 @@ const InsertTrips = () => {
 
     const [ticketsT, setTicketsT] = React.useState([]);
     const [ticketsPS, setTicketsPS] = React.useState([]);
-    const [ticketsA, setTicketsA] = React.useState([]);
+    const [ticketsB, setTicketsB] = React.useState([]);
+    const [ticketsS, setTicketsS] = React.useState([]);
     const [orderT, setOrderT] = React.useState([]);
     const [orderPS, setOrderPS] = React.useState([]);
     const [orderA, setOrderA] = React.useState([]);
@@ -316,7 +317,7 @@ const InsertTrips = () => {
             setTicket(datas.length);
         });
 
-        database.ref("/customer").on("value", (snapshot) => {
+        database.ref("/customers/transports/").on("value", (snapshot) => {
             const datas = snapshot.val();
             const dataTicket = [];
             for (let id in datas) {
@@ -326,7 +327,7 @@ const InsertTrips = () => {
             setTicketsT(dataTicket);
         });
 
-        database.ref("/customer").on("value", (snapshot) => {
+        database.ref("/customers/transports/").on("value", (snapshot) => {
             const datas = snapshot.val();
             const dataCustomer = [];
             for (let id in datas) {
@@ -336,7 +337,7 @@ const InsertTrips = () => {
             setCustomer(dataCustomer);
         });
 
-        database.ref("/depot/gasStations").on("value", (snapshot) => {
+        database.ref("/customers/gasstations/").on("value", (snapshot) => {
             const datas = snapshot.val();
             const dataGasStations = [];
             for (let id in datas) {
@@ -345,13 +346,22 @@ const InsertTrips = () => {
             setTicketsPS(dataGasStations);
         });
 
-        database.ref("/ticket-stock").on("value", (snapshot) => {
+        database.ref("/customers/bigtruck/").on("value", (snapshot) => {
             const datas = snapshot.val();
             const dataStock = [];
             for (let id in datas) {
                 dataStock.push({ id, ...datas[id] })
             }
-            setTicketsA(dataStock);
+            setTicketsB(dataStock);
+        });
+
+        database.ref("/customers/smalltruck/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            const dataStock = [];
+            for (let id in datas) {
+                dataStock.push({ id, ...datas[id] })
+            }
+            setTicketsS(dataStock);
         });
     };
 
@@ -363,68 +373,6 @@ const InsertTrips = () => {
         getOrder();
         getTrip();
     }, []);
-
-    // const filteredOptions = ticket.filter(row =>
-    //     row.Code.toLowerCase().includes(code.toLowerCase())
-    // );
-
-    // const handleTickets = () => {
-    //     if (registration === "0:0:0") {
-    //         ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
-    //     } else {
-    //         ShowConfirm(
-    //             "ต้องการสร้างตั๋วใช่หรือไม่",
-    //             () => {
-    //                 // เงื่อนไขเมื่อกดปุ่มตกลง
-    //                 setShowTickers(false)
-    //                 database
-    //                     .ref("tickets/")
-    //                     .child(ticket)
-    //                     .update({
-    //                         id: ticket + 1,
-    //                         DateStart: dayjs(selectedDate).format('DD/MM/YYYY'),
-    //                         Registration: registration.split(":")[1],
-    //                         Driver: registration.split(":")[2],
-    //                         WeightTruck: weight
-    //                     })
-    //                     .then(() => {
-    //                         ShowSuccess("สามารถเพิ่มตั๋วได้เลย");
-    //                         setTicketsTrip(ticket);
-    //                         database.ref("/tickets/" + ticket + "/ticketOrder").on("value", (snapshot) => {
-    //                             const datas = snapshot.val();
-    //                             const dataTicket = [];
-    //                             for (let id in datas) {
-    //                                 dataTicket.push({ id, ...datas[id] })
-    //                             }
-    //                             setTicketsOrder(dataTicket);
-    //                         });
-
-    //                         database
-    //                             .ref("truck/registration/")
-    //                             .child((registration.split(":")[0]) - 1)
-    //                             .update({
-    //                                 Status: "GT:" + ticket
-    //                             })
-    //                             .then(() => {
-    //                                 console.log("Data pushed successfully");
-
-    //                             })
-    //                             .catch((error) => {
-    //                                 console.error("Error pushing data:", error);
-    //                             });
-    //                     })
-    //                     .catch((error) => {
-    //                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-    //                         console.error("Error pushing data:", error);
-    //                     });
-    //             },
-    //             () => {
-    //                 // เงื่อนไขเมื่อกดปุ่มยกเลิก
-    //                 setShowTickers(true)
-    //             }
-    //         );
-    //     }
-    // }
 
     const handleTrip = () => {
         ShowConfirm(
@@ -464,97 +412,6 @@ const InsertTrips = () => {
                                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                                 console.error("Error pushing data:", error);
                             });
-
-                        // database
-                        //     .ref("trip/" + trip.length + "/ProductT")
-                        //     .child("/G91")
-                        //     .update({
-                        //         Name: "G91",
-                        //         TotalCost: costG91,
-                        //         TotalVolume: volumeG91,
-                        //     })
-                        //     .then(() => {
-                        //         console.log("pushing data success:");
-                        //     })
-                        //     .catch((error) => {
-                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        //         console.error("Error pushing data:", error);
-                        //     });
-                        // database
-                        //     .ref("trip/" + trip.length + "/ProductT")
-                        //     .child("/G95")
-                        //     .update({
-                        //         Name: "G95",
-                        //         TotalCost: costG95,
-                        //         TotalVolume: volumeG95,
-                        //     })
-                        //     .then(() => {
-                        //         console.log("pushing data success:");
-                        //     })
-                        //     .catch((error) => {
-                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        //         console.error("Error pushing data:", error);
-                        //     });
-                        // database
-                        //     .ref("trip/" + trip.length + "/ProductT")
-                        //     .child("/B7")
-                        //     .update({
-                        //         Name: "B7",
-                        //         TotalCost: costB7,
-                        //         TotalVolume: volumeB7,
-                        //     })
-                        //     .then(() => {
-                        //         console.log("pushing data success:");
-                        //     })
-                        //     .catch((error) => {
-                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        //         console.error("Error pushing data:", error);
-                        //     });
-                        // database
-                        //     .ref("trip/" + trip.length + "/ProductT")
-                        //     .child("/B95")
-                        //     .update({
-                        //         Name: "B95",
-                        //         TotalCost: costB95,
-                        //         TotalVolume: volumeB95,
-                        //     })
-                        //     .then(() => {
-                        //         console.log("pushing data success:");
-                        //     })
-                        //     .catch((error) => {
-                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        //         console.error("Error pushing data:", error);
-                        //     });
-                        // database
-                        //     .ref("trip/" + trip.length + "/ProductT")
-                        //     .child("/E20")
-                        //     .update({
-                        //         Name: "E20",
-                        //         TotalCost: costE20,
-                        //         TotalVolume: volumeE20,
-                        //     })
-                        //     .then(() => {
-                        //         console.log("pushing data success:");
-                        //     })
-                        //     .catch((error) => {
-                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        //         console.error("Error pushing data:", error);
-                        //     });
-                        // database
-                        //     .ref("trip/" + trip.length + "/ProductT")
-                        //     .child("/PWD")
-                        //     .update({
-                        //         Name: "PWD",
-                        //         TotalCost: costPWD,
-                        //         TotalVolume: volumePWD,
-                        //     })
-                        //     .then(() => {
-                        //         console.log("pushing data success:");
-                        //     })
-                        //     .catch((error) => {
-                        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        //         console.error("Error pushing data:", error);
-                        //     });
 
                         setTrips(trip.length);
                         database.ref("/order").on("value", (snapshot) => {
@@ -626,14 +483,6 @@ const InsertTrips = () => {
                                             }
                                         }
                                     });
-                                    // database.ref("/depot/stock/").on("value", (snapshot) => {
-                                    //     const stock = snapshot.val();
-                                    //     const dataA = [];
-                                    //     for (let A in stock) {
-                                    //         dataA.push({ A, ...stock[A] });
-                                    //     }
-                                    //     setOrderA(dataA); // ตั้งค่า OrderA เมื่อดึงข้อมูลสำเร็จ
-                                    // });
                                 }
                             }
 
@@ -655,61 +504,6 @@ const InsertTrips = () => {
 
     console.log("Order : ", orders);
 
-    // const findProduct = (id) => Object.values(productT).find(product => product.id === id) ?? { Name: id, TotalCost: 0, TotalVolume: 0 };
-
-    // const [productTG91,setProductTG91] = React.useState(productT.G91);
-    // const [productTG95,setProductTG95] = React.useState(productT.G95);
-    // const [productTB7,setProductTB7] = React.useState(productT.B7);
-    // const [productTB95,setProductTB95] = React.useState(productT.B95);
-    // const [productTE20,setProductTE20] = React.useState(productT.E20);
-    // const [productTPWD,setProductTPWD] = React.useState(productT.PWD);
-
-    // console.log("G91 : ", productTG91.TotalVolume);
-    // console.log("G95 : ", productTG95.TotalVolume);
-    // console.log("B7 : ", productTB7.TotalVolume);
-    // console.log("B95 : ", productTB95.TotalVolume);
-    // console.log("E20 : ", productTE20.TotalVolume);
-    // console.log("PWD : ", productTPWD.TotalVolume);
-
-    // const handlePost = (event) => {
-    //     setTickets(event.target.value)
-    //     const ticketName = event.target.value;
-    //     if (registration === "0:0:0") {
-    //         ShowWarning("กรุณาเลือกผู้ขับ/ป้ายทะเบียนให้เรียบร้อย")
-    //     } else {
-    //         database
-    //             .ref("tickets/" + ticketsTrip + "/ticketOrder")
-    //             .child(ticketsOrder.length)
-    //             .update({
-    //                 id: ticketsOrder.length + 1,
-    //                 TicketName: ticketName,
-    //             })
-    //             .then(() => {
-    //                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-    //                 console.log("Data pushed successfully");
-    //                 setCode("");
-    //             })
-    //             .catch((error) => {
-    //                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-    //                 console.error("Error pushing data:", error);
-    //             });
-
-    //         database
-    //             .ref("truck/registration/")
-    //             .child((registration.split(":")[0]) - 1)
-    //             .update({
-    //                 Status: "GT:" + ticketsTrip
-    //             })
-    //             .then(() => {
-    //                 console.log("Data pushed successfully");
-
-    //             })
-    //             .catch((error) => {
-    //                 console.error("Error pushing data:", error);
-    //             });
-    //     }
-    // };
-
     const [ordersTickets, setOrdersTickets] = React.useState({});
     const [selling, setSelling] = React.useState({});
     const [volumeT, setVolumeT] = React.useState({});
@@ -721,9 +515,27 @@ const InsertTrips = () => {
 
     const handlePost = (event) => {
         const ticketValue = event.target.value;
-        setTickets(ticketValue);
+  setTickets(ticketValue);
 
-        if (ticketValue === "0:0") return;
+  if (ticketValue === "0:0") return;
+
+  // ค้นหา ticket ที่ตรงกับ ticketValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
+  const ticketData = getTickets().find(
+    (item) => item.TicketsName === ticketValue
+  );
+
+  // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
+  let newRate = 0;
+  if (ticketData && depots) {
+    // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
+    if (depots.split(":")[1] === "คลังลำปาง") {
+      newRate = ticketData.Rate1;
+    } else if (depots.split(":")[1] === "คลังพิจิตร") {
+      newRate = ticketData.Rate2;
+    } else if (depots.split(":")[1] === "คลังสระบุรี/บางปะอิน/IR") {
+      newRate = ticketData.Rate3;
+    }
+  }
 
         setOrdersTickets((prev) => {
             const newIndex = Object.keys(prev).length;
@@ -732,7 +544,7 @@ const InsertTrips = () => {
                 [newIndex]: {
                     TicketName: ticketValue,
                     id: newIndex,
-                    Rate: 0.75,
+                    Rate: newRate,
                     OrderID: "",
                     Product: {} // เพิ่ม Product ไว้เป็น Object ว่าง
                 }
@@ -746,6 +558,27 @@ const InsertTrips = () => {
 
         if (customerValue === "0:0") return;
 
+  // ค้นหา ticket ที่ตรงกับ customerValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
+  const ticketData = getTickets().find(
+    (item) => item.TicketsName === customerValue
+  );
+
+  // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
+  let newRate = 0;
+  if (ticketData && depots) {
+    // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
+    if (depots.split(":")[1] === "คลังลำปาง") {
+      newRate = ticketData.Rate1;
+      setCostTrip((prev) => (prev === 0 ? 750 : prev + 200));
+    } else if (depots.split(":")[1] === "คลังพิจิตร") {
+      newRate = ticketData.Rate2;
+      setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
+    } else if (depots.split(":")[1] === "คลังสระบุรี/บางปะอิน/IR") {
+      newRate = ticketData.Rate3;
+      setCostTrip((prev) => (prev === 0 ? (2000+1200) : prev + 200));
+    }
+  }
+
         setSelling((prev) => {
             const newIndex = Object.keys(prev).length;
             return {
@@ -756,12 +589,12 @@ const InsertTrips = () => {
                     Driver: registration.split(":")[2],
                     Customer: customerValue.split(":")[1],
                     TicketName: customerValue,
+                    Rate: newRate,
                     id: newIndex
                 }
             };
         });
 
-        setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
     };
 
     console.log("selling : ", selling);
@@ -778,6 +611,76 @@ const InsertTrips = () => {
             };
         });
     };
+
+    // ฟังก์ชันอัพเดตราคาใน ordersTickets เมื่อมีการเปลี่ยน depot
+    const updateRatesByDepot = (selectedDepot) => {
+        setCostTrip(0);
+        setOrdersTickets((prevOrders) => {
+          return Object.keys(prevOrders).reduce((acc, key) => {
+            const order = prevOrders[key];
+            const ticketData = getTickets().find(
+              (item) => item.TicketsName === order.TicketName
+            );
+            let newRate = 0;
+            if (ticketData) {
+              if (selectedDepot === "คลังลำปาง") {
+                newRate = ticketData.Rate1;
+              } else if (selectedDepot === "คลังพิจิตร") {
+                newRate = ticketData.Rate2;
+              } else if (selectedDepot === "คลังสระบุรี/บางปะอิน/IR") {
+                newRate = ticketData.Rate3;
+              }
+            }
+            acc[key] = {
+              ...order,
+              Rate: newRate,
+            };
+            return acc;
+          }, {});
+        });
+      
+        // คำนวณ costTrip ครั้งเดียว โดยดูจากจำนวน ordersTickets ที่มีอยู่และค่า depot
+        // สมมุติว่า ordersTickets มี 3 รายการ
+        // เราคำนวณตามเงื่อนไข depot แต่ละครั้ง
+        setSelling((prevOrders) => {
+          const updatedOrders = Object.keys(prevOrders).reduce((acc, key) => {
+            const order = prevOrders[key];
+            const ticketData = getTickets().find(
+              (item) => item.TicketsName === order.TicketName
+            );
+            let newRate = 0;
+            if (ticketData) {
+              if (selectedDepot === "คลังลำปาง") {
+                newRate = ticketData.Rate1;
+              } else if (selectedDepot === "คลังพิจิตร") {
+                newRate = ticketData.Rate2;
+              } else if (selectedDepot === "คลังสระบุรี/บางปะอิน/IR") {
+                newRate = ticketData.Rate3;
+              }
+            }
+            acc[key] = {
+              ...order,
+              Rate: newRate,
+            };
+            return acc;
+          }, {});
+      
+          // หลังจากอัพเดต orders แล้ว คำนวณ costTrip รวม
+          let cost = 0;
+          Object.keys(updatedOrders).forEach((key) => {
+            if (selectedDepot === "คลังลำปาง") {
+              cost += cost === 0 ? 750 : 200;
+            } else if (selectedDepot === "คลังพิจิตร") {
+              cost += cost === 0 ? 2000 : 200;
+            } else if (selectedDepot === "คลังสระบุรี/บางปะอิน/IR") {
+              cost += cost === 0 ? 2000 + 1200 : 200;
+            }
+          });
+          setCostTrip(cost);
+          return updatedOrders;
+        });
+      };
+      
 
     const handleAddProduct = (ticketIndex, productName, field, value) => {
         setOrdersTickets((prev) => {
@@ -1010,7 +913,18 @@ const InsertTrips = () => {
             return newOrder;
         });
 
-        setCostTrip((prev) => (prev === 2000 ? 0 : prev - 200));
+         // ลด costTrip -200 เมื่อมีการยกเลิก (กดปุ่ม "ยกเลิก")
+  if (depots) {
+    // ตรวจสอบค่า depot ที่เลือก
+    const depotName = depots.split(":")[1]; // สมมุติรูปแบบ depots = "xx:คลังลำปาง" เป็นต้น
+    if (depotName === "คลังลำปาง") {
+      setCostTrip((prev) => (prev === 750 ? 0 : prev - 200));
+    } else if (depotName === "คลังพิจิตร") {
+      setCostTrip((prev) => (prev === 2000 ? 0 : prev - 200));
+    } else if (depotName === "คลังสระบุรี/บางปะอิน/IR") {
+      setCostTrip((prev) => (prev === 3200 ? 0 : prev - 200));
+    }
+  }
     };
 
 
@@ -1127,8 +1041,6 @@ const InsertTrips = () => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
-
-
     };
 
     const handleTotalWeight = (newHeavyOil, newWeight) => {
@@ -1137,52 +1049,6 @@ const InsertTrips = () => {
             parseFloat(newWeight || 0);
         setTotalWeight(total);
     };
-
-    const handleChangeHeavyOil = (e) => {
-        const value = e.target.value;
-        setHeavyOil(value);
-        handleTotalWeight(value, weight);
-    };
-
-    const handleChangeWeight = (e) => {
-        const value = e.target.value;
-        setWeight(value);
-        handleTotalWeight(heavyOil, value);
-    };
-
-    const getCombinedTickets = () => {
-        const combinedTickets = [];
-        const maxLength = Math.max(ticketsT.length, ticketsA.length, ticketsPS.length);
-
-        for (let i = 0; i < maxLength; i++) {
-            if (ticketsT[i]) combinedTickets.push({ type: "T", ...ticketsT[i] });
-            if (ticketsA[i]) combinedTickets.push({ type: "A", ...ticketsA[i] });
-            if (ticketsPS[i]) combinedTickets.push({ type: "PS", ...ticketsPS[i] });
-        }
-
-        return combinedTickets;
-    };
-
-    // เรียกใช้ฟังก์ชันเพื่อสร้างอาร์เรย์ combinedTickets
-    const combinedTickets = getCombinedTickets();
-
-    console.log("แสดง " + orderT.length + "," + orderPS.length + "," + orderA.length);
-
-    const getCombinedOrder = () => {
-        const combinedOrder = [];
-        const maxLength = Math.max(orderT.length, orderA.length, orderPS.length);
-
-        for (let i = 0; i < maxLength; i++) {
-            if (orderT[i]) combinedOrder.push({ type: "T", ...orderT[i] });
-            if (orderA[i]) combinedOrder.push({ type: "A", ...orderA[i] });
-            if (orderPS[i]) combinedOrder.push({ type: "PS", ...orderPS[i] });
-        }
-
-        return combinedOrder;
-    };
-
-    // เรียกใช้ฟังก์ชันเพื่อสร้างอาร์เรย์ combinedOrder
-    const combinedOrder = getCombinedOrder();
 
     React.useEffect(() => {
         const currentRow = regHead.find((row) => row.RegHead === registration.split(":")[1]);
@@ -1193,11 +1059,11 @@ const InsertTrips = () => {
 
     const getTickets = () => {
         const tickets = [
-            ...ticketsPS.map((item) => ({ ...item, type: item.Code })),
+            ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item, type: "T" })),
-            ...ticketsA.map((item) => ({ ...item, type: "A" })),
+                .map((item) => ({ ...item })),
+            ...ticketsB.map((item) => ({ ...item })),
         ];
 
         // ✅ ป้องกันกรณีที่ options เป็น undefined
@@ -1206,16 +1072,18 @@ const InsertTrips = () => {
 
     const getCustomers = () => {
         const customers = [
-            ...ticketsPS.map((item) => ({ ...item, type: item.Code })),
+            ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item, type: "T" })),
-            ...ticketsA.map((item) => ({ ...item, type: "A" })),
+                .map((item) => ({ ...item })),
+            ...ticketsB.map((item) => ({ ...item})),
         ];
 
         // ✅ ป้องกันกรณีที่ options เป็น undefined
         return customers.filter((item) => item.id || item.TicketsCode);
     };
+
+    console.log("depots : ",depots);
 
     // const getTickets = () => {
     //     if (codeCustomer === "") {
@@ -1225,7 +1093,7 @@ const InsertTrips = () => {
     //             ...ticketsT
     //                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
     //                 .map((item) => ({ ...item, type: "T" })),
-    //             ...ticketsA.map((item) => ({ ...item, type: "A" })),
+    //             ...ticketsB.map((item) => ({ ...item, type: "A" })),
     //         ];
     //     } else if (codeCustomer === "PS") {
     //         return ticketsPS.map((item) => ({ ...item, type: item.Code }));
@@ -1234,7 +1102,7 @@ const InsertTrips = () => {
     //             .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
     //             .map((item) => ({ ...item, type: "T" }));
     //     } else if (codeCustomer === "A") {
-    //         return ticketsA.map((item) => ({ ...item, type: "A" }));
+    //         return ticketsB.map((item) => ({ ...item, type: "A" }));
     //     }
     //     return []; // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
     // };
@@ -1247,7 +1115,7 @@ const InsertTrips = () => {
     //             ...ticketsT
     //                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
     //                 .map((item) => ({ ...item, type: "T" })),
-    //             ...ticketsA.map((item) => ({ ...item, type: "A" })),
+    //             ...ticketsB.map((item) => ({ ...item, type: "A" })),
     //         ];
     //     } else if (codeCustomer === "PS") {
     //         return ticketsPS.map((item) => ({ ...item, type: "PS" }));
@@ -1256,7 +1124,7 @@ const InsertTrips = () => {
     //             .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
     //             .map((item) => ({ ...item, type: "T" }));
     //     } else if (codeCustomer === "A") {
-    //         return ticketsA.map((item) => ({ ...item, type: "A" }));
+    //         return ticketsB.map((item) => ({ ...item, type: "A" }));
     //     }
     //     return []; // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
     // };
@@ -1331,45 +1199,41 @@ const InsertTrips = () => {
                                 <Paper
                                     component="form" sx={{ height: "30px", width: "100%" }}>
                                     <Autocomplete
-                                        id="autocomplete-registration"
-                                        options={regHead} // ใช้ regHead เป็น options
-                                        getOptionLabel={(option) =>
-                                            `${option.Driver} : ${option.RegHead}/${option.RegTail}` // รูปแบบที่จะแสดงใน dropdown
-                                        }
-                                        isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบว่าเลือกถูกต้อง
-                                        value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}` === registration) : null} // ค่าที่เลือกจากการพิมพ์หรือเลือกใน dropdown
-                                        onChange={(event, newValue) => {
-                                            if (newValue) {
-                                                const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}`; // รูปแบบค่าที่ต้องการ
-                                                setRegistration(value); // อัปเดตค่าที่เลือก
-                                            } else {
-                                                setRegistration("0:0:0"); // รีเซ็ตค่ากลับไป
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label={registration === "0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""} // เปลี่ยน label เมื่อไม่มีการเลือก
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{
-                                                    "& .MuiOutlinedInput-root": { height: "30px" },
-                                                    "& .MuiInputBase-input": {
-                                                        fontSize: "14px",
-                                                        padding: "3px 8px",
-                                                    },
-                                                }}
-                                            />
-                                        )}
-                                        fullWidth
-                                        renderOption={(props, option) => (
-                                            <li {...props}>
-                                                <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail}`}</Typography>
-                                            </li>
-                                        )}
-                                        disabled={!showTickers} // ปิดการใช้งานถ้า showTickers เป็น false
-                                    />
-
+  id="autocomplete-registration-1"
+  options={regHead}
+  getOptionLabel={(option) =>
+    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""}`
+  }
+  isOptionEqualToValue={(option, value) => option.id === value.id}
+  value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}` === registration) : null}
+  onChange={(event, newValue) => {
+    if (newValue) {
+      const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}`;
+      setRegistration(value);
+    } else {
+      setRegistration(null);
+    }
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label={!registration ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+      variant="outlined"
+      size="small"
+      sx={{
+        "& .MuiOutlinedInput-root": { height: "30px" },
+        "& .MuiInputBase-input": { fontSize: "14px", padding: "3px 8px" },
+      }}
+    />
+  )}
+  fullWidth
+  renderOption={(props, option) => (
+    <li {...props}>
+      <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail}`}</Typography>
+    </li>
+  )}
+  disabled={!showTickers}
+/>
                                 </Paper>
                             </Box>
                         </Grid>
@@ -1724,13 +1588,13 @@ const InsertTrips = () => {
                                                 id="autocomplete-tickets"
                                                 options={getTickets()} // ดึงข้อมูลจากฟังก์ชัน getTickets()
                                                 getOptionLabel={(option) =>
-                                                    `${option.type}:${option.id || option.TicketsCode}:${option.Name || option.TicketsName}`
+                                                    `${option.TicketsName}`
                                                 } // กำหนดรูปแบบของ Label ที่แสดง
                                                 isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
-                                                value={tickets ? getTickets().find(item => item.type + ":" + item.id === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                                value={tickets ? getTickets().find(item => item.TicketsName === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
                                                 onChange={(event, newValue) => {
                                                     if (newValue) {
-                                                        const value = `${newValue.type}:${newValue.id}:${newValue.Name}`;
+                                                        const value = `${newValue.TicketsName}`;
                                                         handlePost({ target: { value } }); // อัพเดตค่าเมื่อเลือก
                                                     } else {
                                                         setTickets("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
@@ -1750,7 +1614,7 @@ const InsertTrips = () => {
                                                 )}
                                                 renderOption={(props, option) => (
                                                     <li {...props}>
-                                                        <Typography fontSize="14px">{`${option.type}:${option.id || option.TicketsCode}:${option.Name || option.TicketsName}`}</Typography>
+                                                        <Typography fontSize="14px">{`${option.TicketsName}`}</Typography>
                                                     </li>
                                                 )}
                                                 disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
@@ -1914,45 +1778,41 @@ const InsertTrips = () => {
                                 <Paper
                                     component="form" sx={{ height: "30px", width: "100%" }}>
                                     <Autocomplete
-                                        id="autocomplete-registration"
-                                        options={regHead} // ใช้ regHead เป็น options
-                                        getOptionLabel={(option) =>
-                                            `${option.Driver} : ${option.RegHead}/${option.RegTail}` // รูปแบบที่จะแสดงใน dropdown
-                                        }
-                                        isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบว่าเลือกถูกต้อง
-                                        value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}` === registration) : null} // ค่าที่เลือกจากการพิมพ์หรือเลือกใน dropdown
-                                        onChange={(event, newValue) => {
-                                            if (newValue) {
-                                                const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}`; // รูปแบบค่าที่ต้องการ
-                                                setRegistration(value); // อัปเดตค่าที่เลือก
-                                            } else {
-                                                setRegistration("0:0:0"); // รีเซ็ตค่ากลับไป
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label={registration === "0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""} // เปลี่ยน label เมื่อไม่มีการเลือก
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{
-                                                    "& .MuiOutlinedInput-root": { height: "30px" },
-                                                    "& .MuiInputBase-input": {
-                                                        fontSize: "14px",
-                                                        padding: "3px 8px",
-                                                    },
-                                                }}
-                                            />
-                                        )}
-                                        fullWidth
-                                        renderOption={(props, option) => (
-                                            <li {...props}>
-                                                <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail}`}</Typography>
-                                            </li>
-                                        )}
-                                        disabled={!showTickers} // ปิดการใช้งานถ้า showTickers เป็น false
-                                    />
-
+  id="autocomplete-registration-2"
+  options={regHead}
+  getOptionLabel={(option) =>
+    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""}`
+  }
+  isOptionEqualToValue={(option, value) => option.id === value.id}
+  value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}` === registration) : null}
+  onChange={(event, newValue) => {
+    if (newValue) {
+      const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}`;
+      setRegistration(value);
+    } else {
+      setRegistration(null);
+    }
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label={!registration ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+      variant="outlined"
+      size="small"
+      sx={{
+        "& .MuiOutlinedInput-root": { height: "30px" },
+        "& .MuiInputBase-input": { fontSize: "14px", padding: "3px 8px" },
+      }}
+    />
+  )}
+  fullWidth
+  renderOption={(props, option) => (
+    <li {...props}>
+      <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail}`}</Typography>
+    </li>
+  )}
+  disabled={!showTickers}
+/>
                                 </Paper>
                             </Box>
                         </Grid>
@@ -2257,13 +2117,13 @@ const InsertTrips = () => {
                                                 id="autocomplete-tickets"
                                                 options={getCustomers()} // ดึงข้อมูลจากฟังก์ชัน getTickets()
                                                 getOptionLabel={(option) =>
-                                                    `${option.type}:${option.id || option.TicketsCode}:${option.Name || option.TicketsName}`
+                                                    `${option.TicketsName}`
                                                 } // กำหนดรูปแบบของ Label ที่แสดง
                                                 isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
-                                                value={customers ? getTickets().find(item => item.type + ":" + item.id === customers) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                                value={customers ? getCustomers().find(item => item.TicketsName === customers) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
                                                 onChange={(event, newValue) => {
                                                     if (newValue) {
-                                                        const value = `${newValue.type}:${newValue.id}:${newValue.Name}`;
+                                                        const value = `${newValue.TicketsName}`;
                                                         handlePostSelling({ target: { value } }); // อัพเดตค่าเมื่อเลือก
                                                     } else {
                                                         setCustomers("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
@@ -2283,7 +2143,7 @@ const InsertTrips = () => {
                                                 )}
                                                 renderOption={(props, option) => (
                                                     <li {...props}>
-                                                        <Typography fontSize="14px">{`${option.type}:${option.id || option.TicketsCode}:${option.Name || option.TicketsName}`}</Typography>
+                                                        <Typography fontSize="14px">{`${option.TicketsName}`}</Typography>
                                                     </li>
                                                 )}
                                                 disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
@@ -2357,9 +2217,12 @@ const InsertTrips = () => {
                                     <Autocomplete
                                         id="depot-autocomplete"
                                         options={depot}
-                                        getOptionLabel={(option) => option.Name}
-                                        value={depot.find((d) => d.Name === depots) || null}
-                                        onChange={(event, newValue) => setDepots(newValue ? newValue.Name : '')}
+                                        getOptionLabel={(option) => `${option.Name}`}
+                                        value={depot.find((d) => d.Name+":"+d.Zone === depots) || null}
+                                        onChange={(event, newValue) => {
+                                            setDepots(newValue ? `${newValue.Name}:${newValue.Zone}` : '')
+                                            updateRatesByDepot(newValue.Zone);
+                                        }}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}

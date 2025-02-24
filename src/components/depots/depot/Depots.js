@@ -124,7 +124,7 @@ const Depots = () => {
                 คลังรับน้ำมัน
               </Typography>
               <Box textAlign="right" marginRight={3} marginTop={-10}>
-                <InserDepot />
+                <InserDepot depot={depots.length} />
               </Box>
                 <Grid container spacing={2} marginTop={1}>
                     <Grid item xs={8}>

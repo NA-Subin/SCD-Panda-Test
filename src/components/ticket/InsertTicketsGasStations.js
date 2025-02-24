@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
+    Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -147,6 +148,8 @@ const InsertTicketsGasStations = (props) => {
                     console.error("Error pushing data:", error);
                 });
         };
+        
+        console.log("ticketsName : ",ticketsName);
 
   return (
     <React.Fragment>
@@ -177,23 +180,18 @@ const InsertTicketsGasStations = (props) => {
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>ชื่อตั๋ว</Typography>
                         <Paper
                                 component="form" sx={{ width: "100%" }}>
-                                <Select
-                                    id="demo-simple-select"
-                                    value={ticketsName}
-                                    size="small"
-                                    sx={{ textAlign: "left" }}
-                                    onChange={(e) => setTicketsName(e.target.value)}
-                                    fullWidth
-                                >
-                                    <MenuItem value={"-"}>
-                                        เลือกปั้ม
-                                    </MenuItem>
-                                    {
-                                        gasStation.map((row) => (
-                                            <MenuItem value={row.Name+"/"+row.ShortName}>{row.Name+"/"+row.ShortName}</MenuItem>
-                                        ))
-                                    }
-                                </Select>
+                                <Autocomplete
+  size="small"
+  fullWidth
+  options={gasStation.map((row) => row.Name + "/" + row.ShortName)}
+  value={ticketsName}
+  onChange={(event, newValue) => {
+    setTicketsName(newValue);
+  }}
+  renderInput={(params) => (
+    <TextField {...params} label="เลือกปั้ม" variant="outlined" />
+  )}
+/>
                             </Paper>
                                 </Grid>
                                 <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">

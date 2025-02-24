@@ -33,6 +33,8 @@ const InsertTicketsTransport = () => {
     const [update, setUpdate] = React.useState(true);
     const [open, setOpen] = React.useState(false);
     const [check, setCheck] = React.useState(true);
+    const [ticketChecked1,setTicketChecked1] = React.useState(true);
+    const [ticketChecked2,setTicketChecked2] = React.useState(true);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -85,10 +87,10 @@ const InsertTicketsTransport = () => {
                     .update({
                         id: ticket + 1,
                         TicketsName: ticketsName,
-                        Status: "ตั๋ว/ผู้รับ",
+                        Status: ticketChecked1 === false && ticketChecked2 === true ? "ตั๋ว" : ticketChecked1 === true && ticketChecked2 === false ? "ผู้รับ" : ticketChecked1 === false && ticketChecked2 === false ? "ตั๋ว/ผู้รับ" : "-",
                         Rate1: rate1,
                         Rate2: rate2,
-                        Rate2: rate2,
+                        Rate3: rate3,
                         Bill: bill,
                         Code: code,
                         companyName: companyName,
@@ -168,8 +170,8 @@ const InsertTicketsTransport = () => {
                                     <FormControlLabel
                                         control={
                                             <Checkbox
-                                                // checked={ticketChecked}
-                                                // onChange={(e) => setTicketChecked(e.target.checked)}
+                                                checked={ticketChecked1 === false ? true : false}
+                                                onChange={() => setTicketChecked1(!ticketChecked1)}
                                                 size="small"
                                             />
                                         }
@@ -178,8 +180,8 @@ const InsertTicketsTransport = () => {
                                     <FormControlLabel
                                         control={
                                             <Checkbox
-                                                // checked={recipientChecked}
-                                                // onChange={(e) => setRecipientChecked(e.target.checked)}
+                                                checked={ticketChecked2 === false ? true : false}
+                                                onChange={() => setTicketChecked2(!ticketChecked2)}
                                                 size="small"
                                             />
                                         }
