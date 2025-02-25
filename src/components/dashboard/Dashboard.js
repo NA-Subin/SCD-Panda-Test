@@ -48,15 +48,19 @@ const Dashboard = () => {
   const token = Cookies.get("token");
   const [slideOut, setSlideOut] = useState(true);
 
-  const [data, setData] = useState({ officers: {}, drivers: {}, creditors: {}, order: {}, trip: {}, tickets: {} });
-
-    useEffect(() => {
-        fetchRealtimeData(setData);
-    }, []);
-
-    const { order } = useData();
-    const orderList = Object.values(order); 
-    console.log("order : ", orderList);
+    const { officers,
+      drivers,
+      creditors,
+      order,
+      trip,
+      tickets,  } = useData(); 
+    const orders = Object.values(order || {}); 
+    const trips = Object.values(trip || {}); 
+    const creditor = Object.values(creditors || {}); 
+    const driver = Object.values(drivers || {}); 
+    const ticket = Object.values(tickets || {}); 
+    const officer = Object.values(officers || {}); 
+    console.log("trip : ", trips.length);
 
   const pieParams = {
     width: 290,
@@ -155,7 +159,7 @@ const Dashboard = () => {
               </Typography>
               <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
               <Typography variant="h2" gutterBottom>
-                {data.trip.length}
+                {trips.length}
               </Typography>
             </Box>
           {/* <Box
@@ -209,7 +213,7 @@ const Dashboard = () => {
               </Typography>
               <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
               <Typography variant="h2" gutterBottom>
-                {data.order.length}
+                {orders.length}
               </Typography>
             </Box>
           {/* <Box
@@ -266,7 +270,7 @@ const Dashboard = () => {
               </Typography>
               <Divider sx={{ marginBottom:1, border: "1px solid white" }}/>
               <Typography variant="h2" gutterBottom>
-                {data.tickets.length}
+                {ticket.length}
               </Typography>
             </Box>
           {/* <Box
@@ -306,16 +310,16 @@ const Dashboard = () => {
         <Grid item xs={12} sm={6} lg={3}>
           <Paper sx={{ height: "30vh",backgroundColor: theme.palette.panda.contrastText,borderRadius:5 }}>
             <Box sx={{ backgroundColor: theme.palette.panda.main, borderTopLeftRadius: 15, borderTopRightRadius: 15, color: "white" }}>
-              <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>จำนวนพนักงาน( ทั้งหมด {data.officers.length+data.drivers.length+data.creditors.length} คน)</Typography> 
+              <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>จำนวนพนักงาน( ทั้งหมด {officer.length+driver.length+creditor.length} คน)</Typography> 
             </Box>
             <Box sx={{ backgroundColor: "white",marginTop: -0.5, marginLeft: 0.5, marginRight:0.5 , paddingBottom: 0.5 }}>
             <PieChart
               series={[
                 {
                   data: [
-                    { id: 0, value: data.officers.length, label: 'พนักงานบริษัท',color: theme.palette.success.main },
-                    { id: 1, value: data.drivers.length, label: 'พนักงานขับรถ',color: theme.palette.primary.main },
-                    { id: 2, value: data.creditors.length, label: 'เจ้าหนี้การค้า',color: theme.palette.warning.main },
+                    { id: 0, value: officer.length, label: 'พนักงานบริษัท',color: theme.palette.success.main },
+                    { id: 1, value: driver.length, label: 'พนักงานขับรถ',color: theme.palette.primary.main },
+                    { id: 2, value: creditor.length, label: 'เจ้าหนี้การค้า',color: theme.palette.warning.main },
                   ],
                   innerRadius: 30,
                 },

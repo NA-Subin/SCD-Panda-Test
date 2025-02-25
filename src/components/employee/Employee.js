@@ -20,6 +20,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
   Tooltip,
@@ -159,6 +160,28 @@ const Employee = () => {
       });
   }
 
+  const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+  
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+  
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    };
+
+    const handleChangeOpen1 = (event) => {
+      setOpen(1);
+      setPage(0);
+    };
+
+    const handleChangeOpen2 = (event) => {
+      setOpen(2);
+      setPage(0);
+    };
+
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
       <Typography
@@ -172,7 +195,7 @@ const Employee = () => {
       <Divider sx={{ marginBottom: 2 }} />
       <Grid container spacing={3} marginTop={1} marginLeft={-7} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230) }}>
         <Grid item xs={12}>
-          <InsertEmployee type={open} driver={datadrivers}/>
+          <InsertEmployee type={open} driver={datadrivers} officer={dataofficers} truck={registrationHead} smallTruck={registrationSmallTruck} />
         </Grid>
         {shouldDrawerOpen ? (
           <Grid item xs={1.5}>
@@ -198,7 +221,7 @@ const Employee = () => {
               color={open === 1 ? "info" : "inherit"}
               size="small"
               fullWidth
-              onClick={() => setOpen(1)}
+              onClick={handleChangeOpen1}
               sx={{ marginBottom: 1.3 }}
             >
               <Badge
@@ -226,7 +249,7 @@ const Employee = () => {
               color={open === 2 ? "info" : "inherit"}
               size="small"
               fullWidth
-              onClick={() => setOpen(2)}
+              onClick={handleChangeOpen2}
               sx={{ marginBottom: 1.3 }}
             >
               <Badge
@@ -334,7 +357,6 @@ const Employee = () => {
             <Paper
               sx={{
                 p: 2,
-                height: "70vh"
               }}
             >
               <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -343,7 +365,6 @@ const Employee = () => {
               <Divider sx={{ marginBottom: 1 }} />
               <TableContainer
                 component={Paper}
-                style={{ maxHeight: "90vh" }}
                 sx={{ marginTop: 2 }}
               >
                 <Table stickyHeader size="small" sx={{ width: "1080px"}}>
@@ -369,7 +390,7 @@ const Employee = () => {
                   </TableHead>
                   <TableBody>
                     {
-                      dataofficers.map((row) => (
+                      dataofficers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                         <TableRow>
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
@@ -383,12 +404,57 @@ const Employee = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              {
+  dataofficers.length < 5 ? null :
+    <TablePagination
+      rowsPerPageOptions={[5, 10, 25]}
+      component="div"
+      count={dataofficers.length}
+      rowsPerPage={rowsPerPage}
+      page={page}
+      onPageChange={handleChangePage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+      labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+      labelDisplayedRows={({ from, to, count }) =>
+        `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+      }
+      sx={{
+        overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
+        '& .MuiTablePagination-toolbar': {
+          backgroundColor: "lightgray",
+          height: "20px", // กำหนดความสูงของ toolbar
+          alignItems: "center",
+          paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+          overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+          fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+        },
+        '& .MuiTablePagination-select': {
+          paddingY: 0,
+          fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+        },
+        '& .MuiTablePagination-actions': {
+          '& button': {
+            paddingY: 0,
+            fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+          },
+        },
+        '& .MuiTablePagination-displayedRows': {
+          fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+        },
+        '& .MuiTablePagination-selectLabel': {
+          fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+        }
+      }}
+    />
+}
+
             </Paper>
           ) : open === 2 ? (
             <Paper
               sx={{
                 p: 2,
-                height: "70vh"
               }}
             >
               <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -397,7 +463,6 @@ const Employee = () => {
               <Divider sx={{ marginBottom: 1 }} />
               <TableContainer
                 component={Paper}
-                style={{ maxHeight: "90vh" }}
                 sx={{ marginTop: 2 }}
               >
                 <Table stickyHeader size="small" sx={{ width: "1200px" }}>
@@ -429,7 +494,7 @@ const Employee = () => {
                   </TableHead>
                   <TableBody>
                     {
-                      datadrivers.map((row) => (
+                      datadrivers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                         <TableRow >
                           <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
@@ -514,6 +579,52 @@ const Employee = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              {
+  datadrivers.length < 5 ? null :
+    <TablePagination
+      rowsPerPageOptions={[5, 10, 25]}
+      component="div"
+      count={datadrivers.length}
+      rowsPerPage={rowsPerPage}
+      page={page}
+      onPageChange={handleChangePage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+      labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+      labelDisplayedRows={({ from, to, count }) =>
+        `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+      }
+      sx={{
+        overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
+        '& .MuiTablePagination-toolbar': {
+          backgroundColor: "lightgray",
+          height: "20px", // กำหนดความสูงของ toolbar
+          alignItems: "center",
+          paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+          overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+          fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+        },
+        '& .MuiTablePagination-select': {
+          paddingY: 0,
+          fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+        },
+        '& .MuiTablePagination-actions': {
+          '& button': {
+            paddingY: 0,
+            fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+          },
+        },
+        '& .MuiTablePagination-displayedRows': {
+          fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+        },
+        '& .MuiTablePagination-selectLabel': {
+          fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+        }
+      }}
+    />
+}
+
             </Paper>
           ) : ""
           }

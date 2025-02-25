@@ -42,14 +42,18 @@ import UploadButton from "./UploadButton";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useData } from "../../server/path";
 
 const InsertEmployee = (props) => {
-    const { type, driver } = props;
+    const { type, driver,officer,truck,smallTruck } = props;
     const [menu, setMenu] = React.useState(type);
 
     React.useEffect(() => {
         setMenu(type);  // อัปเดต state เมื่อ props.type เปลี่ยน
     }, [type]);
+
+    const { gasstation } = useData();
+    const gasStation = Object.values(gasstation); 
 
     const [open, setOpen] = React.useState(false);
     const [prefix, setPrefix] = React.useState(0);
@@ -67,14 +71,6 @@ const InsertEmployee = (props) => {
         setOpen(false);
     };
 
-    const [officer, setOfficer] = useState([]);
-    const getOfficer = async () => {
-        database.ref("/employee/officers/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setOfficer(datas.length);
-        });
-    };
-
     const [regTruck, setRegTruck] = React.useState("0:ไม่มี");
     const [bank, setBank] = React.useState("");
     const [bankID, setBankID] = React.useState("");
@@ -86,60 +82,7 @@ const InsertEmployee = (props) => {
     const [loan, setLoan] = React.useState("");
     const [drivingLicense, setDrivingLicense] = React.useState("");
     const [expiration, setExpiration] = React.useState("");
-    const [truck, setTruck] = useState([]);
-    const [smallTruck, setSmallTruck] = useState([]);
-    const [gasStation, setGasStation] = useState([]);
     const [gasStations, setGasStations] = useState("");
-
-    const getTruck = async () => {
-        database.ref("/truck/registration/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataTruck = [];
-            for (let id in datas) {
-                if (datas[id].Driver === "ไม่มี") {
-                    dataTruck.push({ id, ...datas[id] })
-                }
-            }
-            setTruck(dataTruck);
-        });
-
-        database.ref("/truck/small/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataSmallTruck = [];
-            for (let id in datas) {
-                if (datas[id].Driver === "ไม่มี") {
-                    dataSmallTruck.push({ id, ...datas[id] })
-                }
-            }
-            setSmallTruck(dataSmallTruck);
-        });
-    };
-
-    const getGasStation = async () => {
-        database.ref("/depot/gasStations/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataGasStation = [];
-            for (let id in datas) {
-                dataGasStation.push({ id, ...datas[id] })
-            }
-            setGasStation(dataGasStation);
-        });
-    };
-
-    // const [driver, setDriver] = useState([]);
-    // const getDriver = async () => {
-    //     database.ref("/employee/drivers/").on("value", (snapshot) => {
-    //         const datas = snapshot.val();
-    //         setDriver(datas.length);
-    //     });
-    // };
-
-    useEffect(() => {
-        getGasStation();
-        getTruck();
-        getOfficer();
-        // getDriver();
-    }, []);
 
     const [position, setPosition] = React.useState("");
     const [phone, setPhone] = React.useState("");
@@ -151,9 +94,9 @@ const InsertEmployee = (props) => {
                 (userCredential) => {
                     database
                         .ref("employee/officers/")
-                        .child(officer)
+                        .child(officer.length)
                         .update({
-                            id: officer + 1,
+                            id: officer.length + 1,
                             Name: prefix + name + " " + lastname,
                             User: user,
                             Password: password,

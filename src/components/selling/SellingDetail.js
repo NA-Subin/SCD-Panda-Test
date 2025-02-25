@@ -571,9 +571,9 @@ const SellingDetail = (props) => {
     return (
         <React.Fragment>
             <TableRow>
-                <TablecellHeader sx={{ textAlign: "center", height: "20px", width: 50, padding: "1px 4px" }}>
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 50, padding: "1px 4px",backgroundColor: theme.palette.success.dark,color: "white" }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.id + 1}</Typography>
-                </TablecellHeader>
+                </TableCell>
                 {/* <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]+detail.TicketName.split(":")[1]}</Typography>
                 </TableCell> */}
@@ -737,7 +737,7 @@ const SellingDetail = (props) => {
                                     </Paper>
                             }
                         </TableCellG91> */}
-                <TableCellG91 sx={{ textAlign: "center", height: "20px", width: 60 }}>
+                <TableCellB95 sx={{ textAlign: "center", height: "20px", width: 60 }}>
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
@@ -758,23 +758,23 @@ const SellingDetail = (props) => {
                                             paddingLeft: 2
                                         },
                                     }}
-                                    value={detail.Product?.G91?.Volume || ""}
+                                    value={detail.Product?.B95?.Volume || ""}
                                     onChange={(e) => {
                                         let newValue = e.target.value;
-                                        onAddProduct("G91", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        onAddProduct("B95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
                                     }}
                                     onFocus={(e) => {
-                                        if (e.target.value === "0") onAddProduct("G91", "Volume", "");
+                                        if (e.target.value === "0") onAddProduct("B95", "Volume", "");
                                     }}
                                     onBlur={(e) => {
-                                        if (e.target.value === "") onAddProduct("G91", "Volume", 0);
+                                        if (e.target.value === "") onAddProduct("B95", "Volume", 0);
                                     }}
                                 />
                             </Paper>
                             :
-                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.G91?.Volume || "-"}</Typography>
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B95?.Volume || "-"}</Typography>
                     }
-                </TableCellG91>
+                </TableCellB95>
                 {/* <TableCellB7 sx={{ textAlign: "center" }}>
                         {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth type="number"
@@ -937,7 +937,7 @@ const SellingDetail = (props) => {
                                     </Paper>
                             }
                         </TableCellB95> */}
-                <TableCellB95 sx={{ textAlign: "center", height: "20px", width: 60 }}>
+                <TableCellG91 sx={{ textAlign: "center", height: "20px", width: 60 }}>
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
@@ -958,23 +958,23 @@ const SellingDetail = (props) => {
                                             paddingLeft: 2
                                         },
                                     }}
-                                    value={detail.Product?.B95?.Volume || ""}
+                                    value={detail.Product?.G91?.Volume || ""}
                                     onChange={(e) => {
                                         let newValue = e.target.value;
-                                        onAddProduct("B95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                        onAddProduct("G91", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
                                     }}
                                     onFocus={(e) => {
-                                        if (e.target.value === "0") onAddProduct("B95", "Volume", "");
+                                        if (e.target.value === "0") onAddProduct("G91", "Volume", "");
                                     }}
                                     onBlur={(e) => {
-                                        if (e.target.value === "") onAddProduct("B95", "Volume", 0);
+                                        if (e.target.value === "") onAddProduct("G91", "Volume", 0);
                                     }}
                                 />
                             </Paper>
                             :
-                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B95?.Volume || "-"}</Typography>
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.G91?.Volume || "-"}</Typography>
                     }
-                </TableCellB95>
+                </TableCellG91>
                 {/* <TableCellE20 sx={{ textAlign: "center" }}>
                         {           <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth type="number"

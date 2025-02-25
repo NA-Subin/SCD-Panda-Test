@@ -388,7 +388,7 @@ export default function Navbar() {
                     { to: "/customer-smalltrucks", icon: <GroupsIcon fontSize="medium" /> },
                     { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="medium" /> },
                     { to: "/gasstations", icon: <LocalGasStationIcon fontSize="medium" /> },
-                    { to: "/selling", icon: <ListAltIcon fontSize="medium" /> },
+                    { to: "/trips", icon: <ListAltIcon fontSize="medium" /> },
                     { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
                   ].map((item, index) => (
                     <Button
@@ -977,7 +977,7 @@ export default function Navbar() {
                   <ListItemButton
                     component={Link}
                     to={
-                      index === 0 ? "/gasstations" : "/selling"
+                      index === 0 ? "/gasstations" : "/trips"
                     }
                     sx={{
                       height: 40, // กำหนดความสูงให้ ListItem

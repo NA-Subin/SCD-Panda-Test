@@ -42,7 +42,8 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
 
-const InsertCreditor = () => {
+const InsertCreditor = (props) => {
+    const { creditor } = props;
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [prefix, setPrefix] = React.useState(0);
@@ -69,20 +70,10 @@ const InsertCreditor = () => {
     const [lat,setLat] = React.useState("");
     const [lng,setLng] = React.useState("");
 
-    const [creditor, setCreditor] = useState([]);
-    const getCreditor = async () => {
-        database.ref("/employee/creditors/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setCreditor(datas.length);
-        });
-    };
-
-    useEffect(() => {
-        getCreditor();
-    }, []);
-
     const [position, setPosition] = React.useState("");
     const [phone, setPhone] = React.useState("");
+
+    console.log("creditor : ", creditor);
 
     const handlePost = () => {
         database
@@ -117,8 +108,6 @@ const InsertCreditor = () => {
                 console.error("Error pushing data:", error);
             });
     };
-
-
 
     return (
         <React.Fragment>

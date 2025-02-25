@@ -237,9 +237,9 @@ const Trucks = () => {
               </Grid>
               <Grid item xs={12}>
               {
-                openMenu === 1 ? <BigTruckRegHead truck={datareghead} repair={repairRegHead} loading={loading} />
-                  : openMenu === 2 ? <BigTruckRegTail truck={dataregtail} status={status} />
-                    : <SmallTruck truck={datasmall} repair={repairSmallTruck} />
+                openMenu === 1 ? <BigTruckRegHead repair={repairRegHead} loading={loading} />
+                  : openMenu === 2 ? <BigTruckRegTail status={status} />
+                    : <SmallTruck repair={repairSmallTruck} />
 
               }
               </Grid>

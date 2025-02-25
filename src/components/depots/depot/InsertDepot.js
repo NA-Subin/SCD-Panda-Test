@@ -63,6 +63,8 @@ const InsertDepot = (props) => {
     const [lng, setLng] = React.useState("");
     const [zone, setZone] = React.useState("-");
 
+    console.log("depot : ",depot);
+
     const handlePost = () => {
         database
             .ref("depot/oils/")

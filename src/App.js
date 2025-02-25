@@ -5,7 +5,6 @@ import Dashboard from "./components/dashboard/Dashboard";
 import { Box } from "@mui/material";
 import Navbar from "./components/navbar/Navbar";
 import { ThemeProvider } from "@mui/material";
-import Selling from "./components/selling/Selling";
 import Employee from "./components/employee/Employee";
 import GasStations from "./components/depots/GasStations";
 import Customer from "./components/customer/Customer";
@@ -25,12 +24,15 @@ import TicketsTransport from "./components/ticket/TicketsTransport";
 import TicketsBigTruck from "./components/ticket/TicketsBigTruck";
 import TicketSmallTruck from "./components/ticket/TicketsSmallTruck";
 import Depots from "./components/depots/depot/Depots";
+import Trips from "./components/selling/Trips";
+import { DataProvider } from "./server/path";
 
 function App() {
 
   return (
       <BrowserRouter>
       <ThemeProvider theme={theme}>
+      <DataProvider>
       <Routes>
         <Route path="/" element={<Login />} />
         {/* <Route path="/:email/*" element={ */}
@@ -60,7 +62,7 @@ function App() {
                   <Route path="/edit-firebase" element={<Editfirebase />} />
                 </Routes>
                 <Routes>
-                  <Route path="/selling" element={<Selling />} />
+                  <Route path="/trips" element={<Trips />} />
                 </Routes>
                 <Routes>
                   <Route path="/employee" element={<Employee />} />
@@ -97,6 +99,7 @@ function App() {
           }
         />
       </Routes>
+      </DataProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

@@ -23,6 +23,7 @@ import {
     TableCell,
     TableContainer,
     TableHead,
+    TablePagination,
     TableRow,
     TextField,
     Tooltip,
@@ -34,22 +35,14 @@ import { database } from "../../../server/firebase";
 import UpdateDepot from "./UpdateDepot";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import InserDepot from "./InsertDepot";
+import { useData } from "../../../server/path";
 
 const Depots = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
-    const [depot, setDepot] = useState(0);
 
-    const getDepot = async () => {
-        database.ref("/depot/oils").on("value", (snapshot) => {
-        const datas = snapshot.val();
-        setDepot(datas.length);
-        });
-    };
-
-    useEffect(() => {
-        getDepot();
-    }, []);
+    const { depots } = useData();
+      const depot = Object.values(depots || {});
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -58,21 +51,6 @@ const Depots = () => {
     const handleClose = () => {
         setOpen(false);
     };
-
-    const [depots,setDepots] = useState([]);
-    const getDepots = async () => {
-        database.ref("/depot/oils").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                dataList.push({ id, ...datas[id] });
-            }
-            setDepots(dataList);
-        });
-    };
-    useEffect(() => {
-        getDepots();
-    }, []);
 
     const [name, setName] = React.useState("");
     const [no, setNo] = React.useState("");
@@ -84,34 +62,17 @@ const Depots = () => {
     const [lat, setLat] = React.useState("");
     const [lng, setLng] = React.useState("");
 
-    const handlePost = () => {
-        database
-            .ref("depot/oils/")
-            .child(depot.length)
-            .update({
-                id: depot.length + 1,
-                Name: name,
-                Address: 
-                (no === "-" ? "-" : no)+
-                (village === "-" ? "" : ","+village)+
-                (subDistrict === "-" ? "" : ","+subDistrict)+
-                (district === "-" ? "" : ","+district)+
-                (province === "-" ? "" : ","+province)+
-                (zipCode === "-" ? "" : ","+zipCode)
-                ,
-                lat: lat,
-                lng: lng
-            })
-            .then(() => {
-                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                console.log("Data pushed successfully");
-                setOpen(false);
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
-    };
+    const [page, setPage] = useState(0);
+      const [rowsPerPage, setRowsPerPage] = useState(10);
+    
+      const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+      };
+    
+      const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+      };
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -124,7 +85,7 @@ const Depots = () => {
                 คลังรับน้ำมัน
               </Typography>
               <Box textAlign="right" marginRight={3} marginTop={-10}>
-                <InserDepot depot={depots.length} />
+                <InserDepot depot={depot.length} />
               </Box>
                 <Grid container spacing={2} marginTop={1}>
                     <Grid item xs={8}>
@@ -165,7 +126,7 @@ const Depots = () => {
                         </TableHead>
                         <TableBody>
                             {
-                                depots.map((row) => (
+                                depot.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                     <TableRow>
                                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
@@ -180,6 +141,51 @@ const Depots = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                {
+  depot.length < 10 ? null :
+    <TablePagination
+      rowsPerPageOptions={[10, 25, 30]}
+      component="div"
+      count={depot.length}
+      rowsPerPage={rowsPerPage}
+      page={page}
+      onPageChange={handleChangePage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+      labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+      labelDisplayedRows={({ from, to, count }) =>
+        `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+      }
+      sx={{
+        overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
+        '& .MuiTablePagination-toolbar': {
+          backgroundColor: "lightgray",
+          height: "20px", // กำหนดความสูงของ toolbar
+          alignItems: "center",
+          paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+          overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+          fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+        },
+        '& .MuiTablePagination-select': {
+          paddingY: 0,
+          fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+        },
+        '& .MuiTablePagination-actions': {
+          '& button': {
+            paddingY: 0,
+            fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+          },
+        },
+        '& .MuiTablePagination-displayedRows': {
+          fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+        },
+        '& .MuiTablePagination-selectLabel': {
+          fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+        }
+      }}
+    />
+}
         </Container>
     );
 };

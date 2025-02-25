@@ -34,9 +34,10 @@ import theme from "../../theme/theme";
 import { RateOils, TablecellHeader } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import InfoIcon from '@mui/icons-material/Info';
 
 const TripsDetail = (props) => {
-    const { trips,windowWidth } = props;
+    const { trips, windowWidth } = props;
     const [approve, setApprove] = React.useState(false);
 
     const handleApprove = () => {
@@ -81,73 +82,91 @@ const TripsDetail = (props) => {
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateStart}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Depot}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Driver}/{trips.Registration}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order1 === undefined ? "-" : trips.Order1.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order2 === undefined ? "-" : trips.Order2.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order3 === undefined ? "-" : trips.Order3.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order4 === undefined ? "-" : trips.Order4.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order5 === undefined ? "-" : trips.Order5.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order6 === undefined ? "-" : trips.Order6.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order7 === undefined ? "-" : trips.Order7.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Order8 === undefined ? "-" : trips.Order8.split(":")[3]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.WeightOil}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.WeightTruck}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{parseFloat(trips.WeightOil) + parseFloat(trips.WeightTruck)}</TableCell>
-                <TableCell sx={{
-                    textAlign: "center", 
-                    color: "white", 
-                    backgroundColor: 
-                    trips.Status === "รออนุมัติ" ? "yellowgreen" 
-                    : trips.Status === "ไม่อนุมัติ" ? "orangered" 
-                    : trips.Status === "อนุมัติแล้ว" ? "blue" 
-                    : trips.Status === "ยกเลิก" ? "red" 
-                    : "green", 
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order1 === undefined ? "-" : trips.Order1}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order2 === undefined ? "-" : trips.Order2}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order3 === undefined ? "-" : trips.Order3}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order4 === undefined ? "-" : trips.Order4}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order5 === undefined ? "-" : trips.Order5}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order6 === undefined ? "-" : trips.Order6}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order7 === undefined ? "-" : trips.Order7}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.Order8 === undefined ? "-" : trips.Order8}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(trips.CostTrip)}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(parseFloat(trips.WeightHigh) + parseFloat(trips.WeightLow))}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(trips.WeightTruck)}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(trips.TotalWeight)}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                    <IconButton color="info" size="small">
+                        <InfoIcon fontSize="small"/>
+                    </IconButton>
+                </TableCell>
+                {/* <TableCell sx={{
+                    textAlign: "center",
+                    color: "white",
+                    backgroundColor:
+                        trips.Status === "รออนุมัติ" ? "yellowgreen"
+                            : trips.Status === "ไม่อนุมัติ" ? "orangered"
+                                : trips.Status === "อนุมัติแล้ว" ? "blue"
+                                    : trips.Status === "ยกเลิก" ? "red"
+                                        : "green",
                     position: "sticky",
                     right: windowWidth <= 900 ? 0 : "200px", // ติดซ้ายสุด
                     zIndex: windowWidth <= 900 ? 2 : 4,
                 }}>{trips.Status}</TableCell>
                 <TableCell sx={
                     windowWidth <= 900 ?
-                    { textAlign: "center" }
-                    :
-                    (trips.Status === "รออนุมัติ" ?
                         { textAlign: "center" }
                         :
-                        {
-                            textAlign: "center",
-                            position: "sticky",
-                            right: 0, // ระยะที่ชิดซ้ายต่อจากเซลล์ก่อนหน้า
-                            backgroundColor: "#fff", // ใส่พื้นหลังเพื่อไม่ให้โปร่งใส
-                            zIndex: 1,
-                        })
-                }>{trips.Creditor}</TableCell>
-                <TableCell
-                    sx={
-                        windowWidth <= 900 ?
-                        {
-                            textAlign: "center",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                        }
-                        :
-                        trips.Status === "รออนุมัติ" ?
+                        (trips.Status === "รออนุมัติ" ?
+                            { textAlign: "center" }
+                            :
                             {
                                 textAlign: "center",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
                                 position: "sticky",
                                 right: 0, // ระยะที่ชิดซ้ายต่อจากเซลล์ก่อนหน้า
                                 backgroundColor: "#fff", // ใส่พื้นหลังเพื่อไม่ให้โปร่งใส
                                 zIndex: 1,
-                            }
-                            :
+                            })
+                }>{trips.Creditor}</TableCell>
+                <TableCell
+                    sx={
+                        windowWidth <= 900 ?
                             {
                                 textAlign: "center",
                                 display: "flex",
                                 justifyContent: "center",
                                 alignItems: "center",
                             }
+                            :
+                            trips.Status === "รออนุมัติ" ?
+                                {
+                                    textAlign: "center",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    position: "sticky",
+                                    right: 0, // ระยะที่ชิดซ้ายต่อจากเซลล์ก่อนหน้า
+                                    backgroundColor: "#fff", // ใส่พื้นหลังเพื่อไม่ให้โปร่งใส
+                                    zIndex: 1,
+                                }
+                                :
+                                {
+                                    textAlign: "center",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }
                     }>
                     {
                         trips.Status === "รออนุมัติ" ?
@@ -158,7 +177,7 @@ const TripsDetail = (props) => {
                             :
                             <Button variant="text" size="small" fullWidth>-</Button>
                     }
-                </TableCell>
+                </TableCell> */}
             </TableRow>
         </React.Fragment>
 

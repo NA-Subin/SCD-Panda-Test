@@ -14,6 +14,7 @@ import {
     TableCell,
     TableContainer,
     TableHead,
+    TablePagination,
     TableRow,
     TextField,
     Typography,
@@ -40,28 +41,28 @@ const TicketsTransport = () => {
     const [open, setOpen] = useState(1);
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-            
-              // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-              useEffect(() => {
-                const handleResize = () => {
-                  setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-                };
-            
-                window.addEventListener('resize', handleResize); // เพิ่ม event listener
-            
-                // ลบ event listener เมื่อ component ถูกทำลาย
-                return () => {
-                  window.removeEventListener('resize', handleResize);
-                };
-              }, []);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // ดึงข้อมูลจาก Firebase
     const getTransport = async () => {
         database.ref("/customers/transports/").on("value", (snapshot) => {
             const datas = snapshot.val();
-            if(datas === null || datas === undefined){
+            if (datas === null || datas === undefined) {
                 setTransport([]);
-            }else{
+            } else {
                 const dataList = [];
                 for (let id in datas) {
                     dataList.push({ id, ...datas[id] })
@@ -70,21 +71,21 @@ const TicketsTransport = () => {
             }
         });
     };
-    
-        const getGasStation = async () => {
-            database.ref("/customers/gasstations/").on("value", (snapshot) => {
-                const datas = snapshot.val();
-                if(datas === null || datas === undefined){
-                    setGasStation([]);
-                }else{
-                    const dataList = [];
-                    for (let id in datas) {
-                        dataList.push({ id, ...datas[id] })
-                    }
-                    setGasStation(dataList);
+
+    const getGasStation = async () => {
+        database.ref("/customers/gasstations/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            if (datas === null || datas === undefined) {
+                setGasStation([]);
+            } else {
+                const dataList = [];
+                for (let id in datas) {
+                    dataList.push({ id, ...datas[id] })
                 }
-            });
-        };
+                setGasStation(dataList);
+            }
+        });
+    };
 
     useEffect(() => {
         getTransport();
@@ -92,48 +93,60 @@ const TicketsTransport = () => {
     }, []);
 
     // State สำหรับเก็บค่าแก้ไข Rate
-        const [rate1Edit, setRate1Edit] = useState("");
-        const [rate2Edit, setRate2Edit] = useState("");
-        const [rate3Edit, setRate3Edit] = useState("");
-    
-        // ฟังก์ชันสำหรับกดแก้ไข
-        const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3) => {
-            setSetting(true);
-            setSelectedRowId(rowId);
-            // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
-            const hasTicket = status.includes("ตั๋ว");
-            const hasRecipient = status.includes("ผู้รับ");
-            setTicketChecked(hasTicket);
-            setRecipientChecked(hasRecipient);
-            // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
-            setRate1Edit(rowRate1);
-            setRate2Edit(rowRate2);
-            setRate3Edit(rowRate3);
-        };
-    
-        // ฟังก์ชันสำหรับบันทึก
-        const handleSave = async () => {
-            const newStatus = [
-                ticketChecked ? "ตั๋ว" : "",
-                recipientChecked ? "ผู้รับ" : ""
-            ].filter((s) => s).join("/");
-    
-            // Update ทั้ง Status และค่า Rate ไปยัง Firebase
-            await database.ref(`/customers/transports/${selectedRowId - 1}`).update({
-                Status: newStatus,
-                Rate1: rate1Edit,
-                Rate2: rate2Edit,
-                Rate3: rate3Edit,
-            });
-            // Reset state หลังบันทึก
-            setSetting(false);
-            setSelectedRowId(null);
-        };
+    const [rate1Edit, setRate1Edit] = useState("");
+    const [rate2Edit, setRate2Edit] = useState("");
+    const [rate3Edit, setRate3Edit] = useState("");
+
+    // ฟังก์ชันสำหรับกดแก้ไข
+    const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3) => {
+        setSetting(true);
+        setSelectedRowId(rowId);
+        // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
+        const hasTicket = status.includes("ตั๋ว");
+        const hasRecipient = status.includes("ผู้รับ");
+        setTicketChecked(hasTicket);
+        setRecipientChecked(hasRecipient);
+        // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
+        setRate1Edit(rowRate1);
+        setRate2Edit(rowRate2);
+        setRate3Edit(rowRate3);
+    };
+
+    // ฟังก์ชันสำหรับบันทึก
+    const handleSave = async () => {
+        const newStatus = [
+            ticketChecked ? "ตั๋ว" : "",
+            recipientChecked ? "ผู้รับ" : ""
+        ].filter((s) => s).join("/");
+
+        // Update ทั้ง Status และค่า Rate ไปยัง Firebase
+        await database.ref(`/customers/transports/${selectedRowId - 1}`).update({
+            Status: newStatus,
+            Rate1: rate1Edit,
+            Rate2: rate2Edit,
+            Rate3: rate3Edit,
+        });
+        // Reset state หลังบันทึก
+        setSetting(false);
+        setSelectedRowId(null);
+    };
 
     const handleCancel = () => {
         setSetting(false);
         setSelectedRowId(null);
     };
+
+    const [page, setPage] = useState(0);
+        const [rowsPerPage, setRowsPerPage] = useState(5);
+    
+        const handleChangePage = (event, newPage) => {
+            setPage(newPage);
+        };
+    
+        const handleChangeRowsPerPage = (event) => {
+            setRowsPerPage(parseInt(event.target.value, 10));
+            setPage(0);
+        };
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -143,7 +156,7 @@ const TicketsTransport = () => {
                 textAlign="center"
                 gutterBottom
             >
-                {open === 1 ? "ลูกค้ารับจ้างขนส่ง" : "ปั้มน้ำมัน" }
+                {open === 1 ? "ลูกค้ารับจ้างขนส่ง" : "ปั้มน้ำมัน"}
             </Typography>
             <Divider sx={{ marginBottom: 1 }} />
             <Grid container spacing={2} marginTop={1}>
@@ -171,250 +184,338 @@ const TicketsTransport = () => {
                     </Grid>
                     <Grid item xs={3}>
                         {
-                            open === 1 ? <InsertTicketsTransport show={open}/> : <InsertTicketsGasStations show={open} />
+                            open === 1 ? <InsertTicketsTransport show={open} /> : <InsertTicketsGasStations show={open} />
                         }
                     </Grid>
                 </Grid>
-                <Divider sx={{ marginBottom: 1,marginTop: 2 }} />
+                <Divider sx={{ marginBottom: 1, marginTop: 2 }} />
                 {
                     open === 1 ?
-                    <TableContainer
-                    component={Paper}
-                    style={{ maxHeight: "70vh" }}
-                    sx={{ marginTop: 2 }}
-                >
-                    <Table stickyHeader size="small">
-                        <TableHead sx={{ height: "7vh" }}>
-                            <TableRow>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
-                                    ลำดับ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                    ชื่อตั๋ว
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                    เรทคลังลำปาง
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                    เรทคลังพิจิตร
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                    เรทคลังสระบุรี/บางปะอิน/IR
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                    สถานะ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ width: 50 }} />
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                transport === null || transport === undefined ?
-                                <TableRow>
-                                    <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
-                                </TableRow>
-                                :
-                                transport.map((row) => (
-                                    <TableRow key={row.id}>
-                                        <TableCell sx={{ textAlign: "center" }}>
-                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                {row.id}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
-                                                                                    {
-                                                                                        // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
-                                                                                        !setting || row.id !== selectedRowId ?
-                                                                                            row.Rate1
-                                                                                            :
-                                                                                            <TextField
-                                                                                                type="number"
-                                                                                                InputLabelProps={{
-                                                                                                    sx: {
-                                                                                                        fontSize: '14px',
-                                                                                                    },
-                                                                                                }}
-                                                                                                sx={{
-                                                                                                    '& .MuiOutlinedInput-root': {
-                                                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                                                    },
-                                                                                                    '& .MuiInputBase-input': {
-                                                                                                        fontSize: '14px', // ขนาด font เวลาพิมพ์
-                                                                                                        fontWeight: 'bold',
-                                                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                                                        paddingLeft: 2
-                                                                                                    },
-                                                                                                }}
-                                                                                                value={rate1Edit}
-                                                                                                onChange={(e) => setRate1Edit(e.target.value)}
-                                                                                                size="small"
-                                                                                                variant="outlined"
-                                                                                            />
-                                                                                    }
-                                                                                </TableCell>
-                                                                                <TableCell sx={{ textAlign: "center" }}>
-                                                                                    {
-                                                                                        !setting || row.id !== selectedRowId ?
-                                                                                            row.Rate2
-                                                                                            :
-                                                                                            <TextField
-                                                                                                type="number"
-                                                                                                InputLabelProps={{
-                                                                                                    sx: {
-                                                                                                        fontSize: '14px',
-                                                                                                    },
-                                                                                                }}
-                                                                                                sx={{
-                                                                                                    '& .MuiOutlinedInput-root': {
-                                                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                                                    },
-                                                                                                    '& .MuiInputBase-input': {
-                                                                                                        fontSize: '14px', // ขนาด font เวลาพิมพ์
-                                                                                                        fontWeight: 'bold',
-                                                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                                                        paddingLeft: 2
-                                                                                                    },
-                                                                                                }}
-                                                                                                value={rate2Edit}
-                                                                                                onChange={(e) => setRate2Edit(e.target.value)}
-                                                                                                size="small"
-                                                                                                variant="outlined"
-                                                                                            />
-                                                                                    }
-                                                                                </TableCell>
-                                                                                <TableCell sx={{ textAlign: "center" }}>
-                                                                                    {
-                                                                                        !setting || row.id !== selectedRowId ?
-                                                                                            row.Rate3
-                                                                                            :
-                                                                                            <TextField
-                                                                                                type="number"
-                                                                                                InputLabelProps={{
-                                                                                                    sx: {
-                                                                                                        fontSize: '14px',
-                                                                                                    },
-                                                                                                }}
-                                                                                                sx={{
-                                                                                                    '& .MuiOutlinedInput-root': {
-                                                                                                        height: '30px', // ปรับความสูงของ TextField
-                                                                                                    },
-                                                                                                    '& .MuiInputBase-input': {
-                                                                                                        fontSize: '14px', // ขนาด font เวลาพิมพ์
-                                                                                                        fontWeight: 'bold',
-                                                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                                                        paddingLeft: 2
-                                                                                                    },
-                                                                                                }}
-                                                                                                value={rate3Edit}
-                                                                                                onChange={(e) => setRate3Edit(e.target.value)}
-                                                                                                size="small"
-                                                                                                variant="outlined"
-                                                                                            />
-                                                                                    }
-                                                                                </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
-                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-{
-                                                !setting || row.id !== selectedRowId ?
-                                                    <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
-                                                    :
-                                                    <>
-                                                        <FormControlLabel
-                                                            control={
-                                                                <Checkbox
-                                                                    checked={ticketChecked}
-                                                                    onChange={(e) => setTicketChecked(e.target.checked)}
-                                                                    size="small"
-                                                                />
-                                                            }
-                                                            label="ตั๋ว"
-                                                        />
-                                                        <FormControlLabel
-                                                            control={
-                                                                <Checkbox
-                                                                    checked={recipientChecked}
-                                                                    onChange={(e) => setRecipientChecked(e.target.checked)}
-                                                                    size="small"
-                                                                />
-                                                            }
-                                                            label="ผู้รับ"
-                                                        />
-                                                    </>
-                                            }
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell width={70}>
-                                            <Box sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center",marginTop:-0.5 }}>
-                                            {
-                                                    !setting || row.id !== selectedRowId ?
-                                                        <Button
-                                                            variant="contained"
-                                                            color="warning"
-                                                            startIcon={<EditNoteIcon />}
-                                                            size="small"
-                                                            onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3)}
-                                                            fullWidth
-                                                        >
-                                                            แก้ไข
-                                                        </Button>
-                                                        :
-                                                        <>
-                                                            <IconButton color="error" onClick={handleCancel} sx={{ marginRight: 2 }} fullWidth>
-                                                                <CancelIcon fontSize="small" />
-                                                            </IconButton>
-                                                            <IconButton color="success" onClick={handleSave} fullWidth>
-                                                                <SaveIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </>
-                                                }
-                                            </Box>
-                                        </TableCell>
+                        <TableContainer
+                            component={Paper}
+                            sx={{ marginTop: 2 }}
+                        >
+                            <Table stickyHeader size="small">
+                                <TableHead sx={{ height: "7vh" }}>
+                                    <TableRow>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                            ลำดับ
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                            ชื่อตั๋ว
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            เรทคลังลำปาง
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            เรทคลังพิจิตร
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            เรทคลังสระบุรี/บางปะอิน/IR
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                            สถานะ
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ width: 50 }} />
                                     </TableRow>
-                                ))
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        transport === null || transport === undefined ?
+                                            <TableRow>
+                                                <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
+                                            </TableRow>
+                                            :
+                                            transport.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                                                <TableRow key={row.id}>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                                                            {row.id}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate1
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate1Edit}
+                                                                    onChange={(e) => setRate1Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate2
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate2Edit}
+                                                                    onChange={(e) => setRate2Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate3
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate3Edit}
+                                                                    onChange={(e) => setRate3Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            {
+                                                                !setting || row.id !== selectedRowId ?
+                                                                    <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
+                                                                    :
+                                                                    <>
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={ticketChecked}
+                                                                                    onChange={(e) => setTicketChecked(e.target.checked)}
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                            label="ตั๋ว"
+                                                                        />
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={recipientChecked}
+                                                                                    onChange={(e) => setRecipientChecked(e.target.checked)}
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                            label="ผู้รับ"
+                                                                        />
+                                                                    </>
+                                                            }
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell width={70}>
+                                                        <Box sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", marginTop: -0.5 }}>
+                                                            {
+                                                                !setting || row.id !== selectedRowId ?
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="warning"
+                                                                        startIcon={<EditNoteIcon />}
+                                                                        size="small"
+                                                                        onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3)}
+                                                                        fullWidth
+                                                                    >
+                                                                        แก้ไข
+                                                                    </Button>
+                                                                    :
+                                                                    <>
+                                                                        <IconButton color="error" onClick={handleCancel} sx={{ marginRight: 2 }} fullWidth>
+                                                                            <CancelIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                        <IconButton color="success" onClick={handleSave} fullWidth>
+                                                                            <SaveIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </>
+                                                            }
+                                                        </Box>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                    }
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        :
+                        <TableContainer
+                            component={Paper}
+                            sx={{ marginTop: 2 }}
+                        >
+                            <Table stickyHeader size="small">
+                                <TableHead sx={{ height: "7vh" }}>
+                                    <TableRow>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                            ลำดับ
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                            ชื่อตั๋ว
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            เรทคลังลำปาง
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            เรทคลังพิจิตร
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            เรทคลังสระบุรี/บางปะอิน/IR
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                            สถานะ
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ width: 50 }} />
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        gasStation.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                                            <TicketsGasStation key={row.id} row={row} />
+                                        ))
+                                    }
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                }
+                {
+                    open === 1 ?
+                    transport.length < 10 ? null :
+                        <TablePagination
+                            rowsPerPageOptions={[10, 25, 30]}
+                            component="div"
+                            count={transport.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+                            labelDisplayedRows={({ from, to, count }) =>
+                                `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
                             }
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                :
-                <TableContainer
-                    component={Paper}
-                    style={{ maxHeight: "70vh" }}
-                    sx={{ marginTop: 2 }}
-                >
-                    <Table stickyHeader size="small">
-                        <TableHead sx={{ height: "7vh" }}>
-                            <TableRow>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
-                                    ลำดับ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                    ชื่อตั๋ว
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                    เรทคลังลำปาง
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                    เรทคลังพิจิตร
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                    เรทคลังสระบุรี/บางปะอิน/IR
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                    สถานะ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ width: 50 }} />
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                gasStation.map((row) => (
-                                    <TicketsGasStation key={row.id} row={row} />
-                                ))
+                            sx={{
+                                overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+                                borderBottomLeftRadius: 5,
+                                borderBottomRightRadius: 5,
+                                '& .MuiTablePagination-toolbar': {
+                                    backgroundColor: "lightgray",
+                                    height: "20px", // กำหนดความสูงของ toolbar
+                                    alignItems: "center",
+                                    paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+                                    overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+                                    fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-select': {
+                                    paddingY: 0,
+                                    fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-actions': {
+                                    '& button': {
+                                        paddingY: 0,
+                                        fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+                                    },
+                                },
+                                '& .MuiTablePagination-displayedRows': {
+                                    fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-selectLabel': {
+                                    fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                                }
+                            }}
+                        />
+                        :
+                        gasStation.length < 10 ? null :
+                        <TablePagination
+                            rowsPerPageOptions={[10, 25, 30]}
+                            component="div"
+                            count={gasStation.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+                            labelDisplayedRows={({ from, to, count }) =>
+                                `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
                             }
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                            sx={{
+                                overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+                                borderBottomLeftRadius: 5,
+                                borderBottomRightRadius: 5,
+                                '& .MuiTablePagination-toolbar': {
+                                    backgroundColor: "lightgray",
+                                    height: "20px", // กำหนดความสูงของ toolbar
+                                    alignItems: "center",
+                                    paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+                                    overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+                                    fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-select': {
+                                    paddingY: 0,
+                                    fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-actions': {
+                                    '& button': {
+                                        paddingY: 0,
+                                        fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+                                    },
+                                },
+                                '& .MuiTablePagination-displayedRows': {
+                                    fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-selectLabel': {
+                                    fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                                }
+                            }}
+                        />
                 }
             </Paper>
         </Container>
