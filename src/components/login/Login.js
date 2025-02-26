@@ -29,6 +29,7 @@ import {
 import { auth, database, googleProvider } from "../../server/firebase";
 import Cookies from 'js-cookie';
 import UpdateDatabase from "../dashboard/test";
+import CryptoJS from "crypto-js";
 
 function createData(No, Email, Password, Position) {
   return {
@@ -41,216 +42,146 @@ function createData(No, Email, Password, Position) {
 
 const Login = () => {
   const navigate = useNavigate();
-
-// ตั้งค่า Token
-
-  useEffect(() => {
-    const token = Cookies.get('user'); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
-    if (token) {
-      if (token){
-        database
-              .ref("/employee/officers/")
-              .orderByChild("User")
-              .equalTo(token)
-              .on("value", (snapshot) => {
-                const datas = snapshot.val();
-                const dataList = [];
-                for (let id in datas) {
-                    if(datas[id].Position === "พนักงานขายหน้าลาน"){
-                      navigate("/gasstation-attendant", { 
-                        state: { Employee: datas[id] } 
-                      });
-                    }else{
-                      navigate("/choose");
-                    }
-                }
-              });
-      }
-      else{
-        navigate('/');
-      }
-    }
-  }, []);
-
-  const [open, setOpen] = useState(false);
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
 
-  // const handleSubmit = async () => {
-  //   await HTTP.get("/employee?Email="+user)
-  //       .then(res => {
-  //           if(res.data.length <= 0 || res.data === undefined){
-  //           console.log("ไม่มีข้อมูล");
-  //           ShowError("ไม่มีอีเมลนี้ในระบบ")
-  //           }else{
-  //           res.data.map((row) => (
-  //             row.Password === password ?
-  //             (
-  //               Cookies.set('token', row.Email.split('@')[0]+"#"+dayjs(new Date())+"?"+row.Position, { expires: 7 }),
-  //               // navigate("/"+user.split('@')[0]+"/dashboard/")
-  //               navigate("/choose")
-  //             )
-  //             : ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง")
-  //           ))
-  //           }
-  //       })
-  //       .catch(e => {
-  //           console.log(e);
-  //       });
-  // }
+  // ฟังก์ชันสำหรับเข้ารหัสรหัสผ่าน
+  const encryptPassword = (password) => {
+    const encrypted = CryptoJS.AES.encrypt(password, 'your-secret-key').toString();
+    return encrypted;
+  };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log("Google Sign-in Success:", result.user);
-    } catch (error) {
-      console.error("Error during Google Sign-in:", error);
-    }
+  // ฟังก์ชันสำหรับถอดรหัสรหัสผ่าน
+  const decryptPassword = (encryptedPassword) => {
+    const bytes = CryptoJS.AES.decrypt(encryptedPassword, 'your-secret-key');
+    const originalPassword = bytes.toString(CryptoJS.enc.Utf8);
+    return originalPassword;
   };
 
   // ฟังก์ชันสำหรับเข้าสู่ระบบด้วย Email และ Password
   const loginUser = async (event) => {
     event.preventDefault();
-    if(user !== "" && password !== ""){
-      signInWithEmailAndPassword(auth, (user+"@gmail.com"), password)
-          .then((userCredential) => {
-            database
-  .ref("/employee/officers")
-  .orderByChild("User")
-  .equalTo(user)
-  .once("value")
-  .then((snapshot) => {
-    const datas = snapshot.val();
-    if (datas) {
-      // พบข้อมูลใน "/employee/officers"
-      const dataList = [];
-      for (let id in datas) {
-        dataList.push({ id, ...datas[id] });
-        if (datas[id].Password === password) {
-          Cookies.set("user", user, {
-            expires: 30,
-            secure: true,
-            sameSite: "Lax",
-          });
 
-          Cookies.set(
-            "sessionToken",
-            user + "$" + datas[id].id,
-            {
-              expires: 30,
-              secure: true,
-              sameSite: "Lax",
+    if (!user || !password) {
+      ShowWarning("กรุณากรอก User และ Password");
+      return;
+    }
+
+    try {
+      // เข้ารหัสรหัสผ่านก่อนเก็บใน Cookie
+      const encryptedPassword = encryptPassword(password);
+
+      // เข้าสู่ระบบ Firebase ด้วยรหัสผ่านที่เข้ารหัส
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        `${user}@gmail.com`,
+        password // ใช้รหัสผ่านที่ไม่ได้เข้ารหัสสำหรับ Firebase
+      );
+
+      const snapshot = await database
+        .ref("/employee/officers")
+        .orderByChild("User")
+        .equalTo(user)
+        .once("value");
+
+      const datas = snapshot.val();
+
+      if (datas) {
+        for (let id in datas) {
+          if (datas[id].Password === password) {
+            // บันทึก Cookies โดยใช้รหัสผ่านที่เข้ารหัส
+            Cookies.set("user", user, { expires: 30, secure: true, sameSite: "Lax" });
+            Cookies.set("sessionToken", `${user}$${datas[id].id}`, { expires: 30, secure: true, sameSite: "Lax" });
+            Cookies.set("password", encryptedPassword, { expires: 30, secure: true, sameSite: "Lax" });
+
+            if (datas[id].Position === "พนักงานขายหน้าลาน") {
+              navigate("/gasstation-attendant", { state: { Employee: datas[id] } });
+            } else {
+              navigate("/choose");
             }
-          );
-
-          if (datas[id].Position === "พนักงานขายหน้าลาน") {
-            navigate("/gasstation-attendant", {
-              state: { Employee: datas[id] },
-            });
-          } else {
-            navigate("/choose");
+            return;
           }
-        } else {
-          ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
         }
+        ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+        return;
       }
-    } else {
-      // ไม่พบข้อมูลใน "/employee/officers"
-      return database
+
+      // ถ้าไม่เจอใน officers ให้เช็ค creditors
+      const creditorSnapshot = await database
         .ref("/employee/creditors")
         .orderByChild("User")
         .equalTo(user)
         .once("value");
-    }
-  })
-  .then((snapshot) => {
-    if (snapshot) {
-      const datas = snapshot.val();
-      if (datas) {
-        // พบข้อมูลใน "/employee/creditor"
-        const dataList = [];
-        for (let id in datas) {
-          dataList.push({ id, ...datas[id] });
-          if (datas[id].Password === password) {
-            Cookies.set("user", user, {
-              expires: 30,
-              secure: true,
-              sameSite: "Lax",
-            });
 
-            Cookies.set(
-              "sessionToken",
-              user.split("@")[0] + "$" + datas[id].id,
-              {
-                expires: 30,
-                secure: true,
-                sameSite: "Lax",
-              }
-            );
+      const creditorDatas = creditorSnapshot.val();
+      if (creditorDatas) {
+        for (let id in creditorDatas) {
+          if (creditorDatas[id].Password === password) {
+            // บันทึก Cookies โดยใช้รหัสผ่านที่เข้ารหัส
+            Cookies.set("user", user, { expires: 30, secure: true, sameSite: "Lax" });
+            Cookies.set("sessionToken", `${user}$${creditorDatas[id].id}`, { expires: 30, secure: true, sameSite: "Lax" });
+            Cookies.set("password", encryptedPassword, { expires: 30, secure: true, sameSite: "Lax" });
 
-            // ตัวอย่างเพิ่มเติมเงื่อนไขอื่น
-            navigate("/trade-payable", {
-              state: { Creditor: datas[id] },
-            });
-          } else {
-            ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+            navigate("/trade-payable", { state: { Creditor: creditorDatas[id] } });
+            return;
           }
         }
-      } else {
-        // ไม่พบข้อมูลในทั้งสองฐานข้อมูล
-        ShowError("ไม่พบ User ในระบบ กรุณาตรวจสอบข้อมูลอีกครั้ง");
+        ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+        return;
       }
-    }
-  })
-  .catch((error) => {
-    console.error("Error:", error);
-    ShowError("เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล");
-  });
-          })
-          .catch((error) => {
-            ShowError("User หรือ Pasword ไม่ถูกต้อง");
-            console.log(error);
-          })
-    }
-    else{
-      ShowWarning("กรุณากรอก User และ Password");
+
+      // ถ้าไม่เจอทั้งสองฐานข้อมูล
+      ShowError("ไม่พบ User ในระบบ กรุณาตรวจสอบข้อมูลอีกครั้ง");
+    } catch (error) {
+      console.error("Login Error:", error);
+      ShowError("User หรือ Password ไม่ถูกต้อง");
     }
   };
 
-  // const loginUser = async (user, password) => {
-  //   try {
-  //     const userCredential = await signInWithEmailAndPassword(auth, user, password);
-  //     const user = userCredential.user;
+  useEffect(() => {
+    const token = Cookies.get("user"); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
+    const encryptedPassword = Cookies.get("password");
 
-  //     // ดึงตำแหน่ง (Position) ของพนักงานจาก Realtime Database
-  //     const dbRef = ref(database);
-  //     const snapshot = await get(child(dbRef, `employee/${user.uid}`));
-
-  //     if (snapshot.exists()) {
-  //       const userData = snapshot.val();
-  //       const position = userData.Position;
-
-  //       // แสดงข้อมูลตำแหน่ง
-  //       console.log('Position:', position);
-
-  //       // ตรวจสอบสิทธิ์การเข้าถึง
-  //       if (position === "1") {
-  //         console.log('User is admin. Can view and edit data.');
-  //         Cookies.set('token', user.split('@')[0]+"#"+dayjs(new Date())+"?"+position, { expires: 7 }),
-  //         navigate("/choose")
-  //       } else {
-  //         console.log('User is regular employee. Can only view data.');
-  //         Cookies.set('token', user.split('@')[0]+"#"+dayjs(new Date())+"?"+position, { expires: 7 }),
-  //         navigate("/choose")
-  //       }
-
-  //     } else {
-  //       console.log('No data available');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error logging in:', error);
-  //   }
-  // };
+    if (token && encryptedPassword) {
+      // ถ้ามี token และรหัสผ่านใน cookies ให้เข้าสู่ระบบ
+      const password = decryptPassword(encryptedPassword); // ถอดรหัสรหัสผ่าน
+      signInWithEmailAndPassword(auth, `${token}@gmail.com`, password) // ใช้ password ที่ถอดรหัสจาก cookie
+        .then((userCredential) => {
+          // ตรวจสอบฐานข้อมูล Firebase หลังจากเข้าสู่ระบบสำเร็จ
+          database
+            .ref("/employee/officers/")
+            .orderByChild("User")
+            .equalTo(token)
+            .once("value") // ใช้ .once เพื่อดึงข้อมูลแค่ครั้งเดียว
+            .then((snapshot) => {
+              const datas = snapshot.val();
+              if (datas) {
+                for (let id in datas) {
+                  // ตรวจสอบตำแหน่งของผู้ใช้ในระบบ
+                  if (datas[id].Position === "พนักงานขายหน้าลาน") {
+                    navigate("/gasstation-attendant", {
+                      state: { Employee: datas[id] },
+                    });
+                  } else {
+                    navigate("/choose");
+                  }
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching employee data:", error);
+              navigate("/");
+            });
+        })
+        .catch((error) => {
+          console.error("Error signing in:", error);
+          navigate("/");
+        });
+    } else {
+      // ถ้าไม่มี cookie 'user' หรือ 'password' ให้ไปหน้า login
+      navigate("/");
+    }
+  }, [navigate]);
 
   return (
     <Container sx={{ p: { xs: 3, sm: 6, md: 9 }, maxWidth: { xs: "lg", sm: "md", md: "sm" }}}>

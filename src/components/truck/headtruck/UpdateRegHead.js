@@ -61,13 +61,13 @@ const UpdateRegHead = (props) => {
             const dataregtail = Object.values(regtail); 
             const dataCompany = Object.values(company); 
             const dataDrivers = Object.values(drivers);
-      const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && row.Company === truck.Company);
+      const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
       const employees = dataDrivers.filter(row => row.Registration && row.Registration === "ไม่มี" && row.TruckType === "รถใหญ่");
 
     const [companies, setCompanies] = React.useState(truck.Company);
     const [driver, setDriver] = React.useState("0:"+truck.Driver);
     const [regHead, setRegHead] = React.useState(truck.RegHead);
-    const [regTail, setRegTail] = React.useState("0:"+truck.RegTail);
+    const [regTail, setRegTail] = React.useState("0:"+truck.RegTail+"::");
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
     const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration);
@@ -81,6 +81,7 @@ const UpdateRegHead = (props) => {
                 RegHead: regHead,
                 RegTail: regTail.split(":")[1],
                 Weight: weight,
+                TotalWeight:  (parseFloat(weight) + parseFloat(regTail.split(":")[3])),
                 Insurance: insurance,
                 VehicleRegistration: vehicleRegistration,
                 VehExpirationDate: vehExpirationDate,
@@ -122,6 +123,8 @@ const UpdateRegHead = (props) => {
                 console.error("Error pushing data:", error);
             });
     }
+
+    console.log("registrationTail :",registrationTail);
 
     return (
         <React.Fragment>
@@ -221,7 +224,7 @@ const UpdateRegHead = (props) => {
                                       </MenuItem>
                                       {
                                         registrationTail.map((row) => (
-                                          <MenuItem value={row.id + ":" + row.RegTail}>{row.RegTail}</MenuItem>
+                                          <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
                                         ))
                                       }
                                     </Select>

@@ -91,16 +91,25 @@ const TicketsBigTruck = () => {
         getTicket();
     }, []);
 
-    // เปิด/ปิดโหมดการแก้ไข
-    const handleSetting = (rowId, status) => {
-        setSetting(true);
-        setSelectedRowId(rowId);
-        // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
-        const hasTicket = status.includes("ตั๋ว");
-        const hasRecipient = status.includes("ผู้รับ");
-        setTicketChecked(hasTicket);
-        setRecipientChecked(hasRecipient);
-    };
+    // State สำหรับเก็บค่าแก้ไข Rate
+        const [rate1Edit, setRate1Edit] = useState("");
+        const [rate2Edit, setRate2Edit] = useState("");
+        const [rate3Edit, setRate3Edit] = useState("");
+    
+        // ฟังก์ชันสำหรับกดแก้ไข
+        const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3) => {
+            setSetting(true);
+            setSelectedRowId(rowId);
+            // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
+            const hasTicket = status.includes("ตั๋ว");
+            const hasRecipient = status.includes("ผู้รับ");
+            setTicketChecked(hasTicket);
+            setRecipientChecked(hasRecipient);
+            // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
+            setRate1Edit(rowRate1);
+            setRate2Edit(rowRate2);
+            setRate3Edit(rowRate3);
+        };
 
     // บันทึกข้อมูลที่แก้ไขแล้ว
     const handleSave = async () => {
@@ -113,7 +122,10 @@ const TicketsBigTruck = () => {
 
         // บันทึกสถานะใหม่ไปยัง Firebase
         await database.ref(`/customers/transports/${selectedRowId - 1}`).update({
-            Status: newStatus
+            Status: newStatus,
+            Rate1: rate1Edit,
+            Rate2: rate2Edit,
+            Rate3: rate3Edit,
         });
         setSetting(false);
         setSelectedRowId(null);
@@ -220,9 +232,99 @@ const TicketsBigTruck = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.Rate1}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.Rate2}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.Rate3}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate1
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate1Edit}
+                                                                    onChange={(e) => setRate1Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate2
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate2Edit}
+                                                                    onChange={(e) => setRate2Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate3
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate3Edit}
+                                                                    onChange={(e) => setRate3Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                             {
@@ -258,7 +360,7 @@ const TicketsBigTruck = () => {
                                                         <Box sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", marginTop: -0.5 }}>
                                                             {
                                                                 !setting ?
-                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} size="small" onClick={() => handleSetting(row.id, row.Status)} fullWidth>แก้ไข</Button>
+                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} size="small" onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3)} fullWidth>แก้ไข</Button>
                                                                     :
                                                                     <>
                                                                         <IconButton variant="contained" color="error" onClick={handleCancel} sx={{ marginRight: 2 }} fullWidth><CancelIcon fontSize="small" /></IconButton>
@@ -285,9 +387,99 @@ const TicketsBigTruck = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.Rate1}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.Rate2}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.Rate3}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate1
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate1Edit}
+                                                                    onChange={(e) => setRate1Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate2
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate2Edit}
+                                                                    onChange={(e) => setRate2Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate3
+                                                                :
+                                                                <TextField
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={rate3Edit}
+                                                                    onChange={(e) => setRate3Edit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                        }
+                                                    </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                             {
@@ -323,7 +515,7 @@ const TicketsBigTruck = () => {
                                                         <Box sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", marginTop: -0.5 }}>
                                                             {
                                                                 !setting ?
-                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} size="small" onClick={() => handleSetting(row.id, row.Status)} fullWidth>แก้ไข</Button>
+                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} size="small" onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3)} fullWidth>แก้ไข</Button>
                                                                     :
                                                                     <>
                                                                         <IconButton variant="contained" color="error" onClick={handleCancel} sx={{ marginRight: 2 }} fullWidth><CancelIcon fontSize="small" /></IconButton>

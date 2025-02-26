@@ -52,7 +52,7 @@ const RegHeadDetail = (props) => {
 
   const [openTab, setOpenTab] = React.useState(true);
   const [setting, setSetting] = React.useState("0:0");
-  const [tail, setTail] = React.useState(0);
+  const [tail, setTail] = React.useState("ไม่มี:::");
 
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
@@ -77,7 +77,7 @@ const RegHeadDetail = (props) => {
 
   const { regtail } = useData();
         const dataregtail = Object.values(regtail); 
-  const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว" && row.Company === truck.Company);
+  const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
 
   // useEffect(() => {
   //   getRegitrationTail();
@@ -89,6 +89,7 @@ const RegHeadDetail = (props) => {
       .child(setting.split(":")[0] - 1)
       .update({
         RegTail: tail.split(":")[1],
+        TotalWeight: (parseFloat(truck.Weight) + parseFloat(tail.split(":")[3])),
       })
       .then(() => {
         database
@@ -142,12 +143,12 @@ const RegHeadDetail = (props) => {
                                       onChange={(e) => setTail(e.target.value)}
                                       fullWidth
                                     >
-                                      <MenuItem value={0}>
+                                      <MenuItem value={"ไม่มี:::"}>
                                         เลือกทะเบียน
                                       </MenuItem>
                                       {
                                         registrationTail.map((row) => (
-                                          <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap}>{row.RegTail}</MenuItem>
+                                          <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
                                         ))
                                       }
                                     </Select>
@@ -171,6 +172,7 @@ const RegHeadDetail = (props) => {
                                 : ""}
                             </TableCell>
                         }
+                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(truck.Weight)}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.VehicleRegistration}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.RepairTruck.split(":")[1]}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.Status}</TableCell>

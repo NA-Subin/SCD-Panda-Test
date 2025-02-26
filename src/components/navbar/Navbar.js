@@ -288,9 +288,11 @@ export default function Navbar() {
         if (result.isConfirmed) {
           signOut(auth)
             .then(() => {
+              Cookies.remove('user');
+              Cookies.remove('sessionToken');
+              Cookies.remove('password');
               navigate("/");
               Swal.fire("ออกจากระบบเรียบร้อย", "", "success");
-              Cookies.remove('user');
             })
             .catch((error) => {
               Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");

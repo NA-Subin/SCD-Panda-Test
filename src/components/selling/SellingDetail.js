@@ -571,7 +571,7 @@ const SellingDetail = (props) => {
     return (
         <React.Fragment>
             <TableRow>
-                <TableCell sx={{ textAlign: "center", height: "20px", width: 50, padding: "1px 4px",backgroundColor: theme.palette.success.dark,color: "white" }}>
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 50, padding: "1px 4px", backgroundColor: theme.palette.success.dark, color: "white" }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.id + 1}</Typography>
                 </TableCell>
                 {/* <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.light }}>
@@ -656,11 +656,14 @@ const SellingDetail = (props) => {
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                             paddingLeft: 2
                                         },
                                     }}
@@ -750,11 +753,14 @@ const SellingDetail = (props) => {
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                             paddingLeft: 2
                                         },
                                     }}
@@ -850,11 +856,14 @@ const SellingDetail = (props) => {
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                             paddingLeft: 2
                                         },
                                     }}
@@ -950,11 +959,14 @@ const SellingDetail = (props) => {
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                             paddingLeft: 2
                                         },
                                     }}
@@ -1050,11 +1062,14 @@ const SellingDetail = (props) => {
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                             paddingLeft: 2
                                         },
                                     }}
@@ -1150,11 +1165,14 @@ const SellingDetail = (props) => {
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                             paddingLeft: 2
                                         },
                                     }}

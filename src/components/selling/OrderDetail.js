@@ -374,11 +374,14 @@ const OrderDetail = (props) => {
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '22px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                             },
                                             '& .MuiInputBase-input': {
                                                 fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px', // ปรับ padding ภายใน input
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                 paddingLeft: 2
                                             },
                                         }}
@@ -441,12 +444,18 @@ const OrderDetail = (props) => {
                                         type="number"
                                         InputLabelProps={{ sx: { fontSize: "12px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '12px',
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                 fontWeight: 'bold',
-                                                padding: '1px 4px',
-                                            }
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                paddingLeft: 2
+                                            },
                                         }}
                                         value={detail.Product?.G95?.Volume || ""}
                                         onChange={(e) => {
@@ -507,12 +516,18 @@ const OrderDetail = (props) => {
                                         type="number"
                                         InputLabelProps={{ sx: { fontSize: "12px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '12px',
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                 fontWeight: 'bold',
-                                                padding: '1px 4px',
-                                            }
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                paddingLeft: 2
+                                            },
                                         }}
                                         value={detail.Product?.B95?.Volume || ""}
                                         onChange={(e) => {
@@ -573,12 +588,18 @@ const OrderDetail = (props) => {
                                         type="number"
                                         InputLabelProps={{ sx: { fontSize: "12px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '12px',
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                 fontWeight: 'bold',
-                                                padding: '1px 4px',
-                                            }
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                paddingLeft: 2
+                                            },
                                         }}
                                         value={detail.Product?.B7?.Volume || ""}
                                         onChange={(e) => {
@@ -639,12 +660,18 @@ const OrderDetail = (props) => {
                                         type="number"
                                         InputLabelProps={{ sx: { fontSize: "12px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '12px',
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                 fontWeight: 'bold',
-                                                padding: '1px 4px',
-                                            }
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                paddingLeft: 2
+                                            },
                                         }}
                                         value={detail.Product?.G91?.Volume || ""}
                                         onChange={(e) => {
@@ -705,12 +732,18 @@ const OrderDetail = (props) => {
                                         type="number"
                                         InputLabelProps={{ sx: { fontSize: "12px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '12px',
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                 fontWeight: 'bold',
-                                                padding: '1px 4px',
-                                            }
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                paddingLeft: 2
+                                            },
                                         }}
                                         value={detail.Product?.E20?.Volume || ""}
                                         onChange={(e) => {
@@ -771,12 +804,18 @@ const OrderDetail = (props) => {
                                         type="number"
                                         InputLabelProps={{ sx: { fontSize: "12px" } }}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '12px',
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                 fontWeight: 'bold',
-                                                padding: '1px 4px',
-                                            }
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                paddingLeft: 2
+                                            },
                                         }}
                                         value={detail.Product?.PWD?.Volume || ""}
                                         onChange={(e) => {

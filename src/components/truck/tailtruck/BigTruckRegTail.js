@@ -180,6 +180,9 @@ const BigTruckRegTail = (props) => {
                       ช่อง
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                      น้ำหนัก
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       เลขจดทะเบียน
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
@@ -198,6 +201,7 @@ const BigTruckRegTail = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.RegTail}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Cap}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Weight)}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.VehicleRegistration}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Company}</TableCell>

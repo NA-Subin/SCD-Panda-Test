@@ -35,6 +35,7 @@ import { RateOils, TablecellHeader } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InfoIcon from '@mui/icons-material/Info';
+import UpdateTrip from "./UpdateTrip";
 
 const TripsDetail = (props) => {
     const { trips, windowWidth } = props;
@@ -107,9 +108,7 @@ const TripsDetail = (props) => {
                     maximumFractionDigits: 2,
                 }).format(trips.TotalWeight)}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
-                    <IconButton color="info" size="small">
-                        <InfoIcon fontSize="small"/>
-                    </IconButton>
+                    <UpdateTrip tripID={trips.id} dateStart={trips.DateStart} weightHigh={trips.WeightHigh} weightLow={trips.WeightLow} totalWeight={trips.TotalWeight} weightTruck={trips.WeightTruck} />
                 </TableCell>
                 {/* <TableCell sx={{
                     textAlign: "center",

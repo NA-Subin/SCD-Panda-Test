@@ -203,6 +203,9 @@ const BigTruckRegHead = (props) => {
                       ทะเบียนหาง
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                      น้ำหนัก
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       เลขจดทะเบียนรถ
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>

@@ -168,6 +168,9 @@ const InsertTruck = (props) => {
         getRegitrationTail();
     }, []);
 
+    console.log("registrationTail : ",registrationTail);
+    console.log("Comapy : ",companies);
+
     const handlePost = () => {
         if(menu === 1){
             database
@@ -180,6 +183,7 @@ const InsertTruck = (props) => {
                 RegTail: tail.split(":")[1],
                 RepairTruck: "00/00/0000:ยังไม่ตรวจสอบสภาพรถ",
                 Weight: weight,
+                TotalWeight:  (parseFloat(weight) + parseFloat(tail.split(":")[3])),
                 Insurance: "-",
                 Act: "-",
                 Status: "ว่าง",
@@ -237,7 +241,6 @@ const InsertTruck = (props) => {
                 Cap: cap,
                 Insurance: "-",
                 Status: "ยังไม่เชื่อมต่อทะเบียนหัว",
-                Driver: "ไม่มี",
                 ...capFields, // เพิ่ม capFields ที่แปลงแล้วเข้าไป
                 VehicleRegistration: licenseRegTail === "มี" ? vehicleRegistration : "ไม่มี",
                 DateEndTax: licenseRegTail === "มี" ? dateEndTax : "ไม่มี",
@@ -433,7 +436,7 @@ const InsertTruck = (props) => {
                                                 </MenuItem>
                                                 {
                                                     registrationTail.map((row) => (
-                                                        row.Company === companies &&
+                                                        // row.Company === companies &&
                                                         <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
                                                     ))
                                                 }
