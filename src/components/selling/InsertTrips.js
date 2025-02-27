@@ -55,7 +55,7 @@ const InsertTrips = () => {
     const [customers, setCustomers] = React.useState("0:0");
     const [customer, setCustomer] = React.useState("0:0");
     const [selectedValue, setSelectedValue] = useState('');
-    const [registration, setRegistration] = React.useState("0:0:0");
+    const [registration, setRegistration] = React.useState("0:0:0:0");
     const [weight, setWeight] = React.useState(0);
     const [totalWeight, setTotalWeight] = React.useState(0);
     const [showTickers, setShowTickers] = React.useState(true);
@@ -245,6 +245,8 @@ const InsertTrips = () => {
     };
 
     const [regHead, setRegHead] = React.useState([]);
+    const [smallTruck, setSmallTruck] = React.useState([]);
+    const [allTruck, setAllTruck] = React.useState([]);
 
     const getTruck = async () => {
         database.ref("/truck/registration/").on("value", (snapshot) => {
@@ -252,10 +254,22 @@ const InsertTrips = () => {
             const dataRegHead = [];
             for (let id in datas) {
                 if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง") {
-                    dataRegHead.push({ id, ...datas[id] })
+                    dataRegHead.push({ id, ...datas[id], type: "รถใหญ่" });
                 }
             }
             setRegHead(dataRegHead);
+
+            database.ref("/truck/small/").on("value", (snapshot) => {
+                const datas = snapshot.val();
+                const dataSmall = [];
+                for (let id in datas) {
+                    if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง") {
+                        dataSmall.push({ id, ...datas[id], type: "รถเล็ก" });
+                    }
+                }
+                setSmallTruck(dataSmall);
+                setAllTruck([...dataRegHead, ...dataSmall]);
+            });
         });
     };
 
@@ -405,7 +419,7 @@ const InsertTrips = () => {
                 newRate = ticketData.Rate1;
             } else if (depots.split(":")[1] === "คลังพิจิตร") {
                 newRate = ticketData.Rate2;
-            } else if (depots.split(":")[1] === "คลังสระบุรี/บางปะอิน/IR") {
+            } else if (depots.split(":")[1] === "คลังสระบุรี" || depots.split(":")[1] === "คลังบางปะอิน" || depots.split(":")[1] === "คลังIR") {
                 newRate = ticketData.Rate3;
             }
         }
@@ -447,7 +461,7 @@ const InsertTrips = () => {
             } else if (depots.split(":")[1] === "คลังพิจิตร") {
                 newRate = ticketData.Rate2;
                 setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
-            } else if (depots.split(":")[1] === "คลังสระบุรี/บางปะอิน/IR") {
+            } else if (depots.split(":")[1] === "คลังสระบุรี" || depots.split(":")[1] === "คลังบางปะอิน" || depots.split(":")[1] === "คลังIR") {
                 newRate = ticketData.Rate3;
                 setCostTrip((prev) => (prev === 0 ? (2000 + 1200) : prev + 200));
             }
@@ -509,7 +523,7 @@ const InsertTrips = () => {
                         newRate = ticketData.Rate1;
                     } else if (selectedDepot === "คลังพิจิตร") {
                         newRate = ticketData.Rate2;
-                    } else if (selectedDepot === "คลังสระบุรี/บางปะอิน/IR") {
+                    } else if (selectedDepot === "คลังสระบุรี" || selectedDepot === "คลังบางปะอิน" || selectedDepot === "คลังIR") {
                         newRate = ticketData.Rate3;
                     }
                 }
@@ -536,7 +550,7 @@ const InsertTrips = () => {
                         newRate = ticketData.Rate1;
                     } else if (selectedDepot === "คลังพิจิตร") {
                         newRate = ticketData.Rate2;
-                    } else if (selectedDepot === "คลังสระบุรี/บางปะอิน/IR") {
+                    } else if (selectedDepot === "คลังสระบุรี" || selectedDepot === "คลังบางปะอิน" || selectedDepot === "คลังIR") {
                         newRate = ticketData.Rate3;
                     }
                 }
@@ -554,7 +568,7 @@ const InsertTrips = () => {
                     cost += cost === 0 ? 750 : 200;
                 } else if (selectedDepot === "คลังพิจิตร") {
                     cost += cost === 0 ? 2000 : 200;
-                } else if (selectedDepot === "คลังสระบุรี/บางปะอิน/IR") {
+                } else if (selectedDepot === "คลังสระบุรี" || selectedDepot === "คลังบางปะอิน" || selectedDepot === "คลังIR") {
                     cost += cost === 0 ? 2000 + 1200 : 200;
                 }
             });
@@ -820,7 +834,7 @@ const InsertTrips = () => {
                 setCostTrip((prev) => (prev === 750 ? 0 : prev - 200));
             } else if (depotName === "คลังพิจิตร") {
                 setCostTrip((prev) => (prev === 2000 ? 0 : prev - 200));
-            } else if (depotName === "คลังสระบุรี/บางปะอิน/IR") {
+            } else if (depotName === "คลังสระบุรี" || depotName === "คลังบางปะอิน" || depotName === "คลังIR") {
                 setCostTrip((prev) => (prev === 3200 ? 0 : prev - 200));
             }
         }
@@ -1021,37 +1035,61 @@ const InsertTrips = () => {
     };
 
     React.useEffect(() => {
-        const currentRow = regHead.find((row) => row.RegHead === registration.split(":")[1]);
+        const currentRow = allTruck.find((item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration);
         if (currentRow) {
-            setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
+            if(currentRow.type === "รถใหญ่"){
+                setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
+            }else{
+                setWeight(currentRow.Weight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
+            }
         }
-    }, [registration, regHead]);
+    }, [registration, allTruck]);
 
     const getTickets = () => {
+        if (!registration || registration === "0:0:0:0") return [];
+    
+        const selectedTruck = allTruck.find(
+            (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+        );
+    
+        if (!selectedTruck) return [];
+    
         const tickets = [
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
                 .map((item) => ({ ...item })),
-            ...ticketsB.map((item) => ({ ...item })),
+            ...(selectedTruck.type === "รถใหญ่"
+                ? ticketsB.map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
+                : ticketsS.map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
+            ),
         ];
-
-        // ✅ ป้องกันกรณีที่ options เป็น undefined
+    
         return tickets.filter((item) => item.id || item.TicketsCode);
     };
 
     const getCustomers = () => {
+        if (!registration || registration === "0:0:0:0") return [];
+    
+        const selectedTruck = allTruck.find(
+            (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+        );
+    
+        if (!selectedTruck) return [];
+    
         const customers = [
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
                 .map((item) => ({ ...item })),
-            ...ticketsB.map((item) => ({ ...item })),
+            ...(selectedTruck.type === "รถใหญ่"
+                ? ticketsB.map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
+                : ticketsS.map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
+            ),
         ];
-
-        // ✅ ป้องกันกรณีที่ options เป็น undefined
+    
         return customers.filter((item) => item.id || item.TicketsCode);
-    };
+    };    
 
     console.log("depots : ", depots);
     console.log("Trip : ",trip.length);
@@ -1176,24 +1214,27 @@ const InsertTrips = () => {
                                         component="form" sx={{ height: "30px", width: "100%" }}>
                                         <Autocomplete
                                             id="autocomplete-registration-1"
-                                            options={regHead}
+                                            options={allTruck}
                                             getOptionLabel={(option) =>
-                                                `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""}`
+                                                option.type === "รถใหญ่" ?
+                                                `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (${option.type ? option.type : ""})`
+                                                :
+                                                 `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
                                             }
-                                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                                            value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}` === registration) : null}
+                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
+                                            value={registration ? allTruck.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration) : null}
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
-                                                    const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}`;
+                                                    const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.type}`;
                                                     setRegistration(value);
                                                 } else {
-                                                    setRegistration("0:0:0");
+                                                    setRegistration("0:0:0:0");
                                                 }
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
-                                                    label={!registration || registration === "0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                    label={!registration || registration === "0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
                                                     variant="outlined"
                                                     size="small"
                                                     sx={{
@@ -1205,10 +1246,14 @@ const InsertTrips = () => {
                                             fullWidth
                                             renderOption={(props, option) => (
                                                 <li {...props}>
-                                                    <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail}`}</Typography>
+                                                    {
+                                                        option.type === "รถใหญ่" ?
+                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
+                                                        :
+                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead} (${option.type})`}</Typography>
+                                                    }
                                                 </li>
                                             )}
-                                            disabled={!showTickers}
                                         />
                                     </Paper>
                                 </Box>
@@ -1813,11 +1858,13 @@ const InsertTrips = () => {
                                                 borderRadius: 10
                                             }}
                                             value={(() => {
-                                                const selectedItem = regHead.find(item => 
-                                                    `${item.id}:${item.RegHead}:${item.Driver}` === registration
+                                                const selectedItem = allTruck.find(item => 
+                                                    `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
                                                 );
-                                                return selectedItem 
-                                                    ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""}`
+                                                return selectedItem && selectedItem.type === "รถใหญ่" 
+                                                    ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (${selectedItem.type ? selectedItem.type : ""})`
+                                                    : selectedItem && selectedItem.type === "รถเล็ก" 
+                                                    ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""} (${selectedItem.type ? selectedItem.type : ""})`
                                                     : "";
                                             })()}
                                         />

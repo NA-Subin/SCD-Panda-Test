@@ -31,6 +31,7 @@ import theme from "../../theme/theme";
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import InsertCustomerBigTruck from "./InsertCustomerBigTruck";
+import ExcelUploader from "../excel/ImportExcel";
 
 const TicketsBigTruck = () => {
     const [update, setUpdate] = React.useState("");
@@ -64,13 +65,14 @@ const TicketsBigTruck = () => {
                 }
 
                 // กรองข้อมูลตาม type
-                const ticketM = dataList.filter((item) => item.type === "เชียงใหม่");
-                const ticketR = dataList.filter((item) => item.type === "เชียงราย");
+                const ticketM = dataList.filter((item) => item.Type === "เชียงใหม่");
+                const ticketR = dataList.filter((item) => item.Type === "เชียงราย");
 
                 // เรียงลำดับข้อมูล (สามารถปรับเปลี่ยนเงื่อนไขการเรียงได้ตามต้องการ)
                 // ตัวอย่าง: เรียงตาม id (หรือ key อื่นๆ ที่เหมาะสม)
-                ticketM.sort((a, b) => a.id.localeCompare(b.id));
-                ticketR.sort((a, b) => a.id.localeCompare(b.id));
+                ticketM.sort((a, b) => a.id - b.id);
+                ticketR.sort((a, b) => a.id - b.id);
+
 
                 // เพิ่มลำดับโดยใช้ property "No"
                 ticketM.forEach((item, index) => {
@@ -158,6 +160,7 @@ const TicketsBigTruck = () => {
             >
                 ลูกค้ารถใหญ่
             </Typography>
+            <ExcelUploader />
             <Divider sx={{ marginBottom: 1 }} />
             <Grid container spacing={2} marginTop={1}>
                 <Grid item xs={6}>

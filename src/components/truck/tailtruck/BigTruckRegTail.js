@@ -167,31 +167,46 @@ const BigTruckRegTail = (props) => {
               component={Paper}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small"  sx={{ width: "1080pxpx" }}>
+              <Table stickyHeader size="small"  sx={{ width: "1050px" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
-                    <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       ลำดับ
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       ทะเบียนหาง
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                      ช่อง
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง1
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง2
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง3
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง4
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง5
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง6
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง7
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                      ช่อง8
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       น้ำหนัก
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                      เลขจดทะเบียน
-                    </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       สถานะ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                      บริษัท
-                    </TablecellHeader>
-                    <TablecellHeader />
+                    <TablecellHeader sx={{ width: 30 }}/>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -200,11 +215,16 @@ const BigTruckRegTail = (props) => {
                       <TableRow >
                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.RegTail}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap1 === undefined ? "-" : row.Cap1}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap2 === undefined ? "-" : row.Cap2}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap3 === undefined ? "-" : row.Cap3}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap4 === undefined ? "-" : row.Cap4}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap5 === undefined ? "-" : row.Cap5}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap6 === undefined ? "-" : row.Cap6}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap7 === undefined ? "-" : row.Cap7}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Cap8 === undefined ? "-" : row.Cap8}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Weight)}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.VehicleRegistration}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Company}</TableCell>
                         <UpdateRegTail key={row.id} truck={row} />
                       </TableRow>
                     ))

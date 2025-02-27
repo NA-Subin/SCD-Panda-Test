@@ -1,0 +1,61 @@
+import React, { useState } from "react";
+import * as XLSX from "xlsx";
+import { getDatabase, ref, set } from "firebase/database";
+import { database } from "../../server/firebase";
+
+const ExcelUploader = () => {
+  const [file, setFile] = useState(null);
+
+  const handleFileUpload = (e) => {
+    const uploadedFile = e.target.files[0];
+    setFile(uploadedFile);
+  };
+
+  const handleFileRead = async () => {
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.readAsBinaryString(file);
+    
+    reader.onload = async (e) => {
+      const binaryStr = e.target.result;
+      const workbook = XLSX.read(binaryStr, { type: "binary" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet);
+      
+      jsonData.forEach((row, index) => {
+        const formattedData = {
+            id: index + 1,
+            TicketsName: row["ชื่อจัดเทียววิ่ง"] ?? "",
+            Status: "ตั๋ว/ผู้รับ",
+            Rate1: parseFloat(parseFloat(row["ขนส่งลำปาง"] ?? 0).toFixed(2)),
+            Rate2: parseFloat(parseFloat(row["พิจิตร"] ?? 0).toFixed(2)),
+            Rate3: parseFloat(parseFloat(row["บางปะอิน/สระบุรี"] ?? 0).toFixed(2)),
+            Bill: row["รอบวางบิล "] ?? "",
+            Code: "-",
+            CompanyName: row["ชื่อ/ใบวางบิล"] ?? "",
+            CodeID: row["เลขผู้เสียภาษี"] ?? "",
+            Address: `${row["บ้านเลขที่"] ?? ""} ${row["หมู่ที่"] ?? ""} ${row["ตำบล"] ?? ""} ${row["อำเภอ"] ?? ""} ${row["จังหวัด"] ?? ""} ${row["รหัสไปรษณีย์"] ?? ""}`.trim(),
+            lat: row["lat"] ?? 0,
+            lng: row["long"] ?? 0,
+            Type: row["ประเภท ลูกค้าค้า"] ?? "",
+          };
+          
+
+        set(ref(database, `/customers/transports/${formattedData.id-1}`), formattedData)
+          .then(() => console.log("Added: ", formattedData))
+          .catch((error) => console.error("Error adding document: ", error));
+      });
+    };
+  };
+
+  return (
+    <div>
+      <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+      <button onClick={handleFileRead}>Upload to Firebase</button>
+    </div>
+  );
+};
+
+export default ExcelUploader;

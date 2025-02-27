@@ -143,7 +143,9 @@ const InsertDepot = (props) => {
                                     </MenuItem>
                                     <MenuItem value={"คลังลำปาง"}>คลังลำปาง</MenuItem>
                                     <MenuItem value={"คลังพิจิตร"}>คลังพิจิตร</MenuItem>
-                                    <MenuItem value={"คลังสระบุรี/บางปะอิน/IR"}>คลังสระบุรี/บางปะอิน/IR</MenuItem>
+                                    <MenuItem value={"คลังสระบุรี"}>คลังสระบุรี</MenuItem>
+                                    <MenuItem value={"คลังบางปะอิน"}>คลังบางปะอิน</MenuItem>
+                                    <MenuItem value={"คลังIR"}>คลังIR</MenuItem>
                                 </Select>
                             </Paper>
                         </Grid>

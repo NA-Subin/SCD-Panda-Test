@@ -104,7 +104,7 @@ const InsertTruck = (props) => {
       const totalValue = updatedFields.reduce((sum, field) => sum + field.value, 0);
   
       // อัปเดต TailWeight ด้วยผลรวม
-      setTailWeight(totalValue);
+    //   setTailWeight(totalValue);
   
       return updatedFields;
     });
@@ -271,7 +271,7 @@ const InsertTruck = (props) => {
             .update({
                 id: regSmallLength + 1,
                 Company: companies,
-                Registration: registration,
+                RegHead: registration,
                 RepairTruck: "00/00/0000:ยังไม่ตรวจสอบสภาพรถ",
                 Weight: weight,
                 Insurance: "-",
@@ -541,7 +541,7 @@ const InsertTruck = (props) => {
                                         </Grid>
                                         <Grid item sm={4} xs={8}>
                                             <Paper component="form">
-                                                <TextField size="small" fullWidth value={tailWeight} disabled />
+                                                <TextField size="small" fullWidth value={tailWeight} onChange={(e) => setTailWeight(e.target.value)} />
                                             </Paper>
                                         </Grid>
                                         {

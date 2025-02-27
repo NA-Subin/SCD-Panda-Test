@@ -108,7 +108,13 @@ const TripsDetail = (props) => {
                     maximumFractionDigits: 2,
                 }).format(trips.TotalWeight)}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
-                    <UpdateTrip tripID={trips.id} dateStart={trips.DateStart} weightHigh={trips.WeightHigh} weightLow={trips.WeightLow} totalWeight={trips.TotalWeight} weightTruck={trips.WeightTruck} />
+                    <UpdateTrip 
+                        tripID={trips.id} 
+                        dateStart={trips.DateStart} 
+                        weightHigh={trips.WeightHigh} 
+                        weightLow={trips.WeightLow} 
+                        totalWeight={trips.TotalWeight} 
+                        weightTruck={trips.WeightTruck} />
                 </TableCell>
                 {/* <TableCell sx={{
                     textAlign: "center",
