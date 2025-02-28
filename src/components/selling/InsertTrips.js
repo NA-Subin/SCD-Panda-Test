@@ -475,6 +475,9 @@ const InsertTrips = () => {
                     TicketName: customerValue,
                     Rate: newRate,
                     Trip : trip.length,
+                    Date: dayjs(selectedDate).format('DD/MM/YYYY'),
+                    Registration: registration.split(":")[1],
+                    Driver: registration.split(":")[2],
                     id: newIndex
                 }
             };
@@ -863,8 +866,13 @@ const InsertTrips = () => {
                 // เราจะ append ข้อมูลใน selling ทีละตัว โดยคำนวณ index ใหม่เป็น currentLength + key ของ selling
                 const updates = {};
                 Object.keys(selling).forEach((key) => {
-                  const newIndex = currentLength + parseInt(key, 10);
-                  updates[newIndex] = selling[key];
+                const newIndex = currentLength + parseInt(key, 10);
+
+                // เพิ่ม No เข้าไปในแต่ละออเดอร์
+                updates[newIndex] = {
+                    ...selling[key], // คัดลอกค่าทั้งหมดใน selling[key]
+                    No: newIndex,    // เพิ่มฟิลด์ No
+                };
                 });
           
                 // อัปเดตข้อมูลใน /order ด้วยการ merge updates
@@ -890,10 +898,16 @@ const InsertTrips = () => {
                 //    2: { name: FF }
                 // }
                 // เราจะ append ข้อมูลใน selling ทีละตัว โดยคำนวณ index ใหม่เป็น currentLength + key ของ selling
+
                 const updates = {};
                 Object.keys(ordersTickets).forEach((key) => {
-                  const newIndex = currentLength + parseInt(key, 10);
-                  updates[newIndex] = ordersTickets[key];
+                const newIndex = currentLength + parseInt(key, 10);
+
+                // เพิ่ม No เข้าไปในแต่ละออเดอร์
+                updates[newIndex] = {
+                    ...ordersTickets[key], // คัดลอกค่าทั้งหมดใน selling[key]
+                    No: newIndex,    // เพิ่มฟิลด์ No
+                };
                 });
           
                 // อัปเดตข้อมูลใน /order ด้วยการ merge updates

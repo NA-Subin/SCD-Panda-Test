@@ -54,9 +54,12 @@ const InsertCustomerBigTruck = (props) => {
     const [zipCode, setZipCode] = React.useState("");
     const [ticket, setTicket] = React.useState(0);
     const [ticketsName, setTicketsName] = React.useState("");
-    const [rate1, setRate1] = React.useState("");
-    const [rate2, setRate2] = React.useState("");
-    const [rate3, setRate3] = React.useState("");
+    const [phone, setPhone] = React.useState("");
+    // const [rate1, setRate1] = React.useState("");
+    // const [rate2, setRate2] = React.useState("");
+    // const [rate3, setRate3] = React.useState("");
+    const [credit,setCredit] = React.useState("");
+    const [creditTime,setCreditTime] = React.useState("");
     const [bill, setBill] = React.useState("");
     const [code, setCode] = React.useState("");
     const [codeID, setCodeID] = React.useState("");
@@ -91,12 +94,12 @@ const InsertCustomerBigTruck = (props) => {
                 id: ticket + 1,
                 TicketsName: ticketsName,
                 Status: ticketChecked1 === false && ticketChecked2 === true ? "ตั๋ว" : ticketChecked1 === true && ticketChecked2 === false ? "ผู้รับ" : ticketChecked1 === false && ticketChecked2 === false ? "ตั๋ว/ผู้รับ" : "-",
-                Rate1: rate1,
-                Rate2: rate2,
-                Rate3: rate3,
+                // Rate1: rate1,
+                // Rate2: rate2,
+                // Rate3: rate3,
                 Bill: bill,
                 Code: code,
-                companyName: companyName,
+                CompanyName: companyName,
                 CodeID: codeID,
                 Address: 
                     (no === "-" ? "-" : no)+
@@ -108,15 +111,20 @@ const InsertCustomerBigTruck = (props) => {
                 ,
                 lat: lat,
                 lng: lng,
-                type: show === 1 ? "เชียงใหม่" : "บ้านโฮ่ง"
+                Type: show === 1 ? "เชียงใหม่" : "บ้านโฮ่ง",
+                Credit: credit,
+                CreditTime: creditTime,
+                Phone: phone
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
                 setTicketsName("")
-                setRate1("")
-                setRate2("")
-                setRate3("")
+                // setRate1("")
+                // setRate2("")
+                // setRate3("")
+                setCredit("")
+                setCreditTime("")
                 setBill("")
                 setCode("")
                 setCompanyName("")
@@ -220,16 +228,16 @@ const InsertCustomerBigTruck = (props) => {
                                                 <Grid item xs={5}>
                                                     <Grid container spacing={2}>
                                                         <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
-                                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
-                                                            <TextField size="small" fullWidth label={"คลังลำปาง"} value={rate1} onChange={(e) => setRate1(e.target.value)} />
+                                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>เครดิต :</Typography>
+                                                            <TextField size="small" fullWidth value={credit} onChange={(e) => setCredit(e.target.value)} />
                                                         </Grid>
                                                         <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
-                                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
-                                                            <TextField size="small" fullWidth label={"คลังพิจิตร"} value={rate2} onChange={(e) => setRate2(e.target.value)} />
+                                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>ระยะเวลาเครดิต :</Typography>
+                                                            <TextField size="small" fullWidth value={creditTime} onChange={(e) => setCreditTime(e.target.value)} />
                                                         </Grid>
                                                         <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
-                                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
-                                                            <TextField size="small" fullWidth label={"คลังสระบุรี/บางปะอิน/IR"} value={rate3} onChange={(e) => setRate3(e.target.value)} />
+                                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>เบอร์โทร :</Typography>
+                                                            <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
                                                         </Grid>
                                                     </Grid>
                                                 </Grid>

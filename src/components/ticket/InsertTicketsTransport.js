@@ -9,10 +9,13 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    FormControl,
     FormControlLabel,
     Grid,
     IconButton,
+    MenuItem,
     Paper,
+    Select,
     Table,
     TableBody,
     TableCell,
@@ -33,8 +36,8 @@ const InsertTicketsTransport = () => {
     const [update, setUpdate] = React.useState(true);
     const [open, setOpen] = React.useState(false);
     const [check, setCheck] = React.useState(true);
-    const [ticketChecked1,setTicketChecked1] = React.useState(true);
-    const [ticketChecked2,setTicketChecked2] = React.useState(true);
+    const [ticketChecked1, setTicketChecked1] = React.useState(true);
+    const [ticketChecked2, setTicketChecked2] = React.useState(true);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -61,7 +64,10 @@ const InsertTicketsTransport = () => {
     const [bill, setBill] = React.useState("");
     const [code, setCode] = React.useState("");
     const [companyName, setCompanyName] = React.useState("");
+    const [phone, setPhone] = React.useState("");
+    const [creditTime, setCreditTime] = React.useState("");
     const [codeID, setCodeID] = React.useState("");
+    const [zone, setZone] = React.useState("-");
 
     const getTicket = async () => {
         database.ref("/customers/transports/").on("value", (snapshot) => {
@@ -81,56 +87,62 @@ const InsertTicketsTransport = () => {
     console.log("tickket:", ticket);
 
     const handlePost = () => {
-                database
-                    .ref("/customers/transports/")
-                    .child(ticket)
-                    .update({
-                        id: ticket + 1,
-                        TicketsName: ticketsName,
-                        Status: ticketChecked1 === false && ticketChecked2 === true ? "ตั๋ว" : ticketChecked1 === true && ticketChecked2 === false ? "ผู้รับ" : ticketChecked1 === false && ticketChecked2 === false ? "ตั๋ว/ผู้รับ" : "-",
-                        Rate1: rate1,
-                        Rate2: rate2,
-                        Rate3: rate3,
-                        Bill: bill,
-                        Code: code,
-                        companyName: companyName,
-                        CodeID: codeID,
-                        Address: 
-                            (no === "-" ? "-" : no)+
-                            (village === "-" ? "" : ","+village)+
-                            (subDistrict === "-" ? "" : ","+subDistrict)+
-                            (district === "-" ? "" : ","+district)+
-                            (province === "-" ? "" : ","+province)+
-                            (zipCode === "-" ? "" : ","+zipCode)
-                        ,
-                        lat: lat,
-                        lng: lng,
-                    })
-                    .then(() => {
-                        ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                        console.log("Data pushed successfully");
-                        setTicketsName("")
-                        setRate1("")
-                        setRate2("")
-                        setRate3("")
-                        setBill("")
-                        setCode("")
-                        setCompanyName("")
-                        setCodeID("")
-                        setNo("")
-                        setVillage("")
-                        setSubDistrict("")
-                        setDistrict("")
-                        setProvince("")
-                        setZipCode("")
-                        setLat("")
-                        setLng("")
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
-            };
+        database
+            .ref("/customers/transports/")
+            .child(ticket)
+            .update({
+                id: ticket + 1,
+                TicketsName: ticketsName,
+                Status: ticketChecked1 === false && ticketChecked2 === true ? "ตั๋ว" : ticketChecked1 === true && ticketChecked2 === false ? "ผู้รับ" : ticketChecked1 === false && ticketChecked2 === false ? "ตั๋ว/ผู้รับ" : "-",
+                Rate1: rate1,
+                Rate2: rate2,
+                Rate3: rate3,
+                Bill: bill,
+                Code: code,
+                companyName: companyName,
+                CodeID: codeID,
+                Address:
+                    (no === "-" ? "-" : no) +
+                    (village === "-" ? "" : "," + village) +
+                    (subDistrict === "-" ? "" : "," + subDistrict) +
+                    (district === "-" ? "" : "," + district) +
+                    (province === "-" ? "" : "," + province) +
+                    (zipCode === "-" ? "" : "," + zipCode)
+                ,
+                lat: lat,
+                lng: lng,
+                Phone: phone,
+                creditTime: creditTime,
+                Type: zone
+            })
+            .then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+                setTicketsName("")
+                setRate1("")
+                setRate2("")
+                setRate3("")
+                setBill("")
+                setPhone("")
+                setCreditTime("")
+                setCode("")
+                setCompanyName("")
+                setCodeID("")
+                setNo("")
+                setVillage("")
+                setSubDistrict("")
+                setDistrict("")
+                setProvince("")
+                setZipCode("")
+                setLat("")
+                setLng("")
+                setZone("-")
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    };
 
     return (
         <React.Fragment>
@@ -165,7 +177,7 @@ const InsertTicketsTransport = () => {
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รอบการวางบิล</Typography>
                                     <TextField size="small" fullWidth value={bill} onChange={(e) => setBill(e.target.value)} />
                                 </Grid>
-                                <Grid item xs={12} display="flex" justifyContent="left" alignItems="center">
+                                <Grid item xs={6} display="flex" justifyContent="left" alignItems="center">
                                     <Typography variant="subtitle1" fontWeight="bold" marginRight={1}>สถานะตั๋ว :</Typography>
                                     <FormControlLabel
                                         control={
@@ -188,29 +200,20 @@ const InsertTicketsTransport = () => {
                                         label="ผู้รับ"
                                     />
                                 </Grid>
-                                {/* <Grid item xs={12} display="flex" justifyContent="left" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold" marginRight={1}>ประเภทรถ :</Typography>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                // checked={ticketChecked}
-                                                // onChange={(e) => setTicketChecked(e.target.checked)}
-                                                size="small"
-                                            />
-                                        }
-                                        label="รถใหญ่"
-                                    />
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                // checked={recipientChecked}
-                                                // onChange={(e) => setRecipientChecked(e.target.checked)}
-                                                size="small"
-                                            />
-                                        }
-                                        label="รถเล็ก"
-                                    />
-                                </Grid> */}
+                                <Grid item xs={6} display="flex" justifyContent="left" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap" }} marginRight={1}>โซน :</Typography>
+                                    <FormControl fullWidth>
+                                        <Select
+                                        size="small"
+                                        value={zone}
+                                        onChange={(e) => setZone(e.target.value)}
+                                        >
+                                        <MenuItem value={"-"}>กรุณาเลือกโซน</MenuItem>
+                                        <MenuItem value={"เชียงใหม่"}>เชียงใหม่</MenuItem>
+                                        <MenuItem value={"เชียงราย"}>เชียงราย</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
                             </Grid>
                         </Grid>
                         <Grid item xs={5}>
@@ -263,8 +266,16 @@ const InsertTicketsTransport = () => {
                             <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>เบอร์โทร</Typography>
+                            <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                        </Grid>
+                        <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>เลขผู้เสียภาษี</Typography>
                             <TextField size="small" fullWidth value={codeID} onChange={(e) => setCodeID(e.target.value)} />
+                        </Grid>
+                        <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ระยะเวลาเครดิต</Typography>
+                            <TextField size="small" fullWidth value={creditTime} onChange={(e) => setCreditTime(e.target.value)} />
                         </Grid>
                     </Grid>
                 </DialogContent>

@@ -1046,7 +1046,7 @@ export default function Navbar() {
                   <ListItemButton
                     component={Link}
                     to={
-                      index === 0 ? "/report" : "/report"
+                      index === 0 ? "/report" : "/invoice"
                     }
                     sx={{
                       height: 40, // กำหนดความสูงให้ ListItem

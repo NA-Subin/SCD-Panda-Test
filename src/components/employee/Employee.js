@@ -161,7 +161,7 @@ const Employee = () => {
   }
 
   const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
   
     const handleChangePage = (event, newPage) => {
       setPage(newPage);
@@ -405,9 +405,9 @@ const Employee = () => {
                 </Table>
               </TableContainer>
               {
-  dataofficers.length < 5 ? null :
+  dataofficers.length <= 10 ? null :
     <TablePagination
-      rowsPerPageOptions={[5, 10, 25]}
+      rowsPerPageOptions={[10, 25, 30]}
       component="div"
       count={dataofficers.length}
       rowsPerPage={rowsPerPage}
@@ -580,9 +580,9 @@ const Employee = () => {
                 </Table>
               </TableContainer>
               {
-  datadrivers.length < 5 ? null :
+  datadrivers.length <= 10 ? null :
     <TablePagination
-      rowsPerPageOptions={[5, 10, 25]}
+      rowsPerPageOptions={[10, 25, 30]}
       component="div"
       count={datadrivers.length}
       rowsPerPage={rowsPerPage}

@@ -139,7 +139,7 @@ const TicketsBigTruck = () => {
     };
 
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -536,7 +536,7 @@ const TicketsBigTruck = () => {
                 </TableContainer>
                 {
                     open === 1 ?
-                        ticketM.length < 10 ? null :
+                        ticketM.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"
@@ -580,7 +580,7 @@ const TicketsBigTruck = () => {
                                 }}
                             />
                         :
-                        ticketR.length < 10 ? null :
+                        ticketR.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"

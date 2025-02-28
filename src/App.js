@@ -26,6 +26,7 @@ import TicketSmallTruck from "./components/ticket/TicketsSmallTruck";
 import Depots from "./components/depots/depot/Depots";
 import Trips from "./components/selling/Trips";
 import { DataProvider } from "./server/path";
+import Invoice from "./components/invoice/Invoice";
 
 function App() {
 
@@ -72,6 +73,9 @@ function App() {
                 </Routes>
                 <Routes>
                   <Route path="/creditor" element={<Creditor />} />
+                </Routes>
+                <Routes>
+                  <Route path="/invoice" element={<Invoice />} />
                 </Routes>
                 <Routes>
                   <Route path="/gasstations" element={<GasStations />} />

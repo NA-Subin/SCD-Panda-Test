@@ -69,8 +69,8 @@ const TicketsSmallTruck = () => {
 
                 // เรียงลำดับข้อมูล (สามารถปรับเปลี่ยนเงื่อนไขการเรียงได้ตามต้องการ)
                 // ตัวอย่าง: เรียงตาม id (หรือ key อื่นๆ ที่เหมาะสม)
-                ticketM.sort((a, b) => a.id.localeCompare(b.id));
-                ticketR.sort((a, b) => a.id.localeCompare(b.id));
+                ticketM.sort((a, b) => a.id - b.id);
+                ticketR.sort((a, b) => a.id - b.id);
 
                 // เพิ่มลำดับโดยใช้ property "No"
                 ticketM.forEach((item, index) => {
@@ -92,12 +92,14 @@ const TicketsSmallTruck = () => {
     }, []);
 
     // State สำหรับเก็บค่าแก้ไข Rate
-        const [rate1Edit, setRate1Edit] = useState("");
-        const [rate2Edit, setRate2Edit] = useState("");
-        const [rate3Edit, setRate3Edit] = useState("");
+        // const [rate1Edit, setRate1Edit] = useState("");
+        // const [rate2Edit, setRate2Edit] = useState("");
+        // const [rate3Edit, setRate3Edit] = useState("");
     
         // ฟังก์ชันสำหรับกดแก้ไข
-        const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3) => {
+        const handleSetting = (rowId, status
+            // , rowRate1, rowRate2, rowRate3
+        ) => {
             setSetting(true);
             setSelectedRowId(rowId);
             // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
@@ -106,9 +108,9 @@ const TicketsSmallTruck = () => {
             setTicketChecked(hasTicket);
             setRecipientChecked(hasRecipient);
             // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
-            setRate1Edit(rowRate1);
-            setRate2Edit(rowRate2);
-            setRate3Edit(rowRate3);
+            // setRate1Edit(rowRate1);
+            // setRate2Edit(rowRate2);
+            // setRate3Edit(rowRate3);
         };
 
     // บันทึกข้อมูลที่แก้ไขแล้ว
@@ -123,9 +125,9 @@ const TicketsSmallTruck = () => {
         // บันทึกสถานะใหม่ไปยัง Firebase
         await database.ref(`/customers/smalltruck/${selectedRowId - 1}`).update({
             Status: newStatus,
-            Rate1: rate1Edit,
-            Rate2: rate2Edit,
-            Rate3: rate3Edit,
+            // Rate1: rate1Edit,
+            // Rate2: rate2Edit,
+            // Rate3: rate3Edit,
         });
         setSetting(false);
         setSelectedRowId(null);
@@ -137,7 +139,7 @@ const TicketsSmallTruck = () => {
     };
 
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -200,7 +202,7 @@ const TicketsSmallTruck = () => {
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                                     ชื่อตั๋ว
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                {/* <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เรทคลังลำปาง
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
@@ -208,7 +210,7 @@ const TicketsSmallTruck = () => {
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เรทคลังสระบุรี/บางปะอิน/IR
-                                </TablecellHeader>
+                                </TablecellHeader> */}
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                     สถานะ
                                 </TablecellHeader>
@@ -232,7 +234,7 @@ const TicketsSmallTruck = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    {/* <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
@@ -324,7 +326,7 @@ const TicketsSmallTruck = () => {
                                                                     variant="outlined"
                                                                 />
                                                         }
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                             {
@@ -387,7 +389,7 @@ const TicketsSmallTruck = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    {/* <TableCell sx={{ textAlign: "center" }}>
                                                     {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
@@ -479,7 +481,7 @@ const TicketsSmallTruck = () => {
                                                                     variant="outlined"
                                                                 />
                                                         }
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                             {
@@ -533,7 +535,7 @@ const TicketsSmallTruck = () => {
                 </TableContainer>
                 {
                     open === 1 ?
-                        ticketM.length < 10 ? null :
+                        ticketM.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"
@@ -577,7 +579,7 @@ const TicketsSmallTruck = () => {
                                 }}
                             />
                         :
-                        ticketR.length < 10 ? null :
+                        ticketR.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"

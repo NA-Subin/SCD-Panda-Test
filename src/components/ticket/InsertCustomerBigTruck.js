@@ -61,6 +61,8 @@ const InsertCustomerBigTruck = (props) => {
     const [code, setCode] = React.useState("");
     const [codeID, setCodeID] = React.useState("");
     const [companyName, setCompanyName] = React.useState("");
+    const [phone, setPhone] = React.useState("");
+    const [creditTime, setCreditTime] = React.useState("");
     const [checked1,setChecked1] = React.useState(show);
     const [checked2,setChecked2] = React.useState(show);
     const [ticketChecked1,setTicketChecked1] = React.useState(true);
@@ -96,7 +98,7 @@ const InsertCustomerBigTruck = (props) => {
                 Rate3: rate3,
                 Bill: bill,
                 Code: code,
-                companyName: companyName,
+                CompanyName: companyName,
                 CodeID: codeID,
                 Address: 
                     (no === "-" ? "-" : no)+
@@ -108,7 +110,9 @@ const InsertCustomerBigTruck = (props) => {
                 ,
                 lat: lat,
                 lng: lng,
-                type: show === 1 ? "เชียงใหม่" : "เชียงราย"
+                Type: show === 1 ? "เชียงใหม่" : "เชียงราย",
+                Phone: phone,
+                CreditTime: creditTime
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -119,6 +123,8 @@ const InsertCustomerBigTruck = (props) => {
                 setRate3("")
                 setBill("")
                 setCode("")
+                setPhone("")
+                setCreditTime("")
                 setCompanyName("")
                 setCodeID("")
                 setNo("")
@@ -267,8 +273,16 @@ const InsertCustomerBigTruck = (props) => {
                                                     <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                                                 </Grid>
                                                 <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
+                                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>เบอร์โทร</Typography>
+                                                    <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                                </Grid>
+                                                <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
                                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>เลขผู้เสียภาษี</Typography>
                                                     <TextField size="small" fullWidth value={codeID} onChange={(e) => setCodeID(e.target.value)} />
+                                                </Grid>
+                                                <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
+                                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ระยะเวลาเครดิต</Typography>
+                                                    <TextField size="small" fullWidth value={creditTime} onChange={(e) => setCreditTime(e.target.value)} />
                                                 </Grid>
                     </Grid>
                 </DialogContent>

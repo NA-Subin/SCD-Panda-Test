@@ -25,12 +25,12 @@ import {
   Typography,
 } from "@mui/material";
 import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
-import InsertCreditor from "./InsertCreditor";
-import UpdateCreditor from "./UpdateCreditor";
 import { useData } from "../../server/path";
+import UpdateInvoice from "./UpdateInvoice";
 
-const Creditor = () => {
+const Invoice = () => {
   const [update, setUpdate] = React.useState(true);
   const [open, setOpen] = useState(false);
 
@@ -64,8 +64,42 @@ const Creditor = () => {
     };
   }, []);
 
-  const { creditors } = useData();
-  const creditor = Object.values(creditors || {});
+  const { order } = useData();
+const orders = Object.values(order || {});
+
+const groupedOrders = orders.reduce((acc, curr) => {
+    const { TicketName, Product } = curr;
+  
+    // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
+    if (!acc[TicketName]) {
+      acc[TicketName] = {
+        TicketName,
+        Volume: 0,
+        Amount: 0,
+        TransferAmount: 0,
+        OverdueTransfer: 0,
+      };
+    }
+  
+    // รวมค่า Volume จาก Product
+    Object.entries(Product).forEach(([key, value]) => {
+      acc[TicketName].Volume += value.Volume * 1000;
+      acc[TicketName].Amount += parseFloat(value.Amount) || 0;
+      acc[TicketName].TransferAmount += (value.TransferAmount || 0);
+      acc[TicketName].OverdueTransfer += (value.OverdueTransfer || 0);
+    });
+  
+    return acc;
+  }, {});
+  
+
+// แปลง Object กลับเป็น Array และเพิ่ม id
+const result = Object.values(groupedOrders).map((item, index) => ({
+    id: index + 1, // เริ่ม id จาก 1
+    ...item
+  }));
+  
+  console.log(result);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -87,17 +121,17 @@ const Creditor = () => {
         textAlign="center"
         gutterBottom
       >
-        เจ้าหนี้น้ำมัน
+        ใบวางบิล
       </Typography>
       <Divider sx={{ marginBottom: 1 }} />
       <Grid container spacing={2} sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth - 10) : (windowWidth - 235) }}>
         <Grid item xs={10}>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
-            รายชื่อเจ้าหนี้น้ำมัน
+            รายการใบวางบิล
           </Typography>
         </Grid>
         <Grid item xs={2}>
-          <InsertCreditor creditor={creditor.length}/>
+           
         </Grid>
         <Grid item xs={12}>
           <Divider />
@@ -108,7 +142,7 @@ const Creditor = () => {
             style={{ maxHeight: "70vh" }}
             sx={{ marginBottom: 2 }}
           >
-            <Table stickyHeader size="small" sx={{ width: "1250px" }}>
+            <Table stickyHeader size="small">
               <TableHead sx={{ height: "7vh" }}>
                 <TableRow>
                   <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -118,31 +152,39 @@ const Creditor = () => {
                     ชื่อ-สกุล
                   </TablecellHeader>
                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                    เลขประจำตัวผู้เสียภาษี
+                    จำนวนลิตร
                   </TablecellHeader>
                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                    เบอร์โทร
+                    ยอดเงิน
                   </TablecellHeader>
                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                    User
+                    ยอดโอน
                   </TablecellHeader>
                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                    ระยะเครดิต
+                    ค้างโอน
                   </TablecellHeader>
                   <TablecellHeader />
                 </TableRow>
               </TableHead>
               <TableBody>
                 {
-                  creditor.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                  result.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                     <TableRow>
                       <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{row.Credit}</TableCell>
-                      <UpdateCreditor key={row.id} employee={row} />
+                      <TableCell sx={{ textAlign: "center" }}>{row.TicketName}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            }).format(parseFloat(row.Volume))}
+                        </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            }).format(parseFloat(row.Amount))}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}></TableCell>
+                      <TableCell sx={{ textAlign: "center" }}></TableCell>
+                      <UpdateInvoice key={row.id} ticketname={row.TicketName} />
                     </TableRow>
                   ))
                 }
@@ -150,11 +192,11 @@ const Creditor = () => {
             </Table>
           </TableContainer>
           {
-            creditor.length <= 10 ? null :
+            result.length <= 10 ? null :
               <TablePagination
                 rowsPerPageOptions={[10, 25, 30]}
                 component="div"
-                count={creditor.length}
+                count={result.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
@@ -200,4 +242,4 @@ const Creditor = () => {
   );
 };
 
-export default Creditor;
+export default Invoice;

@@ -109,7 +109,7 @@ const BigTruckRegHead = (props) => {
   }
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -233,9 +233,9 @@ const BigTruckRegHead = (props) => {
               </Table>
             </TableContainer>
             {
-  truck.length < 5 ? null :
+  truck.length <= 10 ? null :
     <TablePagination
-      rowsPerPageOptions={[5, 10, 25]}
+      rowsPerPageOptions={[10, 25, 30]}
       component="div"
       count={truck.length}
       rowsPerPage={rowsPerPage}
