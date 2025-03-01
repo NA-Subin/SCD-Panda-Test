@@ -473,6 +473,13 @@ const InsertTrips = () => {
                 ...prev,
                 [newIndex]: {
                     TicketName: customerValue,
+                    CompanyName: ticketData.CompanyName || "-",
+                    Address: ticketData.Address || "-",
+                    Lat: ticketData.lat || "-",
+                    Lng: ticketData.lng || "-",
+                    CodeID: ticketData.CodeID || "-",
+                    CreditTime: ticketData.CreditTime || "-",
+                    Bill: ticketData.Bill || "-",
                     Rate: newRate,
                     Trip : trip.length,
                     Date: dayjs(selectedDate).format('DD/MM/YYYY'),

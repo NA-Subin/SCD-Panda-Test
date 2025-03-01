@@ -68,12 +68,13 @@ const Invoice = () => {
 const orders = Object.values(order || {});
 
 const groupedOrders = orders.reduce((acc, curr) => {
-    const { TicketName, Product } = curr;
+    const { TicketName,Date ,Product } = curr;
   
     // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
     if (!acc[TicketName]) {
       acc[TicketName] = {
         TicketName,
+        Date,
         Volume: 0,
         Amount: 0,
         TransferAmount: 0,
@@ -139,7 +140,6 @@ const result = Object.values(groupedOrders).map((item, index) => ({
         <Grid item xs={12}>
           <TableContainer
             component={Paper}
-            style={{ maxHeight: "70vh" }}
             sx={{ marginBottom: 2 }}
           >
             <Table stickyHeader size="small">
@@ -169,23 +169,7 @@ const result = Object.values(groupedOrders).map((item, index) => ({
               <TableBody>
                 {
                   result.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <TableRow>
-                      <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{row.TicketName}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>
-                        {new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format(parseFloat(row.Volume))}
-                        </TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format(parseFloat(row.Amount))}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}></TableCell>
-                      <TableCell sx={{ textAlign: "center" }}></TableCell>
-                      <UpdateInvoice key={row.id} ticketname={row.TicketName} />
-                    </TableRow>
+                    <UpdateInvoice key={row.id} ticket={row} />
                   ))
                 }
               </TableBody>
