@@ -193,6 +193,9 @@ const Trips = () => {
                                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                                     น้ำหนักรวม
                                                 </TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                    สถานะ
+                                                </TablecellHeader>
                                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 70 }}/>
                                                 {/* <TablecellHeader sx={{
                                                     textAlign: "center", fontSize: 16, width: 100, position: "sticky",

@@ -211,27 +211,12 @@ const UpdateTrip = (props) => {
                         <Paper
                             sx={{ p: 1, backgroundColor: (parseFloat(weightHigh) + parseFloat(weightLow) + parseFloat(weightTruck)) > 50300 ? "red" : "lightgray", marginBottom: 1 }}
                         >
-                            <Paper
-                                className="custom-scrollbar"
-                                sx={{
-                                    position: "relative",
-                                    maxWidth: "100%",
-                                    height: "31vh", // ความสูงรวมของ container หลัก
-                                    overflow: "hidden",
-                                    marginBottom: 0.5,
-                                    overflowX: "auto",
-                                }}
-                            >
+                            <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
                                 {/* Header: คงที่ด้านบน */}
                                 <Box
                                     sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
                                         height: "35px", // กำหนดความสูง header
                                         backgroundColor: theme.palette.info.main,
-                                        zIndex: 3,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -247,7 +232,6 @@ const UpdateTrip = (props) => {
                                                 <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
                                                 <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
-                                                <TablecellSelling width={ticket.length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white" }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -255,13 +239,10 @@ const UpdateTrip = (props) => {
 
                                 {/* TableBody: ส่วนที่ scroll ได้ */}
                                 <Box
-                                    className="custom-scrollbar"
-                                    sx={{
-                                        position: "absolute",
-                                        top: "35px", // เริ่มจากด้านล่าง header
-                                        bottom: "35px", // จนถึงด้านบนของ footer
-                                        overflowY: "auto",
-                                    }}
+                                    sx={{ 
+                                        top: "35px",
+                                        bottom: "25px"
+                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableBody>
@@ -303,7 +284,6 @@ const UpdateTrip = (props) => {
                                                     <TableCellPWD width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px"}}>
                                                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.PWD !== undefined ? row.Product.PWD.Volume : "-"}</Typography>
                                                     </TableCellPWD>
-                                                    <TablecellSelling width={ticket.length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} />
                                                 </TableRow>
                                             );
                                             })}
@@ -314,50 +294,38 @@ const UpdateTrip = (props) => {
                                 {/* Footer: คงที่ด้านล่าง */}
                                 <Box
                                     sx={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "35px", // กำหนดความสูง footer
-                                        backgroundColor: theme.palette.info.main,
-                                        zIndex: 2,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellSelling width={650} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={650} sx={{ textAlign: "center",height: "25px" }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
                                                 </TablecellSelling>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
-                                                </TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
-                                                </TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
-                                                </TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
-                                                </TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
-                                                   
-                                                </TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
-                                                </TableCellPWD>
-                                                <TablecellSelling width={ticket.length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: editMode ? "" : "lightgray" }} >
-                                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                                        
-                                                    </Box>
+                                                </TablecellSelling>
+                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                    
                                                 </TablecellSelling>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
                                 </Box>
-                            </Paper>
-                            <Grid container spacing={1} marginBottom={-1}>
+                                </TableContainer>
+                            <Grid container spacing={1} marginBottom={-0.5}>
                                 <Grid item sm={3} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำมันหนัก</Typography>
                                     <Paper
@@ -475,28 +443,12 @@ const UpdateTrip = (props) => {
                             </Grid>
                         </Grid>
                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
-                            <Paper
-                                className="custom-scrollbar"
-                                sx={{
-                                    position: "relative",
-                                    maxWidth: "100%",
-                                    height: "31vh", // ความสูงรวมของ container หลัก
-                                    overflow: "hidden",
-                                    marginBottom: 0.5,
-                                    overflowX: "auto",
-                                    paddingBottom: -1
-                                }}
-                            >
+                        <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
                                 {/* Header: คงที่ด้านบน */}
                                 <Box
                                     sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "35px", // กำหนดความสูง header
                                         backgroundColor: theme.palette.info.main,
-                                        zIndex: 3,
+                                        height: "35px"
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -529,7 +481,6 @@ const UpdateTrip = (props) => {
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
                                                     PWD
                                                 </TableCellPWD>
-                                                <TablecellSelling width={order.length > 4 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -539,10 +490,8 @@ const UpdateTrip = (props) => {
                                 <Box
                                     className="custom-scrollbar"
                                     sx={{
-                                        position: "absolute",
                                         top: "35px", // เริ่มจากด้านล่าง header
-                                        bottom: "60px", // จนถึงด้านบนของ footer
-                                        overflowY: "auto",
+                                        bottom: "25px", // จนถึงด้านบนของ footer
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -582,7 +531,6 @@ const UpdateTrip = (props) => {
                                                         <TableCellPWD width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px"}}>
                                                         <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.PWD !== undefined ? row.Product.PWD.Volume : "-"}</Typography>
                                                         </TableCellPWD>
-                                                        <TablecellSelling width={order.length > 4 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} />
                                                     </TableRow>
                                                 );
                                             })}
@@ -593,43 +541,34 @@ const UpdateTrip = (props) => {
                                 {/* Footer: คงที่ด้านล่าง */}
                                 <Box
                                     sx={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "25px", // กำหนดความสูง footer
+                                        top: "25px", // จนถึงด้านบนของ footer
                                         bottom: "25px", // จนถึงด้านบนของ footer
                                         backgroundColor: theme.palette.info.main,
-                                        zIndex: 2,
-                                        marginBottom: 0.5
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main, }}>
-                                                <TablecellSelling width={500} sx={{ textAlign: "center" }}>
+                                                <TablecellSelling width={500} sx={{ height: "25px",textAlign: "center" }}>
                                                     รวม
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
-                                                </TablecellSelling>
-                                                <TablecellSelling width={order.length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                            
                                                 </TablecellSelling>
                                             </TableRow>
                                         </TableFooter>
@@ -639,49 +578,39 @@ const UpdateTrip = (props) => {
                                 {/* Footer: คงที่ด้านล่าง */}
                                 <Box
                                     sx={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "25px", // กำหนดความสูง footer
                                         backgroundColor: theme.palette.info.main,
-                                        zIndex: 2,
                                         borderTop: "2px solid white",
-                                        marginBottom: 0.5
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellSelling width={500} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellSelling width={500} sx={{ height: "25px",textAlign: "center", height: "25px" }}>
                                                     คงเหลือ
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold",borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={order.length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     
                                                 </TablecellSelling>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
                                 </Box>
-                            </Paper>
+                            </TableContainer>
                             <Grid container spacing={1}>
                                 <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
@@ -754,10 +683,6 @@ const UpdateTrip = (props) => {
                                 </Grid>
                             </Grid>
                         </Paper>
-                    </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                        <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
-                        <Button variant="contained" color="success" size="small">บันทึก</Button>
                     </Box>
                     <Box textAlign="center" marginTop={1}>
                         <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>

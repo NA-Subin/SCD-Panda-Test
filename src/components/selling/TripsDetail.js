@@ -77,7 +77,6 @@ const TripsDetail = (props) => {
 
     return (
         <React.Fragment>
-
             <TableRow>
                 <TableCell sx={{ textAlign: "center" }}>{trips.id}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateStart}</TableCell>
@@ -107,6 +106,9 @@ const TripsDetail = (props) => {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                 }).format(trips.TotalWeight)}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+
+                </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     <UpdateTrip 
                         tripID={trips.id} 

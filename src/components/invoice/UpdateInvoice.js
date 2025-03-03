@@ -164,7 +164,7 @@ const UpdateInvoice = (props) => {
             {
                 open &&
                 <TableRow>
-                    <TableCell colSpan={7} sx={{ p: 1, backgroundColor: "lightgray", paddingLeft: 4, paddingRight: 4 }}>
+                    <TableCell colSpan={7} sx={{ p: 1, backgroundColor: "#eeeeee", paddingLeft: 4, paddingRight: 4, borderTop: "3px solid gray" }}>
                         <Grid container spacing={2}>
                             <Grid item xs={9.5}>
                             <Typography variant="subtitle1" sx={{ marginTop: 1 }} fontWeight="bold" gutterBottom>
