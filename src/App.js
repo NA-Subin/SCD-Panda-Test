@@ -27,6 +27,7 @@ import Depots from "./components/depots/depot/Depots";
 import Trips from "./components/selling/Trips";
 import { DataProvider } from "./server/path";
 import Invoice from "./components/invoice/Invoice";
+import PrintInvoice from "./components/invoice/PrintInvoice";
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         {/* <Route path="/:email/*" element={ */}
+        <Route path="/print-invoice" element={<PrintInvoice />} />
         <Route path="/gasstation-attendant" element={<GasStationA />} />
         <Route path="/trade-payable" element={<TradePayable />} />
         <Route path="/choose" element={<Choose />} />
