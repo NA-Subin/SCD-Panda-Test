@@ -160,7 +160,7 @@ const TicketsBigTruck = () => {
             >
                 ลูกค้ารถใหญ่
             </Typography>
-            <ExcelUploader />
+            {/* <ExcelUploader /> */}
             <Divider sx={{ marginBottom: 1 }} />
             <Grid container spacing={2} marginTop={1}>
                 <Grid item xs={6}>

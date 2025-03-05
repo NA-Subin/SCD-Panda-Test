@@ -28,12 +28,13 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { IconButtonError, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
+import { IconButtonError, IconButtonInfo, IconButtonSuccess, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import CancelIcon from '@mui/icons-material/Cancel';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BackspaceIcon from '@mui/icons-material/Backspace';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
@@ -41,10 +42,11 @@ import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import theme from "../../theme/theme";
 import { ref, update } from "firebase/database";
-import { ShowError } from "../sweetalert/sweetalert";
+import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import dayjs from "dayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import "dayjs/locale/th";
 import jsPDF from "jspdf";
 import notoSansThaiRegular from "@fontsource/noto-sans-thai";
 import html2canvas from "html2canvas";
@@ -52,6 +54,11 @@ import html2canvas from "html2canvas";
 const UpdateInvoice = (props) => {
     const { ticket } = props;
     const [open, setOpen] = useState(false);
+    const [price, setPrice] = useState([]);
+    const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
+    const [show, setShow] = useState(false);
+
+    const [latestPrice, setLatestPrice] = useState([]);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -61,8 +68,19 @@ const UpdateInvoice = (props) => {
         setOpen(false);
     };
 
-    const { order } = useData();
+    const { 
+        order,
+        customertransports,
+        customergasstations,
+        customerbigtruck,
+        customersmalltruck,
+     } = useData();
+
     const orders = Object.values(order || {});
+    const customertransport = Object.values(customertransports || {});
+    const customergasstation = Object.values(customergasstations || {});
+    const customerbigtrucks = Object.values(customerbigtruck || {});
+    const customersmalltrucks = Object.values(customersmalltruck || {});
 
     const orderList = orders.filter(item => item.TicketName === ticket.TicketName);
 
@@ -110,33 +128,45 @@ const UpdateInvoice = (props) => {
         });
     };
 
-
     const generatePDF = () => {
         const invoiceData = {
-          Company: "บริษัท แพนด้า สตาร์ ออยล์ จำกัด (สำนักงานใหญ่)",
-          Address: "261 หมู่ 2 ต.สันพระเนตร อ.สันทราย จ.เชียงใหม่ 50210",
-          IDCard: "050 5562 00472 6",
-          date: "01/03/2025",
-          account: "SCB",
-          amount: "10,000 บาท",
-          note: "โอนเงินเข้าบัญชี",
+            Report: orderList.flatMap((row, rowIndex) =>
+                Object.entries(row.Product).map(([productName, Volume], index) => ({
+                    No: row.No,
+                    TicketName: row.TicketName,
+                    RateOil: Volume.RateOil || 0,
+                    Amount: Volume.Amount || 0,
+                    Date: row.Date,
+                    Driver: row.Driver,
+                    Registration: row.Registration,
+                    ProductName: productName,
+                    Volume: Volume.Volume * 1000,
+                    uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
+                }))
+            ),
+            Order: order.reduce((acc, current) => {
+                // ✅ ตรวจสอบว่าค่า TicketName ซ้ำหรือไม่ และต้องตรงกับ ticket.TicketName
+                if (!acc.some(item => item.TicketName === current.TicketName) && current.TicketName === ticket.TicketName) {
+                    acc.push(current);
+                }
+                return acc;
+            }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
+            Volume: ticket.Volume || 0,
+            Amount: ticket.Amount || 0
         };
-      
+
         // บันทึกข้อมูลลง sessionStorage
         sessionStorage.setItem("invoiceData", JSON.stringify(invoiceData));
-      
+
         // เปิดหน้าต่างใหม่ไปที่ /print-invoice
         const printWindow = window.open("/print-invoice", "_blank", "width=800,height=600");
-      
-        if (!printWindow) {
-          alert("กรุณาปิด pop-up blocker แล้วลองใหม่");
-        }
-      };
-      
 
+        if (!printWindow) {
+            alert("กรุณาปิด pop-up blocker แล้วลองใหม่");
+        }
+    };
 
     console.log("Report : ", report);
-
 
     const handleSave = () => {
         Object.entries(report).forEach(([uniqueRowId, data]) => {
@@ -163,49 +193,94 @@ const UpdateInvoice = (props) => {
         });
     };
 
-    const [price, setPrice] = useState([]);
-    const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
-    const [show, setShow] = useState(false);
-
     const handlePost = () => {
-        const newIndex = price.length;
-        const newRow = {
-            id: newIndex,
-            DateStart: dayjs(new Date).format("DD/MM/YYYY"),
-            BankName: "",
-            Transport: "",
-            IncomingMoney: "",
-            Note: "",
-        };
-
-        setPrice([...price, newRow]); // เพิ่มแถวใหม่
-        setFormData({ ...formData, [newIndex]: newRow }); // เพิ่มค่าชั่วคราว
-        setShow(true);
-    };
-
-    const handleChange = (id, field, value) => {
-        setFormData({
-            ...formData,
-            [id]: { ...formData[id], [field]: value },
+        setPrice(prevPrice => {
+            const newIndex = prevPrice.length;
+            const newRow = {
+                id: newIndex,
+                DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                BankName: "",
+                Transport: "",
+                IncomingMoney: "",
+                Note: "",
+            };
+            return [...prevPrice, newRow];
         });
     };
-
-    const handleSubmit = (id) => {
-        setPrice(price.map(row => row.id === id ? formData[id] : row));
-        setShow(false);
+    
+    const handleChange = (id, field, value) => {
+        setPrice(prevPrice =>
+            prevPrice.map(row =>
+                row.id === id ? { 
+                    ...row, 
+                    [field]: value 
+                } : row
+            )
+        );
     };
 
     // ลบแถวออกจาก price
-    const handleDelete = (id) => {
-        setPrice(price.filter(row => row.id !== id));
-        setFormData((prev) => {
-            const updatedForm = { ...prev };
-            delete updatedForm[id];
-            return updatedForm;
+    const handleDelete = (indexToDelete) => {
+        setPrice((prev) => {
+            const newPrice = prev
+                .filter((row) => row.id !== indexToDelete) // กรองเอาอันที่ต้องการลบออก
+                .map((row, newIndex) => ({ ...row, id: newIndex })); // รีเซ็ต id ใหม่
+
+            return newPrice;
         });
     };
 
-    console.log("Price : ", price);
+    useEffect(() => {
+        setLatestPrice(price); // อัปเดตค่าล่าสุดของ price
+    }, [price]);
+
+    const handleSubmit = () => {
+        console.log("Using latestPrice:", latestPrice);
+        
+        if (latestPrice.length === 0) {
+            ShowError("Price เป็นค่าว่าง");
+            return;
+        }
+    
+        let foundItem;
+        let refPath = "";
+    
+        foundItem = customertransport.find(item => item.TicketName === ticket.TicketName);
+        if (foundItem) refPath = "/customers/transports/";
+    
+        if (!foundItem) {
+            foundItem = customergasstation.find(item => item.TicketName === ticket.TicketName);
+            if (foundItem) refPath = "/customers/gasstations/";
+        }
+    
+        if (!foundItem) {
+            foundItem = customerbigtrucks.find(item => item.TicketName === ticket.TicketName);
+            if (foundItem) refPath = "/customers/bigtruck/";
+        }
+    
+        if (!foundItem) {
+            foundItem = customersmalltrucks.find(item => item.TicketName === ticket.TicketName);
+            if (foundItem) refPath = "/customers/smalltruck/";
+        }
+    
+        if (foundItem) {
+            database
+                .ref(refPath)
+                .child(foundItem.id)
+                .update({
+                    Price: latestPrice // ใช้ค่า price ที่ถูกอัปเดตล่าสุด
+                })
+                .then(() => {
+                    ShowSuccess("สำเร็จ");
+                })
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        } else {
+            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+        }
+    };
 
     return (
         <React.Fragment>
@@ -480,7 +555,7 @@ const UpdateInvoice = (props) => {
 
                         <Typography variant='subtitle1' fontWeight="bold" gutterBottom>ข้อมูลการโอน</Typography>
                         <Grid container spacing={2}>
-                            <Grid item xs={11}>
+                            <Grid item xs={11.5}>
                                 <TableContainer
                                     component={Paper}
                                     sx={{ marginBottom: 2, borderRadius: 2 }}
@@ -494,7 +569,18 @@ const UpdateInvoice = (props) => {
                                                 <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px" }}>บริษัทขนส่ง</TablecellSelling>
                                                 <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px" }}>ยอดเงินเข้า</TablecellSelling>
                                                 <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 200, height: "30px" }}>หมายเหตุ</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px" }} />
+                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px" }}>
+                                                <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
+                                    <IconButton color="info"
+                                        size="small"
+                                        fullWidth
+                                        onClick={handlePost}
+                                        sx={{ borderRadius: 2 }}
+                                    >
+                                        <AddBoxIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                                </TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -505,155 +591,95 @@ const UpdateInvoice = (props) => {
                                                             {row.id + 1}
                                                         </Typography>
                                                     </TableCell>
+
+                                                    {/* DatePicker */}
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                        {
-                                                            show ?
-                                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                        <DatePicker
-                                                                            openTo="day"
-                                                                            views={["year", "month", "day"]}
-                                                                            value={formData[row.id]?.["DateStart"] ? dayjs(formData[row.id]["DateStart"]) : null} // ตรวจสอบค่า null
-                                                                            format="DD/MM/YYYY"
-                                                                            onChange={(newValue) => handleChange(row.id, "DateStart", newValue ? newValue.format("YYYY-MM-DD") : "")}
-                                                                            slotProps={{
-                                                                                textField: {
-                                                                                    size: "small",
-                                                                                    fullWidth: true,
-                                                                                    sx: {
-                                                                                        "& .MuiOutlinedInput-root": {
-                                                                                            height: "22px",
-                                                                                            paddingRight: "8px",
-                                                                                        },
-                                                                                        "& .MuiInputBase-input": {
-                                                                                            fontSize: "14px",
-                                                                                        },
-                                                                                        "& .MuiInputAdornment-root": {
-                                                                                            marginLeft: "0px",
-                                                                                            paddingLeft: "0px"
-                                                                                        }
-                                                                                    },
-                                                                                },
-                                                                            }}
-                                                                        />
-                                                                    </LocalizationProvider>
-                                                                </Paper>
-                                                                :
-                                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                                    {dayjs(formData[row.id]["DateStart"])}
-                                                                </Typography>
-                                                        }
+                                                        {show ? (
+                                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                                                            <DatePicker
+                                                                                                                openTo="day"
+                                                                                                                views={["year", "month", "day"]}
+                                                                                                                value={dayjs(row.DateStart, "DD/MM/YYYY")}  // กำหนดรูปแบบที่ต้องการ
+                                                                                                                format="DD/MM/YYYY"
+                                                                                                                onChange={(newValue) => handleChange(row.id, "DateStart", newValue)}
+                                                                                                                slotProps={{
+                                                                                                                    textField: {
+                                                                                                                        size: "small",
+                                                                                                                        fullWidth: true,
+                                                                                                                        sx: {
+                                                                                                                            "& .MuiOutlinedInput-root": {
+                                                                                                                                height: "25px",
+                                                                                                                                paddingRight: "8px",
+                                                                                                                            },
+                                                                                                                            "& .MuiInputBase-input": {
+                                                                                                                                fontSize: "14px",
+                                                                                                                            },
+                                                                                                                        },
+                                                                                                                    },
+                                                                                                                }}
+                                                                                                            />
+                                                                                                        </LocalizationProvider>
+                                                            </Paper>
+                                                        ) : (
+                                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                                {row.DateStart ? dayjs(row.DateStart).format("DD/MM/YYYY") : "-"}
+                                                            </Typography>
+                                                        )}
                                                     </TableCell>
+
+                                                    {/* Select Bank Name */}
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>
                                                         <Paper component="form" sx={{ width: "100%" }}>
                                                             <FormControl
                                                                 fullWidth
                                                                 size="small"
                                                                 sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px',
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: "14px",
-                                                                        textAlign: 'center',
-                                                                    },
-                                                                    borderRadius: 10,
+                                                                    '& .MuiOutlinedInput-root': { height: '25px' },
+                                                                    '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
                                                                 }}
                                                             >
                                                                 <Select
-                                                                    labelId="demo-select-small-label"
-                                                                    id="demo-select-small"
-                                                                    value={formData[row.id]?.["BankName"] || ""}
+                                                                    value={row.BankName || ""}
                                                                     onChange={(e) => handleChange(row.id, "BankName", e.target.value)}
                                                                 >
-                                                                    <MenuItem value="" sx={{ fontSize: "14px" }}>
-                                                                        <em>None</em>
-                                                                    </MenuItem>
-                                                                    <MenuItem value={10} sx={{ fontSize: "14px" }}>Ten</MenuItem>
-                                                                    <MenuItem value={20} sx={{ fontSize: "14px" }}>Twenty</MenuItem>
-                                                                    <MenuItem value={30} sx={{ fontSize: "14px" }}>Thirty</MenuItem>
+                                                                    <MenuItem value="10" sx={{ fontSize: "14px", }}>Ten</MenuItem>
+                                                                    <MenuItem value="20" sx={{ fontSize: "14px", }}>Twenty</MenuItem>
+                                                                    <MenuItem value="30" sx={{ fontSize: "14px", }}>Thirty</MenuItem>
                                                                 </Select>
                                                             </FormControl>
                                                         </Paper>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField
-                                                                value={formData[row.id]?.["Transport"] || ""}
-                                                                onChange={(e) => handleChange(row.id, "Transport", e.target.value)}
-                                                                size="small"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px',
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: "14px",
-                                                                        textAlign: 'center',
-                                                                    },
-                                                                    borderRadius: 10,
-                                                                }}
-                                                            />
-                                                        </Paper>
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField
-                                                                value={formData[row.id]?.["IncomingMoney"] || ""}
-                                                                onChange={(e) => handleChange(row.id, "IncomingMoney", e.target.value)}
-                                                                size="small"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px',
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: "14px",
-                                                                        textAlign: 'center',
-                                                                    },
-                                                                    borderRadius: 10,
-                                                                }}
-                                                            />
-                                                        </Paper>
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 200 }}>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField
-                                                                value={formData[row.id]?.["Note"] || ""}
-                                                                onChange={(e) => handleChange(row.id, "Note", e.target.value)}
-                                                                size="small"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px',
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: "14px",
-                                                                        textAlign: 'center',
-                                                                    },
-                                                                    borderRadius: 10,
-                                                                }}
-                                                            />
-                                                        </Paper>
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", width: 60, display: "flex", justifyContent: "center", alignItems: "center", height: "30px" }}>
-                                                        <IconButton
-                                                            color="success"
-                                                            size="small"
-                                                            onClick={() => handleSubmit(row.id)}
-                                                        >
-                                                            <SaveIcon fontSize="small" />
-                                                        </IconButton>
-                                                        <IconButton
-                                                            color="error"
-                                                            size="small"
-                                                            onClick={() => handleDelete(row.id)}
-                                                        >
+
+                                                    {/* Input Fields */}
+                                                    {["Transport", "IncomingMoney", "Note"].map((field) => (
+                                                        <TableCell key={field} sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                                <TextField
+                                                                    value={row[field] || ""}
+                                                                    onChange={(e) => handleChange(row.id, field, e.target.value)}
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
+                                                                    }}
+                                                                />
+                                                            </Paper>
+                                                        </TableCell>
+                                                    ))}
+
+                                                    {/* Action Buttons */}
+                                                    <TableCell sx={{ textAlign: "center", width: 60, height: "30px" }}>
+                                                    <Tooltip title="ยกเลิก" placement="left">
+                                                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
                                                             <BackspaceIcon fontSize="small" />
                                                         </IconButton>
+                                                    </Tooltip>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
+
                                         </TableBody>
                                     </Table>
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -679,18 +705,25 @@ const UpdateInvoice = (props) => {
                                     </Table>
                                 </TableContainer>
                             </Grid>
-                            <Grid item xs={1}>
-                                <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="top">
-                                    <Button
-                                        color="primary"
-                                        variant='contained'
-                                        fullWidth
-                                        onClick={handlePost}
-                                        sx={{ flexDirection: "row", gap: 0.5, borderRadius: 2 }}
-                                    >
-                                        <AddIcon sx={{ color: "white" }} />
-                                    </Button>
+                            <Grid item xs={0.5}>
+                                {
+                                                price.length > 0 &&
+                                                <Tooltip title="บันทึก" placement="left">
+                                                    <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main,marginLeft: -1,marginRight: -1,marginTop: 1 }}>
+                                                                <Button
+                                                                    color="inherit"
+                                                                    fullWidth
+                                                                    onClick={handleSubmit}
+                                                                    sx={{ flexDirection: "column", gap: 0.5 }}
+                                                                >
+                                                                    <SaveIcon fontSize="small" sx={{ color: "white" }} />
+                                                                    <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                                                        บันทึก
+                                                                    </Typography>
+                                                                </Button>
+                                                            </Paper>
                                 </Tooltip>
+                                            }
                             </Grid>
                         </Grid>
                     </TableCell>

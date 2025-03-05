@@ -26,44 +26,44 @@ const ExcelUploader = () => {
       
       jsonData.forEach((row, index) => {
         //รถใหญ่
-        // const formattedData = {
-        //   id: index + 1,
-        //   TicketsName: row["ชื่อจัดเทียววิ่ง"] ?? "",
-        //   Status: "ตั๋ว/ผู้รับ",
-        //   Rate1: parseFloat(parseFloat(row["ขนส่งลำปาง"] ?? 0).toFixed(2)),
-        //   Rate2: parseFloat(parseFloat(row["พิจิตร"] ?? 0).toFixed(2)),
-        //   Rate3: parseFloat(parseFloat(row["บางปะอิน/สระบุรี"] ?? 0).toFixed(2)),
-        //   Bill: "-",
-        //   Code: "-",
-        //   CompanyName: row["ชื่อ/ใบวางบิล"] ?? "",
-        //   CodeID: row["เลขผู้เสียภาษี"] ?? "",
-        //   Address: `${row["บ้านเลขที่"] ?? ""} ${row["หมู่ที่"] ?? ""} ${row["ตำบล"] ?? ""} ${row["อำเภอ"] ?? ""} ${row["จังหวัด"] ?? ""} ${row["รหัสไปรษณีย์"] ?? ""}`.trim(),
-        //   lat: row["lat"] ?? 0,
-        //   lng: row["long"] ?? 0,
-        //   Type: row["แยกฝั่ง"] ?? "",
-        //   CreditTime: row["เวลาเครดิต"] ?? 0,
-        //   Phone: row["เบอร์โทร"] ?? ""
-        // };
+        const formattedData = {
+          id: index + 1,
+          TicketsName: row["ชื่อจัดเทียววิ่ง"] ?? "",
+          Status: "ตั๋ว/ผู้รับ",
+          Rate1: parseFloat(parseFloat(row["ขนส่งลำปาง"] ?? 0).toFixed(2)),
+          Rate2: parseFloat(parseFloat(row["พิจิตร"] ?? 0).toFixed(2)),
+          Rate3: parseFloat(parseFloat(row["บางปะอิน/สระบุรี"] ?? 0).toFixed(2)),
+          Bill: "-",
+          Code: "-",
+          CompanyName: row["ชื่อ/ใบวางบิล"] ?? "",
+          CodeID: row["เลขผู้เสียภาษี"] ?? "",
+          Address: `${row["บ้านเลขที่"] ?? ""} ${row["หมู่ที่"] ?? ""} ${row["ตำบล"] ?? ""} ${row["อำเภอ"] ?? ""} ${row["จังหวัด"] ?? ""} ${row["รหัสไปรณีย์"] ?? ""}`.trim(),
+          lat: row["lat"] ?? 0,
+          lng: row["long"] ?? 0,
+          Type: row["แยกฝั่ง"] ?? "",
+          CreditTime: row["เวลาเครดิต"] ?? 0,
+          Phone: row["เบอร์โทร"] ?? ""
+        };
 
         //รับจ้างขนส่ง
-        const formattedData = {
-            id: index + 1,
-            TicketsName: row["ชื่อจัดเทียววิ่ง"] ?? "",
-            Status: "ตั๋ว/ผู้รับ",
-            Rate1: parseFloat(parseFloat(row["ขนส่งลำปาง"] ?? 0).toFixed(2)),
-            Rate2: parseFloat(parseFloat(row["พิจิตร"] ?? 0).toFixed(2)),
-            Rate3: parseFloat(parseFloat(row["บางปะอิน/สระบุรี"] ?? 0).toFixed(2)),
-            Bill: row["รอบวางบิล "] ?? "",
-            Code: "-",
-            CompanyName: row["ชื่อ/ใบวางบิล"] ?? "",
-            CodeID: row["เลขผู้เสียภาษี"] ?? "",
-            Address: `${row["บ้านเลขที่"] ?? ""} ${row["หมู่ที่"] ?? ""} ${row["ตำบล"] ?? ""} ${row["อำเภอ"] ?? ""} ${row["จังหวัด"] ?? ""} ${row["รหัสไปรษณีย์"] ?? ""}`.trim(),
-            lat: row["lat"] ?? 0,
-            lng: row["long"] ?? 0,
-            Type: row["ประเภท ลูกค้าค้า"] ?? "",
-            CreditTime: "-",
-            Phone: row["เบอร์โทร"] ?? ""
-          };
+        // const formattedData = {
+        //     id: index + 1,
+        //     TicketsName: row["ชื่อจัดเทียววิ่ง"] ?? "",
+        //     Status: "ตั๋ว/ผู้รับ",
+        //     Rate1: parseFloat(parseFloat(row["ขนส่งลำปาง"] ?? 0).toFixed(2)),
+        //     Rate2: parseFloat(parseFloat(row["พิจิตร"] ?? 0).toFixed(2)),
+        //     Rate3: parseFloat(parseFloat(row["บางปะอิน/สระบุรี"] ?? 0).toFixed(2)),
+        //     Bill: row["รอบวางบิล "] ?? "",
+        //     Code: "-",
+        //     CompanyName: row["ชื่อ/ใบวางบิล"] ?? "",
+        //     CodeID: row["เลขผู้เสียภาษี"] ?? "",
+        //     Address: `${row["บ้านเลขที่"] ?? ""} ${row["หมู่ที่"] ?? ""} ${row["ตำบล"] ?? ""} ${row["อำเภอ"] ?? ""} ${row["จังหวัด"] ?? ""} ${row["รหัสไปรณีย์"] ?? ""}`.trim(),
+        //     lat: row["lat"] ?? 0,
+        //     lng: row["long"] ?? 0,
+        //     Type: row["ประเภท ลูกค้าค้า"] ?? "",
+        //     CreditTime: "-",
+        //     Phone: row["เบอร์โทร"] ?? ""
+        //   };
 
           // ลูกค้ารถเล็ก
           // const formattedData = {
@@ -74,7 +74,7 @@ const ExcelUploader = () => {
           //   Code: "-",
           //   CompanyName: row["ชื่อ...ใบวางบิล"] ?? "",
           //   CodeID: row["เลขบัตรประชาชน/เลขผู้เสี่ยภาษี"] ?? "",
-          //   Address: `${row["บ้านเลขที่"] ?? ""} ${row["หมู่ที่"] ?? ""} ${row["ตำบล"] ?? ""} ${row["อำเภอ"] ?? ""} ${row["จังหวัด"] ?? ""} ${row["รหัสไปรษณีย์"] ?? ""}`.trim(),
+          //   Address: `${row["บ้านเลขที่"] ?? ""} ${row["หมู่ที่"] ?? ""} ${row["ตำบล"] ?? ""} ${row["อำเภอ"] ?? ""} ${row["จังหวัด"] ?? ""} ${row["รหัสไปรณีย์"] ?? ""}`.trim(),
           //   lat: row["lat"] ?? 0,
           //   lng: row["long"] ?? 0,
           //   Type: row["ฝั่ง"] === "NP" ? "บ้านโฮ่ง" : "เชียงใหม่",
@@ -84,7 +84,7 @@ const ExcelUploader = () => {
           // };
           
 
-        set(ref(database, `/customers/transports/${formattedData.id-1}`), formattedData)
+        set(ref(database, `/customers/bigtruck/${formattedData.id-1}`), formattedData)
           .then(() => console.log("Added: ", formattedData))
           .catch((error) => console.error("Error adding document: ", error));
       });

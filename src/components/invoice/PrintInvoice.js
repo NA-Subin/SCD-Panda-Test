@@ -1,48 +1,117 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Button, Grid, TableHead, TableCell, TableRow, Table, Paper, TableContainer, TableBody } from "@mui/material";
-import { jsPDF } from "jspdf";
-import dayjs from "dayjs";
+import html2canvas from 'html2canvas';
 
 const PrintInvoice = () => {
   const [invoiceData, setInvoiceData] = useState(null);
 
-  useEffect(() => {
-    // ดึงข้อมูลจาก sessionStorage
-    const storedData = sessionStorage.getItem("invoiceData");
-    if (storedData) {
+useEffect(() => {
+  // ดึงข้อมูลจาก sessionStorage
+  const storedData = sessionStorage.getItem("invoiceData");
+
+  if (storedData) {
+    try {
       setInvoiceData(JSON.parse(storedData));
+    } catch (error) {
+      console.error("Error parsing invoiceData:", error);
     }
-  }, []);
+  }
+}, []);
 
-  const handlePrintPDF = () => {
-    const doc = new jsPDF();
-    doc.setFont("NotoSansThai-Regular");
-    doc.text("ใบวางบิล", 105, 20, { align: "center" });
-    doc.text(`วันที่: ${invoiceData?.date}`, 20, 40);
-    doc.text(`บัญชี: ${invoiceData?.account}`, 20, 50);
-    doc.text(`ยอดเงิน: ${invoiceData?.amount}`, 20, 60);
-    doc.text(`หมายเหตุ: ${invoiceData?.note}`, 20, 70);
+const address = invoiceData?.Order[0].Address || ''; // ดึงที่อยู่จาก invoiceData
 
-    doc.save("invoice.pdf");
-  };
+let formattedAddress = "-"; // ค่าเริ่มต้นเป็น "-"
+
+if (address !== "-") { 
+    // แยกที่อยู่เป็นส่วนๆ โดยใช้ split(" ")
+    const addressParts = address.split(" ");
+
+    // ตรวจสอบว่ามีค่าพอให้ใช้งานหรือไม่ (ป้องกัน error)
+    if (addressParts.length >= 6) {
+        formattedAddress = `บ้านเลขที่${addressParts[0]} หมู่ที่${addressParts[1]} ตำบล${addressParts[2]} อำเภอ${addressParts[3]} จังหวัด${addressParts[4]} รหัสไปรษณีย์${addressParts[5]}`;
+    }
+}
+
+const numberToThaiText = (num) => {
+  const thaiNumbers = ["ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+  const thaiPlaces = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
+
+  let text = "";
+  let numberStr = parseFloat(num).toFixed(2).toString(); // แปลงเป็น string พร้อมทศนิยม
+  let [integerPart, decimalPart] = numberStr.split("."); // แยกส่วนจำนวนเต็มและทศนิยม
+
+  // 🟢 แปลงส่วนจำนวนเต็ม
+  let intLen = integerPart.length;
+  for (let i = 0; i < intLen; i++) {
+      let digit = parseInt(integerPart[i]);
+      let place = intLen - i - 1;
+
+      if (digit !== 0) {
+          if (place === 1 && digit === 1) {
+              text += "สิบ"; // "หนึ่งสิบ" → "สิบ"
+          } else if (place === 1 && digit === 2) {
+              text += "ยี่สิบ"; // "สองสิบ" → "ยี่สิบ"
+          } else if (place === 0 && digit === 1 && intLen > 1) {
+              text += "เอ็ด"; // "หนึ่ง" → "เอ็ด" ในหลักหน่วย
+          } else {
+              text += thaiNumbers[digit] + thaiPlaces[place];
+          }
+      }
+  }
+
+  text += "บาท"; // หน่วยเงินไทย
+
+  // 🟢 แปลงส่วนทศนิยม (สตางค์)
+  if (decimalPart && decimalPart !== "00") {
+      text += " " + thaiNumbers[parseInt(decimalPart[0])] + "สิบ";
+      if (decimalPart[1] !== "0") {
+          text += thaiNumbers[parseInt(decimalPart[1])];
+      }
+      text += "สตางค์";
+  } else {
+      text += "ถ้วน";
+  }
+
+  return text;
+};
+
+console.log("invoiceData: ", invoiceData?.Report);
+console.log("order: ", invoiceData?.Order[0].Address);
+
+
+const handleDownloadImage = () => {
+  const content = document.querySelector("#invoiceContent"); // เลือก div ที่คุณต้องการแปลงเป็นรูปภาพ
+
+    // ใช้ html2canvas เพื่อแปลงเนื้อหา HTML เป็นรูปภาพ
+    html2canvas(content).then((canvas) => {
+        // แปลง canvas ให้เป็น URL รูปภาพ
+        const imageUrl = canvas.toDataURL("image/png");
+
+        // สร้างลิงก์ดาวน์โหลด
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = 'invoice.png'; // ตั้งชื่อไฟล์
+        link.click(); // คลิกเพื่อดาวน์โหลด
+    });
+};
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div id="invoiceContent" style={{ padding: "20px" }}>
         <Grid container spacing={2}>
             <Grid item xs={8}>
                 {
                     invoiceData && 
                     (
                         <React.Fragment>
-                            <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>{invoiceData.Company}</Typography>
-                            <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>{invoiceData.Address}</Typography>
-                            <Typography variant="subtitle1" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {invoiceData.IDCard}</Typography>
+                            <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>บริษัท แพนด้า สตาร์ ออยล์ จำกัด (สำนักงานใหญ่)</Typography>
+                            <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>261 หมู่ 2 ต.สันพระเนตร อ.สันทราย จ.เชียงใหม่ 50210</Typography>
+                            <Typography variant="subtitle1" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : 050 5562 00472 6</Typography>
                         </React.Fragment>
                     )
                 }
             </Grid>
-            <Grid item xs={4}>
-                <Typography variant="subtitle1" align="center">
+            <Grid item xs={4} textAlign="right">
+                <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
                     ใบวางบิล/ใบแจ้งหนี้
                 </Typography>
             </Grid>
@@ -51,26 +120,26 @@ const PrintInvoice = () => {
   <Grid container spacing={2} marginTop={2} sx={{ px: 2 }}>
     {/* ส่วนข้อมูลบริษัท */}
     <Grid item xs={10} sx={{ border: "2px solid black", height: "140px" }}>
-      <Typography variant="subtitle1"><b>รหัส:</b> {invoiceData.date}</Typography>
-      <Typography variant="subtitle1"><b>ชื่อบริษัท:</b> {invoiceData.account}</Typography>
-      <Typography variant="subtitle1"><b>ที่อยู่:</b> {invoiceData.amount}</Typography>
-      <Typography variant="subtitle1"><b>เลขประจำตัวผู้เสียภาษีอากร:</b> {invoiceData.note}</Typography>
+      <Typography variant="subtitle2" sx={{ marginTop: 1 }}><b>รหัส:</b> </Typography>
+      <Typography variant="subtitle2"><b>ชื่อบริษัท:</b> {invoiceData?.Order[0].CompanyName}</Typography>
+      <Typography variant="subtitle2"><b>ที่อยู่:</b> {formattedAddress}</Typography>
+      <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b> {invoiceData?.Order[0].CodeID}</Typography>
     </Grid>
 
     {/* ส่วนวันที่และเลขที่เอกสาร */}
     <Grid item xs={2}>
       <Grid container spacing={2}>
-        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", height: "30px" }}>
-          <Typography variant="subtitle1" sx={{ textAlign: "center", marginTop: -2 }} gutterBottom>วันที่</Typography>
+        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>วันที่</Typography>
         </Grid>
-        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", height: "40px" }}>
-          <Typography variant="subtitle1" sx={{ textAlign: "center", marginTop: -1 }} gutterBottom>{dayjs(new Date).format("DD/MM/YYYY")}</Typography>
+        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
+          <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>{invoiceData?.Order[0].Date}</Typography>
         </Grid>
-        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", height: "30px" }}>
-          <Typography variant="subtitle1" sx={{ textAlign: "center", marginTop: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
+        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: "bold",marginTop: -1.5 }} gutterBottom>เลขที่เอกสาร</Typography>
         </Grid>
-        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", borderBottom: "2px solid black", height: "40px" }}>
-          <Typography variant="subtitle1" sx={{ textAlign: "center", marginTop: -1 }} gutterBottom>DDDDD</Typography>
+        <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
+          <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>DDDDD</Typography>
         </Grid>
       </Grid>
     </Grid>
@@ -100,63 +169,73 @@ const PrintInvoice = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-                <TableRow sx={{ borderBottom: "2px solid black",height: "30px" }}>
-                <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                    <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{dayjs(new Date).format("DD/MM/YYYY")}</Typography>
-                    </TableCell>
-                <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                    <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>-</Typography>
-                    </TableCell>
-                <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                    <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>G95</Typography>
-                    </TableCell>
-                <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                    <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                    {new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(6000)}
-                    </Typography>
-                    </TableCell>
-                <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                    <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(31.04)}</Typography>
-                    </TableCell>
-                <TableCell sx={{ textAlign: "center", }}>
-                <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(120300)}</Typography>
-                </TableCell>
-                </TableRow>
+                {
+                  invoiceData.Report.map((row) => (
+                    <TableRow sx={{ borderBottom: "2px solid black",height: "30px" }}>
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Date}</Typography>
+                          </TableCell>
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver}</Typography>
+                          </TableCell>
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>
+                          </TableCell>
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                          {new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      }).format(row.Volume)}
+                          </Typography>
+                          </TableCell>
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      }).format(row.RateOil)}</Typography>
+                          </TableCell>
+                      <TableCell sx={{ textAlign: "center", }}>
+                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      }).format(row.Amount)}</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                }
                 <TableRow sx={{ borderBottom: "2px solid black",height: "30px" }}>
                     <TableCell colSpan={2} sx={{ textAlign: "left" }}>
-                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>กำหนดชำระเงิน</Typography>
+                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>กำหนดชำระเงิน วันที่:{invoiceData?.Order[0].Date}</Typography>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "right", borderRight: "2px solid black" }}>
+                    <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
-                        -
+                    {new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      }).format(invoiceData.Volume)}
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
-                        -
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                        -
+                    <TableCell sx={{ textAlign: "center" }} colSpan={2}>
+                    {new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      }).format(invoiceData.Amount)}
                     </TableCell>
                 </TableRow>
                 <TableRow sx={{ borderBottom: "2px solid black",height: "30px" }}>
-                    <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }} colSpan={4}>
-                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>-</Typography>
+                    <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }} colSpan={3}>
+                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{numberToThaiText(invoiceData.Amount)}</Typography>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "right", borderRight: "2px solid black" }}>
+                    <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมเป็นเงิน</Typography>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                        -
+                    <TableCell sx={{ textAlign: "center" }} colSpan={2}>
+                      {new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      }).format(invoiceData.Amount)}
                     </TableCell>
                 </TableRow>
             </TableBody>
@@ -166,8 +245,8 @@ const PrintInvoice = () => {
 
 
       <div style={{ textAlign: "center", marginTop: "20px" }}>
-        <Button variant="contained" onClick={handlePrintPDF}>
-          บันทึกเป็น PDF
+        <Button variant="contained" onClick={handleDownloadImage}>
+          บันทึกรูปภาพ
         </Button>
       </div>
     </div>
