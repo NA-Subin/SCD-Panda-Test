@@ -57,17 +57,7 @@ const UpdateInvoice = (props) => {
     const [price, setPrice] = useState([]);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
-
-    const [latestPrice, setLatestPrice] = useState([]);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
+    const [test, setTest] = useState([]);
     const { 
         order,
         customertransports,
@@ -83,6 +73,67 @@ const UpdateInvoice = (props) => {
     const customersmalltrucks = Object.values(customersmalltruck || {});
 
     const orderList = orders.filter(item => item.TicketName === ticket.TicketName);
+
+    const getPrice = () => {
+        let foundItem;
+        let refPath = "";
+        let initialPrice = [];
+    
+        if (ticket?.TicketName) { 
+            foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+            if (foundItem) {
+                refPath = `/customers/transports/${foundItem.id - 1}/Price`;
+                initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+            }
+    
+            if (!foundItem) {
+                foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) {
+                    refPath = `/customers/gasstations/${foundItem.id - 1}/Price`;
+                    initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+                }
+            }
+    
+            if (!foundItem) {
+                foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) {
+                    refPath = `/customers/bigtruck/${foundItem.id - 1}/Price`;
+                    initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+                }
+            }
+    
+            if (!foundItem) {
+                foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) {
+                    refPath = `/customers/smalltruck/${foundItem.id - 1}/Price`;
+                    initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+                }
+            }
+        } else {
+            ShowError("Ticket Name ไม่ถูกต้อง");
+            return;
+        }
+    
+        console.log("🔍 Found Item:", foundItem);
+        console.log("📌 Ref Path:", refPath);
+        console.log("📊 Initial Price Data:", initialPrice);
+    
+        setPrice(initialPrice);
+    };
+    
+    useEffect(() => {
+        getPrice();
+    }, [ticket]);
+
+    console.log("TEST : ", test);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -180,7 +231,6 @@ const UpdateInvoice = (props) => {
             update(ref(database, path), {
                 RateOil: data.Price,
                 Amount: data.Amount,
-                TransferAmount: 0,
                 OverdueTransfer: data.Amount
             })
                 .then(() => {
@@ -195,7 +245,7 @@ const UpdateInvoice = (props) => {
 
     const handlePost = () => {
         setPrice(prevPrice => {
-            const newIndex = prevPrice.length;
+            const newIndex = prevPrice.length > 0 ? Math.max(...prevPrice.map(item => Number(item.id))) + 1 : 0;
             const newRow = {
                 id: newIndex,
                 DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
@@ -213,7 +263,7 @@ const UpdateInvoice = (props) => {
             prevPrice.map(row =>
                 row.id === id ? { 
                     ...row, 
-                    [field]: value 
+                    [field]: field === "DateStart" ? dayjs(value).format("DD/MM/YYYY") : value
                 } : row
             )
         );
@@ -230,14 +280,12 @@ const UpdateInvoice = (props) => {
         });
     };
 
-    useEffect(() => {
-        setLatestPrice(price); // อัปเดตค่าล่าสุดของ price
-    }, [price]);
-
     const handleSubmit = () => {
-        console.log("Using latestPrice:", latestPrice);
-        
-        if (latestPrice.length === 0) {
+        console.log("Using Price:", price);
+        console.log("Ticket Name:", ticket?.TicketName);
+        console.log("Customer Transport Data:", customertransport);
+    
+        if (!price || price.length === 0) {
             ShowError("Price เป็นค่าว่าง");
             return;
         }
@@ -245,33 +293,52 @@ const UpdateInvoice = (props) => {
         let foundItem;
         let refPath = "";
     
-        foundItem = customertransport.find(item => item.TicketName === ticket.TicketName);
-        if (foundItem) refPath = "/customers/transports/";
+        if (ticket?.TicketName) { 
+            foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+            if (foundItem) refPath = "/customers/transports/";
     
-        if (!foundItem) {
-            foundItem = customergasstation.find(item => item.TicketName === ticket.TicketName);
-            if (foundItem) refPath = "/customers/gasstations/";
+            if (!foundItem) {
+                foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) refPath = "/customers/gasstations/";
+            }
+    
+            if (!foundItem) {
+                foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) refPath = "/customers/bigtruck/";
+            }
+    
+            if (!foundItem) {
+                foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) refPath = "/customers/smalltruck/";
+            }
+        } else {
+            ShowError("Ticket Name ไม่ถูกต้อง");
+            return;
         }
     
-        if (!foundItem) {
-            foundItem = customerbigtrucks.find(item => item.TicketName === ticket.TicketName);
-            if (foundItem) refPath = "/customers/bigtruck/";
-        }
-    
-        if (!foundItem) {
-            foundItem = customersmalltrucks.find(item => item.TicketName === ticket.TicketName);
-            if (foundItem) refPath = "/customers/smalltruck/";
-        }
+        console.log("Item :", foundItem);
+        console.log("Path :", refPath);
+
+        const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
     
         if (foundItem) {
             database
                 .ref(refPath)
-                .child(foundItem.id)
-                .update({
-                    Price: latestPrice // ใช้ค่า price ที่ถูกอัปเดตล่าสุด
-                })
+                .child(`${foundItem.id - 1}/Price/`)
+                .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
                 .then(() => {
-                    ShowSuccess("สำเร็จ");
+                    const pathOrder = `order/${ticket.id-1}`;
+                        update(ref(database, pathOrder), {
+                            TransferAmount: TotalPrice,
+                            TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
+                        })
+                            .then(() => {
+                                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
                 })
                 .catch((error) => {
                     ShowError("ไม่สำเร็จ");
@@ -281,6 +348,8 @@ const UpdateInvoice = (props) => {
             ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
         }
     };
+    
+    console.log(" Price : ",price);
 
     return (
         <React.Fragment>
@@ -291,20 +360,20 @@ const UpdateInvoice = (props) => {
                     {new Intl.NumberFormat("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
-                    }).format(parseFloat(ticket.Volume))}
+                    }).format(parseFloat(ticket.Volume || 0))}
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                }).format(parseFloat(ticket.Amount))}</TableCell>
+                }).format(parseFloat(ticket.Amount || 0))}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                }).format(parseFloat(ticket.TransferAmount))}</TableCell>
+                }).format(parseFloat(ticket.TransferAmount || 0))}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                }).format(parseFloat(ticket.OverdueTransfer))}
+                }).format(parseFloat(ticket.TotalOverdueTransfer || 0))}
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     {
@@ -411,7 +480,7 @@ const UpdateInvoice = (props) => {
                                                     Registration: row.Registration,
                                                     ProductName: productName,
                                                     Volume: Volume.Volume * 1000,
-                                                    uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
+                                                    uniqueRowId: `${index}:${productName}:${row.No}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
                                                 }))
                                             )
                                             .map((row, index) => (
@@ -594,7 +663,6 @@ const UpdateInvoice = (props) => {
 
                                                     {/* DatePicker */}
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                        {show ? (
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                                                                             <DatePicker
@@ -621,11 +689,9 @@ const UpdateInvoice = (props) => {
                                                                                                             />
                                                                                                         </LocalizationProvider>
                                                             </Paper>
-                                                        ) : (
-                                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                            {/* <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                                 {row.DateStart ? dayjs(row.DateStart).format("DD/MM/YYYY") : "-"}
-                                                            </Typography>
-                                                        )}
+                                                            </Typography> */}
                                                     </TableCell>
 
                                                     {/* Select Bank Name */}
@@ -643,9 +709,9 @@ const UpdateInvoice = (props) => {
                                                                     value={row.BankName || ""}
                                                                     onChange={(e) => handleChange(row.id, "BankName", e.target.value)}
                                                                 >
-                                                                    <MenuItem value="10" sx={{ fontSize: "14px", }}>Ten</MenuItem>
-                                                                    <MenuItem value="20" sx={{ fontSize: "14px", }}>Twenty</MenuItem>
-                                                                    <MenuItem value="30" sx={{ fontSize: "14px", }}>Thirty</MenuItem>
+                                                                    <MenuItem value="แพนด้า สตาร์ออย - KBANK" sx={{ fontSize: "14px", }}>แพนด้า สตาร์ออย - KBANK</MenuItem>
+                                                                    <MenuItem value="แพนด้า สตาร์ออย - KTB" sx={{ fontSize: "14px", }}>แพนด้า สตาร์ออย - KTB</MenuItem>
+                                                                    <MenuItem value="แพนด้า สตาร์ออย - SCB" sx={{ fontSize: "14px", }}>แพนด้า สตาร์ออย - SCB</MenuItem>
                                                                 </Select>
                                                             </FormControl>
                                                         </Paper>

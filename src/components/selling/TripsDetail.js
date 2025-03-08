@@ -109,7 +109,7 @@ const TripsDetail = (props) => {
                 <TableCell sx={{ textAlign: "center" }}>
 
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
+                <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white"  }}>
                     <UpdateTrip 
                         tripID={trips.id} 
                         dateStart={trips.DateStart} 

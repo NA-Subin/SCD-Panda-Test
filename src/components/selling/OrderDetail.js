@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
+    Autocomplete,
     Badge,
     Box,
     Button,
@@ -33,7 +34,7 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
 
 const OrderDetail = (props) => {
-    const { detail, ticketsTrip, onSendBack, total, onDelete, onAddProduct, onUpdateOrderID, editMode } = props;
+    const { detail, ticketsTrip, onSendBack, total, onDelete, onAddProduct, onUpdateOrderID, editMode, tickets } = props;
     const [CostG91, setCostG91] = React.useState(0);
     const [VolumeG91, setVolumeG91] = React.useState(0);
     const [CostG95, setCostG95] = React.useState(0);
@@ -315,11 +316,62 @@ const OrderDetail = (props) => {
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]+detail.TicketName.split(":")[1]}</Typography>
                 </TableCell> */}
                 <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px",width: 350 }}>
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>
-                        {detail.TicketName.includes("/")
-                            ? detail.TicketName.split("/")[1]
-                            : detail.TicketName}
-                    </Typography>
+                    {
+                        detail.TicketName === "ตั๋วเปล่า" ?
+                        <Autocomplete
+                            size="small"
+                            fullWidth
+                            options={tickets}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
+                            getOptionLabel={(option) => 
+                                option.TicketsName.includes("/")
+                                ? option.TicketsName.split("/")[1]
+                                : option.TicketsName
+                            }  // ใช้ OrderID หรือค่าที่ต้องการแสดง
+                            isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
+                            value={detail.TicketsName ? tickets.find(item => item.TicketsName === detail.TicketsName) : null} // ค่าที่เลือก
+                            onChange={(e, newValue) => {
+                                if (newValue) {
+                                    onUpdateOrderID("TicketName", newValue.TicketsName); // อัปเดตค่า OrderID
+                                } else {
+                                    onUpdateOrderID("TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
+                                }
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '12px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            paddingLeft: 2,
+                                        },
+                                    }}
+                                />
+                            )}
+                            renderOption={(props, option) => (
+                                <li {...props}>
+                                    <Typography fontSize="14px">
+                                        {option.TicketsName}
+                                    </Typography>
+                                </li>
+                            )}
+                        />
+                        :
+                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>
+                                {detail.TicketName.includes("/")
+                                    ? detail.TicketName.split("/")[1]
+                                    : detail.TicketName}
+                            </Typography>
+                    }
                 </TableCell>
                             <TableCell sx={{ textAlign: "center", height: "20px",width: 150 }}>
                                 {

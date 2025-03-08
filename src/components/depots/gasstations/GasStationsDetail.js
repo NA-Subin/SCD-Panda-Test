@@ -267,6 +267,7 @@ const GasStationsDetail = (props) => {
                                                         gasStation={row}
                                                         gasStationOil={gasStationOil}
                                                         selectedDate={selectedDate}
+                                                        count={matchCount}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
                                                         currentReport={currentReport} // ส่งค่า Report ที่ตรวจสอบแล้ว
                                                         onSendBack={handleSendBack}
@@ -289,10 +290,10 @@ const GasStationsDetail = (props) => {
                                             width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) : windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275), overflowY: 'auto'
                                         }}
                                     >
-                                        {
-                                        gasStationOil.map((row, rowIndex) => {
-                                            let lastReport = null; // เก็บค่า row.Report ของรายการก่อนหน้า
-                                            let matchCount = 0;
+                                        {(() => {
+                                            let matchCount = 0; // ✅ ย้ายตัวแปรมาไว้ในฟังก์ชันย่อย
+                                            let lastReport = null;
+                                            return gasStationOil.map((row, rowIndex) => {
                                             let currentReport = row.Report; // ค่า row.Report ปัจจุบัน
                                             if (checkStock === row.Stock) {
                                                 matchCount++; // เพิ่มตัวนับเมื่อเงื่อนไขเป็นจริง
@@ -321,6 +322,7 @@ const GasStationsDetail = (props) => {
                                                         gasStation={row}
                                                         gasStationOil={gasStationOil}
                                                         selectedDate={selectedDate}
+                                                        count={matchCount}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
                                                         currentReport={currentReport} // ส่งค่า Report ที่ตรวจสอบแล้ว
                                                         onSendBack={handleSendBack}
@@ -329,6 +331,7 @@ const GasStationsDetail = (props) => {
                                             }
                                             return null; // ไม่แสดงอะไรถ้าเงื่อนไขไม่ตรง
                                         })}
+                                        )()}
                                     </Paper>
                         }
                     </Grid>

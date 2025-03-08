@@ -29,7 +29,7 @@ const ExcelUploader = () => {
         const formattedData = {
           id: index + 1,
           TicketsName: row["ชื่อจัดเทียววิ่ง"] ?? "",
-          Status: "ตั๋ว/ผู้รับ",
+          Status: "ลูกค้าประจำ",
           Rate1: parseFloat(parseFloat(row["ขนส่งลำปาง"] ?? 0).toFixed(2)),
           Rate2: parseFloat(parseFloat(row["พิจิตร"] ?? 0).toFixed(2)),
           Rate3: parseFloat(parseFloat(row["บางปะอิน/สระบุรี"] ?? 0).toFixed(2)),
@@ -69,7 +69,7 @@ const ExcelUploader = () => {
           // const formattedData = {
           //   id: index + 1,
           //   TicketsName: row["ชื่อ...จัดเทียววิ่ง"] ?? "",
-          //   Status: "ตั๋ว/ผู้รับ",
+          //   Status: "ลูกค้าประจำ",
           //   Bill: row["รอบวางบิล "] ?? "",
           //   Code: "-",
           //   CompanyName: row["ชื่อ...ใบวางบิล"] ?? "",

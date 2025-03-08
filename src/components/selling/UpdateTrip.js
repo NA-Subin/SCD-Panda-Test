@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
     Autocomplete,
     Badge,
@@ -58,8 +58,7 @@ const UpdateTrip = (props) => {
     const [open, setOpen] = React.useState(false);
     const dialogRef = useRef(null);
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
-    const [editMode, setEditMode] = useState(true);
-
+    const [update, setUpdate] = useState(true);
 
 
     // โหลด html2canvas จาก CDN
@@ -116,6 +115,8 @@ const UpdateTrip = (props) => {
     const [order, setOrder] = React.useState([]);
     const [ticket, setTicket] = React.useState([]);
     const [trip, setTrip] = React.useState([]);
+    const [ticketsT, setTicketsT] = React.useState([]);
+    const [ticketsPS, setTicketsPS] = React.useState([]);
 
     const getOrder = async () => {
         database.ref("/order").on("value", (snapshot) => {
@@ -140,6 +141,25 @@ const UpdateTrip = (props) => {
                 }
             }
             setTicket(dataTickets);
+        });
+
+        database.ref("/customers/transports/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            const dataTicket = [];
+            for (let id in datas) {
+                if (datas[id].Status === "ตั๋ว" || datas[id].Status === "ตั๋ว/ผู้รับ")
+                    dataTicket.push({ id, ...datas[id] })
+            }
+            setTicketsT(dataTicket);
+        });
+
+        database.ref("/customers/gasstations/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            const dataGasStations = [];
+            for (let id in datas) {
+                dataGasStations.push({ id, ...datas[id] })
+            }
+            setTicketsPS(dataGasStations);
         });
     };
 
@@ -166,7 +186,198 @@ const UpdateTrip = (props) => {
         setOpen(false);
     }
 
-    console.log("Trip : ",trip);
+    const [editMode, setEditMode] = useState(false);
+    const [editableTickets, setEditableTickets] = useState([]);
+    const [editableOrders, setEditableOrders] = useState([]);
+
+    useEffect(() => {
+        if (ticket && ticket.length > 0) {
+            setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
+        }
+
+        if (order && order.length > 0) {
+            setEditableOrders(order.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
+        }
+    }, [ticket,order]); // ใช้ useEffect ดักจับการเปลี่ยนแปลงของ ticket
+
+    const handleEditChange = (index, field, value) => {
+        setEditableTickets((prev) => {
+            const updatedTickets = [...prev]; // คัดลอกอาร์เรย์ก่อนเปลี่ยนแปลง
+            const fields = field.split("."); // แยก key ที่ต้องแก้ไข เช่น "Product.G95.Volume"
+            
+            let obj = updatedTickets[index]; // ค้นหาตั๋วที่ต้องแก้ไข
+            
+            // เดินทางไปยัง key ที่ต้องแก้ไข
+            for (let i = 0; i < fields.length - 1; i++) {
+                const key = fields[i];
+                if (!obj[key]) obj[key] = {}; // ถ้าไม่มี object นี้ ให้สร้างใหม่
+                obj = obj[key];
+            }
+    
+            // แปลงค่าเป็นตัวเลข และกำหนดให้เป็น 0 ถ้ากรอกค่าว่าง
+            obj[fields[fields.length - 1]] = value === "" ? 0 : Number(value);
+    
+            // ตรวจสอบว่า Volume เป็น 0 แล้วลบ Product นั้นๆ
+            if (obj[fields[fields.length - 1]] === 0) {
+                const productType = fields[1]; // ตรวจสอบชื่อ product เช่น G91, G95 เป็นต้น
+                delete updatedTickets[index].Product[productType]; // ลบ product ที่มี Volume เป็น 0
+            }
+    
+            return updatedTickets;
+        });
+    };
+
+    const handleOrderChange = (index, field, value) => {
+        setEditableOrders((prev) => {
+            const updatedOrders = [...prev]; // คัดลอกอาร์เรย์ก่อนเปลี่ยนแปลง
+            const fields = field.split("."); // แยก key ที่ต้องแก้ไข เช่น "Product.G95.Volume"
+            
+            let obj = updatedOrders[index]; // ค้นหาตั๋วที่ต้องแก้ไข
+            
+            // เดินทางไปยัง key ที่ต้องแก้ไข
+            for (let i = 0; i < fields.length - 1; i++) {
+                const key = fields[i];
+                if (!obj[key]) obj[key] = {}; // ถ้าไม่มี object นี้ ให้สร้างใหม่
+                obj = obj[key];
+            }
+    
+            // แปลงค่าเป็นตัวเลข และกำหนดให้เป็น 0 ถ้ากรอกค่าว่าง
+            obj[fields[fields.length - 1]] = value === "" ? 0 : Number(value);
+    
+            // ตรวจสอบว่า Volume เป็น 0 แล้วลบ Product นั้นๆ
+            if (obj[fields[fields.length - 1]] === 0) {
+                const productType = fields[1]; // ตรวจสอบชื่อ product เช่น G91, G95 เป็นต้น
+                delete updatedOrders[index].Product[productType]; // ลบ product ที่มี Volume เป็น 0
+            }
+    
+            return updatedOrders;
+        });
+    };
+
+    const handleUpdate = () => {
+        setEditMode(!editMode); // สลับโหมดแก้ไข <-> อ่านอย่างเดียว
+    };
+
+    const [totalVolumesTicket, setTotalVolumesTicket] = useState({});
+    const [totalVolumesOrder, setTotalVolumesOrder] = useState({});
+
+    useEffect(() => {
+        // คำนวณยอดรวมของแต่ละ product ใน editableTickets
+        const totalsTicket = ["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((acc, product) => {
+            acc[product] = editableTickets.reduce((sum, row) => sum + (Number(row.Product[product]?.Volume) || 0), 0);
+            return acc;
+        }, {});
+    
+        // คำนวณยอดรวมของแต่ละ product ใน editableOrders
+        const totalsOrder = ["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((acc, product) => {
+            acc[product] = editableOrders.reduce((sum, row) => sum + (Number(row.Product[product]?.Volume) || 0), 0);
+            return acc;
+        }, {});
+    
+        // คำนวณน้ำมันเบาและน้ำมันหนัก
+        const calculateOil = (volume, factor) => (volume * factor) * 1000; // สูตรคำนวณน้ำมัน
+    
+        const oilLight = 
+            calculateOil(totalsTicket["G91"], 0.740) +
+            calculateOil(totalsTicket["G95"], 0.740) +
+            calculateOil(totalsTicket["B95"], 0.740) +
+            calculateOil(totalsTicket["E20"], 0.740) +
+            calculateOil(totalsTicket["PWD"], 0.740);
+    
+        const oilHeavy = 
+            calculateOil(totalsTicket["B7"], 0.837);
+
+        const totalWeight = parseFloat(trip.WeightTruck) +
+            calculateOil(totalsTicket["G91"], 0.740) +
+            calculateOil(totalsTicket["G95"], 0.740) +
+            calculateOil(totalsTicket["B95"], 0.740) +
+            calculateOil(totalsTicket["E20"], 0.740) +
+            calculateOil(totalsTicket["PWD"], 0.740) +
+            calculateOil(totalsTicket["B7"], 0.837);
+    
+        // ตั้งค่าผลลัพธ์
+        setTotalVolumesTicket({
+            ...totalsTicket,
+            oilLight: oilLight,
+            oilHeavy: oilHeavy,
+            totalWeight: totalWeight
+        });
+    
+        setTotalVolumesOrder({
+            ...totalsOrder
+        });
+    
+    }, [editableTickets, editableOrders,trip]);
+     // คำนวณใหม่ทุกครั้งที่ editableOrders เปลี่ยน
+
+     const handleSave = () => {
+        // Loop ผ่านแต่ละ item ใน editableTickets
+        editableTickets.forEach(ticket => {
+            const ticketNo = ticket.No; // ใช้ No เพื่ออ้างอิง
+            database
+                .ref("/tickets")
+                .child(ticketNo)  // ใช้ No ในการเลือก Child
+                .update(ticket)    // อัปเดตข้อมูลของแต่ละ ticket
+                .then(() => {
+                    ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                })
+                .catch((error) => {
+                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                    console.error("Error pushing data:", error);
+                });
+        });
+    
+        // Loop ผ่านแต่ละ item ใน editableOrders
+        editableOrders.forEach(order => {
+            const orderNo = order.No; // ใช้ No เพื่ออ้างอิง
+            database
+                .ref("/order")
+                .child(orderNo)  // ใช้ No ในการเลือก Child
+                .update(order)    // อัปเดตข้อมูลของแต่ละ order
+                .then(() => {
+                    ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                })
+                .catch((error) => {
+                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                    console.error("Error pushing data:", error);
+                });
+        });
+
+        database
+                .ref("/trip")
+                .child(Number(tripID) - 1)  // ใช้ No ในการเลือก Child
+                .update({
+                    WeightHigh: totalVolumesTicket.oilHeavy,
+                    WeightLow: totalVolumesTicket.oilLight,
+                    TotalWeight: totalVolumesTicket.totalWeight,
+                })    // อัปเดตข้อมูลของแต่ละ order
+                .then(() => {
+                    ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                })
+                .catch((error) => {
+                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                    console.error("Error pushing data:", error);
+                });
+
+        setEditMode(false);
+    };
+    
+    const getTickets = () => {
+        const tickets = [
+            { TicketsName: "ตั๋วเปล่า", id: "blank_ticket" },  // เพิ่มตั๋วเปล่าเข้าไป
+            ...ticketsPS.map((item) => ({ ...item })),
+            ...ticketsT
+                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .map((item) => ({ ...item })),
+        ];
+    
+        return tickets.filter((item) => item.id || item.TicketsCode);
+    };
+
+    console.log("Updated Tickets : ",editableTickets);
+    console.log("Updated Orders : ",editableOrders);
+    console.log("Total Volumes : ",totalVolumesTicket);
+    console.log("Tickets : ",getTickets());
 
     return (
         <React.Fragment>
@@ -209,7 +420,7 @@ const UpdateTrip = (props) => {
                             </Grid>
                         </Grid>
                         <Paper
-                            sx={{ p: 1, backgroundColor: (parseFloat(weightHigh) + parseFloat(weightLow) + parseFloat(weightTruck)) > 50300 ? "red" : "lightgray", marginBottom: 1 }}
+                            sx={{ p: 1, backgroundColor: totalVolumesTicket.totalWeight > 50300 ? "red" : "lightgray", marginBottom: 1 }}
                         >
                             <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
                                 {/* Header: คงที่ด้านบน */}
@@ -246,47 +457,155 @@ const UpdateTrip = (props) => {
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableBody>
-                                        {ticket.map((row, rowIdx) => {
+                                        {editableTickets.map((row, rowIdx) => (
+    <TableRow key={rowIdx}>
+        {/* ลำดับ */}
+        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.success.dark, color: "white" }}>
+            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{Number(row.id) + 1}</Typography>
+        </TableCell>
 
-                                            return (
-                                                <TableRow key={rowIdx}>
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px",width: 50,backgroundColor: theme.palette.success.dark,color: "white" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{Number(row.id) + 1}</Typography>
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px",width: 350}}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>
-                                                    {row.TicketName.includes("/")
-                                                            ? row.TicketName.split("/")[1]
-                                                            : row.TicketName}
-                                                    </Typography>
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px",width: 150 }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.OrderID}</Typography>
-                                                    </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px",width: 100 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Rate}</Typography>
-                                                    </TableCell>
-                                                    <TableCellG95 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.G95 !== undefined ? row.Product.G95.Volume : "-"}</Typography>
-                                                    </TableCellG95>
-                                                    <TableCellB95 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.B95 !== undefined ? row.Product.B95.Volume : "-"}</Typography>
-                                                    </TableCellB95>
-                                                    <TableCellB7 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.B7 !== undefined ? row.Product.B7.Volume : "-"}</Typography>
-                                                    </TableCellB7>
-                                                    <TableCellG91 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.G91 !== undefined ? row.Product.G91.Volume : "-"}</Typography>
-                                                    </TableCellG91>
-                                                    <TableCellE20 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.E20 !== undefined ? row.Product.E20.Volume : "-"}</Typography>
-                                                    </TableCellE20>
-                                                    <TableCellPWD width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px"}}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.PWD !== undefined ? row.Product.PWD.Volume : "-"}</Typography>
-                                                    </TableCellPWD>
-                                                </TableRow>
-                                            );
-                                            })}
+        {/* Ticket Name */}
+        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
+    {editMode && row.TicketName === "ตั๋วเปล่า" ? (
+        <Autocomplete
+            size="small"
+            fullWidth
+            options={getTickets()}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
+            getOptionLabel={(option) => 
+                option.TicketsName && option.TicketsName.includes("/")
+                    ? option.TicketsName.split("/")[1]
+                    : option.TicketsName
+            }  // ใช้ OrderID หรือค่าที่ต้องการแสดง
+            isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
+            value={row.TicketName ? getTickets().find(item => item.TicketsName === row.TicketName) : null} // ค่าที่เลือก
+            onChange={(e, newValue) => {
+                if (newValue) {
+                    handleEditChange(rowIdx, "TicketName", newValue.TicketsName); // อัปเดตค่า TicketName
+                } else {
+                    handleEditChange(rowIdx, "TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
+                }
+            }}
+            renderInput={(params) => (
+                <TextField
+                    {...params}
+                    InputLabelProps={{
+                        sx: {
+                            fontSize: '12px',
+                        },
+                    }}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            height: '22px', // ปรับความสูงของ TextField
+                        },
+                        '& .MuiInputBase-input': {
+                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                            fontWeight: 'bold',
+                            padding: '2px 6px', // ปรับ padding ภายใน input
+                            paddingLeft: 2,
+                        },
+                    }}
+                />
+            )}
+            renderOption={(props, option) => (
+                <li {...props}>
+                    <Typography fontSize="14px">
+                        {option.TicketsName}
+                    </Typography>
+                </li>
+            )}
+        />
+    ) : (
+        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+            {row.TicketName && row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
+        </Typography>
+    )}
+</TableCell>
+
+
+        {/* OrderID */}
+        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 150 }}>
+            {editMode ? (
+                <TextField
+                    value={row.OrderID}
+                    fullWidth
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '12px',
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                paddingLeft: 2
+                                            },
+                                        }}
+                    onChange={(e) => handleEditChange(rowIdx, "OrderID", e.target.value)}
+                />
+            ) : (
+                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{row.OrderID}</Typography>
+            )}
+        </TableCell>
+
+        {/* Rate */}
+        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
+            {editMode ? (
+                <TextField
+                    value={row.Rate}
+                    type="number"
+                    fullWidth
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '12px',
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                paddingLeft: 2
+                                            },
+                                        }}
+                    onChange={(e) => handleEditChange(rowIdx, "Rate", e.target.value)}
+                />
+            ) : (
+                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{row.Rate}</Typography>
+            )}
+        </TableCell>
+
+        {/* Product Data */}
+        {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
+        <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
+            {editMode ? (
+                <TextField
+                    value={editableTickets[rowIdx]?.Product[productType]?.Volume || ""}
+                    type="number"
+                    fullWidth
+                    InputLabelProps={{ sx: { fontSize: '12px' } }}
+                    sx={{
+                        '& .MuiOutlinedInput-root': { height: '22px' },
+                        '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                    }}
+                    onChange={(e) => handleEditChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                />
+            ) : (
+                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                    {row.Product[productType]?.Volume ?? "-"}
+                </Typography>
+            )}
+        </TableCell>
+    ))}
+    </TableRow>
+))}
+
                                         </TableBody>
                                     </Table>
                                 </Box>
@@ -298,29 +617,20 @@ const UpdateTrip = (props) => {
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
-                                            <TableRow>
-                                                <TablecellSelling width={650} sx={{ textAlign: "center",height: "25px" }}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center",height: "25px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                            </TableRow>
+                                        <TableRow>
+    <TablecellSelling width={650} sx={{ textAlign: "center", height: "25px" }}>
+        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
+    </TablecellSelling>
+
+    {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
+        <TablecellSelling key={product} width={60} sx={{ 
+            textAlign: "center", height: "25px", color: "black", 
+            fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+        }}>
+            {totalVolumesTicket[product]}
+        </TablecellSelling>
+    ))}
+</TableRow>
                                         </TableFooter>
                                     </Table>
                                 </Box>
@@ -348,7 +658,7 @@ const UpdateTrip = (props) => {
                                             value={new Intl.NumberFormat("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
-                                            }).format(parseFloat(trip.WeightHigh))}
+                                            }).format(parseFloat(editMode ? totalVolumesTicket.oilHeavy || trip.WeightHigh : trip.WeightHigh))}
                                         />
                                     </Paper>
                                 </Grid>
@@ -374,7 +684,7 @@ const UpdateTrip = (props) => {
                                             value={new Intl.NumberFormat("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
-                                            }).format(parseFloat(trip.WeightLow))}
+                                            }).format(parseFloat(editMode ? totalVolumesTicket.oilLight || trip.WeightLow : trip.WeightLow))}
                                         />
                                     </Paper>
                                 </Grid>
@@ -427,7 +737,7 @@ const UpdateTrip = (props) => {
                                             value={new Intl.NumberFormat("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
-                                            }).format(totalWeight)}
+                                            }).format(editMode ? totalVolumesTicket.totalWeight || totalWeight : totalWeight)}
                                         />
                                     </Paper>
                                 </Grid>
@@ -496,44 +806,74 @@ const UpdateTrip = (props) => {
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableBody>
-                                            {order.map((row, rowIdx) => {
+                                        {editableOrders.map((row, rowIdx) => (
+    <TableRow key={rowIdx}>
+        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.success.dark, color: "white" }}>
+            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                {Number(row.id) + 1}
+            </Typography>
+        </TableCell>
+        
+        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
+            {editMode ? (
+                <TextField
+                    value={editableOrders[rowIdx]?.TicketName || ""}
+                    fullWidth
+                    sx={{
+                        '& .MuiOutlinedInput-root': { height: '22px' },
+                        '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                    }}
+                    onChange={(e) => handleOrderChange(rowIdx, "TicketName", e.target.value)}
+                />
+            ) : (
+                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                    {row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
+                </Typography>
+            )}
+        </TableCell>
+        
+        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
+            {editMode ? (
+                <TextField
+                    value={editableOrders[rowIdx]?.Rate || ""}
+                    type="number"
+                        fullWidth
+                        sx={{
+                            '& .MuiOutlinedInput-root': { height: '22px' },
+                            '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                        }}
+                    onChange={(e) => handleOrderChange(rowIdx, "Rate", e.target.value)}
+                />
+            ) : (
+                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                    {row.Rate}
+                </Typography>
+            )}
+        </TableCell>
 
-                                                return (
-                                                    <TableRow key={rowIdx}>
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px",width: 50,backgroundColor: theme.palette.success.dark,color: "white" }}>
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{Number(row.id) + 1}</Typography>
-                                                        </TableCell>
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px",width: 350}}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>
-                                                        {row.TicketName.includes("/")
-                                                                ? row.TicketName.split("/")[1]
-                                                                : row.TicketName}
-                                                        </Typography>
-                                                        </TableCell>
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px",width: 100 }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Rate}</Typography>
-                                                        </TableCell>
-                                                        <TableCellG95 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.G95 !== undefined ? row.Product.G95.Volume : "-"}</Typography>
-                                                        </TableCellG95>
-                                                        <TableCellB95 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.B95 !== undefined ? row.Product.B95.Volume : "-"}</Typography>
-                                                        </TableCellB95>
-                                                        <TableCellB7 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.B7 !== undefined ? row.Product.B7.Volume : "-"}</Typography>
-                                                        </TableCellB7>
-                                                        <TableCellG91 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.G91 !== undefined ? row.Product.G91.Volume : "-"}</Typography>
-                                                        </TableCellG91>
-                                                        <TableCellE20 width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.E20 !== undefined ? row.Product.E20.Volume : "-"}</Typography>
-                                                        </TableCellE20>
-                                                        <TableCellPWD width={60} sx={{ textAlign: "center", height: "25px", padding: "1px 4px"}}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{row.Product.PWD !== undefined ? row.Product.PWD.Volume : "-"}</Typography>
-                                                        </TableCellPWD>
-                                                    </TableRow>
-                                                );
-                                            })}
+        {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
+            <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
+                {editMode ? (
+                    <TextField
+                        value={editableOrders[rowIdx]?.Product[productType]?.Volume || ""}
+                        type="number"
+                        fullWidth
+                        sx={{
+                            '& .MuiOutlinedInput-root': { height: '22px' },
+                            '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                        }}
+                        onChange={(e) => handleOrderChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                    />
+                ) : (
+                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                        {row.Product[productType]?.Volume ?? "-"}
+                    </Typography>
+                )}
+            </TableCell>
+        ))}
+    </TableRow>
+))}
+
                                         </TableBody>
                                     </Table>
                                 </Box>
@@ -548,28 +888,19 @@ const UpdateTrip = (props) => {
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
-                                            <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main, }}>
-                                                <TablecellSelling width={500} sx={{ height: "25px",textAlign: "center" }}>
-                                                    รวม
+                                            <TableRow>
+                                                <TablecellSelling width={500} sx={{ textAlign: "center", height: "25px" }}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
+
+                                                {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
+                                                    <TablecellSelling key={product} width={60} sx={{ 
+                                                        textAlign: "center", height: "25px", color: "black", 
+                                                        fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+                                                    }}>
+                                                        {totalVolumesOrder[product]}
+                                                    </TablecellSelling>
+                                                ))}
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -584,28 +915,19 @@ const UpdateTrip = (props) => {
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
-                                            <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellSelling width={500} sx={{ height: "25px",textAlign: "center", height: "25px" }}>
-                                                    คงเหลือ
+                                        <TableRow>
+                                                <TablecellSelling width={500} sx={{ textAlign: "center", height: "25px" }}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>คงเหลือ</Typography>
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ height: "25px",textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    
-                                                </TablecellSelling>
+
+                                                {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
+                                                    <TablecellSelling key={product} width={60} sx={{ 
+                                                        textAlign: "center", height: "25px", color: "black", 
+                                                        fontWeight: "bold", backgroundColor: (totalVolumesTicket[product]-totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product]-totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
+                                                    }}>
+                                                        {totalVolumesTicket[product]-totalVolumesOrder[product]}
+                                                    </TablecellSelling>
+                                                ))}
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -684,9 +1006,18 @@ const UpdateTrip = (props) => {
                             </Grid>
                         </Paper>
                     </Box>
-                    <Box textAlign="center" marginTop={1}>
-                        <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
-                    </Box>
+                    {
+                        !editMode ?
+                            <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
+                                <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate}>แก้ไข</Button>
+                                <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                            </Box>
+                        :
+                            <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
+                                <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={() => setEditMode(false)}>ยกเลิก</Button>
+                                <Button variant="contained" color="success" size="small" onClick={handleSave}>บันทึก</Button>
+                            </Box>
+                    }
                 </DialogContent>
             </Dialog>
         </React.Fragment>

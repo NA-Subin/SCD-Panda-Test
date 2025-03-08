@@ -196,7 +196,7 @@ const Trips = () => {
                                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                                     สถานะ
                                                 </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 70 }}/>
+                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 70, position: "sticky", right: 0 }}/>
                                                 {/* <TablecellHeader sx={{
                                                     textAlign: "center", fontSize: 16, width: 100, position: "sticky",
                                                     right: windowWidth <= 900 ? 0 : "200px", // ติดซ้ายสุด

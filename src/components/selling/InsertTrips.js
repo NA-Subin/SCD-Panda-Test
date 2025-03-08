@@ -1076,14 +1076,11 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
     
         const tickets = [
+            { TicketsName: "ตั๋วเปล่า", id: "blank_ticket" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
                 .map((item) => ({ ...item })),
-            ...(selectedTruck.type === "รถใหญ่"
-                ? ticketsB.map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
-                : ticketsS.map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
-            ),
         ];
     
         return tickets.filter((item) => item.id || item.TicketsCode);
@@ -1104,8 +1101,8 @@ const InsertTrips = () => {
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
                 .map((item) => ({ ...item })),
             ...(selectedTruck.type === "รถใหญ่"
-                ? ticketsB.map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
-                : ticketsS.map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
+                ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
+                : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
             ),
         ];
     
@@ -1384,6 +1381,7 @@ const InsertTrips = () => {
                                                     ticketsTrip={ticketsTrip}
                                                     total={weightOil}
                                                     editMode={editMode}
+                                                    tickets={getTickets()}
                                                     onSendBack={handleSendBack}
                                                     onDelete={() => handleDelete(parseInt(key))}
                                                     onAddProduct={(productName, field, value) =>

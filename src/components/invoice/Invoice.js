@@ -68,16 +68,17 @@ const Invoice = () => {
 const orders = Object.values(order || {});
 
 const groupedOrders = orders.reduce((acc, curr) => {
-    const { TicketName,Date ,Product } = curr;
+    const { TicketName,Date ,Product, TransferAmount, TotalOverdueTransfer } = curr;
   
     // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
     if (!acc[TicketName]) {
       acc[TicketName] = {
         TicketName,
         Date,
+        TotalOverdueTransfer,
+        TransferAmount,
         Volume: 0,
         Amount: 0,
-        TransferAmount: 0,
         OverdueTransfer: 0,
       };
     }
@@ -86,7 +87,6 @@ const groupedOrders = orders.reduce((acc, curr) => {
     Object.entries(Product).forEach(([key, value]) => {
       acc[TicketName].Volume += value.Volume * 1000;
       acc[TicketName].Amount += parseFloat(value.Amount) || 0;
-      acc[TicketName].TransferAmount += (value.TransferAmount || 0);
       acc[TicketName].OverdueTransfer += (value.OverdueTransfer || 0);
     });
   

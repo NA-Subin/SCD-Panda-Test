@@ -102,11 +102,15 @@ const TicketsBigTruck = () => {
         const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3) => {
             setSetting(true);
             setSelectedRowId(rowId);
-            // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
-            const hasTicket = status.includes("ตั๋ว");
-            const hasRecipient = status.includes("ผู้รับ");
-            setTicketChecked(hasTicket);
-            setRecipientChecked(hasRecipient);
+
+            if(status === "ลูกค้าประจำ"){
+                setTicketChecked(true);
+                setRecipientChecked(false);
+            }else{
+                setTicketChecked(false);
+                setRecipientChecked(true);
+            }
+            
             // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
             setRate1Edit(rowRate1);
             setRate2Edit(rowRate2);
@@ -115,15 +119,12 @@ const TicketsBigTruck = () => {
 
     // บันทึกข้อมูลที่แก้ไขแล้ว
     const handleSave = async () => {
-        const newStatus = [
-            ticketChecked ? "ตั๋ว" : "",
-            recipientChecked ? "ผู้รับ" : ""
-        ]
-            .filter((s) => s) // กรองค่าที่ไม่ใช่ค่าว่าง
-            .join("/");
+        const newStatus = 
+            (ticketChecked && !recipientChecked ? "ลูกค้าประจำ" : 
+            !ticketChecked && recipientChecked ? "ลูกค้าไม่ประจำ" : "ยกเลิก")
 
         // บันทึกสถานะใหม่ไปยัง Firebase
-        await database.ref(`/customers/transports/${selectedRowId - 1}`).update({
+        await database.ref(`/customers/bigtruck/${selectedRowId - 1}`).update({
             Status: newStatus,
             Rate1: rate1Edit,
             Rate2: rate2Edit,
@@ -149,6 +150,16 @@ const TicketsBigTruck = () => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
+    const handleChangeTicketChecked = () => {
+        setTicketChecked(true);
+        setRecipientChecked(false);
+    }
+
+    const handleChangeRecipientChecked = () => {
+        setTicketChecked(false);
+        setRecipientChecked(true);
+    }
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -338,22 +349,22 @@ const TicketsBigTruck = () => {
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox
-                                                                                    checked={ticketChecked}
-                                                                                    onChange={(e) => setTicketChecked(e.target.checked)}
+                                                                                    checked={ticketChecked && !recipientChecked ? true : false}
+                                                                                    onChange={handleChangeTicketChecked}
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ตั๋ว"
+                                                                            label="ลูกค้าประจำ"
                                                                         />
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox
-                                                                                    checked={recipientChecked}
-                                                                                    onChange={(e) => setRecipientChecked(e.target.checked)}
+                                                                                    checked={!ticketChecked && recipientChecked ? true : false}
+                                                                                    onChange={handleChangeRecipientChecked}
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ผู้รับ"
+                                                                            label="ลูกค้าไม่ประจำ"
                                                                         />
                                                                     </>
                                                             }
@@ -493,22 +504,22 @@ const TicketsBigTruck = () => {
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox
-                                                                                    checked={ticketChecked}
-                                                                                    onChange={(e) => setTicketChecked(e.target.checked)}
+                                                                                    checked={ticketChecked && !recipientChecked ? true : false}
+                                                                                    onChange={handleChangeTicketChecked}
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ตั๋ว"
+                                                                            label="ลูกค้าประจำ"
                                                                         />
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox
-                                                                                    checked={recipientChecked}
-                                                                                    onChange={(e) => setRecipientChecked(e.target.checked)}
+                                                                                    checked={!ticketChecked && recipientChecked ? true : false}
+                                                                                    onChange={handleChangeRecipientChecked}
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ผู้รับ"
+                                                                            label="ลูกค้าไม่ประจำ"
                                                                         />
                                                                     </>
                                                             }

@@ -42,7 +42,7 @@ import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
 const UpdateGasStations = (props) => {
-    const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport } = props;
+    const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport,count } = props;
     const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
     const [setting, setSetting] = React.useState(true);
@@ -193,6 +193,7 @@ const UpdateGasStations = (props) => {
     // }, [totalVolumes]); // รันเมื่อ totalVolumes เปลี่ยนแปลง
 
     const updateValuesForDate = () => {
+        console.log(" DATE : ",dayjs(selectedDate).format("DD/MM/YYYY"));
         const isFirstStation = (gasStationOil?.[0]?.Name === gasStation?.Name) || false;
         const formattedDate = dayjs(selectedDate).format("DD-MM-YYYY");
         const reportData = gasStation?.Report?.[formattedDate];
@@ -230,11 +231,11 @@ const UpdateGasStations = (props) => {
                         Capacity: value?.Capacity || 0,
                         Color: value?.Color || "",
                         Volume: (yesterdayEntry?.Difference || yesterdayEntry?.OilBalance) || 0,
-                        Squeeze: value?.Squeeze || 0,
+                        Squeeze: value?.Squeeze ?? yesterdayEntry?.Squeeze ?? Squeeze,
                         Delivered: value?.Delivered || 0,
                         Pending1: value?.Pending1 || 0,
                         Pending2: value?.Pending2 || 0,
-                        EstimateSell: value?.EstimateSell || yesterdayEntry?.EstimateSell,
+                        EstimateSell: value?.EstimateSell ?? yesterdayEntry?.EstimateSell ?? 0,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,
                         YesterDay: (Number(twoDaysAgoEntry?.Difference || twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
@@ -252,7 +253,7 @@ const UpdateGasStations = (props) => {
                     Capacity: row?.Capacity || 0,
                     Color: row?.Color || "",
                     Volume: (yesterdayEntry?.Difference || yesterdayEntry?.OilBalance) || 0,
-                    Squeeze: squeeze,
+                    Squeeze: values[index]?.Squeeze !== undefined ? values[index]?.Squeeze : yesterdayEntry?.Squeeze || Squeeze,
                     Delivered: 0,
                     Pending1: 0,
                     Pending2: 0,
@@ -279,7 +280,7 @@ const UpdateGasStations = (props) => {
 
     useEffect(() => {
         updateValuesForDate();
-    }, [selectedDate]);
+    }, [selectedDate,count,Squeeze]);
 
     const deepEqual = (obj1, obj2) => {
         return JSON.stringify(obj1) === JSON.stringify(obj2);
@@ -1049,7 +1050,7 @@ const UpdateGasStations = (props) => {
                                                             : `${row.Color}4A`,
                                                         fontWeight: "bold",
                                                         borderBottom: "2px solid white"
-                                                    }}>{new Intl.NumberFormat("en-US").format(values[index]?.Capacity || row.Capacity)}</TableCell>
+                                                    }}>{count === 2 ? "" : new Intl.NumberFormat("en-US").format(values[index]?.Capacity || row.Capacity)}</TableCell>
                                                     <TableCell sx={{
                                                         textAlign: "center", backgroundColor: values[index]?.Color
                                                             ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
