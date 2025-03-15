@@ -142,6 +142,8 @@ const GasStationsDetail = (props) => {
         return count + gasStationOil.filter((row) => stock.Name === row.Stock && row.Stock === open).length;
     }, 0);
 
+    let accumulatedDownHoleMap = {};
+
     console.log("ปั้มทั้งหมด" + matchCount);
 
     return (
@@ -257,8 +259,81 @@ const GasStationsDetail = (props) => {
                                                         currentReport = lastReport; // ใช้ค่าจากรายการก่อนหน้า
                                                     }
                                                 }
-                                                // อัปเดต lastReport เป็น currentReport
-                                                lastReport = currentReport;
+                                                let day = dayjs(selectedDate).format("DD-MM-YYYY");
+
+                                                // ✅ สร้างตัวแปรเก็บค่า DownHole ตาม id และ productName
+                                                let downholeMap = {}; 
+                                                
+                                                console.log("Match Count : ", matchCount);
+                                                console.log("Current Report : ", currentReport?.[day]);
+                                                
+                                                // ✅ ตรวจสอบว่ามีข้อมูล currentReport[day] หรือไม่
+                                                if (currentReport?.[day]) {
+                                                    Object.entries(currentReport[day]).forEach(([id, reportItem]) => {
+                                                        let productName = reportItem?.ProductName || ""; // ✅ ใช้ชื่อ productName เป็น key
+                                                        let downHoleValue = Number(reportItem?.DownHole) || 0; // ✅ ใช้ Number() เพื่อป้องกัน NaN
+                                                
+                                                        console.log("ProductName : ", productName);
+                                                        console.log("DownHole Value : ", downHoleValue);
+                                                
+                                                        // ✅ ถ้ายังไม่มีค่าใน downholeMap ให้กำหนดเป็น 0
+                                                        if (!downholeMap[id]) {
+                                                            downholeMap[id] = {};
+                                                        }
+                                                        if (!downholeMap[id][productName]) {
+                                                            downholeMap[id][productName] = 0;
+                                                        }
+                                                
+                                                        // ✅ บันทึกค่าลงใน downholeMap
+                                                        downholeMap[id][productName] += downHoleValue;
+                                                
+                                                        console.log(`DownholeMap [${id}][${productName}] : `, downholeMap[id][productName]);
+                                                    });
+                                                
+                                                    // ✅ คำนวณค่า DownHole สำหรับ matchCount
+                                                    let finalDownHoleMap = {};
+                                                
+                                                    if (matchCount === 1) {
+                                                        // ถ้า matchCount เป็น 1 คำนวณผลรวมจาก downholeMap
+                                                        Object.entries(downholeMap).forEach(([id, products]) => {
+                                                            Object.entries(products).forEach(([productName, totalDownHole]) => {
+                                                                if (!finalDownHoleMap[productName]) {
+                                                                    finalDownHoleMap[productName] = 0;
+                                                                }
+                                                                finalDownHoleMap[productName] += totalDownHole;
+                                                            });
+                                                        });
+                                                    } else if (matchCount > 1) {
+                                                        // ถ้า matchCount > 1 คำนวณสะสมค่า DownHole
+                                                        let accumulatedDownHoleMap = {}; // ตัวแปรสะสมค่า
+                                                
+                                                        // ใช้ downholeMap ที่สะสมค่าแต่ละรอบมาเก็บใน accumulatedDownHoleMap
+                                                        Object.entries(downholeMap).forEach(([id, products]) => {
+                                                            Object.entries(products).forEach(([productName, downHoleValue]) => {
+                                                                if (!accumulatedDownHoleMap[productName]) {
+                                                                    accumulatedDownHoleMap[productName] = 0;
+                                                                }
+                                                                // ✅ สะสมค่า DownHole จาก matchCount ต่างๆ
+                                                                accumulatedDownHoleMap[productName] += downHoleValue;
+                                                            });
+                                                        });
+                                                
+                                                        // ✅ แทนที่ค่าที่สะสมลงใน finalDownHoleMap แทนการแทนที่ค่า
+                                                        Object.entries(accumulatedDownHoleMap).forEach(([productName, totalDownHole]) => {
+                                                            if (!finalDownHoleMap[productName]) {
+                                                                finalDownHoleMap[productName] = 0;
+                                                            }
+                                                            finalDownHoleMap[productName] += totalDownHole;  // สะสมค่าของแต่ละ productName
+                                                        });
+                                                
+                                                        console.log("Final Down Hole Map after calculation for matchCount > 1: ", finalDownHoleMap);
+                                                    }
+                                                
+                                                    console.log("Final Down Hole Map : ", finalDownHoleMap);
+                                                }
+                                                
+
+
 
                                                 // ส่งค่าไปยัง <UpdateGasStations />
                                                 return (

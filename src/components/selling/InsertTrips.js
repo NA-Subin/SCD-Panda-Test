@@ -319,6 +319,7 @@ const InsertTrips = () => {
 
     const [ticketsT, setTicketsT] = React.useState([]);
     const [ticketsPS, setTicketsPS] = React.useState([]);
+    const [ticketsA, setTicketsA] = React.useState([]);
     const [ticketsB, setTicketsB] = React.useState([]);
     const [ticketsS, setTicketsS] = React.useState([]);
     const [orderT, setOrderT] = React.useState([]);
@@ -358,6 +359,15 @@ const InsertTrips = () => {
                 dataGasStations.push({ id, ...datas[id] })
             }
             setTicketsPS(dataGasStations);
+        });
+
+        database.ref("/customers/tickets/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            const dataGasStations = [];
+            for (let id in datas) {
+                dataGasStations.push({ id, ...datas[id] })
+            }
+            setTicketsA(dataGasStations);
         });
 
         database.ref("/customers/bigtruck/").on("value", (snapshot) => {
@@ -1077,6 +1087,7 @@ const InsertTrips = () => {
     
         const tickets = [
             { TicketsName: "ตั๋วเปล่า", id: "blank_ticket" },  // เพิ่มตั๋วเปล่าเข้าไป
+            ...ticketsA.map((item) => ({ ...item })),
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")

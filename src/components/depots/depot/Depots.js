@@ -87,14 +87,7 @@ const Depots = () => {
               <Box textAlign="right" marginRight={3} marginTop={-10}>
                 <InserDepot depot={depot.length} />
               </Box>
-                <Grid container spacing={2} marginTop={1}>
-                    <Grid item xs={8}>
-                        <Typography variant="h6" fontWeight="bold" gutterBottom>
-                            คลังรับน้ำมัน
-                        </Typography>
-                    </Grid>
-                </Grid>
-                <Divider sx={{ marginBottom: 1 }} />
+                <Divider sx={{ marginBottom: 1, marginTop: 5 }} />
                 <TableContainer
                     component={Paper}
                     style={{ maxHeight: "70vh" }}

@@ -917,7 +917,7 @@ export default function Navbar() {
               }
             >
               <Collapse in={!openData}>
-                {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "คลังรับน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
+                {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
                   <ListItem
                     key={text}
                     disablePadding
@@ -934,9 +934,10 @@ export default function Navbar() {
                           : index === 1 ? "/employee"
                             : index === 2 ? "/trucks"
                               : index === 3 ? "/depots"
-                                : index === 4 ? "/transports"
-                                  : index === 5 ? "/customer-bigtrucks"
-                                    : index === 6 ? "/customer-smalltrucks"
+                              : index === 4 ? "/ticket"
+                                : index === 5 ? "/transports"
+                                  : index === 6 ? "/customer-bigtrucks"
+                                    : index === 7 ? "/customer-smalltrucks"
                                       : "/creditor"
                       }
                       sx={{
@@ -964,8 +965,10 @@ export default function Navbar() {
                         ) : index === 4 ? (
                           <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
                         ) : index === 5 ? (
-                          <GroupsIcon />
+                          <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
                         ) : index === 6 ? (
+                          <GroupsIcon />
+                        ) : index === 7 ? (
                           <GroupsIcon />
                         ) : (
                           <CurrencyExchangeIcon />
