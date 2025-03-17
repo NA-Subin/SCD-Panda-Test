@@ -142,9 +142,116 @@ const GasStationsDetail = (props) => {
         return count + gasStationOil.filter((row) => stock.Name === row.Stock && row.Stock === open).length;
     }, 0);
 
-    let accumulatedDownHoleMap = {};
-
     console.log("ปั้มทั้งหมด" + matchCount);
+
+    let day = dayjs(selectedDate).format("DD-MM-YYYY"); // แปลงวันที่เป็นรูปแบบ "DD-MM-YYYY"
+
+    // gasStation: {
+    //     0: {
+    //         id: 1,
+    //         Name: "แม่โจ้-เฟิร์สโปร",
+    //         StockName: "แม่โจ้",
+    //         Report: {
+    //             12-03-2025: {
+    //                 0: {
+    //                     ProductName: "G95",
+    //                         DownHole: 2000
+    //                 },
+    //                 1: {
+    //                     ProductName: "G91",
+    //                         DownHole: 3000
+    //                 },
+    //                 2: {
+    //                     ProductName: "B7",
+    //                         DownHole: 5000
+    //                 }
+    //             },
+    //             13-03-2025: {
+    //                 0: {
+    //                     ProductName: "G95",
+    //                         DownHole: 3000
+    //                 },
+    //                 1: {
+    //                     ProductName: "G91",
+    //                         DownHole: 5000
+    //                 },
+    //                 2: {
+    //                     ProductName: "B7",
+    //                         DownHole: 6000
+    //                 }
+    //             },
+    //         }
+    //     },
+    //     2: {
+    //         id: 2,
+    //         Name: "สันกลาง-เฟิร์สโปร",
+    //         StockName: "สันกลาง",
+    //         Report: {
+    //             12-03-2025: {
+    //                 0: {
+    //                     ProductName: "G95",
+    //                         DownHole: 3000
+    //                 },
+    //                 1: {
+    //                     ProductName: "B7",
+    //                         DownHole: 3000
+    //                 }
+    //             },
+    //             13-03-2025: {
+    //                 0: {
+    //                     ProductName: "G95",
+    //                         DownHole: 2000
+    //                 },
+    //                 1: {
+    //                     ProductName: "B7",
+    //                         DownHole: 4000
+    //                 }
+    //             },
+    //         }
+    //     },
+    //     3: {
+    //         id: 3,
+    //         Name: "แม่โจ้-นามอส",
+    //         StockName: "แม่โจ้",
+    //         Report: {
+    //             12-03-2025: {
+    //                 0: {
+    //                     ProductName: "G95",
+    //                         DownHole: 3000
+    //                 },
+    //                 1: {
+    //                     ProductName: "G91",
+    //                         DownHole: 3000
+    //                 },
+    //                 2: {
+    //                     ProductName: "B7",
+    //                         DownHole: 2000
+    //                 }
+    //             },
+    //             13-03-2025: {
+    //                 0: {
+    //                     ProductName: "G95",
+    //                         DownHole: 2000
+    //                 },
+    //                 1: {
+    //                     ProductName: "G91",
+    //                         DownHole: 2000
+    //                 },
+    //                 2: {
+    //                     ProductName: "B7",
+    //                         DownHole: 4000
+    //                 }
+    //             },
+    //         }
+    //     }
+    // }
+
+    // ถ้าเกิดเป็น StockName: "แม่โจ้" และวันที่ 12-03-2025  ข้อมูลที่บันทึกเข้าไปใน downHole จะได้ดังนี้
+    // downHole :{
+    //     G95: 3000+2000
+    //     G91: 3000+3000
+    //     B7: 2000+5000
+    // }
 
     return (
         <React.Fragment>
@@ -199,25 +306,25 @@ const GasStationsDetail = (props) => {
                     <Grid item sm={6} lg={8}>
                         <FormGroup row>
                             <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={checkStock === "ทั้งหมด"}
-                                            onChange={() => setCheckStock("ทั้งหมด")}
-                                        />
-                                    }
-                                    label="ทั้งหมด"
+                                control={
+                                    <Checkbox
+                                        checked={checkStock === "ทั้งหมด"}
+                                        onChange={() => setCheckStock("ทั้งหมด")}
+                                    />
+                                }
+                                label="ทั้งหมด"
                             />
                             {stocks.map((row) => (
                                 <FormControlLabel
-                                key={row.Name}
-                                control={
-                                    <Checkbox
-                                        checked={checkStock === row.Name}
-                                        onChange={() => setCheckStock(row.Name)}
-                                    />
-                                }
-                                label={row.Name}
-                            />
+                                    key={row.Name}
+                                    control={
+                                        <Checkbox
+                                            checked={checkStock === row.Name}
+                                            onChange={() => setCheckStock(row.Name)}
+                                        />
+                                    }
+                                    label={row.Name}
+                                />
                             ))}
                         </FormGroup>
                     </Grid>
@@ -225,117 +332,58 @@ const GasStationsDetail = (props) => {
                         {
                             checkStock === "ทั้งหมด" ?
                             stocks.map((stock, index) => {
+                                let downHole = {}; // ตัวแปรเก็บค่ารวมของ DownHole
+                                let matchCount = 0; // ตัวแปรนับจำนวน match
 
-                                let lastReport = null; // เก็บค่า row.Report ของรายการก่อนหน้า
-                                let matchCount = 0;
+                                console.log(`1.Final DownHole for Stock: ${stock.Name}`, downHole);
+                                
+                                gasStationOil.forEach((row) => {
+                                    if (stock.Name === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
+                                        const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+                                        const yesterdayData = row?.Report?.[yesterdayDate];
+
+                                        let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
+                                        if (currentReport) {
+                                            Object.values(currentReport).forEach(reportItem => {
+                                                const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+                                                
+                                                let productName = reportItem?.ProductName || "";
+                                                let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
+                                                let deliveredValue = Number(reportItem?.Delivered) || 0;
+                                                let padding1Value = Number(reportItem?.Padding1) || 0;
+                                                let padding2Value = Number(reportItem?.Padding2) || 0;
+
+                                                let total = (volumeValue+(deliveredValue+padding1Value+padding2Value));
+
+                                                console.log("Total : ",total);
+                
+                                                if (!downHole[productName]) {
+                                                    downHole[productName] = 0;
+                                                }
+                                                downHole[productName] += total;
+                                            });
+                                        }
+                                    }
+                                });
+                
+                                console.log(`2.Final DownHole for Stock: ${stock.Name}`, downHole);
+                
                                 return (
                                     <Paper
                                         sx={{
                                             p: 2,
                                             marginBottom: 2,
-                                            border: '2px solid lightgray', // เพิ่มขอบเข้ม
-                                            borderRadius: 3, // เพิ่มความมน (ค่าในหน่วย px)
-                                            boxShadow: 1, // เพิ่มเงาเพื่อความสวยงาม
-                                            width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) : windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275), overflowY: 'auto'
+                                            border: '2px solid lightgray',
+                                            borderRadius: 3,
+                                            boxShadow: 1,
+                                            width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) : windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275),
+                                            overflowY: 'auto'
                                         }}
                                         key={stock.id || index}
                                     >
-                                        {gasStationOil.map((row, rowIndex) => {
-                                            let currentReport = row.Report; // ค่า row.Report ปัจจุบัน
-                                            if (stock.Name === row.Stock) {
-                                                matchCount++; // เพิ่มตัวนับเมื่อเงื่อนไขเป็นจริง
-
-                                                console.log(
-                                                    `Match ${matchCount}: stock.Name = ${stock.Name}, row.Stock = ${row.Stock}`, matchCount
-                                                );
-
-                                                if (!row.Report) {
-                                                    // ถ้าไม่มี row.Report
-                                                    if (rowIndex === 0) {
-                                                        // loop แรก
-                                                        currentReport = null; // ไม่มีค่าให้ไปที่ <UpdateGasStations />
-                                                    } else {
-                                                        // loop ถัดไป
-                                                        currentReport = lastReport; // ใช้ค่าจากรายการก่อนหน้า
-                                                    }
-                                                }
-                                                let day = dayjs(selectedDate).format("DD-MM-YYYY");
-
-                                                // ✅ สร้างตัวแปรเก็บค่า DownHole ตาม id และ productName
-                                                let downholeMap = {}; 
-                                                
-                                                console.log("Match Count : ", matchCount);
-                                                console.log("Current Report : ", currentReport?.[day]);
-                                                
-                                                // ✅ ตรวจสอบว่ามีข้อมูล currentReport[day] หรือไม่
-                                                if (currentReport?.[day]) {
-                                                    Object.entries(currentReport[day]).forEach(([id, reportItem]) => {
-                                                        let productName = reportItem?.ProductName || ""; // ✅ ใช้ชื่อ productName เป็น key
-                                                        let downHoleValue = Number(reportItem?.DownHole) || 0; // ✅ ใช้ Number() เพื่อป้องกัน NaN
-                                                
-                                                        console.log("ProductName : ", productName);
-                                                        console.log("DownHole Value : ", downHoleValue);
-                                                
-                                                        // ✅ ถ้ายังไม่มีค่าใน downholeMap ให้กำหนดเป็น 0
-                                                        if (!downholeMap[id]) {
-                                                            downholeMap[id] = {};
-                                                        }
-                                                        if (!downholeMap[id][productName]) {
-                                                            downholeMap[id][productName] = 0;
-                                                        }
-                                                
-                                                        // ✅ บันทึกค่าลงใน downholeMap
-                                                        downholeMap[id][productName] += downHoleValue;
-                                                
-                                                        console.log(`DownholeMap [${id}][${productName}] : `, downholeMap[id][productName]);
-                                                    });
-                                                
-                                                    // ✅ คำนวณค่า DownHole สำหรับ matchCount
-                                                    let finalDownHoleMap = {};
-                                                
-                                                    if (matchCount === 1) {
-                                                        // ถ้า matchCount เป็น 1 คำนวณผลรวมจาก downholeMap
-                                                        Object.entries(downholeMap).forEach(([id, products]) => {
-                                                            Object.entries(products).forEach(([productName, totalDownHole]) => {
-                                                                if (!finalDownHoleMap[productName]) {
-                                                                    finalDownHoleMap[productName] = 0;
-                                                                }
-                                                                finalDownHoleMap[productName] += totalDownHole;
-                                                            });
-                                                        });
-                                                    } else if (matchCount > 1) {
-                                                        // ถ้า matchCount > 1 คำนวณสะสมค่า DownHole
-                                                        let accumulatedDownHoleMap = {}; // ตัวแปรสะสมค่า
-                                                
-                                                        // ใช้ downholeMap ที่สะสมค่าแต่ละรอบมาเก็บใน accumulatedDownHoleMap
-                                                        Object.entries(downholeMap).forEach(([id, products]) => {
-                                                            Object.entries(products).forEach(([productName, downHoleValue]) => {
-                                                                if (!accumulatedDownHoleMap[productName]) {
-                                                                    accumulatedDownHoleMap[productName] = 0;
-                                                                }
-                                                                // ✅ สะสมค่า DownHole จาก matchCount ต่างๆ
-                                                                accumulatedDownHoleMap[productName] += downHoleValue;
-                                                            });
-                                                        });
-                                                
-                                                        // ✅ แทนที่ค่าที่สะสมลงใน finalDownHoleMap แทนการแทนที่ค่า
-                                                        Object.entries(accumulatedDownHoleMap).forEach(([productName, totalDownHole]) => {
-                                                            if (!finalDownHoleMap[productName]) {
-                                                                finalDownHoleMap[productName] = 0;
-                                                            }
-                                                            finalDownHoleMap[productName] += totalDownHole;  // สะสมค่าของแต่ละ productName
-                                                        });
-                                                
-                                                        console.log("Final Down Hole Map after calculation for matchCount > 1: ", finalDownHoleMap);
-                                                    }
-                                                
-                                                    console.log("Final Down Hole Map : ", finalDownHoleMap);
-                                                }
-                                                
-
-
-
-                                                // ส่งค่าไปยัง <UpdateGasStations />
+                                        {gasStationOil.map((row) => {
+                                            if (stock.Name === row.Stock) { // แสดงเฉพาะแถวที่ตรงกับ StockName
+                                                matchCount++; 
                                                 return (
                                                     <UpdateGasStations
                                                         key={row.id}
@@ -344,53 +392,64 @@ const GasStationsDetail = (props) => {
                                                         selectedDate={selectedDate}
                                                         count={matchCount}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
-                                                        currentReport={currentReport} // ส่งค่า Report ที่ตรวจสอบแล้ว
+                                                        currentReport={row.Report?.[day] || null} // ส่ง Report ตามวัน
+                                                        valueDownHole={downHole} // ส่งข้อมูลที่รวมแล้ว
                                                         onSendBack={handleSendBack}
                                                     />
                                                 );
                                             }
-                                            return null; // ไม่แสดงอะไรถ้าเงื่อนไขไม่ตรง
+                                            return null;
                                         })}
                                     </Paper>
                                 );
                             })
-                            :
-                                    <Paper
-                                        sx={{
-                                            p: 2,
-                                            marginBottom: 2,
-                                            border: '2px solid lightgray', // เพิ่มขอบเข้ม
-                                            borderRadius: 3, // เพิ่มความมน (ค่าในหน่วย px)
-                                            boxShadow: 1, // เพิ่มเงาเพื่อความสวยงาม
-                                            width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) : windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275), overflowY: 'auto'
-                                        }}
-                                    >
-                                        {(() => {
-                                            let matchCount = 0; // ✅ ย้ายตัวแปรมาไว้ในฟังก์ชันย่อย
-                                            let lastReport = null;
-                                            return gasStationOil.map((row, rowIndex) => {
+                                :
+                                <Paper
+                                    sx={{
+                                        p: 2,
+                                        marginBottom: 2,
+                                        border: '2px solid lightgray', // เพิ่มขอบเข้ม
+                                        borderRadius: 3, // เพิ่มความมน (ค่าในหน่วย px)
+                                        boxShadow: 1, // เพิ่มเงาเพื่อความสวยงาม
+                                        width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) : windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275), overflowY: 'auto'
+                                    }}
+                                >
+                                    {(() => {
+                                        let downHole = {}; // ตัวแปรเก็บค่ารวมของ DownHole
+                                        let matchCount = 0; // ตัวแปรนับจำนวน match
+                                        gasStationOil.forEach((row) => {
+                                            if (checkStock === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
+                                                const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+                                                const yesterdayData = row?.Report?.[yesterdayDate];
+        
+                                                let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
+                                                if (currentReport) {
+                                                    Object.values(currentReport).forEach(reportItem => {
+                                                        const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+                                                        
+                                                        let productName = reportItem?.ProductName || "";
+                                                        let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
+                                                        let deliveredValue = Number(reportItem?.Delivered) || 0;
+                                                        let padding1Value = Number(reportItem?.Padding1) || 0;
+                                                        let padding2Value = Number(reportItem?.Padding2) || 0;
+        
+                                                        let total = (volumeValue+(deliveredValue+padding1Value+padding2Value));
+        
+                                                        console.log("Total : ",total);
+                        
+                                                        if (!downHole[productName]) {
+                                                            downHole[productName] = 0;
+                                                        }
+                                                        downHole[productName] += total;
+                                                    });
+                                                }
+                                            }
+                                        });
+
+                                        return gasStationOil.map((row, rowIndex) => {
                                             let currentReport = row.Report; // ค่า row.Report ปัจจุบัน
                                             if (checkStock === row.Stock) {
                                                 matchCount++; // เพิ่มตัวนับเมื่อเงื่อนไขเป็นจริง
-
-                                                console.log(
-                                                    `Match ${matchCount}: checkStock = ${checkStock}, row.Stock = ${row.Stock}`, matchCount
-                                                );
-
-                                                if (!row.Report) {
-                                                    // ถ้าไม่มี row.Report
-                                                    if (rowIndex === 0) {
-                                                        // loop แรก
-                                                        currentReport = null; // ไม่มีค่าให้ไปที่ <UpdateGasStations />
-                                                    } else {
-                                                        // loop ถัดไป
-                                                        currentReport = lastReport; // ใช้ค่าจากรายการก่อนหน้า
-                                                    }
-                                                }
-                                                // อัปเดต lastReport เป็น currentReport
-                                                lastReport = currentReport;
-
-                                                // ส่งค่าไปยัง <UpdateGasStations />
                                                 return (
                                                     <UpdateGasStations
                                                         key={row.id}
@@ -399,15 +458,17 @@ const GasStationsDetail = (props) => {
                                                         selectedDate={selectedDate}
                                                         count={matchCount}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
-                                                        currentReport={currentReport} // ส่งค่า Report ที่ตรวจสอบแล้ว
+                                                        currentReport={row.Report?.[day] || null} // ส่ง Report ตามวัน
+                                                        valueDownHole={downHole} // ส่งข้อมูลที่รวมแล้ว
                                                         onSendBack={handleSendBack}
                                                     />
                                                 );
                                             }
                                             return null; // ไม่แสดงอะไรถ้าเงื่อนไขไม่ตรง
-                                        })}
-                                        )()}
-                                    </Paper>
+                                        })
+                                    }
+                                    )()}
+                                </Paper>
                         }
                     </Grid>
                 </Grid>

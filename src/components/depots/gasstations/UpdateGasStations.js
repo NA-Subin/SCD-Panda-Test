@@ -42,7 +42,7 @@ import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
 const UpdateGasStations = (props) => {
-    const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport,count } = props;
+    const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport,count,valueDownHole } = props;
     const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
     const [setting, setSetting] = React.useState(true);
@@ -62,6 +62,8 @@ const UpdateGasStations = (props) => {
     const [driversData, setDriversData] = useState([]);
     const [driver1, setDriver1] = React.useState("");
     const [driver2, setDriver2] = React.useState("");
+
+    console.log(" Show DownHole : ",valueDownHole);
 
     // ฟังก์ชันค้นหาข้อมูลที่ใกล้เคียงกับที่พิมพ์
     const filterOptions = (options, { inputValue }) => {
@@ -208,11 +210,11 @@ const UpdateGasStations = (props) => {
         setTwoDaysAgoData(twoDaysAgoData);
         setFormattedDate(formattedDate);
 
-        let sharedDownHole = 0;
-        if (isFirstStation && reportData) {
-            const firstProductWithDownHole = Object.values(reportData).find(entry => entry?.DownHole);
-            sharedDownHole = firstProductWithDownHole?.DownHole || 0;
-        }
+        // let sharedDownHole = 0;
+        // if (isFirstStation && reportData) {
+        //     const firstProductWithDownHole = Object.values(reportData).find(entry => entry?.DownHole);
+        //     sharedDownHole = firstProductWithDownHole?.DownHole || 0;
+        // }
 
         const updatedValues = reportData
             ? Object.entries(reportData)
@@ -259,7 +261,8 @@ const UpdateGasStations = (props) => {
                     Pending2: 0,
                     EstimateSell: values[index]?.EstimateSell !== undefined ? values[index]?.EstimateSell : yesterdayEntry?.EstimateSell || 0,
                     Period: 0,
-                    DownHole: sharedDownHole || 0,
+                    DownHole: 0,
+                    // DownHole: sharedDownHole || 0,
                     YesterDay: (Number(yesterdayEntry?.Difference || twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
                     Sell: 0,
                     TotalVolume: 0,
@@ -1406,7 +1409,7 @@ const UpdateGasStations = (props) => {
                                                         </Paper>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#92CDDC", color: (values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze)) < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#a5d6a7", color: (((values[index]?.Capacity || 0)) - Math.round((values[index]?.DownHole || 0))) < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(Math.round((values[index]?.Capacity || 0)) - Math.round((values[index]?.DownHole || 0)))}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#a5d6a7", color: (((values[index]?.Capacity || 0)) - Math.round((valueDownHole[row?.ProductName] || 0))) < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{count === 1 && new Intl.NumberFormat("en-US").format(Math.round((values[index]?.Capacity || 0)) - Math.round((valueDownHole[row?.ProductName] || 0)))}</TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center",color: values[index]?.YesterDay < 0 ? "#d50000" : "black", fontWeight: "bold" }}>
                                                             <TextField
                                                                 size="small"
