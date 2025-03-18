@@ -1086,7 +1086,7 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
     
         const tickets = [
-            { TicketsName: "ตั๋วเปล่า", id: "blank_ticket" },  // เพิ่มตั๋วเปล่าเข้าไป
+            { TicketsName: "ตั๋วเปล่า", id: 0 },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item })),
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT

@@ -139,6 +139,9 @@ const UpdateTrip = (props) => {
     const [ticketsB, setTicketsB] = React.useState([]);
     const [ticketsS, setTicketsS] = React.useState([]);
     const [ticketLength, setTicketLength] = React.useState(0);
+    const [costTrip, setCostTrip] = useState(trip.CostTrip);
+
+    console.log("Ticket Length : ",ticketLength);
 
     const getTicket = async () => {
         database.ref("/tickets").on("value", (snapshot) => {
@@ -265,33 +268,38 @@ const UpdateTrip = (props) => {
                 obj = obj[key];
             }
     
-            obj[fields[fields.length - 1]] = value === "" ? 0 : Number(value);
+            // แปลงค่า value ให้เป็นตัวเลข (ถ้าเป็นค่าว่างหรือไม่ใช่ตัวเลขให้ใช้ 0 แทน)
+            const numericValue = parseFloat(value) || 0;
+            obj[fields[fields.length - 1]] = numericValue;
+    
+            console.log("Updated Value:", numericValue);
     
             // ถ้าเป็นการเพิ่ม Product ใหม่ และ Value > 0 ให้เพิ่มโครงสร้าง Product
-            if (fields[0] === "Product" && value > 0) {
+            if (fields[0] === "Product" && numericValue > 0) {
                 const productType = fields[1];
                 if (!updatedTickets[index].Product) {
                     updatedTickets[index].Product = {};
                 }
-                updatedTickets[index].Product[productType] = { Volume: value };
+                updatedTickets[index].Product[productType] = { Volume: numericValue.toString() };
             }
     
-            // ลบ Product ที่มี Volume เป็น 0 ออก
-            if (fields[0] === "Product" && value === 0) {
+            // **ลบ Product ที่มี Volume เป็น 0 ออก**
+            if (fields[0] === "Product" && numericValue === 0) {
                 const productType = fields[1];
+                console.log(`Removing Product: ${productType}`);
+    
+                // ลบ key ของ Product
                 delete updatedTickets[index].Product[productType];
+    
+                // ถ้า Product ไม่มี key เหลืออยู่ ให้ลบทั้ง object
                 if (Object.keys(updatedTickets[index].Product).length === 0) {
                     delete updatedTickets[index].Product;
                 }
             }
     
-            // อัปเดตค่า no ให้เป็นจำนวนของ OrderID
-            updatedTickets[index].No = updatedTickets.length;
-    
             return updatedTickets;
         });
-    };    
-    
+    };
 
     const handleOrderChange = (index, field, value) => {
         setEditableOrders((prev) => {
@@ -302,45 +310,50 @@ const UpdateTrip = (props) => {
                 updatedOrders[index] = { id: index + 1, No: 0, Product: {} };
             }
     
-            // ตรวจสอบว่า field ไม่เป็น undefined
-            if (field) {
-                const fields = field.split(".");
-                let obj = updatedOrders[index];
+            const fields = field.split(".");
+            let obj = updatedOrders[index];
     
-                for (let i = 0; i < fields.length - 1; i++) {
-                    const key = fields[i];
-                    if (!obj[key]) obj[key] = {}; // ถ้าไม่มี ให้สร้าง object ใหม่
-                    obj = obj[key];
-                }
-    
-                obj[fields[fields.length - 1]] = value === "" ? 0 : Number(value);
-    
-                // ถ้าเป็นการเพิ่ม Product ใหม่ และ Value > 0 ให้เพิ่มโครงสร้าง Product
-                if (fields[0] === "Product" && value > 0) {
-                    const productType = fields[1];
-                    if (!updatedOrders[index].Product) {
-                        updatedOrders[index].Product = {};
-                    }
-                    updatedOrders[index].Product[productType] = { Volume: value };
-                }
-    
-                // ลบ Product ที่มี Volume เป็น 0 ออก
-                if (fields[0] === "Product" && value === 0) {
-                    const productType = fields[1];
-                    delete updatedOrders[index].Product[productType];
-                    if (Object.keys(updatedOrders[index].Product).length === 0) {
-                        delete updatedOrders[index].Product;
-                    }
-                }
+            for (let i = 0; i < fields.length - 1; i++) {
+                const key = fields[i];
+                if (!obj[key]) obj[key] = {}; // ถ้าไม่มี ให้สร้าง object ใหม่
+                obj = obj[key];
             }
     
-            // อัปเดตค่า no ให้เป็นจำนวนของ OrderID
-            updatedOrders[index].No = updatedOrders.length;
+            // แปลงค่า value ให้เป็นตัวเลข (ถ้าเป็นค่าว่างหรือไม่ใช่ตัวเลขให้ใช้ 0 แทน)
+            const numericValue = parseFloat(value) || 0;
+            obj[fields[fields.length - 1]] = numericValue;
+    
+            console.log("Updated Value:", numericValue);
+    
+            // ถ้าเป็นการเพิ่ม Product ใหม่ และ Value > 0 ให้เพิ่มโครงสร้าง Product
+            if (fields[0] === "Product" && numericValue > 0) {
+                const productType = fields[1];
+                if (!updatedOrders[index].Product) {
+                    updatedOrders[index].Product = {};
+                }
+                updatedOrders[index].Product[productType] = { Volume: numericValue.toString() };
+            }
+    
+            // **ลบ Product ที่มี Volume เป็น 0 ออก**
+            if (fields[0] === "Product" && numericValue === 0) {
+                const productType = fields[1];
+                console.log(`Removing Product: ${productType}`);
+    
+                // ลบ key ของ Product
+                delete updatedOrders[index].Product[productType];
+    
+                // ถ้า Product ไม่มี key เหลืออยู่ ให้ลบทั้ง object
+                if (Object.keys(updatedOrders[index].Product).length === 0) {
+                    delete updatedOrders[index].Product;
+                }
+            }
+
+            console.log("Order Length :  ",updatedOrders.length);
     
             return updatedOrders;
         });
     };
-    
+
 
     const handleUpdate = () => {
         setEditMode(!editMode); // สลับโหมดแก้ไข <-> อ่านอย่างเดียว
@@ -361,6 +374,20 @@ const UpdateTrip = (props) => {
             acc[product] = editableOrders.reduce((sum, row) => sum + (Number(row.Product[product]?.Volume) || 0), 0);
             return acc;
         }, {});
+
+        // ✅ คำนวณ CostTrip
+        const orderCount = editableOrders.length;
+        let newCostTrip = 0;
+
+        if (orderCount > 0) {
+            if (trip.Depot === "ลำปาง") {
+                newCostTrip = 750 + (orderCount - 1) * 200;
+            } else if (trip.Depot === "พิจิตร") {
+                newCostTrip = 2000 + (orderCount - 1) * 200;
+            } else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip.Depot)) {
+                newCostTrip = 3200 + (orderCount - 1) * 200;
+            }
+        }
 
         // คำนวณน้ำมันเบาและน้ำมันหนัก
         const calculateOil = (volume, factor) => (volume * factor) * 1000; // สูตรคำนวณน้ำมัน
@@ -395,13 +422,53 @@ const UpdateTrip = (props) => {
             ...totalsOrder
         });
 
+        setCostTrip((prevCost) => {
+            console.log("🔄 Previous CostTrip:", prevCost);
+            console.log("✅ New CostTrip:", newCostTrip);
+            return newCostTrip;
+        });
+
     }, [editableTickets, editableOrders, trip]);
     // คำนวณใหม่ทุกครั้งที่ editableOrders เปลี่ยน
 
     const handleSave = () => {
+        const noCountTicket = {}; // เก็บจำนวนครั้งที่ No ปรากฏ
+        const noIdTrackerTicket = {}; // เก็บค่า id ที่ใช้ไปแล้วสำหรับ No แต่ละค่า
+        let newNoTicket = ticketLength+1; // เริ่มนับ No ใหม่จากจำนวน ticket ที่มีอยู่
+
+        editableTickets.forEach(ticket => {
+            const currentNo = ticket.No;
+            const currentId = ticket.id;
+
+            console.log(" NO : ",currentNo);
+            console.log(" ID : ",currentId);
+
+            // นับจำนวนครั้งที่ No ปรากฏ
+            if (!noCountTicket[currentNo]) {
+                noCountTicket[currentNo] = 1;
+                noIdTrackerTicket[currentNo] = new Set(); // ใช้ Set เก็บ id ที่ซ้ำ
+            } else {
+                noCountTicket[currentNo]++;
+            }
+
+            // ถ้า No ซ้ำกันและ id ไม่ซ้ำกัน
+            if (noCountTicket[currentNo] > 1 && !noIdTrackerTicket[currentNo].has(currentId)) {
+                ticket.No = newNoTicket; // เปลี่ยน No ใหม่
+                newNoTicket++; // เพิ่มค่า No ใหม่
+            }
+
+            // บันทึก id ที่เคยใช้สำหรับ No นี้
+            noIdTrackerTicket[currentNo].add(currentId);
+        });
+
+        console.log(" Ticket Update : ",editableTickets);
+
         // Loop ผ่านแต่ละ item ใน editableTickets
         editableTickets.forEach(ticket => {
             const ticketNo = ticket.No; // ใช้ No เพื่ออ้างอิง
+            console.log("Ticket NO : ", ticketNo);
+            console.log("Ticket Detail : ", ticket);
+
             database
                 .ref("/tickets")
                 .child(ticketNo)  // ใช้ No ในการเลือก Child
@@ -415,9 +482,41 @@ const UpdateTrip = (props) => {
                 });
         });
 
+        const noCountOrder = {}; // เก็บจำนวนครั้งที่ No ปรากฏ
+        const noIdTrackerOrder = {}; // เก็บค่า id ที่ใช้ไปแล้วสำหรับ No แต่ละค่า
+        let newNoOrder = orderLength+1; // เริ่มนับ No ใหม่จากจำนวน order ที่มีอยู่
+
+        editableOrders.forEach(order => {
+            const currentNo = order.No;
+            const currentId = order.id;
+
+            console.log(" NO : ",currentNo);
+            console.log(" ID : ",currentId);
+
+            // นับจำนวนครั้งที่ No ปรากฏ
+            if (!noCountOrder[currentNo]) {
+                noCountOrder[currentNo] = 1;
+                noIdTrackerOrder[currentNo] = new Set(); // ใช้ Set เก็บ id ที่ซ้ำ
+            } else {
+                noCountOrder[currentNo]++;
+            }
+
+            // ถ้า No ซ้ำกันและ id ไม่ซ้ำกัน
+            if (noCountOrder[currentNo] > 1 && !noIdTrackerOrder[currentNo].has(currentId)) {
+                order.No = newNoOrder; // เปลี่ยน No ใหม่
+                newNoOrder++; // เพิ่มค่า No ใหม่
+            }
+
+            // บันทึก id ที่เคยใช้สำหรับ No นี้
+            noIdTrackerOrder[currentNo].add(currentId);
+        });
+
+        console.log(" Order Update : ",editableOrders);
+
         // Loop ผ่านแต่ละ item ใน editableOrders
         editableOrders.forEach(order => {
             const orderNo = order.No; // ใช้ No เพื่ออ้างอิง
+            console.log("Order NO : ", orderNo);
             database
                 .ref("/order")
                 .child(orderNo)  // ใช้ No ในการเลือก Child
@@ -438,6 +537,7 @@ const UpdateTrip = (props) => {
                 WeightHigh: totalVolumesTicket.oilHeavy,
                 WeightLow: totalVolumesTicket.oilLight,
                 TotalWeight: totalVolumesTicket.totalWeight,
+                CostTrip: costTrip
             })    // อัปเดตข้อมูลของแต่ละ order
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -450,9 +550,14 @@ const UpdateTrip = (props) => {
         setEditMode(false);
     };
 
+    console.log("Updated Cost Trip:", costTrip);
+    console.log("Updated Oil Heavy:", totalVolumesTicket.oilHeavy);
+    console.log("Updated Oil Light:", totalVolumesTicket.oilLight);
+    console.log("Updated Total Weight:", totalVolumesTicket.totalWeight);
+
     const getTickets = () => {
         const tickets = [
-            { TicketsName: "ตั๋วเปล่า", id: "blank_ticket" },  // เพิ่มตั๋วเปล่าเข้าไป
+            { TicketsName: "ตั๋วเปล่า", id: 0 },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item })),
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
@@ -471,14 +576,14 @@ const UpdateTrip = (props) => {
                 .map((item) => ({ ...item })),
             ...ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item }))
         ];
-    
+
         return customers.filter((item) => item.id || item.TicketsCode);
-    }; 
+    };
 
     console.log("Updated Tickets : ", editableTickets);
     console.log("Updated Orders : ", editableOrders);
     console.log("Total Volumes : ", totalVolumesTicket);
-    console.log("Tickets : ", getTickets());
+    
 
     return (
         <React.Fragment>
@@ -515,10 +620,36 @@ const UpdateTrip = (props) => {
                             <Grid item sm={1} xs={4} textAlign="left">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ตั๋วน้ำมัน</Typography>
                             </Grid>
-                            <Grid item sm={11} xs={8} display="flex" alignItems="center" justifyContent='center'>
+                            <Grid item sm={editMode ? 7 : 11} xs={editMode ? 12 : 8} display="flex" alignItems="center" justifyContent='center'>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateStart}</Typography>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver}</Typography>
                             </Grid>
+                            {
+                                editMode &&
+                                <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
+                                    <Paper sx={{ width: "100%" }}
+                                        component="form">
+                                        <TextField size="small" fullWidth
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                    display: 'flex', // ใช้ flexbox
+                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
+                                                    fontWeight: 'bold',
+                                                    padding: '1px 4px', // ปรับ padding ภายใน input
+                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                },
+                                                borderRadius: 10
+                                            }}
+                                            value={trip.Depot}
+                                        />
+                                    </Paper>
+                                </Grid>
+                            }
                         </Grid>
                         <Paper
                             sx={{ p: 1, backgroundColor: totalVolumesTicket.totalWeight > 50300 ? "red" : "lightgray", marginBottom: 1 }}
@@ -739,11 +870,7 @@ const UpdateTrip = (props) => {
                             <Grid container spacing={1} marginBottom={-0.5}>
                                 {
                                     editMode &&
-                                    <>
-                                        <Grid item sm={1.5} xs={1.5} marginBottom={-0.5}>
-                                            <Typography variant="subtitle2" fontWeight="bold" sx={{ paddingLeft: 1, paddingTop: 0.5 }} gutterBottom>เลือกตั๋วที่ต้องการ</Typography>
-                                        </Grid>
-                                        <Grid item sm={10.5} xs={10.5} marginBottom={-0.5}>
+                                        <Grid item sm={6} xs={12} marginBottom={-0.5}>
                                             <Paper
                                                 component="form"
                                                 sx={{ height: "30px", width: "100%" }}
@@ -759,13 +886,24 @@ const UpdateTrip = (props) => {
                                                         if (newValue) {
                                                             setEditableTickets((prev) => {
                                                                 const updatedTickets = [...prev];
-                                                    
+
                                                                 // ตรวจสอบว่ามีตั๋วนี้อยู่แล้วหรือไม่
                                                                 const existingIndex = updatedTickets.findIndex(
                                                                     (item) => item.TicketName === newValue.TicketsName
                                                                 );
-                                                    
+
                                                                 if (existingIndex === -1) {
+
+                                                                    let depotTrip = "-"; // ค่าเริ่มต้น
+
+                                                                    if (trip.Depot === "ลำปาง") {
+                                                                        depotTrip = newValue.Rate1;
+                                                                    } else if (trip.Depot === "พิจิตร") {
+                                                                        depotTrip = newValue.Rate2;
+                                                                    } else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip.Depot)) {
+                                                                        depotTrip = newValue.Rate3;
+                                                                    }
+
                                                                     // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
                                                                     updatedTickets.push({
                                                                         id: updatedTickets.length, // ลำดับ id
@@ -773,11 +911,11 @@ const UpdateTrip = (props) => {
                                                                         Trip: (Number(tripID) - 1),
                                                                         TicketName: newValue.TicketsName,
                                                                         OrderID: "",
-                                                                        Rate: 0,
+                                                                        Rate: depotTrip,
                                                                         Product: {} // เริ่มต้นเป็น Object ว่าง
                                                                     });
                                                                 }
-                                                    
+
                                                                 return updatedTickets;
                                                             });
                                                         }
@@ -802,9 +940,8 @@ const UpdateTrip = (props) => {
                                                 />
                                             </Paper>
                                         </Grid>
-                                    </>
                                 }
-                                <Grid item sm={3} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำมันหนัก</Typography>
                                     <Paper
                                         component="form">
@@ -830,7 +967,7 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={3} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำมันเบา</Typography>
                                     <Paper
                                         component="form">
@@ -856,7 +993,7 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={3} xs={6} display="flex" justifyContent="center" alignItems="center">
+                                <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำหนักรถ</Typography>
                                     <Paper
                                         component="form">
@@ -882,6 +1019,8 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
+                                {
+                                    !editMode &&
                                 <Grid item sm={3} xs={6} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
                                     <Paper
@@ -909,16 +1048,52 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
+                                }
                             </Grid>
                         </Paper>
                         <Grid container spacing={1}>
                             <Grid item sm={1} xs={4} textAlign="left">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                             </Grid>
-                            <Grid item sm={11} xs={8} display="flex" alignItems="center" justifyContent='center'>
+                            <Grid item sm={editMode ? 8 : 11} xs={editMode ? 11 : 8} display="flex" alignItems="center" justifyContent='center'>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateStart}</Typography>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver}</Typography>
                             </Grid>
+                            {
+                                editMode && 
+                                    <Grid item sm={3} xs={12}>
+                                                                    <Box sx={{ backgroundColor: editMode ? (totalVolumesTicket.totalWeight || totalWeight) > 50300 ? "red" : "lightgray" : totalWeight > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1 , borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
+                                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
+                                                                        <Paper
+                                                                            component="form" sx={{ width: "100%" }}>
+                                                                            <TextField size="small" fullWidth
+                                                                                sx={{
+                                                                                    '& .MuiOutlinedInput-root': {
+                                                                                        height: '30px', // ปรับความสูงของ TextField
+                                                                                        display: 'flex', // ใช้ flexbox
+                                                                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                                                    },
+                                                                                    '& .MuiInputBase-input': {
+                                                                                        fontSize: '16px', // ขนาด font เวลาพิมพ์
+                                                                                        fontWeight: 'bold',
+                                                                                        padding: '1px 4px', // ปรับ padding ภายใน input
+                                                                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                                        paddingLeft: 2
+                                                                                    },
+                                                                                    borderRadius: 10
+                                                                                }}
+                                                                                value={new Intl.NumberFormat("en-US", {
+                                                                                    minimumFractionDigits: 2,
+                                                                                    maximumFractionDigits: 2,
+                                                                                }).format(editMode ? (totalVolumesTicket.totalWeight || totalWeight) : totalWeight)}
+                                                                            // InputProps={{
+                                                                            //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
+                                                                            // }}
+                                                                            />
+                                                                        </Paper>
+                                                                    </Box>
+                                                                </Grid>
+                            }
                         </Grid>
                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
                             <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
@@ -999,8 +1174,8 @@ const UpdateTrip = (props) => {
                                                             </Typography>
                                                         )} */}
                                                         <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
-                                                            </Typography>
+                                                            {row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
+                                                        </Typography>
                                                     </TableCell>
 
                                                     <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
@@ -1105,13 +1280,10 @@ const UpdateTrip = (props) => {
                                 </Box>
                             </TableContainer>
                             <Grid container spacing={1}>
-                            {
-                                    editMode &&
+                                {
+                                    editMode ?
                                     <>
-                                        <Grid item sm={1.5} xs={1.5} marginBottom={-0.5}>
-                                            <Typography variant="subtitle2" fontWeight="bold" sx={{ paddingLeft: 1, paddingTop: 0.5 }} gutterBottom>เลือกลูกค้าที่ต้องการ</Typography>
-                                        </Grid>
-                                        <Grid item sm={10.5} xs={10.5} marginBottom={-0.5}>
+                                        <Grid item sm={6} xs={12} marginBottom={-0.5}>
                                             <Paper
                                                 component="form"
                                                 sx={{ height: "30px", width: "100%" }}
@@ -1125,15 +1297,27 @@ const UpdateTrip = (props) => {
                                                     isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName} // ตรวจสอบค่าที่เลือก
                                                     onChange={(event, newValue) => {
                                                         if (newValue) {
+                                                            console.log("customer : ", getCustomers());
                                                             setEditableOrders((prev) => {
                                                                 const updatedOrders = [...prev];
-                                                    
+
                                                                 // ตรวจสอบว่ามีตั๋วนี้อยู่แล้วหรือไม่
                                                                 const existingIndex = updatedOrders.findIndex(
                                                                     (item) => item.TicketName === newValue.TicketsName
                                                                 );
-                                                    
+
                                                                 if (existingIndex === -1) {
+
+                                                                    let depotTrip = "-"; // ค่าเริ่มต้น
+
+                                                                    if (trip.Depot === "ลำปาง") {
+                                                                        depotTrip = newValue.Rate1;
+                                                                    } else if (trip.Depot === "พิจิตร") {
+                                                                        depotTrip = newValue.Rate2;
+                                                                    } else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip.Depot)) {
+                                                                        depotTrip = newValue.Rate3;
+                                                                    }
+
                                                                     // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
                                                                     updatedOrders.push({
                                                                         Address: newValue.Address || "-",
@@ -1146,20 +1330,20 @@ const UpdateTrip = (props) => {
                                                                         Lat: newValue.Lat || 0,
                                                                         Lng: newValue.Lng || 0,
                                                                         Product: newValue.Product || "-",
-                                                                        Rate: newValue.Rate || "-",
+                                                                        Rate: depotTrip,
                                                                         Registration: trip.Registration,
-                                                                        id: updatedOrders.length + 1, // ลำดับ id ใหม่
+                                                                        id: updatedOrders.length, // ลำดับ id ใหม่
                                                                         No: orderLength, // คำนวณจำนวน order
                                                                         Trip: (Number(tripID) - 1),
                                                                         TicketName: newValue.TicketsName,
                                                                         Product: {} // เริ่มต้นเป็น Object ว่าง
                                                                     });
                                                                 }
-                                                    
+
                                                                 return updatedOrders;
                                                             });
                                                         }
-                                                    }}                                                    
+                                                    }}
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
@@ -1181,8 +1365,8 @@ const UpdateTrip = (props) => {
                                             </Paper>
                                         </Grid>
                                     </>
-                                }
-                                <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                    :
+                                    <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
@@ -1205,7 +1389,8 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={3} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                }
+                                <Grid item sm={editMode ? 2 : 3} xs={12} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
@@ -1224,11 +1409,11 @@ const UpdateTrip = (props) => {
                                                 },
                                                 borderRadius: 10
                                             }}
-                                            value={trip.CostTrip}
+                                            value={editMode ? costTrip : trip.CostTrip}
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={5} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item sm={editMode ? 4 : 5} xs={12} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
