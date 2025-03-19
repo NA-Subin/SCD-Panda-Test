@@ -422,17 +422,17 @@ const InsertTrips = () => {
         );
 
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
-        let newRate = 0;
-        if (ticketData && depots) {
-            // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
-            if (depots.split(":")[1] === "คลังลำปาง") {
-                newRate = ticketData.Rate1;
-            } else if (depots.split(":")[1] === "คลังพิจิตร") {
-                newRate = ticketData.Rate2;
-            } else if (depots.split(":")[1] === "คลังสระบุรี" || depots.split(":")[1] === "คลังบางปะอิน" || depots.split(":")[1] === "คลังIR") {
-                newRate = ticketData.Rate3;
-            }
-        }
+        // let newRate = 0;
+        // if (ticketData && depots) {
+        //     // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
+        //     if (depots.split(":")[1] === "ลำปาง") {
+        //         newRate = ticketData.Rate1;
+        //     } else if (depots.split(":")[1] === "พิจิตร") {
+        //         newRate = ticketData.Rate2;
+        //     } else if (depots.split(":")[1] === "สระบุรี" || depots.split(":")[1] === "บางปะอิน" || depots.split(":")[1] === "IR") {
+        //         newRate = ticketData.Rate3;
+        //     }
+        // }
 
         setOrdersTickets((prev) => {
             const newIndex = Object.keys(prev).length;
@@ -441,9 +441,11 @@ const InsertTrips = () => {
                 [newIndex]: {
                     TicketName: ticketValue,
                     id: newIndex,
-                    Rate: newRate,
+                    Rate1: ticketData.Rate1,
+                    Rate2: ticketData.Rate2,
+                    Rate3: ticketData.Rate3,
                     OrderID: "",
-                    Trip : trip.length,
+                    Trip: trip.length,
                     Product: {} // เพิ่ม Product ไว้เป็น Object ว่าง
                 }
             };
@@ -457,22 +459,22 @@ const InsertTrips = () => {
         if (customerValue === "0:0") return;
 
         // ค้นหา ticket ที่ตรงกับ customerValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
-        const ticketData = getTickets().find(
+        const ticketData = getCustomers().find(
             (item) => item.TicketsName === customerValue
         );
 
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
-        let newRate = 0;
+        // let newRate = 0;
         if (ticketData && depots) {
             // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
-            if (depots.split(":")[1] === "คลังลำปาง") {
-                newRate = ticketData.Rate1;
+            if (depots.split(":")[1] === "ลำปาง") {
+                // newRate = ticketData.Rate1;
                 setCostTrip((prev) => (prev === 0 ? 750 : prev + 200));
-            } else if (depots.split(":")[1] === "คลังพิจิตร") {
-                newRate = ticketData.Rate2;
+            } else if (depots.split(":")[1] === "พิจิตร") {
+                // newRate = ticketData.Rate2;
                 setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
-            } else if (depots.split(":")[1] === "คลังสระบุรี" || depots.split(":")[1] === "คลังบางปะอิน" || depots.split(":")[1] === "คลังIR") {
-                newRate = ticketData.Rate3;
+            } else if (depots.split(":")[1] === "สระบุรี" || depots.split(":")[1] === "บางปะอิน" || depots.split(":")[1] === "IR") {
+                // newRate = ticketData.Rate3;
                 setCostTrip((prev) => (prev === 0 ? (2000 + 1200) : prev + 200));
             }
         }
@@ -490,8 +492,10 @@ const InsertTrips = () => {
                     CodeID: ticketData.CodeID || "-",
                     CreditTime: ticketData.CreditTime || "-",
                     Bill: ticketData.Bill || "-",
-                    Rate: newRate,
-                    Trip : trip.length,
+                    Rate1: ticketData.Rate1,
+                    Rate2: ticketData.Rate2,
+                    Rate3: ticketData.Rate3,
+                    Trip: trip.length,
                     Date: dayjs(selectedDate).format('DD/MM/YYYY'),
                     Registration: registration.split(":")[1],
                     Driver: registration.split(":")[2],
@@ -504,16 +508,16 @@ const InsertTrips = () => {
             const newIndex = Object.keys(prev).length + 1; // เพิ่มเป็น 1-based index
             return {
                 ...prev,
-                [`Order${newIndex}`]: customerValue.includes("/") 
-                  ? customerValue.split("/")[1] 
-                  : customerValue
+                [`Order${newIndex}`]: customerValue.includes("/")
+                    ? customerValue.split("/")[1]
+                    : customerValue
             };
-          });
+        });
 
     };
 
     console.log("selling : ", selling);
-    console.log("orderTrip : ",orderTrip);
+    console.log("orderTrip : ", orderTrip);
 
 
     const handleUpdateOrderID = (ticketIndex, field, value) => {
@@ -537,19 +541,21 @@ const InsertTrips = () => {
                 const ticketData = getTickets().find(
                     (item) => item.TicketsName === order.TicketName
                 );
-                let newRate = 0;
-                if (ticketData) {
-                    if (selectedDepot === "คลังลำปาง") {
-                        newRate = ticketData.Rate1;
-                    } else if (selectedDepot === "คลังพิจิตร") {
-                        newRate = ticketData.Rate2;
-                    } else if (selectedDepot === "คลังสระบุรี" || selectedDepot === "คลังบางปะอิน" || selectedDepot === "คลังIR") {
-                        newRate = ticketData.Rate3;
-                    }
-                }
+                // let newRate = 0;
+                // if (ticketData) {
+                //     if (selectedDepot === "ลำปาง") {
+                //         newRate = ticketData.Rate1;
+                //     } else if (selectedDepot === "พิจิตร") {
+                //         newRate = ticketData.Rate2;
+                //     } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
+                //         newRate = ticketData.Rate3;
+                //     }
+                // }
                 acc[key] = {
                     ...order,
-                    Rate: newRate,
+                    Rate1: ticketData.Rate1,
+                    Rate2: ticketData.Rate2,
+                    Rate3: ticketData.Rate3,
                 };
                 return acc;
             }, {});
@@ -561,22 +567,24 @@ const InsertTrips = () => {
         setSelling((prevOrders) => {
             const updatedOrders = Object.keys(prevOrders).reduce((acc, key) => {
                 const order = prevOrders[key];
-                const ticketData = getTickets().find(
+                const ticketData = getCustomers().find(
                     (item) => item.TicketsName === order.TicketName
                 );
-                let newRate = 0;
-                if (ticketData) {
-                    if (selectedDepot === "คลังลำปาง") {
-                        newRate = ticketData.Rate1;
-                    } else if (selectedDepot === "คลังพิจิตร") {
-                        newRate = ticketData.Rate2;
-                    } else if (selectedDepot === "คลังสระบุรี" || selectedDepot === "คลังบางปะอิน" || selectedDepot === "คลังIR") {
-                        newRate = ticketData.Rate3;
-                    }
-                }
+                // let newRate = 0;
+                // if (ticketData) {
+                //     if (selectedDepot === "ลำปาง") {
+                //         newRate = ticketData.Rate1;
+                //     } else if (selectedDepot === "พิจิตร") {
+                //         newRate = ticketData.Rate2;
+                //     } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
+                //         newRate = ticketData.Rate3;
+                //     }
+                // }
                 acc[key] = {
                     ...order,
-                    Rate: newRate,
+                    Rate1: ticketData.Rate1,
+                    Rate2: ticketData.Rate2,
+                    Rate3: ticketData.Rate3,
                 };
                 return acc;
             }, {});
@@ -584,11 +592,11 @@ const InsertTrips = () => {
             // หลังจากอัพเดต orders แล้ว คำนวณ costTrip รวม
             let cost = 0;
             Object.keys(updatedOrders).forEach((key) => {
-                if (selectedDepot === "คลังลำปาง") {
+                if (selectedDepot === "ลำปาง") {
                     cost += cost === 0 ? 750 : 200;
-                } else if (selectedDepot === "คลังพิจิตร") {
+                } else if (selectedDepot === "พิจิตร") {
                     cost += cost === 0 ? 2000 : 200;
-                } else if (selectedDepot === "คลังสระบุรี" || selectedDepot === "คลังบางปะอิน" || selectedDepot === "คลังIR") {
+                } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
                     cost += cost === 0 ? 2000 + 1200 : 200;
                 }
             });
@@ -832,29 +840,29 @@ const InsertTrips = () => {
         setOrderTrip((prev) => {
             // แปลง object เป็น array ของ entries
             const entries = Object.entries(prev);
-          
+
             // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น order1)
             const filtered = entries.filter(([key]) => key !== `order${parseInt(indexToDelete, 10) + 1}`);
-          
+
             // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก order1
             const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
-              acc[`order${index + 1}`] = value;
-              return acc;
+                acc[`order${index + 1}`] = value;
+                return acc;
             }, {});
-          
+
             return newOrderTrip;
-          });
-          
+        });
+
 
         // ลด costTrip -200 เมื่อมีการยกเลิก (กดปุ่ม "ยกเลิก")
         if (depots) {
             // ตรวจสอบค่า depot ที่เลือก
-            const depotName = depots.split(":")[1]; // สมมุติรูปแบบ depots = "xx:คลังลำปาง" เป็นต้น
-            if (depotName === "คลังลำปาง") {
+            const depotName = depots.split(":")[1]; // สมมุติรูปแบบ depots = "xx:ลำปาง" เป็นต้น
+            if (depotName === "ลำปาง") {
                 setCostTrip((prev) => (prev === 750 ? 0 : prev - 200));
-            } else if (depotName === "คลังพิจิตร") {
+            } else if (depotName === "พิจิตร") {
                 setCostTrip((prev) => (prev === 2000 ? 0 : prev - 200));
-            } else if (depotName === "คลังสระบุรี" || depotName === "คลังบางปะอิน" || depotName === "คลังIR") {
+            } else if (depotName === "สระบุรี" || depotName === "บางปะอิน" || depotName === "IR") {
                 setCostTrip((prev) => (prev === 3200 ? 0 : prev - 200));
             }
         }
@@ -865,15 +873,15 @@ const InsertTrips = () => {
     console.log(" VolumeT: ", volumeT);
 
     const handleSubmit = () => {
-            const orderRef = database.ref("order/");
-            const ticketsRef = database.ref("tickets/");
-          
-            // ดึงข้อมูลปัจจุบันใน order เพื่อหาค่า index ล่าสุด
-            orderRef.once("value")
-              .then((snapshot) => {
+        const orderRef = database.ref("order/");
+        const ticketsRef = database.ref("tickets/");
+
+        // ดึงข้อมูลปัจจุบันใน order เพื่อหาค่า index ล่าสุด
+        orderRef.once("value")
+            .then((snapshot) => {
                 const orders = snapshot.val() || {};
                 const currentLength = Object.keys(orders).length;
-          
+
                 // สมมุติ selling คือ object ที่มีโครงสร้างเป็น
                 // {
                 //    0: { name: GG },
@@ -883,31 +891,31 @@ const InsertTrips = () => {
                 // เราจะ append ข้อมูลใน selling ทีละตัว โดยคำนวณ index ใหม่เป็น currentLength + key ของ selling
                 const updates = {};
                 Object.keys(selling).forEach((key) => {
-                const newIndex = currentLength + parseInt(key, 10);
+                    const newIndex = currentLength + parseInt(key, 10);
 
-                // เพิ่ม No เข้าไปในแต่ละออเดอร์
-                updates[newIndex] = {
-                    ...selling[key], // คัดลอกค่าทั้งหมดใน selling[key]
-                    No: newIndex,    // เพิ่มฟิลด์ No
-                };
+                    // เพิ่ม No เข้าไปในแต่ละออเดอร์
+                    updates[newIndex] = {
+                        ...selling[key], // คัดลอกค่าทั้งหมดใน selling[key]
+                        No: newIndex,    // เพิ่มฟิลด์ No
+                    };
                 });
-          
+
                 // อัปเดตข้อมูลใน /order ด้วยการ merge updates
                 return orderRef.update(updates);
-              })
-              .then(() => {
+            })
+            .then(() => {
                 ShowSuccess("เพิ่มออเดอร์เรียบร้อย");
-              })
-              .catch((error) => {
+            })
+            .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error updating order:", error);
-              });
+            });
 
-              ticketsRef.once("value")
-              .then((snapshot) => {
+        ticketsRef.once("value")
+            .then((snapshot) => {
                 const tickets = snapshot.val() || {};
                 const currentLength = Object.keys(tickets).length;
-          
+
                 // สมมุติ selling คือ object ที่มีโครงสร้างเป็น
                 // {
                 //    0: { name: GG },
@@ -918,26 +926,26 @@ const InsertTrips = () => {
 
                 const updates = {};
                 Object.keys(ordersTickets).forEach((key) => {
-                const newIndex = currentLength + parseInt(key, 10);
+                    const newIndex = currentLength + parseInt(key, 10);
 
-                // เพิ่ม No เข้าไปในแต่ละออเดอร์
-                updates[newIndex] = {
-                    ...ordersTickets[key], // คัดลอกค่าทั้งหมดใน selling[key]
-                    No: newIndex,    // เพิ่มฟิลด์ No
-                };
+                    // เพิ่ม No เข้าไปในแต่ละออเดอร์
+                    updates[newIndex] = {
+                        ...ordersTickets[key], // คัดลอกค่าทั้งหมดใน selling[key]
+                        No: newIndex,    // เพิ่มฟิลด์ No
+                    };
                 });
-          
+
                 // อัปเดตข้อมูลใน /order ด้วยการ merge updates
                 return ticketsRef.update(updates);
-              })
-              .then(() => {
+            })
+            .then(() => {
                 ShowSuccess("เพิ่มออเดอร์เรียบร้อย");
-              })
-              .catch((error) => {
+            })
+            .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error updating order:", error);
-              });
-          
+            });
+
         database
             .ref("trip/")
             .child(trip.length)
@@ -1068,9 +1076,9 @@ const InsertTrips = () => {
     React.useEffect(() => {
         const currentRow = allTruck.find((item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration);
         if (currentRow) {
-            if(currentRow.type === "รถใหญ่"){
+            if (currentRow.type === "รถใหญ่") {
                 setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
-            }else{
+            } else {
                 setWeight(currentRow.Weight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
             }
         }
@@ -1078,13 +1086,13 @@ const InsertTrips = () => {
 
     const getTickets = () => {
         if (!registration || registration === "0:0:0:0") return [];
-    
+
         const selectedTruck = allTruck.find(
             (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
         );
-    
+
         if (!selectedTruck) return [];
-    
+
         const tickets = [
             { TicketsName: "ตั๋วเปล่า", id: 0 },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item })),
@@ -1093,19 +1101,19 @@ const InsertTrips = () => {
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
                 .map((item) => ({ ...item })),
         ];
-    
+
         return tickets.filter((item) => item.id || item.TicketsCode);
     };
 
     const getCustomers = () => {
         if (!registration || registration === "0:0:0:0") return [];
-    
+
         const selectedTruck = allTruck.find(
             (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
         );
-    
+
         if (!selectedTruck) return [];
-    
+
         const customers = [
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
@@ -1116,12 +1124,12 @@ const InsertTrips = () => {
                 : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
             ),
         ];
-    
+
         return customers.filter((item) => item.id || item.TicketsCode);
-    };    
+    };
 
     console.log("depots : ", depots);
-    console.log("Trip : ",trip.length);
+    console.log("Trip : ", trip.length);
 
     // const getTickets = () => {
     //     if (codeCustomer === "") {
@@ -1216,8 +1224,8 @@ const InsertTrips = () => {
                                                         size: "small",
                                                         fullWidth: true,
                                                         sx: {
-                                                            "& .MuiOutlinedInput-root": { 
-                                                                height: "30px", 
+                                                            "& .MuiOutlinedInput-root": {
+                                                                height: "30px",
                                                                 paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง 
                                                             },
                                                             "& .MuiInputBase-input": {
@@ -1246,9 +1254,9 @@ const InsertTrips = () => {
                                             options={allTruck}
                                             getOptionLabel={(option) =>
                                                 option.type === "รถใหญ่" ?
-                                                `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (${option.type ? option.type : ""})`
-                                                :
-                                                 `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
+                                                    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (${option.type ? option.type : ""})`
+                                                    :
+                                                    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
                                             }
                                             isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
                                             value={registration ? allTruck.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration) : null}
@@ -1277,9 +1285,9 @@ const InsertTrips = () => {
                                                 <li {...props}>
                                                     {
                                                         option.type === "รถใหญ่" ?
-                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
-                                                        :
-                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead} (${option.type})`}</Typography>
+                                                            <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
+                                                            :
+                                                            <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead} (${option.type})`}</Typography>
                                                     }
                                                 </li>
                                             )}
@@ -1288,45 +1296,45 @@ const InsertTrips = () => {
                                 </Box>
                             </Grid>
                             <Grid item sm={3} xs={12} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} fontWeight="bold" gutterBottom>คลัง</Typography>
-                                    <Paper sx={{ width: "100%" }}
-                                        component="form">
-                                        <Autocomplete
-                                            id="depot-autocomplete"
-                                            options={depot}
-                                            getOptionLabel={(option) => `${option.Name}`}
-                                            value={depot.find((d) => d.Name + ":" + d.Zone === depots) || null}
-                                            onChange={(event, newValue) => {
-                                                setDepots(newValue ? `${newValue.Name}:${newValue.Zone}` : '')
-                                                updateRatesByDepot(newValue.Zone);
-                                            }}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label={depots === "" ? "กรุณาเลือกคลัง" : ""} // เปลี่ยน label กลับหากไม่เลือก
-                                                    variant="outlined"
-                                                    size="small"
-                                                    sx={{
-                                                        "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
-                                                    }}
-                                                />
-                                            )}
-                                            sx={{
-                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    padding: "2px 6px",
-                                                },
-                                            }}
-                                            renderOption={(props, option) => (
-                                                <li {...props}>
-                                                    <Typography fontSize="14px">{option.Name}</Typography>
-                                                </li>
-                                            )}
-                                        />
-                                    </Paper>
-                                </Grid>
+                                <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} fontWeight="bold" gutterBottom>คลัง</Typography>
+                                <Paper sx={{ width: "100%" }}
+                                    component="form">
+                                    <Autocomplete
+                                        id="depot-autocomplete"
+                                        options={depot}
+                                        getOptionLabel={(option) => `${option.Name}`}
+                                        value={depot.find((d) => d.Name + ":" + d.Zone === depots) || null}
+                                        onChange={(event, newValue) => {
+                                            setDepots(newValue ? `${newValue.Name}:${newValue.Zone}` : '')
+                                            updateRatesByDepot(newValue.Zone);
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label={depots === "" ? "กรุณาเลือกคลัง" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                                variant="outlined"
+                                                size="small"
+                                                sx={{
+                                                    "& .MuiOutlinedInput-root": { height: "30px" },
+                                                    "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
+                                                }}
+                                            />
+                                        )}
+                                        sx={{
+                                            "& .MuiOutlinedInput-root": { height: "30px" },
+                                            "& .MuiInputBase-input": {
+                                                fontSize: "14px",
+                                                padding: "2px 6px",
+                                            },
+                                        }}
+                                        renderOption={(props, option) => (
+                                            <li {...props}>
+                                                <Typography fontSize="14px">{option.Name}</Typography>
+                                            </li>
+                                        )}
+                                    />
+                                </Paper>
+                            </Grid>
                         </Grid>
                         <Paper
                             sx={{ p: 1, backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", marginBottom: 1 }}
@@ -1392,6 +1400,7 @@ const InsertTrips = () => {
                                                     ticketsTrip={ticketsTrip}
                                                     total={weightOil}
                                                     editMode={editMode}
+                                                    depots={depots}
                                                     tickets={getTickets()}
                                                     onSendBack={handleSendBack}
                                                     onDelete={() => handleDelete(parseInt(key))}
@@ -1841,7 +1850,7 @@ const InsertTrips = () => {
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
                                                 openTo="day"
                                                 views={["year", "month", "day"]}
@@ -1853,8 +1862,8 @@ const InsertTrips = () => {
                                                         size: "small",
                                                         fullWidth: true,
                                                         sx: {
-                                                            "& .MuiOutlinedInput-root": { 
-                                                                height: "30px", 
+                                                            "& .MuiOutlinedInput-root": {
+                                                                height: "30px",
                                                                 paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง 
                                                             },
                                                             "& .MuiInputBase-input": {
@@ -1888,14 +1897,14 @@ const InsertTrips = () => {
                                                 borderRadius: 10
                                             }}
                                             value={(() => {
-                                                const selectedItem = allTruck.find(item => 
+                                                const selectedItem = allTruck.find(item =>
                                                     `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
                                                 );
-                                                return selectedItem && selectedItem.type === "รถใหญ่" 
+                                                return selectedItem && selectedItem.type === "รถใหญ่"
                                                     ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (${selectedItem.type ? selectedItem.type : ""})`
-                                                    : selectedItem && selectedItem.type === "รถเล็ก" 
-                                                    ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""} (${selectedItem.type ? selectedItem.type : ""})`
-                                                    : "";
+                                                    : selectedItem && selectedItem.type === "รถเล็ก"
+                                                        ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""} (${selectedItem.type ? selectedItem.type : ""})`
+                                                        : "";
                                             })()}
                                         />
                                         {/* <Autocomplete
@@ -1938,8 +1947,8 @@ const InsertTrips = () => {
                                 </Box>
                             </Grid>
                             <Grid item sm={3} xs={12}>
-                                <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1 , borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
-                                <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
+                                <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
                                     <Paper
                                         component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
@@ -2051,13 +2060,8 @@ const InsertTrips = () => {
                                                         orders={orders.length}
                                                         ticketsTrip={ticketsTrip}
                                                         customers={customers}
-                                                        checkG95={volumeG95}
-                                                        checkG91={volumeG91}
-                                                        checkB7={volumeB7}
-                                                        checkB95={volumeB95}
-                                                        checkE20={volumeE20}
-                                                        checkPWD={volumePWD}
                                                         editMode={editMode}
+                                                        depots={depots}
                                                         onSendBack={handleSendBackSell}
                                                         onDelete={() => handleDeleteCustomer(parseInt(key))}
                                                         onAddProduct={(productName, field, value) =>
@@ -2348,7 +2352,7 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 <Grid item sm={4} xs={12} display="flex" alignItems="center" justifyContent="center">
-                                <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
                                         <TextField

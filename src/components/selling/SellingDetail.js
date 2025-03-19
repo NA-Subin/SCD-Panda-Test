@@ -37,49 +37,13 @@ const SellingDetail = (props) => {
         detail,
         ticketsTrip,
         orders,
-        customers,
-        checkG95,
-        checkG91,
-        checkB7,
-        checkB95,
-        checkE20,
-        checkPWD,
         onSendBack,
         onDelete,
         onAddProduct,
         onUpdateOrderID,
-        editMode
+        editMode,
+        depots
     } = props;
-
-    const [CostG91, setCostG91] = React.useState(0);
-    const [CostG95, setCostG95] = React.useState(0);
-    const [CostB7, setCostB7] = React.useState(0);
-    const [CostB95, setCostB95] = React.useState(0);
-    const [CostE20, setCostE20] = React.useState(0);
-    const [CostPWD, setCostPWD] = React.useState(0);
-
-    const [SellingG91, setSellingG91] = React.useState(0);
-    const [SellingG95, setSellingG95] = React.useState(0);
-    const [SellingB7, setSellingB7] = React.useState(0);
-    const [SellingB95, setSellingB95] = React.useState(0);
-    const [SellingE20, setSellingE20] = React.useState(0);
-    const [SellingPWD, setSellingPWD] = React.useState(0);
-
-    const [VolumeG91, setVolumeG91] = React.useState(0);
-    const [VolumeG95, setVolumeG95] = React.useState(0);
-    const [VolumeB7, setVolumeB7] = React.useState(0);
-    const [VolumeB95, setVolumeB95] = React.useState(0);
-    const [VolumeE20, setVolumeE20] = React.useState(0);
-    const [VolumePWD, setVolumePWD] = React.useState(0);
-
-    const [orderDetail, setOrderDetail] = React.useState(true);
-    const [G91, setG91] = React.useState([]);
-    const [G95, setG95] = React.useState([]);
-    const [B7, setB7] = React.useState([]);
-    const [B95, setB95] = React.useState([]);
-    const [E20, setE20] = React.useState([]);
-    const [PWD, setPWD] = React.useState([]);
-    const [order, setOrder] = React.useState([]);
 
     const [orderG91, setOrderG91] = React.useState([]);
     const [orderG95, setOrderG95] = React.useState([]);
@@ -87,14 +51,6 @@ const SellingDetail = (props) => {
     const [orderB95, setOrderB95] = React.useState([]);
     const [orderE20, setOrderE20] = React.useState([]);
     const [orderPWD, setOrderPWD] = React.useState([]);
-
-    const [ticketT, setTicketsT] = React.useState(0);
-    const [ticketA, setTicketsA] = React.useState(0);
-    const [ticketPS, setTicketsPS] = React.useState(0);
-
-    const [ticketNameT, setTicketsNameT] = React.useState(0);
-    const [ticketNameA, setTicketsNameA] = React.useState(0);
-    const [ticketNamePS, setTicketsNamePS] = React.useState(0);
 
     // const getData = async () => {
     //     database.ref("tickets/" + ticketsTrip + "/ticketOrder/").on("value", (snapshot) => {
@@ -251,322 +207,7 @@ const SellingDetail = (props) => {
 
     }, []);
 
-    const SubmitOrder = () => {
-
-        // const totalG95 = (G95.Volume === "-" ? G95.Volume : (parseFloat(G95.Volume) - parseFloat(checkG95)));
-        // const totalG91 = (G91.Volume === "-" ? G91.Volume : (parseFloat(G91.Volume) - parseFloat(checkG91)));
-        // const totalB7 = (B7.Volume === "-" ? B7.Volume : (parseFloat(B7.Volume) - parseFloat(checkB7)));
-        // const totalB95 = (B95.Volume === "-" ? B95.Volume : (parseFloat(B95.Volume) - parseFloat(checkB95)));
-        // const totalE20 = (E20.Volume === "-" ? E20.Volume : (parseFloat(E20.Volume) - parseFloat(checkE20)));
-        // const totalPWD = (PWD.Volume === "-" ? PWD.Volume : (parseFloat(PWD.Volume) - parseFloat(checkPWD)));
-
-        if (onSendBack) {
-            console.log("Values Sent to Parent:", VolumeG91, VolumeG95, VolumeB7, VolumeB95, VolumeE20, VolumePWD);
-
-            onSendBack(
-                Number(VolumeG91), Number(VolumeG95), Number(VolumeB7), Number(VolumeB95), Number(VolumeE20), Number(VolumePWD)
-            );
-        }
-
-        database
-            .ref("trip/")
-            .child((detail.Trip))
-            .update({
-                [`Order${orders}`]: detail.id + ":" + detail.TicketName,
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-
-        database
-            .ref("order/")
-            .child((detail.id - 1))
-            .update({
-                TicketName: detail.TicketName.split(":")[0] === "PS" ? ticketNamePS : detail.TicketName.split(":")[0] === "A" ? ticketNameA : ticketNameT
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/G91")
-            .update({
-                Cost: CostG91 === 0 ? "-" : CostG91,
-                Volume: VolumeG91 === 0 ? "-" : VolumeG91,
-                Selling: SellingG91 === 0 ? "-" : SellingG91
-            })
-            .then(() => {
-                // if (detail.TicketName.split(":")[0] === "PS") {
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                //     .child("/Product/G91")
-                //     .update({
-                //         Volume: totalG91,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else if(detail.TicketName.split(":")[0] === "A"){
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                //     .child("/Product/G91")
-                //     .update({
-                //         Volume: totalG91,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else if(detail.TicketName === customers && detail.TicketName.split(":")[0] === "T"){
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketT)
-                //     .child("/Product/G91")
-                //     .update({
-                //         Volume: totalG91,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/G95")
-            .update({
-                Cost: CostG95 === 0 ? "-" : CostG95,
-                Volume: VolumeG95 === 0 ? "-" : VolumeG95,
-                Selling: SellingG95 === 0 ? "-" : SellingG95
-            })
-            .then(() => {
-                // if (detail.TicketName.split(":")[0] === "PS") {
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                //     .child("/Product/G95")
-                //     .update({
-                //         Volume: totalG95,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else if(detail.TicketName.split(":")[0] === "A"){
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                //     .child("/Product/G95")
-                //     .update({
-                //         Volume: totalG95,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else{
-
-                // }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/B7")
-            .update({
-                Cost: CostB7 === 0 ? "-" : CostB7,
-                Volume: VolumeB7 === 0 ? "-" : VolumeB7,
-                Selling: SellingB7 === 0 ? "-" : SellingB7
-            })
-            .then(() => {
-                // if (detail.TicketName.split(":")[0] === "PS") {
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                //     .child("/Product/B7")
-                //     .update({
-                //         Volume: totalB7
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else if(detail.TicketName.split(":")[0] === "A"){
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                //     .child("/Product/B7")
-                //     .update({
-                //         Volume: totalB7
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else{
-
-                // }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/B95")
-            .update({
-                Cost: CostB95 === 0 ? "-" : CostB95,
-                Volume: VolumeB95 === 0 ? "-" : VolumeB95,
-                Selling: SellingB95 === 0 ? "-" : SellingB95
-            })
-            .then(() => {
-                // if (detail.TicketName.split(":")[0] === "PS") {
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                //     .child("/Product/B95")
-                //     .update({
-                //         Volume: totalB95,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else if(detail.TicketName.split(":")[0] === "A"){
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                //     .child("/Product/B95")
-                //     .update({
-                //         Volume: totalB95,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else{
-
-                // }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/E20")
-            .update({
-                Cost: CostE20 === 0 ? "-" : CostE20,
-                Volume: VolumeE20 === 0 ? "-" : VolumeE20,
-                Selling: SellingE20 === 0 ? "-" : SellingE20
-            })
-            .then(() => {
-                // if (detail.TicketName.split(":")[0] === "PS") {
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                //     .child("/Product/E20")
-                //     .update({
-                //         Volume: totalE20,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else if(detail.TicketName.split(":")[0] === "A"){
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                //     .child("/Product/E20")
-                //     .update({
-                //         Volume: totalE20,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else{
-
-                // }
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("order/" + (detail.id - 1))
-            .child("/Product/PWD")
-            .update({
-                Cost: CostPWD === 0 ? "-" : CostPWD,
-                Volume: VolumePWD === 0 ? "-" : VolumePWD,
-                Selling: SellingPWD === 0 ? "-" : SellingPWD
-            })
-            .then(() => {
-                // if (detail.TicketName.split(":")[0] === "PS") {
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketPS)
-                //     .child("/Product/PWD")
-                //     .update({
-                //         Volume: totalPWD,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else if(detail.TicketName.split(":")[0] === "A"){
-                //     database
-                //     .ref("tickets/" + ticketsTrip + "/ticketOrder/" + ticketA)
-                //     .child("/Product/PWD")
-                //     .update({
-                //         Volume: totalPWD,
-                //     })
-                //     .then(() => {
-                //         console.log("Data pushed successfully");
-                //     })
-                //     .catch((error) => {
-                //         console.error("Error pushing data:", error);
-                //     });
-                // }else{
-
-                // }
-                console.log("Data pushed successfully");
-                ShowSuccess("เพิ่มข้อมูลเรียบร้อย")
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-                ShowError(error);
-            });
-
-        setOrderDetail(false);
-    }
+    console.log("Depot : ",depots);
 
     return (
         <React.Fragment>
@@ -585,7 +226,14 @@ const SellingDetail = (props) => {
                     </Typography>
                 </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 100, padding: "1px 4px" }}>
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate}</Typography>
+                    {
+                        depots.split(":")[1] === "ลำปาง" ?
+                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate1}</Typography>
+                        : depots.split(":")[1] === "พิจิตร" ?
+                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate2}</Typography>
+                        :
+                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate3}</Typography>
+                    }
                 </TableCell>
                 {/* <TableCellG95 sx={{ textAlign: "center" }}>
                         {           <Paper component="form" sx={{ width: "100%" }}>

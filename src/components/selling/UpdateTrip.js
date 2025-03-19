@@ -45,6 +45,8 @@ import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 import "../../theme/scrollbar.css"
 
+const depotOptions = ["ลำปาง", "พิจิตร", "สระบุรี", "บางปะอิน", "IR"];
+
 const UpdateTrip = (props) => {
     const { tripID,
         weightHigh,
@@ -240,6 +242,10 @@ const UpdateTrip = (props) => {
     const [editableTickets, setEditableTickets] = useState([]);
     const [editableOrders, setEditableOrders] = useState([]);
 
+    console.log("Depot : : :",trip.depot);
+    const [depot,setDepot] = useState(trip.Depot);
+    console.log("Depot : : : : ",depot);
+
     useEffect(() => {
         if (ticket && ticket.length > 0) {
             setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
@@ -380,11 +386,11 @@ const UpdateTrip = (props) => {
         let newCostTrip = 0;
 
         if (orderCount > 0) {
-            if (trip.Depot === "ลำปาง") {
+            if (depot === "ลำปาง") {
                 newCostTrip = 750 + (orderCount - 1) * 200;
-            } else if (trip.Depot === "พิจิตร") {
+            } else if (depot === "พิจิตร") {
                 newCostTrip = 2000 + (orderCount - 1) * 200;
-            } else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip.Depot)) {
+            } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot)) {
                 newCostTrip = 3200 + (orderCount - 1) * 200;
             }
         }
@@ -428,7 +434,7 @@ const UpdateTrip = (props) => {
             return newCostTrip;
         });
 
-    }, [editableTickets, editableOrders, trip]);
+    }, [editableTickets, editableOrders, trip, depot]);
     // คำนวณใหม่ทุกครั้งที่ editableOrders เปลี่ยน
 
     const handleSave = () => {
@@ -583,7 +589,7 @@ const UpdateTrip = (props) => {
     console.log("Updated Tickets : ", editableTickets);
     console.log("Updated Orders : ", editableOrders);
     console.log("Total Volumes : ", totalVolumesTicket);
-    
+    console.log("Depot : ",depot);
 
     return (
         <React.Fragment>
@@ -628,26 +634,33 @@ const UpdateTrip = (props) => {
                                 editMode &&
                                 <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
-                                    <Paper sx={{ width: "100%" }}
-                                        component="form">
-                                        <TextField size="small" fullWidth
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: '30px', // ปรับความสูงของ TextField
-                                                    display: 'flex', // ใช้ flexbox
-                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                    fontWeight: 'bold',
-                                                    padding: '1px 4px', // ปรับ padding ภายใน input
-                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                },
-                                                borderRadius: 10
-                                            }}
-                                            value={trip.Depot}
-                                        />
-                                    </Paper>
+                                        <Paper
+                                                component="form"
+                                                sx={{ height: "30px", width: "100%" }}
+                                            >
+                                                <Autocomplete
+                                                    options={depotOptions}
+                                                    value={depotOptions.includes(depot) ? depot : null} // ตรวจสอบว่ามีอยู่ใน options ไหม
+                                                    onChange={(event, newValue) => setDepot(newValue)}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                        {...params}
+                                                        label={depot ? "เลือกคลังสินค้า" : "เลือกคลังสินค้า"} // เปลี่ยน label ได้ตามต้องการ
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{
+                                                            "& .MuiOutlinedInput-root": { height: "30px" },
+                                                            "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
+                                                        }}
+                                                        />
+                                                    )}
+                                                    renderOption={(props, option) => (
+                                                        <li {...props}>
+                                                        <Typography fontSize="14px">{option}</Typography>
+                                                        </li>
+                                                    )}
+                                                    />
+                                            </Paper>
                                 </Grid>
                             }
                         </Grid>
@@ -896,11 +909,11 @@ const UpdateTrip = (props) => {
 
                                                                     let depotTrip = "-"; // ค่าเริ่มต้น
 
-                                                                    if (trip.Depot === "ลำปาง") {
+                                                                    if (depot === "ลำปาง") {
                                                                         depotTrip = newValue.Rate1;
-                                                                    } else if (trip.Depot === "พิจิตร") {
+                                                                    } else if (depot === "พิจิตร") {
                                                                         depotTrip = newValue.Rate2;
-                                                                    } else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip.Depot)) {
+                                                                    } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot)) {
                                                                         depotTrip = newValue.Rate3;
                                                                     }
 
@@ -923,7 +936,7 @@ const UpdateTrip = (props) => {
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
-                                                            label={tickets === "0:0" ? "เลือกตั๋วที่ต้องการเพิ่ม" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                                            label={"เลือกตั๋วที่ต้องการเพิ่ม"} // เปลี่ยน label กลับหากไม่เลือก
                                                             variant="outlined"
                                                             size="small"
                                                             sx={{
@@ -1310,11 +1323,11 @@ const UpdateTrip = (props) => {
 
                                                                     let depotTrip = "-"; // ค่าเริ่มต้น
 
-                                                                    if (trip.Depot === "ลำปาง") {
+                                                                    if (depot === "ลำปาง") {
                                                                         depotTrip = newValue.Rate1;
-                                                                    } else if (trip.Depot === "พิจิตร") {
+                                                                    } else if (depot === "พิจิตร") {
                                                                         depotTrip = newValue.Rate2;
-                                                                    } else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip.Depot)) {
+                                                                    } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot)) {
                                                                         depotTrip = newValue.Rate3;
                                                                     }
 
@@ -1347,7 +1360,7 @@ const UpdateTrip = (props) => {
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
-                                                            label={tickets === "0:0" ? "เลือกตั๋วที่ต้องการเพิ่ม" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                                            label={"เลือกลูกค้าที่ต้องการเพิ่ม"} // เปลี่ยน label กลับหากไม่เลือก
                                                             variant="outlined"
                                                             size="small"
                                                             sx={{
@@ -1385,7 +1398,7 @@ const UpdateTrip = (props) => {
                                                 },
                                                 borderRadius: 10
                                             }}
-                                            value={trip.Depot}
+                                            value={depot}
                                         />
                                     </Paper>
                                 </Grid>

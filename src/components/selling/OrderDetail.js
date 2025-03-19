@@ -34,26 +34,7 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
 
 const OrderDetail = (props) => {
-    const { detail, ticketsTrip, onSendBack, total, onDelete, onAddProduct, onUpdateOrderID, editMode, tickets } = props;
-    const [CostG91, setCostG91] = React.useState(0);
-    const [VolumeG91, setVolumeG91] = React.useState(0);
-    const [CostG95, setCostG95] = React.useState(0);
-    const [VolumeG95, setVolumeG95] = React.useState(0);
-    const [CostB7, setCostB7] = React.useState(0);
-    const [VolumeB7, setVolumeB7] = React.useState(0);
-    const [CostB95, setCostB95] = React.useState(0);
-    const [VolumeB95, setVolumeB95] = React.useState(0);
-    // const [CostB10, setCostB10] = React.useState(0);
-    // const [VolumeB10, setVolumeB10] = React.useState(0);
-    // const [CostB20, setCostB20] = React.useState(0);
-    // const [VolumeB20, setVolumeB20] = React.useState(0);
-    const [CostE20, setCostE20] = React.useState(0);
-    const [VolumeE20, setVolumeE20] = React.useState(0);
-    // const [CostE85, setCostE85] = React.useState(0);
-    // const [VolumeE85, setVolumeE85] = React.useState(0);
-    const [CostPWD, setCostPWD] = React.useState(0);
-    const [VolumePWD, setVolumePWD] = React.useState(0);
-    const [orderDetail, setOrderDetail] = React.useState(true);
+    const { detail, ticketsTrip, onSendBack, total, onDelete, onAddProduct, onUpdateOrderID, editMode, tickets, depots } = props;
     const [rate, setRate] = React.useState(0.75);
     const [G91, setG91] = React.useState([]);
     const [G95, setG95] = React.useState([]);
@@ -110,235 +91,79 @@ const OrderDetail = (props) => {
         getData();
     }, []);
 
-    const handleTotalWeight = (newVolumeG91, newVolumeG95, newVolumeB7, newVolumeB95, newVolumeE20, newVolumePWD) => {
-
-        const total = newVolumeG91 + newVolumeG95 + newVolumeB7 + newVolumeB95 + newVolumeE20 + newVolumePWD;
-        // const totalCost = Number(CostG91) + Number(CostG95) + Number(CostB7) + Number(CostB95) + Number(CostE20) + Number(CostPWD);
-        const totalVolume = Number(VolumeG91) + Number(VolumeG95) + Number(VolumeB7) + Number(VolumeB95) + Number(VolumeE20) + Number(VolumePWD);
-        // parseFloat(newVolumeG91 || 0) +
-        // parseFloat(newVolumeG95 || 0) +
-        // parseFloat(newVolumeB7 || 0) +
-        // parseFloat(newVolumeB95 || 0) +
-        // parseFloat(newVolumeB10 || 0) +
-        // parseFloat(newVolumeB20 || 0) +
-        // parseFloat(newVolumeE20 || 0) +
-        // parseFloat(newVolumeE85 || 0) +
-        // parseFloat(newVolumePWD || 0);
-
-        if (onSendBack) {
-            onSendBack(total, totalVolume, Number(VolumeG91), Number(VolumeG95), Number(VolumeB7), Number(VolumeB95), Number(VolumeE20), Number(VolumePWD), Number(CostG91), Number(CostG95), Number(CostB7), Number(CostB95), Number(CostE20), Number(CostPWD)); // เรียกฟังก์ชันที่ส่งมาจาก Page 1
-        }
-    };
-
-    const SubmitOrder = () => {
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/")
-            .child(detail.id)
-            .update({
-                id: detail.id,
-                TicketName: detail.TicketName,
-                Rate: rate,
-                OrderID: orderID
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
-            .child("/Product/G91")
-            .update({
-                Cost: CostG91 === 0 ? "-" : CostG91,
-                Volume: VolumeG91 === 0 ? "-" : VolumeG91
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
-            .child("/Product/G95")
-            .update({
-                Cost: CostG95 === 0 ? "-" : CostG95,
-                Volume: VolumeG95 === 0 ? "-" : VolumeG95
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
-            .child("/Product/B7")
-            .update({
-                Cost: CostB7 === 0 ? "-" : CostB7,
-                Volume: VolumeB7 === 0 ? "-" : VolumeB7
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
-            .child("/Product/B95")
-            .update({
-                Cost: CostB95 === 0 ? "-" : CostB95,
-                Volume: VolumeB95 === 0 ? "-" : VolumeB95
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        // database
-        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id))
-        //     .child("/Product/B10")
-        //     .update({
-        //         Cost: CostB10 === 0 ? "-" : CostB10,
-        //         Volume: VolumeB10 === 0 ? "-" : VolumeB10
-        //     })
-        //     .then(() => {
-        //         console.log("Data pushed successfully");
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error pushing data:", error);
-        //     });
-        // database
-        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id))
-        //     .child("/Product/B20")
-        //     .update({
-        //         Cost: CostB20 === 0 ? "-" : CostB20,
-        //         Volume: VolumeB20 === 0 ? "-" : VolumeB20
-        //     })
-        //     .then(() => {
-        //         console.log("Data pushed successfully");
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error pushing data:", error);
-        //     });
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
-            .child("/Product/E20")
-            .update({
-                Cost: CostE20 === 0 ? "-" : CostE20,
-                Volume: VolumeE20 === 0 ? "-" : VolumeE20
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-            });
-        // database
-        //     .ref("tickets/"+ticketsTrip+"/ticketOrder/" + (detail.id))
-        //     .child("/Product/E85")
-        //     .update({
-        //         Cost: CostE85 === 0 ? "-" : CostE85,
-        //         Volume: VolumeE85 === 0 ? "-" : VolumeE85
-        //     })
-        //     .then(() => {
-        //         console.log("Data pushed successfully");
-        //     })
-        //     .catch((error) => {
-        //         console.error("Error pushing data:", error);
-        //     });
-        database
-            .ref("tickets/" + ticketsTrip + "/ticketOrder/" + (detail.id))
-            .child("/Product/PWD")
-            .update({
-                Cost: CostPWD === 0 ? "-" : CostPWD,
-                Volume: VolumePWD === 0 ? "-" : VolumePWD
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-                ShowSuccess("เพิ่มข้อมูลเรียบร้อย")
-            })
-            .catch((error) => {
-                console.error("Error pushing data:", error);
-                ShowError(error);
-            });
-        database.ref("/products").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            let G95 = 0;
-            let G91 = 0;
-            let B7 = 0;
-            let B95 = 0;
-            // let B10 = 0;
-            // let B20 = 0;
-            let E20 = 0;
-            // let E85 = 0;
-            let PWD = 0;
-
-            for (let id in datas) {
-                switch (datas[id].Product_name) {
-                    case "G95":
-                        G95 = (detail.Product?.G95?.Cost * datas[id].SG) * 1000;
-                        break;
-                    case "G91":
-                        G91 = (detail.Product?.G91?.Cost * datas[id].SG) * 1000;
-                        break;
-                    case "B7":
-                        B7 = (detail.Product?.B7?.Cost * datas[id].SG) * 1000;
-                        break;
-                    case "B95":
-                        B95 = (detail.Product?.B95?.Cost * datas[id].SG) * 1000;
-                        break;
-                    case "E20":
-                        E20 = (detail.Product?.E20?.Cost * datas[id].SG) * 1000;
-                        break;
-                    case "PWD":
-                        PWD = (detail.Product?.PWD?.Cost * datas[id].SG) * 1000;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            handleTotalWeight(G91, G95, B7, B95, E20, PWD);
-        });
-        setOrderDetail(false);
-    }
-
     return (
         <React.Fragment>
             <TableRow>
-                <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px",width: 50,backgroundColor: theme.palette.success.dark,color: "white" }}>
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>{detail.id + 1}</Typography>
+                <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.success.dark, color: "white" }}>
+                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.id + 1}</Typography>
                 </TableCell>
                 {/* <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.main }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]+detail.TicketName.split(":")[1]}</Typography>
                 </TableCell> */}
-                <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px",width: 350 }}>
+                <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px", width: 350 }}>
                     {
                         detail.TicketName === "ตั๋วเปล่า" ?
-                        <Autocomplete
-                            size="small"
-                            fullWidth
-                            options={tickets}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
-                            getOptionLabel={(option) => 
-                                option.TicketsName.includes("/")
-                                ? option.TicketsName.split("/")[1]
-                                : option.TicketsName
-                            }  // ใช้ OrderID หรือค่าที่ต้องการแสดง
-                            isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
-                            value={detail.TicketsName ? tickets.find(item => item.TicketsName === detail.TicketsName) : null} // ค่าที่เลือก
-                            onChange={(e, newValue) => {
-                                if (newValue) {
-                                    onUpdateOrderID("TicketName", newValue.TicketsName); // อัปเดตค่า OrderID
-                                } else {
-                                    onUpdateOrderID("TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
-                                }
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
+                            <Autocomplete
+                                size="small"
+                                fullWidth
+                                options={tickets}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
+                                getOptionLabel={(option) =>
+                                    option.TicketsName.includes("/")
+                                        ? option.TicketsName.split("/")[1]
+                                        : option.TicketsName
+                                }  // ใช้ OrderID หรือค่าที่ต้องการแสดง
+                                isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
+                                value={detail.TicketsName ? tickets.find(item => item.TicketsName === detail.TicketsName) : null} // ค่าที่เลือก
+                                onChange={(e, newValue) => {
+                                    if (newValue) {
+                                        onUpdateOrderID("TicketName", newValue.TicketsName); // อัปเดตค่า OrderID
+                                    } else {
+                                        onUpdateOrderID("TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
+                                    }
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '12px',
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '22px', // ปรับความสูงของ TextField
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                paddingLeft: 2,
+                                            },
+                                        }}
+                                    />
+                                )}
+                                renderOption={(props, option) => (
+                                    <li {...props}>
+                                        <Typography fontSize="14px">
+                                            {option.TicketsName}
+                                        </Typography>
+                                    </li>
+                                )}
+                            />
+                            :
+                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                {detail.TicketName.includes("/")
+                                    ? detail.TicketName.split("/")[1]
+                                    : detail.TicketName}
+                            </Typography>
+                    }
+                </TableCell>
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 150 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px',
@@ -352,110 +177,145 @@ const OrderDetail = (props) => {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            paddingLeft: 2,
+                                            paddingLeft: 2
                                         },
                                     }}
+                                    value={detail.OrderID ?? ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        onUpdateOrderID("OrderID", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onUpdateOrderID("OrderID", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onUpdateOrderID("OrderID", 0);
+                                    }}
                                 />
-                            )}
-                            renderOption={(props, option) => (
-                                <li {...props}>
-                                    <Typography fontSize="14px">
-                                        {option.TicketsName}
-                                    </Typography>
-                                </li>
-                            )}
-                        />
-                        :
-                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }}  gutterBottom>
-                                {detail.TicketName.includes("/")
-                                    ? detail.TicketName.split("/")[1]
-                                    : detail.TicketName}
-                            </Typography>
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.OrderID || "-"}</Typography>
                     }
                 </TableCell>
-                            <TableCell sx={{ textAlign: "center", height: "20px",width: 150 }}>
-                                {
-                                    editMode ?
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 100 }}>
+                    {
+                        editMode ?
+                            (
+                                depots.split(":")[1] === "ลำปาง" ?
                                     <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth
-                                        type="number"
-                                        InputLabelProps={{
-                                            sx: {
-                                                fontSize: '12px',
-                                            },
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.OrderID ?? ""}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onUpdateOrderID("OrderID", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onUpdateOrderID("OrderID", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onUpdateOrderID("OrderID", 0);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.OrderID || "-"}</Typography>
-                                }
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", height: "20px",width: 100 }}>
-                                {
-                                    editMode ?
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth
-                                        type="number"
-                                        InputLabelProps={{
-                                            sx: {
-                                                fontSize: '12px',
-                                            },
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                                display: 'flex', // ใช้ flexbox
-                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.Rate ?? 0.75}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onUpdateOrderID("Rate", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onUpdateOrderID("Rate", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onUpdateOrderID("Rate", 0.75);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Rate || 0.75}</Typography>
-                                }
-                            </TableCell>
-                            {/* ช่องกรอกราคา Cost G95*/}
-                            {/* <TableCellG95 sx={{ textAlign: "center" }}>
+                                        <TextField size="small" fullWidth
+                                            type="number"
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '12px',
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '22px', // ปรับความสูงของ TextField
+                                                    display: 'flex', // ใช้ flexbox
+                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                    fontWeight: 'bold',
+                                                    padding: '2px 6px', // ปรับ padding ภายใน input
+                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                    paddingLeft: 2
+                                                },
+                                            }}
+                                            value={detail.Rate1 ?? 0.75}
+                                            onChange={(e) => {
+                                                let newValue = e.target.value;
+                                                onUpdateOrderID("Rate1", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                            }}
+                                            onFocus={(e) => {
+                                                if (e.target.value === "0") onUpdateOrderID("Rate1", "");
+                                            }}
+                                            onBlur={(e) => {
+                                                if (e.target.value === "") onUpdateOrderID("Rate1", 0.75);
+                                            }}
+                                        />
+                                    </Paper>
+                                    : depots.split(":")[1] === "พิจิตร" ?
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" fullWidth
+                                                type="number"
+                                                InputLabelProps={{
+                                                    sx: {
+                                                        fontSize: '12px',
+                                                    },
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        height: '22px', // ปรับความสูงของ TextField
+                                                        display: 'flex', // ใช้ flexbox
+                                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                        fontWeight: 'bold',
+                                                        padding: '2px 6px', // ปรับ padding ภายใน input
+                                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                        paddingLeft: 2
+                                                    },
+                                                }}
+                                                value={detail.Rate2 ?? 0.75}
+                                                onChange={(e) => {
+                                                    let newValue = e.target.value;
+                                                    onUpdateOrderID("Rate2", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") onUpdateOrderID("Rate2", "");
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") onUpdateOrderID("Rate2", 0.75);
+                                                }}
+                                            />
+                                        </Paper>
+                                        : 
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" fullWidth
+                                                type="number"
+                                                InputLabelProps={{
+                                                    sx: {
+                                                        fontSize: '12px',
+                                                    },
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        height: '22px', // ปรับความสูงของ TextField
+                                                        display: 'flex', // ใช้ flexbox
+                                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                        fontWeight: 'bold',
+                                                        padding: '2px 6px', // ปรับ padding ภายใน input
+                                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                        paddingLeft: 2
+                                                    },
+                                                }}
+                                                value={detail.Rate3 ?? 0.75}
+                                                onChange={(e) => {
+                                                    let newValue = e.target.value;
+                                                    onUpdateOrderID("Rate3", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") onUpdateOrderID("Rate3", "");
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") onUpdateOrderID("Rate3", 0.75);
+                                                }}
+                                            />
+                                        </Paper>
+                            )
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Rate || 0.75}</Typography>
+                    }
+                </TableCell>
+                {/* ช่องกรอกราคา Cost G95*/}
+                {/* <TableCellG95 sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
@@ -485,49 +345,49 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCellG95> */}
 
-                            {/* ช่องกรอกปริมาณ Volume G95 */}
-                            <TableCellG95 sx={{ textAlign: "center", backgroundColor: "#FFC000", height: "20px",width: 60 }}>
-                                {
-                                    editMode ?
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField
-                                        size="small"
-                                        fullWidth
-                                        type="number"
-                                        InputLabelProps={{ sx: { fontSize: "12px" } }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                                display: 'flex', // ใช้ flexbox
-                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.Product?.G95?.Volume || ""}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onAddProduct("G95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onAddProduct("G95", "Volume", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onAddProduct("G95", "Volume", 0);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.G95?.Volume || "-"}</Typography>
-                                }
-                            </TableCellG95>
-                            {/* ช่องกรอกราคา Cost G91 */}
-                            {/* <TableCellG91 sx={{ textAlign: "center" }}>
+                {/* ช่องกรอกปริมาณ Volume G95 */}
+                <TableCellG95 sx={{ textAlign: "center", backgroundColor: "#FFC000", height: "20px", width: 60 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    type="number"
+                                    InputLabelProps={{ sx: { fontSize: "12px" } }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Product?.G95?.Volume || ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        onAddProduct("G95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onAddProduct("G95", "Volume", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onAddProduct("G95", "Volume", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.G95?.Volume || "-"}</Typography>
+                    }
+                </TableCellG95>
+                {/* ช่องกรอกราคา Cost G91 */}
+                {/* <TableCellG91 sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
@@ -557,49 +417,49 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCellG91> */}
 
-                            {/* ช่องกรอกปริมาณ Volume G91 */}
-                            <TableCellB95 sx={{ textAlign: "center", backgroundColor: "#92D050", height: "20px",width: 60 }}>
-                                {
-                                    editMode ?
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField
-                                        size="small"
-                                        fullWidth
-                                        type="number"
-                                        InputLabelProps={{ sx: { fontSize: "12px" } }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                                display: 'flex', // ใช้ flexbox
-                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.Product?.B95?.Volume || ""}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onAddProduct("B95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onAddProduct("B95", "Volume", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onAddProduct("B95", "Volume", 0);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B95?.Volume || "-"}</Typography>
-                                }
-                            </TableCellB95>
-                            {/* ช่องกรอกราคา Cost B7 */}
-                            {/* <TableCellB7 sx={{ textAlign: "center" }}>
+                {/* ช่องกรอกปริมาณ Volume G91 */}
+                <TableCellB95 sx={{ textAlign: "center", backgroundColor: "#92D050", height: "20px", width: 60 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    type="number"
+                                    InputLabelProps={{ sx: { fontSize: "12px" } }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Product?.B95?.Volume || ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        onAddProduct("B95", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onAddProduct("B95", "Volume", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onAddProduct("B95", "Volume", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B95?.Volume || "-"}</Typography>
+                    }
+                </TableCellB95>
+                {/* ช่องกรอกราคา Cost B7 */}
+                {/* <TableCellB7 sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
@@ -629,49 +489,49 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCellB7> */}
 
-                            {/* ช่องกรอกปริมาณ Volume  B7 */}
-                            <TableCellB7 sx={{ textAlign: "center", backgroundColor: "#FFFF99", height: "20px",width: 60 }}>
-                                {
-                                    editMode ?
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField
-                                        size="small"
-                                        fullWidth
-                                        type="number"
-                                        InputLabelProps={{ sx: { fontSize: "12px" } }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                                display: 'flex', // ใช้ flexbox
-                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.Product?.B7?.Volume || ""}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onAddProduct("B7", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onAddProduct("B7", "Volume", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onAddProduct("B7", "Volume", 0);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B7?.Volume || "-"}</Typography>
-                                }
-                            </TableCellB7>
-                            {/* ช่องกรอกราคา Cost B95 */}
-                            {/* <TableCellB95 sx={{ textAlign: "center" }}>
+                {/* ช่องกรอกปริมาณ Volume  B7 */}
+                <TableCellB7 sx={{ textAlign: "center", backgroundColor: "#FFFF99", height: "20px", width: 60 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    type="number"
+                                    InputLabelProps={{ sx: { fontSize: "12px" } }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Product?.B7?.Volume || ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        onAddProduct("B7", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onAddProduct("B7", "Volume", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onAddProduct("B7", "Volume", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B7?.Volume || "-"}</Typography>
+                    }
+                </TableCellB7>
+                {/* ช่องกรอกราคา Cost B95 */}
+                {/* <TableCellB95 sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
@@ -701,49 +561,49 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCellB95> */}
 
-                            {/* ช่องกรอกปริมาณ Volume  B95 */}
-                            <TableCellG91 sx={{ textAlign: "center", backgroundColor: "#B7DEE8", height: "20px",width: 60 }}>
-                                {
-                                    editMode ?
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField
-                                        size="small"
-                                        fullWidth
-                                        type="number"
-                                        InputLabelProps={{ sx: { fontSize: "12px" } }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                                display: 'flex', // ใช้ flexbox
-                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.Product?.G91?.Volume || ""}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onAddProduct("G91", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onAddProduct("G91", "Volume", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onAddProduct("G91", "Volume", 0);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.G91?.Volume || "-"}</Typography>
-                                }
-                            </TableCellG91>
-                            {/* ช่องกรอกราคา Cost E20 */}
-                            {/* <TableCellE20 sx={{ textAlign: "center" }}>
+                {/* ช่องกรอกปริมาณ Volume  B95 */}
+                <TableCellG91 sx={{ textAlign: "center", backgroundColor: "#B7DEE8", height: "20px", width: 60 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    type="number"
+                                    InputLabelProps={{ sx: { fontSize: "12px" } }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Product?.G91?.Volume || ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        onAddProduct("G91", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onAddProduct("G91", "Volume", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onAddProduct("G91", "Volume", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.G91?.Volume || "-"}</Typography>
+                    }
+                </TableCellG91>
+                {/* ช่องกรอกราคา Cost E20 */}
+                {/* <TableCellE20 sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
@@ -773,49 +633,49 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCellE20> */}
 
-                            {/* ช่องกรอกปริมาณ Volume  E20 */}
-                            <TableCellE20 sx={{ textAlign: "center", backgroundColor: "#C4BD97", height: "20px",width: 60 }}>
-                                {
-                                    editMode ?
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField
-                                        size="small"
-                                        fullWidth
-                                        type="number"
-                                        InputLabelProps={{ sx: { fontSize: "12px" } }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                                display: 'flex', // ใช้ flexbox
-                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.Product?.E20?.Volume || ""}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onAddProduct("E20", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onAddProduct("E20", "Volume", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onAddProduct("E20", "Volume", 0);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.E20?.Volume || "-"}</Typography>
-                                }
-                            </TableCellE20>
-                            {/* ช่องกรอกราคา Cost PWD */}
-                            {/* <TableCellPWD sx={{ textAlign: "center" }}>
+                {/* ช่องกรอกปริมาณ Volume  E20 */}
+                <TableCellE20 sx={{ textAlign: "center", backgroundColor: "#C4BD97", height: "20px", width: 60 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    type="number"
+                                    InputLabelProps={{ sx: { fontSize: "12px" } }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Product?.E20?.Volume || ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        onAddProduct("E20", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onAddProduct("E20", "Volume", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onAddProduct("E20", "Volume", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.E20?.Volume || "-"}</Typography>
+                    }
+                </TableCellE20>
+                {/* ช่องกรอกราคา Cost PWD */}
+                {/* <TableCellPWD sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
@@ -845,48 +705,48 @@ const OrderDetail = (props) => {
                                 </Paper>
                             </TableCellPWD> */}
 
-                            {/* ช่องกรอกปริมาณ Volume  PWD */}
-                            <TableCellPWD sx={{ textAlign: "center", backgroundColor: "#F141D8", height: "20px",width: 60 }}>
-                                {
-                                    editMode ?
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField
-                                        size="small"
-                                        fullWidth
-                                        type="number"
-                                        InputLabelProps={{ sx: { fontSize: "12px" } }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                height: '22px', // ปรับความสูงของ TextField
-                                                display: 'flex', // ใช้ flexbox
-                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                fontWeight: 'bold',
-                                                padding: '2px 6px', // ปรับ padding ภายใน input
-                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                paddingLeft: 2
-                                            },
-                                        }}
-                                        value={detail.Product?.PWD?.Volume || ""}
-                                        onChange={(e) => {
-                                            let newValue = e.target.value;
-                                            onAddProduct("PWD", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
-                                        }}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") onAddProduct("PWD", "Volume", "");
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") onAddProduct("PWD", "Volume", 0);
-                                        }}
-                                    />
-                                </Paper>
-                                :
-                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.PWD?.Volume || "-"}</Typography>
-                                }
-                            </TableCellPWD>
-                            {/* <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#92D050" }}>
+                {/* ช่องกรอกปริมาณ Volume  PWD */}
+                <TableCellPWD sx={{ textAlign: "center", backgroundColor: "#F141D8", height: "20px", width: 60 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    type="number"
+                                    InputLabelProps={{ sx: { fontSize: "12px" } }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                            display: 'flex', // ใช้ flexbox
+                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Product?.PWD?.Volume || ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        onAddProduct("PWD", "Volume", newValue === "" ? "" : newValue.replace(/^0+(?=\d)/, ""));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onAddProduct("PWD", "Volume", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onAddProduct("PWD", "Volume", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.PWD?.Volume || "-"}</Typography>
+                    }
+                </TableCellPWD>
+                {/* <TableCell sx={{ textAlign: "center",borderLeft: "3px solid white",backgroundColor: "#92D050" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -992,7 +852,7 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell> */}
-                            {/* <TableCell sx={{ textAlign: "center" }}>
+                {/* <TableCell sx={{ textAlign: "center" }}>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
                                         type="number"
@@ -1416,15 +1276,15 @@ const OrderDetail = (props) => {
                                     />
                                 </Paper>
                             </TableCell> */}
-                            <TableCell sx={{ textAlign: "center", height: "20px",width: 80 }} >
-                                { editMode ?
-                                <Button variant="contained" color="error" size="small" sx={{ height: "20px",width : "30px" }} onClick={onDelete}>ยกเลิก</Button>
-                                :
-                                ""
-                                }
-                                {/* <Button variant="contained" color="success" size="small" sx={{ width: 30 }} onClick={SubmitOrder}>บันทึก</Button> */}
-                            </TableCell>
-                        {/* </>
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 80 }} >
+                    {editMode ?
+                        <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }} onClick={onDelete}>ยกเลิก</Button>
+                        :
+                        ""
+                    }
+                    {/* <Button variant="contained" color="success" size="small" sx={{ width: 30 }} onClick={SubmitOrder}>บันทึก</Button> */}
+                </TableCell>
+                {/* </>
                         // :
                         // <>
                         //     <TableCell sx={{ textAlign: "center" }}>
