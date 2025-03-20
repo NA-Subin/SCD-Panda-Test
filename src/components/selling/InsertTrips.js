@@ -1094,7 +1094,7 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const tickets = [
-            { TicketsName: "ตั๋วเปล่า", id: 0 },  // เพิ่มตั๋วเปล่าเข้าไป
+            { TicketsName: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item })),
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
@@ -1704,7 +1704,7 @@ const InsertTrips = () => {
                                             getOptionLabel={(option) =>
                                                 `${option.TicketsName}`
                                             } // กำหนดรูปแบบของ Label ที่แสดง
-                                            isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
+                                            isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName} // ตรวจสอบค่าที่เลือก
                                             value={tickets ? getTickets().find(item => item.TicketsName === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
@@ -2374,13 +2374,18 @@ const InsertTrips = () => {
                             </Grid>
                         </Paper>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                    {
+                        (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) <= 50300 &&
+                        <>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
                         <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
                         <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
                     </Box>
                     <Box textAlign="center" marginTop={1}>
                         <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
                     </Box>
+                        </>
+                    }
                 </DialogContent>
                 {/* <DialogActions
                     sx={{

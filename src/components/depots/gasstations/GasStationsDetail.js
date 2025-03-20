@@ -144,8 +144,6 @@ const GasStationsDetail = (props) => {
 
     console.log("ปั้มทั้งหมด" + matchCount);
 
-    let day = dayjs(selectedDate).format("DD-MM-YYYY"); // แปลงวันที่เป็นรูปแบบ "DD-MM-YYYY"
-
     // gasStation: {
     //     0: {
     //         id: 1,
@@ -334,6 +332,7 @@ const GasStationsDetail = (props) => {
                             stocks.map((stock, index) => {
                                 let downHole = {}; // ตัวแปรเก็บค่ารวมของ DownHole
                                 let matchCount = 0; // ตัวแปรนับจำนวน match
+                                let day = dayjs(selectedDate).format("DD-MM-YYYY");
 
                                 console.log(`1.Final DownHole for Stock: ${stock.Name}`, downHole);
                                 
@@ -350,10 +349,15 @@ const GasStationsDetail = (props) => {
                                                 let productName = reportItem?.ProductName || "";
                                                 let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
                                                 let deliveredValue = Number(reportItem?.Delivered) || 0;
-                                                let padding1Value = Number(reportItem?.Padding1) || 0;
-                                                let padding2Value = Number(reportItem?.Padding2) || 0;
+                                                let pending1Value = Number(reportItem?.Pending1) || 0;
+                                                let pending2Value = Number(reportItem?.Pending2) || 0;
 
-                                                let total = (volumeValue+(deliveredValue+padding1Value+padding2Value));
+                                                console.log("Volume : ",volumeValue);
+                                                console.log("DeliveredValue : ",deliveredValue);
+                                                console.log("Pending1 : ",pending1Value);
+                                                console.log("Pending2 : ",pending2Value);
+
+                                                let total = (volumeValue+(deliveredValue+pending1Value+pending2Value));
 
                                                 console.log("Total : ",total);
                 
@@ -392,7 +396,7 @@ const GasStationsDetail = (props) => {
                                                         selectedDate={selectedDate}
                                                         count={matchCount}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
-                                                        currentReport={row.Report?.[day] || null} // ส่ง Report ตามวัน
+                                                        currentReport={row.Report} // ส่ง Report ตามวัน
                                                         valueDownHole={downHole} // ส่งข้อมูลที่รวมแล้ว
                                                         onSendBack={handleSendBack}
                                                     />
@@ -417,6 +421,8 @@ const GasStationsDetail = (props) => {
                                     {(() => {
                                         let downHole = {}; // ตัวแปรเก็บค่ารวมของ DownHole
                                         let matchCount = 0; // ตัวแปรนับจำนวน match
+                                        let day = dayjs(selectedDate).format("DD-MM-YYYY");
+
                                         gasStationOil.forEach((row) => {
                                             if (checkStock === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
                                                 const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
@@ -430,10 +436,10 @@ const GasStationsDetail = (props) => {
                                                         let productName = reportItem?.ProductName || "";
                                                         let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
                                                         let deliveredValue = Number(reportItem?.Delivered) || 0;
-                                                        let padding1Value = Number(reportItem?.Padding1) || 0;
-                                                        let padding2Value = Number(reportItem?.Padding2) || 0;
+                                                        let pending1Value = Number(reportItem?.Pending1) || 0;
+                                                        let pending2Value = Number(reportItem?.Pending2) || 0;
         
-                                                        let total = (volumeValue+(deliveredValue+padding1Value+padding2Value));
+                                                        let total = (volumeValue+(deliveredValue+pending1Value+pending2Value));
         
                                                         console.log("Total : ",total);
                         
@@ -447,9 +453,9 @@ const GasStationsDetail = (props) => {
                                         });
 
                                         return gasStationOil.map((row, rowIndex) => {
-                                            let currentReport = row.Report; // ค่า row.Report ปัจจุบัน
                                             if (checkStock === row.Stock) {
                                                 matchCount++; // เพิ่มตัวนับเมื่อเงื่อนไขเป็นจริง
+                                                console.log(`Stock : ${checkStock}, row.Stock : ${row.Stock}`);
                                                 return (
                                                     <UpdateGasStations
                                                         key={row.id}
@@ -458,7 +464,7 @@ const GasStationsDetail = (props) => {
                                                         selectedDate={selectedDate}
                                                         count={matchCount}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
-                                                        currentReport={row.Report?.[day] || null} // ส่ง Report ตามวัน
+                                                        currentReport={row.Report} // ส่ง Report ตามวัน
                                                         valueDownHole={downHole} // ส่งข้อมูลที่รวมแล้ว
                                                         onSendBack={handleSendBack}
                                                     />

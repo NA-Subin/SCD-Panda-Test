@@ -444,8 +444,30 @@ const GasStationDetail = (props) => {
                                             size="small"
                                             type="number"
                                             fullWidth
-                                            value={updateVolumes[row.ProductName] || row.Delivered}
-                                            onChange={(e) => handleUpdateVolumeChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
+                                            value={updateVolumes[row.ProductName] ?? row.Delivered} // ใช้ ?? ป้องกัน undefined
+                                            onChange={(e) => {
+                                                let newValue = e.target.value;
+                                        
+                                                // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
+                                                newValue = newValue.replace(/^0+(?=\d)/, "");
+                                        
+                                                // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
+                                                if (newValue === "" || newValue === "0") {
+                                                    handleUpdateVolumeChange(row.ProductName, "");
+                                                } else {
+                                                    handleUpdateVolumeChange(row.ProductName, newValue);
+                                                }
+                                            }}
+                                            onFocus={(e) => {
+                                                if (e.target.value === "0") {
+                                                    handleUpdateVolumeChange(row.ProductName, ""); // ล้างค่า 0 ออก
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                if (e.target.value === "") {
+                                                    handleUpdateVolumeChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
+                                                }
+                                            }}
                                             disabled={setting ? true : false}
                                         />
                                     </Paper>
@@ -455,10 +477,32 @@ const GasStationDetail = (props) => {
                                     <Paper component="form" sx={{ marginTop: -1 }}>
                                         <TextField
                                             size="small"
-                                            type={setting ? "text" : "number"}
+                                            type="number"
                                             fullWidth
-                                            value={updateStocks[row.ProductName] || row.OilBalance}
-                                            onChange={(e) => handleUpdateStockChange(row.ProductName, e.target.value)} // เปลี่ยนค่าใน updateVolumes
+                                            value={updateStocks[row.ProductName] ?? row.Delivered} // ใช้ ?? ป้องกัน undefined
+                                            onChange={(e) => {
+                                                let newValue = e.target.value;
+                                        
+                                                // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
+                                                newValue = newValue.replace(/^0+(?=\d)/, "");
+                                        
+                                                // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
+                                                if (newValue === "" || newValue === "0") {
+                                                    handleUpdateStockChange(row.ProductName, "");
+                                                } else {
+                                                    handleUpdateStockChange(row.ProductName, newValue);
+                                                }
+                                            }}
+                                            onFocus={(e) => {
+                                                if (e.target.value === "0") {
+                                                    handleUpdateStockChange(row.ProductName, ""); // ล้างค่า 0 ออก
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                if (e.target.value === "") {
+                                                    handleUpdateStockChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
+                                                }
+                                            }}
                                             disabled={setting ? true : false}
                                         />
                                     </Paper>

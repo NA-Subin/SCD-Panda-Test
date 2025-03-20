@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/login/Login";
 import Dashboard from "./components/dashboard/Dashboard";
@@ -28,8 +28,49 @@ import Trips from "./components/selling/Trips";
 import { DataProvider } from "./server/path";
 import Invoice from "./components/invoice/Invoice";
 import PrintInvoice from "./components/invoice/PrintInvoice";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
+
+const ShowInfo = (title, text) => {
+  MySwal.fire({
+    icon: "info",
+    title: title,
+    html: <div style={{ marginBottom: 2 }}>{text}</div>,
+    confirmButtonColor: "#FF9843",
+    confirmButtonText: "ตกลง",
+  }).then(() => {
+    window.location.reload(); // รีเฟรชหน้าหลังจากกดตกลง
+  });
+};
+
+const checkForUpdate = async () => {
+  try {
+    const response = await fetch("/__/firebase/hosting.json", { cache: "no-store" });
+    const data = await response.json();
+
+    const latestVersion = data.version;
+    const storedVersion = localStorage.getItem("firebase_version");
+
+    console.log("📌 Current Version:", storedVersion);
+    console.log("🔄 Latest Version:", latestVersion);
+
+    if (storedVersion && storedVersion !== latestVersion) {
+      ShowInfo("มีการอัปเดตใหม่", "กรุณารีเฟรชหน้าเพื่อใช้เวอร์ชันล่าสุด");
+      localStorage.setItem("firebase_version", latestVersion);
+    } else {
+      localStorage.setItem("firebase_version", latestVersion);
+    }
+  } catch (error) {
+    console.error("❌ Error checking for updates:", error);
+  }
+};
 
 function App() {
+  useEffect(() => {
+    checkForUpdate();
+  }, []);
 
   return (
       <BrowserRouter>

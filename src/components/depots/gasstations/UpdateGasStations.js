@@ -228,6 +228,8 @@ const UpdateGasStations = (props) => {
                     const twoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(entry => entry?.ProductName === value?.ProductName) || { OilBalance: 0 };
                     setDriver1(value?.Driver1 || "")
                     setDriver2(value?.Driver2 || "")
+
+                    console.log("Product Name : ",value?.ProductName);
                     return {
                         ProductName: value?.ProductName || "",
                         Capacity: value?.Capacity || 0,
@@ -250,6 +252,7 @@ const UpdateGasStations = (props) => {
             : stock.map((row, index) => {
                 const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === row?.ProductName) || { OilBalance: 0 };
                 const twoDaysAgoEntry = Object.values(twoDaysAgoData || {}).find(entry => entry?.ProductName === row?.ProductName) || { OilBalance: 0 };
+                
                 return {
                     ProductName: row?.ProductName || "",
                     Capacity: row?.Capacity || 0,
@@ -1030,52 +1033,57 @@ const UpdateGasStations = (props) => {
                                 }).map(([key, value], index) => (
                                     <React.Fragment key={index}>
                                         {
-                                            stock.map((row, indexProduct) => (
-                                                row.ProductName === key &&
-                                                <TableRow key={row.ProductName}>
+                                            stock.map((row, indexProduct) => {
+                                                if (row.ProductName === key) {
+                                                    const matchedValue = values.find(v => v.ProductName === key);
+                                            
+                                                    console.log(`🔍 Checking: row.ProductName = ${values[indexProduct]?.ProductName} : ${values[index]?.ProductName} : ${row.ProductName}, key = ${key}, matchedValue = ${matchedValue?.ProductName}`);
+                                                
+                                                    return (
+                                                <TableRow key={matchedValue?.ProductName}>
                                                     <TablecellHeader
                                                         sx={{
-                                                            backgroundColor: values[index]?.Color || row.Color,
+                                                            backgroundColor: matchedValue?.Color ?? row.Color ?? "white",
                                                             width: 50,
                                                             color: "black",
                                                             position: "sticky",
                                                             left: 0,
-                                                            zIndex: 1, // กำหนด z-index เพื่อให้อยู่ด้านบน
+                                                            zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
                                                             borderBottom: "2px solid white" 
                                                         }}
                                                     >
-                                                        {values[index]?.ProductName || row.ProductName}
+                                                        {matchedValue?.ProductName || row.ProductName}
                                                     </TablecellHeader>
                                                     <TableCell sx={{
                                                         textAlign: "center",
-                                                        backgroundColor: values[index]?.Color
-                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                        backgroundColor: matchedValue?.Color
+                                                            ? `${matchedValue?.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
                                                             : `${row.Color}4A`,
                                                         fontWeight: "bold",
                                                         borderBottom: "2px solid white"
-                                                    }}>{count === 2 ? "" : new Intl.NumberFormat("en-US").format(values[index]?.Capacity || row.Capacity)}</TableCell>
+                                                    }}>{count === 2 ? "" : new Intl.NumberFormat("en-US").format(matchedValue?.Capacity || row.Capacity)}</TableCell>
                                                     <TableCell sx={{
-                                                        textAlign: "center", backgroundColor: values[index]?.Color
-                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
-                                                            : `${row.Color}4A`, color: values[index]?.Volume < 0 ? "#d50000" : "black", 
+                                                        textAlign: "center", backgroundColor: matchedValue?.Color
+                                                            ? `${matchedValue?.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`, color: matchedValue?.Volume < 0 ? "#d50000" : "black", 
                                                             fontWeight: "bold",
                                                             borderBottom: "2px solid white"
-                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.Volume || 0))}</TableCell>
+                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(matchedValue?.Volume || 0))}</TableCell>
                                                     <TableCell sx={{
-                                                        textAlign: "center", backgroundColor: values[index]?.Color
-                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                        textAlign: "center", backgroundColor: matchedValue?.Color
+                                                            ? `${matchedValue?.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
                                                             : `${row.Color}4A`,
                                                             borderBottom: "2px solid white"
                                                     }}>
                                                         <TextField
                                                             style={{ display: 'none' }}
                                                             inputProps={{ readOnly: true }}
-                                                            value={values[index]?.Volume || 0}
+                                                            value={matchedValue?.Volume || 0}
                                                         />
                                                         <TextField
                                                             style={{ display: 'none' }}
                                                             inputProps={{ readOnly: true }}
-                                                            value={values[index]?.Color || ""}
+                                                            value={matchedValue?.Color || ""}
                                                         />
                                                         <Paper sx={{ width: "100%" }}>
                                                             <TextField
@@ -1086,16 +1094,16 @@ const UpdateGasStations = (props) => {
                                                                         fontSize: '12px',
                                                                     },
                                                                 }}
-                                                                value={values[index]?.Squeeze || squeeze} // ถ้าค่าว่างให้เป็น 0
-                                                                onChange={(e) => handleInputChange(index, "Squeeze", e.target.value)}
+                                                                value={matchedValue?.Squeeze || squeeze} // ถ้าค่าว่างให้เป็น 0
+                                                                onChange={(e) => handleInputChange(indexProduct, "Squeeze", e.target.value)}
                                                                 onFocus={(e) => {
                                                                     if (e.target.value === "0") {
-                                                                        handleInputChange(index, "Squeeze", ""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                        handleInputChange(indexProduct, "Squeeze", ""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.target.value === "") {
-                                                                        handleInputChange(index, "Squeeze", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                        handleInputChange(indexProduct, "Squeeze", 0); // ถ้าค่าว่างให้เป็น 0
                                                                     }
                                                                 }}
                                                                 sx={{
@@ -1119,8 +1127,8 @@ const UpdateGasStations = (props) => {
                                                             justifyContent: "center",
                                                             alignItems: "center",
                                                             gap: 1, // เพิ่มระยะห่างระหว่าง TextField
-                                                            backgroundColor: values[index]?.Color
-                                                                ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            backgroundColor: matchedValue?.Color
+                                                                ? `${matchedValue?.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
                                                                 : `${row.Color}4A`,
                                                                 borderBottom: "2px solid white"
                                                         }}
@@ -1135,36 +1143,36 @@ const UpdateGasStations = (props) => {
                                                                 //     ),
                                                                 // }}
                                                                 label="ลงจริงไปแล้ว"
-                                                                value={values[index]?.Delivered === "" ? "" : values[index]?.Delivered || 0}
+                                                                value={matchedValue?.Delivered === "" ? "" : matchedValue?.Delivered || 0}
                                                                 onChange={(e) => {
                                                                     let newValue = e.target.value;
 
                                                                     // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                                     if (newValue === "") {
-                                                                        handleInputChange(index, "Delivered", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                        handleInputChange(indexProduct, "Delivered", ""); // ให้เป็นค่าว่างชั่วคราว
                                                                     } else {
-                                                                        handleInputChange(index, "Delivered", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                        handleInputChange(indexProduct, "Delivered", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
                                                                     }
                                                                 }}
                                                                 onFocus={(e) => {
                                                                     if (e.target.value === "0") {
-                                                                        handleInputChange(index, "Delivered", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                        handleInputChange(indexProduct, "Delivered", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.target.value === "") {
-                                                                        handleInputChange(index, "Delivered", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                        handleInputChange(indexProduct, "Delivered", 0); // ถ้าค่าว่างให้เป็น 0
                                                                     }
                                                                 }}
                                                                 onKeyDown={(e) => {
-                                                                    let currentValue = parseInt(values[index]?.Delivered || 0, 10);
+                                                                    let currentValue = parseInt(matchedValue?.Delivered || 0, 10);
 
                                                                     if (e.key === "ArrowUp") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Delivered", currentValue + 1000);
+                                                                        handleInputChange(indexProduct, "Delivered", currentValue + 1000);
                                                                     } else if (e.key === "ArrowDown") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Delivered", Math.max(0, currentValue - 1000));
+                                                                        handleInputChange(indexProduct, "Delivered", Math.max(0, currentValue - 1000));
                                                                     }
                                                                 }}
                                                                 InputProps={{
@@ -1203,39 +1211,39 @@ const UpdateGasStations = (props) => {
                                                                 //     ),
                                                                 // }}
                                                                 label={driver1}
-                                                                value={values[index]?.Pending1 === "" ? "" : values[index]?.Pending1 || 0}
+                                                                value={matchedValue?.Pending1 === "" ? "" : matchedValue?.Pending1 || 0}
                                                                 // onChange={(e) =>
-                                                                //     handleInputChange(index, "Pending1", parseFloat(e.target.value) || 0)
+                                                                //     handleInputChange(indexProduct, "Pending1", parseFloat(e.target.value) || 0)
                                                                 // }
                                                                 onChange={(e) => {
                                                                     let newValue = e.target.value;
 
                                                                     // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                                     if (newValue === "") {
-                                                                        handleInputChange(index, "Pending1", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                        handleInputChange(indexProduct, "Pending1", ""); // ให้เป็นค่าว่างชั่วคราว
                                                                     } else {
-                                                                        handleInputChange(index, "Pending1", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                        handleInputChange(indexProduct, "Pending1", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
                                                                     }
                                                                 }}
                                                                 onFocus={(e) => {
                                                                     if (e.target.value === "0") {
-                                                                        handleInputChange(index, "Pending1", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                        handleInputChange(indexProduct, "Pending1", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.target.value === "") {
-                                                                        handleInputChange(index, "Pending1", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                        handleInputChange(indexProduct, "Pending1", 0); // ถ้าค่าว่างให้เป็น 0
                                                                     }
                                                                 }}
                                                                 onKeyDown={(e) => {
-                                                                    let currentValue = parseInt(values[index]?.Pending1 || 0, 10);
+                                                                    let currentValue = parseInt(matchedValue?.Pending1 || 0, 10);
 
                                                                     if (e.key === "ArrowUp") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Pending1", currentValue + 1000);
+                                                                        handleInputChange(indexProduct, "Pending1", currentValue + 1000);
                                                                     } else if (e.key === "ArrowDown") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Pending1", Math.max(0, currentValue - 1000));
+                                                                        handleInputChange(indexProduct, "Pending1", Math.max(0, currentValue - 1000));
                                                                     }
                                                                 }}
                                                                 InputProps={{
@@ -1274,36 +1282,36 @@ const UpdateGasStations = (props) => {
                                                                 //     ),
                                                                 // }}
                                                                 label={driver2}
-                                                                value={values[index]?.Pending2 === "" ? "" : values[index]?.Pending2 || 0}
+                                                                value={matchedValue?.Pending2 === "" ? "" : matchedValue?.Pending2 || 0}
                                                                 onChange={(e) => {
                                                                     let newValue = e.target.value;
 
                                                                     // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                                     if (newValue === "") {
-                                                                        handleInputChange(index, "Pending2", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                        handleInputChange(indexProduct, "Pending2", ""); // ให้เป็นค่าว่างชั่วคราว
                                                                     } else {
-                                                                        handleInputChange(index, "Pending2", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                        handleInputChange(indexProduct, "Pending2", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
                                                                     }
                                                                 }}
                                                                 onFocus={(e) => {
                                                                     if (e.target.value === "0") {
-                                                                        handleInputChange(index, "Pending2", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                        handleInputChange(indexProduct, "Pending2", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.target.value === "") {
-                                                                        handleInputChange(index, "Pending2", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                        handleInputChange(indexProduct, "Pending2", 0); // ถ้าค่าว่างให้เป็น 0
                                                                     }
                                                                 }}
                                                                 onKeyDown={(e) => {
-                                                                    let currentValue = parseInt(values[index]?.Pending2 || 0, 10);
+                                                                    let currentValue = parseInt(matchedValue?.Pending2 || 0, 10);
 
                                                                     if (e.key === "ArrowUp") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Pending2", currentValue + 1000);
+                                                                        handleInputChange(indexProduct, "Pending2", currentValue + 1000);
                                                                     } else if (e.key === "ArrowDown") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Pending2", Math.max(0, currentValue - 1000));
+                                                                        handleInputChange(indexProduct, "Pending2", Math.max(0, currentValue - 1000));
                                                                     }
                                                                 }}
                                                                 InputProps={{
@@ -1334,8 +1342,8 @@ const UpdateGasStations = (props) => {
                                                         </Paper>
                                                     </TableCell>
                                                     <TableCell sx={{
-                                                        textAlign: "center", backgroundColor: values[index]?.Color
-                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                        textAlign: "center", backgroundColor: matchedValue?.Color
+                                                            ? `${matchedValue?.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
                                                             : `${row.Color}4A`,
                                                             borderBottom: "2px solid white"
                                                     }}>
@@ -1355,36 +1363,36 @@ const UpdateGasStations = (props) => {
                                                                         fontWeight: "bold"
                                                                     },
                                                                 }}
-                                                                value={values[index]?.EstimateSell === "" ? "" : values[index]?.EstimateSell || 0}
+                                                                value={matchedValue?.EstimateSell === "" ? "" : matchedValue?.EstimateSell || 0}
                                                                 onChange={(e) => {
                                                                     let newValue = e.target.value;
 
                                                                     // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                                     if (newValue === "") {
-                                                                        handleInputChange(index, "EstimateSell", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                        handleInputChange(indexProduct, "EstimateSell", ""); // ให้เป็นค่าว่างชั่วคราว
                                                                     } else {
-                                                                        handleInputChange(index, "EstimateSell", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                        handleInputChange(indexProduct, "EstimateSell", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
                                                                     }
                                                                 }}
                                                                 onFocus={(e) => {
                                                                     if (e.target.value === "0") {
-                                                                        handleInputChange(index, "EstimateSell", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                        handleInputChange(indexProduct, "EstimateSell", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.target.value === "") {
-                                                                        handleInputChange(index, "EstimateSell", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                        handleInputChange(indexProduct, "EstimateSell", 0); // ถ้าค่าว่างให้เป็น 0
                                                                     }
                                                                 }}
                                                                 onKeyDown={(e) => {
-                                                                    let currentValue = parseInt(values[index]?.EstimateSell || 0, 10);
+                                                                    let currentValue = parseInt(matchedValue?.EstimateSell || 0, 10);
 
                                                                     if (e.key === "ArrowUp") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "EstimateSell", currentValue + 1000);
+                                                                        handleInputChange(indexProduct, "EstimateSell", currentValue + 1000);
                                                                     } else if (e.key === "ArrowDown") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "EstimateSell", Math.max(0, currentValue - 1000));
+                                                                        handleInputChange(indexProduct, "EstimateSell", Math.max(0, currentValue - 1000));
                                                                     }
                                                                 }}
                                                                 InputProps={{
@@ -1408,9 +1416,9 @@ const UpdateGasStations = (props) => {
                                                             />
                                                         </Paper>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#92CDDC", color: (values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze)) < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(values[index]?.Period || (values[index]?.Volume - values[index]?.Squeeze))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#a5d6a7", color: (((values[index]?.Capacity || 0)) - Math.round((valueDownHole[row?.ProductName] || 0))) < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{count === 1 && new Intl.NumberFormat("en-US").format(Math.round((values[index]?.Capacity || 0)) - Math.round((valueDownHole[row?.ProductName] || 0)))}</TableCell>
-                                                    {/* <TableCell sx={{ textAlign: "center",color: values[index]?.YesterDay < 0 ? "#d50000" : "black", fontWeight: "bold" }}>
+                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#92CDDC", color: (matchedValue?.Period || (matchedValue?.Volume - matchedValue?.Squeeze)) < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(matchedValue?.Period || (matchedValue?.Volume - matchedValue?.Squeeze))}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center",borderBottom: "2px solid white", backgroundColor: "#a5d6a7", color: (((matchedValue?.Capacity || 0)) - Math.round((valueDownHole[row?.ProductName] || 0))) < 0 ? "#d50000" : "black", fontWeight: "bold" }}>{count === 1 && new Intl.NumberFormat("en-US").format(Math.round((matchedValue?.Capacity || 0)) - Math.round((valueDownHole[row?.ProductName] || 0)))}</TableCell>
+                                                    {/* <TableCell sx={{ textAlign: "center",color: matchedValue?.YesterDay < 0 ? "#d50000" : "black", fontWeight: "bold" }}>
                                                             <TextField
                                                                 size="small"
                                                                 type="number"
@@ -1419,9 +1427,9 @@ const UpdateGasStations = (props) => {
                                                                         fontSize: '12px',
                                                                     },
                                                                 }}
-                                                                value={values[index]?.YesterDay || 0}
+                                                                value={matchedValue?.YesterDay || 0}
                                                                 onChange={(e) =>
-                                                                    handleInputChange(index, "YesterDay", e.target.value)
+                                                                    handleInputChange(indexProduct, "YesterDay", e.target.value)
                                                                 }
                                                                 sx={{
                                                                     '& .MuiOutlinedInput-root': {
@@ -1438,21 +1446,21 @@ const UpdateGasStations = (props) => {
                                                             />
                                                         </TableCell> */}
                                                     <TableCell sx={{
-                                                        textAlign: "center", backgroundColor: values[index]?.Color
-                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
-                                                            : `${row.Color}4A`, color: values[index]?.YesterDay < 0 ? "#d50000" : "black",
+                                                        textAlign: "center", backgroundColor: matchedValue?.Color
+                                                            ? `${matchedValue?.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`, color: matchedValue?.YesterDay < 0 ? "#d50000" : "black",
                                                             fontWeight: "bold",
                                                             borderBottom: "2px solid white"
-                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.YesterDay || 0))}</TableCell>
+                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(matchedValue?.YesterDay || 0))}</TableCell>
                                                     <TableCell sx={{
-                                                        textAlign: "center", backgroundColor: values[index]?.Color
-                                                            ? `${values[index].Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
-                                                            : `${row.Color}4A`, color: values[index]?.Sell < 0 ? "#d50000" : "black",
+                                                        textAlign: "center", backgroundColor: matchedValue?.Color
+                                                            ? `${matchedValue?.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                            : `${row.Color}4A`, color: matchedValue?.Sell < 0 ? "#d50000" : "black",
                                                             fontWeight: "bold",
                                                             borderBottom: "2px solid white"
-                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(values[index]?.Sell || 0))}</TableCell>
-                                                    {/* ถ้าเป็นแถวแรก (index === 0) ให้เพิ่ม rowSpan, แถวอื่นไม่ต้องแสดง cell นี้ */}
-                                                    {index === 0 ? (
+                                                    }}>{new Intl.NumberFormat("en-US").format(Math.round(matchedValue?.Sell || 0))}</TableCell>
+                                                    {/* ถ้าเป็นแถวแรก (indexProduct === 0) ให้เพิ่ม rowSpan, แถวอื่นไม่ต้องแสดง cell นี้ */}
+                                                    {indexProduct === 0 ? (
                                                         <TableCell rowSpan={productsLength}>
                                                             <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main }}>
                                                                 <Button
@@ -1470,8 +1478,11 @@ const UpdateGasStations = (props) => {
                                                         </TableCell>
                                                     ) : null}
                                                 </TableRow>
-                                            ))
-                                        }
+                                                )
+                                            }
+                                            return null;
+                                        })
+                                    }
                                     </React.Fragment>
                                 ))
                         }
