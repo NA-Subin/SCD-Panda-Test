@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
     Autocomplete,
     Badge,
@@ -42,7 +42,7 @@ import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
 const UpdateGasStations = (props) => {
-    const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport,count,valueDownHole } = props;
+    const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport,count,valueDownHole,checkStock } = props;
     const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
     const [setting, setSetting] = React.useState(true);
@@ -63,7 +63,7 @@ const UpdateGasStations = (props) => {
     const [driver1, setDriver1] = React.useState("");
     const [driver2, setDriver2] = React.useState("");
 
-    console.log(" Show DownHole : ",valueDownHole);
+    //console.log(" Show DownHole : ",valueDownHole);
 
     // ฟังก์ชันค้นหาข้อมูลที่ใกล้เคียงกับที่พิมพ์
     const filterOptions = (options, { inputValue }) => {
@@ -90,8 +90,8 @@ const UpdateGasStations = (props) => {
     const productsLength = Object.keys(gasStation.Products).length;
 
     // console.log(gasStation.id+" แสดงค่า : ",downHole);
-    console.log(gasStation.id + " แสดงค่า : ", downHole);
-    console.log("gasStation.Products : ", productsLength);
+    //console.log(gasStation.id + " แสดงค่า : ", downHole);
+    //console.log("gasStation.Products : ", productsLength);
 
     const getStock = async () => {
         database.ref("depot/stock").on("value", (snapshot) => {
@@ -195,7 +195,7 @@ const UpdateGasStations = (props) => {
     // }, [totalVolumes]); // รันเมื่อ totalVolumes เปลี่ยนแปลง
 
     const updateValuesForDate = () => {
-        console.log(" DATE : ",dayjs(selectedDate).format("DD/MM/YYYY"));
+        //console.log(" DATE : ",dayjs(selectedDate).format("DD/MM/YYYY"));
         const isFirstStation = (gasStationOil?.[0]?.Name === gasStation?.Name) || false;
         const formattedDate = dayjs(selectedDate).format("DD-MM-YYYY");
         const reportData = gasStation?.Report?.[formattedDate];
@@ -216,7 +216,11 @@ const UpdateGasStations = (props) => {
         //     sharedDownHole = firstProductWithDownHole?.DownHole || 0;
         // }
 
-        const updatedValues = reportData
+        console.log("formated Date : ",formattedDate);
+        console.log("reportData : ",reportData);
+        console.log("stock : ",stock);
+
+        const updatedValues = reportData !== undefined
             ? Object.entries(reportData)
                 .sort(([keyA, valueA], [keyB, valueB]) => {
                     const indexA = customOrder.indexOf(valueA?.ProductName);
@@ -229,7 +233,7 @@ const UpdateGasStations = (props) => {
                     setDriver1(value?.Driver1 || "")
                     setDriver2(value?.Driver2 || "")
 
-                    console.log("Product Name : ",value?.ProductName);
+                    //console.log("Product Name : ",value?.ProductName);
                     return {
                         ProductName: value?.ProductName || "",
                         Capacity: value?.Capacity || 0,
@@ -281,18 +285,42 @@ const UpdateGasStations = (props) => {
             row.TotalVolume = calculateTotalVolume(row);
         });
 
+        console.log("updatedValues : ",updatedValues);
+        let shereValue = {
+            GasStaionName: gasStation.ShortName,
+            Stock: gasStation.Stock,
+            Report: {
+                [dayjs(selectedDate).format("DD-MM-YYYY")]: { ...updatedValues } // ใช้ Spread เพื่อทำให้เป็น Object
+            }
+        };
+        
+        // ส่งค่ากลับไปในรูปแบบ Object
+        if (onSendBack) {
+            onSendBack(shereValue);
+        }
+        
         setValues(updatedValues);
     };
 
     useEffect(() => {
-        updateValuesForDate();
-    }, [selectedDate,count,Squeeze]);
+        if (checkStock) {
+            updateValuesForDate();
+        }
+    }, [selectedDate,count,Squeeze,checkStock,stock]);
 
     const deepEqual = (obj1, obj2) => {
         return JSON.stringify(obj1) === JSON.stringify(obj2);
     };
 
+    let shereValue = {
+        GasStaionName: gasStation.ShortName,
+        Stock: gasStation.Stock,
+        Report: {
+            [dayjs(selectedDate).format("DD-MM-YYYY")]: { ...values } // ใช้ Spread เพื่อทำให้เป็น Object
+        }
+    };
 
+    console.log("Values : ",shereValue);
 
     // const handleEditVolume = () => {
     //     const isFirstStation = (gasStationOil?.[0]?.Name === gasStation?.Name) || false;
@@ -386,7 +414,7 @@ const UpdateGasStations = (props) => {
     // };    
 
     const handleInputChange = (index, field, value) => {
-        console.log("Before update:", { index, field, value, currentValue: values[index]?.[field] });
+        //console.log("Before update:", { index, field, value, currentValue: values[index]?.[field] });
         const updatedValues = [...values];
 
         // ตรวจสอบการเพิ่มข้อมูลครั้งแรก
@@ -434,6 +462,19 @@ const UpdateGasStations = (props) => {
 
         console.log("Updated value:", updatedValues[index]);
 
+        // let shereValue = {
+        //     GasStaionName: gasStation.ShortName,
+        //     Stock: gasStation.Stock,
+        //     Report: {
+        //         [dayjs(selectedDate).format("DD-MM-YYYY")]: { ...updatedValues[index] } // ใช้ Spread เพื่อทำให้เป็น Object
+        //     }
+        // };
+        
+        // ส่งค่ากลับไปในรูปแบบ Object
+        if (onSendBack) {
+            onSendBack(shereValue);
+        }
+
         setValues(prevValues => {
             const newValues = [...prevValues];
             newValues[index] = updatedValues[index];
@@ -450,7 +491,7 @@ const UpdateGasStations = (props) => {
         const squeezeoil = parseFloat(row.Squeeze) || squeeze;
         const volume = parseFloat(row.Volume) || 0;
 
-        console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
+        //console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
 
         if (estimateSell === 0) {
             return ((volume + Delivered + Pending1 + Pending2) - squeezeoil).toFixed(2);
@@ -460,7 +501,7 @@ const UpdateGasStations = (props) => {
     };
 
     const calculateDownHole = (row) => {
-        console.log("Before calculateDownHole:", row);
+        //console.log("Before calculateDownHole:", row);
 
         const Delivered = parseFloat(row.Delivered) || 0;
         const Pending1 = parseFloat(row.Pending1) || 0;
@@ -472,7 +513,7 @@ const UpdateGasStations = (props) => {
         // console.log("value :",value);
         // return ((value + Delivered + Pending1 + Pending2)).toFixed(2);
 
-        console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
+        //console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
 
         if (downHole !== 0) {
             return ((volume + Delivered + Pending1 + Pending2)).toFixed(2);
@@ -519,8 +560,8 @@ const UpdateGasStations = (props) => {
             });
     }
 
-    console.log("driversData : ", driversData);
-    console.log("truckDriver : ", truckDriver);
+    //console.log("driversData : ", driversData);
+    //console.log("truckDriver : ", truckDriver);
     // console.log("totalVolumes : ", totalVolumes);
 
     return (
@@ -1040,7 +1081,7 @@ const UpdateGasStations = (props) => {
                                                     console.log(`🔍 Checking: row.ProductName = ${values[indexProduct]?.ProductName} : ${values[index]?.ProductName} : ${row.ProductName}, key = ${key}, matchedValue = ${matchedValue?.ProductName}`);
                                                 
                                                     return (
-                                                <TableRow key={matchedValue?.ProductName}>
+                                                <TableRow key={row.ProductName}>
                                                     <TablecellHeader
                                                         sx={{
                                                             backgroundColor: matchedValue?.Color ?? row.Color ?? "white",

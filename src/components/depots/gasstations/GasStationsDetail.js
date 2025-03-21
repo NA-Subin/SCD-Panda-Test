@@ -74,9 +74,44 @@ const GasStationsDetail = (props) => {
     console.log("แสดงค่ารวม " + total); // แสดงผลรวมที่ได้จากการคำนวณ
     console.log(volume);
 
-    const handleSendBack = (data) => {
-        setDownHole(data);
+    const [values, setValues] = React.useState([]);
+
+    const handleSendBack = (newData) => {
+        setValues(prevValues => {
+            // ค้นหา index ของ Stock ที่มีอยู่แล้ว
+            const stockIndex = prevValues.findIndex(item => (item.Stock === newData.Stock) && (item.GasStaionName === newData.GasStaionName));
+    
+            if (stockIndex !== -1) {
+                // ถ้ามี Stock อยู่แล้ว
+                let updatedValues = [...prevValues]; // Clone ข้อมูลเดิม
+                let existingReport = updatedValues[stockIndex].Report;
+    
+                // ดึงวันที่จาก newData
+                let newDateKey = Object.keys(newData.Report)[0]; // วันที่ใหม่
+                let newReportData = newData.Report[newDateKey]; // ข้อมูลใหม่ของวันนั้น
+    
+                if (existingReport[newDateKey]) {
+                    // ถ้าวันที่ตรงกัน อัปเดตข้อมูลของวันนั้น
+                    existingReport[newDateKey] = { ...newReportData };
+                } else {
+                    // ถ้าเป็นวันใหม่ เพิ่มข้อมูลเข้าไป
+                    existingReport[newDateKey] = newReportData;
+                }
+
+                console.log("✅ Updated Values before return:", updatedValues); // ตรวจสอบค่าก่อน return
+    
+                return updatedValues;
+            } else {
+                // ถ้าเป็น Stock ใหม่ ให้เพิ่มเข้าไปใน Array
+                return [...prevValues, newData];
+            }
+        });
     };
+
+    useEffect(() => {
+        console.log("🔥 Updated Values:", values);
+    }, [values]); // ทำงานทุกครั้งที่ `values` เปลี่ยนแปลง
+    
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -335,8 +370,9 @@ const GasStationsDetail = (props) => {
                                 let day = dayjs(selectedDate).format("DD-MM-YYYY");
 
                                 console.log(`1.Final DownHole for Stock: ${stock.Name}`, downHole);
-                                
-                                gasStationOil.forEach((row) => {
+                                console.log("Show Values : ",values);
+
+                                values.forEach((row) => {
                                     if (stock.Name === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
                                         const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
                                         const yesterdayData = row?.Report?.[yesterdayDate];
@@ -344,27 +380,27 @@ const GasStationsDetail = (props) => {
                                         let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
                                         if (currentReport) {
                                             Object.values(currentReport).forEach(reportItem => {
-                                                const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+                                                // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
                                                 
                                                 let productName = reportItem?.ProductName || "";
-                                                let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
-                                                let deliveredValue = Number(reportItem?.Delivered) || 0;
-                                                let pending1Value = Number(reportItem?.Pending1) || 0;
-                                                let pending2Value = Number(reportItem?.Pending2) || 0;
+                                                // let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
+                                                // let deliveredValue = Number(reportItem?.Delivered) || 0;
+                                                // let pending1Value = Number(reportItem?.Pending1) || 0;
+                                                // let pending2Value = Number(reportItem?.Pending2) || 0;
 
-                                                console.log("Volume : ",volumeValue);
-                                                console.log("DeliveredValue : ",deliveredValue);
-                                                console.log("Pending1 : ",pending1Value);
-                                                console.log("Pending2 : ",pending2Value);
+                                                // console.log("Volume : ",volumeValue);
+                                                // console.log("DeliveredValue : ",deliveredValue);
+                                                // console.log("Pending1 : ",pending1Value);
+                                                // console.log("Pending2 : ",pending2Value);
 
-                                                let total = (volumeValue+(deliveredValue+pending1Value+pending2Value));
+                                                // let total = (volumeValue+(deliveredValue+pending1Value+pending2Value));
 
-                                                console.log("Total : ",total);
+                                                console.log("DownHole : ",parseFloat(reportItem?.DownHole));
                 
                                                 if (!downHole[productName]) {
                                                     downHole[productName] = 0;
                                                 }
-                                                downHole[productName] += total;
+                                                downHole[productName] += parseFloat(reportItem?.DownHole);
                                             });
                                         }
                                     }
@@ -395,6 +431,7 @@ const GasStationsDetail = (props) => {
                                                         gasStationOil={gasStationOil}
                                                         selectedDate={selectedDate}
                                                         count={matchCount}
+                                                        checkStock={checkStock}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
                                                         currentReport={row.Report} // ส่ง Report ตามวัน
                                                         valueDownHole={downHole} // ส่งข้อมูลที่รวมแล้ว
@@ -422,8 +459,9 @@ const GasStationsDetail = (props) => {
                                         let downHole = {}; // ตัวแปรเก็บค่ารวมของ DownHole
                                         let matchCount = 0; // ตัวแปรนับจำนวน match
                                         let day = dayjs(selectedDate).format("DD-MM-YYYY");
+                                        console.log("Show Values : ",values);
 
-                                        gasStationOil.forEach((row) => {
+                                        values.forEach((row) => {
                                             if (checkStock === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
                                                 const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
                                                 const yesterdayData = row?.Report?.[yesterdayDate];
@@ -431,22 +469,28 @@ const GasStationsDetail = (props) => {
                                                 let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
                                                 if (currentReport) {
                                                     Object.values(currentReport).forEach(reportItem => {
-                                                        const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+                                                        // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
                                                         
                                                         let productName = reportItem?.ProductName || "";
-                                                        let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
-                                                        let deliveredValue = Number(reportItem?.Delivered) || 0;
-                                                        let pending1Value = Number(reportItem?.Pending1) || 0;
-                                                        let pending2Value = Number(reportItem?.Pending2) || 0;
+                                                        // let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
+                                                        // let deliveredValue = Number(reportItem?.Delivered) || 0;
+                                                        // let pending1Value = Number(reportItem?.Pending1) || 0;
+                                                        // let pending2Value = Number(reportItem?.Pending2) || 0;
         
-                                                        let total = (volumeValue+(deliveredValue+pending1Value+pending2Value));
+                                                        // let total = (volumeValue+(deliveredValue+pending1Value+pending2Value));
         
-                                                        console.log("Total : ",total);
+                                                        // console.log("Total : ",total);
                         
+                                                        // if (!downHole[productName]) {
+                                                        //     downHole[productName] = 0;
+                                                        // }
+                                                        // downHole[productName] += total;
+                                                        console.log("DownHole : ",parseFloat(reportItem?.DownHole));
+                
                                                         if (!downHole[productName]) {
                                                             downHole[productName] = 0;
                                                         }
-                                                        downHole[productName] += total;
+                                                        downHole[productName] += parseFloat(reportItem?.DownHole);
                                                     });
                                                 }
                                             }
@@ -463,6 +507,7 @@ const GasStationsDetail = (props) => {
                                                         gasStationOil={gasStationOil}
                                                         selectedDate={selectedDate}
                                                         count={matchCount}
+                                                        checkStock={checkStock}
                                                         Squeeze={matchCount === 1 ? 800 : 0} // กำหนดค่า Squeeze
                                                         currentReport={row.Report} // ส่ง Report ตามวัน
                                                         valueDownHole={downHole} // ส่งข้อมูลที่รวมแล้ว
