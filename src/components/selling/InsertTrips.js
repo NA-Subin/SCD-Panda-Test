@@ -463,6 +463,8 @@ const InsertTrips = () => {
             (item) => item.TicketsName === customerValue
         );
 
+
+
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
         // let newRate = 0;
         if (ticketData && depots) {
@@ -954,7 +956,7 @@ const InsertTrips = () => {
                 DateStart: dayjs(selectedDate).format('DD/MM/YYYY'),
                 Registration: registration.split(":")[1],
                 Driver: registration.split(":")[2],
-                Depot: depots.split(":")[0],
+                Depot: depots,
                 CostTrip: costTrip,
                 WeightHigh: parseFloat(weightH).toFixed(2),
                 WeightLow: parseFloat(weightL).toFixed(2),
@@ -1174,6 +1176,20 @@ const InsertTrips = () => {
     //     }
     //     return []; // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
     // };
+
+    let G95 = (Number(volumeT.G95) - Number(volumeS.G95));
+    let B95 = (Number(volumeT.B95) - Number(volumeS.B95));
+    let B7 = (Number(volumeT.B7) - Number(volumeS.B7));
+    let G91 = (Number(volumeT.G91) - Number(volumeS.G91));
+    let E20 = (Number(volumeT.E20) - Number(volumeS.E20));
+    let PWD = (Number(volumeT.PWD) - Number(volumeS.PWD));
+
+    console.log("G95", G95);
+    console.log("B95", B95);
+    console.log("B7", B7);
+    console.log("G91", G91);
+    console.log("E20", E20);
+    console.log("PWD", PWD);
 
     return (
         <React.Fragment>
@@ -2375,16 +2391,16 @@ const InsertTrips = () => {
                         </Paper>
                     </Box>
                     {
-                        (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) <= 50300 &&
-                        <>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                        <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
-                        <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
-                    </Box>
-                    <Box textAlign="center" marginTop={1}>
-                        <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
-                    </Box>
-                        </>
+                        (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) <= 50300 && 
+                            <>
+                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                                    <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
+                                    <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
+                                </Box>
+                                <Box textAlign="center" marginTop={1}>
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                                </Box>
+                            </>
                     }
                 </DialogContent>
                 {/* <DialogActions

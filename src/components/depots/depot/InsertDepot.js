@@ -141,11 +141,11 @@ const InsertDepot = (props) => {
                                     <MenuItem value={"-"}>
                                         เลือกโซน
                                     </MenuItem>
-                                    <MenuItem value={"คลังลำปาง"}>คลังลำปาง</MenuItem>
-                                    <MenuItem value={"คลังพิจิตร"}>คลังพิจิตร</MenuItem>
-                                    <MenuItem value={"คลังสระบุรี"}>คลังสระบุรี</MenuItem>
-                                    <MenuItem value={"คลังบางปะอิน"}>คลังบางปะอิน</MenuItem>
-                                    <MenuItem value={"คลังIR"}>คลังIR</MenuItem>
+                                    <MenuItem value={"ลำปาง"}>ลำปาง</MenuItem>
+                                    <MenuItem value={"พิจิตร"}>พิจิตร</MenuItem>
+                                    <MenuItem value={"สระบุรี"}>สระบุรี</MenuItem>
+                                    <MenuItem value={"บางปะอิน"}>บางปะอิน</MenuItem>
+                                    <MenuItem value={"IR"}>IR</MenuItem>
                                 </Select>
                             </Paper>
                         </Grid>

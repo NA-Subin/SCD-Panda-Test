@@ -116,7 +116,9 @@ const TripsDetail = (props) => {
                         weightHigh={trips.WeightHigh} 
                         weightLow={trips.WeightLow} 
                         totalWeight={trips.TotalWeight} 
-                        weightTruck={trips.WeightTruck} />
+                        weightTruck={trips.WeightTruck} 
+                        depotTrip={trips.Depot}
+                        />
                 </TableCell>
                 {/* <TableCell sx={{
                     textAlign: "center",
