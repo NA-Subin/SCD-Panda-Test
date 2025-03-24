@@ -884,7 +884,14 @@ const UpdateTrip = (props) => {
                                                             />
                                                             : ""
                                                         ) : (
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{row.Rate}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                {
+                                                                    depot.split(":")[1] === "ลำปาง" ? row.Rate1 :
+                                                                    depot.split(":")[1] === "พิจิตร" ? row.Rate2 :
+                                                                    depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ? row.Rate3 :
+                                                                    ""
+                                                                }
+                                                            </Typography>
                                                         )}
                                                     </TableCell>
 

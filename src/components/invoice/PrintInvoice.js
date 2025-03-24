@@ -76,6 +76,7 @@ const numberToThaiText = (num) => {
 };
 
 console.log("invoiceData: ", invoiceData?.Report);
+console.log("Reagistration : ",invoiceData?.Registration);
 console.log("order: ", invoiceData?.Order[0].Address);
 
 
@@ -176,7 +177,7 @@ const handleDownloadImage = () => {
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Date}</Typography>
                           </TableCell>
                       <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver}</Typography>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{`${row.Driver} / ${row.Registration}`}</Typography>
                           </TableCell>
                       <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>

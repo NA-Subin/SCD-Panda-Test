@@ -146,13 +146,6 @@ const InsertTrips = () => {
 
     const [weightOil, setWeightOil] = React.useState(0);
     const [volume, setVolume] = React.useState(0);
-    const [cost, setCost] = React.useState(0);
-    const [costG91, setCostG91] = React.useState(0);
-    const [costG95, setCostG95] = React.useState(0);
-    const [costB7, setCostB7] = React.useState(0);
-    const [costB95, setCostB95] = React.useState(0);
-    const [costE20, setCostE20] = React.useState(0);
-    const [costPWD, setCostPWD] = React.useState(0);
     const [volumeG91, setVolumeG91] = React.useState(0);
     const [volumeG95, setVolumeG95] = React.useState(0);
     const [volumeB7, setVolumeB7] = React.useState(0);
@@ -518,10 +511,6 @@ const InsertTrips = () => {
 
     };
 
-    console.log("selling : ", selling);
-    console.log("orderTrip : ", orderTrip);
-
-
     const handleUpdateOrderID = (ticketIndex, field, value) => {
         setOrdersTickets((prev) => {
             return {
@@ -668,7 +657,7 @@ const InsertTrips = () => {
             let PWD = (totalPWD * 0.740) * 1000;
 
             setWeightA({ G91: G91.toFixed(2), G95: G95.toFixed(2), B7: B7.toFixed(2), B95: B95.toFixed(2), E20: E20.toFixed(2), PWD: PWD.toFixed(2) });
-            setWeightL(G91 + G95 + B95 + E20 + PWD);
+            setWeightL(parseFloat(G91) + parseFloat(G95) + parseFloat(B95) + parseFloat(E20) + parseFloat(PWD));
             setWeightH(B7);
 
             // อัปเดตค่า State ของแต่ละ productName
@@ -739,9 +728,6 @@ const InsertTrips = () => {
             return updatedOrders;
         });
     };
-
-    console.log("Weight All : ", weightA);
-    console.log("Cost Trip : ", costTrip);
 
     const handleDelete = (indexToDelete) => {
         setOrdersTickets((prev) => {
@@ -869,10 +855,6 @@ const InsertTrips = () => {
             }
         }
     };
-
-
-    console.log(" Tickets Order : ", ordersTickets);
-    console.log(" VolumeT: ", volumeT);
 
     const handleSubmit = () => {
         const orderRef = database.ref("order/");
@@ -1130,9 +1112,6 @@ const InsertTrips = () => {
         return customers.filter((item) => item.id || item.TicketsCode);
     };
 
-    console.log("depots : ", depots);
-    console.log("Trip : ", trip.length);
-
     // const getTickets = () => {
     //     if (codeCustomer === "") {
     //         // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
@@ -1184,12 +1163,22 @@ const InsertTrips = () => {
     let E20 = (Number(volumeT.E20) - Number(volumeS.E20));
     let PWD = (Number(volumeT.PWD) - Number(volumeS.PWD));
 
+    const isNegative = Math.min(G95, B95, B7, G91, E20, PWD) < 0;
+
+    const fuelTypes = ["G95", "B95", "B7", "G91", "E20", "PWD"];
+    const totalVolume = fuelTypes.reduce((sum, type) => sum + (Number(volumeT[type]) - Number(volumeS[type])), 0) || 0;
+
+    const getBackgroundColor = (value) => 
+        value < 0 ? "red" : value > 0 ? "yellow" : "lightgray";
+
     console.log("G95", G95);
     console.log("B95", B95);
     console.log("B7", B7);
     console.log("G91", G91);
     console.log("E20", E20);
     console.log("PWD", PWD);
+
+    console.log("Check : ",isNegative);
 
     return (
         <React.Fragment>
@@ -2189,24 +2178,27 @@ const InsertTrips = () => {
                                                 <TablecellSelling width={500} sx={{ textAlign: "center", height: "35px" }}>
                                                     คงเหลือ
                                                 </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", backgroundColor: (Number(volumeT.G95) - Number(volumeS.G95)) < 0 ? "red" : (Number(volumeT.G95) - Number(volumeS.G95)) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white" }}>
-                                                    {(Number(volumeT.G95) - Number(volumeS.G95)) || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", backgroundColor: (Number(volumeT.B95) - Number(volumeS.B95)) < 0 ? "red" : (Number(volumeT.B95) - Number(volumeS.B95)) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white" }}>
-                                                    {(Number(volumeT.B95) - Number(volumeS.B95)) || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", backgroundColor: Number(volumeT.B7) - Number(volumeS.B7) < 0 ? "red" : Number(volumeT.B7) - Number(volumeS.B7) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white" }}>
-                                                    {(Number(volumeT.B7) - Number(volumeS.B7)) || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", backgroundColor: (Number(volumeT.G91) - Number(volumeS.G91)) < 0 ? "red" : (Number(volumeT.G91) - Number(volumeS.G91)) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white" }}>
-                                                    {(Number(volumeT.G91) - Number(volumeS.G91)) || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", backgroundColor: Number(volumeT.E20) - Number(volumeS.E20) < 0 ? "red" : Number(volumeT.E20) - Number(volumeS.E20) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white" }}>
-                                                    {(Number(volumeT.E20) - Number(volumeS.E20)) || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", height: "35px", fontWeight: "bold", backgroundColor: Number(volumeT.PWD) - Number(volumeS.PWD) < 0 ? "red" : Number(volumeT.PWD) - Number(volumeS.PWD) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white" }}>
-                                                    {(Number(volumeT.PWD) - Number(volumeS.PWD)) || 0}
-                                                </TablecellSelling>
+                                                {
+                                                    fuelTypes.map((type) => {
+                                                        const value = Number(volumeT[type]) - Number(volumeS[type]);
+                                                        return (
+                                                          <TablecellSelling
+                                                            key={type}
+                                                            width={60}
+                                                            sx={{
+                                                              textAlign: "center",
+                                                              color: "black",
+                                                              height: "35px",
+                                                              fontWeight: "bold",
+                                                              backgroundColor: getBackgroundColor(value),
+                                                              borderLeft: "2px solid white",
+                                                            }}
+                                                          >
+                                                            {value || 0}
+                                                          </TablecellSelling>
+                                                        );
+                                                      })
+                                                }
                                                 <TablecellSelling width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {
                                                         editMode ?
@@ -2232,27 +2224,13 @@ const InsertTrips = () => {
                                                                             paddingLeft: 2
                                                                         },
                                                                     }}
-                                                                    value={
-                                                                        (Number(volumeT.G95) - Number(volumeS.G95) +
-                                                                            Number(volumeT.B95) - Number(volumeS.B95) +
-                                                                            Number(volumeT.B7) - Number(volumeS.B7) +
-                                                                            Number(volumeT.G91) - Number(volumeS.G91) +
-                                                                            Number(volumeT.E20) - Number(volumeS.E20) +
-                                                                            Number(volumeT.PWD) - Number(volumeS.PWD)) || 0
-                                                                    }
+                                                                    value={totalVolume}
                                                                 // value={volumeG95}
                                                                 />
                                                             </Paper>
                                                             :
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>
-                                                                {
-                                                                    (Number(volumeT.G95) - Number(volumeS.G95) +
-                                                                        Number(volumeT.B95) - Number(volumeS.B95) +
-                                                                        Number(volumeT.B7) - Number(volumeS.B7) +
-                                                                        Number(volumeT.G91) - Number(volumeS.G91) +
-                                                                        Number(volumeT.E20) - Number(volumeS.E20) +
-                                                                        Number(volumeT.PWD) - Number(volumeS.PWD)) || 0
-                                                                }
+                                                                {totalVolume}
                                                             </Typography>
                                                     }
                                                 </TablecellSelling>
@@ -2391,17 +2369,19 @@ const InsertTrips = () => {
                         </Paper>
                     </Box>
                     {
-                        (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) <= 50300 && 
+                        (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) <= 50300 &&
+                        !isNegative && ( // เพิ่มเงื่อนไขเช็คว่าห้ามมีค่าติดลบ
                             <>
-                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                                    <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
-                                    <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
-                                </Box>
-                                <Box textAlign="center" marginTop={1}>
-                                    <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
-                                </Box>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                                <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
+                                <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
+                            </Box>
+                            <Box textAlign="center" marginTop={1}>
+                                <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                            </Box>
                             </>
-                    }
+                        )
+                        }
                 </DialogContent>
                 {/* <DialogActions
                     sx={{
