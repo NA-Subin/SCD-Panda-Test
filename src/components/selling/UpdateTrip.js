@@ -681,12 +681,28 @@ const UpdateTrip = (props) => {
                         <Paper
                             sx={{ p: 1, backgroundColor: totalVolumesTicket.totalWeight > 50300 ? "red" : "lightgray", marginBottom: 1 }}
                         >
+                            <Paper
+                                                            className="custom-scrollbar"
+                                                            sx={{
+                                                                position: "relative",
+                                                                maxWidth: "100%",
+                                                                height: "31vh", // ความสูงรวมของ container หลัก
+                                                                overflow: "hidden",
+                                                                marginBottom: 0.5,
+                                                                overflowX: "auto",
+                                                            }}
+                                                        >
                             <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
                                 {/* Header: คงที่ด้านบน */}
                                 <Box
                                     sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
                                         height: "35px", // กำหนดความสูง header
                                         backgroundColor: theme.palette.info.main,
+                                        zIndex: 3,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -702,6 +718,7 @@ const UpdateTrip = (props) => {
                                                 <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
                                                 <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
+                                                <TableCell width={60} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -709,9 +726,12 @@ const UpdateTrip = (props) => {
 
                                 {/* TableBody: ส่วนที่ scroll ได้ */}
                                 <Box
+                                    className="custom-scrollbar"
                                     sx={{
-                                        top: "35px",
-                                        bottom: "25px"
+                                        position: "absolute",
+                                        top: "35px", // เริ่มจากด้านล่าง header
+                                        bottom: "35px", // จนถึงด้านบนของ footer
+                                        overflowY: "auto",
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -894,7 +914,6 @@ const UpdateTrip = (props) => {
                                                             </Typography>
                                                         )}
                                                     </TableCell>
-
                                                     {/* Product Data */}
                                                     {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
                                                         <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
@@ -917,6 +936,7 @@ const UpdateTrip = (props) => {
                                                             )}
                                                         </TableCell>
                                                     ))}
+                                                    <TableCell width={60} />
                                                 </TableRow>
                                             ))}
 
@@ -927,6 +947,13 @@ const UpdateTrip = (props) => {
                                 {/* Footer: คงที่ด้านล่าง */}
                                 <Box
                                     sx={{
+                                        position: "absolute",
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: "35px", // กำหนดความสูง footer
+                                        backgroundColor: theme.palette.info.main,
+                                        zIndex: 2,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -935,7 +962,6 @@ const UpdateTrip = (props) => {
                                                 <TablecellSelling width={650} sx={{ textAlign: "center", height: "25px" }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
                                                 </TablecellSelling>
-
                                                 {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
                                                     <TablecellSelling key={product} width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
@@ -944,11 +970,18 @@ const UpdateTrip = (props) => {
                                                         {totalVolumesTicket[product]}
                                                     </TablecellSelling>
                                                 ))}
+                                                <TablecellSelling width={60} sx={{ 
+                                                    textAlign: "center", height: "25px", color: "black",
+                                                        fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+                                                 }}>
+                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0)}
+                                                </TablecellSelling>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
                                 </Box>
                             </TableContainer>
+                        </Paper>
                             <Grid container spacing={1} marginBottom={-0.5}>
                                 {
                                     editMode &&
@@ -1180,12 +1213,29 @@ const UpdateTrip = (props) => {
                             }
                         </Grid>
                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
+                            <Paper
+                                                            className="custom-scrollbar"
+                                                            sx={{
+                                                                position: "relative",
+                                                                maxWidth: "100%",
+                                                                height: "31vh", // ความสูงรวมของ container หลัก
+                                                                overflow: "hidden",
+                                                                marginBottom: 0.5,
+                                                                overflowX: "auto",
+                                                                paddingBottom: -1
+                                                            }}
+                                                        >
                             <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
                                 {/* Header: คงที่ด้านบน */}
                                 <Box
                                     sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: "35px", // กำหนดความสูง header
                                         backgroundColor: theme.palette.info.main,
-                                        height: "35px"
+                                        zIndex: 3,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -1218,6 +1268,7 @@ const UpdateTrip = (props) => {
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
                                                     PWD
                                                 </TableCellPWD>
+                                                <TableCell width={60} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -1227,8 +1278,10 @@ const UpdateTrip = (props) => {
                                 <Box
                                     className="custom-scrollbar"
                                     sx={{
+                                        position: "absolute",
                                         top: "35px", // เริ่มจากด้านล่าง header
-                                        bottom: "25px", // จนถึงด้านบนของ footer
+                                        bottom: "60px", // จนถึงด้านบนของ footer
+                                        overflowY: "auto",
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -1330,6 +1383,7 @@ const UpdateTrip = (props) => {
                                                             )}
                                                         </TableCell>
                                                     ))}
+                                                    <TableCell width={60} />
                                                 </TableRow>
                                             ))}
 
@@ -1340,9 +1394,15 @@ const UpdateTrip = (props) => {
                                 {/* Footer: คงที่ด้านล่าง */}
                                 <Box
                                     sx={{
-                                        top: "25px", // จนถึงด้านบนของ footer
+                                        position: "absolute",
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: "25px", // กำหนดความสูง footer
                                         bottom: "25px", // จนถึงด้านบนของ footer
                                         backgroundColor: theme.palette.info.main,
+                                        zIndex: 2,
+                                        marginBottom: 0.5
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -1360,6 +1420,12 @@ const UpdateTrip = (props) => {
                                                         {totalVolumesOrder[product]}
                                                     </TablecellSelling>
                                                 ))}
+                                                    <TablecellSelling width={60} sx={{
+                                                        textAlign: "center", height: "25px", color: "black",
+                                                        fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+                                                    }}>
+                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesOrder[product] || 0), 0)}
+                                                    </TablecellSelling>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -1368,8 +1434,15 @@ const UpdateTrip = (props) => {
                                 {/* Footer: คงที่ด้านล่าง */}
                                 <Box
                                     sx={{
+                                        position: "absolute",
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: "25px", // กำหนดความสูง footer
                                         backgroundColor: theme.palette.info.main,
+                                        zIndex: 2,
                                         borderTop: "2px solid white",
+                                        marginBottom: 0.5
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
@@ -1387,11 +1460,18 @@ const UpdateTrip = (props) => {
                                                         {totalVolumesTicket[product] - totalVolumesOrder[product]}
                                                     </TablecellSelling>
                                                 ))}
+                                                <TablecellSelling width={60} sx={{
+                                                        textAlign: "center", height: "25px", color: "black",
+                                                        fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+                                                    }}>
+                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + ((totalVolumesTicket[product] - totalVolumesOrder[product]) || 0), 0)}
+                                                    </TablecellSelling>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
                                 </Box>
                             </TableContainer>
+                            </Paper>
                             <Grid container spacing={1}>
                                 {
                                     editMode ?
@@ -1552,7 +1632,7 @@ const UpdateTrip = (props) => {
                                     </Paper>
                                 </Grid>
                             </Grid>
-                        </Paper>
+                            </Paper>
                     </Box>
                     {
                         !editMode ?

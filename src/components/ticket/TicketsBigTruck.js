@@ -97,9 +97,10 @@ const TicketsBigTruck = () => {
         const [rate1Edit, setRate1Edit] = useState("");
         const [rate2Edit, setRate2Edit] = useState("");
         const [rate3Edit, setRate3Edit] = useState("");
+        const [creditTimeEdit, setCreditTimeEdit] = useState("");
     
         // ฟังก์ชันสำหรับกดแก้ไข
-        const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3) => {
+        const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3, rowCreditTime) => {
             setSetting(true);
             setSelectedRowId(rowId);
 
@@ -115,6 +116,7 @@ const TicketsBigTruck = () => {
             setRate1Edit(rowRate1);
             setRate2Edit(rowRate2);
             setRate3Edit(rowRate3);
+            setCreditTimeEdit(rowCreditTime);
         };
 
     // บันทึกข้อมูลที่แก้ไขแล้ว
@@ -129,6 +131,7 @@ const TicketsBigTruck = () => {
             Rate1: rate1Edit,
             Rate2: rate2Edit,
             Rate3: rate3Edit,
+            CreditTime: creditTimeEdit
         });
         setSetting(false);
         setSelectedRowId(null);
@@ -205,7 +208,7 @@ const TicketsBigTruck = () => {
                     component={Paper}
                     sx={{ marginTop: 2 }}
                 >
-                    <Table stickyHeader size="small">
+                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                         <TableHead sx={{ height: "7vh" }}>
                             <TableRow>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
@@ -214,19 +217,22 @@ const TicketsBigTruck = () => {
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                                     ชื่อตั๋ว
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100, whiteSpace: "nowrap" }}>
+                                    ระยะเครดิต
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 150 : 100 }}>
                                     เรทคลังลำปาง
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 150 : 100 }}>
                                     เรทคลังพิจิตร
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 150 : 100 }}>
                                     เรทคลังสระบุรี/บางปะอิน/IR
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
                                     สถานะ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ width: 50 }} />
+                                <TablecellHeader sx={{ width: 80 }} />
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -239,21 +245,23 @@ const TicketsBigTruck = () => {
                                             </TableRow>
                                             :
                                             ticketM.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                                                <TableRow key={row.id}>
+                                                <TableRow key={row.id} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                                                             {row.No}
                                                         </Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                        {
+                                                    {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
-                                                                row.Rate1
+                                                                row.CreditTime
                                                                 :
+                                                                <Paper sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     type="number"
+                                                                    fullWidth
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '14px',
@@ -267,7 +275,41 @@ const TicketsBigTruck = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            paddingLeft: 2
+                                                                            textAlign: "center"
+                                                                        },
+                                                                    }}
+                                                                    value={creditTimeEdit}
+                                                                    onChange={(e) => setCreditTimeEdit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate1
+                                                                :
+                                                                <Paper sx={{ width: "100%" }}>
+                                                                <TextField
+                                                                    type="number"
+                                                                    fullWidth
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            textAlign: "center"
                                                                         },
                                                                     }}
                                                                     value={rate1Edit}
@@ -275,6 +317,7 @@ const TicketsBigTruck = () => {
                                                                     size="small"
                                                                     variant="outlined"
                                                                 />
+                                                                </Paper>
                                                         }
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
@@ -283,8 +326,10 @@ const TicketsBigTruck = () => {
                                                             !setting || row.id !== selectedRowId ?
                                                                 row.Rate2
                                                                 :
+                                                                <Paper sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     type="number"
+                                                                    fullWidth
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '14px',
@@ -298,7 +343,7 @@ const TicketsBigTruck = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            paddingLeft: 2
+                                                                            textAlign: "center"
                                                                         },
                                                                     }}
                                                                     value={rate2Edit}
@@ -306,6 +351,7 @@ const TicketsBigTruck = () => {
                                                                     size="small"
                                                                     variant="outlined"
                                                                 />
+                                                                </Paper>
                                                         }
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
@@ -314,8 +360,10 @@ const TicketsBigTruck = () => {
                                                             !setting || row.id !== selectedRowId ?
                                                                 row.Rate3
                                                                 :
+                                                                <Paper sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     type="number"
+                                                                    fullWidth
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '14px',
@@ -329,7 +377,7 @@ const TicketsBigTruck = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            paddingLeft: 2
+                                                                            textAlign: "center"
                                                                         },
                                                                     }}
                                                                     value={rate3Edit}
@@ -337,16 +385,17 @@ const TicketsBigTruck = () => {
                                                                     size="small"
                                                                     variant="outlined"
                                                                 />
+                                                                </Paper>
                                                         }
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
                                                                     <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
                                                                     :
                                                                     <>
                                                                         <FormControlLabel
+                                                                            sx={{ whiteSpace: "nowrap" }}
                                                                             control={
                                                                                 <Checkbox
                                                                                     checked={ticketChecked && !recipientChecked ? true : false}
@@ -354,9 +403,14 @@ const TicketsBigTruck = () => {
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ลูกค้าประจำ"
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    ลูกค้าประจำ
+                                                                                </Typography>
+                                                                            }
                                                                         />
                                                                         <FormControlLabel
+                                                                            sx={{ whiteSpace: "nowrap",marginTop: -2 }}
                                                                             control={
                                                                                 <Checkbox
                                                                                     checked={!ticketChecked && recipientChecked ? true : false}
@@ -364,21 +418,24 @@ const TicketsBigTruck = () => {
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ลูกค้าไม่ประจำ"
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    ลูกค้าไม่ประจำ
+                                                                                </Typography>
+                                                                            }
                                                                         />
                                                                     </>
                                                             }
-                                                        </Box>
                                                     </TableCell>
                                                     <TableCell width={70}>
-                                                        <Box sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", marginTop: -0.5 }}>
+                                                        <Box sx={{ textAlign: "center", marginTop: -0.5 }}>
                                                             {
-                                                                !setting ?
-                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} size="small" onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3)} fullWidth>แก้ไข</Button>
+                                                                !setting || row.id !== selectedRowId ?
+                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }} size="small" onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime)} fullWidth>แก้ไข</Button>
                                                                     :
                                                                     <>
-                                                                        <IconButton variant="contained" color="error" onClick={handleCancel} sx={{ marginRight: 2 }} fullWidth><CancelIcon fontSize="small" /></IconButton>
-                                                                        <IconButton variant="contained" color="success" onClick={handleSave} fullWidth><SaveIcon fontSize="small" /></IconButton>
+                                                                        <Button variant="contained" color="success" onClick={handleSave} sx={{ height: "25px", marginTop: 0.5 }} size="small" fullWidth>บันทึก</Button>
+                                                                        <Button variant="contained" color="error" onClick={handleCancel} sx={{ height: "25px", marginTop: 0.5 }}  size="small" fullWidth>ยกเลิก</Button>
                                                                     </>
                                                             }
                                                         </Box>
@@ -394,21 +451,23 @@ const TicketsBigTruck = () => {
                                             </TableRow>
                                             :
                                             ticketR.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                                                <TableRow key={row.id}>
+                                                <TableRow key={row.id} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                                                             {row.No}
                                                         </Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{row.TicketsName}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                     {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
-                                                                row.Rate1
+                                                                row.CreditTime
                                                                 :
+                                                                <Paper sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     type="number"
+                                                                    fullWidth
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '14px',
@@ -422,7 +481,41 @@ const TicketsBigTruck = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            paddingLeft: 2
+                                                                            textAlign: "center"
+                                                                        },
+                                                                    }}
+                                                                    value={creditTimeEdit}
+                                                                    onChange={(e) => setCreditTimeEdit(e.target.value)}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Rate1
+                                                                :
+                                                                <Paper sx={{ width: "100%" }}>
+                                                                <TextField
+                                                                    type="number"
+                                                                    fullWidth
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '14px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '30px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            textAlign: "center"
                                                                         },
                                                                     }}
                                                                     value={rate1Edit}
@@ -430,6 +523,7 @@ const TicketsBigTruck = () => {
                                                                     size="small"
                                                                     variant="outlined"
                                                                 />
+                                                                </Paper>
                                                         }
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
@@ -438,8 +532,10 @@ const TicketsBigTruck = () => {
                                                             !setting || row.id !== selectedRowId ?
                                                                 row.Rate2
                                                                 :
+                                                                <Paper sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     type="number"
+                                                                    fullWidth
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '14px',
@@ -453,7 +549,7 @@ const TicketsBigTruck = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            paddingLeft: 2
+                                                                            textAlign: "center"
                                                                         },
                                                                     }}
                                                                     value={rate2Edit}
@@ -461,6 +557,7 @@ const TicketsBigTruck = () => {
                                                                     size="small"
                                                                     variant="outlined"
                                                                 />
+                                                                </Paper>
                                                         }
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
@@ -469,8 +566,10 @@ const TicketsBigTruck = () => {
                                                             !setting || row.id !== selectedRowId ?
                                                                 row.Rate3
                                                                 :
+                                                                <Paper sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     type="number"
+                                                                    fullWidth
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '14px',
@@ -484,7 +583,7 @@ const TicketsBigTruck = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            paddingLeft: 2
+                                                                            textAlign: "center"
                                                                         },
                                                                     }}
                                                                     value={rate3Edit}
@@ -492,16 +591,17 @@ const TicketsBigTruck = () => {
                                                                     size="small"
                                                                     variant="outlined"
                                                                 />
+                                                                </Paper>
                                                         }
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
                                                                     <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
                                                                     :
                                                                     <>
                                                                         <FormControlLabel
+                                                                            sx={{ whiteSpace: "nowrap" }}
                                                                             control={
                                                                                 <Checkbox
                                                                                     checked={ticketChecked && !recipientChecked ? true : false}
@@ -509,9 +609,14 @@ const TicketsBigTruck = () => {
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ลูกค้าประจำ"
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    ลูกค้าประจำ
+                                                                                </Typography>
+                                                                            }
                                                                         />
                                                                         <FormControlLabel
+                                                                            sx={{ whiteSpace: "nowrap", marginTop: -2 }}
                                                                             control={
                                                                                 <Checkbox
                                                                                     checked={!ticketChecked && recipientChecked ? true : false}
@@ -519,21 +624,24 @@ const TicketsBigTruck = () => {
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label="ลูกค้าไม่ประจำ"
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    ลูกค้าไม่ประจำ
+                                                                                </Typography>
+                                                                            }
                                                                         />
                                                                     </>
                                                             }
-                                                        </Box>
                                                     </TableCell>
                                                     <TableCell width={70}>
-                                                        <Box sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", marginTop: -0.5 }}>
+                                                        <Box sx={{ marginTop: -0.5 }}>
                                                             {
-                                                                !setting ?
-                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} size="small" onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3)} fullWidth>แก้ไข</Button>
+                                                                !setting || row.id !== selectedRowId ?
+                                                                <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }} size="small" onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime)} fullWidth>แก้ไข</Button>
                                                                     :
                                                                     <>
-                                                                        <IconButton variant="contained" color="error" onClick={handleCancel} sx={{ marginRight: 2 }} fullWidth><CancelIcon fontSize="small" /></IconButton>
-                                                                        <IconButton variant="contained" color="success" onClick={handleSave} fullWidth><SaveIcon fontSize="small" /></IconButton>
+                                                                        <Button variant="contained" color="success" onClick={handleSave} sx={{ height: "25px", marginTop: 0.5 }} size="small" fullWidth>บันทึก</Button>
+                                                                        <Button variant="contained" color="error" onClick={handleCancel} sx={{ height: "25px", marginTop: 0.5 }}  size="small" fullWidth>ยกเลิก</Button>
                                                                     </>
                                                             }
                                                         </Box>

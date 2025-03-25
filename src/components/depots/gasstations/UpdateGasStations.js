@@ -955,6 +955,7 @@ const UpdateGasStations = (props) => {
                                                                         fontSize: '12px',
                                                                     },
                                                                 }}
+                                                                style={{ display: count === 2 ? "none" : ""}}
                                                                 value={row.Squeeze || squeeze} // ถ้าค่าว่างให้เป็น 0
                                                                 onChange={(e) => handleInputChange(index, "Squeeze", e.target.value)}
                                                                 onFocus={(e) => {

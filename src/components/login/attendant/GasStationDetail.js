@@ -306,6 +306,15 @@ const GasStationDetail = (props) => {
         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
     });
 
+    console.log("reports : ",reports);
+    console.log("sortReport : ",sortedReport);
+    console.log("not report : ",notReport);
+
+    console.log("stock : ",stocks);
+    console.log("volume : ",volumes);
+    console.log("update stock : ",updateStocks);
+    console.log("update volume : ",updateVolumes);
+
     // useEffect(() => {
     //     const newDifference = sortedOilBalance.reduce((acc, item) => {
     //         acc[item.ProductName] = item.prevOilBalance - item.latestOilBalance;
@@ -479,7 +488,7 @@ const GasStationDetail = (props) => {
                                             size="small"
                                             type="number"
                                             fullWidth
-                                            value={updateStocks[row.ProductName] ?? row.Delivered} // ใช้ ?? ป้องกัน undefined
+                                            value={updateStocks[row.ProductName] ?? row.OilBalance} // ใช้ ?? ป้องกัน undefined
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
                                         

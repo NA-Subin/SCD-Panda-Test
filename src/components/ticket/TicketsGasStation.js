@@ -25,8 +25,10 @@ import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
@@ -39,50 +41,61 @@ const TicketsGasStation = (props) => {
     const [rate1, setRate1] = React.useState(row.Rate1);
     const [rate2, setRate2] = React.useState(row.Rate2);
     const [rate3, setRate3] = React.useState(row.Rate3);
+    const [creditTime, setCreditTime] = React.useState(row.CreditTime);
     const [status, setStatus] = React.useState(row.Status);
     const [open, setOpen] = useState(false);
 
     const handleUpdate = () => {
         database
-                    .ref("/customers/gasstations/")
-                    .child(row.id-1)
-                    .update({
-                    Rate1: rate1,
-                    Rate2: rate2,
-                    Rate3: rate3,
-                    }) // อัพเดท values ทั้งหมด
-                    .then(() => {
-                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                        console.log("Data updated successfully");
-                        setOpen(false);
-                    })
-                    .catch((error) => {
-                        ShowError("แก้ไขข้อมูลไม่สำเร็จ");
-                        console.error("Error updating data:", error);
-                    });
+            .ref("/customers/gasstations/")
+            .child(row.id - 1)
+            .update({
+                Rate1: rate1,
+                Rate2: rate2,
+                Rate3: rate3,
+                CreditTime: creditTime
+            }) // อัพเดท values ทั้งหมด
+            .then(() => {
+                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                console.log("Data updated successfully");
+                setOpen(false);
+            })
+            .catch((error) => {
+                ShowError("แก้ไขข้อมูลไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
     };
 
     return (
         <React.Fragment>
             {
                 !open ?
-                    <TableRow key={row.id}>
+                    <TableRow key={row.id} >
                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{name}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{creditTime}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate2}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate3}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{status}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                            <IconButton color="warning" onClick={() => setOpen(true)}>
-                                <BorderColorIcon />
-                            </IconButton>
+                        <Button
+                                        variant="contained"
+                                        color="warning"
+                                        startIcon={<EditNoteIcon />}
+                                        size="small"
+                                        sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }}
+                                        onClick={() => setOpen(true)}
+                                        fullWidth
+                                    >
+                                        แก้ไข
+                                    </Button>
                         </TableCell>
                     </TableRow>
                     :
-                    <TableRow key={row.id}>
-                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{name}</TableCell>
+                    <TableRow key={row.id} sx={{ backgroundColor: "#fff59d" }}>
+                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{row.id}</TableCell>
+                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth
@@ -100,7 +113,32 @@ const TicketsGasStation = (props) => {
                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            paddingLeft: 2
+                                            textAlign: "center"
+                                        },
+                                    }}
+                                    value={creditTime || 0}
+                                    onChange={(e) => setCreditTime(e.target.value)}
+                                />
+                            </Paper>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '14px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '30px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: "center"
                                         },
                                     }}
                                     value={rate1 || 0}
@@ -109,7 +147,7 @@ const TicketsGasStation = (props) => {
                             </Paper>
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                        <Paper component="form" sx={{ width: "100%" }}>
+                            <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth
                                     type="number"
                                     InputLabelProps={{
@@ -125,7 +163,7 @@ const TicketsGasStation = (props) => {
                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            paddingLeft: 2
+                                            textAlign: "center"
                                         },
                                     }}
                                     value={rate2 || 0}
@@ -134,7 +172,7 @@ const TicketsGasStation = (props) => {
                             </Paper>
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                        <Paper component="form" sx={{ width: "100%" }}>
+                            <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth
                                     type="number"
                                     InputLabelProps={{
@@ -150,7 +188,7 @@ const TicketsGasStation = (props) => {
                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            paddingLeft: 2
+                                            textAlign: "center"
                                         },
                                     }}
                                     value={rate3 || 0}
@@ -158,22 +196,26 @@ const TicketsGasStation = (props) => {
                                 />
                             </Paper>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
+                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{row.Status}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             {
                                 !open ?
-                                <IconButton color="warning" size="small" onClick={() => setOpen(true)}>
-                                <BorderColorIcon fontSize="small"/>
-                            </IconButton>
-                            :
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                            <IconButton color="error" size="small" onClick={() => setOpen(false)}>
-                                <BorderColorIcon fontSize="small"/>
-                            </IconButton>
-                            <IconButton color="success" size="small" onClick={handleUpdate}>
-                                <BorderColorIcon fontSize="small"/>
-                            </IconButton>
-                            </Box>
+                                    <Button
+                                        variant="contained"
+                                        color="warning"
+                                        startIcon={<EditNoteIcon />}
+                                        size="small"
+                                        sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }}
+                                        onClick={() => setOpen(true)}
+                                        fullWidth
+                                    >
+                                        แก้ไข
+                                    </Button>
+                                    :
+                                    <>
+                                        <Button variant="contained" color="success" onClick={handleUpdate} sx={{ height: "25px", marginTop: 0.5 }} size="small" fullWidth>บันทึก</Button>
+                                        <Button variant="contained" color="error" onClick={() => setOpen(false)} sx={{ height: "25px", marginTop: 0.5 }} size="small" fullWidth>ยกเลิก</Button>
+                                    </>
                             }
                         </TableCell>
                     </TableRow>
