@@ -113,21 +113,9 @@ const Trips = () => {
                 <InsertTrips />
             </Box>
             <Divider sx={{ marginBottom: 2 }} />
-            <Grid container spacing={3} marginTop={1}>
-                <Grid item xs={12}>
-                    <Paper
-                        sx={{
-                            p: 2,
-                        }}
-                    >
-                        <Grid container spacing={2} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 150) : windowWidth <= 600 ? (windowWidth - 50) : (windowWidth - 300) }}>
+                        <Grid container spacing={2} width="100%">
                             <Grid item xs={12}>
-                                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                    รายการเที่ยววิ่งรถ
-                                </Typography>
-                                <Divider sx={{ marginTop: 1 }} />
-                            </Grid>
-                            <Grid item xs={12}>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -2, fontSize: "12px", color: "red",textAlign: "right", marginRight: 7 }} gutterBottom>*ดูรายละเอียดและแก้ไขการจัดเที่ยววิ่งรถตรงนี้*</Typography>
                                 <TableContainer
                                     component={Paper}
                                     sx={{
@@ -139,9 +127,7 @@ const Trips = () => {
                                     <Table
                                         stickyHeader
                                         size="small"
-                                        sx={{
-                                            tableLayout: "fixed", // บังคับความกว้างของคอลัมน์
-                                        }}
+                                        sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
                                     >
                                         <TableHead>
                                             <TableRow sx={{ height: "7vh" }}>
@@ -278,9 +264,6 @@ const Trips = () => {
                                 }
                             </Grid>
                         </Grid>
-                    </Paper>
-                </Grid>
-            </Grid>
         </Container>
 
     );

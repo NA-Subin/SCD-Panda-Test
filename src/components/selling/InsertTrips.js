@@ -35,7 +35,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TableCellPWD, TablecellSelling } from "../../theme/style";
+import { IconButtonError, RateOils, TableCellB7, TableCellB95, TablecellCustomers, TableCellE20, TableCellG91, TableCellG95, TableCellPWD, TablecellSelling, TablecellTickets } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import { database } from "../../server/firebase";
@@ -1211,7 +1211,7 @@ const InsertTrips = () => {
                     <Box sx={{ p: 2 }} ref={dialogRef}>
                         <Grid container spacing={1} marginTop={0.5}>
                             <Grid item sm={1} xs={4} textAlign="left">
-                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ตั๋วน้ำมัน</Typography>
+                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                             </Grid>
                             <Grid item sm={2} xs={8} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
@@ -1370,17 +1370,17 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TablecellSelling width={50} sx={{ textAlign: "center", height: "35px" }}>ลำดับ</TablecellSelling>
-                                                <TablecellSelling width={350} sx={{ textAlign: "center", height: "35px" }}>ตั๋ว</TablecellSelling>
-                                                <TablecellSelling width={150} sx={{ textAlign: "center", height: "35px" }}>เลขที่ออเดอร์</TablecellSelling>
-                                                <TablecellSelling width={100} sx={{ textAlign: "center", height: "35px" }}>ค่าบรรทุก</TablecellSelling>
+                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
+                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
+                                                <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
+                                                <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
                                                 <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
                                                 <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
                                                 <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
                                                 <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
-                                                <TablecellSelling width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white" }} />
+                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -1404,6 +1404,7 @@ const InsertTrips = () => {
                                                     detail={ordersTickets[key]}
                                                     ticketsTrip={ticketsTrip}
                                                     total={weightOil}
+                                                    totalWeight={(parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight))}
                                                     editMode={editMode}
                                                     depots={depots}
                                                     tickets={getTickets()}
@@ -1428,17 +1429,15 @@ const InsertTrips = () => {
                                         bottom: 0,
                                         left: 0,
                                         right: 0,
-                                        height: "35px", // กำหนดความสูง footer
-                                        backgroundColor: theme.palette.info.main,
                                         zIndex: 2,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellSelling width={650} sx={{ textAlign: "center" }}>
+                                                <TablecellTickets width={650} sx={{ textAlign: "center",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
-                                                </TablecellSelling>
+                                                </TablecellTickets>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
                                                         editMode ?
@@ -1637,7 +1636,7 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.PWD || 0}</Typography>
                                                     }
                                                 </TableCellPWD>
-                                                <TablecellSelling width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: editMode ? "" : "lightgray" }} >
+                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} >
                                                     <Box display="flex" justifyContent="center" alignItems="center">
                                                         {/* <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1 }} gutterBottom>ต้นทุนรวม</Typography>
                                                         <Paper component="form">
@@ -1691,7 +1690,7 @@ const InsertTrips = () => {
                                                                 <Typography variant="subtitle2" fontSize="12px" fontWeight="bold" color="black" gutterBottom>{(volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD) || 0}</Typography>
                                                         }
                                                     </Box>
-                                                </TablecellSelling>
+                                                </TablecellTickets>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -1849,7 +1848,7 @@ const InsertTrips = () => {
                     }*/}
                         <Grid container spacing={1}>
                             <Grid item sm={1} xs={4} textAlign="left">
-                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
+                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.info.main }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                             </Grid>
                             <Grid item sm={2} xs={8} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
@@ -2012,15 +2011,15 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellSelling width={50} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px" }}>
                                                     ลำดับ
-                                                </TablecellSelling>
-                                                <TablecellSelling width={350} sx={{ textAlign: "center", height: "35px" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px" }}>
                                                     ลูกค้า
-                                                </TablecellSelling>
-                                                <TablecellSelling width={100} sx={{ textAlign: "center", height: "35px" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px" }}>
                                                     ค่าบรรทุก
-                                                </TablecellSelling>
+                                                </TablecellCustomers>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>
                                                     G95
                                                 </TableCellG95>
@@ -2039,7 +2038,7 @@ const InsertTrips = () => {
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
                                                     PWD
                                                 </TableCellPWD>
-                                                <TablecellSelling width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} />
+                                                <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -2051,7 +2050,7 @@ const InsertTrips = () => {
                                     sx={{
                                         position: "absolute",
                                         top: "35px", // เริ่มจากด้านล่าง header
-                                        bottom: "60px", // จนถึงด้านบนของ footer
+                                        bottom: "25px", // จนถึงด้านบนของ footer
                                         overflowY: "auto",
                                     }}
                                 >
@@ -2086,10 +2085,7 @@ const InsertTrips = () => {
                                 <Box
                                     sx={{
                                         position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "25px", // กำหนดความสูง footer
+                                        height: "25px",
                                         bottom: "25px", // จนถึงด้านบนของ footer
                                         backgroundColor: theme.palette.info.main,
                                         zIndex: 2,
@@ -2099,28 +2095,28 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main, }}>
-                                                <TablecellSelling width={500} sx={{ textAlign: "center" }}>
+                                                <TablecellCustomers width={500} sx={{ textAlign: "center" }}>
                                                     รวม
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.G95 || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.B95 || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.B7 || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.G91 || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.E20 || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.PWD || 0}
-                                                </TablecellSelling>
-                                                <TablecellSelling width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
@@ -2152,7 +2148,7 @@ const InsertTrips = () => {
                                                             :
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}</Typography>
                                                     }
-                                                </TablecellSelling>
+                                                </TablecellCustomers>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -2162,10 +2158,8 @@ const InsertTrips = () => {
                                 <Box
                                     sx={{
                                         position: "absolute",
+                                        height: "25px",
                                         bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "25px", // กำหนดความสูง footer
                                         backgroundColor: theme.palette.info.main,
                                         zIndex: 2,
                                         borderTop: "2px solid white",
@@ -2175,14 +2169,14 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellSelling width={500} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "35px" }}>
                                                     คงเหลือ
-                                                </TablecellSelling>
+                                                </TablecellCustomers>
                                                 {
                                                     fuelTypes.map((type) => {
                                                         const value = Number(volumeT[type]) - Number(volumeS[type]);
                                                         return (
-                                                          <TablecellSelling
+                                                          <TablecellCustomers
                                                             key={type}
                                                             width={60}
                                                             sx={{
@@ -2195,11 +2189,11 @@ const InsertTrips = () => {
                                                             }}
                                                           >
                                                             {value || 0}
-                                                          </TablecellSelling>
+                                                          </TablecellCustomers>
                                                         );
                                                       })
                                                 }
-                                                <TablecellSelling width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
@@ -2233,7 +2227,7 @@ const InsertTrips = () => {
                                                                 {totalVolume}
                                                             </Typography>
                                                     }
-                                                </TablecellSelling>
+                                                </TablecellCustomers>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>

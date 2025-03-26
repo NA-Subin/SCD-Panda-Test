@@ -237,6 +237,7 @@ const UpdateGasStations = (props) => {
                         Delivered: value?.Delivered || 0,
                         Pending1: value?.Pending1 || 0,
                         Pending2: value?.Pending2 || 0,
+                        Pending3: value?.Pending3 || value?.Delivered || 0,
                         EstimateSell: value?.EstimateSell ?? yesterdayEntry?.EstimateSell ?? 0,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,
@@ -270,6 +271,7 @@ const UpdateGasStations = (props) => {
                                 Delivered: 0,
                                 Pending1: 0,
                                 Pending2: 0,
+                                Pending3: 0,
                                 EstimateSell: values.find(v => v?.ProductName === key)?.EstimateSell ?? yesterdayEntry?.EstimateSell ?? 0,
                                 Period: 0,
                                 DownHole: 0,
@@ -433,6 +435,7 @@ const UpdateGasStations = (props) => {
                 Volume: 0,
                 Pending1: 0,
                 Pending2: 0,
+                Pending3: 0,
                 EstimateSell: 0,
                 Period: 0,
                 // ใช้ค่า DownHole เริ่มต้นจาก gasStation ถ้าค่าใน downHole ไม่มี
@@ -489,7 +492,7 @@ const UpdateGasStations = (props) => {
     // ฟังก์ชันคำนวณผลรวม
     const calculatePeriod = (row) => {
         const estimateSell = parseFloat(row.EstimateSell) || 0;
-        const Delivered = parseFloat(row.Delivered) || 0;
+        const Pending3 = parseFloat(row.Pending3) || 0;
         const Pending1 = parseFloat(row.Pending1) || 0;
         const Pending2 = parseFloat(row.Pending2) || 0;
         const squeezeoil = parseFloat(row.Squeeze) || squeeze;
@@ -498,16 +501,16 @@ const UpdateGasStations = (props) => {
         //console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
 
         if (estimateSell === 0) {
-            return ((volume + Delivered + Pending1 + Pending2) - squeezeoil).toFixed(2);
+            return ((volume + Pending3 + Pending1 + Pending2) - squeezeoil).toFixed(2);
         } else {
-            return (((volume + Delivered + Pending1 + Pending2) - squeezeoil) / estimateSell).toFixed(2);
+            return (((volume + Pending3 + Pending1 + Pending2) - squeezeoil) / estimateSell).toFixed(2);
         }
     };
 
     const calculateDownHole = (row) => {
         //console.log("Before calculateDownHole:", row);
 
-        const Delivered = parseFloat(row.Delivered) || 0;
+        const Pending3 = parseFloat(row.Pending3) || 0;
         const Pending1 = parseFloat(row.Pending1) || 0;
         const Pending2 = parseFloat(row.Pending2) || 0;
         const downHole = parseFloat(row.DownHole) || 0;
@@ -515,15 +518,15 @@ const UpdateGasStations = (props) => {
 
         // console.log("downHole :",downHole);
         // console.log("value :",value);
-        // return ((value + Delivered + Pending1 + Pending2)).toFixed(2);
+        // return ((value + Pending3 + Pending1 + Pending2)).toFixed(2);
 
         //console.log("ProductName:", row.ProductName, "Pending2:", Pending2);
 
         if (downHole !== 0) {
-            return ((volume + Delivered + Pending1 + Pending2)).toFixed(2);
+            return ((volume + Pending3 + Pending1 + Pending2)).toFixed(2);
         }
         else {
-            return ((volume + Delivered + Pending1 + Pending2 + downHole)).toFixed(2);
+            return ((volume + Pending3 + Pending1 + Pending2 + downHole)).toFixed(2);
         }
     };
 
@@ -1000,36 +1003,36 @@ const UpdateGasStations = (props) => {
                                                                 size="small"
                                                                 type="number"
                                                                 label="ลงจริงไปแล้ว"
-                                                                value={row.Delivered || 0}
+                                                                value={row.Pending3 || 0}
                                                                 onChange={(e) => {
                                                                     let newValue = e.target.value;
 
                                                                     // ตรวจสอบว่าเป็นค่าว่างหรือไม่
                                                                     if (newValue === "") {
-                                                                        handleInputChange(index, "Delivered", ""); // ให้เป็นค่าว่างชั่วคราว
+                                                                        handleInputChange(index, "Pending3", ""); // ให้เป็นค่าว่างชั่วคราว
                                                                     } else {
-                                                                        handleInputChange(index, "Delivered", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
+                                                                        handleInputChange(index, "Pending3", newValue.replace(/^0+(?=\d)/, "")); // ลบ 0 นำหน้าทันที
                                                                     }
                                                                 }}
                                                                 onFocus={(e) => {
                                                                     if (e.target.value === "0") {
-                                                                        handleInputChange(index, "Delivered", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
+                                                                        handleInputChange(index, "Pending3", ""); // ล้าง 0 ออกเมื่อเริ่มพิมพ์
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.target.value === "") {
-                                                                        handleInputChange(index, "Delivered", 0); // ถ้าค่าว่างให้เป็น 0
+                                                                        handleInputChange(index, "Pending3", 0); // ถ้าค่าว่างให้เป็น 0
                                                                     }
                                                                 }}
                                                                 onKeyDown={(e) => {
-                                                                    let currentValue = parseInt(row.Delivered || 0, 10);
+                                                                    let currentValue = parseInt(row.Pending3 || 0, 10);
 
                                                                     if (e.key === "ArrowUp") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Delivered", currentValue + 1000);
+                                                                        handleInputChange(index, "Pending3", currentValue + 1000);
                                                                     } else if (e.key === "ArrowDown") {
                                                                         e.preventDefault();
-                                                                        handleInputChange(index, "Delivered", Math.max(0, currentValue - 1000));
+                                                                        handleInputChange(index, "Pending3", Math.max(0, currentValue - 1000));
                                                                     }
                                                                 }}
                                                                 InputProps={{

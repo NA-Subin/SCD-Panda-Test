@@ -75,6 +75,9 @@ const GasStationsDetail = (props) => {
     console.log(volume);
 
     const [values, setValues] = React.useState([]);
+    const [isDataUpdated, setIsDataUpdated] = useState(false); // ตรวจสอบว่าอัพเดทข้อมูลแล้วหรือยัง
+
+    console.log("Check : ", isDataUpdated);
 
     const handleSendBack = (newData) => {
         setValues(prevValues => {
@@ -179,6 +182,54 @@ const GasStationsDetail = (props) => {
 
     console.log("ปั้มทั้งหมด" + matchCount);
 
+    console.log(" Gas Station Oil : ",gasStationOil);
+    console.log(" Gas Station Oil edit : ",values);
+
+    // ใช้ useEffect เพื่อตรวจสอบค่า values และอัปเดต isDataUpdated
+    React.useEffect(() => {
+        if (!values.length || !gasStationOil) return;
+    
+        let date = dayjs(selectedDate).format("DD-MM-YYYY");
+    
+        // 🔍 ดึงข้อมูลของวันนั้นจาก values และ gasStationOil ด้วย optional chaining
+        let reportData = values.find(item => item.Stock === checkStock && item.Report?.[date])?.Report[date] || null;
+        let gasStationData = gasStationOil.find(item => item.Stock === checkStock && item.Report?.[date])?.Report[date] || null;
+    
+        console.log("📅 Date:", date);
+        console.log("📦 reportData จาก values:", reportData);
+        console.log("🛢️ gasStationData จาก gasStationOil:", gasStationData);
+    
+        // ถ้าไม่มีข้อมูลใน reportData หรือ gasStationData สำหรับวันที่นั้น ให้ตั้งค่า isDataUpdated เป็น false
+        if (!reportData || !gasStationData) {
+            setIsDataUpdated(false);
+            return;
+        }
+    
+        // 🔍 ตรวจสอบค่าต่าง ๆ ใน reportData และ gasStationData
+        const isUpdated = Object.keys(reportData).some(index => {
+            const reportItem = reportData[index];
+            const gasStationItem = gasStationData[index];
+    
+            if (reportItem) {
+                // ตรวจสอบว่ามีค่าที่ไม่ตรงกันหรือไม่
+                return (
+                    reportItem.Period !== gasStationItem.Period
+                );
+            }
+    
+            // ถ้าไม่มีข้อมูลใน gasStationData ถือว่าไม่มีการเปลี่ยนแปลง
+            return false;
+        });
+    
+        // กำหนดค่า isDataUpdated: ถ้ามีการเปลี่ยนแปลง จะเป็น true
+        setIsDataUpdated(isUpdated);
+    
+        console.log("🔄 ค่า isDataUpdated:", isUpdated);
+    }, [values, gasStationOil, selectedDate]);
+    
+    
+    
+    
     // gasStation: {
     //     0: {
     //         id: 1,
@@ -337,29 +388,36 @@ const GasStationsDetail = (props) => {
                         </Paper>
                     </Grid>
                     <Grid item sm={6} lg={8}>
-                        <FormGroup row>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={checkStock === "ทั้งหมด"}
-                                        onChange={() => setCheckStock("ทั้งหมด")}
-                                    />
-                                }
-                                label="ทั้งหมด"
-                            />
-                            {stocks.map((row) => (
-                                <FormControlLabel
-                                    key={row.Name}
-                                    control={
-                                        <Checkbox
-                                            checked={checkStock === row.Name}
-                                            onChange={() => setCheckStock(row.Name)}
-                                        />
-                                    }
-                                    label={row.Name}
-                                />
-                            ))}
-                        </FormGroup>
+                    <FormGroup row>
+    <FormControlLabel
+        control={
+            <Checkbox
+                checked={checkStock === "ทั้งหมด"}
+                onChange={() => setCheckStock("ทั้งหมด")}
+                disabled={isDataUpdated} // 🔹 ปิดการเลือกถ้ามีการเปลี่ยนแปลง
+            />
+        }
+        label="ทั้งหมด"
+    />
+    {stocks.map((row) => (
+        <FormControlLabel
+            key={row.Name}
+            control={
+                <Checkbox
+                    checked={checkStock === row.Name}
+                    onChange={() => setCheckStock(row.Name)}
+                    disabled={isDataUpdated} // 🔹 ปิดการเลือกถ้ามีการเปลี่ยนแปลง
+                />
+            }
+            label={row.Name}
+        />
+    ))}
+</FormGroup>
+{isDataUpdated && (
+    <Typography color="error" sx={{ mt: 1 }}>
+        ⚠️ กรุณาบันทึกข้อมูลก่อนเปลี่ยนสาขา
+    </Typography>
+)}
                     </Grid>
                     <Grid item xs={12}>
                         {
@@ -383,6 +441,7 @@ const GasStationsDetail = (props) => {
                                                 // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
                                                 
                                                 let productName = reportItem?.ProductName || "";
+                                                
                                                 // let volumeValue = Number(yesterdayEntry?.Difference) || Number(yesterdayEntry?.OilBalance) || 0;
                                                 // let deliveredValue = Number(reportItem?.Delivered) || 0;
                                                 // let pending1Value = Number(reportItem?.Pending1) || 0;
@@ -495,6 +554,8 @@ const GasStationsDetail = (props) => {
                                                 }
                                             }
                                         });
+
+                                        console.log(`2.Final DownHole for Stock: ${stock.Name}`, downHole);
 
                                         return gasStationOil.map((row, rowIndex) => {
                                             if (checkStock === row.Stock) {

@@ -1636,15 +1636,21 @@ const UpdateTrip = (props) => {
                     </Box>
                     {
                         !editMode ?
-                            <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
-                                <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate}>แก้ไข</Button>
-                                <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
-                            </Box>
+                            <>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*ถ้าต้องการเพิ่มตั๋วหรือลูกค้าให้กดปุ่มแก้ไข*</Typography>
+                                <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
+                                    <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate}>แก้ไข</Button>
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                                </Box>
+                            </>
                             :
-                            <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
-                                <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={() => setEditMode(false)}>ยกเลิก</Button>
-                                <Button variant="contained" color="success" size="small" onClick={handleSave}>บันทึก</Button>
-                            </Box>
+                            <>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*เมื่อแก้ไขเสร็จแล้วให้กดบันทึกให้เรียบร้อย*</Typography>
+                                <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
+                                    <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={() => setEditMode(false)}>ยกเลิก</Button>
+                                    <Button variant="contained" color="success" size="small" onClick={handleSave}>บันทึก</Button>
+                                </Box>
+                            </>
                     }
                 </DialogContent>
             </Dialog>

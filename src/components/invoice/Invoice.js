@@ -64,6 +64,12 @@ const Invoice = () => {
     };
   }, []);
 
+  const [selectedRow, setSelectedRow] = useState(0);
+
+  const handleRowClick = (row) => {
+    setSelectedRow(row);
+  };
+
   const { order } = useData();
 const orders = Object.values(order || {});
 
@@ -103,7 +109,7 @@ const result = Object.values(groupedOrders).map((item, index) => ({
   console.log(result);
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -126,24 +132,14 @@ const result = Object.values(groupedOrders).map((item, index) => ({
       </Typography>
       <Divider sx={{ marginBottom: 1 }} />
       <Grid container spacing={2} sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth - 10) : (windowWidth - 235) }}>
-        <Grid item xs={10}>
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            รายการใบวางบิล
-          </Typography>
-        </Grid>
-        <Grid item xs={2}>
-           
-        </Grid>
         <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        <Grid item xs={12}>
+          <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
           <TableContainer
             component={Paper}
-            sx={{ marginBottom: 2 }}
+            sx={{ marginBottom: 2, height: "250px" }}
           >
-            <Table stickyHeader size="small">
-              <TableHead sx={{ height: "7vh" }}>
+            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+              <TableHead sx={{ height: "5vh" }}>
                 <TableRow>
                   <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                     ลำดับ
@@ -151,34 +147,54 @@ const result = Object.values(groupedOrders).map((item, index) => ({
                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                     ชื่อ-สกุล
                   </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                     จำนวนลิตร
                   </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                     ยอดเงิน
                   </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                     ยอดโอน
                   </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                     ค้างโอน
                   </TablecellHeader>
-                  <TablecellHeader />
                 </TableRow>
               </TableHead>
               <TableBody>
                 {
-                  result.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <UpdateInvoice key={row.id} ticket={row} />
+                  result.map((row) => (
+                    <TableRow 
+                      key={row.id} 
+                      onClick={() => handleRowClick(row)} 
+                      sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+                    >
+                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
+                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+                            {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+                        </TableCell>
+                    </TableRow>
                   ))
                 }
+                {/* {
+                  result
+                  //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <UpdateInvoice key={row.id} ticket={row} />
+                  ))
+                } */}
               </TableBody>
             </Table>
           </TableContainer>
-          {
-            result.length <= 10 ? null :
+          {/* {
+            result.length <= 5 ? null :
               <TablePagination
-                rowsPerPageOptions={[10, 25, 30]}
+                rowsPerPageOptions={[5, 10, 25, 30]}
                 component="div"
                 count={result.length}
                 rowsPerPage={rowsPerPage}
@@ -219,6 +235,15 @@ const result = Object.values(groupedOrders).map((item, index) => ({
                   }
                 }}
               />
+          } */}
+        </Grid>
+        <Grid item xs={12}>
+          {
+            result.map((row) => (
+              selectedRow && selectedRow.id === row.id ?
+              <UpdateInvoice key={row.id} ticket={row} />
+              : ""
+            ))
           }
         </Grid>
       </Grid>

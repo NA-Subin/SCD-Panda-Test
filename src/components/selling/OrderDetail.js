@@ -34,7 +34,7 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import theme from "../../theme/theme";
 
 const OrderDetail = (props) => {
-    const { detail, ticketsTrip, onSendBack, total, onDelete, onAddProduct, onUpdateOrderID, editMode, tickets, depots } = props;
+    const { detail, ticketsTrip, onSendBack, total, onDelete, onAddProduct, onUpdateOrderID, editMode, tickets, depots, totalWeight } = props;
     const [rate, setRate] = React.useState(0.75);
     const [G91, setG91] = React.useState([]);
     const [G95, setG95] = React.useState([]);
@@ -94,7 +94,7 @@ const OrderDetail = (props) => {
     return (
         <React.Fragment>
             <TableRow>
-                <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.success.dark, color: "white" }}>
+                <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px", width: 50, backgroundColor: totalWeight > 50300 ? theme.palette.error.main : theme.palette.success.dark, color: "white" }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.id + 1}</Typography>
                 </TableCell>
                 {/* <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.main }}>

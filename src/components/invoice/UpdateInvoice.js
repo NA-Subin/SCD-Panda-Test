@@ -58,13 +58,13 @@ const UpdateInvoice = (props) => {
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
     const [test, setTest] = useState([]);
-    const { 
+    const {
         order,
         customertransports,
         customergasstations,
         customerbigtruck,
         customersmalltruck,
-     } = useData();
+    } = useData();
 
     const orders = Object.values(order || {});
     const customertransport = Object.values(customertransports || {});
@@ -78,14 +78,14 @@ const UpdateInvoice = (props) => {
         let foundItem;
         let refPath = "";
         let initialPrice = [];
-    
-        if (ticket?.TicketName) { 
+
+        if (ticket?.TicketName) {
             foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
             if (foundItem) {
                 refPath = `/customers/transports/${foundItem.id - 1}/Price`;
                 initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
             }
-    
+
             if (!foundItem) {
                 foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
                 if (foundItem) {
@@ -93,7 +93,7 @@ const UpdateInvoice = (props) => {
                     initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
                 }
             }
-    
+
             if (!foundItem) {
                 foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
                 if (foundItem) {
@@ -101,7 +101,7 @@ const UpdateInvoice = (props) => {
                     initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
                 }
             }
-    
+
             if (!foundItem) {
                 foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
                 if (foundItem) {
@@ -113,14 +113,14 @@ const UpdateInvoice = (props) => {
             ShowError("Ticket Name ไม่ถูกต้อง");
             return;
         }
-    
+
         console.log("🔍 Found Item:", foundItem);
         console.log("📌 Ref Path:", refPath);
         console.log("📊 Initial Price Data:", initialPrice);
-    
+
         setPrice(initialPrice);
     };
-    
+
     useEffect(() => {
         getPrice();
     }, [ticket]);
@@ -257,12 +257,12 @@ const UpdateInvoice = (props) => {
             return [...prevPrice, newRow];
         });
     };
-    
+
     const handleChange = (id, field, value) => {
         setPrice(prevPrice =>
             prevPrice.map(row =>
-                row.id === id ? { 
-                    ...row, 
+                row.id === id ? {
+                    ...row,
                     [field]: field === "DateStart" ? dayjs(value).format("DD/MM/YYYY") : value
                 } : row
             )
@@ -284,29 +284,29 @@ const UpdateInvoice = (props) => {
         console.log("Using Price:", price);
         console.log("Ticket Name:", ticket?.TicketName);
         console.log("Customer Transport Data:", customertransport);
-    
+
         if (!price || price.length === 0) {
             ShowError("Price เป็นค่าว่าง");
             return;
         }
-    
+
         let foundItem;
         let refPath = "";
-    
-        if (ticket?.TicketName) { 
+
+        if (ticket?.TicketName) {
             foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
             if (foundItem) refPath = "/customers/transports/";
-    
+
             if (!foundItem) {
                 foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
                 if (foundItem) refPath = "/customers/gasstations/";
             }
-    
+
             if (!foundItem) {
                 foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
                 if (foundItem) refPath = "/customers/bigtruck/";
             }
-    
+
             if (!foundItem) {
                 foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
                 if (foundItem) refPath = "/customers/smalltruck/";
@@ -315,30 +315,30 @@ const UpdateInvoice = (props) => {
             ShowError("Ticket Name ไม่ถูกต้อง");
             return;
         }
-    
+
         console.log("Item :", foundItem);
         console.log("Path :", refPath);
 
         const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
-    
+
         if (foundItem) {
             database
                 .ref(refPath)
                 .child(`${foundItem.id - 1}/Price/`)
                 .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
                 .then(() => {
-                    const pathOrder = `order/${ticket.id-1}`;
-                        update(ref(database, pathOrder), {
-                            TransferAmount: TotalPrice,
-                            TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
+                    const pathOrder = `order/${ticket.id - 1}`;
+                    update(ref(database, pathOrder), {
+                        TransferAmount: TotalPrice,
+                        TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
+                    })
+                        .then(() => {
+                            console.log("บันทึกข้อมูลเรียบร้อย ✅");
                         })
-                            .then(() => {
-                                console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error("Error pushing data:", error);
+                        });
                 })
                 .catch((error) => {
                     ShowError("ไม่สำเร็จ");
@@ -348,51 +348,15 @@ const UpdateInvoice = (props) => {
             ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
         }
     };
-    
-    console.log(" Price : ",price);
 
     return (
         <React.Fragment>
-            <TableRow>
-                <TableCell sx={{ textAlign: "center" }}>{ticket.id}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{ticket.TicketName}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {new Intl.NumberFormat("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                    }).format(parseFloat(ticket.Volume || 0))}
-                </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(parseFloat(ticket.Amount || 0))}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(parseFloat(ticket.TransferAmount || 0))}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(parseFloat(ticket.TotalOverdueTransfer || 0))}
-                </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        !open ?
-                            <IconButton color="info" size="small" onClick={handleClickOpen}><KeyboardArrowDownIcon fontSize="small" /></IconButton>
-                            :
-                            <IconButton color="info" size="small" onClick={handleClose}><KeyboardArrowUpIcon fontSize="small" /></IconButton>
-                    }
-                </TableCell>
-            </TableRow>
-            {
-                open &&
-                <TableRow>
-                    <TableCell colSpan={7} sx={{ p: 1, backgroundColor: "#eeeeee", paddingLeft: 4, paddingRight: 4, borderTop: "3px solid gray" }}>
                         <Grid container spacing={2}>
                             <Grid item xs={9.5}>
-                                <Typography variant="subtitle1" sx={{ marginTop: 1 }} fontWeight="bold" gutterBottom>
+                                <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                                     รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName}
                                 </Typography>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red",textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography>
                             </Grid>
                             <Grid item xs={1.5}>
                                 <Tooltip title="พิมพ์ใบวางบิล" placement="top">
@@ -442,25 +406,25 @@ const UpdateInvoice = (props) => {
                             <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px' }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             ลำดับ
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px' }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             วันที่
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px' }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             ผู้ขับ/ป้ายทะเบียน
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px' }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             ชนิดน้ำมัน
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px' }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             จำนวนลิตร
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px' }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             ราคาน้ำมัน
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px' }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             ยอดเงิน
                                         </TablecellSelling>
                                     </TableRow>
@@ -499,10 +463,7 @@ const UpdateInvoice = (props) => {
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                            {new Intl.NumberFormat("en-US", {
-                                                                minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 2,
-                                                            }).format(parseFloat(row.Volume))}
+                                                            {new Intl.NumberFormat("en-US").format(row.Volume)}
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 100 }}>
@@ -577,10 +538,7 @@ const UpdateInvoice = (props) => {
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                            {new Intl.NumberFormat("en-US", {
-                                                                minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 2,
-                                                            }).format(report[row.uniqueRowId]?.Amount || row.Amount)}
+                                                            {new Intl.NumberFormat("en-US").format(report[row.uniqueRowId]?.Amount || row.Amount)}
                                                         </Typography>
                                                     </TableCell>
                                                 </TableRow>
@@ -591,30 +549,24 @@ const UpdateInvoice = (props) => {
                             <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "gray", color: "white" }} colSpan={4}>
+                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={4}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                 รวม
                                             </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "gray", color: "white" }}>
+                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {new Intl.NumberFormat("en-US", {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                }).format(parseFloat(ticket.Volume))}
+                                                {new Intl.NumberFormat("en-US").format(ticket.Volume)}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 100, backgroundColor: "gray", color: "white" }}>
+                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 100, backgroundColor: "#616161", color: "white" }}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                 0
                                             </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "gray", color: "white" }}>
+                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {new Intl.NumberFormat("en-US", {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                }).format(parseFloat(ticket.Amount))}
+                                                {new Intl.NumberFormat("en-US").format(ticket.Amount)}
                                             </Typography>
                                         </TableCell>
                                     </TableRow>
@@ -622,7 +574,8 @@ const UpdateInvoice = (props) => {
                             </Table>
                         </TableContainer>
 
-                        <Typography variant='subtitle1' fontWeight="bold" gutterBottom>ข้อมูลการโอน</Typography>
+                        <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: 5, fontSize: "18px" }} gutterBottom>ข้อมูลการโอน</Typography>
+                        <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red",textAlign: "right", marginRight: 7 }} gutterBottom>*เพิ่มข้อมูลการโอนเงินตรงนี้*</Typography>
                         <Grid container spacing={2}>
                             <Grid item xs={11.5}>
                                 <TableContainer
@@ -632,23 +585,23 @@ const UpdateInvoice = (props) => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px" }}>ลำดับ</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px" }}>วันที่เงินเข้า</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px" }}>บัญชี</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px" }}>บริษัทขนส่ง</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px" }}>ยอดเงินเข้า</TablecellSelling>
-                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 200, height: "30px" }}>หมายเหตุ</TablecellSelling>
-                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px" }}>
-                                                <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
-                                    <IconButton color="info"
-                                        size="small"
-                                        fullWidth
-                                        onClick={handlePost}
-                                        sx={{ borderRadius: 2 }}
-                                    >
-                                        <AddBoxIcon />
-                                    </IconButton>
-                                </Tooltip>
+                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px",backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px",backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px",backgroundColor: theme.palette.success.main }}>บัญชี</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px",backgroundColor: theme.palette.success.main }}>บริษัทขนส่ง</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px",backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
+                                                <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 200, height: "30px",backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px",backgroundColor: "white" }}>
+                                                    <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
+                                                        <IconButton color="success"
+                                                            size="small"
+                                                            fullWidth
+                                                            onClick={handlePost}
+                                                            sx={{ borderRadius: 2 }}
+                                                        >
+                                                            <AddBoxIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 </TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -663,33 +616,33 @@ const UpdateInvoice = (props) => {
 
                                                     {/* DatePicker */}
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                                                            <DatePicker
-                                                                                                                openTo="day"
-                                                                                                                views={["year", "month", "day"]}
-                                                                                                                value={dayjs(row.DateStart, "DD/MM/YYYY")}  // กำหนดรูปแบบที่ต้องการ
-                                                                                                                format="DD/MM/YYYY"
-                                                                                                                onChange={(newValue) => handleChange(row.id, "DateStart", newValue)}
-                                                                                                                slotProps={{
-                                                                                                                    textField: {
-                                                                                                                        size: "small",
-                                                                                                                        fullWidth: true,
-                                                                                                                        sx: {
-                                                                                                                            "& .MuiOutlinedInput-root": {
-                                                                                                                                height: "25px",
-                                                                                                                                paddingRight: "8px",
-                                                                                                                            },
-                                                                                                                            "& .MuiInputBase-input": {
-                                                                                                                                fontSize: "14px",
-                                                                                                                            },
-                                                                                                                        },
-                                                                                                                    },
-                                                                                                                }}
-                                                                                                            />
-                                                                                                        </LocalizationProvider>
-                                                            </Paper>
-                                                            {/* <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                <DatePicker
+                                                                    openTo="day"
+                                                                    views={["year", "month", "day"]}
+                                                                    value={dayjs(row.DateStart, "DD/MM/YYYY")}  // กำหนดรูปแบบที่ต้องการ
+                                                                    format="DD/MM/YYYY"
+                                                                    onChange={(newValue) => handleChange(row.id, "DateStart", newValue)}
+                                                                    slotProps={{
+                                                                        textField: {
+                                                                            size: "small",
+                                                                            fullWidth: true,
+                                                                            sx: {
+                                                                                "& .MuiOutlinedInput-root": {
+                                                                                    height: "25px",
+                                                                                    paddingRight: "8px",
+                                                                                },
+                                                                                "& .MuiInputBase-input": {
+                                                                                    fontSize: "14px",
+                                                                                },
+                                                                            },
+                                                                        },
+                                                                    }}
+                                                                />
+                                                            </LocalizationProvider>
+                                                        </Paper>
+                                                        {/* <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                                 {row.DateStart ? dayjs(row.DateStart).format("DD/MM/YYYY") : "-"}
                                                             </Typography> */}
                                                     </TableCell>
@@ -737,11 +690,11 @@ const UpdateInvoice = (props) => {
 
                                                     {/* Action Buttons */}
                                                     <TableCell sx={{ textAlign: "center", width: 60, height: "30px" }}>
-                                                    <Tooltip title="ยกเลิก" placement="left">
-                                                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                                                            <BackspaceIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
+                                                        <Tooltip title="ยกเลิก" placement="left">
+                                                            <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                                                                <BackspaceIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -751,17 +704,17 @@ const UpdateInvoice = (props) => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "gray", color: "white", width: 700 }} colSpan={4}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 700 }} colSpan={4}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         รวม
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "gray", color: "white" }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
 
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 260, backgroundColor: "gray", color: "white" }} colSpan={2}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 260, backgroundColor: "#616161", color: "white" }} colSpan={2}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
 
                                                     </Typography>
@@ -773,28 +726,25 @@ const UpdateInvoice = (props) => {
                             </Grid>
                             <Grid item xs={0.5}>
                                 {
-                                                price.length > 0 &&
-                                                <Tooltip title="บันทึก" placement="left">
-                                                    <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main,marginLeft: -1,marginRight: -1,marginTop: 1 }}>
-                                                                <Button
-                                                                    color="inherit"
-                                                                    fullWidth
-                                                                    onClick={handleSubmit}
-                                                                    sx={{ flexDirection: "column", gap: 0.5 }}
-                                                                >
-                                                                    <SaveIcon fontSize="small" sx={{ color: "white" }} />
-                                                                    <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
-                                                                        บันทึก
-                                                                    </Typography>
-                                                                </Button>
-                                                            </Paper>
-                                </Tooltip>
-                                            }
+                                    price.length > 0 &&
+                                    <Tooltip title="บันทึก" placement="left">
+                                        <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
+                                            <Button
+                                                color="inherit"
+                                                fullWidth
+                                                onClick={handleSubmit}
+                                                sx={{ flexDirection: "column", gap: 0.5 }}
+                                            >
+                                                <SaveIcon fontSize="small" sx={{ color: "white" }} />
+                                                <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                                    บันทึก
+                                                </Typography>
+                                            </Button>
+                                        </Paper>
+                                    </Tooltip>
+                                }
                             </Grid>
                         </Grid>
-                    </TableCell>
-                </TableRow>
-            }
         </React.Fragment>
     );
 };

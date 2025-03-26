@@ -210,6 +210,7 @@ const GasStationDetail = (props) => {
                         Delivered: Number(updateVolumes[row.ProductName] || row.Delivered),
                         Pending1: row.Pending1 || 0,
                         Pending2: row.Pending2 || 0,
+                        Pending3: row.Pending3 || 0,
                         Driver1: row.Driver1 || "",
                         Driver2: row.Driver2 || "",
                         EstimateSell: row.EstimateSell || 0, // ใช้ค่าจาก state ถ้ามี
