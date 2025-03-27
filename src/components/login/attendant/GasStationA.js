@@ -396,6 +396,7 @@ const GasStationAdmin = () => {
                                     Delivered: prevItem.Delivered || 0,
                                     Pending1: prevItem.Pending1 || 0,
                                     Pending2: prevItem.Pending2 || 0,
+                                    Pending3: prevItem.Pending3 || 0,
                                     Driver1: prevItem.Driver1 || 0,
                                     Driver2: prevItem.Driver2 || 0,
                                     EstimateSell: prevItem.EstimateSell || 0,

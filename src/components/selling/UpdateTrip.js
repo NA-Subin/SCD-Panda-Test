@@ -35,7 +35,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TableCellPWD, TablecellSelling } from "../../theme/style";
+import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TableCellPWD, TablecellSelling, TablecellTickets, TablecellCustomers } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import { database } from "../../server/firebase";
@@ -63,6 +63,19 @@ const UpdateTrip = (props) => {
     const dialogRef = useRef(null);
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
     const [update, setUpdate] = useState(true);
+    const [order, setOrder] = React.useState([]);
+    const [customer, setCustomer] = React.useState([]);
+    const [ticket, setTicket] = React.useState([]);
+    const [trip, setTrip] = React.useState([]);
+    const [tickets, setTickets] = React.useState([]);
+    const [orderLength, setOrderLength] = React.useState(0);
+    const [ticketsT, setTicketsT] = React.useState([]);
+    const [ticketsPS, setTicketsPS] = React.useState([]);
+    const [ticketsA, setTicketsA] = React.useState([]);
+    const [ticketsB, setTicketsB] = React.useState([]);
+    const [ticketsS, setTicketsS] = React.useState([]);
+    const [ticketLength, setTicketLength] = React.useState(0);
+    const [costTrip, setCostTrip] = useState(trip.CostTrip);
 
     const { depots } = useData();
           const depotOptions = Object.values(depots || {});
@@ -76,55 +89,72 @@ const UpdateTrip = (props) => {
         document.body.appendChild(script);
     }, []);
 
-    const handleSaveAsImage = async () => {
-        setEditMode(false); // เปลี่ยนเป็นโหมดแสดงผลแบบ Typography
+    const handleSaveAsImage = () => {
+        const Trips = {
+            Tickets: editableTickets,
+            Orders: editableOrders,
+            TotalVolumeTicket: totalVolumesTicket,
+            TotalVolumeOrder: totalVolumesOrder,
+            CostTrip: costTrip,
+            DateStart: trip.DateStart,
+            Driver: trip.Driver,
+            Depot: depotTrip,
+            WeightTruck: trip.WeightTruck,
+        };
 
-        setTimeout(async () => {
-            if (dialogRef.current && html2canvasLoaded) {
-                // ดึงค่าความสูงของ TextField และกำหนดให้ inline style
-                const inputElement = dialogRef.current.querySelector("input");
-                if (inputElement) {
-                    const computedStyle = window.getComputedStyle(inputElement);
-                    inputElement.style.height = computedStyle.height;
-                    inputElement.style.fontSize = computedStyle.fontSize;
-                    inputElement.style.fontWeight = computedStyle.fontWeight;
-                    inputElement.style.padding = computedStyle.padding;
-                }
+        // บันทึกข้อมูลลง sessionStorage
+        sessionStorage.setItem("Trips", JSON.stringify(Trips));
 
-                // ใช้ html2canvas จับภาพ
-                const canvas = await window.html2canvas(dialogRef.current, {
-                    scrollY: 0,
-                    useCORS: true,
-                    width: dialogRef.current.scrollWidth,
-                    height: dialogRef.current.scrollHeight,
-                    scale: window.devicePixelRatio,
-                });
+        // เปิดหน้าต่างใหม่ไปที่ /print-invoice
+        const printWindow = window.open("/print-trips", "_blank", "width=800,height=600");
 
-                const image = canvas.toDataURL("image/png");
-
-                // สร้างลิงก์ดาวน์โหลด
-                const link = document.createElement("a");
-                link.href = image;
-                link.download = "บันทึกข้อมูลการขนส่งน้ำมันวันที่" + dateStart + ".png";
-                link.click();
-
-                setEditMode(true);
-            } else {
-                console.error("html2canvas ยังไม่ถูกโหลด");
-            }
-        }, 500); // รอให้ React เปลี่ยน UI ก่อนแคปภาพ
+        if (!printWindow) {
+            alert("กรุณาปิด pop-up blocker แล้วลองใหม่");
+        }
     };
+
+    // const handleSaveAsImage = async () => {
+    //     setEditMode(false); // เปลี่ยนเป็นโหมดแสดงผลแบบ Typography
+
+    //     setTimeout(async () => {
+    //         if (dialogRef.current && html2canvasLoaded) {
+    //             // ดึงค่าความสูงของ TextField และกำหนดให้ inline style
+    //             const inputElement = dialogRef.current.querySelector("input");
+    //             if (inputElement) {
+    //                 const computedStyle = window.getComputedStyle(inputElement);
+    //                 inputElement.style.height = computedStyle.height;
+    //                 inputElement.style.fontSize = computedStyle.fontSize;
+    //                 inputElement.style.fontWeight = computedStyle.fontWeight;
+    //                 inputElement.style.padding = computedStyle.padding;
+    //             }
+
+    //             // ใช้ html2canvas จับภาพ
+    //             const canvas = await window.html2canvas(dialogRef.current, {
+    //                 scrollY: 0,
+    //                 useCORS: true,
+    //                 width: dialogRef.current.scrollWidth,
+    //                 height: dialogRef.current.scrollHeight,
+    //                 scale: window.devicePixelRatio,
+    //             });
+
+    //             const image = canvas.toDataURL("image/png");
+
+    //             // สร้างลิงก์ดาวน์โหลด
+    //             const link = document.createElement("a");
+    //             link.href = image;
+    //             link.download = "บันทึกข้อมูลการขนส่งน้ำมันวันที่" + dateStart + ".png";
+    //             link.click();
+
+    //             setEditMode(true);
+    //         } else {
+    //             console.error("html2canvas ยังไม่ถูกโหลด");
+    //         }
+    //     }, 500); // รอให้ React เปลี่ยน UI ก่อนแคปภาพ
+    // };
 
     const handleClickOpen = () => {
         setOpen(true);
     };
-
-    const [order, setOrder] = React.useState([]);
-    const [customer, setCustomer] = React.useState([]);
-    const [ticket, setTicket] = React.useState([]);
-    const [trip, setTrip] = React.useState([]);
-    const [tickets, setTickets] = React.useState([]);
-    const [orderLength, setOrderLength] = React.useState(0);
 
     const getOrder = async () => {
         database.ref("/order").on("value", (snapshot) => {
@@ -139,14 +169,6 @@ const UpdateTrip = (props) => {
             setOrder(dataOrder);
         });
     };
-
-    const [ticketsT, setTicketsT] = React.useState([]);
-    const [ticketsPS, setTicketsPS] = React.useState([]);
-    const [ticketsA, setTicketsA] = React.useState([]);
-    const [ticketsB, setTicketsB] = React.useState([]);
-    const [ticketsS, setTicketsS] = React.useState([]);
-    const [ticketLength, setTicketLength] = React.useState(0);
-    const [costTrip, setCostTrip] = useState(trip.CostTrip);
 
     console.log("Ticket Length : ", ticketLength);
 
@@ -701,24 +723,23 @@ const UpdateTrip = (props) => {
                                         left: 0,
                                         right: 0,
                                         height: "35px", // กำหนดความสูง header
-                                        backgroundColor: theme.palette.info.main,
                                         zIndex: 3,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TablecellSelling width={50} sx={{ textAlign: "center", height: "35px" }}>ลำดับ</TablecellSelling>
-                                                <TablecellSelling width={350} sx={{ textAlign: "center", height: "35px" }}>ตั๋ว</TablecellSelling>
-                                                <TablecellSelling width={150} sx={{ textAlign: "center", height: "35px" }}>เลขที่ออเดอร์</TablecellSelling>
-                                                <TablecellSelling width={100} sx={{ textAlign: "center", height: "35px" }}>ค่าบรรทุก</TablecellSelling>
+                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
+                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
+                                                <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
+                                                <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
                                                 <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
                                                 <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
                                                 <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
                                                 <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
-                                                <TableCell width={60} />
+                                                <TablecellTickets width={60} sx={{ backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}/>
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -739,7 +760,7 @@ const UpdateTrip = (props) => {
                                             {editableTickets.map((row, rowIdx) => (
                                                 <TableRow key={rowIdx}>
                                                     {/* ลำดับ */}
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.success.dark, color: "white" }}>
+                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50,backgroundColor: totalVolumesTicket.totalWeight > 50300 ? theme.palette.error.main : theme.palette.success.dark , color: "white" }}>
                                                         <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{Number(row.id) + 1}</Typography>
                                                     </TableCell>
 
@@ -951,31 +972,29 @@ const UpdateTrip = (props) => {
                                         bottom: 0,
                                         left: 0,
                                         right: 0,
-                                        height: "35px", // กำหนดความสูง footer
-                                        backgroundColor: theme.palette.info.main,
                                         zIndex: 2,
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellSelling width={650} sx={{ textAlign: "center", height: "25px" }}>
+                                                <TablecellTickets width={650} sx={{ textAlign: "center", height: "25px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
-                                                </TablecellSelling>
+                                                </TablecellTickets>
                                                 {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                    <TablecellSelling key={product} width={60} sx={{
+                                                    <TablecellTickets key={product} width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
                                                         {totalVolumesTicket[product]}
-                                                    </TablecellSelling>
+                                                    </TablecellTickets>
                                                 ))}
-                                                <TablecellSelling width={60} sx={{ 
+                                                <TablecellTickets width={60} sx={{ 
                                                     textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                  }}>
                                                     {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0)}
-                                                </TablecellSelling>
+                                                </TablecellTickets>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -1241,15 +1260,15 @@ const UpdateTrip = (props) => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellSelling width={50} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px" }}>
                                                     ลำดับ
-                                                </TablecellSelling>
-                                                <TablecellSelling width={350} sx={{ textAlign: "center", height: "35px" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px" }}>
                                                     ลูกค้า
-                                                </TablecellSelling>
-                                                <TablecellSelling width={100} sx={{ textAlign: "center", height: "35px" }}>
+                                                </TablecellCustomers>
+                                                <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px" }}>
                                                     ค่าบรรทุก
-                                                </TablecellSelling>
+                                                </TablecellCustomers>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>
                                                     G95
                                                 </TableCellG95>
@@ -1268,7 +1287,7 @@ const UpdateTrip = (props) => {
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
                                                     PWD
                                                 </TableCellPWD>
-                                                <TableCell width={60} />
+                                                <TablecellCustomers width={60} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -1288,7 +1307,7 @@ const UpdateTrip = (props) => {
                                         <TableBody>
                                             {editableOrders.map((row, rowIdx) => (
                                                 <TableRow key={rowIdx}>
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.success.dark, color: "white" }}>
+                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.info.main, color: "white" }}>
                                                         <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                             {Number(row.id) + 1}
                                                         </Typography>
@@ -1408,24 +1427,24 @@ const UpdateTrip = (props) => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellSelling width={500} sx={{ textAlign: "center", height: "25px" }}>
+                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px" }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
-                                                </TablecellSelling>
+                                                </TablecellCustomers>
 
                                                 {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                    <TablecellSelling key={product} width={60} sx={{
+                                                    <TablecellCustomers key={product} width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
                                                         {totalVolumesOrder[product]}
-                                                    </TablecellSelling>
+                                                    </TablecellCustomers>
                                                 ))}
-                                                    <TablecellSelling width={60} sx={{
+                                                    <TablecellCustomers width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
                                                         {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesOrder[product] || 0), 0)}
-                                                    </TablecellSelling>
+                                                    </TablecellCustomers>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
@@ -1448,24 +1467,24 @@ const UpdateTrip = (props) => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellSelling width={500} sx={{ textAlign: "center", height: "25px" }}>
+                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px" }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>คงเหลือ</Typography>
-                                                </TablecellSelling>
+                                                </TablecellCustomers>
 
                                                 {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                    <TablecellSelling key={product} width={60} sx={{
+                                                    <TablecellCustomers key={product} width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: (totalVolumesTicket[product] - totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product] - totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
                                                     }}>
                                                         {totalVolumesTicket[product] - totalVolumesOrder[product]}
-                                                    </TablecellSelling>
+                                                    </TablecellCustomers>
                                                 ))}
-                                                <TablecellSelling width={60} sx={{
+                                                <TablecellCustomers width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
                                                         {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + ((totalVolumesTicket[product] - totalVolumesOrder[product]) || 0), 0)}
-                                                    </TablecellSelling>
+                                                    </TablecellCustomers>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>

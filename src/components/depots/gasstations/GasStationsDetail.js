@@ -504,7 +504,7 @@ const GasStationsDetail = (props) => {
                                     value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
                                     format="DD/MM/YYYY"
                                     onChange={handleDateChange}
-                                    disabled={isDataUpdated} // 🔹 ปิดการเลือกถ้ามีการเปลี่ยนแปลง
+                                    //disabled={isDataUpdated} // 🔹 ปิดการเลือกถ้ามีการเปลี่ยนแปลง
                                     slotProps={{
                                         textField: {
                                             size: "small",
@@ -553,12 +553,12 @@ const GasStationsDetail = (props) => {
                                     label={row.Name}
                                 />
                             ))}
-                        </FormGroup>
-                        {isDataUpdated && (
+                            {isDataUpdated && (
                             <Typography color="error" sx={{ mt: 1 }}>
                                 ⚠️ กรุณาบันทึกข้อมูลก่อนเปลี่ยนสาขา
                             </Typography>
                         )}
+                        </FormGroup>
                     </Grid>
                     <Grid item xs={12}>
                         {

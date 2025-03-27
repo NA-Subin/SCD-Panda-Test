@@ -403,6 +403,9 @@ const InsertTrips = () => {
     const [weightL, setWeightL] = React.useState(0);
     const [costTrip, setCostTrip] = React.useState(0);
 
+    console.log("ข้อมูลตั๋ว : ",ordersTickets);
+    console.log("ข้อมูลลูกค้า : ",selling);
+
     const handlePost = (event) => {
         const ticketValue = event.target.value;
         setTickets(ticketValue);
@@ -439,7 +442,9 @@ const InsertTrips = () => {
                     Rate3: ticketData.Rate3,
                     OrderID: "",
                     Trip: trip.length,
-                    Product: {} // เพิ่ม Product ไว้เป็น Object ว่าง
+                    Product: {
+                        P: { Volume: 0, Cost: 0, Selling: 0 },
+                    } // เพิ่ม Product ไว้เป็น Object ว่าง
                 }
             };
         });
@@ -494,7 +499,10 @@ const InsertTrips = () => {
                     Date: dayjs(selectedDate).format('DD/MM/YYYY'),
                     Registration: registration.split(":")[1],
                     Driver: registration.split(":")[2],
-                    id: newIndex
+                    id: newIndex,
+                    Product: {
+                        P: { Volume: 0, Cost: 0, Selling: 0 },
+                    }
                 }
             };
         });

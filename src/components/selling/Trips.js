@@ -71,6 +71,7 @@ const Trips = () => {
         getTrip();
     }, []);
 
+    console.log("Trip : ",trip);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -88,7 +89,7 @@ const Trips = () => {
     }, []);
 
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);

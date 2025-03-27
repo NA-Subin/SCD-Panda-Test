@@ -30,6 +30,7 @@ import Invoice from "./components/invoice/Invoice";
 import PrintInvoice from "./components/invoice/PrintInvoice";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import PrintTrips from "./components/selling/PrintTrips";
 
 const MySwal = withReactContent(Swal);
 
@@ -80,6 +81,7 @@ function App() {
         <Route path="/" element={<Login />} />
         {/* <Route path="/:email/*" element={ */}
         <Route path="/print-invoice" element={<PrintInvoice />} />
+        <Route path="/print-trips" element={<PrintTrips />} />
         <Route path="/gasstation-attendant" element={<GasStationA />} />
         <Route path="/trade-payable" element={<TradePayable />} />
         <Route path="/choose" element={<Choose />} />

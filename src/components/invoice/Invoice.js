@@ -11,6 +11,7 @@ import {
   Divider,
   Grid,
   IconButton,
+  InputAdornment,
   Paper,
   Popover,
   Table,
@@ -29,23 +30,31 @@ import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import UpdateInvoice from "./UpdateInvoice";
+import theme from "../../theme/theme";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const Invoice = () => {
   const [update, setUpdate] = React.useState(true);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(1);
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
+  const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
+
+
+  const handleDateChangeDateStart = (newValue) => {
+    if (newValue) {
+      const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+      setSelectedDateStart(formattedDate);
+    }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const [openTab, setOpenTab] = React.useState(true);
-
-  const toggleDrawer = (newOpen) => () => {
-    setOpenTab(newOpen);
+  const handleDateChangeDateEnd = (newValue) => {
+    if (newValue) {
+      const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+      setSelectedDateEnd(formattedDate);
+    }
   };
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -70,12 +79,15 @@ const Invoice = () => {
     setSelectedRow(row);
   };
 
-  const { order } = useData();
-const orders = Object.values(order || {});
+  const { order, customertransports, customergasstations, customerbigtruck } = useData();
+  const orders = Object.values(order || {});
+  const transports = Object.values(customertransports || {});
+  const gasstations = Object.values(customergasstations || {});
+  const bigtruck = Object.values(customerbigtruck || {});
 
-const groupedOrders = orders.reduce((acc, curr) => {
-    const { TicketName,Date ,Product, TransferAmount, TotalOverdueTransfer } = curr;
-  
+  const groupedOrders = orders.reduce((acc, curr) => {
+    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer } = curr;
+
     // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
     if (!acc[TicketName]) {
       acc[TicketName] = {
@@ -88,25 +100,58 @@ const groupedOrders = orders.reduce((acc, curr) => {
         OverdueTransfer: 0,
       };
     }
-  
+
     // รวมค่า Volume จาก Product
     Object.entries(Product).forEach(([key, value]) => {
       acc[TicketName].Volume += value.Volume * 1000;
       acc[TicketName].Amount += parseFloat(value.Amount) || 0;
       acc[TicketName].OverdueTransfer += (value.OverdueTransfer || 0);
     });
-  
+
     return acc;
   }, {});
-  
 
-// แปลง Object กลับเป็น Array และเพิ่ม id
-const result = Object.values(groupedOrders).map((item, index) => ({
+
+  // แปลง Object กลับเป็น Array และเพิ่ม id
+  const result = Object.values(groupedOrders).map((item, index) => ({
     id: index + 1, // เริ่ม id จาก 1
     ...item
   }));
-  
-  console.log(result);
+
+  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ bigtruck
+  const resultBigTruck = Object.values(groupedOrders)
+    .filter(item => 
+      bigtruck.some(entry => entry.TicketsName === item.TicketName) &&
+      dayjs(item.Date, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]') // ตรวจสอบวันที่ในช่วงที่เลือก
+    )
+    .map((item, index) => ({
+      id: index + 1,
+      ...item
+    }));
+
+  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ transports
+  const resultTransport = Object.values(groupedOrders)
+    .filter(item => 
+      transports.some(entry => entry.TicketsName === item.TicketName) &&
+      dayjs(item.Date, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]') // ตรวจสอบวันที่ในช่วงที่เลือก
+    )
+    .map((item, index) => ({
+      id: index + 1,
+      ...item
+    }));
+
+  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ gasstations
+  const resultGasStation = Object.values(groupedOrders)
+    .filter(item => 
+      gasstations.some(entry => entry.TicketsName === item.TicketName) &&
+      dayjs(item.Date, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]') // ตรวจสอบวันที่ในช่วงที่เลือก
+    )
+    .map((item, index) => ({
+      id: index + 1,
+      ...item
+    }));
+
+  console.log(groupedOrders);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -122,129 +167,315 @@ const result = Object.values(groupedOrders).map((item, index) => ({
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
-      <Typography
-        variant="h3"
-        fontWeight="bold"
-        textAlign="center"
-        gutterBottom
-      >
-        ใบวางบิล
-      </Typography>
-      <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth - 10) : (windowWidth - 235) }}>
-        <Grid item xs={12}>
-          <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
-          <TableContainer
-            component={Paper}
-            sx={{ marginBottom: 2, height: "250px" }}
+      <Grid container spacing={2}>
+        <Grid item xs={3}>
+
+        </Grid>
+        <Grid item xs={9}>
+          <Typography
+            variant="h3"
+            fontWeight="bold"
+            textAlign="center"
+            gutterBottom
           >
-            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
-              <TableHead sx={{ height: "5vh" }}>
-                <TableRow>
-                  <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                    ลำดับ
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                    ชื่อ-สกุล
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                    จำนวนลิตร
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                    ยอดเงิน
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                    ยอดโอน
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                    ค้างโอน
-                  </TablecellHeader>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {
-                  result.map((row) => (
-                    <TableRow 
-                      key={row.id} 
-                      onClick={() => handleRowClick(row)} 
-                      sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
-                    >
-                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
-                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
-                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
-                            {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
-                        </TableCell>
-                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
-                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                        <TableCell sx={{ textAlign: "center",fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
-                        </TableCell>
-                    </TableRow>
-                  ))
-                }
-                {/* {
-                  result
-                  //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <UpdateInvoice key={row.id} ticket={row} />
-                  ))
-                } */}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          {/* {
-            result.length <= 5 ? null :
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25, 30]}
-                component="div"
-                count={result.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
-                }
-                sx={{
-                  overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
-                  borderBottomLeftRadius: 5,
-                  borderBottomRightRadius: 5,
-                  '& .MuiTablePagination-toolbar': {
-                    backgroundColor: "lightgray",
-                    height: "20px", // กำหนดความสูงของ toolbar
-                    alignItems: "center",
-                    paddingY: 0, // ลด padding บนและล่างให้เป็น 0
-                    overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
-                    fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+            ใบวางบิล
+          </Typography>
+        </Grid>
+      </Grid>
+      <Box
+        sx={{
+          width: "100%", // กำหนดความกว้างของ Paper
+          height: "40px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: -8,
+          marginBottom: 3,
+          width: 550
+        }}
+      >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            openTo="day"
+            views={["year", "month", "day"]}
+            value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+            format="DD/MM/YYYY"
+            onChange={handleDateChangeDateStart}
+            sx={{ marginRight: 2, }}
+            slotProps={{
+              textField: {
+                size: "small",
+                fullWidth: true,
+                InputProps: {
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                      วันที่เริ่มต้น :
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                    height: "40px",  // ความสูงของ Input
+                    padding: "10px", // Padding ภายใน Input
+                    fontWeight: "bold",
                   },
-                  '& .MuiTablePagination-select': {
-                    paddingY: 0,
-                    fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                },
+              },
+            }}
+          />
+          <DatePicker
+            openTo="day"
+            views={["year", "month", "day"]}
+            value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+            format="DD/MM/YYYY"
+            onChange={handleDateChangeDateEnd}
+            slotProps={{
+              textField: {
+                size: "small",
+                fullWidth: true,
+                InputProps: {
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                      วันที่สิ้นสุด :
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                    height: "40px",  // ความสูงของ Input
+                    padding: "10px", // Padding ภายใน Input
+                    fontWeight: "bold",
                   },
-                  '& .MuiTablePagination-actions': {
-                    '& button': {
-                      paddingY: 0,
-                      fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
-                    },
-                  },
-                  '& .MuiTablePagination-displayedRows': {
-                    fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
-                  },
-                  '& .MuiTablePagination-selectLabel': {
-                    fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
-                  }
-                }}
-              />
-          } */}
+                },
+              },
+            }}
+          />
+        </LocalizationProvider>
+      </Box>
+      <Divider sx={{ marginBottom: 1 }} />
+      <Grid container spacing={2} marginTop={1}>
+        <Grid item xs={4}>
+          <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ลูกค้า</Button>
+        </Grid>
+        <Grid item xs={4}>
+          <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ขนส่ง</Button>
+        </Grid>
+        <Grid item xs={4}>
+          <Button variant="contained" color={open === 3 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 3 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(3)}>ปั้ม</Button>
+        </Grid>
+        <Grid item xs={4} sx={{ marginTop: -3 }}>
+          {
+            open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.loght} gutterBottom>||</Typography>
+          }
+        </Grid>
+        <Grid item xs={4} sx={{ marginTop: -3 }}>
+          {
+            open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+          }
+        </Grid>
+        <Grid item xs={4} sx={{ marginTop: -3 }}>
+          {
+            open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+          }
         </Grid>
         <Grid item xs={12}>
-          {
-            result.map((row) => (
-              selectedRow && selectedRow.id === row.id ?
-              <UpdateInvoice key={row.id} ticket={row} />
-              : ""
-            ))
-          }
+          <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -5 }}>
+            {
+              open === 1 ?
+                <Grid container spacing={2} sx={{ marginTop: -5, }}>
+                  <Grid item xs={12}>
+                    <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+                    <TableContainer
+                      component={Paper}
+                      sx={resultBigTruck.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                    >
+                      <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+                        <TableHead sx={{ height: "5vh" }}>
+                          <TableRow>
+                            <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                              ลำดับ
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                              ชื่อ-สกุล
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              จำนวนลิตร
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              ยอดเงิน
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              ยอดโอน
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              ค้างโอน
+                            </TablecellHeader>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {
+                            resultBigTruck.map((row) => (
+                              <TableRow
+                                key={row.id}
+                                onClick={() => handleRowClick(row)}
+                                sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+                              >
+                                <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+                                  {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          }
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid item xs={12}>
+                    {
+                      resultBigTruck.map((row) => (
+                        selectedRow && selectedRow.id === row.id ?
+                          <UpdateInvoice key={row.id} ticket={row} />
+                          : ""
+                      ))
+                    }
+                  </Grid>
+                </Grid>
+                : open === 2 ?
+                  <Grid container spacing={2} sx={{ marginTop: -5, }}>
+                    <Grid item xs={12}>
+                      <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+                      <TableContainer
+                        component={Paper}
+                        sx={resultTransport.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                      >
+                        <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+                          <TableHead sx={{ height: "5vh" }}>
+                            <TableRow>
+                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                ลำดับ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                ชื่อ-สกุล
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                จำนวนลิตร
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ยอดเงิน
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ยอดโอน
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ค้างโอน
+                              </TablecellHeader>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {
+                              resultTransport.map((row) => (
+                                <TableRow
+                                  key={row.id}
+                                  onClick={() => handleRowClick(row)}
+                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+                                >
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            }
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                    <Grid item xs={12}>
+                      {
+                        resultTransport.map((row) => (
+                          selectedRow && selectedRow.id === row.id ?
+                            <UpdateInvoice key={row.id} ticket={row} />
+                            : ""
+                        ))
+                      }
+                    </Grid>
+                  </Grid>
+                  :
+                  <Grid container spacing={2} sx={{ marginTop: -5, }}>
+                    <Grid item xs={12}>
+                      <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+                      <TableContainer
+                        component={Paper}
+                        sx={resultGasStation.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                      >
+                        <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+                          <TableHead sx={{ height: "5vh" }}>
+                            <TableRow>
+                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                ลำดับ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                ชื่อ-สกุล
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                จำนวนลิตร
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ยอดเงิน
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ยอดโอน
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ค้างโอน
+                              </TablecellHeader>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {
+                              resultGasStation.map((row) => (
+                                <TableRow
+                                  key={row.id}
+                                  onClick={() => handleRowClick(row)}
+                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+                                >
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            }
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                    <Grid item xs={12}>
+                      {
+                        resultGasStation.map((row) => (
+                          selectedRow && selectedRow.id === row.id ?
+                            <UpdateInvoice key={row.id} ticket={row} />
+                            : ""
+                        ))
+                      }
+                    </Grid>
+                  </Grid>
+            }
+          </Paper>
         </Grid>
       </Grid>
     </Container>
