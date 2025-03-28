@@ -60,7 +60,8 @@ const InsertTrips = () => {
     const [totalWeight, setTotalWeight] = React.useState(0);
     const [showTickers, setShowTickers] = React.useState(true);
     const [showTrips, setShowTrips] = React.useState(true);
-    const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
+    const [selectedDateReceive, setSelectedDateReceive] = useState(dayjs(new Date()));
+    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs(new Date()));
     const [depots, setDepots] = React.useState("");
     const [status, setStatus] = React.useState("");
     const [ticket, setTicket] = React.useState(0);
@@ -78,50 +79,57 @@ const InsertTrips = () => {
         document.body.appendChild(script);
     }, []);
 
-    const handleSaveAsImage = async () => {
-        setEditMode(false); // เปลี่ยนเป็นโหมดแสดงผลแบบ Typography
+    // const handleSaveAsImage = async () => {
+    //     setEditMode(false); // เปลี่ยนเป็นโหมดแสดงผลแบบ Typography
 
-        setTimeout(async () => {
-            if (dialogRef.current && html2canvasLoaded) {
-                // ดึงค่าความสูงของ TextField และกำหนดให้ inline style
-                const inputElement = dialogRef.current.querySelector("input");
-                if (inputElement) {
-                    const computedStyle = window.getComputedStyle(inputElement);
-                    inputElement.style.height = computedStyle.height;
-                    inputElement.style.fontSize = computedStyle.fontSize;
-                    inputElement.style.fontWeight = computedStyle.fontWeight;
-                    inputElement.style.padding = computedStyle.padding;
-                }
+    //     setTimeout(async () => {
+    //         if (dialogRef.current && html2canvasLoaded) {
+    //             // ดึงค่าความสูงของ TextField และกำหนดให้ inline style
+    //             const inputElement = dialogRef.current.querySelector("input");
+    //             if (inputElement) {
+    //                 const computedStyle = window.getComputedStyle(inputElement);
+    //                 inputElement.style.height = computedStyle.height;
+    //                 inputElement.style.fontSize = computedStyle.fontSize;
+    //                 inputElement.style.fontWeight = computedStyle.fontWeight;
+    //                 inputElement.style.padding = computedStyle.padding;
+    //             }
 
-                // ใช้ html2canvas จับภาพ
-                const canvas = await window.html2canvas(dialogRef.current, {
-                    scrollY: 0,
-                    useCORS: true,
-                    width: dialogRef.current.scrollWidth,
-                    height: dialogRef.current.scrollHeight,
-                    scale: window.devicePixelRatio,
-                });
+    //             // ใช้ html2canvas จับภาพ
+    //             const canvas = await window.html2canvas(dialogRef.current, {
+    //                 scrollY: 0,
+    //                 useCORS: true,
+    //                 width: dialogRef.current.scrollWidth,
+    //                 height: dialogRef.current.scrollHeight,
+    //                 scale: window.devicePixelRatio,
+    //             });
 
-                const image = canvas.toDataURL("image/png");
+    //             const image = canvas.toDataURL("image/png");
 
-                // สร้างลิงก์ดาวน์โหลด
-                const link = document.createElement("a");
-                link.href = image;
-                link.download = "บันทึกข้อมูลการขนส่งน้ำมันวันที่" + dayjs(selectedDate).format("DD-MM-YYYY") + ".png";
-                link.click();
+    //             // สร้างลิงก์ดาวน์โหลด
+    //             const link = document.createElement("a");
+    //             link.href = image;
+    //             link.download = "บันทึกข้อมูลการขนส่งน้ำมันวันที่" + dayjs(selectedDate).format("DD-MM-YYYY") + ".png";
+    //             link.click();
 
-                setEditMode(true);
-            } else {
-                console.error("html2canvas ยังไม่ถูกโหลด");
-            }
-        }, 500); // รอให้ React เปลี่ยน UI ก่อนแคปภาพ
-    };
+    //             setEditMode(true);
+    //         } else {
+    //             console.error("html2canvas ยังไม่ถูกโหลด");
+    //         }
+    //     }, 500); // รอให้ React เปลี่ยน UI ก่อนแคปภาพ
+    // };
 
 
-    const handleDateChange = (newValue) => {
+    const handleDateChangeReceive = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
-            setSelectedDate(formattedDate);
+            setSelectedDateReceive(formattedDate);
+        }
+    };
+
+    const handleDateChangeDelivery = (newValue) => {
+        if (newValue) {
+            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            setSelectedDateDelivery(formattedDate);
         }
     };
 
@@ -403,8 +411,8 @@ const InsertTrips = () => {
     const [weightL, setWeightL] = React.useState(0);
     const [costTrip, setCostTrip] = React.useState(0);
 
-    console.log("ข้อมูลตั๋ว : ",ordersTickets);
-    console.log("ข้อมูลลูกค้า : ",selling);
+    console.log("ข้อมูลตั๋ว : ",Object.values(ordersTickets));
+    console.log("ข้อมูลลูกค้า : ",Object.values(selling));
 
     const handlePost = (event) => {
         const ticketValue = event.target.value;
@@ -496,7 +504,7 @@ const InsertTrips = () => {
                     Rate2: ticketData.Rate2,
                     Rate3: ticketData.Rate3,
                     Trip: trip.length,
-                    Date: dayjs(selectedDate).format('DD/MM/YYYY'),
+                    Date: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
                     Registration: registration.split(":")[1],
                     Driver: registration.split(":")[2],
                     id: newIndex,
@@ -864,6 +872,34 @@ const InsertTrips = () => {
         }
     };
 
+    const handleSaveAsImage = () => {
+        const Trips = {
+            Tickets: Object.values(ordersTickets),
+            Orders: Object.values(selling),
+            TotalVolumeTicket: volumeT,
+            TotalVolumeOrder: volumeS,
+            CostTrip: costTrip,
+            DateReceive: dayjs(selectedDateReceive).format("DD/MM/YYYY"),
+            DateDelivery: dayjs(selectedDateDelivery).format("DD/MM/YYYY"),
+            Driver: registration.split(":")[2]+" / "+registration.split(":")[1],
+            Depot: depots,
+            WeightHigh: weightH,
+            WeightLow: weightL,
+            WeightTruck: weight,
+            TotalWeight: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)),
+        };
+
+        // บันทึกข้อมูลลง sessionStorage
+        sessionStorage.setItem("Trips", JSON.stringify(Trips));
+
+        // เปิดหน้าต่างใหม่ไปที่ /print-invoice
+        const printWindow = window.open("/print-trips", "_blank", "width=800,height=600");
+
+        if (!printWindow) {
+            alert("กรุณาปิด pop-up blocker แล้วลองใหม่");
+        }
+    };
+
     const handleSubmit = () => {
         const orderRef = database.ref("order/");
         const ticketsRef = database.ref("tickets/");
@@ -943,7 +979,8 @@ const InsertTrips = () => {
             .child(trip.length)
             .update({
                 id: trip.length + 1,
-                DateStart: dayjs(selectedDate).format('DD/MM/YYYY'),
+                DateReceive: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
+                DateDelivery: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
                 Registration: registration.split(":")[1],
                 Driver: registration.split(":")[2],
                 Depot: depots,
@@ -952,6 +989,8 @@ const InsertTrips = () => {
                 WeightLow: parseFloat(weightL).toFixed(2),
                 WeightTruck: parseFloat(weight).toFixed(2),
                 TotalWeight: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)),
+                Status: status,
+                StatusTrip: "กำลังจัดเที่ยววิ่ง",
                 ...orderTrip
             })
             .then(() => {
@@ -1035,28 +1074,28 @@ const InsertTrips = () => {
         }
     }
 
-    const handleCustomer = () => {
-        database
-            .ref("order/")
-            .child(order.length)
-            .update({
-                id: order.length + 1,
-                DateStart: dayjs(selectedDate).format('DD/MM/YYYY'),
-                Registration: registration.split(":")[1],
-                Driver: registration.split(":")[2],
-                Customer: customers.split(":")[1],
-                TicketName: customers,
-                Trip: trip.length
-            })
-            .then(() => {
-                ShowSuccess("เพิ่มออเดอร์เรียบร้อย");
+    // const handleCustomer = () => {
+    //     database
+    //         .ref("order/")
+    //         .child(order.length)
+    //         .update({
+    //             id: order.length + 1,
+    //             DateReceive: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
+    //             Registration: registration.split(":")[1],
+    //             Driver: registration.split(":")[2],
+    //             Customer: customers.split(":")[1],
+    //             TicketName: customers,
+    //             Trip: trip.length
+    //         })
+    //         .then(() => {
+    //             ShowSuccess("เพิ่มออเดอร์เรียบร้อย");
 
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
-    };
+    //         })
+    //         .catch((error) => {
+    //             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+    //             console.error("Error pushing data:", error);
+    //         });
+    // };
 
     const handleTotalWeight = (newHeavyOil, newWeight) => {
         const total =
@@ -1229,9 +1268,9 @@ const InsertTrips = () => {
                                             <DatePicker
                                                 openTo="day"
                                                 views={["year", "month", "day"]}
-                                                value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                                value={dayjs(selectedDateReceive)} // แปลงสตริงกลับเป็น dayjs object
                                                 format="DD/MM/YYYY"
-                                                onChange={handleDateChange}
+                                                onChange={handleDateChangeReceive}
                                                 slotProps={{
                                                     textField: {
                                                         size: "small",
@@ -1860,15 +1899,15 @@ const InsertTrips = () => {
                             </Grid>
                             <Grid item sm={2} xs={8} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่ส่ง</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
                                                 openTo="day"
                                                 views={["year", "month", "day"]}
-                                                value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                                value={dayjs(selectedDateDelivery)} // แปลงสตริงกลับเป็น dayjs object
                                                 format="DD/MM/YYYY"
-                                                onChange={handleDateChange}
+                                                onChange={handleDateChangeDelivery}
                                                 slotProps={{
                                                     textField: {
                                                         size: "small",

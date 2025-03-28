@@ -75,6 +75,21 @@ const numberToThaiText = (num) => {
   return text;
 };
 
+const formatThaiDate = (dateString) => {
+  if (!dateString) return "ไม่พบข้อมูลวันที่"; // ถ้า undefined หรือ null ให้คืนค่าเริ่มต้น
+
+  const [day, month, year] = dateString.split("/").map(Number);
+  const date = new Date(year, month - 1, day); // month - 1 เพราะ JavaScript นับเดือนจาก 0-11
+
+  const formattedDate = new Intl.DateTimeFormat("th-TH", {
+    month: "long",
+  }).format(date); // ดึงชื่อเดือนภาษาไทย
+
+  const buddhistYear = year + 543; // แปลงปี ค.ศ. เป็น พ.ศ.
+
+  return `วันที่ ${day} เดือน ${formattedDate} พ.ศ. ${buddhistYear}`;
+};
+
 console.log("invoiceData: ", invoiceData?.Report);
 console.log("Reagistration : ",invoiceData?.Registration);
 console.log("order: ", invoiceData?.Order[0].Address);
@@ -184,45 +199,30 @@ const handleDownloadImage = () => {
                           </TableCell>
                       <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                          {new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                      }).format(row.Volume)}
+                          {new Intl.NumberFormat("en-US").format(row.Volume)}
                           </Typography>
                           </TableCell>
                       <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                      }).format(row.RateOil)}</Typography>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.RateOil)}</Typography>
                           </TableCell>
                       <TableCell sx={{ textAlign: "center", }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                      }).format(row.Amount)}</Typography>
+                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Amount)}</Typography>
                       </TableCell>
                     </TableRow>
                   ))
                 }
                 <TableRow sx={{ borderBottom: "2px solid black",height: "30px" }}>
                     <TableCell colSpan={2} sx={{ textAlign: "left" }}>
-                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>กำหนดชำระเงิน วันที่:{invoiceData?.Order[0].Date}</Typography>
+                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{invoiceData?.DateEnd}</Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
-                    {new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                      }).format(invoiceData.Volume)}
+                    {new Intl.NumberFormat("en-US").format(invoiceData.Volume)}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }} colSpan={2}>
-                    {new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                      }).format(invoiceData.Amount)}
+                    {new Intl.NumberFormat("en-US").format(invoiceData.Amount)}
                     </TableCell>
                 </TableRow>
                 <TableRow sx={{ borderBottom: "2px solid black",height: "30px" }}>
@@ -233,10 +233,7 @@ const handleDownloadImage = () => {
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมเป็นเงิน</Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }} colSpan={2}>
-                      {new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                      }).format(invoiceData.Amount)}
+                      {new Intl.NumberFormat("en-US").format(invoiceData.Amount)}
                     </TableCell>
                 </TableRow>
             </TableBody>

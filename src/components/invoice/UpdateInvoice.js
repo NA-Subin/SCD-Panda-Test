@@ -125,7 +125,30 @@ const UpdateInvoice = (props) => {
         getPrice();
     }, [ticket]);
 
-    console.log("TEST : ", test);
+    const calculateDueDate = (dateString, creditDays) => {
+        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่"; // ตรวจสอบค่าว่าง
+    
+        const [day, month, year] = dateString.split("/").map(Number);
+        const date = new Date(year, month - 1, day); // สร้าง Date object (month - 1 เพราะเริ่มที่ 0-11)
+    
+        date.setDate(date.getDate() + Number(creditDays)); // เพิ่มจำนวนวัน
+    
+        // แปลงเป็นวันที่ภาษาไทย
+        const formattedDate = new Intl.DateTimeFormat("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        }).format(date);
+    
+        return `กำหนดชำระเงิน: ${formattedDate}`;
+    };
+    
+    // 🔥 ทดสอบโค้ด
+    console.log("Date:", ticket.Date);
+    console.log("Credit Time:", ticket.CreditTime);
+    console.log(calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime));
+
+    console.log("orderList : ", orderList);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -203,7 +226,8 @@ const UpdateInvoice = (props) => {
                 return acc;
             }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
             Volume: ticket.Volume || 0,
-            Amount: ticket.Amount || 0
+            Amount: ticket.Amount || 0,
+            DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime )
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -218,6 +242,7 @@ const UpdateInvoice = (props) => {
     };
 
     console.log("Report : ", report);
+    console.log("price : ",price);
 
     const handleSave = () => {
         Object.entries(report).forEach(([uniqueRowId, data]) => {

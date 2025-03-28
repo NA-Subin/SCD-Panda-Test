@@ -38,6 +38,8 @@ import theme from "../../theme/theme";
 import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TableCellPWD, TablecellSelling, TablecellTickets, TablecellCustomers } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+import PlagiarismIcon from '@mui/icons-material/Plagiarism';
+import TaskIcon from '@mui/icons-material/Task';
 import { database } from "../../server/firebase";
 import { ShowConfirm, ShowError, ShowSuccess, ShowWarning } from "../sweetalert/sweetalert";
 import InfoIcon from '@mui/icons-material/Info';
@@ -76,10 +78,13 @@ const UpdateTrip = (props) => {
     const [ticketsS, setTicketsS] = React.useState([]);
     const [ticketLength, setTicketLength] = React.useState(0);
     const [costTrip, setCostTrip] = useState(trip.CostTrip);
+    const [status, setStatus] = useState(trip.Status);
 
-    const { depots } = useData();
-          const depotOptions = Object.values(depots || {});
+    const { depots,reghead } = useData();
+    const depotOptions = Object.values(depots || {});
+    const registrationTruck = Object.values(reghead || {});
 
+    console.log("Status : ", status);
 
     // โหลด html2canvas จาก CDN
     useEffect(() => {
@@ -96,10 +101,14 @@ const UpdateTrip = (props) => {
             TotalVolumeTicket: totalVolumesTicket,
             TotalVolumeOrder: totalVolumesOrder,
             CostTrip: costTrip,
-            DateStart: trip.DateStart,
-            Driver: trip.Driver,
+            DateReceive: trip.DateReceive,
+            DateDelivery: trip.DateDelivery,
+            Driver: trip.Driver+" / "+trip.Registration,
             Depot: depotTrip,
+            WeightHigh: totalVolumesTicket.oilHeavy,
+            WeightLow: totalVolumesTicket.oilLight,
             WeightTruck: trip.WeightTruck,
+            TotalWeight: totalVolumesTicket.totalWeight,
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -268,8 +277,11 @@ const UpdateTrip = (props) => {
     const [editMode, setEditMode] = useState(false);
     const [editableTickets, setEditableTickets] = useState([]);
     const [editableOrders, setEditableOrders] = useState([]);
+    const [orderTrip, setOrderTrip] = useState([]);
 
     const [depot, setDepot] = useState(depotTrip);
+
+    console.log("orderTrip : ",orderTrip);
 
     useEffect(() => {
         if (ticket && ticket.length > 0) {
@@ -278,6 +290,31 @@ const UpdateTrip = (props) => {
 
         if (order && order.length > 0) {
             setEditableOrders(order.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
+
+            setOrderTrip((prev) => {
+                const newOrders = {};
+                order.forEach((item, index) => {
+                    const newIndex = index + 1; // ใช้ 1-based index
+                    const branches = [
+                        "( สาขาที่  00001)/",
+                        "( สาขาที่  00002)/",
+                        "( สาขาที่  00003)/",
+                        "( สำนักงานใหญ่)/"
+                    ];
+    
+                    let ticketName = item.TicketName;
+                    for (const branch of branches) {
+                        if (ticketName.includes(branch)) {
+                            ticketName = ticketName.split(branch)[1];
+                            break;
+                        }
+                    }
+    
+                    newOrders[`Order${newIndex}`] = ticketName;
+                });
+    
+                return { ...prev, ...newOrders };
+            });
         }
     }, [ticket, order]); // ใช้ useEffect ดักจับการเปลี่ยนแปลงของ ticket
 
@@ -380,6 +417,34 @@ const UpdateTrip = (props) => {
             }
 
             console.log("Order Length :  ", updatedOrders.length);
+
+            // **อัปเดต setOrderTrip ในรูปแบบที่ต้องการ**
+        setOrderTrip((prev) => {
+            const newOrders = {};
+            const allOrders = [...updatedOrders]; // ใช้ข้อมูลใหม่ทั้งหมด
+
+            allOrders.forEach((item, i) => {
+                const newIndex = i + 1; // ใช้ 1-based index
+                const branches = [
+                    "( สาขาที่  00001)/",
+                    "( สาขาที่  00002)/",
+                    "( สาขาที่  00003)/",
+                    "( สำนักงานใหญ่)/"
+                ];
+
+                let ticketName = item.TicketName;
+                for (const branch of branches) {
+                    if (ticketName.includes(branch)) {
+                        ticketName = ticketName.split(branch)[1];
+                        break;
+                    }
+                }
+
+                newOrders[`Order${newIndex}`] = ticketName;
+            });
+
+            return { ...prev, ...newOrders };
+        });
 
             return updatedOrders;
         });
@@ -568,7 +633,9 @@ const UpdateTrip = (props) => {
                 WeightHigh: totalVolumesTicket.oilHeavy,
                 WeightLow: totalVolumesTicket.oilLight,
                 TotalWeight: totalVolumesTicket.totalWeight,
-                CostTrip: costTrip
+                CostTrip: costTrip,
+                Status: status,
+                ...orderTrip
             })    // อัปเดตข้อมูลของแต่ละ order
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -611,6 +678,47 @@ const UpdateTrip = (props) => {
         return customers.filter((item) => item.id || item.TicketsCode);
     };
 
+    const handleChangeStatus = () => {
+        if(registrationTruck){
+            registrationTruck.map((row) => (
+                row.Driver === trip.Driver && row.RegHead === trip.Registration ?
+                database
+                            .ref("truck/registration/")
+                            .child(Number(row.id) - 1)
+                            .update({
+                                Status: "ว่าง"
+                            })
+                            .then(() => {
+                                setOpen(false);
+                                console.log("Data pushed successfully");
+        
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            })
+                            :
+                            ""
+            ))
+
+            database
+                            .ref("trip/")
+                            .child(Number(tripID) - 1)
+                            .update({
+                                StatusTrips: "จบทริป"
+                            })
+                            .then(() => {
+                                setOpen(false);
+                                console.log("Data pushed successfully");
+        
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            })
+        }
+    }
+
     console.log("Updated Tickets : ", editableTickets);
     console.log("Updated Orders : ", editableOrders);
     console.log("Total Volumes : ", totalVolumesTicket);
@@ -618,9 +726,21 @@ const UpdateTrip = (props) => {
 
     return (
         <React.Fragment>
-            <IconButton color="info" size="small" onClick={handleClickOpen}>
-                <InfoIcon fontSize="small" />
-            </IconButton>
+                {
+                    trip.StatusTrips !== "จบทริป" &&
+                    <Tooltip title="กดเพื่อจบทริป" placement="left">
+                        <IconButton color="success" size="small" onClick={handleChangeStatus}>
+                            <TaskIcon />
+                        </IconButton>
+                    </Tooltip>
+                    // <Button variant="contained" size="small" color="success" sx={{ height: 20,marginRight: 0.5 }} onClick={handleChangeStatus}>จบทริป</Button>
+                }
+                {/* <Button variant="contained" size="small" color="info" sx={{ height: 20 }} onClick={handleClickOpen}>ตรวจสอบ</Button> */}
+                <Tooltip title="กดเพื่อดูรายละเอียด" placement="right">
+                <IconButton color="info" size="small" onClick={handleClickOpen}>
+                    <PlagiarismIcon/>
+                </IconButton>
+                </Tooltip>
             <Dialog
                 open={open}
                 keepMounted
@@ -652,8 +772,8 @@ const UpdateTrip = (props) => {
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ตั๋วน้ำมัน</Typography>
                             </Grid>
                             <Grid item sm={editMode ? 7 : 11} xs={editMode ? 12 : 8} display="flex" alignItems="center" justifyContent='center'>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateStart}</Typography>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver}</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver+" / "+trip.Registration}</Typography>
                             </Grid>
                             {
                                 editMode &&
@@ -771,11 +891,22 @@ const UpdateTrip = (props) => {
                                                                 size="small"
                                                                 fullWidth
                                                                 options={getTickets()}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
-                                                                getOptionLabel={(option) =>
-                                                                    option.TicketsName && option.TicketsName.includes("/")
-                                                                        ? option.TicketsName.split("/")[1]
-                                                                        : option.TicketsName
-                                                                }  // ใช้ OrderID หรือค่าที่ต้องการแสดง
+                                                                getOptionLabel={(option) => {
+                                                                    const branches = [
+                                                                        "( สาขาที่  00001)/",
+                                                                        "( สาขาที่  00002)/",
+                                                                        "( สาขาที่  00003)/",
+                                                                        "( สำนักงานใหญ่)/"
+                                                                    ];
+                                                                
+                                                                    for (const branch of branches) {
+                                                                        if (option.TicketsName.includes(branch)) {
+                                                                            return option.TicketsName.split(branch)[1];
+                                                                        }
+                                                                    }
+                                                                
+                                                                    return option.TicketsName;
+                                                                }}  // ใช้ OrderID หรือค่าที่ต้องการแสดง
                                                                 isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
                                                                 value={row.TicketName ? getTickets().find(item => item.TicketsName === row.TicketName) : null} // ค่าที่เลือก
                                                                 onChange={(e, newValue) => {
@@ -816,7 +947,24 @@ const UpdateTrip = (props) => {
                                                             />
                                                         ) : (
                                                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {row.TicketName && row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
+                                                                {
+                                                                    (() => {
+                                                                        const branches = [
+                                                                            "( สาขาที่  00001)/",
+                                                                            "( สาขาที่  00002)/",
+                                                                            "( สาขาที่  00003)/",
+                                                                            "(สำนักงานใหญ่)/"
+                                                                        ];
+
+                                                                        for (const branch of branches) {
+                                                                            if (row.TicketName.includes(branch)) {
+                                                                                return row.TicketName.split(branch)[1];
+                                                                            }
+                                                                        }
+
+                                                                        return row.TicketName;
+                                                                    })()
+                                                                }
                                                             </Typography>
                                                         )}
                                                     </TableCell>
@@ -1192,8 +1340,8 @@ const UpdateTrip = (props) => {
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                             </Grid>
                             <Grid item sm={editMode ? 8 : 11} xs={editMode ? 11 : 8} display="flex" alignItems="center" justifyContent='center'>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateStart}</Typography>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver}</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery }</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver+" / "+trip.Registration}</Typography>
                             </Grid>
                             {
                                 editMode &&
@@ -1330,7 +1478,24 @@ const UpdateTrip = (props) => {
                                                             </Typography>
                                                         )} */}
                                                         <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                            {row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
+                                                        {
+                                                                    (() => {
+                                                                        const branches = [
+                                                                            "( สาขาที่  00001)/",
+                                                                            "( สาขาที่  00002)/",
+                                                                            "( สาขาที่  00003)/",
+                                                                            "(สำนักงานใหญ่)/"
+                                                                        ];
+
+                                                                        for (const branch of branches) {
+                                                                            if (row.TicketName.includes(branch)) {
+                                                                                return row.TicketName.split(branch)[1];
+                                                                            }
+                                                                        }
+
+                                                                        return row.TicketName;
+                                                                    })()
+                                                                }
                                                         </Typography>
                                                     </TableCell>
 
@@ -1646,7 +1811,8 @@ const UpdateTrip = (props) => {
                                                 },
                                                 borderRadius: 10
                                             }}
-                                            value={trip.Status}
+                                            value={status}
+                                            onChange={(e) => setStatus(e.target.value)}
                                         />
                                     </Paper>
                                 </Grid>
@@ -1656,9 +1822,17 @@ const UpdateTrip = (props) => {
                     {
                         !editMode ?
                             <>
-                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*ถ้าต้องการเพิ่มตั๋วหรือลูกค้าให้กดปุ่มแก้ไข*</Typography>
+                                {
+                                    trip.StatusTrips !== "จบทริป" ?
+                                    <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*ถ้าต้องการเพิ่มตั๋วหรือลูกค้าให้กดปุ่มแก้ไข*</Typography>
+                                    :
+                                    <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*บันทึกรูปภาพ*</Typography>
+                                }
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
-                                    <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate}>แก้ไข</Button>
+                                    {
+                                        trip.StatusTrips !== "จบทริป" &&
+                                        <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate}>แก้ไข</Button>
+                                    }
                                     <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
                                 </Box>
                             </>

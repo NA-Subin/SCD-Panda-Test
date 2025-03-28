@@ -116,7 +116,7 @@ const Trips = () => {
             <Divider sx={{ marginBottom: 2 }} />
                         <Grid container spacing={2} width="100%">
                             <Grid item xs={12}>
-                                <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -2, fontSize: "12px", color: "red",textAlign: "right", marginRight: 7 }} gutterBottom>*ดูรายละเอียดและแก้ไขการจัดเที่ยววิ่งรถตรงนี้*</Typography>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -2, fontSize: "12px", color: "red",textAlign: "right", marginRight: 7 }} gutterBottom>*ดูรายละเอียด/แก้ไขการจัดเที่ยววิ่ง/กดจบทริปตรงนี้*</Typography>
                                 <TableContainer
                                     component={Paper}
                                     sx={{
@@ -180,10 +180,10 @@ const Trips = () => {
                                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                                     น้ำหนักรวม
                                                 </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                                     สถานะ
                                                 </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 70, position: "sticky", right: 0 }}/>
+                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", right: 0 }}/>
                                                 {/* <TablecellHeader sx={{
                                                     textAlign: "center", fontSize: 16, width: 100, position: "sticky",
                                                     right: windowWidth <= 900 ? 0 : "200px", // ติดซ้ายสุด

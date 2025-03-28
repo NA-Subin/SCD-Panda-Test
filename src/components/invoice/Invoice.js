@@ -79,14 +79,18 @@ const Invoice = () => {
     setSelectedRow(row);
   };
 
+  console.log("selectedRow : ",selectedRow);
+
   const { order, customertransports, customergasstations, customerbigtruck } = useData();
   const orders = Object.values(order || {});
   const transports = Object.values(customertransports || {});
   const gasstations = Object.values(customergasstations || {});
   const bigtruck = Object.values(customerbigtruck || {});
 
+  console.log("Order : ",orders);
+
   const groupedOrders = orders.reduce((acc, curr) => {
-    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer } = curr;
+    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime } = curr;
 
     // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
     if (!acc[TicketName]) {
@@ -98,6 +102,7 @@ const Invoice = () => {
         Volume: 0,
         Amount: 0,
         OverdueTransfer: 0,
+        CreditTime
       };
     }
 

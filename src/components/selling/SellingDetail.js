@@ -220,9 +220,24 @@ const SellingDetail = (props) => {
                 </TableCell> */}
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 350, padding: "1px 4px" }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                        {detail.TicketName.includes("/")
-                            ? detail.TicketName.split("/")[1]
-                            : detail.TicketName}
+                    {
+                                    (() => {
+                                        const branches = [
+                                            "( สาขาที่  00001)/",
+                                            "( สาขาที่  00002)/",
+                                            "( สาขาที่  00003)/",
+                                            "(สำนักงานใหญ่)/"
+                                        ];
+
+                                        for (const branch of branches) {
+                                            if (detail.TicketName.includes(branch)) {
+                                                return detail.TicketName.split(branch)[1];
+                                            }
+                                        }
+
+                                        return detail.TicketName;
+                                    })()
+                                }
                     </Typography>
                 </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 100, padding: "1px 4px" }}>

@@ -35,14 +35,14 @@ import UpdateDatabase from "../dashboard/test";
 const Choose = () => {
   const navigate = useNavigate();
 
-
   const handleChooseGasStation = () => {
-    navigate("/gasStation-admin");
-  }
+    window.location.href = "/gasStation-admin";
+};
 
-  const handleChooseDashboard = () => {
-    navigate("/dashboard");
-  }
+const handleChooseDashboard = () => {
+    window.location.href = "/dashboard";
+};
+
 
   // ฟังก์ชันสำหรับเข้าสู่ระบบด้วย Email และ Password
   return (

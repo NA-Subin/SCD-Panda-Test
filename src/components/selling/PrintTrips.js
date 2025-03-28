@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Button, Grid, TableHead, TableCell, TableRow, Table, Paper, TableContainer, TableBody } from "@mui/material";
 import html2canvas from 'html2canvas';
+import dayjs from "dayjs";
+import "dayjs/locale/th";
+
 
 const PrintTrips = () => {
   const [trips, setTrips] = useState(null);
@@ -17,6 +20,35 @@ const PrintTrips = () => {
       }
     }
   }, []);
+
+  //   const formatThaiDate = (dateString) => {
+  //     if (!dateString) return "-";
+  //     const date = new Date(dateString);
+  //     const day = date.getDate();
+  //     const monthNames = [
+  //         "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  //         "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  //     ];
+  //     const month = monthNames[date.getMonth()];
+  //     const year = date.getFullYear() + 543; // แปลงจาก ค.ศ. เป็น พ.ศ.
+
+  //     return `วันที่ ${day} เดือน${month} พ.ศ.${year}`;
+  // };
+
+  const formatThaiDate = (dateString) => {
+    if (!dateString) return "ไม่พบข้อมูลวันที่"; // ถ้า undefined หรือ null ให้คืนค่าเริ่มต้น
+
+    const [day, month, year] = dateString.split("/").map(Number);
+    const date = new Date(year, month - 1, day); // month - 1 เพราะ JavaScript นับเดือนจาก 0-11
+
+    const formattedDate = new Intl.DateTimeFormat("th-TH", {
+      month: "long",
+    }).format(date); // ดึงชื่อเดือนภาษาไทย
+
+    const buddhistYear = year + 543; // แปลงปี ค.ศ. เป็น พ.ศ.
+
+    return `วันที่ ${day} เดือน ${formattedDate} พ.ศ. ${buddhistYear}`;
+  };
 
   console.log("Ticket : ", trips?.Tickets);
   console.log("Order : ", trips?.Orders);
@@ -45,7 +77,7 @@ const PrintTrips = () => {
 
   return (
     <div id="invoiceContent" style={{ padding: "20px" }}>
-      <Grid container spacing={2}>
+      {/* <Grid container spacing={2}>
         <Grid item xs={8}>
           {
             trips &&
@@ -59,14 +91,17 @@ const PrintTrips = () => {
           }
         </Grid>
         <Grid item xs={4} textAlign="right">
-          <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
+          <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 2 }}>
             รายการจัดเที่ยววิ่ง
           </Typography>
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ marginRight: 2 }}>
+            พิมพ์วันที่ {dayjs(new Date).format("DD/MM/YYYY")}
+          </Typography>
         </Grid>
-      </Grid>
+      </Grid> */}
       <Grid container spacing={2}>
         <Grid item xs={12} marginBottom={-2}>
-          <Typography variant="subtitle1" fontWeight="bold">จัดการตั๋ว : วันที่รับ : {trips?.DateStart} พนักงานขับรถ : {trips?.Driver}</Typography>
+          <Typography variant="subtitle1" fontWeight="bold">จัดการตั๋ว : วันที่รับ : {formatThaiDate(trips?.DateReceive)} พนักงานขับรถ : {trips?.Driver}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Table size="small" sx={{ "& .MuiTableCell-root": { padding: "2px" }, border: "1px solid black" }}>
@@ -89,9 +124,35 @@ const PrintTrips = () => {
                 trips?.Tickets.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.id + 1}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.TicketName}</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
+                      {
+                        (() => {
+                          const branches = [
+                            "( สาขาที่  00001)/",
+                            "( สาขาที่  00002)/",
+                            "( สาขาที่  00003)/",
+                            "(สำนักงานใหญ่)/"
+                          ];
+
+                          for (const branch of branches) {
+                            if (row.TicketName.includes(branch)) {
+                              return row.TicketName.split(branch)[1];
+                            }
+                          }
+
+                          return row.TicketName;
+                        })()
+                      }
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.OrderID}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Rate1}</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
+                      {
+                        trips?.Depot.split(":")[0] === "ลำปาง" ? row.Rate1
+                          : trips?.Depot.split(":")[0] === "พิจิตร" ? row.Rate2
+                            : trips?.Depot.split(":")[0] === "สระบุรี" || trips?.Depot.split(":")[0] === "บางปะอิน" || trips?.Depot.split(":")[0] === "IR" ? row.Rate3
+                              : row.Rate
+                      }
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.G95 ? row.Product.G95.Volume : "-"}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.B95 ? row.Product.B95.Volume : "-"}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.B7 ? row.Product.B7.Volume : "-"}</TableCell>
@@ -119,12 +180,12 @@ const PrintTrips = () => {
                 <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(trips?.TotalVolumeTicket.oilHeavy)}</TableCell>
+                }).format(trips?.WeightHigh)}</TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>น้ำมันเบา : </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(trips?.TotalVolumeTicket.oilLight)}</TableCell>
+                }).format(trips?.WeightLow)}</TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>น้ำหนักรถ : </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", {
                   minimumFractionDigits: 2,
@@ -134,13 +195,13 @@ const PrintTrips = () => {
                 <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(trips?.TotalVolumeTicket.totalWeight)}</TableCell>
+                }).format(trips?.TotalWeight)}</TableCell>
               </TableRow>
             </TableHead>
           </Table>
         </Grid>
         <Grid item xs={12} marginBottom={-2}>
-          <Typography variant="subtitle1" fontWeight="bold">จัดการเที่ยววิ่ง : วันที่รับ : {trips?.DateStart} พนักงานขับรถ : {trips?.Driver}</Typography>
+          <Typography variant="subtitle1" fontWeight="bold">จัดการเที่ยววิ่ง : วันที่ส่ง : {formatThaiDate(trips?.DateDelivery)} พนักงานขับรถ : {trips?.Driver}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Table size="small" sx={{ "& .MuiTableCell-root": { padding: "2px" }, border: "1px solid black" }}>
@@ -162,8 +223,34 @@ const PrintTrips = () => {
                 trips?.Orders.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.id + 1}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.TicketName}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Rate1}</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
+                      {
+                        (() => {
+                          const branches = [
+                            "( สาขาที่  00001)/",
+                            "( สาขาที่  00002)/",
+                            "( สาขาที่  00003)/",
+                            "(สำนักงานใหญ่)/"
+                          ];
+
+                          for (const branch of branches) {
+                            if (row.TicketName.includes(branch)) {
+                              return row.TicketName.split(branch)[1];
+                            }
+                          }
+
+                          return row.TicketName;
+                        })()
+                      }
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
+                    {
+                        trips?.Depot.split(":")[0] === "ลำปาง" ? row.Rate1
+                          : trips?.Depot.split(":")[0] === "พิจิตร" ? row.Rate2
+                            : trips?.Depot.split(":")[0] === "สระบุรี" || trips?.Depot.split(":")[0] === "บางปะอิน" || trips?.Depot.split(":")[0] === "IR" ? row.Rate3
+                              : row.Rate
+                      }
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.G95 ? row.Product.G95.Volume : "-"}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.B95 ? row.Product.B95.Volume : "-"}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.B7 ? row.Product.B7.Volume : "-"}</TableCell>
@@ -197,7 +284,7 @@ const PrintTrips = () => {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#e0e0e0" }}>
                 <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>คลังรับน้ำมัน :</TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold", width: 100 }}>{trips?.Depot.split(":")[0]}</TableCell>
+                <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold", width: 200 }}>{trips?.Depot.split(":")[0]}</TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>ค่าเที่ยว :</TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold", width: 100 }}>{trips?.CostTrip}</TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>สถานะ :</TableCell>
