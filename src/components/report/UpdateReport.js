@@ -51,7 +51,7 @@ import jsPDF from "jspdf";
 import notoSansThaiRegular from "@fontsource/noto-sans-thai";
 import html2canvas from "html2canvas";
 
-const UpdateInvoice = (props) => {
+const UpdateReport = (props) => {
     const { ticket } = props;
     const [open, setOpen] = useState(false);
     const [price, setPrice] = useState([]);
@@ -59,20 +59,20 @@ const UpdateInvoice = (props) => {
     const [show, setShow] = useState(false);
     const [test, setTest] = useState([]);
     const {
-        order,
+        tickets,
         customertransports,
         customergasstations,
-        customerbigtruck,
-        customersmalltruck,
+        customertickets,
+        trip
     } = useData();
 
-    const orders = Object.values(order || {});
+    const showTickets = Object.values(tickets || {});
     const customertransport = Object.values(customertransports || {});
     const customergasstation = Object.values(customergasstations || {});
-    const customerbigtrucks = Object.values(customerbigtruck || {});
-    const customersmalltrucks = Object.values(customersmalltruck || {});
+    const customerTickets = Object.values(customertickets || {});
+    const showTrips = Object.values(trip || {});
 
-    const orderList = orders.filter(item => item.TicketName === ticket.TicketName);
+    const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName);
 
     const getPrice = () => {
         let foundItem;
@@ -95,17 +95,9 @@ const UpdateInvoice = (props) => {
             }
 
             if (!foundItem) {
-                foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
+                foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
                 if (foundItem) {
-                    refPath = `/customers/bigtruck/${foundItem.id - 1}/Price`;
-                    initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
-                }
-            }
-
-            if (!foundItem) {
-                foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) {
-                    refPath = `/customers/smalltruck/${foundItem.id - 1}/Price`;
+                    refPath = `/customers/tickets/${foundItem.id - 1}/Price`;
                     initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
                 }
             }
@@ -124,6 +116,16 @@ const UpdateInvoice = (props) => {
     useEffect(() => {
         getPrice();
     }, [ticket]);
+
+    const trips = showTrips.filter(item => item.id === (ticket.Trip+1));
+
+    console.log("Report ID : ",ticket);
+    console.log("customer transport : ",customertransport);
+    console.log("customer gasStation : ",customergasstations);
+    console.log("customer tickets : ",customerTickets);
+    console.log("Trips : ",trips);
+
+    console.log("Price : ",price);
 
     const calculateDueDate = (dateString, creditDays) => {
         if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่"; // ตรวจสอบค่าว่าง
@@ -148,7 +150,7 @@ const UpdateInvoice = (props) => {
     console.log("Credit Time:", ticket.CreditTime);
     console.log(calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime));
 
-    console.log("orderList : ", orderList);
+    console.log("ticketsList : ", ticketsList);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -204,23 +206,26 @@ const UpdateInvoice = (props) => {
 
     const generatePDF = () => {
         const invoiceData = {
-            Report: orderList.flatMap((row, rowIndex) =>
-                Object.entries(row.Product)
-                .filter(([productName]) => productName !== "P")
+            Report: ticketsList.flatMap((row, rowIndex) => {
+                // 🔍 ค้นหา trip ที่ตรงกับ row.No
+                const matchedTrip = showTrips.find(trip => trip.id === row.Trip+1);
+        
+                return Object.entries(row.Product)
+                .filter(([productName]) => productName !== "P") // กรองก่อน map
                 .map(([productName, Volume], index) => ({
                     No: row.No,
                     TicketName: row.TicketName,
                     RateOil: Volume.RateOil || 0,
                     Amount: Volume.Amount || 0,
-                    Date: row.Date,
-                    Driver: row.Driver,
-                    Registration: row.Registration,
+                    Date: matchedTrip ? matchedTrip.DateDelivery : row.DateDelivery,
+                    Driver: matchedTrip ? matchedTrip.Driver : row.Driver, // ✅ ใช้ค่า Driver จาก showTrip ถ้ามี
+                    Registration: matchedTrip ? matchedTrip.Registration : row.Registration, // ✅ ใช้ค่า Registration จาก showTrip ถ้ามี
                     ProductName: productName,
                     Volume: Volume.Volume * 1000,
-                    uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
-                }))
-            ),
-            Order: order.reduce((acc, current) => {
+                    uniqueRowId: `${index}:${productName}:${row.No}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
+                }));
+            }),
+            Order: showTickets.reduce((acc, current) => {
                 // ✅ ตรวจสอบว่าค่า TicketName ซ้ำหรือไม่ และต้องตรงกับ ticket.TicketName
                 if (!acc.some(item => item.TicketName === current.TicketName) && current.TicketName === ticket.TicketName) {
                     acc.push(current);
@@ -245,6 +250,7 @@ const UpdateInvoice = (props) => {
 
     console.log("Report : ", report);
     console.log("price : ",price);
+    console.log("Order : ",ticketsList);
 
     const handleSave = () => {
         Object.entries(report).forEach(([uniqueRowId, data]) => {
@@ -254,7 +260,7 @@ const UpdateInvoice = (props) => {
                 return;
             }
 
-            const path = `order/${data.No}/Product/${data.ProductName}`;
+            const path = `tickets/${data.No}/Product/${data.ProductName}`;
             update(ref(database, path), {
                 RateOil: data.Price,
                 Amount: data.Amount,
@@ -330,13 +336,8 @@ const UpdateInvoice = (props) => {
             }
 
             if (!foundItem) {
-                foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) refPath = "/customers/bigtruck/";
-            }
-
-            if (!foundItem) {
-                foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) refPath = "/customers/smalltruck/";
+                foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) refPath = "/customers/tickets/";
             }
         } else {
             ShowError("Ticket Name ไม่ถูกต้อง");
@@ -354,7 +355,7 @@ const UpdateInvoice = (props) => {
                 .child(`${foundItem.id - 1}/Price/`)
                 .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
                 .then(() => {
-                    const pathOrder = `order/${ticket.id - 1}`;
+                    const pathOrder = `tickets/${ticket.id - 1}`;
                     update(ref(database, pathOrder), {
                         TransferAmount: TotalPrice,
                         TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
@@ -381,7 +382,7 @@ const UpdateInvoice = (props) => {
                         <Grid container spacing={2}>
                             <Grid item xs={9.5}>
                                 <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                                    รายละเอียด : วันที่ส่ง : {ticket.Date} จากลูกค้าชื่อ : {ticket.TicketName}
+                                    รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName}
                                 </Typography>
                                 <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red",textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography>
                             </Grid>
@@ -449,34 +450,43 @@ const UpdateInvoice = (props) => {
                                             จำนวนลิตร
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px',backgroundColor: theme.palette.primary.dark }}>
-                                            ราคาน้ำมัน
+                                            ค่าบรรทุก
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px',backgroundColor: theme.palette.primary.dark }}>
                                             ยอดเงิน
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px',backgroundColor: theme.palette.primary.dark }}>
+                                            หักภาษี 1%
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px',backgroundColor: theme.palette.primary.dark }}>
+                                            ยอดชำระ
                                         </TablecellSelling>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        orderList
-                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                            .flatMap((row, rowIndex) =>
-                                                Object.entries(row.Product)
-                                                  .filter(([productName]) => productName !== "P") // กรองก่อน map
-                                                  .map(([productName, Volume], index) => ({
-                                                    No: row.No,
-                                                    TicketName: row.TicketName,
-                                                    RateOil: Volume.RateOil || 0,
-                                                    Amount: Volume.Amount || 0,
-                                                    Date: row.Date,
-                                                    Driver: row.Driver,
-                                                    Registration: row.Registration,
-                                                    ProductName: productName,
-                                                    Volume: Volume.Volume * 1000,
-                                                    uniqueRowId: `${index}:${productName}:${row.No}`, 
-                                                  }))
-                                            )
-                                            .map((row, index) => (
+                                        ticketsList
+                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .flatMap((row, rowIndex) => {
+                                            // 🔍 ค้นหา trip ที่ตรงกับ row.No
+                                            const matchedTrip = showTrips.find(trip => trip.id === row.Trip+1);
+                                    
+                                            return Object.entries(row.Product)
+                                            .filter(([productName]) => productName !== "P") // กรองก่อน map
+                                            .map(([productName, Volume], index) => ({
+                                                No: row.No,
+                                                TicketName: row.TicketName,
+                                                RateOil: Volume.RateOil || 0,
+                                                Amount: Volume.Amount || 0,
+                                                Date: matchedTrip ? matchedTrip.DateDelivery : row.DateDelivery,
+                                                Driver: matchedTrip ? matchedTrip.Driver : row.Driver, // ✅ ใช้ค่า Driver จาก showTrip ถ้ามี
+                                                Registration: matchedTrip ? matchedTrip.Registration : row.Registration, // ✅ ใช้ค่า Registration จาก showTrip ถ้ามี
+                                                ProductName: productName,
+                                                Volume: Volume.Volume * 1000,
+                                                uniqueRowId: `${index}:${productName}:${row.No}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
+                                            }));
+                                        })
+                                        .map((row, index) => (
                                                 <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
@@ -778,4 +788,4 @@ const UpdateInvoice = (props) => {
     );
 };
 
-export default UpdateInvoice;
+export default UpdateReport;

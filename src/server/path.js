@@ -48,7 +48,8 @@ export const DataProvider = ({ children }) => {
         customertransports: ref(database, "/customers/transports/"),
         customergasstations: ref(database, "/customers/gasstations/"),
         customerbigtruck: ref(database, "/customers/bigtruck/"),
-        customersmalltruck: ref(database, "/customers/smalltruck/")
+        customersmalltruck: ref(database, "/customers/smalltruck/"),
+        customertickets: ref(database, "/customers/tickets/")
     }), []);
 
     // ฟังก์ชันโหลดข้อมูลทั้งหมดครั้งแรก

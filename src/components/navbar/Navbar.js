@@ -71,6 +71,7 @@ import { auth, database } from "../../server/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import ReplyAllIcon from '@mui/icons-material/ReplyAll';
 import ListIcon from '@mui/icons-material/List';
+import PaidIcon from '@mui/icons-material/Paid';
 import Cookies from 'js-cookie';
 const drawerWidth = 200;
 
@@ -1125,7 +1126,7 @@ export default function Navbar() {
               }
             >
               <Collapse in={!report}>
-                {["ใบแจ้งหนี้", "ใบวางบิล"].map((text, index) => (
+                {["ชำระค่าน้ำมัน", "ชำระค่าขนส่ง"].map((text, index) => (
                   <ListItem
                     key={text}
                     disablePadding
@@ -1138,7 +1139,7 @@ export default function Navbar() {
                     <ListItemButton
                       component={Link}
                       to={
-                        index === 0 ? "/report" : "/invoice"
+                        index === 0 ? "/invoice" : "/report"
                       }
                       sx={{
                         height: 40, // กำหนดความสูงให้ ListItem
@@ -1155,9 +1156,9 @@ export default function Navbar() {
                         }}
                       >
                         {index === 0 ? (
-                          <ListAltIcon />
+                          <PaidIcon />
                         ) : (
-                          <ListAltIcon />
+                          <PaidIcon />
                         )}
                       </ListItemIcon>
                       <ListItemText

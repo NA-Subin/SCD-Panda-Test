@@ -29,13 +29,13 @@ import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
-import UpdateInvoice from "./UpdateInvoice";
+import UpdateReport from "./UpdateReport";
 import theme from "../../theme/theme";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 
-const Invoice = () => {
+const Report = () => {
   const [update, setUpdate] = React.useState(true);
   const [open, setOpen] = useState(1);
 
@@ -81,16 +81,16 @@ const Invoice = () => {
 
   console.log("selectedRow : ",selectedRow);
 
-  const { order, customertransports, customergasstations, customerbigtruck } = useData();
-  const orders = Object.values(order || {});
+  const { tickets, customertransports, customergasstations, customertickets } = useData();
+  const ticket = Object.values(tickets || {});
   const transports = Object.values(customertransports || {});
   const gasstations = Object.values(customergasstations || {});
-  const bigtruck = Object.values(customerbigtruck || {});
+  const ticketsOrder = Object.values(customertickets || {});
 
-  console.log("Order : ",orders);
+  console.log("Ticket : ",ticket);
 
-  const groupedOrders = orders.reduce((acc, curr) => {
-    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime } = curr;
+  const groupedTickets = ticket.reduce((acc, curr) => {
+    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime, Trip } = curr;
 
     // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
     if (!acc[TicketName]) {
@@ -102,7 +102,8 @@ const Invoice = () => {
         Volume: 0,
         Amount: 0,
         OverdueTransfer: 0,
-        CreditTime
+        CreditTime,
+        Trip
       };
     }
 
@@ -118,15 +119,15 @@ const Invoice = () => {
 
 
   // แปลง Object กลับเป็น Array และเพิ่ม id
-  const result = Object.values(groupedOrders).map((item, index) => ({
+  const result = Object.values(groupedTickets).map((item, index) => ({
     id: index + 1, // เริ่ม id จาก 1
     ...item
   }));
 
-  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ bigtruck
-  const resultBigTruck = Object.values(groupedOrders)
+  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ ticketsOrder
+  const resultTickets = Object.values(groupedTickets)
     .filter(item => 
-      bigtruck.some(entry => entry.TicketsName === item.TicketName) &&
+      ticketsOrder.some(entry => entry.TicketsName === item.TicketName) &&
       dayjs(item.Date, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]') // ตรวจสอบวันที่ในช่วงที่เลือก
     )
     .map((item, index) => ({
@@ -135,7 +136,7 @@ const Invoice = () => {
     }));
 
   // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ transports
-  const resultTransport = Object.values(groupedOrders)
+  const resultTransport = Object.values(groupedTickets)
     .filter(item => 
       transports.some(entry => entry.TicketsName === item.TicketName) &&
       dayjs(item.Date, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]') // ตรวจสอบวันที่ในช่วงที่เลือก
@@ -146,7 +147,7 @@ const Invoice = () => {
     }));
 
   // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ gasstations
-  const resultGasStation = Object.values(groupedOrders)
+  const resultGasStation = Object.values(groupedTickets)
     .filter(item => 
       gasstations.some(entry => entry.TicketsName === item.TicketName) &&
       dayjs(item.Date, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]') // ตรวจสอบวันที่ในช่วงที่เลือก
@@ -156,7 +157,7 @@ const Invoice = () => {
       ...item
     }));
 
-  console.log(groupedOrders);
+  console.log(groupedTickets);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -183,7 +184,7 @@ const Invoice = () => {
             textAlign="center"
             gutterBottom
           >
-            ชำระค่าน้ำมัน
+            ชำระค่าขนส่ง
           </Typography>
         </Grid>
       </Grid>
@@ -258,13 +259,13 @@ const Invoice = () => {
       <Divider sx={{ marginBottom: 1 }} />
       <Grid container spacing={2} marginTop={1}>
         <Grid item xs={4}>
-          <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ลูกค้า</Button>
+          <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ตั๋วน้ำมัน</Button>
         </Grid>
         <Grid item xs={4}>
-          <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ขนส่ง</Button>
+          <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ตั๋วรับจ้างขนส่ง</Button>
         </Grid>
         <Grid item xs={4}>
-          <Button variant="contained" color={open === 3 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 3 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(3)}>ปั้ม</Button>
+          <Button variant="contained" color={open === 3 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 3 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(3)}>ตั่๋วปั้ม</Button>
         </Grid>
         <Grid item xs={4} sx={{ marginTop: -3 }}>
           {
@@ -290,7 +291,7 @@ const Invoice = () => {
                     <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
                     <TableContainer
                       component={Paper}
-                      sx={resultBigTruck.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                      sx={resultTickets.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
                     >
                       <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
                         <TableHead sx={{ height: "5vh" }}>
@@ -299,13 +300,16 @@ const Invoice = () => {
                               ลำดับ
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                              ชื่อ-สกุล
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              จำนวนลิตร
+                              ชื่อตั๋ว
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                               ยอดเงิน
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              หักภาษี 1%
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              ยอดชำระ
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                               ยอดโอน
@@ -317,7 +321,7 @@ const Invoice = () => {
                         </TableHead>
                         <TableBody>
                           {
-                            resultBigTruck.map((row) => (
+                            resultTickets.map((row) => (
                               <TableRow
                                 key={row.id}
                                 onClick={() => handleRowClick(row)}
@@ -326,11 +330,14 @@ const Invoice = () => {
                                 <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
-                                  {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
+                                  { 0 }
                                 </TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+                                  { 0 }
                                 </TableCell>
                               </TableRow>
                             ))
@@ -341,9 +348,9 @@ const Invoice = () => {
                   </Grid>
                   <Grid item xs={12}>
                     {
-                      resultBigTruck.map((row) => (
+                      resultTickets.map((row) => (
                         selectedRow && selectedRow.id === row.id ?
-                          <UpdateInvoice key={row.id} ticket={row} />
+                          <UpdateReport key={row.id} ticket={row} />
                           : ""
                       ))
                     }
@@ -408,7 +415,7 @@ const Invoice = () => {
                       {
                         resultTransport.map((row) => (
                           selectedRow && selectedRow.id === row.id ?
-                            <UpdateInvoice key={row.id} ticket={row} />
+                            <UpdateReport key={row.id} ticket={row} />
                             : ""
                         ))
                       }
@@ -473,7 +480,7 @@ const Invoice = () => {
                       {
                         resultGasStation.map((row) => (
                           selectedRow && selectedRow.id === row.id ?
-                            <UpdateInvoice key={row.id} ticket={row} />
+                            <UpdateReport key={row.id} ticket={row} />
                             : ""
                         ))
                       }
@@ -487,4 +494,4 @@ const Invoice = () => {
   );
 };
 
-export default Invoice;
+export default Report;

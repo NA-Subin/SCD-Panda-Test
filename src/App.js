@@ -31,6 +31,7 @@ import PrintInvoice from "./components/invoice/PrintInvoice";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import PrintTrips from "./components/selling/PrintTrips";
+import Report from "./components/report/Report";
 
 const MySwal = withReactContent(Swal);
 
@@ -121,6 +122,9 @@ function App() {
                 </Routes>
                 <Routes>
                   <Route path="/invoice" element={<Invoice />} />
+                </Routes>
+                <Routes>
+                  <Route path="/report" element={<Report />} />
                 </Routes>
                 <Routes>
                   <Route path="/gasstations" element={<GasStations />} />
