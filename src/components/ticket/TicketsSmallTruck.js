@@ -104,10 +104,14 @@ const TicketsSmallTruck = () => {
         setSetting(true);
         setSelectedRowId(rowId);
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
-        const hasTicket = status.includes("ตั๋ว");
-        const hasRecipient = status.includes("ผู้รับ");
-        setTicketChecked(hasTicket);
-        setRecipientChecked(hasRecipient);
+        if(status === "ลูกค้าประจำ"){
+            setTicketChecked(true);
+            setRecipientChecked(false);
+        }else{
+            setTicketChecked(false);
+            setRecipientChecked(true);
+        }
+        
         setCreditTimeEdit(rowCreditTime);
         // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
         // setRate1Edit(rowRate1);
@@ -117,12 +121,9 @@ const TicketsSmallTruck = () => {
 
     // บันทึกข้อมูลที่แก้ไขแล้ว
     const handleSave = async () => {
-        const newStatus = [
-            ticketChecked ? "ตั๋ว" : "",
-            recipientChecked ? "ผู้รับ" : ""
-        ]
-            .filter((s) => s) // กรองค่าที่ไม่ใช่ค่าว่าง
-            .join("/");
+        const newStatus = 
+            (ticketChecked && !recipientChecked ? "ลูกค้าประจำ" : 
+            !ticketChecked && recipientChecked ? "ลูกค้าไม่ประจำ" : "ยกเลิก")
 
         // บันทึกสถานะใหม่ไปยัง Firebase
         await database.ref(`/customers/smalltruck/${selectedRowId - 1}`).update({
