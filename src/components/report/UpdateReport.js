@@ -281,19 +281,39 @@ const UpdateReport = (props) => {
     const { company1Tickets, company2Tickets } = splitByCompany(processedTickets);
 
     // ฟังก์ชันคำนวณผลรวม
-    const calculateTotal = (tickets) =>
-        tickets.reduce(
+    const calculateTotal = (tickets) => {
+        // ใช้ reduce เพื่อคำนวณค่าทั้งหมด
+        const result = tickets.reduce(
             (acc, row) => {
                 const amount = row.Volume * row.Rate;
+    
+                console.log("Row Price : ", ticket.Price);
+                console.log("Row Company : ", row.Company);
+    
+                // คำนวณยอดโอนจาก Price ที่ตรงกับ Company
+                const totalIncomingMoney = Array.isArray(ticket.Price)
+                    ? ticket.Price
+                        .filter(p => p.Transport === row.Company)
+                        .reduce((sum, p) => sum + (Number(p.IncomingMoney) || 0), 0)
+                    : 0;
+    
                 acc.totalVolume += row.Volume;
                 acc.transferAmount += (row.TransferAmount || 0);
                 acc.totalAmount += amount;
                 acc.totalTax += amount * 0.01;
                 acc.totalPayment += amount - (amount * 0.01);
+                acc.totalIncomingMoney = totalIncomingMoney; // รวมยอดโอนทั้งหมดในแต่ละรอบ
+    
                 return acc;
             },
-            { totalVolume: 0, transferAmount: 0, totalAmount: 0, totalTax: 0, totalPayment: 0 }
+            { totalVolume: 0, transferAmount: 0, totalAmount: 0, totalTax: 0, totalPayment: 0, totalIncomingMoney: 0 }
         );
+    
+        // คำนวณ totalOverdueTransfer หลังจาก reduce เสร็จ
+        result.totalOverdueTransfer = result.totalPayment - result.totalIncomingMoney;
+    
+        return result;
+    };
 
     // คำนวณผลรวมสำหรับทั้งสองบริษัท
     const total1 = calculateTotal(company1Tickets);
@@ -304,6 +324,8 @@ const UpdateReport = (props) => {
 
     console.log("Total for บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", total1);
     console.log("Total for หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", total2);
+
+    console.log("processedTickets : ",processedTickets);
 
     const generatePDFCompany1 = () => {
         const invoiceData = {
@@ -349,7 +371,7 @@ const UpdateReport = (props) => {
 
     console.log("Report : ", report);
     console.log("price : ", price);
-    console.log("Order : ", ticketsList);
+    console.log("tickets : ", ticket);
 
     const handleSave = () => {
         Object.entries(report).forEach(([uniqueRowId, data]) => {
@@ -859,7 +881,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={0}
+                                                value={new Intl.NumberFormat("en-US").format(total1.totalIncomingMoney)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -894,7 +916,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={0}
+                                                value={new Intl.NumberFormat("en-US").format(total1.totalOverdueTransfer)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1275,7 +1297,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={0}
+                                                value={new Intl.NumberFormat("en-US").format(total2.totalIncomingMoney)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1310,7 +1332,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={0}
+                                                value={new Intl.NumberFormat("en-US").format(total2.totalOverdueTransfer)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>

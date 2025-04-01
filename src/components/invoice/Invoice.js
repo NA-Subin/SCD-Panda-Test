@@ -125,14 +125,36 @@ const Invoice = () => {
 
   // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ bigtruck
   const resultBigTruck = Object.values(groupedOrders)
-    .filter(item => 
-      bigtruck.some(entry => entry.TicketsName === item.TicketName) &&
-      dayjs(item.Date, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]') // ตรวจสอบวันที่ในช่วงที่เลือก
-    )
-    .map((item, index) => ({
-      id: index + 1,
-      ...item
-    }));
+    .map((item, index) => {
+      const matchedTruck = bigtruck.find(entry => entry.TicketsName === item.TicketName);
+
+      if (!matchedTruck) return null; // ถ้าไม่เจอ ให้ return null
+
+      // ตรวจสอบว่าวันที่อยู่ในช่วงที่เลือก
+      const isDateInRange = dayjs(item.Date, "DD/MM/YYYY").isBetween(
+        selectedDateStart, selectedDateEnd, 'day', '[]'
+      );
+
+      if (!isDateInRange) return null; // ถ้าไม่อยู่ในช่วงที่เลือก ให้ return null
+
+      // ตรวจสอบว่ามี Price เป็นอาร์เรย์หรือไม่
+      const Price = Array.isArray(matchedTruck.Price)
+        ? matchedTruck.Price.reduce((acc, p) => acc + (Number(p.IncomingMoney) || 0), 0)
+        : 0;
+
+      console.log("1.Price : ", matchedTruck);
+      console.log("2.Price : ", Price);
+
+      return {
+        id: index + 1,
+        ...item,
+        TransferAmount: Price, // รวมข้อมูลจาก bigtruck ที่ตรงกันเข้ากับ item
+        TotalOverdueTransfer: item.Amount - Price
+      };
+    })
+    .filter(Boolean); // กรองค่า null ออกไป
+
+  console.log("resultBigTruck : ",resultBigTruck);
 
   // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ transports
   const resultTransport = Object.values(groupedOrders)

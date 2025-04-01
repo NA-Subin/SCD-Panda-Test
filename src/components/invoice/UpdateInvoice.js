@@ -356,18 +356,21 @@ const UpdateInvoice = (props) => {
                 .child(`${foundItem.id - 1}/Price/`)
                 .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
                 .then(() => {
-                    const pathOrder = `order/${ticket.id - 1}`;
-                    update(ref(database, pathOrder), {
-                        TransferAmount: TotalPrice,
-                        TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
-                    })
-                        .then(() => {
-                            console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                        })
-                        .catch((error) => {
-                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                            console.error("Error pushing data:", error);
-                        });
+                    
+                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                    // const pathOrder = `order/${ticket.id - 1}`;
+                    // update(ref(database, pathOrder), {
+                    //     TransferAmount: TotalPrice,
+                    //     TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
+                    // })
+                    //     .then(() => {
+                    //         console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                    //     })
+                    //     .catch((error) => {
+                    //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                    //         console.error("Error pushing data:", error);
+                    //     });
                 })
                 .catch((error) => {
                     ShowError("ไม่สำเร็จ");
