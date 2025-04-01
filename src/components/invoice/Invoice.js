@@ -256,8 +256,8 @@ const Invoice = () => {
         </LocalizationProvider>
       </Box>
       <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} marginTop={1}>
-        <Grid item xs={4}>
+       <Grid container spacing={2} marginTop={1}>
+      {/*  <Grid item xs={4}>
           <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ลูกค้า</Button>
         </Grid>
         <Grid item xs={4}>
@@ -273,6 +273,11 @@ const Invoice = () => {
         </Grid>
         <Grid item xs={4} sx={{ marginTop: -3 }}>
           {
+            open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.loght} gutterBottom>||</Typography>
+          }
+        </Grid>
+        <Grid item xs={4} sx={{ marginTop: -3 }}>
+          {
             open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
           }
         </Grid>
@@ -280,11 +285,11 @@ const Invoice = () => {
           {
             open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
           }
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -5 }}>
             {
-              open === 1 ?
+              //open === 1 ?
                 <Grid container spacing={2} sx={{ marginTop: -5, }}>
                   <Grid item xs={12}>
                     <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
@@ -349,137 +354,137 @@ const Invoice = () => {
                     }
                   </Grid>
                 </Grid>
-                : open === 2 ?
-                  <Grid container spacing={2} sx={{ marginTop: -5, }}>
-                    <Grid item xs={12}>
-                      <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
-                      <TableContainer
-                        component={Paper}
-                        sx={resultTransport.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
-                      >
-                        <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
-                          <TableHead sx={{ height: "5vh" }}>
-                            <TableRow>
-                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                                ลำดับ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                ชื่อ-สกุล
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                จำนวนลิตร
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดเงิน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดโอน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ค้างโอน
-                              </TablecellHeader>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {
-                              resultTransport.map((row) => (
-                                <TableRow
-                                  key={row.id}
-                                  onClick={() => handleRowClick(row)}
-                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
-                                >
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            }
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                    <Grid item xs={12}>
-                      {
-                        resultTransport.map((row) => (
-                          selectedRow && selectedRow.id === row.id ?
-                            <UpdateInvoice key={row.id} ticket={row} />
-                            : ""
-                        ))
-                      }
-                    </Grid>
-                  </Grid>
-                  :
-                  <Grid container spacing={2} sx={{ marginTop: -5, }}>
-                    <Grid item xs={12}>
-                      <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
-                      <TableContainer
-                        component={Paper}
-                        sx={resultGasStation.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
-                      >
-                        <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
-                          <TableHead sx={{ height: "5vh" }}>
-                            <TableRow>
-                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                                ลำดับ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                                ชื่อ-สกุล
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                จำนวนลิตร
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดเงิน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดโอน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ค้างโอน
-                              </TablecellHeader>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {
-                              resultGasStation.map((row) => (
-                                <TableRow
-                                  key={row.id}
-                                  onClick={() => handleRowClick(row)}
-                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
-                                >
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            }
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                    <Grid item xs={12}>
-                      {
-                        resultGasStation.map((row) => (
-                          selectedRow && selectedRow.id === row.id ?
-                            <UpdateInvoice key={row.id} ticket={row} />
-                            : ""
-                        ))
-                      }
-                    </Grid>
-                  </Grid>
-            }
+            //     : open === 2 ?
+            //       <Grid container spacing={2} sx={{ marginTop: -5, }}>
+            //         <Grid item xs={12}>
+            //           <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+            //           <TableContainer
+            //             component={Paper}
+            //             sx={resultTransport.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+            //           >
+            //             <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+            //               <TableHead sx={{ height: "5vh" }}>
+            //                 <TableRow>
+            //                   <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+            //                     ลำดับ
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+            //                     ชื่อ-สกุล
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     จำนวนลิตร
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     ยอดเงิน
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     ยอดโอน
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     ค้างโอน
+            //                   </TablecellHeader>
+            //                 </TableRow>
+            //               </TableHead>
+            //               <TableBody>
+            //                 {
+            //                   resultTransport.map((row) => (
+            //                     <TableRow
+            //                       key={row.id}
+            //                       onClick={() => handleRowClick(row)}
+            //                       sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+            //                     >
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+            //                         {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
+            //                       </TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+            //                       </TableCell>
+            //                     </TableRow>
+            //                   ))
+            //                 }
+            //               </TableBody>
+            //             </Table>
+            //           </TableContainer>
+            //         </Grid>
+            //         <Grid item xs={12}>
+            //           {
+            //             resultTransport.map((row) => (
+            //               selectedRow && selectedRow.id === row.id ?
+            //                 <UpdateInvoice key={row.id} ticket={row} />
+            //                 : ""
+            //             ))
+            //           }
+            //         </Grid>
+            //       </Grid>
+            //       :
+            //       <Grid container spacing={2} sx={{ marginTop: -5, }}>
+            //         <Grid item xs={12}>
+            //           <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+            //           <TableContainer
+            //             component={Paper}
+            //             sx={resultGasStation.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+            //           >
+            //             <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+            //               <TableHead sx={{ height: "5vh" }}>
+            //                 <TableRow>
+            //                   <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+            //                     ลำดับ
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+            //                     ชื่อ-สกุล
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     จำนวนลิตร
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     ยอดเงิน
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     ยอดโอน
+            //                   </TablecellHeader>
+            //                   <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+            //                     ค้างโอน
+            //                   </TablecellHeader>
+            //                 </TableRow>
+            //               </TableHead>
+            //               <TableBody>
+            //                 {
+            //                   resultGasStation.map((row) => (
+            //                     <TableRow
+            //                       key={row.id}
+            //                       onClick={() => handleRowClick(row)}
+            //                       sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+            //                     >
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+            //                         {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
+            //                       </TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+            //                       <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+            //                       </TableCell>
+            //                     </TableRow>
+            //                   ))
+            //                 }
+            //               </TableBody>
+            //             </Table>
+            //           </TableContainer>
+            //         </Grid>
+            //         <Grid item xs={12}>
+            //           {
+            //             resultGasStation.map((row) => (
+            //               selectedRow && selectedRow.id === row.id ?
+            //                 <UpdateInvoice key={row.id} ticket={row} />
+            //                 : ""
+            //             ))
+            //           }
+            //         </Grid>
+            //       </Grid>
+             }
           </Paper>
         </Grid>
       </Grid>

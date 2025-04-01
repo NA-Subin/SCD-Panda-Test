@@ -33,6 +33,7 @@ export const DataProvider = ({ children }) => {
     // 🔹 ใช้ useMemo เพื่อป้องกันไม่ให้ ref ถูกสร้างใหม่ทุกครั้งที่ Component re-render
     const refs = useMemo(() => ({
         company: ref(database, "/company"),
+        banks: ref(database, "/banks"),
         customer: ref(database, "/customer"),
         officers: ref(database, "/employee/officers"),
         drivers: ref(database, "/employee/drivers"),

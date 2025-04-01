@@ -51,6 +51,7 @@ import "../../theme/scrollbar.css"
 import jsPDF from "jspdf";
 import notoSansThaiRegular from "@fontsource/noto-sans-thai";
 import html2canvas from "html2canvas";
+import BankDetail from "./BankDetail";
 
 const UpdateReport = (props) => {
     const { ticket } = props;
@@ -66,7 +67,8 @@ const UpdateReport = (props) => {
         customertickets,
         trip,
         reghead,
-        company
+        company,
+        banks
     } = useData();
 
     const showTickets = Object.values(tickets || {});
@@ -76,6 +78,7 @@ const UpdateReport = (props) => {
     const showTrips = Object.values(trip || {});
     const registrationHead = Object.values(reghead || {});
     const companies = Object.values(company || {});
+    const bankDetail = Object.values(banks || {});
 
     const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName);
 
@@ -283,12 +286,13 @@ const UpdateReport = (props) => {
             (acc, row) => {
                 const amount = row.Volume * row.Rate;
                 acc.totalVolume += row.Volume;
+                acc.transferAmount += (row.TransferAmount || 0);
                 acc.totalAmount += amount;
                 acc.totalTax += amount * 0.01;
                 acc.totalPayment += amount - (amount * 0.01);
                 return acc;
             },
-            { totalVolume: 0, totalAmount: 0, totalTax: 0, totalPayment: 0 }
+            { totalVolume: 0, transferAmount: 0, totalAmount: 0, totalTax: 0, totalPayment: 0 }
         );
 
     // คำนวณผลรวมสำหรับทั้งสองบริษัท
@@ -409,68 +413,104 @@ const UpdateReport = (props) => {
     };
 
     const handleSubmit = () => {
-        console.log("Using Price:", price);
-        console.log("Ticket Name:", ticket?.TicketName);
-        console.log("Customer Transport Data:", customertransport);
+        // อัพเดต companies โดยใช้ข้อมูลจาก price
+        const updatedCompanies = companies.map(company => {
+            // ค้นหารายการของ price ที่ตรงกับ company.Name
+            const matchingPrices = price.filter(row => row.Transport === company.Name);
+    
+            return {
+                ...company,
+                prices: matchingPrices, // เก็บข้อมูลของ price ที่ตรงกับบริษัท
+            };
+        });
+
+        // companies.forEach(company => {
+        //     // ค้นหารายการของ price ที่ตรงกับ company.Name
+        //     const matchingPrices = price.filter(row => row.Transport === company.Name);
+    
+        //     // อ้างอิง path ของบริษัทใน Firebase โดยใช้ company.id
+        //     const companyRef = ref(database, `company/${company.id-1}`);
+    
+        //     // บันทึกข้อมูลใหม่เข้า Firebase
+        //     update(companyRef, {
+        //         price: matchingPrices
+        //     }).then(() => {
+        //         console.log(`Updated company ${company.id} successfully.`);
+        //     }).catch(error => {
+        //         console.error(`Error updating company ${company.id}:`, error);
+        //     });
+        // });
 
         if (!price || price.length === 0) {
-            ShowError("Price เป็นค่าว่าง");
-            return;
-        }
+                    ShowError("Price เป็นค่าว่าง");
+                    return;
+                }
+        
+                let foundItem;
+                let refPath = "";
+        
+                if (ticket?.TicketName) {
+                    foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+                    if (foundItem) refPath = "/customers/transports/";
+        
+                    if (!foundItem) {
+                        foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
+                        if (foundItem) refPath = "/customers/gasstations/";
+                    }
+        
+                    if (!foundItem) {
+                        foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
+                        if (foundItem) refPath = "/customers/tickets/";
+                    }
+                } else {
+                    ShowError("Ticket Name ไม่ถูกต้อง");
+                    return;
+                }
+        
+                console.log("Item :", foundItem);
+                console.log("Path :", refPath);
+        
+                const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
 
-        let foundItem;
-        let refPath = "";
-
-        if (ticket?.TicketName) {
-            foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
-            if (foundItem) refPath = "/customers/transports/";
-
-            if (!foundItem) {
-                foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) refPath = "/customers/gasstations/";
-            }
-
-            if (!foundItem) {
-                foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) refPath = "/customers/tickets/";
-            }
-        } else {
-            ShowError("Ticket Name ไม่ถูกต้อง");
-            return;
-        }
-
-        console.log("Item :", foundItem);
-        console.log("Path :", refPath);
-
-        const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
-
-        if (foundItem) {
-            database
-                .ref(refPath)
-                .child(`${foundItem.id - 1}/Price/`)
-                .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-                .then(() => {
-                    const pathOrder = `tickets/${ticket.id - 1}`;
-                    update(ref(database, pathOrder), {
-                        TransferAmount: TotalPrice,
-                        TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
-                    })
-                        .then(() => {
-                            console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                        })
-                        .catch((error) => {
-                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                            console.error("Error pushing data:", error);
-                        });
-                })
-                .catch((error) => {
-                    ShowError("ไม่สำเร็จ");
-                    console.error("Error updating data:", error);
-                });
-        } else {
-            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
-        }
+                if (foundItem) {
+                            database
+                                .ref(refPath)
+                                .child(`${foundItem.id - 1}/Price/`)
+                                .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+                                .then(() => {
+                                    ShowSuccess("บันทึกข้อมูลเรียบร้อยแล้ว")
+                                })
+                                .catch((error) => {
+                                    ShowError("ไม่สำเร็จ");
+                                    console.error("Error updating data:", error);
+                                });
+                        } else {
+                            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+                        }
+    
+        console.log("Using Price:", price);
+        console.log("Company:", companies);
+        console.log("Show Total Price : ",TotalPrice);
+        console.log("Updated Companies with Price Data:", updatedCompanies);
     };
+    
+
+    const rowSpanMap1 = company1Tickets.reduce((acc, row) => {
+        const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+    }, {});
+
+    const rowSpanMap2 = company2Tickets.reduce((acc, row) => {
+        const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+    }, {});
+
+    let mergedCells1 = {};
+    let mergedCells2 = {};
+    let displayIndex1 = 0;
+    let displayIndex2 = 0;
 
     return (
         <React.Fragment>
@@ -572,20 +612,45 @@ const UpdateReport = (props) => {
                     >
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                             <TableBody>
-                                {
-                                    company1Tickets.map((row, index) => (
+                                {company1Tickets.map((row, index) => {
+                                    const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
+                                    const rowSpan = rowSpanMap1[key] && !mergedCells1[key] ? rowSpanMap1[key] : 0;
+                                    if (rowSpan) {
+                                        mergedCells1[key] = true;
+                                        displayIndex1++;
+                                    }
+
+                                    return (
                                         <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
-                                            </TableCell>
+                                            {rowSpan > 0 && (
+                                                <TableCell rowSpan={rowSpan}
+                                                sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle" }}>
+                                                    {displayIndex1}
+                                                </TableCell>
+                                            )}
+                                            {rowSpan > 0 && (
+                                                <TableCell
+                                                    rowSpan={rowSpan}
+                                                    sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle" }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {row.Date}
+                                                    </Typography>
+                                                </TableCell>
+                                            )}
+                                            {rowSpan > 0 && (
+                                                <TableCell
+                                                    rowSpan={rowSpan}
+                                                    sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle" }}
+                                                >
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {row.Driver} : {row.Registration}
+                                                    </Typography>
+                                                </TableCell>
+                                            )}
                                             <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Date}</Typography>
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 300 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver} : {row.Registration}</Typography>
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>
+                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {row.ProductName}
+                                                </Typography>
                                             </TableCell>
                                             <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                 <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
@@ -613,8 +678,8 @@ const UpdateReport = (props) => {
                                                 </Typography>
                                             </TableCell>
                                         </TableRow>
-                                    ))
-                                }
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </Box>
@@ -963,20 +1028,45 @@ const UpdateReport = (props) => {
                     >
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                             <TableBody>
-                                {
-                                    company2Tickets.map((row, index) => (
+                                {company2Tickets.map((row, index) => {
+                                    const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
+                                    const rowSpan = rowSpanMap2[key] && !mergedCells2[key] ? rowSpanMap2[key] : 0;
+                                    if (rowSpan) {
+                                        mergedCells2[key] = true;
+                                        displayIndex2++;
+                                    }
+
+                                    return (
                                         <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
-                                            </TableCell>
+                                            {rowSpan > 0 && (
+                                                <TableCell rowSpan={rowSpan}
+                                                sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle" }}>
+                                                    {displayIndex2}
+                                                </TableCell>
+                                            )}
+                                            {rowSpan > 0 && (
+                                                <TableCell
+                                                    rowSpan={rowSpan}
+                                                    sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle" }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {row.Date}
+                                                    </Typography>
+                                                </TableCell>
+                                            )}
+                                            {rowSpan > 0 && (
+                                                <TableCell
+                                                    rowSpan={rowSpan}
+                                                    sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle" }}
+                                                >
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {row.Driver} : {row.Registration}
+                                                    </Typography>
+                                                </TableCell>
+                                            )}
                                             <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Date}</Typography>
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 300 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver} : {row.Registration}</Typography>
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>
+                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {row.ProductName}
+                                                </Typography>
                                             </TableCell>
                                             <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                 <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
@@ -1004,8 +1094,8 @@ const UpdateReport = (props) => {
                                                 </Typography>
                                             </TableCell>
                                         </TableRow>
-                                    ))
-                                }
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </Box>
@@ -1258,9 +1348,8 @@ const UpdateReport = (props) => {
                         </Table> */}
                     </Box>
                 </Paper>
-            </Box>
+            </Box >
             <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: 5, fontSize: "18px" }} gutterBottom>ข้อมูลการโอน</Typography>
-            <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red", textAlign: "right", marginRight: 7 }} gutterBottom>*เพิ่มข้อมูลการโอนเงินตรงนี้*</Typography>
             <Grid container spacing={2}>
                 <Grid item xs={11.5}>
                     <TableContainer
@@ -1270,12 +1359,20 @@ const UpdateReport = (props) => {
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell sx={{ width: 50 }}></TableCell>
+                                    <TableCell sx={{ width: 150 }}></TableCell>
+                                    <TableCell sx={{ width: 250 }}><Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center" }} gutterBottom>*เพิ่มบัญชีธนาคารตรงนี้*</Typography></TableCell>
+                                    <TableCell sx={{ width: 300 }}></TableCell>
+                                    <TableCell sx={{ width: 150 }}></TableCell>
+                                    <TableCell sx={{ width: 210 }} colSpan={2}><Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center" }} gutterBottom>*เพิ่มข้อมูลการโอนเงินตรงนี้*</Typography></TableCell>
+                                </TableRow>
+                                <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>บัญชี</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทขนส่ง</TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 250, height: "30px", backgroundColor: theme.palette.success.main }}><BankDetail/></TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 300, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทขนส่ง</TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 200, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
                                     <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                         <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                             <IconButton color="success"
@@ -1333,7 +1430,7 @@ const UpdateReport = (props) => {
                                         </TableCell>
 
                                         {/* Select Bank Name */}
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>
+                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 300 }}>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                                 <FormControl
                                                     fullWidth
@@ -1347,17 +1444,40 @@ const UpdateReport = (props) => {
                                                         value={row.BankName || ""}
                                                         onChange={(e) => handleChange(row.id, "BankName", e.target.value)}
                                                     >
-                                                        <MenuItem value="แพนด้า สตาร์ออย - KBANK" sx={{ fontSize: "14px", }}>แพนด้า สตาร์ออย - KBANK</MenuItem>
-                                                        <MenuItem value="แพนด้า สตาร์ออย - KTB" sx={{ fontSize: "14px", }}>แพนด้า สตาร์ออย - KTB</MenuItem>
-                                                        <MenuItem value="แพนด้า สตาร์ออย - SCB" sx={{ fontSize: "14px", }}>แพนด้า สตาร์ออย - SCB</MenuItem>
+                                                        {
+                                                            bankDetail.map((row) => (
+                                                                <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                            ))
+                                                        }
+                                                    </Select>
+                                                </FormControl>
+                                            </Paper>
+                                        </TableCell>
+
+                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 300 }}>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <FormControl
+                                                    fullWidth
+                                                    size="small"
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
+                                                    }}
+                                                >
+                                                    <Select
+                                                        value={row.Transport || ""}
+                                                        onChange={(e) => handleChange(row.id, "Transport", e.target.value)}
+                                                    >
+                                                        <MenuItem value="บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
+                                                        <MenuItem value="หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
                                                     </Select>
                                                 </FormControl>
                                             </Paper>
                                         </TableCell>
 
                                         {/* Input Fields */}
-                                        {["Transport", "IncomingMoney", "Note"].map((field) => (
-                                            <TableCell key={field} sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                        {["IncomingMoney", "Note"].map((field) => (
+                                            <TableCell key={field} sx={{ textAlign: "center", height: '30px', width: 100 }}>
                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                     <TextField
                                                         value={row[field] || ""}
@@ -1430,7 +1550,7 @@ const UpdateReport = (props) => {
                     }
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </React.Fragment >
     );
 };
 

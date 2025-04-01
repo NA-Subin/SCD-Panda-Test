@@ -348,6 +348,8 @@ const UpdateInvoice = (props) => {
 
         const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
 
+        console.log("price : ", TotalPrice);
+
         if (foundItem) {
             database
                 .ref(refPath)

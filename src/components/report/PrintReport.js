@@ -30,11 +30,17 @@ const PrintReport = () => {
   };
 
   const formatTaxID = (taxID) => {
-    return taxID.replace(/(\d{3})(\d{4})(\d{5})(\d{1})/, "$1 $2 $3 $4");
+    if (!taxID || taxID === "-") {
+      return "-";
+    }
+    return String(taxID).replace(/(\d{3})(\d{4})(\d{5})(\d{1})/, "$1 $2 $3 $4");
   };
 
   const formatPhoneNumber = (phone) => {
-    return phone.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+    if (!phone || phone === "-") {
+      return "-";
+    }
+    return String(phone).replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
   };
 
   const numberToThaiText = (num) => {
@@ -95,6 +101,15 @@ const PrintReport = () => {
       link.click(); // คลิกเพื่อดาวน์โหลด
     });
   };
+
+  const rowSpanMap = invoiceData?.Report.reduce((acc, row) => {
+    const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  let mergedCells = {};
+  let displayIndex = 0;
 
   console.log("Tickets Order : ", invoiceData?.Report);
   console.log("Total Order : ", invoiceData?.Total);
@@ -174,28 +189,46 @@ const PrintReport = () => {
               </TableHead>
               <TableBody>
                 {
-                  invoiceData?.Report.map((row) => (
-                    <TableRow sx={{ height: "30px" }}>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Date}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver} : {row.Registration}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Volume)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Rate)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Volume * row.Rate)}</Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  invoiceData?.Report.map((row, index) => {
+                    const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
+                    const rowSpan = rowSpanMap[key] && !mergedCells[key] ? rowSpanMap[key] : 0;
+                    if (rowSpan) {
+                      mergedCells[key] = true;
+                      displayIndex++;
+                    }
+
+                    return (
+                      <TableRow sx={{ height: "30px" }}>
+                        {rowSpan > 0 && (
+                          <TableCell
+                            rowSpan={rowSpan}
+                            sx={{ textAlign: "center", height: '30px', width: "80px", verticalAlign: "middle" }}>
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Date}</Typography>
+                          </TableCell>
+                        )}
+                        {rowSpan > 0 && (
+                          <TableCell
+                            rowSpan={rowSpan}
+                            sx={{ textAlign: "center", height: '30px', verticalAlign: "middle" }}
+                          >
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver} : {row.Registration}</Typography>
+                          </TableCell>
+                        )}
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Volume)}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Rate)}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Volume * row.Rate)}</Typography>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
                 }
                 <TableRow sx={{ borderBottom: "2px solid black", borderTop: "2px solid black", height: "25px" }}>
                   <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={3}>
