@@ -37,7 +37,7 @@ import { database } from "../../server/firebase";
 import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
 
-const TripsBigTruck = () => {
+const TripsSmallTruck = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [approve, setApprove] = React.useState(false);
@@ -60,7 +60,7 @@ const TripsBigTruck = () => {
             } else {
                 const dataTrip = [];
                 for (let id in datas) {
-                    datas[id].TruckType === "รถใหญ่" &&
+                    datas[id].TruckType === "รถเล็ก" &&
                     dataTrip.push({ id, ...datas[id] })
                 }
                 setTrip(dataTrip);
@@ -109,7 +109,7 @@ const TripsBigTruck = () => {
                 textAlign="center"
                 gutterBottom
             >
-                เที่ยววิ่งรถใหญ่
+                เที่ยววิ่งรถเล็ก
             </Typography>
             <Box textAlign="right" marginTop={-8} marginBottom={4} marginRight={5}>
                 <InsertTrips />
@@ -271,4 +271,4 @@ const TripsBigTruck = () => {
     );
 };
 
-export default TripsBigTruck;
+export default TripsSmallTruck;

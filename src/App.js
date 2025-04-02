@@ -24,7 +24,8 @@ import TicketsTransport from "./components/ticket/TicketsTransport";
 import TicketsBigTruck from "./components/ticket/TicketsBigTruck";
 import TicketSmallTruck from "./components/ticket/TicketsSmallTruck";
 import Depots from "./components/depots/depot/Depots";
-import Trips from "./components/selling/Trips";
+import TripsBigTruck from "./components/selling/Trips";
+import TripsSmallTruck from "./components/sellingsmalltruck/Trips";
 import { DataProvider } from "./server/path";
 import Invoice from "./components/invoice/Invoice";
 import PrintInvoice from "./components/invoice/PrintInvoice";
@@ -111,7 +112,10 @@ function App() {
                   <Route path="/edit-firebase" element={<Editfirebase />} />
                 </Routes>
                 <Routes>
-                  <Route path="/trips" element={<Trips />} />
+                  <Route path="/trips-bigtruck" element={<TripsBigTruck />} />
+                </Routes>
+                <Routes>
+                  <Route path="/trips-smalltruck" element={<TripsSmallTruck />} />
                 </Routes>
                 <Routes>
                   <Route path="/employee" element={<Employee />} />

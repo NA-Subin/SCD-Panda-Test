@@ -79,6 +79,8 @@ const InsertTrips = () => {
         document.body.appendChild(script);
     }, []);
 
+    console.log("Registration : ",registration);
+
     // const handleSaveAsImage = async () => {
     //     setEditMode(false); // เปลี่ยนเป็นโหมดแสดงผลแบบ Typography
 
@@ -991,7 +993,7 @@ const InsertTrips = () => {
                 TotalWeight: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)),
                 Status: status,
                 StatusTrip: "กำลังจัดเที่ยววิ่ง",
-                TruckType: "รถใหญ่",
+                TruckType: "รถเล็ก",
                 ...orderTrip
             })
             .then(() => {
@@ -1106,7 +1108,7 @@ const InsertTrips = () => {
     };
 
     React.useEffect(() => {
-        const currentRow = allTruck.find((item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration);
+        const currentRow = ticketsS.find((item) => `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration);
         if (currentRow) {
             if (currentRow.type === "รถใหญ่") {
                 setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
@@ -1119,11 +1121,11 @@ const InsertTrips = () => {
     const getTickets = () => {
         if (!registration || registration === "0:0:0:0") return [];
 
-        const selectedTruck = allTruck.find(
-            (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
-        );
+        // const selectedTruck = allTruck.find(
+        //     (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+        // );
 
-        if (!selectedTruck) return [];
+        // if (!selectedTruck) return [];
 
         const tickets = [
             { TicketsName: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
@@ -1140,21 +1142,22 @@ const InsertTrips = () => {
     const getCustomers = () => {
         if (!registration || registration === "0:0:0:0") return [];
 
-        const selectedTruck = allTruck.find(
-            (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
-        );
+        // const selectedTruck = allTruck.find(
+        //     (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+        // );
 
-        if (!selectedTruck) return [];
+        // if (!selectedTruck) return [];
 
         const customers = [
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
                 .map((item) => ({ ...item })),
-            ...(selectedTruck.type === "รถใหญ่"
-                ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
-                : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
-            ),
+            ...ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item }))
+            // ...(selectedTruck.type === "รถใหญ่"
+            //     ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
+            //     : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
+            //),
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);
@@ -1228,6 +1231,8 @@ const InsertTrips = () => {
 
     console.log("Check : ",isNegative);
 
+    console.log("Show Registration : ",smallTruck.find(item =>`${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration && `${item.Driver}:${item.Registration}:(${item.type})`))
+
     return (
         <React.Fragment>
             <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} endIcon={<AddLocationAltIcon />} >จัดเที่ยววิ่ง</Button>
@@ -1246,7 +1251,7 @@ const InsertTrips = () => {
                 <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
                     <Grid container marginTop={-1.5} marginBottom={-1.5}>
                         <Grid item xs={10}>
-                            <Typography variant="h6" fontWeight="bold" color="white" >บันทึกข้อมูลการขนส่งน้ำมันของรถใหญ่</Typography>
+                            <Typography variant="h6" fontWeight="bold" color="white" >บันทึกข้อมูลการขนส่งน้ำมันของรถเล็ก</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
                             <IconButtonError size="small" onClick={handleCancle}>
@@ -1304,18 +1309,15 @@ const InsertTrips = () => {
                                         component="form" sx={{ height: "30px", width: "100%" }}>
                                         <Autocomplete
                                             id="autocomplete-registration-1"
-                                            options={regHead}
+                                            options={smallTruck}
                                             getOptionLabel={(option) =>
-                                                option.type === "รถใหญ่" ?
-                                                    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (${option.type ? option.type : ""})`
-                                                    :
-                                                    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
+                                                    `${option.Driver ? option.Driver : ""} : ${option.Registration ? option.Registration : ""} (${option.type ? option.type : ""})`
                                             }
                                             isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
-                                            value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration) : null}
+                                            value={registration ? smallTruck.find(item => `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration) : null}
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
-                                                    const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.type}`;
+                                                    const value = `${newValue.id}:${newValue.Registration}:${newValue.Driver}:${newValue.type}`;
                                                     setRegistration(value);
                                                 } else {
                                                     setRegistration("0:0:0:0");
@@ -1337,10 +1339,7 @@ const InsertTrips = () => {
                                             renderOption={(props, option) => (
                                                 <li {...props}>
                                                     {
-                                                        option.type === "รถใหญ่" ?
-                                                            <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
-                                                            :
-                                                            <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead} (${option.type})`}</Typography>
+                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.Registration} (${option.type})`}</Typography>
                                                     }
                                                 </li>
                                             )}
@@ -1949,14 +1948,10 @@ const InsertTrips = () => {
                                                 borderRadius: 10
                                             }}
                                             value={(() => {
-                                                const selectedItem = regHead.find(item =>
-                                                    `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+                                                const selectedItem = smallTruck.find(item =>
+                                                    `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration
                                                 );
-                                                return selectedItem && selectedItem.type === "รถใหญ่"
-                                                    ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (${selectedItem.type ? selectedItem.type : ""})`
-                                                    : selectedItem && selectedItem.type === "รถเล็ก"
-                                                        ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""} (${selectedItem.type ? selectedItem.type : ""})`
-                                                        : "";
+                                                return selectedItem && `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.Registration ? selectedItem.Registration : ""} (${selectedItem.type ? selectedItem.type : ""})`;
                                             })()}
                                         />
                                         {/* <Autocomplete

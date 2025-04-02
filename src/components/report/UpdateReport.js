@@ -669,8 +669,19 @@ const UpdateReport = (props) => {
                                                     </Typography>
                                                 </TableCell>
                                             )}
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100,
+                                                    backgroundColor: row.ProductName === "G91" ? "#92D050" :
+                                                    row.ProductName === "G95" ? "#FFC000" :
+                                                        row.ProductName === "B7" ? "#FFFF99" :
+                                                            row.ProductName === "B95" ? "#B7DEE8" :
+                                                                row.ProductName === "B10" ? "#32CD32" :
+                                                                    row.ProductName === "B20" ? "#228B22" :
+                                                                        row.ProductName === "E20" ? "#C4BD97" :
+                                                                            row.ProductName === "E85" ? "#0000FF" :
+                                                                                row.ProductName === "PWD" ? "#F141D8" :
+                                                                                    "#FFFFFF"
+                                             }}>
+                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                     {row.ProductName}
                                                 </Typography>
                                             </TableCell>
@@ -1085,8 +1096,19 @@ const UpdateReport = (props) => {
                                                     </Typography>
                                                 </TableCell>
                                             )}
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
-                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100,
+                                                backgroundColor: row.ProductName === "G91" ? "#92D050" :
+                                                row.ProductName === "G95" ? "#FFC000" :
+                                                    row.ProductName === "B7" ? "#FFFF99" :
+                                                        row.ProductName === "B95" ? "#B7DEE8" :
+                                                            row.ProductName === "B10" ? "#32CD32" :
+                                                                row.ProductName === "B20" ? "#228B22" :
+                                                                    row.ProductName === "E20" ? "#C4BD97" :
+                                                                        row.ProductName === "E85" ? "#0000FF" :
+                                                                            row.ProductName === "PWD" ? "#F141D8" :
+                                                                                "#FFFFFF"
+                                             }}>
+                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                     {row.ProductName}
                                                 </Typography>
                                             </TableCell>

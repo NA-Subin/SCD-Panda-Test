@@ -402,7 +402,8 @@ export default function Navbar() {
                     { to: "/customer-smalltrucks", icon: <GroupsIcon fontSize="medium" /> },
                     { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="medium" /> },
                     { to: "/gasstations", icon: <LocalGasStationIcon fontSize="medium" /> },
-                    { to: "/trips", icon: <ListAltIcon fontSize="medium" /> },
+                    { to: "/trips-bigtruck", icon: <ListAltIcon fontSize="medium" /> },
+                    { to: "/trips-smalltruck", icon: <ListAltIcon fontSize="medium" /> },
                     { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
                   ].map((item, index) => (
                     <Button
@@ -1033,7 +1034,7 @@ export default function Navbar() {
               }
             >
               <Collapse in={!operation}>
-                {["สต็อกหน้าลาน", "เที่ยววิ่งรถ"].map((text, index) => (
+                {["สต็อกหน้าลาน", "เที่ยววิ่งรถใหญ่", "เที่ยววิ่งรถเล็ก"].map((text, index) => (
                   <ListItem
                     key={text}
                     disablePadding
@@ -1046,7 +1047,7 @@ export default function Navbar() {
                     <ListItemButton
                       component={Link}
                       to={
-                        index === 0 ? "/gasstations" : "/trips"
+                        index === 0 ? "/gasstations" : index === 1 ? "/trips-bigtruck" : "/trips-smalltruck"
                       }
                       sx={{
                         height: 40, // กำหนดความสูงให้ ListItem
