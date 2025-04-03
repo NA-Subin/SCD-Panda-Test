@@ -237,7 +237,7 @@ const UpdateGasStations = (props) => {
                         Delivered: value?.Delivered || 0,
                         Pending1: value?.Pending1 || 0,
                         Pending2: value?.Pending2 || 0,
-                        Pending3: value?.Pending3 || value?.Delivered || 0,
+                        Pending3: value?.Pending3 || 0,
                         EstimateSell: value?.EstimateSell ?? yesterdayEntry?.EstimateSell ?? 0,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,

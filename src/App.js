@@ -34,6 +34,7 @@ import withReactContent from "sweetalert2-react-content";
 import PrintTrips from "./components/selling/PrintTrips";
 import Report from "./components/report/Report";
 import PrintReport from "./components/report/PrintReport";
+import Driver from "./components/driver/Driver";
 
 const MySwal = withReactContent(Swal);
 
@@ -87,6 +88,7 @@ function App() {
         <Route path="/print-trips" element={<PrintTrips />} />
         <Route path="/print-report" element={<PrintReport />} />
         <Route path="/gasstation-attendant" element={<GasStationA />} />
+        <Route path="/driver" element={<Driver />} />
         <Route path="/trade-payable" element={<TradePayable />} />
         <Route path="/choose" element={<Choose />} />
         <Route path="/gasStation-admin" element={<GasStationAdmin />} />

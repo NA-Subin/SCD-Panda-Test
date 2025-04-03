@@ -1108,15 +1108,14 @@ const InsertTrips = () => {
     };
 
     React.useEffect(() => {
-        const currentRow = ticketsS.find((item) => `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration);
+        const currentRow = smallTruck.find(item =>
+            `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration)
+        console.log("Current : ",currentRow);
+
         if (currentRow) {
-            if (currentRow.type === "รถใหญ่") {
-                setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
-            } else {
-                setWeight(currentRow.Weight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
-            }
+            setWeight(currentRow.Weight || 0); 
         }
-    }, [registration, allTruck]);
+    }, [registration, smallTruck]);
 
     const getTickets = () => {
         if (!registration || registration === "0:0:0:0") return [];

@@ -29,6 +29,7 @@ import {
 import { auth, database, googleProvider } from "../../server/firebase";
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import DriveEtaIcon from '@mui/icons-material/DriveEta';
 import Cookies from 'js-cookie';
 import UpdateDatabase from "../dashboard/test";
 
@@ -43,11 +44,15 @@ const handleChooseDashboard = () => {
     window.location.href = "/dashboard";
 };
 
+const handleChooseDriver = () => {
+  window.location.href = "/driver";
+};
+
 
   // ฟังก์ชันสำหรับเข้าสู่ระบบด้วย Email และ Password
   return (
     <Container sx={{ p: { xs: 2, sm: 3 }, maxWidth: { xs: "lg", sm: "md" }}}>
-      <Grid container spacing={5} sx={{ marginTop: { xs: 2, sm: 4, md: 20} }}>
+      <Grid container spacing={5} sx={{ marginTop: { xs: 2, sm: 4, md: 15} }}>
         <Grid item xs={12}>
             <Typography variant="h3" fontWeight="bold" textAlign="center">กรุณาเลือกหน้าที่ต้องการ</Typography>
         </Grid>
@@ -71,7 +76,7 @@ const handleChooseDashboard = () => {
         </Grid>
         <Grid item xs={12} sm={6}>
             <Button variant="contained" 
-            color="info" 
+            color="success" 
             fullWidth 
             sx={{ height: "20vh", borderRadius: 5,fontSize: 26, fontWeight: "bold" }} 
             onClick={handleChooseDashboard}
@@ -86,6 +91,25 @@ const handleChooseDashboard = () => {
                 หน้าหลัก
             </Button>
         </Grid>
+        <Grid item xs={12} sm={3}></Grid>
+        <Grid item xs={12} sm={6}>
+            <Button variant="contained" 
+            color="info" 
+            fullWidth 
+            sx={{ height: "20vh", borderRadius: 5,fontSize: 26, fontWeight: "bold" }} 
+            onClick={handleChooseDriver}
+            startIcon={
+                <DriveEtaIcon
+                    sx={{
+                        width: 80,  // ความกว้างที่ต้องการ
+                        height: 80, // ความสูงที่ต้องการ
+                    }}
+                />
+            }>
+                พนักงานขับรถ
+            </Button>
+        </Grid>
+        <Grid item xs={12} sm={3}></Grid>
       </Grid>
     </Container>
   );
