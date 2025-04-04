@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Button, Grid, TableHead, TableCell, TableRow, Table, Paper, TableContainer, TableBody } from "@mui/material";
+import { Typography, Button, Grid, TableHead, TableCell, TableRow, Table, Paper, TableContainer, TableBody, Box } from "@mui/material";
 import html2canvas from 'html2canvas';
 
 const PrintInvoice = () => {
@@ -113,7 +113,15 @@ const PrintInvoice = () => {
 
   return (
     <React.Fragment>
-      <div id="invoiceContent" style={{ padding: "20px" }}>
+      <Box
+          id="invoiceContent"
+          sx={{
+            width: "21cm",  // ใช้หน่วย cm
+            height: "14.8cm",
+            backgroundColor: "#f9f9f9", // สีพื้นหลังอ่อนๆ
+            p: 2
+          }}
+        >
         <Grid container spacing={2}>
           <Grid item xs={8}>
             {
@@ -241,7 +249,7 @@ const PrintInvoice = () => {
             </Table>
           </Grid>
         )}
-      </div>
+      </Box>
       <div style={{ textAlign: "center", marginTop: "20px" }}>
         <Button variant="contained" onClick={handleDownloadImage}>
           บันทึกรูปภาพ

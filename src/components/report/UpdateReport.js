@@ -286,32 +286,32 @@ const UpdateReport = (props) => {
         const result = tickets.reduce(
             (acc, row) => {
                 const amount = row.Volume * row.Rate;
-    
+
                 console.log("Row Price : ", ticket.Price);
                 console.log("Row Company : ", row.Company);
-    
+
                 // คำนวณยอดโอนจาก Price ที่ตรงกับ Company
                 const totalIncomingMoney = Array.isArray(ticket.Price)
                     ? ticket.Price
                         .filter(p => p.Transport === row.Company)
                         .reduce((sum, p) => sum + (Number(p.IncomingMoney) || 0), 0)
                     : 0;
-    
+
                 acc.totalVolume += row.Volume;
                 acc.transferAmount += (row.TransferAmount || 0);
                 acc.totalAmount += amount;
                 acc.totalTax += amount * 0.01;
                 acc.totalPayment += amount - (amount * 0.01);
                 acc.totalIncomingMoney = totalIncomingMoney; // รวมยอดโอนทั้งหมดในแต่ละรอบ
-    
+
                 return acc;
             },
             { totalVolume: 0, transferAmount: 0, totalAmount: 0, totalTax: 0, totalPayment: 0, totalIncomingMoney: 0 }
         );
-    
+
         // คำนวณ totalOverdueTransfer หลังจาก reduce เสร็จ
         result.totalOverdueTransfer = result.totalPayment - result.totalIncomingMoney;
-    
+
         return result;
     };
 
@@ -325,7 +325,7 @@ const UpdateReport = (props) => {
     console.log("Total for บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", total1);
     console.log("Total for หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", total2);
 
-    console.log("processedTickets : ",processedTickets);
+    console.log("processedTickets : ", processedTickets);
 
     const generatePDFCompany1 = () => {
         const invoiceData = {
@@ -341,7 +341,20 @@ const UpdateReport = (props) => {
         sessionStorage.setItem("invoiceData", JSON.stringify(invoiceData));
 
         // เปิดหน้าต่างใหม่ไปที่ /print-invoice
-        const printWindow = window.open("/print-report", "_blank", "width=800,height=600");
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const windowWidth = 820;
+        const windowHeight = 559;
+
+        const left = (screenWidth - windowWidth) / 2;
+        const top = (screenHeight - windowHeight) / 2;
+
+        const printWindow = window.open(
+            "/print-report",
+            "_blank",
+            `width=${windowWidth},height=${windowHeight},left=${left},top=${top}`
+        );
+
 
         if (!printWindow) {
             alert("กรุณาปิด pop-up blocker แล้วลองใหม่");
@@ -439,7 +452,7 @@ const UpdateReport = (props) => {
         const updatedCompanies = companies.map(company => {
             // ค้นหารายการของ price ที่ตรงกับ company.Name
             const matchingPrices = price.filter(row => row.Transport === company.Name);
-    
+
             return {
                 ...company,
                 prices: matchingPrices, // เก็บข้อมูลของ price ที่ตรงกับบริษัท
@@ -449,10 +462,10 @@ const UpdateReport = (props) => {
         // companies.forEach(company => {
         //     // ค้นหารายการของ price ที่ตรงกับ company.Name
         //     const matchingPrices = price.filter(row => row.Transport === company.Name);
-    
+
         //     // อ้างอิง path ของบริษัทใน Firebase โดยใช้ company.id
         //     const companyRef = ref(database, `company/${company.id-1}`);
-    
+
         //     // บันทึกข้อมูลใหม่เข้า Firebase
         //     update(companyRef, {
         //         price: matchingPrices
@@ -464,58 +477,58 @@ const UpdateReport = (props) => {
         // });
 
         if (!price || price.length === 0) {
-                    ShowError("Price เป็นค่าว่าง");
-                    return;
-                }
-        
-                let foundItem;
-                let refPath = "";
-        
-                if (ticket?.TicketName) {
-                    foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
-                    if (foundItem) refPath = "/customers/transports/";
-        
-                    if (!foundItem) {
-                        foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
-                        if (foundItem) refPath = "/customers/gasstations/";
-                    }
-        
-                    if (!foundItem) {
-                        foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
-                        if (foundItem) refPath = "/customers/tickets/";
-                    }
-                } else {
-                    ShowError("Ticket Name ไม่ถูกต้อง");
-                    return;
-                }
-        
-                console.log("Item :", foundItem);
-                console.log("Path :", refPath);
-        
-                const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
+            ShowError("Price เป็นค่าว่าง");
+            return;
+        }
 
-                if (foundItem) {
-                            database
-                                .ref(refPath)
-                                .child(`${foundItem.id - 1}/Price/`)
-                                .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-                                .then(() => {
-                                    ShowSuccess("บันทึกข้อมูลเรียบร้อยแล้ว")
-                                })
-                                .catch((error) => {
-                                    ShowError("ไม่สำเร็จ");
-                                    console.error("Error updating data:", error);
-                                });
-                        } else {
-                            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
-                        }
-    
+        let foundItem;
+        let refPath = "";
+
+        if (ticket?.TicketName) {
+            foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+            if (foundItem) refPath = "/customers/transports/";
+
+            if (!foundItem) {
+                foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) refPath = "/customers/gasstations/";
+            }
+
+            if (!foundItem) {
+                foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
+                if (foundItem) refPath = "/customers/tickets/";
+            }
+        } else {
+            ShowError("Ticket Name ไม่ถูกต้อง");
+            return;
+        }
+
+        console.log("Item :", foundItem);
+        console.log("Path :", refPath);
+
+        const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
+
+        if (foundItem) {
+            database
+                .ref(refPath)
+                .child(`${foundItem.id - 1}/Price/`)
+                .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+                .then(() => {
+                    ShowSuccess("บันทึกข้อมูลเรียบร้อยแล้ว")
+                })
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        } else {
+            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+        }
+
         console.log("Using Price:", price);
         console.log("Company:", companies);
-        console.log("Show Total Price : ",TotalPrice);
+        console.log("Show Total Price : ", TotalPrice);
         console.log("Updated Companies with Price Data:", updatedCompanies);
     };
-    
+
 
     const rowSpanMap1 = company1Tickets.reduce((acc, row) => {
         const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
@@ -646,7 +659,7 @@ const UpdateReport = (props) => {
                                         <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
                                             {rowSpan > 0 && (
                                                 <TableCell rowSpan={rowSpan}
-                                                sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle" }}>
+                                                    sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle" }}>
                                                     {displayIndex1}
                                                 </TableCell>
                                             )}
@@ -669,8 +682,9 @@ const UpdateReport = (props) => {
                                                     </Typography>
                                                 </TableCell>
                                             )}
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100,
-                                                    backgroundColor: row.ProductName === "G91" ? "#92D050" :
+                                            <TableCell sx={{
+                                                textAlign: "center", height: '30px', width: 100,
+                                                backgroundColor: row.ProductName === "G91" ? "#92D050" :
                                                     row.ProductName === "G95" ? "#FFC000" :
                                                         row.ProductName === "B7" ? "#FFFF99" :
                                                             row.ProductName === "B95" ? "#B7DEE8" :
@@ -680,7 +694,7 @@ const UpdateReport = (props) => {
                                                                             row.ProductName === "E85" ? "#0000FF" :
                                                                                 row.ProductName === "PWD" ? "#F141D8" :
                                                                                     "#FFFFFF"
-                                             }}>
+                                            }}>
                                                 <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                     {row.ProductName}
                                                 </Typography>
@@ -1073,7 +1087,7 @@ const UpdateReport = (props) => {
                                         <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
                                             {rowSpan > 0 && (
                                                 <TableCell rowSpan={rowSpan}
-                                                sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle" }}>
+                                                    sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle" }}>
                                                     {displayIndex2}
                                                 </TableCell>
                                             )}
@@ -1096,18 +1110,19 @@ const UpdateReport = (props) => {
                                                     </Typography>
                                                 </TableCell>
                                             )}
-                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100,
+                                            <TableCell sx={{
+                                                textAlign: "center", height: '30px', width: 100,
                                                 backgroundColor: row.ProductName === "G91" ? "#92D050" :
-                                                row.ProductName === "G95" ? "#FFC000" :
-                                                    row.ProductName === "B7" ? "#FFFF99" :
-                                                        row.ProductName === "B95" ? "#B7DEE8" :
-                                                            row.ProductName === "B10" ? "#32CD32" :
-                                                                row.ProductName === "B20" ? "#228B22" :
-                                                                    row.ProductName === "E20" ? "#C4BD97" :
-                                                                        row.ProductName === "E85" ? "#0000FF" :
-                                                                            row.ProductName === "PWD" ? "#F141D8" :
-                                                                                "#FFFFFF"
-                                             }}>
+                                                    row.ProductName === "G95" ? "#FFC000" :
+                                                        row.ProductName === "B7" ? "#FFFF99" :
+                                                            row.ProductName === "B95" ? "#B7DEE8" :
+                                                                row.ProductName === "B10" ? "#32CD32" :
+                                                                    row.ProductName === "B20" ? "#228B22" :
+                                                                        row.ProductName === "E20" ? "#C4BD97" :
+                                                                            row.ProductName === "E85" ? "#0000FF" :
+                                                                                row.ProductName === "PWD" ? "#F141D8" :
+                                                                                    "#FFFFFF"
+                                            }}>
                                                 <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                     {row.ProductName}
                                                 </Typography>
@@ -1413,7 +1428,7 @@ const UpdateReport = (props) => {
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 250, height: "30px", backgroundColor: theme.palette.success.main }}><BankDetail/></TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 250, height: "30px", backgroundColor: theme.palette.success.main }}><BankDetail /></TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 300, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทขนส่ง</TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>

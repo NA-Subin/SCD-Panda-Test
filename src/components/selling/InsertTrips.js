@@ -892,8 +892,19 @@ const InsertTrips = () => {
         // บันทึกข้อมูลลง sessionStorage
         sessionStorage.setItem("Trips", JSON.stringify(Trips));
 
-        // เปิดหน้าต่างใหม่ไปที่ /print-invoice
-        const printWindow = window.open("/print-trips", "_blank", "width=800,height=600");
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const windowWidth = 835;
+        const windowHeight = 559;
+
+        const left = (screenWidth - windowWidth) / 2;
+        const top = (screenHeight - windowHeight) / 2;
+
+        const printWindow = window.open(
+            "/print-trips",
+            "_blank",
+            `width=${windowWidth},height=${windowHeight},left=${left},top=${top}`
+        );
 
         if (!printWindow) {
             alert("กรุณาปิด pop-up blocker แล้วลองใหม่");

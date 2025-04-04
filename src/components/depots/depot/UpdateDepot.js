@@ -63,7 +63,7 @@ const UpdateDepot = (props) => {
 
     const handleUpdate = () => {
         database
-            .ref("/customer")
+            .ref("/depot/oils/")
             .child(depot.id - 1)
             .update({
                 Name: name,
@@ -75,8 +75,8 @@ const UpdateDepot = (props) => {
                 (province === "-" ? "" : ","+province)+
                 (zipCode === "-" ? "" : ","+zipCode)
                 ,
-                Lat: lat,
-                Lng: lng
+                lat: lat,
+                lng: lng
             })
             .then(() => {
                 ShowSuccess("แก้ไขข้อมูลสำเร็จ");
