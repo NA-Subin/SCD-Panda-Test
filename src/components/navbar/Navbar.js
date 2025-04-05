@@ -397,6 +397,8 @@ export default function Navbar() {
                     { to: "/dashboard", icon: <HomeIcon fontSize="medium" /> },
                     { to: "/employee", icon: <AccountCircleIcon fontSize="medium" /> },
                     { to: "/trucks", icon: <LocalShippingIcon fontSize="medium" /> },
+                    { to: "/depots", icon: <StoreMallDirectoryIcon fontSize="medium" /> },
+                    { to: "/ticket", icon: <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} fontSize="medium" /> },
                     { to: "/transports", icon: <BookOnlineIcon fontSize="medium" sx={{ transform: "rotate(90deg)" }} /> },
                     { to: "/customer-bigtrucks", icon: <GroupsIcon fontSize="medium" /> },
                     { to: "/customer-smalltrucks", icon: <GroupsIcon fontSize="medium" /> },
@@ -404,6 +406,8 @@ export default function Navbar() {
                     { to: "/gasstations", icon: <LocalGasStationIcon fontSize="medium" /> },
                     { to: "/trips-bigtruck", icon: <ListAltIcon fontSize="medium" /> },
                     { to: "/trips-smalltruck", icon: <ListAltIcon fontSize="medium" /> },
+                    { to: "/invoice", icon: <ListItemIcon fontSize="medium" /> },
+                    { to: "/report", icon: <ListItemIcon fontSize="medium" /> },
                     { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
                   ].map((item, index) => (
                     <Button

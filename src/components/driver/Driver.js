@@ -50,6 +50,7 @@ import Cookies from 'js-cookie';
 import 'dayjs/locale/th';
 import { database } from "../../server/firebase";
 import { TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellSelling, TableCellPWD } from "../../theme/style";
+import { useData } from "../../server/path";
 
 const Driver = () => {
     const [truck, setTruck] = React.useState("0:0:0");
@@ -77,81 +78,96 @@ const Driver = () => {
         };
     }, []);
 
-    const [driver, setDriver] = useState([]);
-    const [trip, setTrip] = useState([]);
-    const [order, setOrder] = useState([]);
+    // const [driver, setDriver] = useState([]);
+    // const [trip, setTrip] = useState([]);
+    // const [order, setOrder] = useState([]);
     const [tripNew, setTripNew] = useState([]);
     const [orderNew, setOrderNew] = useState([]);
-    const [depot, setDepot] = useState([]);
+    // const [depot, setDepot] = useState([]);
     const [depotNew, setDepotNew] = useState([]);
     const [showTrip, setShowTrip] = useState(true);
     const [check, setCheck] = useState({});
 
-    const getTrip = async () => {
-        database.ref("/truck/registration").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setDriver([]);
-            } else {
-                const dataDriver = [];
-                for (let id in datas) {
-                    if (datas[id].Driver !== "ไม่มี") {
-                        dataDriver.push({ id, ...datas[id] })
-                    }
-                }
-                setDriver(dataDriver);
-            }
-        });
+    // const getTrip = async () => {
+    //     database.ref("/truck/registration").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setDriver([]);
+    //         } else {
+    //             const dataDriver = [];
+    //             for (let id in datas) {
+    //                 if (datas[id].Driver !== "ไม่มี") {
+    //                     dataDriver.push({ id, ...datas[id] })
+    //                 }
+    //             }
+    //             setDriver(dataDriver);
+    //         }
+    //     });
 
-        database.ref("/trip").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setTrip([]);
-            } else {
-                const dataTrip = [];
-                for (let id in datas) {
-                    if (datas[id].StatusTrips !== "จบทริป") {
-                        dataTrip.push({ id, ...datas[id] })
-                    }
-                }
-                setTrip(dataTrip);
-            }
-        });
+    //     database.ref("/trip").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setTrip([]);
+    //         } else {
+    //             const dataTrip = [];
+    //             for (let id in datas) {
+    //                 if (datas[id].StatusTrips === "กำลังจัดเที่ยววิ่ง" || (datas[id].StatusTrips === "จบทริป" && datas[id].DateEnd === dayjs(new Date).format("DD/MM/YYYY"))) {
+    //                     dataTrip.push({ id, ...datas[id] })
+    //                 }
+    //             }
+    //             setTrip(dataTrip);
+    //         }
+    //     });
 
-        database.ref("/order").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setOrder([]);
-            } else {
-                const dataOrder = [];
-                for (let id in datas) {
-                    dataOrder.push({ id, ...datas[id] })
-                }
-                setOrder(dataOrder);
-            }
-        });
+    //     database.ref("/order").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setOrder([]);
+    //         } else {
+    //             const dataOrder = [];
+    //             for (let id in datas) {
+    //                 dataOrder.push({ id, ...datas[id] })
+    //             }
+    //             setOrder(dataOrder);
+    //         }
+    //     });
 
-        database.ref("/depot/oils").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setDepot([]);
-            } else {
-                const dataDepot = [];
-                for (let id in datas) {
-                    dataDepot.push({ id, ...datas[id] })
-                }
-                setDepot(dataDepot);
-            }
-        });
-    };
+    //     database.ref("/depot/oils").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setDepot([]);
+    //         } else {
+    //             const dataDepot = [];
+    //             for (let id in datas) {
+    //                 dataDepot.push({ id, ...datas[id] })
+    //             }
+    //             setDepot(dataDepot);
+    //         }
+    //     });
+    // };
+
+    // useEffect(() => {
+    //     getTrip();
+    // }, []);
+
+    const { reghead, trip, order, depots } = useData();
+    const drivers = Object.values(reghead || {});
+  const trips = Object.values(trip || {});
+  const orders = Object.values(order || {});
+  const depot = Object.values(depots || {});
+
+    // กรองตามเงื่อนไขที่ต้องการหลังจาก data มาแล้ว
+    const driver = drivers.filter(d => d.Driver !== "ไม่มี");
+
+    const today = dayjs(new Date()).format("DD/MM/YYYY");
+    const tripDetail = trips.filter(t =>
+        t.StatusTrips === "กำลังจัดเที่ยววิ่ง" ||
+        (t.StatusTrips === "จบทริป" && t.DateEnd === today)
+    );
 
     useEffect(() => {
-        getTrip();
-    }, []);
-
-    useEffect(() => {
-        const check = trip.find((item) => item.Driver === truck.split(":")[0]) || {};
-        const checkOrder = order.filter((item) => item.Trip === (check.id - 1))
+        const check = tripDetail.find((item) => item.Driver === truck.split(":")[0]) || {};
+        const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
@@ -178,7 +194,8 @@ const Driver = () => {
                 .ref("trip/")
                 .child(check.id - 1)
                 .update({
-                    StatusTrips: "จบทริป"
+                    StatusTrips: "จบทริป",
+                    DateEnd: dayjs(new Date).format("DD/MM/YYYY")
                 })
                 .then(() => {
                     console.log("Data pushed successfully");
@@ -194,8 +211,8 @@ const Driver = () => {
     const handleChangeDriver = (e) => {
         const trucks = e.target.value;
         setTruck(e.target.value);
-        const check = trip.find((item) => item.Driver === trucks.split(":")[0]) || {};
-        const checkOrder = order.filter((item) => item.Trip === (check.id - 1))
+        const check = tripDetail.find((item) => item.Driver === trucks.split(":")[0]) || {};
+        const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
@@ -222,7 +239,8 @@ const Driver = () => {
                 .ref("trip/")
                 .child(check.id - 1)
                 .update({
-                    StatusTrips: "จบทริป"
+                    StatusTrips: "จบทริป",
+                    DateEnd: dayjs(new Date).format("DD/MM/YYYY")
                 })
                 .then(() => {
                     console.log("Data pushed successfully");
@@ -265,7 +283,7 @@ const Driver = () => {
         return `${houseNo} หมู่ ${moo} ต.${subdistrict} อ.${district} จ.${province} ${postalCode}`;
     };
 
-    console.log("Trip : ", trip);
+    console.log("Trip : ", tripDetail);
     console.log("Truck : ", truck.split(":")[1]);
     console.log("TripNew : ", tripNew);
     console.log("TripNew length : ", Object.keys(tripNew).length);
