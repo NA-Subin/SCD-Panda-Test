@@ -247,6 +247,25 @@ const PrintInvoice = () => {
                 </TableRow>
               </TableBody>
             </Table>
+
+            <Grid item xs={12}>
+              <Grid container spacing={2}>
+                <Grid item xs={5}>
+<Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด กสิกรไทย</Typography>
+                      <Typography variant="subtitle2" gutterBottom>1. เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
+                      <Typography variant="subtitle2" gutterBottom>2. ป่าแดด...เชียงราย 062-8-16524-6</Typography>
+                      <Typography variant="subtitle2" gutterBottom>3. พะเยา - แม่ต่ำ 065-1-88088-2</Typography>
+                </Grid>
+                <Grid item xs={4}>
+                <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
+                      <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
+                </Grid>
+                <Grid item xs={3} sx={{ textAlign: "center",marginTop: 4 }}>
+                                    <Typography variant="subtitle2" gutterBottom>_________________________</Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
+                                    </Grid>
+              </Grid>
+            </Grid>
           </Grid>
         )}
       </Box>

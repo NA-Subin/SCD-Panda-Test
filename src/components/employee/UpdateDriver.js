@@ -177,7 +177,7 @@ const UpdateDriver = (props) => {
     return (
         <React.Fragment>
             <TableCell sx={{ textAlign: "center" }}>
-                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpen(driver.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
+                <IconButton sx={{ marginTop: -0.5 }} onClick={() => setOpen(driver.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
             </TableCell>
             <Dialog
                 open={open === driver.id ? true : false}

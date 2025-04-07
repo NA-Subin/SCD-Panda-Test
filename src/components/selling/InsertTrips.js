@@ -992,6 +992,7 @@ const InsertTrips = () => {
                 id: trip.length + 1,
                 DateReceive: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
                 DateDelivery: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
+                DateStart: dayjs(new Date()).format('DD/MM/YYYY'),
                 Registration: registration.split(":")[1],
                 Driver: registration.split(":")[2],
                 Depot: depots,

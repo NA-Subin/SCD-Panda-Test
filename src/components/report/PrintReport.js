@@ -289,6 +289,19 @@ const PrintReport = () => {
                   </TableRow>
                 </TableBody>
               </Table>
+              <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={8}>
+                      <Typography variant="subtitle2" fontWeight="bold" gutterBottom>โอนเงินเข้าบัญชีบริษัท {invoiceData?.Company}</Typography>
+                      <Typography variant="subtitle2" gutterBottom>1. KBANK สาขา เฟสติเวล 663-1-00798-6</Typography>
+                      <Typography variant="subtitle2" gutterBottom>2. KBANK สาขาป่าแดด 064-8-29539-1</Typography>
+                    </Grid>
+                    <Grid item xs={4} sx={{ textAlign: "center",marginTop: 4 }}>
+                    <Typography variant="subtitle2" gutterBottom>_________________________</Typography>
+                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
+                    </Grid>
+                  </Grid>
+              </Grid>
             </Grid>
           )}
         </Box>
