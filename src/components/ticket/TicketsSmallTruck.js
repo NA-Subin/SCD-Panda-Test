@@ -96,23 +96,25 @@ const TicketsSmallTruck = () => {
     // const [rate2Edit, setRate2Edit] = useState("");
     // const [rate3Edit, setRate3Edit] = useState("");
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
+    const [name,setName] = useState("");
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (rowId, status, rowCreditTime
+    const handleSetting = (rowId, status, rowCreditTime, newname
         // , rowRate1, rowRate2, rowRate3
     ) => {
         setSetting(true);
         setSelectedRowId(rowId);
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
-        if(status === "ลูกค้าประจำ"){
+        if (status === "ลูกค้าประจำ") {
             setTicketChecked(true);
             setRecipientChecked(false);
-        }else{
+        } else {
             setTicketChecked(false);
             setRecipientChecked(true);
         }
-        
+
         setCreditTimeEdit(rowCreditTime);
+        setName(newname);
         // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
         // setRate1Edit(rowRate1);
         // setRate2Edit(rowRate2);
@@ -121,14 +123,15 @@ const TicketsSmallTruck = () => {
 
     // บันทึกข้อมูลที่แก้ไขแล้ว
     const handleSave = async () => {
-        const newStatus = 
-            (ticketChecked && !recipientChecked ? "ลูกค้าประจำ" : 
-            !ticketChecked && recipientChecked ? "ลูกค้าไม่ประจำ" : "ยกเลิก")
+        const newStatus =
+            (ticketChecked && !recipientChecked ? "ลูกค้าประจำ" :
+                !ticketChecked && recipientChecked ? "ลูกค้าไม่ประจำ" : "ยกเลิก")
 
         // บันทึกสถานะใหม่ไปยัง Firebase
         await database.ref(`/customers/smalltruck/${selectedRowId - 1}`).update({
             Status: newStatus,
-            CreditTime: creditTimeEdit
+            CreditTime: creditTimeEdit,
+            Name: name
             // Rate1: rate1Edit,
             // Rate2: rate2Edit,
             // Rate3: rate3Edit,
@@ -144,6 +147,18 @@ const TicketsSmallTruck = () => {
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    const handleClickOpen1 = () => {
+        setOpen(1);
+        setPage(0)
+        setRowsPerPage(10)
+    };
+
+    const handleClickOpen2 = () => {
+        setOpen(2);
+        setPage(0)
+        setRowsPerPage(10)
+    };
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -177,10 +192,10 @@ const TicketsSmallTruck = () => {
             <Divider sx={{ marginBottom: 1 }} />
             <Grid container spacing={2} marginTop={1}>
                 <Grid item xs={6}>
-                    <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>เชียงใหม่</Button>
+                    <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={handleClickOpen1}>เชียงใหม่</Button>
                 </Grid>
                 <Grid item xs={6}>
-                    <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>บ้านโฮ่ง</Button>
+                    <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={handleClickOpen2}>บ้านโฮ่ง</Button>
                 </Grid>
                 <Grid item xs={6} sx={{ marginTop: -3 }}>
                     {
@@ -250,7 +265,40 @@ const TicketsSmallTruck = () => {
                                                             {row.No}
                                                         </Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell>
+                                                    {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Name
+                                                                :
+                                                                <Paper sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px',
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                                fontWeight: 'bold',
+                                                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                                textAlign: "center"
+                                                                            },
+                                                                        }}
+                                                                        value={name}
+                                                                        onChange={(e) => setName(e.target.value)}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                    />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
@@ -379,49 +427,49 @@ const TicketsSmallTruck = () => {
                                                         }
                                                     </TableCell> */}
                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                            {
-                                                                !setting || row.id !== selectedRowId ?
-                                                                    <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
-                                                                    :
-                                                                    <>
-                                                                        <FormControlLabel
-                                                                            sx={{ whiteSpace: "nowrap" }}
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    checked={ticketChecked && !recipientChecked ? true : false}
-                                                                                    onChange={handleChangeTicketChecked}
-                                                                                    size="small"
-                                                                                />
-                                                                            }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    ลูกค้าประจำ
-                                                                                </Typography>
-                                                                            }
-                                                                        />
-                                                                        <FormControlLabel
-                                                                            sx={{ whiteSpace: "nowrap", marginTop: -2 }}
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    checked={!ticketChecked && recipientChecked ? true : false}
-                                                                                    onChange={handleChangeRecipientChecked}
-                                                                                    size="small"
-                                                                                />
-                                                                            }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    ลูกค้าไม่ประจำ
-                                                                                </Typography>
-                                                                            }
-                                                                        />
-                                                                    </>
-                                                            }
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
+                                                                :
+                                                                <>
+                                                                    <FormControlLabel
+                                                                        sx={{ whiteSpace: "nowrap" }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={ticketChecked && !recipientChecked ? true : false}
+                                                                                onChange={handleChangeTicketChecked}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                        label={
+                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                ลูกค้าประจำ
+                                                                            </Typography>
+                                                                        }
+                                                                    />
+                                                                    <FormControlLabel
+                                                                        sx={{ whiteSpace: "nowrap", marginTop: -2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={!ticketChecked && recipientChecked ? true : false}
+                                                                                onChange={handleChangeRecipientChecked}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                        label={
+                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                ลูกค้าไม่ประจำ
+                                                                            </Typography>
+                                                                        }
+                                                                    />
+                                                                </>
+                                                        }
                                                     </TableCell>
                                                     <TableCell width={70}>
                                                         <Box sx={{ marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
-                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }} size="small" onClick={() => handleSetting(row.id, row.Status, row.CreditTime)} fullWidth>แก้ไข</Button>
+                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }} size="small" onClick={() => handleSetting(row.id, row.Status, row.CreditTime, row.Name)} fullWidth>แก้ไข</Button>
                                                                     :
                                                                     <>
                                                                         <Button variant="contained" color="success" onClick={handleSave} sx={{ height: "25px", marginTop: 0.5 }} size="small" fullWidth>บันทึก</Button>
@@ -447,7 +495,40 @@ const TicketsSmallTruck = () => {
                                                             {row.No}
                                                         </Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell>
+                                                    {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell> */}
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Name
+                                                                :
+                                                                <Paper sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px',
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                                fontWeight: 'bold',
+                                                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                                textAlign: "center"
+                                                                            },
+                                                                        }}
+                                                                        value={name}
+                                                                        onChange={(e) => setName(e.target.value)}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                    />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
@@ -576,49 +657,49 @@ const TicketsSmallTruck = () => {
                                                         }
                                                     </TableCell> */}
                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                            {
-                                                                !setting || row.id !== selectedRowId ?
-                                                                    <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
-                                                                    :
-                                                                    <>
-                                                                        <FormControlLabel
-                                                                            sx={{ whiteSpace: "nowrap" }}
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    checked={ticketChecked && !recipientChecked ? true : false}
-                                                                                    onChange={handleChangeTicketChecked}
-                                                                                    size="small"
-                                                                                />
-                                                                            }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    ลูกค้าประจำ
-                                                                                </Typography>
-                                                                            }
-                                                                        />
-                                                                        <FormControlLabel
-                                                                            sx={{ whiteSpace: "nowrap", marginTop: -2 }}
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    checked={!ticketChecked && recipientChecked ? true : false}
-                                                                                    onChange={handleChangeRecipientChecked}
-                                                                                    size="small"
-                                                                                />
-                                                                            }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    ลูกค้าไม่ประจำ
-                                                                                </Typography>
-                                                                            }
-                                                                        />
-                                                                    </>
-                                                            }
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
+                                                                :
+                                                                <>
+                                                                    <FormControlLabel
+                                                                        sx={{ whiteSpace: "nowrap" }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={ticketChecked && !recipientChecked ? true : false}
+                                                                                onChange={handleChangeTicketChecked}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                        label={
+                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                ลูกค้าประจำ
+                                                                            </Typography>
+                                                                        }
+                                                                    />
+                                                                    <FormControlLabel
+                                                                        sx={{ whiteSpace: "nowrap", marginTop: -2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={!ticketChecked && recipientChecked ? true : false}
+                                                                                onChange={handleChangeRecipientChecked}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                        label={
+                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                ลูกค้าไม่ประจำ
+                                                                            </Typography>
+                                                                        }
+                                                                    />
+                                                                </>
+                                                        }
                                                     </TableCell>
                                                     <TableCell width={70}>
                                                         <Box sx={{ marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
-                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }} size="small" onClick={() => handleSetting(row.id, row.Status, row.CreditTime)} fullWidth>แก้ไข</Button>
+                                                                    <Button variant="contained" color="warning" startIcon={<EditNoteIcon />} sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }} size="small" onClick={() => handleSetting(row.id, row.Status, row.CreditTime, row.Name)} fullWidth>แก้ไข</Button>
                                                                     :
                                                                     <>
                                                                         <Button variant="contained" color="success" onClick={handleSave} sx={{ height: "25px", marginTop: 0.5 }} size="small" fullWidth>บันทึก</Button>

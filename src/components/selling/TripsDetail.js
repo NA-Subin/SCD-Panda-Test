@@ -118,6 +118,7 @@ const TripsDetail = (props) => {
                         totalWeight={trips.TotalWeight} 
                         weightTruck={trips.WeightTruck} 
                         depotTrip={trips.Depot}
+                        registrations={`${trips.Driver}/${trips.Registration}`}
                         />
                 </TableCell>
                 {/* <TableCell sx={{

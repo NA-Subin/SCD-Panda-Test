@@ -92,6 +92,7 @@ const InsertTicketsTransport = () => {
             .child(ticket)
             .update({
                 id: ticket + 1,
+                Name: ticketsName,
                 TicketsName: ticketsName,
                 Status: ticketChecked1 === false && ticketChecked2 === true ? "ตั๋ว" : ticketChecked1 === true && ticketChecked2 === false ? "ผู้รับ" : ticketChecked1 === false && ticketChecked2 === false ? "ตั๋ว/ผู้รับ" : "-",
                 Rate1: rate1,

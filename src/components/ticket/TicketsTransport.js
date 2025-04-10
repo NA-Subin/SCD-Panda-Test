@@ -97,9 +97,10 @@ const TicketsTransport = () => {
     const [rate2Edit, setRate2Edit] = useState("");
     const [rate3Edit, setRate3Edit] = useState("");
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
+    const [name,setName] = useState("");
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3, rowCreditTime) => {
+    const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname) => {
         setSetting(true);
         setSelectedRowId(rowId);
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
@@ -111,6 +112,7 @@ const TicketsTransport = () => {
         setRate1Edit(rowRate1);
         setRate2Edit(rowRate2);
         setRate3Edit(rowRate3);
+        setName(newname);
         setCreditTimeEdit(rowCreditTime);
     };
 
@@ -127,7 +129,8 @@ const TicketsTransport = () => {
             Rate1: rate1Edit,
             Rate2: rate2Edit,
             Rate3: rate3Edit,
-            CreditTime: creditTimeEdit
+            CreditTime: creditTimeEdit,
+            Name: name
         });
         // Reset state หลังบันทึก
         setSetting(false);
@@ -141,6 +144,18 @@ const TicketsTransport = () => {
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    const handleClickOpen1 = () => {
+        setOpen(1);
+        setPage(0)
+        setRowsPerPage(10)
+    };
+
+    const handleClickOpen2 = () => {
+        setOpen(2);
+        setPage(0)
+        setRowsPerPage(10)
+    };
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -164,10 +179,10 @@ const TicketsTransport = () => {
             <Divider sx={{ marginBottom: 1 }} />
             <Grid container spacing={2} marginTop={1}>
                 <Grid item xs={6}>
-                    <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ลูกค้ารับจ้างขนส่ง</Button>
+                    <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={handleClickOpen1}>ลูกค้ารับจ้างขนส่ง</Button>
                 </Grid>
                 <Grid item xs={6}>
-                    <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ปั้มน้ำมัน</Button>
+                    <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={handleClickOpen2}>ปั้มน้ำมัน</Button>
                 </Grid>
                 <Grid item xs={6} sx={{ marginTop: -3 }}>
                     {
@@ -239,7 +254,40 @@ const TicketsTransport = () => {
                                                             {row.id}
                                                         </Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell>
+                                                    {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Name
+                                                                :
+                                                                <Paper sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '14px',
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของ TextField
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                                fontWeight: 'bold',
+                                                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                                textAlign: "center"
+                                                                            },
+                                                                        }}
+                                                                        value={name}
+                                                                        onChange={(e) => setName(e.target.value)}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                    />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
@@ -422,7 +470,7 @@ const TicketsTransport = () => {
                                                                         startIcon={<EditNoteIcon />}
                                                                         size="small"
                                                                         sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }}
-                                                                        onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime)}
+                                                                        onClick={() => handleSetting(row.id, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name)}
                                                                         fullWidth
                                                                     >
                                                                         แก้ไข

@@ -110,7 +110,7 @@ const TicketsStock = () => {
                                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                 {
                                                     !setting ?
-                                                        row.TicketsName
+                                                        row.Name
                                                         :
                                                         <>
                                                             <Typography variant="subtitle2" gutterBottom sx={{ whiteSpace: 'nowrap', marginRight: 1 }}>ชื่อตั๋ว</Typography>

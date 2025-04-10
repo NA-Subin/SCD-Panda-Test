@@ -37,7 +37,7 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 const TicketsGasStation = (props) => {
     const { row } = props;
     const [update, setUpdate] = React.useState(true);
-    const [name, setName] = React.useState(row.TicketsName);
+    const [name, setName] = React.useState(row.Name);
     const [rate1, setRate1] = React.useState(row.Rate1);
     const [rate2, setRate2] = React.useState(row.Rate2);
     const [rate3, setRate3] = React.useState(row.Rate3);
@@ -53,7 +53,8 @@ const TicketsGasStation = (props) => {
                 Rate1: rate1,
                 Rate2: rate2,
                 Rate3: rate3,
-                CreditTime: creditTime
+                CreditTime: creditTime,
+                Name: name
             }) // อัพเดท values ทั้งหมด
             .then(() => {
                 ShowSuccess("แก้ไขข้อมูลสำเร็จ");
@@ -79,23 +80,50 @@ const TicketsGasStation = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{rate3}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{status}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
-                        <Button
-                                        variant="contained"
-                                        color="warning"
-                                        startIcon={<EditNoteIcon />}
-                                        size="small"
-                                        sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }}
-                                        onClick={() => setOpen(true)}
-                                        fullWidth
-                                    >
-                                        แก้ไข
-                                    </Button>
+                            <Button
+                                variant="contained"
+                                color="warning"
+                                startIcon={<EditNoteIcon />}
+                                size="small"
+                                sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }}
+                                onClick={() => setOpen(true)}
+                                fullWidth
+                            >
+                                แก้ไข
+                            </Button>
                         </TableCell>
                     </TableRow>
                     :
                     <TableRow key={row.id} sx={{ backgroundColor: "#fff59d" }}>
                         <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{row.id}</TableCell>
-                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{name}</TableCell>
+                        {/* <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{name}</TableCell> */}
+                        <TableCell sx={{ textAlign: "center" }}>
+                            <Paper sx={{ width: "100%" }}>
+                                <TextField
+                                    fullWidth
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '14px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '30px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            textAlign: "center"
+                                        },
+                                    }}
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Paper>
+                        </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth

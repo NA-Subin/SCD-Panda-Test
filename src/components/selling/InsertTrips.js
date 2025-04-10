@@ -1138,7 +1138,7 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const tickets = [
-            { TicketsName: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
+            { TicketsName: "ตั๋วเปล่า",Name: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item })),
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
@@ -1766,7 +1766,7 @@ const InsertTrips = () => {
                                             id="autocomplete-tickets"
                                             options={getTickets()} // ดึงข้อมูลจากฟังก์ชัน getTickets()
                                             getOptionLabel={(option) =>
-                                                `${option.TicketsName}`
+                                                `${option.Name}`
                                             } // กำหนดรูปแบบของ Label ที่แสดง
                                             isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName} // ตรวจสอบค่าที่เลือก
                                             value={tickets ? getTickets().find(item => item.TicketsName === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
@@ -1792,7 +1792,7 @@ const InsertTrips = () => {
                                             )}
                                             renderOption={(props, option) => (
                                                 <li {...props}>
-                                                    <Typography fontSize="14px">{`${option.TicketsName}`}</Typography>
+                                                    <Typography fontSize="14px">{`${option.Name}`}</Typography>
                                                 </li>
                                             )}
                                             disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
@@ -2304,7 +2304,7 @@ const InsertTrips = () => {
                                                     id="autocomplete-tickets"
                                                     options={getCustomers()} // ดึงข้อมูลจากฟังก์ชัน getTickets()
                                                     getOptionLabel={(option) =>
-                                                        `${option.TicketsName}`
+                                                        `${option.Name}`
                                                     } // กำหนดรูปแบบของ Label ที่แสดง
                                                     isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
                                                     value={customers ? getCustomers().find(item => item.TicketsName === customers) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
@@ -2330,7 +2330,7 @@ const InsertTrips = () => {
                                                     )}
                                                     renderOption={(props, option) => (
                                                         <li {...props}>
-                                                            <Typography fontSize="14px">{`${option.TicketsName}`}</Typography>
+                                                            <Typography fontSize="14px">{`${option.Name}`}</Typography>
                                                         </li>
                                                     )}
                                                     disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false

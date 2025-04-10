@@ -1,28 +1,28 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
     Autocomplete,
-  Box,
-  Button,
-  Checkbox,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
+    Box,
+    Button,
+    Checkbox,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    Grid,
+    IconButton,
+    MenuItem,
+    Paper,
+    Select,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography,
 } from "@mui/material";
 import { IconButtonError, TablecellHeader } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -32,129 +32,130 @@ import theme from "../../theme/theme";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const InsertTicketsGasStations = (props) => {
-  const [update, setUpdate] = React.useState(true);
-  const [open, setOpen] = React.useState(false);
-  const [check, setCheck] = React.useState(true);
-  const [gasStation, setGasStation] = React.useState([]);
-  
-      const handleClickOpen = () => {
-          setOpen(true);
-      };
-  
-      const handleClose = () => {
-          setOpen(false);
-      };
+    const [update, setUpdate] = React.useState(true);
+    const [open, setOpen] = React.useState(false);
+    const [check, setCheck] = React.useState(true);
+    const [gasStation, setGasStation] = React.useState([]);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     const [name, setName] = React.useState("");
-        const [no, setNo] = React.useState("");
-        const [village, setVillage] = React.useState("");
-        const [subDistrict, setSubDistrict] = React.useState("");
-        const [district, setDistrict] = React.useState("");
-        const [province, setProvince] = React.useState("");
-        const [lat,setLat] = React.useState("");
-        const [lng,setLng] = React.useState("");
-        const [zipCode, setZipCode] = React.useState("");
-        const [ticket,setTicket] = React.useState(0);
-        const [ticketsName,setTicketsName] = React.useState("-");
-        const [rate1,setRate1] = React.useState("");
-        const [rate2,setRate2] = React.useState("");
-        const [rate3,setRate3] = React.useState("");
-        const [bill,setBill] = React.useState("");
-        const [code,setCode] = React.useState("");
-        const [companyName,setCompanyName] = React.useState("");
-        const [codeID,setCodeID] = React.useState("");
-    
-        const getTicket = async () => {
-                database.ref("/customers/gasstations/").on("value", (snapshot) => {
-                    const datas = snapshot.val();
-                    if(datas === null || datas === undefined){
-                        setTicket(0);
-                    }else{
-                        setTicket(datas.length); 
-                    }
-                });
-            };
+    const [no, setNo] = React.useState("");
+    const [village, setVillage] = React.useState("");
+    const [subDistrict, setSubDistrict] = React.useState("");
+    const [district, setDistrict] = React.useState("");
+    const [province, setProvince] = React.useState("");
+    const [lat, setLat] = React.useState("");
+    const [lng, setLng] = React.useState("");
+    const [zipCode, setZipCode] = React.useState("");
+    const [ticket, setTicket] = React.useState(0);
+    const [ticketsName, setTicketsName] = React.useState("");
+    const [rate1, setRate1] = React.useState("");
+    const [rate2, setRate2] = React.useState("");
+    const [rate3, setRate3] = React.useState("");
+    const [creditTime, setCreditTime] = React.useState("");
+    const [code, setCode] = React.useState("");
+    const [companyName, setCompanyName] = React.useState("");
+    const [codeID, setCodeID] = React.useState("");
 
-            const getGasStation = async () => {
-                        database.ref("/depot/gasStations/").on("value", (snapshot) => {
-                            const datas = snapshot.val();
-                            if(datas === null || datas === undefined){
-                                setGasStation([]);
-                            }else{
-                                const dataList = [];
-                                for (let id in datas) {
-                                    dataList.push({ id, ...datas[id] })
-                                }
-                                setGasStation(dataList);
-                            }
-                        });
-                    };
-        
-            useEffect(() => {
-                getTicket();
-                getGasStation();
-            }, []);
+    const getTicket = async () => {
+        database.ref("/customers/gasstations/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            if (datas === null || datas === undefined) {
+                setTicket(0);
+            } else {
+                setTicket(datas.length);
+            }
+        });
+    };
 
-        console.log("tickket:",ticket);
+    const getGasStation = async () => {
+        database.ref("/depot/gasStations/").on("value", (snapshot) => {
+            const datas = snapshot.val();
+            if (datas === null || datas === undefined) {
+                setGasStation([]);
+            } else {
+                const dataList = [];
+                for (let id in datas) {
+                    dataList.push({ id, ...datas[id] })
+                }
+                setGasStation(dataList);
+            }
+        });
+    };
+
+    useEffect(() => {
+        getTicket();
+        getGasStation();
+    }, []);
+
+    console.log("tickket:", ticket);
 
     const handlePost = () => {
-            database
-                .ref("/customers/gasstations/")
-                .child(ticket)
-                .update({
-                    id: ticket + 1,
-                    TicketsName: ticketsName,
-                    Status: "ตั๋ว/ผู้รับ",
-                    Rate1: rate1,
-                    Rate2: rate2,
-                    Rate3: rate3,
-                    Bill: bill,
-                    Code: code,
-                    companyName: companyName,
-                    CodeID: codeID,
-                    Address: 
-                        (no === "-" ? "-" : no)+
-                        (village === "-" ? "" : ","+village)+
-                        (subDistrict === "-" ? "" : ","+subDistrict)+
-                        (district === "-" ? "" : ","+district)+
-                        (province === "-" ? "" : ","+province)+
-                        (zipCode === "-" ? "" : ","+zipCode)
-                    ,
-                    lat: lat,
-                    lng: lng,
-                })
-                .then(() => {
-                    ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                    console.log("Data pushed successfully");
-                    setTicketsName("")
-                    setRate1("")
-                    setRate2("")
-                    setRate3("")
-                    setBill("")
-                    setCode("")
-                    setCompanyName("")
-                    setCodeID("")
-                    setNo("")
-                    setVillage("")
-                    setSubDistrict("")
-                    setDistrict("")
-                    setProvince("")
-                    setZipCode("")
-                    setLat("")
-                    setLng("")
-                })
-                .catch((error) => {
-                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                    console.error("Error pushing data:", error);
-                });
-        };
-        
-        console.log("ticketsName : ",ticketsName);
+        database
+            .ref("/customers/gasstations/")
+            .child(ticket)
+            .update({
+                id: ticket + 1,
+                Name: name,
+                TicketsName: ticketsName,
+                Status: "ตั๋ว/ผู้รับ",
+                Rate1: rate1,
+                Rate2: rate2,
+                Rate3: rate3,
+                CreditTime: creditTime,
+                Code: code,
+                companyName: companyName,
+                CodeID: codeID,
+                Address:
+                    (no === "-" ? "-" : no) +
+                    (village === "-" ? "" : "," + village) +
+                    (subDistrict === "-" ? "" : "," + subDistrict) +
+                    (district === "-" ? "" : "," + district) +
+                    (province === "-" ? "" : "," + province) +
+                    (zipCode === "-" ? "" : "," + zipCode)
+                ,
+                lat: lat,
+                lng: lng,
+            })
+            .then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+                setTicketsName("")
+                setRate1("")
+                setRate2("")
+                setRate3("")
+                setCreditTime("")
+                setCode("")
+                setCompanyName("")
+                setCodeID("")
+                setNo("")
+                setVillage("")
+                setSubDistrict("")
+                setDistrict("")
+                setProvince("")
+                setZipCode("")
+                setLat("")
+                setLng("")
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    };
 
-  return (
-    <React.Fragment>
-      <Button variant="contained" color="info" startIcon={<BookOnlineIcon sx={{ transform: "rotate(90deg)" }}/>} onClick={handleClickOpen} fullWidth>เพิ่มตั๋วปั้ม</Button>
-      <Dialog
+    console.log("ticketsName : ", ticketsName);
+
+    return (
+        <React.Fragment>
+            <Button variant="contained" color="info" startIcon={<BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />} onClick={handleClickOpen} fullWidth>เพิ่มตั๋วปั้ม</Button>
+            <Dialog
                 open={open}
                 keepMounted
                 onClose={handleClose}
@@ -177,81 +178,85 @@ const InsertTicketsGasStations = (props) => {
                         <Grid item xs={7} display="flex" justifyContent="center" alignItems="center">
                             <Grid container spacing={2}>
                                 <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>ชื่อตั๋ว</Typography>
-                        <Paper
-                                component="form" sx={{ width: "100%" }}>
-                                <Autocomplete
-  size="small"
-  fullWidth
-  options={gasStation.map((row) => row.Name + "/" + row.ShortName)}
-  value={ticketsName}
-  onChange={(event, newValue) => {
-    setTicketsName(newValue);
-  }}
-  renderInput={(params) => (
-    <TextField {...params} label="เลือกปั้ม" variant="outlined" />
-  )}
-/>
-                            </Paper>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ชื่อตั๋ว</Typography>
+                                    <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                                 </Grid>
                                 <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>รอบการวางบิล</Typography>
-                                <TextField size="small" fullWidth  value={bill} onChange={(e) => setBill(e.target.value)}/>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>เลือกปั้ม</Typography>
+                                    <Paper
+                                        component="form" sx={{ width: "100%" }}>
+                                        <Autocomplete
+                                            size="small"
+                                            fullWidth
+                                            options={gasStation.map((row) => row.Name + "/" + row.ShortName)}
+                                            value={ticketsName}
+                                            onChange={(event, newValue) => {
+                                                setTicketsName(newValue);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField {...params} label="กรุณาเลือกปั้ม" variant="outlined" />
+                                            )}
+                                        />
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รอบการวางบิล</Typography>
+                                    <TextField size="small" fullWidth value={creditTime} onChange={(e) => setCreditTime(e.target.value)} />
                                 </Grid>
                             </Grid>
                         </Grid>
                         <Grid item xs={5}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap",marginRight: 1, marginTop:1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
-                                    <TextField size="small" fullWidth label={"คลังลำปาง"}  value={rate1} onChange={(e) => setRate1(e.target.value)}/>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
+                                    <TextField size="small" fullWidth label={"คลังลำปาง"} value={rate1} onChange={(e) => setRate1(e.target.value)} />
                                 </Grid>
                                 <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap",marginRight: 1, marginTop:1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
-                                    <TextField size="small" fullWidth label={"คลังพิจิตร"}  value={rate2} onChange={(e) => setRate2(e.target.value)}/>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
+                                    <TextField size="small" fullWidth label={"คลังพิจิตร"} value={rate2} onChange={(e) => setRate2(e.target.value)} />
                                 </Grid>
                                 <Grid item xs={12} display='flex' justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap",marginRight: 1, marginTop:1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
-                                    <TextField size="small" fullWidth label={"คลังสระบุรี/บางปะอิน/IR"}  value={rate3} onChange={(e) => setRate3(e.target.value)}/>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1 }} gutterBottom>Rate ค่าขนส่ง :</Typography>
+                                    <TextField size="small" fullWidth label={"คลังสระบุรี/บางปะอิน/IR"} value={rate3} onChange={(e) => setRate3(e.target.value)} />
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid  item xs={12}>
+                        <Grid item xs={12}>
                             <Divider>
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap'}} gutterBottom>ใบวางบิล/ใบแจ้งหนี้</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ใบวางบิล/ใบแจ้งหนี้</Typography>
                             </Divider>
                         </Grid>
                         <Grid item xs={3} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>รหัส</Typography>
-                        <TextField size="small" fullWidth  value={code} onChange={(e) => setCode(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รหัส</Typography>
+                            <TextField size="small" fullWidth value={code} onChange={(e) => setCode(e.target.value)} />
                         </Grid>
                         <Grid item xs={9} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>ชื่อบริษัท</Typography>
-                        <TextField size="small" fullWidth  value={companyName} onChange={(e) => setCompanyName(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ชื่อบริษัท</Typography>
+                            <TextField size="small" fullWidth value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>บ้านเลขที่</Typography>
-                        <TextField size="small" fullWidth  value={no} onChange={(e) => setNo(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>บ้านเลขที่</Typography>
+                            <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>ตำบล</Typography>
-                        <TextField size="small" fullWidth  value={subDistrict} onChange={(e) => setSubDistrict(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ตำบล</Typography>
+                            <TextField size="small" fullWidth value={subDistrict} onChange={(e) => setSubDistrict(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>อำเภอ</Typography>
-                        <TextField size="small" fullWidth  value={district} onChange={(e) => setDistrict(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>อำเภอ</Typography>
+                            <TextField size="small" fullWidth value={district} onChange={(e) => setDistrict(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>จังหวัด</Typography>
-                        <TextField size="small" fullWidth  value={province} onChange={(e) => setProvince(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>จังหวัด</Typography>
+                            <TextField size="small" fullWidth value={province} onChange={(e) => setProvince(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>รหัสไปรณีย์</Typography>
-                        <TextField size="small" fullWidth  value={zipCode} onChange={(e) => setZipCode(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รหัสไปรณีย์</Typography>
+                            <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                         </Grid>
                         <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap',marginRight: 1, marginTop:1 }} gutterBottom>เลขผู้เสียภาษี</Typography>
-                        <TextField size="small" fullWidth  value={codeID} onChange={(e) => setCodeID(e.target.value)}/>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>เลขผู้เสียภาษี</Typography>
+                            <TextField size="small" fullWidth value={codeID} onChange={(e) => setCodeID(e.target.value)} />
                         </Grid>
                     </Grid>
                 </DialogContent>
@@ -260,8 +265,8 @@ const InsertTicketsGasStations = (props) => {
                     <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
                 </DialogActions>
             </Dialog>
-    </React.Fragment>
-  );
+        </React.Fragment>
+    );
 };
 
 export default InsertTicketsGasStations;

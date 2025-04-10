@@ -9,7 +9,7 @@
     "@mui/icons-material": "^6.3.0",
     "@mui/material": "^6.4.4",
     "@mui/x-charts": "^7.23.2",
-    "@mui/x-date-pickers": "^7.23.3",
+    "@mui/x-date-pickers": "^7.28.3",
     "cra-template": "1.2.0",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",

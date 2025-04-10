@@ -55,6 +55,7 @@ const GasStationAdmin = () => {
     const [openOil, setOpenOil] = React.useState(true);
     const [gasStationOil, setGasStationsOil] = useState([]);
     const [stock, setStock] = useState([]);
+    const [statusSave,setStatusSave] = useState(true);
     const [newVolume, setNewVolume] = React.useState(0);
     const [gasStation, setGasStation] = React.useState(0);
     const [gasStations, setGasStations] = React.useState([]);
@@ -117,6 +118,7 @@ const GasStationAdmin = () => {
                     }
                 }
                 setGasStationsOil(dataListG);
+                setStatusSave(false);
             });
         }
     };
@@ -185,6 +187,7 @@ const GasStationAdmin = () => {
                 }
             }
             setGasStationsOil(dataListG);
+            setStatusSave(false);
         });
     };
 
@@ -444,6 +447,7 @@ const GasStationAdmin = () => {
                                     last={latestGas}
                                     reportOilBalance={reportOilBalance}
                                     oilBalance={oilBalance}
+                                    status={statusSave}
                                 />
                             </React.Fragment>
                         );

@@ -57,7 +57,8 @@ const UpdateTrip = (props) => {
         totalWeight,
         weightTruck,
         dateStart,
-        depotTrip
+        depotTrip,
+        registrations
     } = props;
 
     console.log("Date : ", dateStart);
@@ -80,7 +81,7 @@ const UpdateTrip = (props) => {
     const [costTrip, setCostTrip] = useState(trip.CostTrip);
     const [status, setStatus] = useState(trip.Status || "-");
 
-    const { depots,reghead } = useData();
+    const { depots, reghead } = useData();
     const depotOptions = Object.values(depots || {});
     const registrationTruck = Object.values(reghead || {});
 
@@ -103,7 +104,7 @@ const UpdateTrip = (props) => {
             CostTrip: costTrip,
             DateReceive: trip.DateReceive,
             DateDelivery: trip.DateDelivery,
-            Driver: trip.Driver+" / "+trip.Registration,
+            Driver: trip.Driver + " / " + trip.Registration,
             Depot: depotTrip,
             WeightHigh: totalVolumesTicket.oilHeavy,
             WeightLow: totalVolumesTicket.oilLight,
@@ -291,8 +292,9 @@ const UpdateTrip = (props) => {
     const [orderTrip, setOrderTrip] = useState([]);
 
     const [depot, setDepot] = useState(depotTrip);
+    const [registration, setRegistration] = useState(registrations);
 
-    console.log("orderTrip : ",orderTrip);
+    console.log("orderTrip : ", orderTrip);
 
     useEffect(() => {
         if (ticket && ticket.length > 0) {
@@ -312,7 +314,7 @@ const UpdateTrip = (props) => {
                         "( สาขาที่  00003)/",
                         "( สำนักงานใหญ่)/"
                     ];
-    
+
                     let ticketName = item.TicketName;
                     for (const branch of branches) {
                         if (ticketName.includes(branch)) {
@@ -320,10 +322,10 @@ const UpdateTrip = (props) => {
                             break;
                         }
                     }
-    
+
                     newOrders[`Order${newIndex}`] = ticketName;
                 });
-    
+
                 return { ...prev, ...newOrders };
             });
         }
@@ -430,32 +432,32 @@ const UpdateTrip = (props) => {
             console.log("Order Length :  ", updatedOrders.length);
 
             // **อัปเดต setOrderTrip ในรูปแบบที่ต้องการ**
-        setOrderTrip((prev) => {
-            const newOrders = {};
-            const allOrders = [...updatedOrders]; // ใช้ข้อมูลใหม่ทั้งหมด
+            setOrderTrip((prev) => {
+                const newOrders = {};
+                const allOrders = [...updatedOrders]; // ใช้ข้อมูลใหม่ทั้งหมด
 
-            allOrders.forEach((item, i) => {
-                const newIndex = i + 1; // ใช้ 1-based index
-                const branches = [
-                    "( สาขาที่  00001)/",
-                    "( สาขาที่  00002)/",
-                    "( สาขาที่  00003)/",
-                    "( สำนักงานใหญ่)/"
-                ];
+                allOrders.forEach((item, i) => {
+                    const newIndex = i + 1; // ใช้ 1-based index
+                    const branches = [
+                        "( สาขาที่  00001)/",
+                        "( สาขาที่  00002)/",
+                        "( สาขาที่  00003)/",
+                        "( สำนักงานใหญ่)/"
+                    ];
 
-                let ticketName = item.TicketName;
-                for (const branch of branches) {
-                    if (ticketName.includes(branch)) {
-                        ticketName = ticketName.split(branch)[1];
-                        break;
+                    let ticketName = item.TicketName;
+                    for (const branch of branches) {
+                        if (ticketName.includes(branch)) {
+                            ticketName = ticketName.split(branch)[1];
+                            break;
+                        }
                     }
-                }
 
-                newOrders[`Order${newIndex}`] = ticketName;
+                    newOrders[`Order${newIndex}`] = ticketName;
+                });
+
+                return { ...prev, ...newOrders };
             });
-
-            return { ...prev, ...newOrders };
-        });
 
             return updatedOrders;
         });
@@ -568,8 +570,6 @@ const UpdateTrip = (props) => {
             noIdTrackerTicket[currentNo].add(currentId);
         });
 
-        console.log(" Ticket Update : ", editableTickets);
-
         // Loop ผ่านแต่ละ item ใน editableTickets
         editableTickets.forEach(ticket => {
             const ticketNo = ticket.No; // ใช้ No เพื่ออ้างอิง
@@ -646,6 +646,8 @@ const UpdateTrip = (props) => {
                 TotalWeight: totalVolumesTicket.totalWeight,
                 CostTrip: costTrip,
                 Status: status,
+                Driver: registration.split("/")[0],
+                Registration: registration.split("/")[1],
                 ...orderTrip
             })    // อัปเดตข้อมูลของแต่ละ order
             .then(() => {
@@ -659,6 +661,8 @@ const UpdateTrip = (props) => {
         setEditMode(false);
     };
 
+    console.log("registration : ", registration);
+
     console.log("Updated Cost Trip:", costTrip);
     console.log("Updated Oil Heavy:", totalVolumesTicket.oilHeavy);
     console.log("Updated Oil Light:", totalVolumesTicket.oilLight);
@@ -666,7 +670,7 @@ const UpdateTrip = (props) => {
 
     const getTickets = () => {
         const tickets = [
-            { TicketsName: "ตั๋วเปล่า", id: 0 },  // เพิ่มตั๋วเปล่าเข้าไป
+            { TicketsName: "ตั๋วเปล่า", Name: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item })),
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
@@ -689,44 +693,163 @@ const UpdateTrip = (props) => {
         return customers.filter((item) => item.id || item.TicketsCode);
     };
 
+    const handleDeleteTickets = (indexToDelete) => {
+        console.log("Show Index Tickets : ",indexToDelete);
+        // setEditableTickets((prev) => {
+        //     const newOrder = {};
+        //     let newIndex = 0;
+
+        //     Object.keys(prev).forEach((key) => {
+        //         if (parseInt(key) !== indexToDelete) {
+        //             newOrder[newIndex] = { ...prev[key], id: newIndex };
+        //             newIndex++;
+        //         }
+        //     });
+
+        //     // คำนวณค่า Volume ใหม่จาก newOrder (ข้อมูลหลังจากลบ)
+        //     let totalG95 = 0;
+        //     let totalG91 = 0;
+        //     let totalB7 = 0;
+        //     let totalB95 = 0;
+        //     let totalE20 = 0;
+        //     let totalPWD = 0;
+
+        //     Object.values(newOrder).forEach((ticket) => {
+        //         if (ticket.Product) {
+        //             totalG95 += ticket.Product?.G95?.Volume || 0;
+        //             totalG91 += ticket.Product?.G91?.Volume || 0;
+        //             totalB7 += ticket.Product?.B7?.Volume || 0;
+        //             totalB95 += ticket.Product?.B95?.Volume || 0;
+        //             totalE20 += ticket.Product?.E20?.Volume || 0;
+        //             totalPWD += ticket.Product?.PWD?.Volume || 0;
+        //         }
+        //     });
+
+        //     return newOrder;
+        // });
+
+        // setOrderTrip((prev) => {
+        //     // แปลง object เป็น array ของ entries
+        //     const entries = Object.entries(prev);
+
+        //     // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น order1)
+        //     const filtered = entries.filter(([key]) => key !== `order${parseInt(indexToDelete, 10) + 1}`);
+
+        //     // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก order1
+        //     const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
+        //         acc[`order${index + 1}`] = value;
+        //         return acc;
+        //     }, {});
+
+        //     return newOrderTrip;
+        // });
+
+
+        // // ลด costTrip -200 เมื่อมีการยกเลิก (กดปุ่ม "ยกเลิก")
+        // if (depots) {
+        //     // ตรวจสอบค่า depot ที่เลือก
+        //     const depotName = depots.split(":")[1]; // สมมุติรูปแบบ depots = "xx:ลำปาง" เป็นต้น
+        //     if (depotName === "ลำปาง") {
+        //         setCostTrip((prev) => (prev === 750 ? 0 : prev - 200));
+        //     } else if (depotName === "พิจิตร") {
+        //         setCostTrip((prev) => (prev === 2000 ? 0 : prev - 200));
+        //     } else if (depotName === "สระบุรี" || depotName === "บางปะอิน" || depotName === "IR") {
+        //         setCostTrip((prev) => (prev === 3200 ? 0 : prev - 200));
+        //     }
+        // }
+    };
+
+    const handleDeleteOrder = (indexToDelete) => {
+        console.log("Show Index Order : ",indexToDelete);
+        // setEditableOrders((prev) => {
+        //     const newOrder = {};
+        //     let newIndex = 0;
+
+        //     Object.keys(prev).forEach((key) => {
+        //         if (parseInt(key) !== indexToDelete) {
+        //             newOrder[newIndex] = { ...prev[key], id: newIndex };
+        //             newIndex++;
+        //         }
+        //     });
+
+        //     // คำนวณค่า Volume ใหม่จาก newOrder (ข้อมูลหลังจากลบ)
+        //     let totalG95 = 0;
+        //     let totalG91 = 0;
+        //     let totalB7 = 0;
+        //     let totalB95 = 0;
+        //     let totalE20 = 0;
+        //     let totalPWD = 0;
+
+        //     Object.values(newOrder).forEach((ticket) => {
+        //         if (ticket.Product) {
+        //             totalG95 += ticket.Product?.G95?.Volume || 0;
+        //             totalG91 += ticket.Product?.G91?.Volume || 0;
+        //             totalB7 += ticket.Product?.B7?.Volume || 0;
+        //             totalB95 += ticket.Product?.B95?.Volume || 0;
+        //             totalE20 += ticket.Product?.E20?.Volume || 0;
+        //             totalPWD += ticket.Product?.PWD?.Volume || 0;
+        //         }
+        //     });
+
+        //     // อัปเดตค่า volumeT ใหม่
+        //     setVolumeT({
+        //         G91: totalG91,
+        //         G95: totalG95,
+        //         B7: totalB7,
+        //         B95: totalB95,
+        //         E20: totalE20,
+        //         PWD: totalPWD
+        //     });
+
+        //     setVolumeG95(totalG95);
+        //     setVolumeG91(totalG91);
+        //     setVolumeB7(totalB7);
+        //     setVolumeB95(totalB95);
+        //     setVolumeE20(totalE20);
+        //     setVolumePWD(totalPWD);
+
+        //     return newOrder;
+        // });
+    };
+
     const handleChangeStatus = () => {
-        if(registrationTruck){
+        if (registrationTruck) {
             registrationTruck.map((row) => (
                 row.Driver === trip.Driver && row.RegHead === trip.Registration ?
-                database
-                            .ref("truck/registration/")
-                            .child(Number(row.id) - 1)
-                            .update({
-                                Status: "ว่าง"
-                            })
-                            .then(() => {
-                                setOpen(false);
-                                console.log("Data pushed successfully");
-        
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            })
-                            :
-                            ""
+                    database
+                        .ref("truck/registration/")
+                        .child(Number(row.id) - 1)
+                        .update({
+                            Status: "ว่าง"
+                        })
+                        .then(() => {
+                            setOpen(false);
+                            console.log("Data pushed successfully");
+
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error("Error pushing data:", error);
+                        })
+                    :
+                    ""
             ))
 
             database
-                            .ref("trip/")
-                            .child(Number(tripID) - 1)
-                            .update({
-                                StatusTrips: "จบทริป"
-                            })
-                            .then(() => {
-                                setOpen(false);
-                                console.log("Data pushed successfully");
-        
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            })
+                .ref("trip/")
+                .child(Number(tripID) - 1)
+                .update({
+                    StatusTrips: "จบทริป"
+                })
+                .then(() => {
+                    setOpen(false);
+                    console.log("Data pushed successfully");
+
+                })
+                .catch((error) => {
+                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                    console.error("Error pushing data:", error);
+                })
         }
     }
 
@@ -737,21 +860,21 @@ const UpdateTrip = (props) => {
 
     return (
         <React.Fragment>
-                {
-                    trip.StatusTrips !== "จบทริป" &&
-                    <Tooltip title="กดเพื่อจบทริป" placement="left">
-                        <IconButton color="success" size="small" onClick={handleChangeStatus}>
-                            <TaskIcon />
-                        </IconButton>
-                    </Tooltip>
-                    // <Button variant="contained" size="small" color="success" sx={{ height: 20,marginRight: 0.5 }} onClick={handleChangeStatus}>จบทริป</Button>
-                }
-                {/* <Button variant="contained" size="small" color="info" sx={{ height: 20 }} onClick={handleClickOpen}>ตรวจสอบ</Button> */}
-                <Tooltip title="กดเพื่อดูรายละเอียด" placement="right">
-                <IconButton color="info" size="small" onClick={handleClickOpen}>
-                    <PlagiarismIcon/>
-                </IconButton>
+            {
+                trip.StatusTrips !== "จบทริป" &&
+                <Tooltip title="กดเพื่อจบทริป" placement="left">
+                    <IconButton color="success" size="small" onClick={handleChangeStatus}>
+                        <TaskIcon />
+                    </IconButton>
                 </Tooltip>
+                // <Button variant="contained" size="small" color="success" sx={{ height: 20,marginRight: 0.5 }} onClick={handleChangeStatus}>จบทริป</Button>
+            }
+            {/* <Button variant="contained" size="small" color="info" sx={{ height: 20 }} onClick={handleClickOpen}>ตรวจสอบ</Button> */}
+            <Tooltip title="กดเพื่อดูรายละเอียด" placement="right">
+                <IconButton color="info" size="small" onClick={handleClickOpen}>
+                    <PlagiarismIcon />
+                </IconButton>
+            </Tooltip>
             <Dialog
                 open={open}
                 keepMounted
@@ -783,8 +906,99 @@ const UpdateTrip = (props) => {
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ตั๋วน้ำมัน</Typography>
                             </Grid>
                             <Grid item sm={editMode ? 7 : 11} xs={editMode ? 12 : 8} display="flex" alignItems="center" justifyContent='center'>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver+" / "+trip.Registration}</Typography>
+                                {
+                                    editMode ?
+                                        <Grid container spacing={2}>
+                                            <Grid item sm={4} xs={12} textAlign="right">
+                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
+                                                    <Paper component="form" sx={{ width: "100%" }}>
+                                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                            <DatePicker
+                                                                openTo="day"
+                                                                views={["year", "month", "day"]}
+                                                                value={dayjs(trip.DateReceive, "DD/MM/YYYY")}
+                                                                format="DD/MM/YYYY"
+                                                                //onChange={handleDateChangeReceive}
+                                                                slotProps={{
+                                                                    textField: {
+                                                                        size: "small",
+                                                                        fullWidth: true,
+                                                                        sx: {
+                                                                            "& .MuiOutlinedInput-root": {
+                                                                                height: "30px",
+                                                                                paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง 
+                                                                            },
+                                                                            "& .MuiInputBase-input": {
+                                                                                fontSize: "14px",
+                                                                            },
+                                                                            "& .MuiInputAdornment-root": {
+                                                                                marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอนปฏิทิน
+                                                                                paddingLeft: "0px"  // เอาพื้นที่ด้านซ้ายของไอคอนออก
+                                                                            }
+                                                                        },
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </LocalizationProvider>
+                                                    </Paper>
+
+                                                </Box>
+                                            </Grid>
+                                            <Grid item sm={8} xs={12}>
+                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                                    <Paper
+                                                        component="form" sx={{ height: "30px", width: "100%" }}>
+                                                        <Autocomplete
+                                                            id="autocomplete-registration-1"
+                                                            options={registrationTruck}
+                                                            getOptionLabel={(option) =>
+                                                                option.Driver !== "ไม่มี" &&
+                                                                `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (รถใหญ่)`
+                                                            }
+                                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
+                                                            value={registration ? registrationTruck.find(item => `${item.Driver}/${item.RegHead}` === registration) : null}
+                                                            onChange={(event, newValue) => {
+                                                                if (newValue) {
+                                                                    const value = `${newValue.RegHead}/${newValue.Driver}`;
+                                                                    setRegistration(value);
+                                                                } else {
+                                                                    setRegistration("0:0:0:0");
+                                                                }
+                                                            }}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label={!registration || registration === "0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    sx={{
+                                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "1px 2px" },
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            fullWidth
+                                                            renderOption={(props, option) => (
+                                                                <li {...props}>
+                                                                    {
+                                                                        option.Driver !== "ไม่มี" &&
+                                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail} (รถใหญ่)`}</Typography>
+                                                                    }
+                                                                </li>
+                                                            )}
+                                                        />
+                                                    </Paper>
+                                                </Box>
+                                            </Grid>
+                                        </Grid>
+                                        :
+                                        <>
+                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
+                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver + " / " + trip.Registration}</Typography>
+                                        </>
+                                }
                             </Grid>
                             {
                                 editMode &&
@@ -795,38 +1009,38 @@ const UpdateTrip = (props) => {
                                         sx={{ height: "30px", width: "100%" }}
                                     >
                                         <Autocomplete
-                                                                                id="depot-autocomplete"
-                                                                                options={depotOptions}
-                                                                                getOptionLabel={(option) => `${option.Name}`}
-                                                                                value={depotOptions.find((d) => d.Name + ":" + d.Zone === depot) || null}
-                                                                                onChange={(event, newValue) => {
-                                                                                    setDepot(newValue ? `${newValue.Name}:${newValue.Zone}` : '')
-                                                                                }}
-                                                                                renderInput={(params) => (
-                                                                                    <TextField
-                                                                                        {...params}
-                                                                                        label={depot === "" ? "กรุณาเลือกคลัง" : ""} // เปลี่ยน label กลับหากไม่เลือก
-                                                                                        variant="outlined"
-                                                                                        size="small"
-                                                                                        sx={{
-                                                                                            "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                                            "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
-                                                                                        }}
-                                                                                    />
-                                                                                )}
-                                                                                sx={{
-                                                                                    "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                                    "& .MuiInputBase-input": {
-                                                                                        fontSize: "14px",
-                                                                                        padding: "2px 6px",
-                                                                                    },
-                                                                                }}
-                                                                                renderOption={(props, option) => (
-                                                                                    <li {...props}>
-                                                                                        <Typography fontSize="14px">{option.Name}</Typography>
-                                                                                    </li>
-                                                                                )}
-                                                                            />
+                                            id="depot-autocomplete"
+                                            options={depotOptions}
+                                            getOptionLabel={(option) => `${option.Name}`}
+                                            value={depotOptions.find((d) => d.Name + ":" + d.Zone === depot) || null}
+                                            onChange={(event, newValue) => {
+                                                setDepot(newValue ? `${newValue.Name}:${newValue.Zone}` : '')
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label={depot === "" ? "กรุณาเลือกคลัง" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
+                                                    }}
+                                                />
+                                            )}
+                                            sx={{
+                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    padding: "2px 6px",
+                                                },
+                                            }}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="14px">{option.Name}</Typography>
+                                                </li>
+                                            )}
+                                        />
                                     </Paper>
                                 </Grid>
                             }
@@ -835,101 +1049,189 @@ const UpdateTrip = (props) => {
                             sx={{ p: 1, backgroundColor: totalVolumesTicket.totalWeight > 50300 ? "red" : "lightgray", marginBottom: 1 }}
                         >
                             <Paper
-                                                            className="custom-scrollbar"
-                                                            sx={{
-                                                                position: "relative",
-                                                                maxWidth: "100%",
-                                                                height: "31vh", // ความสูงรวมของ container หลัก
-                                                                overflow: "hidden",
-                                                                marginBottom: 0.5,
-                                                                overflowX: "auto",
-                                                            }}
-                                                        >
-                            <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
-                                {/* Header: คงที่ด้านบน */}
-                                <Box
-                                    sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "35px", // กำหนดความสูง header
-                                        zIndex: 3,
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
-                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
-                                                <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
-                                                <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
-                                                <TablecellTickets width={60} sx={{ backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}/>
-                                            </TableRow>
-                                        </TableHead>
-                                    </Table>
-                                </Box>
+                                className="custom-scrollbar"
+                                sx={{
+                                    position: "relative",
+                                    maxWidth: "100%",
+                                    height: "31vh", // ความสูงรวมของ container หลัก
+                                    overflow: "hidden",
+                                    marginBottom: 0.5,
+                                    overflowX: "auto",
+                                }}
+                            >
+                                <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
+                                    {/* Header: คงที่ด้านบน */}
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            height: "35px", // กำหนดความสูง header
+                                            zIndex: 3,
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
+                                                    <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
+                                                    <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
+                                                    <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
+                                                    <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
+                                                    <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
+                                                    <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
+                                                    <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
+                                                    <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
+                                                    <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
+                                                    <TablecellTickets width={60} sx={{ backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }} />
+                                                </TableRow>
+                                            </TableHead>
+                                        </Table>
+                                    </Box>
 
-                                {/* TableBody: ส่วนที่ scroll ได้ */}
-                                <Box
-                                    className="custom-scrollbar"
-                                    sx={{
-                                        position: "absolute",
-                                        top: "35px", // เริ่มจากด้านล่าง header
-                                        bottom: "35px", // จนถึงด้านบนของ footer
-                                        overflowY: "auto",
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableBody>
-                                            {editableTickets.map((row, rowIdx) => (
-                                                <TableRow key={rowIdx}>
-                                                    {/* ลำดับ */}
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50,backgroundColor: totalVolumesTicket.totalWeight > 50300 ? theme.palette.error.main : theme.palette.success.dark , color: "white" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{Number(row.id) + 1}</Typography>
-                                                    </TableCell>
+                                    {/* TableBody: ส่วนที่ scroll ได้ */}
+                                    <Box
+                                        className="custom-scrollbar"
+                                        sx={{
+                                            position: "absolute",
+                                            top: "35px", // เริ่มจากด้านล่าง header
+                                            bottom: "35px", // จนถึงด้านบนของ footer
+                                            overflowY: "auto",
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableBody>
+                                                {editableTickets.map((row, rowIdx) => (
+                                                    <TableRow key={rowIdx}>
+                                                        {/* ลำดับ */}
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: totalVolumesTicket.totalWeight > 50300 ? theme.palette.error.main : theme.palette.success.dark, color: "white" }}>
+                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{Number(row.id) + 1}</Typography>
+                                                        </TableCell>
 
-                                                    {/* Ticket Name */}
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
-                                                        {editMode && row.TicketName === "ตั๋วเปล่า" ? (
-                                                            <Autocomplete
-                                                                size="small"
-                                                                fullWidth
-                                                                options={getTickets()}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
-                                                                getOptionLabel={(option) => {
-                                                                    const branches = [
-                                                                        "( สาขาที่  00001)/",
-                                                                        "( สาขาที่  00002)/",
-                                                                        "( สาขาที่  00003)/",
-                                                                        "( สำนักงานใหญ่)/"
-                                                                    ];
-                                                                
-                                                                    for (const branch of branches) {
-                                                                        if (option.TicketsName.includes(branch)) {
-                                                                            return option.TicketsName.split(branch)[1];
+                                                        {/* Ticket Name */}
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
+                                                            {editMode && row.TicketName === "ตั๋วเปล่า" ? (
+                                                                <Autocomplete
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    options={getTickets()}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
+                                                                    getOptionLabel={(option) => {
+                                                                        const branches = [
+                                                                            "( สาขาที่  00001)/",
+                                                                            "( สาขาที่  00002)/",
+                                                                            "( สาขาที่  00003)/",
+                                                                            "( สำนักงานใหญ่)/"
+                                                                        ];
+
+                                                                        for (const branch of branches) {
+                                                                            if (option.TicketsName.includes(branch)) {
+                                                                                return option.TicketsName.split(branch)[1];
+                                                                            }
                                                                         }
+
+                                                                        return option.TicketsName;
+                                                                    }}  // ใช้ OrderID หรือค่าที่ต้องการแสดง
+                                                                    isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
+                                                                    value={row.TicketName ? getTickets().find(item => item.TicketsName === row.TicketName) : null} // ค่าที่เลือก
+                                                                    onChange={(e, newValue) => {
+                                                                        if (newValue) {
+                                                                            handleEditChange(rowIdx, "TicketName", newValue.TicketsName); // อัปเดตค่า TicketName
+                                                                        } else {
+                                                                            handleEditChange(rowIdx, "TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
+                                                                        }
+                                                                    }}
+                                                                    renderInput={(params) => (
+                                                                        <TextField
+                                                                            {...params}
+                                                                            InputLabelProps={{
+                                                                                sx: {
+                                                                                    fontSize: '12px',
+                                                                                },
+                                                                            }}
+                                                                            sx={{
+                                                                                '& .MuiOutlinedInput-root': {
+                                                                                    height: '22px', // ปรับความสูงของ TextField
+                                                                                },
+                                                                                '& .MuiInputBase-input': {
+                                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                                    fontWeight: 'bold',
+                                                                                    padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                                    paddingLeft: 2,
+                                                                                },
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    renderOption={(props, option) => (
+                                                                        <li {...props}>
+                                                                            <Typography fontSize="14px">
+                                                                                {option.TicketsName}
+                                                                            </Typography>
+                                                                        </li>
+                                                                    )}
+                                                                />
+                                                            ) : (
+                                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                    {
+                                                                        (() => {
+                                                                            const branches = [
+                                                                                "( สาขาที่  00001)/",
+                                                                                "( สาขาที่  00002)/",
+                                                                                "( สาขาที่  00003)/",
+                                                                                "(สำนักงานใหญ่)/"
+                                                                            ];
+
+                                                                            for (const branch of branches) {
+                                                                                if (row.TicketName.includes(branch)) {
+                                                                                    return row.TicketName.split(branch)[1];
+                                                                                }
+                                                                            }
+
+                                                                            return row.TicketName;
+                                                                        })()
                                                                     }
-                                                                
-                                                                    return option.TicketsName;
-                                                                }}  // ใช้ OrderID หรือค่าที่ต้องการแสดง
-                                                                isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
-                                                                value={row.TicketName ? getTickets().find(item => item.TicketsName === row.TicketName) : null} // ค่าที่เลือก
-                                                                onChange={(e, newValue) => {
-                                                                    if (newValue) {
-                                                                        handleEditChange(rowIdx, "TicketName", newValue.TicketsName); // อัปเดตค่า TicketName
-                                                                    } else {
-                                                                        handleEditChange(rowIdx, "TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
-                                                                    }
-                                                                }}
-                                                                renderInput={(params) => (
+                                                                </Typography>
+                                                            )}
+                                                        </TableCell>
+
+
+                                                        {/* OrderID */}
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 150 }}>
+                                                            {editMode ? (
+                                                                <TextField
+                                                                    value={row.OrderID}
+                                                                    fullWidth
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '12px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    onChange={(e) => handleEditChange(rowIdx, "OrderID", e.target.value)}
+                                                                />
+                                                            ) : (
+                                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{row.OrderID}</Typography>
+                                                            )}
+                                                        </TableCell>
+
+                                                        {/* Rate */}
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
+                                                            {editMode ? (
+                                                                depot.split(":")[1] === "ลำปาง" ?
                                                                     <TextField
-                                                                        {...params}
+                                                                        value={row.Rate1}
+                                                                        type="number"
+                                                                        fullWidth
                                                                         InputLabelProps={{
                                                                             sx: {
                                                                                 fontSize: '12px',
@@ -943,223 +1245,145 @@ const UpdateTrip = (props) => {
                                                                                 fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                                 fontWeight: 'bold',
                                                                                 padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                                paddingLeft: 2,
+                                                                                paddingLeft: 2
                                                                             },
                                                                         }}
+                                                                        onChange={(e) => handleEditChange(rowIdx, "Rate1", e.target.value)}
                                                                     />
-                                                                )}
-                                                                renderOption={(props, option) => (
-                                                                    <li {...props}>
-                                                                        <Typography fontSize="14px">
-                                                                            {option.TicketsName}
-                                                                        </Typography>
-                                                                    </li>
-                                                                )}
-                                                            />
-                                                        ) : (
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {
-                                                                    (() => {
-                                                                        const branches = [
-                                                                            "( สาขาที่  00001)/",
-                                                                            "( สาขาที่  00002)/",
-                                                                            "( สาขาที่  00003)/",
-                                                                            "(สำนักงานใหญ่)/"
-                                                                        ];
-
-                                                                        for (const branch of branches) {
-                                                                            if (row.TicketName.includes(branch)) {
-                                                                                return row.TicketName.split(branch)[1];
-                                                                            }
-                                                                        }
-
-                                                                        return row.TicketName;
-                                                                    })()
-                                                                }
-                                                            </Typography>
-                                                        )}
-                                                    </TableCell>
-
-
-                                                    {/* OrderID */}
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 150 }}>
-                                                        {editMode ? (
-                                                            <TextField
-                                                                value={row.OrderID}
-                                                                fullWidth
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '12px',
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                        fontWeight: 'bold',
-                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                        paddingLeft: 2
-                                                                    },
-                                                                }}
-                                                                onChange={(e) => handleEditChange(rowIdx, "OrderID", e.target.value)}
-                                                            />
-                                                        ) : (
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{row.OrderID}</Typography>
-                                                        )}
-                                                    </TableCell>
-
-                                                    {/* Rate */}
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
-                                                        {editMode ? (
-                                                            depot.split(":")[1] === "ลำปาง" ?
-                                                            <TextField
-                                                                value={row.Rate1}
-                                                                type="number"
-                                                                fullWidth
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '12px',
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                        fontWeight: 'bold',
-                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                        paddingLeft: 2
-                                                                    },
-                                                                }}
-                                                                onChange={(e) => handleEditChange(rowIdx, "Rate1", e.target.value)}
-                                                            />
-                                                            : depot.split(":")[1] === "พิจิตร" ?
-                                                            <TextField
-                                                                value={row.Rate2}
-                                                                type="number"
-                                                                fullWidth
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '12px',
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                        fontWeight: 'bold',
-                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                        paddingLeft: 2
-                                                                    },
-                                                                }}
-                                                                onChange={(e) => handleEditChange(rowIdx, "Rate2", e.target.value)}
-                                                            />
-                                                            : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ?
-                                                            <TextField
-                                                                value={row.Rate3}
-                                                                type="number"
-                                                                fullWidth
-                                                                InputLabelProps={{
-                                                                    sx: {
-                                                                        fontSize: '12px',
-                                                                    },
-                                                                }}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px', // ปรับความสูงของ TextField
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                        fontWeight: 'bold',
-                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                        paddingLeft: 2
-                                                                    },
-                                                                }}
-                                                                onChange={(e) => handleEditChange(rowIdx, "Rate3", e.target.value)}
-                                                            />
-                                                            : ""
-                                                        ) : (
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {
-                                                                    depot.split(":")[1] === "ลำปาง" ? row.Rate1 :
-                                                                    depot.split(":")[1] === "พิจิตร" ? row.Rate2 :
-                                                                    depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ? row.Rate3 :
-                                                                    ""
-                                                                }
-                                                            </Typography>
-                                                        )}
-                                                    </TableCell>
-                                                    {/* Product Data */}
-                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
-                                                        <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
-                                                            {editMode ? (
-                                                                <TextField
-                                                                    value={editableTickets[rowIdx]?.Product[productType]?.Volume || ""}
-                                                                    type="number"
-                                                                    fullWidth
-                                                                    InputLabelProps={{ sx: { fontSize: '12px' } }}
-                                                                    sx={{
-                                                                        '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                        '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                    }}
-                                                                    onChange={(e) => handleEditChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
-                                                                />
+                                                                    : depot.split(":")[1] === "พิจิตร" ?
+                                                                        <TextField
+                                                                            value={row.Rate2}
+                                                                            type="number"
+                                                                            fullWidth
+                                                                            InputLabelProps={{
+                                                                                sx: {
+                                                                                    fontSize: '12px',
+                                                                                },
+                                                                            }}
+                                                                            sx={{
+                                                                                '& .MuiOutlinedInput-root': {
+                                                                                    height: '22px', // ปรับความสูงของ TextField
+                                                                                },
+                                                                                '& .MuiInputBase-input': {
+                                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                                    fontWeight: 'bold',
+                                                                                    padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                                    paddingLeft: 2
+                                                                                },
+                                                                            }}
+                                                                            onChange={(e) => handleEditChange(rowIdx, "Rate2", e.target.value)}
+                                                                        />
+                                                                        : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ?
+                                                                            <TextField
+                                                                                value={row.Rate3}
+                                                                                type="number"
+                                                                                fullWidth
+                                                                                InputLabelProps={{
+                                                                                    sx: {
+                                                                                        fontSize: '12px',
+                                                                                    },
+                                                                                }}
+                                                                                sx={{
+                                                                                    '& .MuiOutlinedInput-root': {
+                                                                                        height: '22px', // ปรับความสูงของ TextField
+                                                                                    },
+                                                                                    '& .MuiInputBase-input': {
+                                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                                        fontWeight: 'bold',
+                                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                                        paddingLeft: 2
+                                                                                    },
+                                                                                }}
+                                                                                onChange={(e) => handleEditChange(rowIdx, "Rate3", e.target.value)}
+                                                                            />
+                                                                            : ""
                                                             ) : (
                                                                 <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                    {row.Product[productType]?.Volume ?? "-"}
+                                                                    {
+                                                                        depot.split(":")[1] === "ลำปาง" ? row.Rate1 :
+                                                                            depot.split(":")[1] === "พิจิตร" ? row.Rate2 :
+                                                                                depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ? row.Rate3 :
+                                                                                    ""
+                                                                    }
                                                                 </Typography>
                                                             )}
                                                         </TableCell>
+                                                        {/* Product Data */}
+                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
+                                                            <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
+                                                                {editMode ? (
+                                                                    <TextField
+                                                                        value={editableTickets[rowIdx]?.Product[productType]?.Volume || ""}
+                                                                        type="number"
+                                                                        fullWidth
+                                                                        InputLabelProps={{ sx: { fontSize: '12px' } }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                            '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                        }}
+                                                                        onChange={(e) => handleEditChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                                                                    />
+                                                                ) : (
+                                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                        {row.Product[productType]?.Volume ?? "-"}
+                                                                    </Typography>
+                                                                )}
+                                                            </TableCell>
+                                                        ))}
+                                                        {
+                                                            editMode ? 
+                                                            <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
+                                                                <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }} 
+                                                                onClick={() => handleDeleteTickets(rowIdx)}
+                                                                >ยกเลิก</Button>
+                                                            </TableCell>
+                                                            :
+                                                            <TableCell width={60} />
+
+                                                        }
+                                                    </TableRow>
+                                                ))}
+
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
+
+                                    {/* Footer: คงที่ด้านล่าง */}
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            bottom: 0,
+                                            left: 0,
+                                            right: 0,
+                                            zIndex: 2,
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableFooter>
+                                                <TableRow>
+                                                    <TablecellTickets width={650} sx={{ textAlign: "center", height: "25px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>
+                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
+                                                    </TablecellTickets>
+                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
+                                                        <TablecellTickets key={product} width={60} sx={{
+                                                            textAlign: "center", height: "25px", color: "black",
+                                                            fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+                                                        }}>
+                                                            {totalVolumesTicket[product]}
+                                                        </TablecellTickets>
                                                     ))}
-                                                    <TableCell width={60} />
-                                                </TableRow>
-                                            ))}
-
-                                        </TableBody>
-                                    </Table>
-                                </Box>
-
-                                {/* Footer: คงที่ด้านล่าง */}
-                                <Box
-                                    sx={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        zIndex: 2,
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableFooter>
-                                            <TableRow>
-                                                <TablecellTickets width={650} sx={{ textAlign: "center", height: "25px",backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
-                                                </TablecellTickets>
-                                                {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                    <TablecellTickets key={product} width={60} sx={{
+                                                    <TablecellTickets width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
-                                                        {totalVolumesTicket[product]}
+                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0)}
                                                     </TablecellTickets>
-                                                ))}
-                                                <TablecellTickets width={60} sx={{ 
-                                                    textAlign: "center", height: "25px", color: "black",
-                                                        fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
-                                                 }}>
-                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0)}
-                                                </TablecellTickets>
-                                            </TableRow>
-                                        </TableFooter>
-                                    </Table>
-                                </Box>
-                            </TableContainer>
-                        </Paper>
+                                                </TableRow>
+                                            </TableFooter>
+                                        </Table>
+                                    </Box>
+                                </TableContainer>
+                            </Paper>
                             <Grid container spacing={1} marginBottom={-0.5}>
                                 {
                                     editMode &&
@@ -1351,8 +1575,32 @@ const UpdateTrip = (props) => {
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                             </Grid>
                             <Grid item sm={editMode ? 8 : 11} xs={editMode ? 11 : 8} display="flex" alignItems="center" justifyContent='center'>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery }</Typography>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver+" / "+trip.Registration}</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
+                                {
+                                    editMode ?
+                                        <Paper
+                                            component="form" sx={{ height: "30px", width: "100%" }}>
+                                            <TextField size="small" fullWidth
+                                                sx={{
+                                                    "& .MuiOutlinedInput-root": { height: "30px" },
+                                                    "& .MuiInputBase-input": {
+                                                        fontSize: "14px",
+                                                        padding: "1px 4px",
+                                                    },
+                                                    borderRadius: 10
+                                                }}
+                                                value={(() => {
+                                                    const selectedItem = registrationTruck.find(item =>
+                                                        `${item.Driver}/${item.RegHead}` === registration
+                                                    );
+                                                    return selectedItem && selectedItem.Driver !== "ไม่มี" &&
+                                                        `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถใหญ่)`;
+                                                })()}
+                                            />
+                                        </Paper>
+                                        :
+                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver + " / " + trip.Registration}</Typography>
+                                }
                             </Grid>
                             {
                                 editMode &&
@@ -1392,88 +1640,88 @@ const UpdateTrip = (props) => {
                         </Grid>
                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
                             <Paper
-                                                            className="custom-scrollbar"
-                                                            sx={{
-                                                                position: "relative",
-                                                                maxWidth: "100%",
-                                                                height: "31vh", // ความสูงรวมของ container หลัก
-                                                                overflow: "hidden",
-                                                                marginBottom: 0.5,
-                                                                overflowX: "auto",
-                                                                paddingBottom: -1
-                                                            }}
-                                                        >
-                            <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
-                                {/* Header: คงที่ด้านบน */}
-                                <Box
-                                    sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "35px", // กำหนดความสูง header
-                                        backgroundColor: theme.palette.info.main,
-                                        zIndex: 3,
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableHead>
-                                            <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px" }}>
-                                                    ลำดับ
-                                                </TablecellCustomers>
-                                                <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px" }}>
-                                                    ลูกค้า
-                                                </TablecellCustomers>
-                                                <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px" }}>
-                                                    ค่าบรรทุก
-                                                </TablecellCustomers>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>
-                                                    G95
-                                                </TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>
-                                                    B95
-                                                </TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>
-                                                    B7(D)
-                                                </TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>
-                                                    G91
-                                                </TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>
-                                                    E20
-                                                </TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
-                                                    PWD
-                                                </TableCellPWD>
-                                                <TablecellCustomers width={60} />
-                                            </TableRow>
-                                        </TableHead>
-                                    </Table>
-                                </Box>
+                                className="custom-scrollbar"
+                                sx={{
+                                    position: "relative",
+                                    maxWidth: "100%",
+                                    height: "31vh", // ความสูงรวมของ container หลัก
+                                    overflow: "hidden",
+                                    marginBottom: 0.5,
+                                    overflowX: "auto",
+                                    paddingBottom: -1
+                                }}
+                            >
+                                <TableContainer component={Paper} sx={{ marginBottom: 0.5 }}>
+                                    {/* Header: คงที่ด้านบน */}
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            height: "35px", // กำหนดความสูง header
+                                            backgroundColor: theme.palette.info.main,
+                                            zIndex: 3,
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableHead>
+                                                <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
+                                                    <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px" }}>
+                                                        ลำดับ
+                                                    </TablecellCustomers>
+                                                    <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px" }}>
+                                                        ลูกค้า
+                                                    </TablecellCustomers>
+                                                    <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px" }}>
+                                                        ค่าบรรทุก
+                                                    </TablecellCustomers>
+                                                    <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                        G95
+                                                    </TableCellG95>
+                                                    <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                        B95
+                                                    </TableCellB95>
+                                                    <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                        B7(D)
+                                                    </TableCellB7>
+                                                    <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                        G91
+                                                    </TableCellG91>
+                                                    <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                        E20
+                                                    </TableCellE20>
+                                                    <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                        PWD
+                                                    </TableCellPWD>
+                                                    <TablecellCustomers width={60} />
+                                                </TableRow>
+                                            </TableHead>
+                                        </Table>
+                                    </Box>
 
-                                {/* TableBody: ส่วนที่ scroll ได้ */}
-                                <Box
-                                    className="custom-scrollbar"
-                                    sx={{
-                                        position: "absolute",
-                                        top: "35px", // เริ่มจากด้านล่าง header
-                                        bottom: "60px", // จนถึงด้านบนของ footer
-                                        overflowY: "auto",
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableBody>
-                                            {editableOrders.map((row, rowIdx) => (
-                                                <TableRow key={rowIdx}>
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.info.main, color: "white" }}>
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                            {Number(row.id) + 1}
-                                                        </Typography>
-                                                    </TableCell>
+                                    {/* TableBody: ส่วนที่ scroll ได้ */}
+                                    <Box
+                                        className="custom-scrollbar"
+                                        sx={{
+                                            position: "absolute",
+                                            top: "35px", // เริ่มจากด้านล่าง header
+                                            bottom: "60px", // จนถึงด้านบนของ footer
+                                            overflowY: "auto",
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableBody>
+                                                {editableOrders.map((row, rowIdx) => (
+                                                    <TableRow key={rowIdx}>
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.info.main, color: "white" }}>
+                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                                {Number(row.id) + 1}
+                                                            </Typography>
+                                                        </TableCell>
 
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
-                                                        {/* {editMode ? (
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
+                                                            {/* {editMode ? (
                                                             <TextField
                                                                 value={editableOrders[rowIdx]?.TicketName || ""}
                                                                 fullWidth
@@ -1488,8 +1736,8 @@ const UpdateTrip = (props) => {
                                                                 {row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
                                                             </Typography>
                                                         )} */}
-                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                        {
+                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                {
                                                                     (() => {
                                                                         const branches = [
                                                                             "( สาขาที่  00001)/",
@@ -1507,165 +1755,175 @@ const UpdateTrip = (props) => {
                                                                         return row.TicketName;
                                                                     })()
                                                                 }
-                                                        </Typography>
-                                                    </TableCell>
-
-                                                    <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
-                                                        {editMode ? (
-                                                            depot.split(":")[1] === "ลำปาง" ?
-<TextField
-                                                                value={editableOrders[rowIdx]?.Rate1 || ""}
-                                                                type="number"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                    '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                }}
-                                                                onChange={(e) => handleOrderChange(rowIdx, "Rate1", e.target.value)}
-                                                            />
-                                                            : depot.split(":")[1] === "พิจิตร" ?
-<TextField
-                                                                value={editableOrders[rowIdx]?.Rate2 || ""}
-                                                                type="number"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                    '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                }}
-                                                                onChange={(e) => handleOrderChange(rowIdx, "Rate2", e.target.value)}
-                                                            />
-                                                            : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ?
-<TextField
-                                                                value={editableOrders[rowIdx]?.Rate3 || ""}
-                                                                type="number"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                    '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                }}
-                                                                onChange={(e) => handleOrderChange(rowIdx, "Rate3", e.target.value)}
-                                                            />
-                                                            : ""
-                                                        ) : (
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {
-                                                                depot.split(":")[1] === "ลำปาง" ? row.Rate1
-                                                                : depot.split(":")[1] === "พิจิตร" ? row.Rate2
-                                                                : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ? row.Rate3
-                                                                : ""
-                                                            }
                                                             </Typography>
-                                                        )}
-                                                    </TableCell>
+                                                        </TableCell>
 
-                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
-                                                        <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
                                                             {editMode ? (
-                                                                <TextField
-                                                                    value={editableOrders[rowIdx]?.Product[productType]?.Volume || ""}
-                                                                    type="number"
-                                                                    fullWidth
-                                                                    sx={{
-                                                                        '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                        '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                    }}
-                                                                    onChange={(e) => handleOrderChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
-                                                                />
+                                                                depot.split(":")[1] === "ลำปาง" ?
+                                                                    <TextField
+                                                                        value={editableOrders[rowIdx]?.Rate1 || ""}
+                                                                        type="number"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                            '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                        }}
+                                                                        onChange={(e) => handleOrderChange(rowIdx, "Rate1", e.target.value)}
+                                                                    />
+                                                                    : depot.split(":")[1] === "พิจิตร" ?
+                                                                        <TextField
+                                                                            value={editableOrders[rowIdx]?.Rate2 || ""}
+                                                                            type="number"
+                                                                            fullWidth
+                                                                            sx={{
+                                                                                '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                                '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                            }}
+                                                                            onChange={(e) => handleOrderChange(rowIdx, "Rate2", e.target.value)}
+                                                                        />
+                                                                        : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ?
+                                                                            <TextField
+                                                                                value={editableOrders[rowIdx]?.Rate3 || ""}
+                                                                                type="number"
+                                                                                fullWidth
+                                                                                sx={{
+                                                                                    '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                                    '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                                }}
+                                                                                onChange={(e) => handleOrderChange(rowIdx, "Rate3", e.target.value)}
+                                                                            />
+                                                                            : ""
                                                             ) : (
                                                                 <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                    {row.Product[productType]?.Volume ?? "-"}
+                                                                    {
+                                                                        depot.split(":")[1] === "ลำปาง" ? row.Rate1
+                                                                            : depot.split(":")[1] === "พิจิตร" ? row.Rate2
+                                                                                : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ? row.Rate3
+                                                                                    : ""
+                                                                    }
                                                                 </Typography>
                                                             )}
                                                         </TableCell>
-                                                    ))}
-                                                    <TableCell width={60} />
-                                                </TableRow>
-                                            ))}
 
-                                        </TableBody>
-                                    </Table>
-                                </Box>
+                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
+                                                            <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
+                                                                {editMode ? (
+                                                                    <TextField
+                                                                        value={editableOrders[rowIdx]?.Product[productType]?.Volume || ""}
+                                                                        type="number"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                            '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                        }}
+                                                                        onChange={(e) => handleOrderChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                                                                    />
+                                                                ) : (
+                                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                        {row.Product[productType]?.Volume ?? "-"}
+                                                                    </Typography>
+                                                                )}
+                                                            </TableCell>
+                                                        ))}
+                                                        {
+                                                            editMode ? 
+                                                            <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
+                                                                <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }} 
+                                                                onClick={() => handleDeleteOrder(rowIdx)}
+                                                                >ยกเลิก</Button>
+                                                            </TableCell>
+                                                            :
+                                                            <TableCell width={60} />
 
-                                {/* Footer: คงที่ด้านล่าง */}
-                                <Box
-                                    sx={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "25px", // กำหนดความสูง footer
-                                        bottom: "25px", // จนถึงด้านบนของ footer
-                                        backgroundColor: theme.palette.info.main,
-                                        zIndex: 2,
-                                        marginBottom: 0.5
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableFooter>
-                                            <TableRow>
-                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px" }}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
-                                                </TablecellCustomers>
-
-                                                {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                    <TablecellCustomers key={product} width={60} sx={{
-                                                        textAlign: "center", height: "25px", color: "black",
-                                                        fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
-                                                    }}>
-                                                        {totalVolumesOrder[product]}
-                                                    </TablecellCustomers>
+                                                        }
+                                                    </TableRow>
                                                 ))}
+
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
+
+                                    {/* Footer: คงที่ด้านล่าง */}
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            bottom: 0,
+                                            left: 0,
+                                            right: 0,
+                                            height: "25px", // กำหนดความสูง footer
+                                            bottom: "25px", // จนถึงด้านบนของ footer
+                                            backgroundColor: theme.palette.info.main,
+                                            zIndex: 2,
+                                            marginBottom: 0.5
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableFooter>
+                                                <TableRow>
+                                                    <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px" }}>
+                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
+                                                    </TablecellCustomers>
+
+                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
+                                                        <TablecellCustomers key={product} width={60} sx={{
+                                                            textAlign: "center", height: "25px", color: "black",
+                                                            fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+                                                        }}>
+                                                            {totalVolumesOrder[product]}
+                                                        </TablecellCustomers>
+                                                    ))}
                                                     <TablecellCustomers width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
                                                         {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesOrder[product] || 0), 0)}
                                                     </TablecellCustomers>
-                                            </TableRow>
-                                        </TableFooter>
-                                    </Table>
-                                </Box>
+                                                </TableRow>
+                                            </TableFooter>
+                                        </Table>
+                                    </Box>
 
-                                {/* Footer: คงที่ด้านล่าง */}
-                                <Box
-                                    sx={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "25px", // กำหนดความสูง footer
-                                        backgroundColor: theme.palette.info.main,
-                                        zIndex: 2,
-                                        borderTop: "2px solid white",
-                                        marginBottom: 0.5
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableFooter>
-                                            <TableRow>
-                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px" }}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>คงเหลือ</Typography>
-                                                </TablecellCustomers>
-
-                                                {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                    <TablecellCustomers key={product} width={60} sx={{
-                                                        textAlign: "center", height: "25px", color: "black",
-                                                        fontWeight: "bold", backgroundColor: (totalVolumesTicket[product] - totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product] - totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
-                                                    }}>
-                                                        {totalVolumesTicket[product] - totalVolumesOrder[product]}
+                                    {/* Footer: คงที่ด้านล่าง */}
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            bottom: 0,
+                                            left: 0,
+                                            right: 0,
+                                            height: "25px", // กำหนดความสูง footer
+                                            backgroundColor: theme.palette.info.main,
+                                            zIndex: 2,
+                                            borderTop: "2px solid white",
+                                            marginBottom: 0.5
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableFooter>
+                                                <TableRow>
+                                                    <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px" }}>
+                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>คงเหลือ</Typography>
                                                     </TablecellCustomers>
-                                                ))}
-                                                <TablecellCustomers width={60} sx={{
+
+                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
+                                                        <TablecellCustomers key={product} width={60} sx={{
+                                                            textAlign: "center", height: "25px", color: "black",
+                                                            fontWeight: "bold", backgroundColor: (totalVolumesTicket[product] - totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product] - totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
+                                                        }}>
+                                                            {totalVolumesTicket[product] - totalVolumesOrder[product]}
+                                                        </TablecellCustomers>
+                                                    ))}
+                                                    <TablecellCustomers width={60} sx={{
                                                         textAlign: "center", height: "25px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
                                                         {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + ((totalVolumesTicket[product] - totalVolumesOrder[product]) || 0), 0)}
                                                     </TablecellCustomers>
-                                            </TableRow>
-                                        </TableFooter>
-                                    </Table>
-                                </Box>
-                            </TableContainer>
+                                                </TableRow>
+                                            </TableFooter>
+                                        </Table>
+                                    </Box>
+                                </TableContainer>
                             </Paper>
                             <Grid container spacing={1}>
                                 {
@@ -1828,16 +2086,16 @@ const UpdateTrip = (props) => {
                                     </Paper>
                                 </Grid>
                             </Grid>
-                            </Paper>
+                        </Paper>
                     </Box>
                     {
                         !editMode ?
                             <>
                                 {
                                     trip.StatusTrips !== "จบทริป" ?
-                                    <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*ถ้าต้องการเพิ่มตั๋วหรือลูกค้าให้กดปุ่มแก้ไข*</Typography>
-                                    :
-                                    <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*บันทึกรูปภาพ*</Typography>
+                                        <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*ถ้าต้องการเพิ่มตั๋วหรือลูกค้าให้กดปุ่มแก้ไข*</Typography>
+                                        :
+                                        <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*บันทึกรูปภาพ*</Typography>
                                 }
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
                                     {
@@ -1849,7 +2107,7 @@ const UpdateTrip = (props) => {
                             </>
                             :
                             <>
-                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red",textAlign: "center",marginTop: -1,marginBottom:-1 }} gutterBottom>*เมื่อแก้ไขเสร็จแล้วให้กดบันทึกให้เรียบร้อย*</Typography>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*เมื่อแก้ไขเสร็จแล้วให้กดบันทึกให้เรียบร้อย*</Typography>
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
                                     <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={() => setEditMode(false)}>ยกเลิก</Button>
                                     <Button variant="contained" color="success" size="small" onClick={handleSave}>บันทึก</Button>

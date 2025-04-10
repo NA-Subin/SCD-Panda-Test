@@ -33,11 +33,14 @@ import 'dayjs/locale/th';
 const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
 const GasStationDetail = (props) => {
-    const { stock, gasStationID, selectedDate, gas, gasID, first, last, reportOilBalance, oilBalance } = props;
+    const { stock, gasStationID, selectedDate, gas, gasID, first, last, reportOilBalance, oilBalance,status } = props;
     // const [selectedDates, setSelectedDates] = React.useState(dayjs(selectedDate));
     const [product, setProduct] = React.useState([]);
     const [notReport, setNotReport] = React.useState([]);
     const [reports, setReports] = React.useState([]);
+    const [save, setSave] = React.useState(false);
+
+    console.log("Status : ",save);
 
     const getGasStations = async () => {
         database.ref("/depot/gasStations/" + (gas.id - 1)).on("value", (snapshot) => {
@@ -69,6 +72,8 @@ const GasStationDetail = (props) => {
 
             setReports(dataReport);
         });
+
+        setSave(status)
     };
 
     useEffect(() => {
@@ -76,7 +81,7 @@ const GasStationDetail = (props) => {
         getGasStations();
         setVolumes({}); // รีเซ็ตค่า Volume เป็นค่าเริ่มต้น
         setStocks({});
-    }, [selectedDate, gas.id]);
+    }, [selectedDate, gas.id, status]);
 
     console.log("Date : ", dayjs(selectedDate).format('DD-MM-YYYY'));
     console.log("Name : ", gas.ShortName);
@@ -137,7 +142,6 @@ const GasStationDetail = (props) => {
     // const formattedDate = dayjs(selectedDates).format('DD-MM-YYYY');
     // const dataReport = gas.Report ? gas.Report[formattedDate] : [];
     // console.log("report: ", dataReport);
-    const [save, setSave] = React.useState(true);
 
     const saveProduct = () => {
         const updatedProducts = notReport
@@ -165,6 +169,7 @@ const GasStationDetail = (props) => {
             return acc;
         }, {}); // เริ่มต้นเป็น object ว่าง
 
+        setSave(true);
 
         // อัปเดตข้อมูลในฐานข้อมูล
         database
