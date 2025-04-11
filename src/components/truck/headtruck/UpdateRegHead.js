@@ -86,7 +86,7 @@ const UpdateRegHead = (props) => {
                 VehicleRegistration: vehicleRegistration,
                 VehExpirationDate: vehExpirationDate,
                 Company: companies,
-                Driver: driver.split(":")[1]
+                Driver: driver
             })
             .then(() => {
                 database

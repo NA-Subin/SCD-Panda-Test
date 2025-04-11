@@ -55,7 +55,7 @@ const InsertTrips = () => {
     const [customers, setCustomers] = React.useState("0:0");
     const [customer, setCustomer] = React.useState("0:0");
     const [selectedValue, setSelectedValue] = useState('');
-    const [registration, setRegistration] = React.useState("0:0:0:0");
+    const [registration, setRegistration] = React.useState("0:0:0:0:0");
     const [weight, setWeight] = React.useState(0);
     const [totalWeight, setTotalWeight] = React.useState(0);
     const [showTickers, setShowTickers] = React.useState(true);
@@ -411,8 +411,8 @@ const InsertTrips = () => {
     const [weightL, setWeightL] = React.useState(0);
     const [costTrip, setCostTrip] = React.useState(0);
 
-    console.log("ข้อมูลตั๋ว : ",Object.values(ordersTickets));
-    console.log("ข้อมูลลูกค้า : ",Object.values(selling));
+    console.log("ข้อมูลตั๋ว : ", Object.values(ordersTickets));
+    console.log("ข้อมูลลูกค้า : ", Object.values(selling));
 
     const handlePost = (event) => {
         const ticketValue = event.target.value;
@@ -422,7 +422,7 @@ const InsertTrips = () => {
 
         // ค้นหา ticket ที่ตรงกับ ticketValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
         const ticketData = getTickets().find(
-            (item) => item.TicketsName === ticketValue
+            (item) => `${item.id}:${item.Name}` === ticketValue
         );
 
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
@@ -466,7 +466,7 @@ const InsertTrips = () => {
 
         // ค้นหา ticket ที่ตรงกับ customerValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
         const ticketData = getCustomers().find(
-            (item) => item.TicketsName === customerValue
+            (item) => `${item.id}:${item.Name}` === customerValue
         );
 
 
@@ -505,8 +505,8 @@ const InsertTrips = () => {
                     Rate3: ticketData.Rate3,
                     Trip: trip.length,
                     Date: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
-                    Registration: registration.split(":")[1],
-                    Driver: registration.split(":")[2],
+                    Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
+                    Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                     id: newIndex,
                     Product: {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
@@ -527,6 +527,32 @@ const InsertTrips = () => {
 
     };
 
+    const handleRegistration = (event) => {
+        const registrationValue = event;
+        setRegistration(registrationValue);
+        console.log("show registration : ",registrationValue);
+
+    // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
+    if (Object.keys(selling).length > 0) {
+        const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+        const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+
+        setSelling((prevSelling) =>
+            Object.fromEntries(
+                Object.entries(prevSelling).map(([key, item]) => [
+                    key,
+                    {
+                        ...item,
+                        Registration: registration,
+                        Driver: driver,
+                    },
+                ])
+            )
+        );
+    }
+
+    }
+
     const handleUpdateOrderID = (ticketIndex, field, value) => {
         setOrdersTickets((prev) => {
             return {
@@ -546,7 +572,7 @@ const InsertTrips = () => {
             return Object.keys(prevOrders).reduce((acc, key) => {
                 const order = prevOrders[key];
                 const ticketData = getTickets().find(
-                    (item) => item.TicketsName === order.TicketName
+                    (item) => `${item.id}:${item.Name}` === order.TicketName
                 );
                 // let newRate = 0;
                 // if (ticketData) {
@@ -575,7 +601,7 @@ const InsertTrips = () => {
             const updatedOrders = Object.keys(prevOrders).reduce((acc, key) => {
                 const order = prevOrders[key];
                 const ticketData = getCustomers().find(
-                    (item) => item.TicketsName === order.TicketName
+                    (item) => `${item.id}:${item.Name}` === order.TicketName
                 );
                 // let newRate = 0;
                 // if (ticketData) {
@@ -881,7 +907,7 @@ const InsertTrips = () => {
             CostTrip: costTrip,
             DateReceive: dayjs(selectedDateReceive).format("DD/MM/YYYY"),
             DateDelivery: dayjs(selectedDateDelivery).format("DD/MM/YYYY"),
-            Driver: registration.split(":")[2]+" / "+registration.split(":")[1],
+            Driver: registration.split(":")[3] + " / " + registration.split(":")[1],
             Depot: depots,
             WeightHigh: weightH,
             WeightLow: weightL,
@@ -993,8 +1019,8 @@ const InsertTrips = () => {
                 DateReceive: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
                 DateDelivery: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
                 DateStart: dayjs(new Date()).format('DD/MM/YYYY'),
-                Registration: registration.split(":")[1],
-                Driver: registration.split(":")[2],
+                Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
+                Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                 Depot: depots,
                 CostTrip: costTrip,
                 WeightHigh: parseFloat(weightH).toFixed(2),
@@ -1129,7 +1155,7 @@ const InsertTrips = () => {
     }, [registration, allTruck]);
 
     const getTickets = () => {
-        if (!registration || registration === "0:0:0:0") return [];
+        if (!registration || registration === "0:0:0:0:0") return [];
 
         const selectedTruck = allTruck.find(
             (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
@@ -1138,7 +1164,7 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const tickets = [
-            { TicketsName: "ตั๋วเปล่า",Name: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
+            { Name: "ตั๋วเปล่า", Name: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item })),
             ...ticketsPS.map((item) => ({ ...item })),
             ...ticketsT
@@ -1150,7 +1176,7 @@ const InsertTrips = () => {
     };
 
     const getCustomers = () => {
-        if (!registration || registration === "0:0:0:0") return [];
+        if (!registration || registration === "0:0:0:0:0") return [];
 
         const selectedTruck = allTruck.find(
             (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
@@ -1228,7 +1254,7 @@ const InsertTrips = () => {
     const fuelTypes = ["G95", "B95", "B7", "G91", "E20", "PWD"];
     const totalVolume = fuelTypes.reduce((sum, type) => sum + (Number(volumeT[type]) - Number(volumeS[type])), 0) || 0;
 
-    const getBackgroundColor = (value) => 
+    const getBackgroundColor = (value) =>
         value < 0 ? "red" : value > 0 ? "yellow" : "lightgray";
 
     console.log("G95", G95);
@@ -1238,7 +1264,7 @@ const InsertTrips = () => {
     console.log("E20", E20);
     console.log("PWD", PWD);
 
-    console.log("Check : ",isNegative);
+    console.log("Check : ", isNegative);
 
     return (
         <React.Fragment>
@@ -1319,24 +1345,24 @@ const InsertTrips = () => {
                                             options={regHead}
                                             getOptionLabel={(option) =>
                                                 option.type === "รถใหญ่" ?
-                                                    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (${option.type ? option.type : ""})`
+                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (${option.type ? option.type : ""})`
                                                     :
-                                                    `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
+                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
                                             }
                                             isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
                                             value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration) : null}
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
-                                                    const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.type}`;
-                                                    setRegistration(value);
+                                                    const values = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.type}`;
+                                                    handleRegistration(values); // อัพเดตค่าเมื่อเลือก
                                                 } else {
-                                                    setRegistration("0:0:0:0");
+                                                    setRegistration("0:0:0:0:0");
                                                 }
                                             }}
                                             renderInput={(params) => (
                                                 <TextField
                                                     {...params}
-                                                    label={!registration || registration === "0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                    label={!registration || registration === "0:0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
                                                     variant="outlined"
                                                     size="small"
                                                     sx={{
@@ -1350,9 +1376,9 @@ const InsertTrips = () => {
                                                 <li {...props}>
                                                     {
                                                         option.type === "รถใหญ่" ?
-                                                            <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
+                                                            <Typography fontSize="14px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
                                                             :
-                                                            <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead} (${option.type})`}</Typography>
+                                                            <Typography fontSize="14px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (${option.type})`}</Typography>
                                                     }
                                                 </li>
                                             )}
@@ -1430,17 +1456,17 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
-                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
-                                                <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
-                                                <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
+                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
+                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
+                                                <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
+                                                <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
                                                 <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
                                                 <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
                                                 <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
                                                 <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
-                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} />
+                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -1495,7 +1521,7 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellTickets width={650} sx={{ textAlign: "center",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
+                                                <TablecellTickets width={650} sx={{ textAlign: "center", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
                                                 </TablecellTickets>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1696,7 +1722,7 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.PWD || 0}</Typography>
                                                     }
                                                 </TableCellPWD>
-                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} >
+                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} >
                                                     <Box display="flex" justifyContent="center" alignItems="center">
                                                         {/* <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1 }} gutterBottom>ต้นทุนรวม</Typography>
                                                         <Paper component="form">
@@ -1768,11 +1794,11 @@ const InsertTrips = () => {
                                             getOptionLabel={(option) =>
                                                 `${option.Name}`
                                             } // กำหนดรูปแบบของ Label ที่แสดง
-                                            isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName} // ตรวจสอบค่าที่เลือก
-                                            value={tickets ? getTickets().find(item => item.TicketsName === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                            isOptionEqualToValue={(option, value) => option.Name === value.Name} // ตรวจสอบค่าที่เลือก
+                                            value={tickets ? getTickets().find(item => `${item.id}:${item.Name}` === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
-                                                    const value = `${newValue.TicketsName}`;
+                                                    const value = `${newValue.id}:${newValue.Name}`;
                                                     handlePost({ target: { value } }); // อัพเดตค่าเมื่อเลือก
                                                 } else {
                                                     setTickets("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
@@ -1965,9 +1991,9 @@ const InsertTrips = () => {
                                                     `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
                                                 );
                                                 return selectedItem && selectedItem.type === "รถใหญ่"
-                                                    ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (${selectedItem.type ? selectedItem.type : ""})`
+                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (${selectedItem.type ? selectedItem.type : ""})`
                                                     : selectedItem && selectedItem.type === "รถเล็ก"
-                                                        ? `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""} (${selectedItem.type ? selectedItem.type : ""})`
+                                                        ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""} (${selectedItem.type ? selectedItem.type : ""})`
                                                         : "";
                                             })()}
                                         />
@@ -2236,22 +2262,22 @@ const InsertTrips = () => {
                                                     fuelTypes.map((type) => {
                                                         const value = Number(volumeT[type]) - Number(volumeS[type]);
                                                         return (
-                                                          <TablecellCustomers
-                                                            key={type}
-                                                            width={60}
-                                                            sx={{
-                                                              textAlign: "center",
-                                                              color: "black",
-                                                              height: "35px",
-                                                              fontWeight: "bold",
-                                                              backgroundColor: getBackgroundColor(value),
-                                                              borderLeft: "2px solid white",
-                                                            }}
-                                                          >
-                                                            {value || 0}
-                                                          </TablecellCustomers>
+                                                            <TablecellCustomers
+                                                                key={type}
+                                                                width={60}
+                                                                sx={{
+                                                                    textAlign: "center",
+                                                                    color: "black",
+                                                                    height: "35px",
+                                                                    fontWeight: "bold",
+                                                                    backgroundColor: getBackgroundColor(value),
+                                                                    borderLeft: "2px solid white",
+                                                                }}
+                                                            >
+                                                                {value || 0}
+                                                            </TablecellCustomers>
                                                         );
-                                                      })
+                                                    })
                                                 }
                                                 <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {
@@ -2307,10 +2333,10 @@ const InsertTrips = () => {
                                                         `${option.Name}`
                                                     } // กำหนดรูปแบบของ Label ที่แสดง
                                                     isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
-                                                    value={customers ? getCustomers().find(item => item.TicketsName === customers) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                                    value={customers ? getCustomers().find(item => `${item.id}:${item.Name}` === customers) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
                                                     onChange={(event, newValue) => {
                                                         if (newValue) {
-                                                            const value = `${newValue.TicketsName}`;
+                                                            const value = `${newValue.id}:${newValue.Name}`;
                                                             handlePostSelling({ target: { value } }); // อัพเดตค่าเมื่อเลือก
                                                         } else {
                                                             setCustomers("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
@@ -2359,7 +2385,7 @@ const InsertTrips = () => {
                                                     // ตรวจสอบประเภทของข้อมูลเพื่อกำหนด prefix ที่เหมาะสม
                                                     const prefix = row.type;
                                                     const id = row.id || row.TicketsCode;
-                                                    const name = row.Name || row.TicketsName;
+                                                    const name = row.Name || row.Name;
 
                                                     return (
                                                         <MenuItem key={id} value={`${prefix}:${id}:${name}`}>
@@ -2426,16 +2452,16 @@ const InsertTrips = () => {
                         (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) <= 50300 &&
                         !isNegative && ( // เพิ่มเงื่อนไขเช็คว่าห้ามมีค่าติดลบ
                             <>
-                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                                <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
-                                <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
-                            </Box>
-                            <Box textAlign="center" marginTop={1}>
-                                <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
-                            </Box>
+                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                                    <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
+                                    <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
+                                </Box>
+                                <Box textAlign="center" marginTop={1}>
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                                </Box>
                             </>
                         )
-                        }
+                    }
                 </DialogContent>
                 {/* <DialogActions
                     sx={{

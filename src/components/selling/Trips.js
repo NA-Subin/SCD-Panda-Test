@@ -133,11 +133,14 @@ const TripsBigTruck = () => {
                                     >
                                         <TableHead>
                                             <TableRow sx={{ height: "7vh" }}>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                                     ลำดับ
                                                 </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                                    วันที่
+                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                                    วันที่รับ
+                                                </TablecellHeader>
+                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                                    วันที่ส่ง
                                                 </TablecellHeader>
                                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
                                                     คลังรับน้ำมัน

@@ -1037,7 +1037,7 @@ const UpdateGasStations = (props) => {
                                                                 }}
                                                                 InputProps={{
                                                                     inputProps: {
-                                                                        min: 0,
+                                                                        min: -1000000,
                                                                         step: 1000, // ทำให้ปุ่มลูกศรเพิ่มลดทีละ 1000
                                                                     },
                                                                 }}
@@ -1100,7 +1100,7 @@ const UpdateGasStations = (props) => {
                                                                 }}
                                                                 InputProps={{
                                                                     inputProps: {
-                                                                        min: 0,
+                                                                        min: -1000000,
                                                                         step: 1000, // ทำให้ปุ่มลูกศรเพิ่มลดทีละ 1000
                                                                     },
                                                                 }}
@@ -1163,7 +1163,7 @@ const UpdateGasStations = (props) => {
                                                                 }}
                                                                 InputProps={{
                                                                     inputProps: {
-                                                                        min: 0,
+                                                                        min: -1000000,
                                                                         step: 1000, // ทำให้ปุ่มลูกศรเพิ่มลดทีละ 1000
                                                                     },
                                                                 }}

@@ -39,6 +39,11 @@ const GasStationDetail = (props) => {
     const [notReport, setNotReport] = React.useState([]);
     const [reports, setReports] = React.useState([]);
     const [save, setSave] = React.useState(false);
+    const [yesterday,setYesterdayData] = React.useState("");
+    const [towDayAgo,setTowDaysAgoData] = React.useState("");
+
+    console.log("วันก่อนหน้า : ",yesterday);
+    console.log("2 วันก่อนหน้า : ",towDayAgo);
 
     console.log("Status : ",save);
 
@@ -73,6 +78,15 @@ const GasStationDetail = (props) => {
             setReports(dataReport);
         });
 
+        
+                const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+                        const twoDaysAgoDate = dayjs(selectedDate).subtract(2, "day").format("DD-MM-YYYY");
+                
+                        const yesterdayData = gas?.Report?.[yesterdayDate];
+                        const twoDaysAgoData = gas?.Report?.[twoDaysAgoDate];
+                setYesterdayData(yesterdayData);
+                setTowDaysAgoData(twoDaysAgoData)
+
         setSave(status)
     };
 
@@ -81,7 +95,7 @@ const GasStationDetail = (props) => {
         getGasStations();
         setVolumes({}); // รีเซ็ตค่า Volume เป็นค่าเริ่มต้น
         setStocks({});
-    }, [selectedDate, gas.id, status]);
+    }, [selectedDate, gas.id, gas.Report, status]);
 
     console.log("Date : ", dayjs(selectedDate).format('DD-MM-YYYY'));
     console.log("Name : ", gas.ShortName);
@@ -147,6 +161,14 @@ const GasStationDetail = (props) => {
         const updatedProducts = notReport
             .map(({ ProductName, Volume }) => { // ✅ ใช้ destructuring ถูกต้อง
                 const matchingStock = stock.find((s) => s.ProductName === ProductName);
+                const yesterdayEntry = Object.values(yesterday || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const twoDaysAgoEntry = Object.values(towDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+
+                console.log("Squeeze วันก่อน : ",yesterdayEntry?.Squeeze)
+                console.log("EstimateSell วันก่อน : ",yesterdayEntry?.EstimateSell)
+                console.log("Squeeze 2 วันก่อน : ",twoDaysAgoEntry?.Squeeze)
+                console.log("EstimateSell 2 วันก่อน : ",twoDaysAgoEntry?.EstimateSell)
+
                 if (!matchingStock) return null; // ถ้าไม่มีข้อมูล ให้ return null (แต่ filter ทิ้งภายหลัง)
                 console.log("differenceAdd : ", (difference[ProductName] ?? 0))
                 return {
@@ -157,6 +179,8 @@ const GasStationDetail = (props) => {
                     Volume: Number(Volume ?? 0),
                     Delivered: Number(volumes?.[ProductName] ?? 0),
                     OilBalance: Number(stocks?.[ProductName] ?? 0),
+                    Squeeze: yesterdayEntry?.Squeeze || twoDaysAgoEntry?.Squeeze,
+                    EstimateSell : yesterdayEntry?.EstimateSell || twoDaysAgoEntry?.EstimateSell
                 };
             })
             .filter(Boolean); // กรองค่าที่เป็น null ออกไป
@@ -169,9 +193,11 @@ const GasStationDetail = (props) => {
             return acc;
         }, {}); // เริ่มต้นเป็น object ว่าง
 
+        console.log("Update : ",updatedProducts)
+
         setSave(true);
 
-        // อัปเดตข้อมูลในฐานข้อมูล
+        //อัปเดตข้อมูลในฐานข้อมูล
         database
             .ref("/depot/gasStations/" + (gas.id - 1) + "/Report")
             .child(dayjs(selectedDate).format("DD-MM-YYYY"))

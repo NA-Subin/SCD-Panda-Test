@@ -107,16 +107,16 @@ const OrderDetail = (props) => {
                                 size="small"
                                 fullWidth
                                 options={tickets}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
-                                getOptionLabel={(option) =>
-                                    option.TicketsName.includes("/")
-                                        ? option.TicketsName.split("/")[1]
-                                        : option.TicketsName
+                                getOptionLabel={(option) => option.Name
+                                    // option.Name.includes("/")
+                                    //     ? option.Name.split("/")[1]
+                                    //     : option.Name
                                 }  // ใช้ OrderID หรือค่าที่ต้องการแสดง
-                                isOptionEqualToValue={(option, value) => option.TicketsName === value.TicketsName}  // ตรวจสอบค่าที่เลือก
-                                value={detail.TicketsName ? tickets.find(item => item.TicketsName === detail.TicketsName) : null} // ค่าที่เลือก
+                                isOptionEqualToValue={(option, value) => option.Name === value.Name}  // ตรวจสอบค่าที่เลือก
+                                value={detail.Name ? tickets.find(item => item.Name === detail.Name) : null} // ค่าที่เลือก
                                 onChange={(e, newValue) => {
                                     if (newValue) {
-                                        onUpdateOrderID("TicketName", newValue.TicketsName); // อัปเดตค่า OrderID
+                                        onUpdateOrderID("TicketName", newValue.Name); // อัปเดตค่า OrderID
                                     } else {
                                         onUpdateOrderID("TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
                                     }
@@ -145,7 +145,7 @@ const OrderDetail = (props) => {
                                 renderOption={(props, option) => (
                                     <li {...props}>
                                         <Typography fontSize="14px">
-                                            {option.TicketsName}
+                                            {option.Name}
                                         </Typography>
                                     </li>
                                 )}
@@ -153,22 +153,23 @@ const OrderDetail = (props) => {
                             :
                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                 {
-                                    (() => {
-                                        const branches = [
-                                            "( สาขาที่  00001)/",
-                                            "( สาขาที่  00002)/",
-                                            "( สาขาที่  00003)/",
-                                            "(สำนักงานใหญ่)/"
-                                        ];
+                                    // (() => {
+                                    //     const branches = [
+                                    //         "( สาขาที่  00001)/",
+                                    //         "( สาขาที่  00002)/",
+                                    //         "( สาขาที่  00003)/",
+                                    //         "(สำนักงานใหญ่)/"
+                                    //     ];
 
-                                        for (const branch of branches) {
-                                            if (detail.TicketName.includes(branch)) {
-                                                return detail.TicketName.split(branch)[1];
-                                            }
-                                        }
+                                    //     for (const branch of branches) {
+                                    //         if (detail.TicketName.includes(branch)) {
+                                    //             return detail.TicketName.split(branch)[1];
+                                    //         }
+                                    //     }
 
-                                        return detail.TicketName;
-                                    })()
+                                    //     return detail.TicketName.split(":")[1];
+                                    // })()
+                                    detail.TicketName.split(":")[1]
                                 }
                             </Typography>
                     }
