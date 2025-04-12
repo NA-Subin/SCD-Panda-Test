@@ -407,12 +407,16 @@ const InsertTrips = () => {
     const [volumeS, setVolumeS] = React.useState({});
     const [weightA, setWeightA] = React.useState({});
     const [orderTrip, setOrderTrip] = React.useState({});
+    const [ticketTrip, setTicketTrip] = React.useState({});
     const [weightH, setWeightH] = React.useState(0);
     const [weightL, setWeightL] = React.useState(0);
     const [costTrip, setCostTrip] = React.useState(0);
 
     console.log("ข้อมูลตั๋ว : ", Object.values(ordersTickets));
     console.log("ข้อมูลลูกค้า : ", Object.values(selling));
+
+    console.log("Order on Trip : ",orderTrip);
+    console.log("Ticket on Trip : ",ticketTrip);
 
     const handlePost = (event) => {
         const ticketValue = event.target.value;
@@ -444,18 +448,40 @@ const InsertTrips = () => {
                 ...prev,
                 [newIndex]: {
                     TicketName: ticketValue,
-                    id: newIndex,
+                    CompanyName: ticketData.CompanyName || "-",
+                    Address: ticketData.Address || "-",
+                    Lat: ticketData.lat || "-",
+                    Lng: ticketData.lng || "-",
+                    CodeID: ticketData.CodeID || "-",
+                    CreditTime: ticketData.CreditTime || "-",
+                    Bill: ticketData.Bill || "-",
                     Rate1: ticketData.Rate1,
                     Rate2: ticketData.Rate2,
                     Rate3: ticketData.Rate3,
-                    OrderID: "",
                     Trip: trip.length,
+                    Date: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
+                    Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
+                    Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
+                    id: newIndex,
+                    CustomerType: ticketData.CustomerType,
                     Product: {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
-                    } // เพิ่ม Product ไว้เป็น Object ว่าง
+                    }
                 }
             };
         });
+
+        setTicketTrip((prev) => {
+            const newIndex = Object.keys(prev).length + 1; // เพิ่มเป็น 1-based index
+            return {
+                ...prev,
+                [`Ticket${newIndex}`]: ticketValue
+                // [`Ticket${newIndex}`]: ticketValue.includes("/")
+                //     ? ticketValue.split("/")[1]
+                //     : ticketValue
+            };
+        });
+
     };
 
     const handlePostSelling = (event) => {
@@ -508,6 +534,7 @@ const InsertTrips = () => {
                     Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
                     Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                     id: newIndex,
+                    CustomerType: ticketData.CustomerType,
                     Product: {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
                     }
@@ -519,9 +546,10 @@ const InsertTrips = () => {
             const newIndex = Object.keys(prev).length + 1; // เพิ่มเป็น 1-based index
             return {
                 ...prev,
-                [`Order${newIndex}`]: customerValue.includes("/")
-                    ? customerValue.split("/")[1]
-                    : customerValue
+                [`Order${newIndex}`]: customerValue
+                // [`Order${newIndex}`]: customerValue.includes("/")
+                //     ? customerValue.split("/")[1]
+                //     : customerValue
             };
         });
 
@@ -531,6 +559,24 @@ const InsertTrips = () => {
         const registrationValue = event;
         setRegistration(registrationValue);
         console.log("show registration : ",registrationValue);
+
+        if (Object.keys(ordersTickets).length > 0) {
+            const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+    
+            setOrdersTickets((prevSelling) =>
+                Object.fromEntries(
+                    Object.entries(prevSelling).map(([key, item]) => [
+                        key,
+                        {
+                            ...item,
+                            Registration: registration,
+                            Driver: driver,
+                        },
+                    ])
+                )
+            );
+        }
 
     // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
     if (Object.keys(selling).length > 0) {
@@ -1030,7 +1076,8 @@ const InsertTrips = () => {
                 Status: status,
                 StatusTrip: "กำลังจัดเที่ยววิ่ง",
                 TruckType: "รถใหญ่",
-                ...orderTrip
+                ...orderTrip,
+                ...ticketTrip
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -1164,12 +1211,12 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const tickets = [
-            { Name: "ตั๋วเปล่า", Name: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
-            ...ticketsA.map((item) => ({ ...item })),
-            ...ticketsPS.map((item) => ({ ...item })),
+            { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
+            ...ticketsA.map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
+            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
             ...ticketsT
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item })),
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
         ];
 
         return tickets.filter((item) => item.id || item.TicketsCode);
@@ -1185,13 +1232,13 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const customers = [
-            ...ticketsPS.map((item) => ({ ...item })),
+            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
             ...ticketsT
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item })),
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
             ...(selectedTruck.type === "รถใหญ่"
-                ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
-                : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
+                ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
+                : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
             ),
         ];
 

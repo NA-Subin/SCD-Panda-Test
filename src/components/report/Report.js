@@ -94,7 +94,7 @@ const Report = () => {
   console.log("Ticket : ", ticket);
 
   const groupedTickets = ticket.reduce((acc, curr) => {
-    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime, Trip, Price } = curr;
+    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime, Trip, CustomerType } = curr;
 
     // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
     if (!acc[TicketName]) {
@@ -107,7 +107,8 @@ const Report = () => {
         Amount: 0,
         OverdueTransfer: 0,
         CreditTime,
-        Trip
+        Trip,
+        CustomerType
       };
     }
 
@@ -128,19 +129,32 @@ const Report = () => {
     ...item
   }));
 
-  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ ticketsOrder
-  const resultTickets = Object.values(groupedTickets)
+  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ transports
+  const resultTransport = Object.values(groupedTickets)
     .filter(item => {
-      const matchedTruck = ticketsOrder.find(entry => entry.TicketsName === item.TicketName);
+
+      console.log("Customet Type ",item.CustomerType);
+      if (item.CustomerType !== "ตั๋วรับจ้างขนส่ง") return null;
+
+      const ticketParts = item.TicketName?.split(":");
+    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+
+    const matchedTruck = transports.find(entry => (entry.id - 1) === ticketId)
       const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
 
       return matchedTruck && matchedTrip &&
         dayjs(matchedTrip?.DateDelivery, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]');
     })
     .map((item, index) => {
-      const matchedTruck = ticketsOrder.find(entry => entry.TicketsName === item.TicketName);
+      const ticketParts = item.TicketName?.split(":");
+    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+
+      const matchedTruck = transports.find(entry => (entry.id - 1) === ticketId)
       const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
 
+      console.log("ticketParts : ", ticketParts);
+      console.log("Number(ticketParts[0]) - 1 ", Number(ticketParts[0]) - 1);
+      console.log("ticketId : ", ticketId);
       console.log("matchedTruck : ", matchedTruck);
       console.log("matchedTrip DateDelivery : ", matchedTrip?.DateDelivery);
 
@@ -167,19 +181,30 @@ const Report = () => {
       };
     });
 
-  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ transports
-  const resultTransport = Object.values(groupedTickets)
+  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ ticketsOrder
+  const resultTickets = Object.values(groupedTickets)
     .filter(item => {
-      const matchedTruck = transports.find(entry => entry.TicketsName === item.TicketName);
+      if (item.CustomerType !== "ตั๋วน้ำมัน") return null;
+
+      const ticketParts = item.TicketName?.split(":");
+    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+
+    const matchedTruck = ticketsOrder.find(entry => (entry.id - 1) === ticketId)
       const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
 
       return matchedTruck && matchedTrip &&
         dayjs(matchedTrip?.DateDelivery, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]');
     })
     .map((item, index) => {
-      const matchedTruck = transports.find(entry => entry.TicketsName === item.TicketName);
+      const ticketParts = item.TicketName?.split(":");
+    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+
+      const matchedTruck = ticketsOrder.find(entry => (entry.id - 1) === ticketId)
       const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
 
+      console.log("ticketParts : ", ticketParts);
+      console.log("Number(ticketParts[0]) - 1 ", Number(ticketParts[0]) - 1);
+      console.log("ticketId : ", ticketId);
       console.log("matchedTruck : ", matchedTruck);
       console.log("matchedTrip DateDelivery : ", matchedTrip?.DateDelivery);
 
@@ -209,14 +234,22 @@ const Report = () => {
   // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ gasstations
   const resultGasStation = Object.values(groupedTickets)
     .filter(item => {
-      const matchedTruck = gasstations.find(entry => entry.TicketsName === item.TicketName);
+      if (item.CustomerType !== "ตั๋วปั้ม") return null;
+
+      const ticketParts = item.TicketName?.split(":");
+    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+
+    const matchedTruck = gasstations.find(entry => (entry.id - 1) === ticketId)
       const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
 
       return matchedTruck && matchedTrip &&
         dayjs(matchedTrip?.DateDelivery, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]');
     })
     .map((item, index) => {
-      const matchedTruck = gasstations.find(entry => entry.TicketsName === item.TicketName);
+      const ticketParts = item.TicketName?.split(":");
+    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+
+      const matchedTruck = gasstations.find(entry => (entry.id - 1) === ticketId)
       const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
 
       console.log("matchedTruck : ", matchedTruck);

@@ -128,34 +128,35 @@ const Invoice = () => {
 
   // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ bigtruck
   const resultBigTruck = Object.values(groupedOrders)
-    .map((item, index) => {
-      const matchedTruck = bigtruck.find(entry => entry.TicketsName === item.TicketName);
+  .map((item, index) => {
+    if (item.CustomerType !== "ตั๋วรถใหญ่") return null;
 
-      if (!matchedTruck) return null; // ถ้าไม่เจอ ให้ return null
+    const ticketParts = item.TicketName?.split(":");
+    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
 
-      // ตรวจสอบว่าวันที่อยู่ในช่วงที่เลือก
-      const isDateInRange = dayjs(item.Date, "DD/MM/YYYY").isBetween(
-        selectedDateStart, selectedDateEnd, 'day', '[]'
-      );
+    const matchedTruck = bigtruck.find(entry => (entry.id - 1) === ticketId);
+    if (!matchedTruck) return null;
 
-      if (!isDateInRange) return null; // ถ้าไม่อยู่ในช่วงที่เลือก ให้ return null
+    const isDateInRange = dayjs(item.Date, "DD/MM/YYYY").isBetween(
+      selectedDateStart, selectedDateEnd, 'day', '[]'
+    );
+    if (!isDateInRange) return null;
 
-      // ตรวจสอบว่ามี Price เป็นอาร์เรย์หรือไม่
-      const Price = Array.isArray(matchedTruck.Price)
-        ? matchedTruck.Price.reduce((acc, p) => acc + (Number(p.IncomingMoney) || 0), 0)
-        : 0;
+    let Price = 0;
+    if (Array.isArray(matchedTruck.Price)) {
+      Price = matchedTruck.Price.reduce((acc, p) => acc + (Number(p.IncomingMoney) || 0), 0);
+    } else if (matchedTruck.Price && typeof matchedTruck.Price === 'object') {
+      Price = Number(matchedTruck.Price.IncomingMoney) || 0;
+    }
 
-      console.log("1.Price : ", matchedTruck);
-      console.log("2.Price : ", Price);
-
-      return {
-        id: index + 1,
-        ...item,
-        TransferAmount: Price, // รวมข้อมูลจาก bigtruck ที่ตรงกันเข้ากับ item
-        TotalOverdueTransfer: item.Amount - Price
-      };
-    })
-    .filter(Boolean); // กรองค่า null ออกไป
+    return {
+      id: index + 1,
+      ...item,
+      TransferAmount: Price,
+      TotalOverdueTransfer: item.Amount - Price
+    };
+  })
+  .filter(Boolean);
 
   console.log("resultBigTruck : ", resultBigTruck);
 

@@ -80,12 +80,14 @@ const UpdateTrip = (props) => {
     const [ticketLength, setTicketLength] = React.useState(0);
     const [costTrip, setCostTrip] = useState(trip.CostTrip);
     const [status, setStatus] = useState(trip.Status || "-");
+    const [weightTrucks, setWeightTrucks] = useState(weightTruck || 0);
 
     const { depots, reghead } = useData();
     const depotOptions = Object.values(depots || {});
     const registrationTruck = Object.values(reghead || {});
 
     console.log("Status : ", status);
+    console.log("registrationTruck : ", registrationTruck);
 
     // โหลด html2canvas จาก CDN
     useEffect(() => {
@@ -108,7 +110,7 @@ const UpdateTrip = (props) => {
             Depot: depotTrip,
             WeightHigh: totalVolumesTicket.oilHeavy,
             WeightLow: totalVolumesTicket.oilLight,
-            WeightTruck: trip.WeightTruck,
+            WeightTruck: weightTrucks,
             TotalWeight: totalVolumesTicket.totalWeight,
         };
 
@@ -290,6 +292,7 @@ const UpdateTrip = (props) => {
     const [editableTickets, setEditableTickets] = useState([]);
     const [editableOrders, setEditableOrders] = useState([]);
     const [orderTrip, setOrderTrip] = useState([]);
+    const [ticketTrip, setTicketTrip] = useState([]);
 
     const [depot, setDepot] = useState(depotTrip);
     const [registration, setRegistration] = useState(registrations);
@@ -301,6 +304,31 @@ const UpdateTrip = (props) => {
     useEffect(() => {
         if (ticket && ticket.length > 0) {
             setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
+
+            setTicketTrip((prev) => {
+                const newTickets = {};
+                ticket.forEach((item, index) => {
+                    const newIndex = index + 1; // ใช้ 1-based index
+                    // const branches = [
+                    //     "( สาขาที่  00001)/",
+                    //     "( สาขาที่  00002)/",
+                    //     "( สาขาที่  00003)/",
+                    //     "( สำนักงานใหญ่)/"
+                    // ];
+
+                    // let ticketName = `${item.TicketName}`;
+                    // for (const branch of branches) {
+                    //     if (ticketName.includes(branch)) {
+                    //         ticketName = ticketName.split(branch)[1];
+                    //         break;
+                    //     }
+                    // }
+
+                    newTickets[`Ticket${newIndex}`] = item.TicketName;
+                });
+
+                return { ...prev, ...newTickets };
+            });
         }
 
         if (order && order.length > 0) {
@@ -310,22 +338,22 @@ const UpdateTrip = (props) => {
                 const newOrders = {};
                 order.forEach((item, index) => {
                     const newIndex = index + 1; // ใช้ 1-based index
-                    const branches = [
-                        "( สาขาที่  00001)/",
-                        "( สาขาที่  00002)/",
-                        "( สาขาที่  00003)/",
-                        "( สำนักงานใหญ่)/"
-                    ];
+                    // const branches = [
+                    //     "( สาขาที่  00001)/",
+                    //     "( สาขาที่  00002)/",
+                    //     "( สาขาที่  00003)/",
+                    //     "( สำนักงานใหญ่)/"
+                    // ];
 
-                    let ticketName = `${item.TicketName}`;
-                    for (const branch of branches) {
-                        if (ticketName.includes(branch)) {
-                            ticketName = ticketName.split(branch)[1];
-                            break;
-                        }
-                    }
+                    // let ticketName = `${item.TicketName}`;
+                    // for (const branch of branches) {
+                    //     if (ticketName.includes(branch)) {
+                    //         ticketName = ticketName.split(branch)[1];
+                    //         break;
+                    //     }
+                    // }
 
-                    newOrders[`Order${newIndex}`] = ticketName;
+                    newOrders[`Order${newIndex}`] = item.TicketName;
                 });
 
                 return { ...prev, ...newOrders };
@@ -379,6 +407,33 @@ const UpdateTrip = (props) => {
                     delete updatedTickets[index].Product;
                 }
             }
+
+            setTicketTrip((prev) => {
+                const newTickets = {};
+                const allTickets = [...updatedTickets]; // ใช้ข้อมูลใหม่ทั้งหมด
+
+                allTickets.forEach((item, i) => {
+                    const newIndex = i + 1; // ใช้ 1-based index
+                    // const branches = [
+                    //     "( สาขาที่  00001)/",
+                    //     "( สาขาที่  00002)/",
+                    //     "( สาขาที่  00003)/",
+                    //     "( สำนักงานใหญ่)/"
+                    // ];
+
+                    // let ticketName = `${item.TicketName}`;
+                    // for (const branch of branches) {
+                    //     if (ticketName.includes(branch)) {
+                    //         ticketName = ticketName.split(branch)[1];
+                    //         break;
+                    //     }
+                    // }
+
+                    newTickets[`Ticket${newIndex}`] = item.TicketName;
+                });
+
+                return { ...prev, ...newTickets };
+            });
 
             return updatedTickets;
         });
@@ -440,22 +495,22 @@ const UpdateTrip = (props) => {
 
                 allOrders.forEach((item, i) => {
                     const newIndex = i + 1; // ใช้ 1-based index
-                    const branches = [
-                        "( สาขาที่  00001)/",
-                        "( สาขาที่  00002)/",
-                        "( สาขาที่  00003)/",
-                        "( สำนักงานใหญ่)/"
-                    ];
+                    // const branches = [
+                    //     "( สาขาที่  00001)/",
+                    //     "( สาขาที่  00002)/",
+                    //     "( สาขาที่  00003)/",
+                    //     "( สำนักงานใหญ่)/"
+                    // ];
 
-                    let ticketName = `${item.TicketName}`;
-                    for (const branch of branches) {
-                        if (ticketName.includes(branch)) {
-                            ticketName = ticketName.split(branch)[1];
-                            break;
-                        }
-                    }
+                    // let ticketName = `${item.TicketName}`;
+                    // for (const branch of branches) {
+                    //     if (ticketName.includes(branch)) {
+                    //         ticketName = ticketName.split(branch)[1];
+                    //         break;
+                    //     }
+                    // }
 
-                    newOrders[`Order${newIndex}`] = ticketName;
+                    newOrders[`Order${newIndex}`] = item.TicketName;
                 });
 
                 return { ...prev, ...newOrders };
@@ -513,7 +568,7 @@ const UpdateTrip = (props) => {
         const oilHeavy =
             calculateOil(totalsTicket["B7"], 0.837);
 
-        const totalWeight = parseFloat(trip.WeightTruck) +
+        const totalWeight = parseFloat(weightTrucks) +
             calculateOil(totalsTicket["G91"], 0.740) +
             calculateOil(totalsTicket["G95"], 0.740) +
             calculateOil(totalsTicket["B95"], 0.740) +
@@ -539,7 +594,7 @@ const UpdateTrip = (props) => {
             return newCostTrip;
         });
 
-    }, [editableTickets, editableOrders, trip, depot]);
+    }, [editableTickets, editableOrders, depot, weightTrucks]);
     // คำนวณใหม่ทุกครั้งที่ editableOrders เปลี่ยน
 
     const handleSave = () => {
@@ -648,9 +703,10 @@ const UpdateTrip = (props) => {
                 TotalWeight: totalVolumesTicket.totalWeight,
                 CostTrip: costTrip,
                 Status: status,
-                Driver: registration.split(":")[0],
-                Registration: registration.split(":")[1],
-                ...orderTrip
+                Driver: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
+                Registration: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
+                ...orderTrip,
+                ...ticketTrip
             })    // อัปเดตข้อมูลของแต่ละ order
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -659,6 +715,37 @@ const UpdateTrip = (props) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+            database
+                    .ref("truck/registration/")
+                    .child(Number(registrations.split(":")[2]) - 1)
+                    .update({
+                        Status: "ว่าง"
+                    })
+                    .then(() => {
+                        setOpen(false);
+                        console.log("Data pushed successfully");
+
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+
+            database
+                    .ref("truck/registration/")
+                    .child(Number(registration.split(":")[2]) - 1)
+                    .update({
+                        Status: "TR:" + (tripID - 1)
+                    })
+                    .then(() => {
+                        setOpen(false);
+                        console.log("Data pushed successfully");
+
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
 
         setEditMode(false);
     };
@@ -672,12 +759,12 @@ const UpdateTrip = (props) => {
 
     const getTickets = () => {
         const tickets = [
-            { Name: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
-            ...ticketsA.map((item) => ({ ...item })),
-            ...ticketsPS.map((item) => ({ ...item })),
+            { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
+            ...ticketsA.map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
+            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
             ...ticketsT
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item })),
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
         ];
 
         return tickets.filter((item) => item.id || item.TicketsCode);
@@ -685,18 +772,18 @@ const UpdateTrip = (props) => {
 
     const getCustomers = () => {
         const customers = [
-            ...ticketsPS.map((item) => ({ ...item })),
+            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
             ...ticketsT
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item })),
-            ...ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+            ...ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" }))
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);
     };
 
     const handleDeleteTickets = (indexToDelete) => {
-        console.log("Show Index Tickets : ",indexToDelete);
+        console.log("Show Index Tickets : ", indexToDelete);
         // setEditableTickets((prev) => {
         //     const newOrder = {};
         //     let newIndex = 0;
@@ -762,7 +849,7 @@ const UpdateTrip = (props) => {
     };
 
     const handleDeleteOrder = (indexToDelete) => {
-        console.log("Show Index Order : ",indexToDelete);
+        console.log("Show Index Order : ", indexToDelete);
         // setEditableOrders((prev) => {
         //     const newOrder = {};
         //     let newIndex = 0;
@@ -815,12 +902,9 @@ const UpdateTrip = (props) => {
     };
 
     const handleChangeStatus = () => {
-        if (registrationTruck) {
-            registrationTruck.map((row) => (
-                row.Driver === trip.Driver && row.RegHead === trip.Registration ?
-                    database
+            database
                         .ref("truck/registration/")
-                        .child(Number(row.id) - 1)
+                        .child(Number(registration.split(":")[2]) - 1)
                         .update({
                             Status: "ว่าง"
                         })
@@ -833,9 +917,6 @@ const UpdateTrip = (props) => {
                             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                             console.error("Error pushing data:", error);
                         })
-                    :
-                    ""
-            ))
 
             database
                 .ref("trip/")
@@ -852,7 +933,43 @@ const UpdateTrip = (props) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                     console.error("Error pushing data:", error);
                 })
+    }
+
+    const handleRegistration = (event,weight) => {
+        const registrationValue = event;
+        setRegistration(registrationValue);
+        setWeightTrucks(weight);
+        console.log("show registration : ",registrationValue);
+
+        if (Object.keys(editableTickets).length > 0) {
+            const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+        
+            const updatedTicketsArray = Object.values(editableTickets).map((item) => ({
+                ...item,
+                Registration: registration,
+                Driver: driver,
+            }));
+        
+            // ถ้าคุณต้องการ set เป็น array:
+            setEditableTickets(updatedTicketsArray);
         }
+
+    // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
+    if (Object.keys(editableOrders).length > 0) {
+        const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+        const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+    
+        const updatedOrdersArray = Object.values(editableOrders).map((item) => ({
+            ...item,
+            Registration: registration,
+            Driver: driver,
+        }));
+    
+        // ถ้าคุณต้องการ set เป็น array:
+        setEditableOrders(updatedOrdersArray);
+    }
+
     }
 
     console.log("Updated Tickets : ", editableTickets);
@@ -955,25 +1072,31 @@ const UpdateTrip = (props) => {
                                                         <Autocomplete
                                                             id="autocomplete-registration-1"
                                                             options={registrationTruck}
-                                                            getOptionLabel={(option) =>
-                                                                option.Driver !== "ไม่มี" &&
-                                                                `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (รถใหญ่)`
-                                                            }
-                                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
-                                                            value={registration ? registrationTruck.find(item => `${item.Driver}:${item.id}:${item.RegHead}` === registration) : null}
+                                                            getOptionLabel={(option) => {
+                                                                if (option.Driver === "ไม่มี" && option.Status === "ว่าง") return "";
+
+                                                                const driverName = option.Driver?.split(":")[1] ?? option.Driver ?? "";
+                                                                const regHead = option.RegHead ?? "";
+                                                                const regTail = option.RegTail ?? "";
+
+                                                                return `${driverName} : ${regHead}/${regTail} (รถใหญ่)`;
+                                                            }}
+                                                            value={registrationTruck.find(
+                                                                (d) => `${d.Driver}:${d.id}:${d.RegHead}` === registration
+                                                            ) || null}
                                                             onChange={(event, newValue) => {
                                                                 if (newValue) {
                                                                     const value = `${newValue.Driver}:${newValue.id}:${newValue.RegHead}`;
-                                                                    console.log("Truck : ",value);
-                                                                    setRegistration(value);
+                                                                    console.log("Truck : ", value);
+                                                                    handleRegistration(value,newValue.TotalWeight)
                                                                 } else {
-                                                                    setRegistration("0:0:0");
+                                                                    setRegistration("0:0:0:0");
                                                                 }
                                                             }}
                                                             renderInput={(params) => (
                                                                 <TextField
                                                                     {...params}
-                                                                    label={!registration || registration === "0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                                    label={!registration || registration === "0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
                                                                     variant="outlined"
                                                                     size="small"
                                                                     sx={{
@@ -986,7 +1109,7 @@ const UpdateTrip = (props) => {
                                                             renderOption={(props, option) => (
                                                                 <li {...props}>
                                                                     {
-                                                                        option.Driver !== "ไม่มี" &&
+                                                                        option.Driver !== "ไม่มี" && option.Status === "ว่าง" &&
                                                                         <Typography fontSize="14px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail} (รถใหญ่)`}</Typography>
                                                                     }
                                                                 </li>
@@ -999,7 +1122,22 @@ const UpdateTrip = (props) => {
                                         :
                                         <>
                                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
-                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver + " / " + trip.Registration}</Typography>
+                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
+                                                {
+                                                    trip.Driver !== undefined &&
+                                                    trip.Driver.split(":")[1] !== undefined ?
+                                                        trip.Driver.split(":")[1]
+                                                        :
+                                                        trip.Driver
+                                                }/
+                                                {
+                                                    trip.Registration !== undefined &&
+                                                    trip.Registration.split(":")[1] !== undefined ?
+                                                        trip.Registration.split(":")[1]
+                                                        :
+                                                        trip.Registration
+                                                }
+                                            </Typography>
                                         </>
                                 }
                             </Grid>
@@ -1193,9 +1331,9 @@ const UpdateTrip = (props) => {
                                                                         //     return row.TicketName;
                                                                         // })()
                                                                         row.TicketName.split(":")[1] !== undefined ?
-                                                                        row.TicketName.split(":")[1]
-                                                                        :
-                                                                        row.TicketName
+                                                                            row.TicketName.split(":")[1]
+                                                                            :
+                                                                            row.TicketName
 
                                                                     }
                                                                 </Typography>
@@ -1339,14 +1477,14 @@ const UpdateTrip = (props) => {
                                                             </TableCell>
                                                         ))}
                                                         {
-                                                            editMode ? 
-                                                            <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
-                                                                <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }} 
-                                                                onClick={() => handleDeleteTickets(rowIdx)}
-                                                                >ยกเลิก</Button>
-                                                            </TableCell>
-                                                            :
-                                                            <TableCell width={60} />
+                                                            editMode ?
+                                                                <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
+                                                                    <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }}
+                                                                        onClick={() => handleDeleteTickets(rowIdx)}
+                                                                    >ยกเลิก</Button>
+                                                                </TableCell>
+                                                                :
+                                                                <TableCell width={60} />
 
                                                         }
                                                     </TableRow>
@@ -1544,7 +1682,7 @@ const UpdateTrip = (props) => {
                                             value={new Intl.NumberFormat("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
-                                            }).format(parseFloat(trip.WeightTruck))}
+                                            }).format(parseFloat(weightTrucks))}
                                         />
                                     </Paper>
                                 </Grid>
@@ -1609,7 +1747,22 @@ const UpdateTrip = (props) => {
                                             />
                                         </Paper>
                                         :
-                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน : {trip.Driver + " / " + trip.Registration}</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
+                                            {
+                                                    trip.Driver !== undefined &&
+                                                    trip.Driver.split(":")[1] !== undefined ?
+                                                        trip.Driver.split(":")[1]
+                                                        :
+                                                        trip.Driver
+                                                }/
+                                                {
+                                                    trip.Registration !== undefined &&
+                                                    trip.Registration.split(":")[1] !== undefined ?
+                                                        trip.Registration.split(":")[1]
+                                                        :
+                                                        trip.Registration
+                                                }
+                                        </Typography>
                                 }
                             </Grid>
                             {
@@ -1765,9 +1918,9 @@ const UpdateTrip = (props) => {
                                                                     //     return row.TicketName;
                                                                     // })()
                                                                     row.TicketName.split(":")[1] !== undefined ?
-                                                                    row.TicketName.split(":")[1]
-                                                                    :
-                                                                    row.TicketName
+                                                                        row.TicketName.split(":")[1]
+                                                                        :
+                                                                        row.TicketName
                                                                 }
                                                             </Typography>
                                                         </TableCell>
@@ -1841,14 +1994,14 @@ const UpdateTrip = (props) => {
                                                             </TableCell>
                                                         ))}
                                                         {
-                                                            editMode ? 
-                                                            <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
-                                                                <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }} 
-                                                                onClick={() => handleDeleteOrder(rowIdx)}
-                                                                >ยกเลิก</Button>
-                                                            </TableCell>
-                                                            :
-                                                            <TableCell width={60} />
+                                                            editMode ?
+                                                                <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
+                                                                    <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }}
+                                                                        onClick={() => handleDeleteOrder(rowIdx)}
+                                                                    >ยกเลิก</Button>
+                                                                </TableCell>
+                                                                :
+                                                                <TableCell width={60} />
 
                                                         }
                                                     </TableRow>

@@ -82,7 +82,21 @@ const TripsDetail = (props) => {
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateDelivery}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateReceive}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Depot.split(":")[0]}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.Driver}/{trips.Registration}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                    {
+                        trips.Driver.split(":")[1] !== undefined ?
+                        trips.Driver.split(":")[1]
+                        :
+                        trips.Driver
+                    }/
+                    {
+                        trips.Registration.split(":")[1] !== undefined ?
+                        trips.Registration.split(":")[1]
+                        :
+                        trips.Registration
+                    }
+                    {/* {trips.Driver}/{trips.Registration} */}
+                </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     {
                         trips.Order1 === undefined ?
