@@ -79,7 +79,7 @@ const InsertTrips = () => {
         document.body.appendChild(script);
     }, []);
 
-    console.log("Registration : ",registration);
+    console.log("Registration : ", registration);
 
     // const handleSaveAsImage = async () => {
     //     setEditMode(false); // เปลี่ยนเป็นโหมดแสดงผลแบบ Typography
@@ -403,6 +403,14 @@ const InsertTrips = () => {
 
     console.log("Order : ", orders);
 
+    const [isFocused, setIsFocused] = useState(false);
+    
+        const formatNumber = (value) => {
+            const number = parseInt(value, 10);
+            if (isNaN(number)) return "";
+            return number.toLocaleString(); // => 3000 -> "3,000"
+        };
+
     const [ordersTickets, setOrdersTickets] = React.useState({});
     const [selling, setSelling] = React.useState({});
     const [volumeT, setVolumeT] = React.useState({});
@@ -413,8 +421,8 @@ const InsertTrips = () => {
     const [weightL, setWeightL] = React.useState(0);
     const [costTrip, setCostTrip] = React.useState(0);
 
-    console.log("ข้อมูลตั๋ว : ",Object.values(ordersTickets));
-    console.log("ข้อมูลลูกค้า : ",Object.values(selling));
+    console.log("ข้อมูลตั๋ว : ", Object.values(ordersTickets));
+    console.log("ข้อมูลลูกค้า : ", Object.values(selling));
 
     const handlePost = (event) => {
         const ticketValue = event.target.value;
@@ -883,7 +891,7 @@ const InsertTrips = () => {
             CostTrip: costTrip,
             DateReceive: dayjs(selectedDateReceive).format("DD/MM/YYYY"),
             DateDelivery: dayjs(selectedDateDelivery).format("DD/MM/YYYY"),
-            Driver: registration.split(":")[2]+" / "+registration.split(":")[1],
+            Driver: registration.split(":")[2] + " / " + registration.split(":")[1],
             Depot: depots,
             WeightHigh: weightH,
             WeightLow: weightL,
@@ -1077,29 +1085,6 @@ const InsertTrips = () => {
         }
     }
 
-    // const handleCustomer = () => {
-    //     database
-    //         .ref("order/")
-    //         .child(order.length)
-    //         .update({
-    //             id: order.length + 1,
-    //             DateReceive: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
-    //             Registration: registration.split(":")[1],
-    //             Driver: registration.split(":")[2],
-    //             Customer: customers.split(":")[1],
-    //             TicketName: customers,
-    //             Trip: trip.length
-    //         })
-    //         .then(() => {
-    //             ShowSuccess("เพิ่มออเดอร์เรียบร้อย");
-
-    //         })
-    //         .catch((error) => {
-    //             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-    //             console.error("Error pushing data:", error);
-    //         });
-    // };
-
     const handleTotalWeight = (newHeavyOil, newWeight) => {
         const total =
             parseFloat(newHeavyOil || 0) +
@@ -1110,10 +1095,10 @@ const InsertTrips = () => {
     React.useEffect(() => {
         const currentRow = smallTruck.find(item =>
             `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration)
-        console.log("Current : ",currentRow);
+        console.log("Current : ", currentRow);
 
         if (currentRow) {
-            setWeight(currentRow.Weight || 0); 
+            setWeight(currentRow.Weight || 0);
         }
     }, [registration, smallTruck]);
 
@@ -1162,50 +1147,6 @@ const InsertTrips = () => {
         return customers.filter((item) => item.id || item.TicketsCode);
     };
 
-    // const getTickets = () => {
-    //     if (codeCustomer === "") {
-    //         // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
-    //         return [
-    //             ...ticketsPS.map((item) => ({ ...item, type: item.Code })),
-    //             ...ticketsT
-    //                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-    //                 .map((item) => ({ ...item, type: "T" })),
-    //             ...ticketsB.map((item) => ({ ...item, type: "A" })),
-    //         ];
-    //     } else if (codeCustomer === "PS") {
-    //         return ticketsPS.map((item) => ({ ...item, type: item.Code }));
-    //     } else if (codeCustomer === "T") {
-    //         return ticketsT
-    //             .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-    //             .map((item) => ({ ...item, type: "T" }));
-    //     } else if (codeCustomer === "A") {
-    //         return ticketsB.map((item) => ({ ...item, type: "A" }));
-    //     }
-    //     return []; // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
-    // };
-
-    // const getCustomers = () => {
-    //     if (codeCustomer === "") {
-    //         // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
-    //         return [
-    //             ...ticketsPS.map((item) => ({ ...item, type: "PS" })),
-    //             ...ticketsT
-    //                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
-    //                 .map((item) => ({ ...item, type: "T" })),
-    //             ...ticketsB.map((item) => ({ ...item, type: "A" })),
-    //         ];
-    //     } else if (codeCustomer === "PS") {
-    //         return ticketsPS.map((item) => ({ ...item, type: "PS" }));
-    //     } else if (codeCustomer === "T") {
-    //         return ticketsT
-    //             .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
-    //             .map((item) => ({ ...item, type: "T" }));
-    //     } else if (codeCustomer === "A") {
-    //         return ticketsB.map((item) => ({ ...item, type: "A" }));
-    //     }
-    //     return []; // ถ้าไม่มีการกำหนด ให้คืนค่า empty array
-    // };
-
     let G95 = (Number(volumeT.G95) - Number(volumeS.G95));
     let B95 = (Number(volumeT.B95) - Number(volumeS.B95));
     let B7 = (Number(volumeT.B7) - Number(volumeS.B7));
@@ -1218,7 +1159,7 @@ const InsertTrips = () => {
     const fuelTypes = ["G95", "B95", "B7", "G91", "E20", "PWD"];
     const totalVolume = fuelTypes.reduce((sum, type) => sum + (Number(volumeT[type]) - Number(volumeS[type])), 0) || 0;
 
-    const getBackgroundColor = (value) => 
+    const getBackgroundColor = (value) =>
         value < 0 ? "red" : value > 0 ? "yellow" : "lightgray";
 
     console.log("G95", G95);
@@ -1228,9 +1169,9 @@ const InsertTrips = () => {
     console.log("E20", E20);
     console.log("PWD", PWD);
 
-    console.log("Check : ",isNegative);
+    console.log("Check : ", isNegative);
 
-    console.log("Show Registration : ",smallTruck.find(item =>`${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration && `${item.Driver}:${item.Registration}:(${item.type})`))
+    console.log("Show Registration : ", smallTruck.find(item => `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration && `${item.Driver}:${item.Registration}:(${item.type})`))
 
     return (
         <React.Fragment>
@@ -1265,7 +1206,7 @@ const InsertTrips = () => {
                             <Grid item sm={1} xs={4} textAlign="left">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                             </Grid>
-                            <Grid item sm={2} xs={8} textAlign="right">
+                            <Grid item sm={3} xs={8} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -1301,7 +1242,7 @@ const InsertTrips = () => {
 
                                 </Box>
                             </Grid>
-                            <Grid item sm={6} xs={12}>
+                            <Grid item sm={8} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
@@ -1310,7 +1251,7 @@ const InsertTrips = () => {
                                             id="autocomplete-registration-1"
                                             options={smallTruck}
                                             getOptionLabel={(option) =>
-                                                    `${option.Driver ? option.Driver : ""} : ${option.Registration ? option.Registration : ""} (${option.type ? option.type : ""})`
+                                                `${option.Driver ? option.Driver : ""} : ${option.Registration ? option.Registration : ""} (${option.type ? option.type : ""})`
                                             }
                                             isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
                                             value={registration ? smallTruck.find(item => `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration) : null}
@@ -1346,49 +1287,9 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item sm={3} xs={12} display="flex" alignItems="center" justifyContent="center">
-                                <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} fontWeight="bold" gutterBottom>คลัง</Typography>
-                                <Paper sx={{ width: "100%" }}
-                                    component="form">
-                                    <Autocomplete
-                                        id="depot-autocomplete"
-                                        options={depot}
-                                        getOptionLabel={(option) => `${option.Name}`}
-                                        value={depot.find((d) => d.Name + ":" + d.Zone === depots) || null}
-                                        onChange={(event, newValue) => {
-                                            setDepots(newValue ? `${newValue.Name}:${newValue.Zone}` : '')
-                                            updateRatesByDepot(newValue.Zone);
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label={depots === "" ? "กรุณาเลือกคลัง" : ""} // เปลี่ยน label กลับหากไม่เลือก
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{
-                                                    "& .MuiOutlinedInput-root": { height: "30px" },
-                                                    "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
-                                                }}
-                                            />
-                                        )}
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": { height: "30px" },
-                                            "& .MuiInputBase-input": {
-                                                fontSize: "14px",
-                                                padding: "2px 6px",
-                                            },
-                                        }}
-                                        renderOption={(props, option) => (
-                                            <li {...props}>
-                                                <Typography fontSize="14px">{option.Name}</Typography>
-                                            </li>
-                                        )}
-                                    />
-                                </Paper>
-                            </Grid>
                         </Grid>
                         <Paper
-                            sx={{ p: 1, backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", marginBottom: 1 }}
+                            sx={{ p: 1, backgroundColor: "lightgray", marginBottom: 1 }}
                         >
                             <Paper
                                 className="custom-scrollbar"
@@ -1416,17 +1317,15 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
-                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
-                                                <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
-                                                <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
-                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} />
+                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px" }}>ลำดับ</TablecellTickets>
+                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px" }}>ตั๋ว</TablecellTickets>
+                                                <TableCellG95 width={70} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
+                                                <TableCellB95 width={70} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
+                                                <TableCellB7 width={70} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
+                                                <TableCellG91 width={70} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
+                                                <TableCellE20 width={70} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
+                                                <TableCellPWD width={70} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
+                                                <TablecellTickets width={Object.keys(ordersTickets).length > 6 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white" }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -1481,15 +1380,15 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellTickets width={650} sx={{ textAlign: "center",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
+                                                <TablecellTickets width={400} sx={{ textAlign: "center" }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
                                                 </TablecellTickets>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                <TableCellG95 width={70} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1505,11 +1404,10 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={volumeT.G95 || 0}
+                                                                    value={formatNumber(volumeT.G95 || 0)}
                                                                 // value={volumeG95}
                                                                 />
                                                             </Paper>
@@ -1517,12 +1415,12 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G95 || 0}</Typography>
                                                     }
                                                 </TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                <TableCellB95 width={70} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1538,11 +1436,10 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={volumeT.B95 || 0}
+                                                                    value={formatNumber(volumeT.B95 || 0)}
                                                                 // value={volumeG95}
                                                                 />
                                                             </Paper>
@@ -1550,12 +1447,12 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.B95 || 0}</Typography>
                                                     }
                                                 </TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                <TableCellB7 width={70} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1571,11 +1468,10 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={volumeT.B7 || 0}
+                                                                    value={formatNumber(volumeT.B7 || 0)}
                                                                 // value={volumeB7}
                                                                 />
                                                             </Paper>
@@ -1583,12 +1479,12 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.B7 || 0}</Typography>
                                                     }
                                                 </TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                <TableCellG91 width={70} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1604,11 +1500,10 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={volumeT.G91 || 0}
+                                                                    value={formatNumber(volumeT.G91 || 0)}
                                                                 // value={volumeG91}
                                                                 />
                                                             </Paper>
@@ -1616,12 +1511,12 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G91 || 0}</Typography>
                                                     }
                                                 </TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                <TableCellE20 width={70} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1637,11 +1532,10 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={volumeT.E20 || 0}
+                                                                    value={formatNumber(volumeT.E20 || 0)}
                                                                 // value={volumeE20}
                                                                 />
                                                             </Paper>
@@ -1649,12 +1543,12 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.E20 || 0}</Typography>
                                                     }
                                                 </TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
+                                                <TableCellPWD width={70} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1670,11 +1564,10 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={volumeT.PWD || 0}
+                                                                    value={formatNumber(volumeT.PWD || 0)}
                                                                 // value={volumePWD}
                                                                 />
                                                             </Paper>
@@ -1682,12 +1575,12 @@ const InsertTrips = () => {
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.PWD || 0}</Typography>
                                                     }
                                                 </TableCellPWD>
-                                                <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white",backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} >
+                                                <TablecellTickets width={Object.keys(ordersTickets).length > 6 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} >
                                                     <Box display="flex" justifyContent="center" alignItems="center">
                                                         {/* <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", color: "white", marginRight: 1 }} gutterBottom>ต้นทุนรวม</Typography>
                                                         <Paper component="form">
                                                             <TextField size="small" fullWidth
-                                                                type="number"
+                                                                
                                                                 InputLabelProps={{
                                                                     sx: {
                                                                         fontSize: '14px'
@@ -1707,7 +1600,7 @@ const InsertTrips = () => {
                                                             editMode ?
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     <TextField size="small" fullWidth
-                                                                        type="number"
+                                                                        
                                                                         InputLabelProps={{
                                                                             sx: {
                                                                                 fontSize: '12px',
@@ -1724,10 +1617,10 @@ const InsertTrips = () => {
                                                                                 fontWeight: 'bold',
                                                                                 padding: '2px 6px', // ปรับ padding ภายใน input
                                                                                 textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                                paddingLeft: 2
+                                                                                paddingLeft: 0.5
                                                                             },
                                                                         }}
-                                                                        value={(volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD) || 0}
+                                                                        value={formatNumber((volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD) || 0)}
 
                                                                     // value={volumeG95}
                                                                     />
@@ -1785,10 +1678,10 @@ const InsertTrips = () => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={2} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำมันหนัก</Typography>
+                                <Grid item sm={6} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>หมายเหตุ</Typography>
                                     <Paper
-                                        component="form">
+                                        component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
@@ -1804,82 +1697,12 @@ const InsertTrips = () => {
                                                 },
                                                 borderRadius: 10
                                             }}
-                                            value={new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format(parseFloat(weightH))}
                                         // InputProps={{
                                         //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
                                         // }}
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={2} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำมันเบา</Typography>
-                                    <Paper
-                                        component="form">
-                                        <TextField size="small" fullWidth
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: '30px', // ปรับความสูงของ TextField
-                                                    display: 'flex', // ใช้ flexbox
-                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                    fontWeight: 'bold',
-                                                    padding: '1px 4px', // ปรับ padding ภายใน input
-                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                },
-                                                borderRadius: 10
-                                            }}
-                                            value={new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format(parseFloat(weightL))}
-                                        // InputProps={{
-                                        //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
-                                        // }}
-                                        />
-                                    </Paper>
-                                </Grid>
-                                {/* {
-                                regHead.map((row) => (
-                                    row.RegHead === registration.split(":")[1] ? */}
-                                <Grid item sm={2} xs={6} display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำหนักรถ</Typography>
-                                    <Paper
-                                        component="form">
-                                        <TextField size="small" fullWidth
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: '30px', // ปรับความสูงของ TextField
-                                                    display: 'flex', // ใช้ flexbox
-                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                    fontWeight: 'bold',
-                                                    padding: '1px 4px', // ปรับ padding ภายใน input
-                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                },
-                                                borderRadius: 10
-                                            }}
-                                            value={new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format(parseFloat(weight))}
-                                            onChange={handleTotalWeight}
-                                        // InputProps={{
-                                        //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
-                                        // }}
-                                        />
-                                    </Paper>
-                                </Grid>
-                                {/* :
-                                        null
-                                ))
-                            } */}
                             </Grid>
                         </Paper>
                         {/* {
@@ -1896,7 +1719,7 @@ const InsertTrips = () => {
                             <Grid item sm={1} xs={4} textAlign="left">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.info.main }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                             </Grid>
-                            <Grid item sm={2} xs={8} textAlign="right">
+                            <Grid item sm={3} xs={8} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่ส่ง</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -1932,7 +1755,7 @@ const InsertTrips = () => {
 
                                 </Box>
                             </Grid>
-                            <Grid item sm={6} xs={12}>
+                            <Grid item sm={8} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
@@ -1952,74 +1775,6 @@ const InsertTrips = () => {
                                                 );
                                                 return selectedItem && `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.Registration ? selectedItem.Registration : ""} (${selectedItem.type ? selectedItem.type : ""})`;
                                             })()}
-                                        />
-                                        {/* <Autocomplete
-                                            id="autocomplete-registration-2"
-                                            options={regHead}
-                                            getOptionLabel={(option) =>
-                                                `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""}`
-                                            }
-                                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                                            value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}` === registration) : null}
-                                            onChange={(event, newValue) => {
-                                                if (newValue) {
-                                                    const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}`;
-                                                    setRegistration(value);
-                                                } else {
-                                                    setRegistration(null);
-                                                }
-                                            }}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label={!registration ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
-                                                    variant="outlined"
-                                                    size="small"
-                                                    sx={{
-                                                        "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "3px 8px" },
-                                                    }}
-                                                />
-                                            )}
-                                            fullWidth
-                                            renderOption={(props, option) => (
-                                                <li {...props}>
-                                                    <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead}/${option.RegTail}`}</Typography>
-                                                </li>
-                                            )}
-                                            disabled={!showTickers}
-                                        /> */}
-                                    </Paper>
-                                </Box>
-                            </Grid>
-                            <Grid item sm={3} xs={12}>
-                                <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
-                                    <Paper
-                                        component="form" sx={{ width: "100%" }}>
-                                        <TextField size="small" fullWidth
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: '30px', // ปรับความสูงของ TextField
-                                                    display: 'flex', // ใช้ flexbox
-                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                    fontWeight: 'bold',
-                                                    padding: '1px 4px', // ปรับ padding ภายใน input
-                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                    paddingLeft: 2
-                                                },
-                                                borderRadius: 10
-                                            }}
-                                            value={new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format((parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) || 0)}
-                                        // InputProps={{
-                                        //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
-                                        // }}
                                         />
                                     </Paper>
                                 </Box>
@@ -2053,34 +1808,37 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     ลำดับ
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px" }}>
-                                                    ลูกค้า
+                                                <TablecellCustomers width={240} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
+                                                    รายการส่ง
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     ค่าบรรทุก
                                                 </TablecellCustomers>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
+                                                    Credit
+                                                </TablecellCustomers>
+                                                <TableCellG95 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     G95
                                                 </TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellB95 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     B95
                                                 </TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellB7 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     B7(D)
                                                 </TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellG91 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     G91
                                                 </TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellE20 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     E20
                                                 </TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellPWD width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     PWD
                                                 </TableCellPWD>
-                                                <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} />
+                                                <TablecellCustomers width={Object.keys(selling).length > 6 ? 90 : 80} sx={{ textAlign: "center" }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -2137,33 +1895,33 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main, }}>
-                                                <TablecellCustomers width={500} sx={{ textAlign: "center" }}>
+                                                <TablecellCustomers width={400} sx={{ textAlign: "center" }}>
                                                     รวม
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    {volumeS.G95 || 0}
+                                                <TablecellCustomers width={70} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                    {formatNumber(volumeS.G95 || 0)}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    {volumeS.B95 || 0}
+                                                <TablecellCustomers width={70} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                    {formatNumber(volumeS.B95 || 0)}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    {volumeS.B7 || 0}
+                                                <TablecellCustomers width={70} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                    {formatNumber(volumeS.B7 || 0)}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    {volumeS.G91 || 0}
+                                                <TablecellCustomers width={70} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                    {formatNumber(volumeS.G91 || 0)}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    {volumeS.E20 || 0}
+                                                <TablecellCustomers width={70} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                    {formatNumber(volumeS.E20 || 0)}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
-                                                    {volumeS.PWD || 0}
+                                                <TablecellCustomers width={70} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                    {formatNumber(volumeS.PWD || 0)}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={Object.keys(selling).length > 6 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -2179,16 +1937,15 @@ const InsertTrips = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}
+                                                                    value={formatNumber((volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0)}
                                                                 // value={volumeG95}
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{formatNumber((volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0)}</Typography>
                                                     }
                                                 </TablecellCustomers>
                                             </TableRow>
@@ -2211,36 +1968,36 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={400} sx={{ textAlign: "center", height: "35px" }}>
                                                     คงเหลือ
                                                 </TablecellCustomers>
                                                 {
                                                     fuelTypes.map((type) => {
                                                         const value = Number(volumeT[type]) - Number(volumeS[type]);
                                                         return (
-                                                          <TablecellCustomers
-                                                            key={type}
-                                                            width={60}
-                                                            sx={{
-                                                              textAlign: "center",
-                                                              color: "black",
-                                                              height: "35px",
-                                                              fontWeight: "bold",
-                                                              backgroundColor: getBackgroundColor(value),
-                                                              borderLeft: "2px solid white",
-                                                            }}
-                                                          >
-                                                            {value || 0}
-                                                          </TablecellCustomers>
+                                                            <TablecellCustomers
+                                                                key={type}
+                                                                width={70}
+                                                                sx={{
+                                                                    textAlign: "center",
+                                                                    color: "black",
+                                                                    height: "35px",
+                                                                    fontWeight: "bold",
+                                                                    backgroundColor: getBackgroundColor(value),
+                                                                    borderLeft: "2px solid white",
+                                                                }}
+                                                            >
+                                                                {formatNumber(value || 0)}
+                                                            </TablecellCustomers>
                                                         );
-                                                      })
+                                                    })
                                                 }
-                                                <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={Object.keys(selling).length > 6 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
                                                                 <TextField size="small" fullWidth
-                                                                    type="number"
+                                                                    
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -2256,17 +2013,16 @@ const InsertTrips = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
+                                                                            textAlign: 'center', 
                                                                         },
                                                                     }}
-                                                                    value={totalVolume}
+                                                                    value={formatNumber(totalVolume)}
                                                                 // value={volumeG95}
                                                                 />
                                                             </Paper>
                                                             :
                                                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>
-                                                                {totalVolume}
+                                                                {formatNumber(totalVolume)}
                                                             </Typography>
                                                     }
                                                 </TablecellCustomers>
@@ -2318,44 +2074,6 @@ const InsertTrips = () => {
                                                     disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
                                                 />
                                             </Grid>
-
-                                            {/* <Grid item sm={1.5} xs={2}>
-                                            <Paper
-                                                component="form">
-                                                <TextField size="small" fullWidth sx={{ borderRadius: 10 }} value={codes} onChange={(e) => setCodes(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item sm={8} xs={7}>
-                                            <Select
-                                                id="demo-simple-select"
-                                                value={customers}
-                                                size="small"
-                                                sx={{ textAlign: "left" }}
-                                                onChange={(event) => handlePostSelling(event)}
-                                                fullWidth
-                                            >
-                                                <MenuItem value={"0:0"}>
-                                                    เลือกลูกค้าที่ต้องการเพิ่ม
-                                                </MenuItem>
-                                                {getCustomers().map((row) => {
-                                                    // ตรวจสอบประเภทของข้อมูลเพื่อกำหนด prefix ที่เหมาะสม
-                                                    const prefix = row.type;
-                                                    const id = row.id || row.TicketsCode;
-                                                    const name = row.Name || row.TicketsName;
-
-                                                    return (
-                                                        <MenuItem key={id} value={`${prefix}:${id}:${name}`}>
-                                                            {`${prefix}:${id}:${name}`}
-                                                        </MenuItem>
-                                                    );
-                                                })}
-                                            </Select>
-                                        </Grid>
-                                        <Grid item sm={2.5} xs={3} display="flex" alignItems="center" paddingLeft={0.5} paddingRight={0.5}>
-                                            {
-                                                (volumeG95 + volumeG91 + volumeB7 + volumeB95 + volumeE20 + volumePWD) !== 0 && <Button variant="contained" color="info" fullWidth onClick={handleCustomer}>เพิ่มออเดอร์</Button>
-                                            }
-                                        </Grid> */}
                                         </Grid>
                                     </Paper>
                                 </Grid>
@@ -2405,33 +2123,19 @@ const InsertTrips = () => {
                         </Paper>
                     </Box>
                     {
-                        (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) <= 50300 &&
                         !isNegative && ( // เพิ่มเงื่อนไขเช็คว่าห้ามมีค่าติดลบ
                             <>
-                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                                <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
-                                <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
-                            </Box>
-                            <Box textAlign="center" marginTop={1}>
-                                <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
-                            </Box>
+                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                                    <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
+                                    <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
+                                </Box>
+                                <Box textAlign="center" marginTop={1}>
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                                </Box>
                             </>
                         )
-                        }
+                    }
                 </DialogContent>
-                {/* <DialogActions
-                    sx={{
-                        textAlign: "center", // ตั้งค่ากลาง
-                        borderTop: "2px solid " + theme.palette.panda.dark,
-                        display: "flex", // ใช้ Flexbox
-                        justifyContent: "center", // จัดตำแหน่งปุ่มให้อยู่กึ่งกลาง
-                    }}
-                >
-                    <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
-                    <Button onClick={handleCancle} variant="contained" color="error" size="small">ยกเลิก</Button>
-                </DialogActions> */}
-
-
             </Dialog>
         </React.Fragment>
 

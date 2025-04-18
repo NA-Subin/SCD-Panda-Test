@@ -5,6 +5,7 @@ import {
   Container,
   Divider,
   Grid,
+  IconButton,
   InputAdornment,
   Paper,
   Popover,
@@ -21,6 +22,7 @@ import {
 import theme from "../../theme/theme";
 import { RateOils, TablecellHeader } from "../../theme/style";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import ClearIcon from '@mui/icons-material/Clear';
 import Cookies from "js-cookie";
 import Logo from "../../theme/img/logoPanda.jpg";
 import { borderRadius, keyframes, width } from "@mui/system";
@@ -98,6 +100,8 @@ const Dashboard = () => {
   const monthOrders = {};
   const monthTickets = {};
   const monthTrips = {};
+  const monthOrderCancel = {};
+  const monthTicketCancel = {};
   const monthStats = {};
 
   const startOfMonth = newValue.startOf('month');  // วันเริ่มต้นของเดือนที่เลือก
@@ -130,25 +134,57 @@ const Dashboard = () => {
     }
   });
 
+  ticket.forEach((t) => {
+    const [day, monthStr] = t.Date.split('/');
+    const monthIndex = parseInt(monthStr, 10) - 1;
+    const monthName = months[monthIndex];
+    const orderDate = dayjs(t.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
+
+    // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
+    if (allDatesInMonth.includes(orderDate.format('DD/MM/YYYY'))) {
+      const dayOnly = orderDate.format('DD'); // ใช้เพียงแค่วันที่
+      if (!monthTickets[dayOnly]) {
+        monthTickets[dayOnly] = { date: dayOnly, ticket: 0 };
+      }
+      monthTickets[dayOnly].ticket += 1;
+    }
+  });
+
+  orders.forEach((o) => {
+    if (o.Trip === "ยกเลิก") {
+      const [day, monthStr] = o.Date.split('/');
+      const monthIndex = parseInt(monthStr, 10) - 1;
+      const monthName = months[monthIndex];
+      const ordersDate = dayjs(o.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
+
+      // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
+      if (allDatesInMonth.includes(ordersDate.format('DD/MM/YYYY'))) {
+        const dayOnly = ordersDate.format('DD'); // ใช้เพียงแค่วันที่
+        if (!monthOrderCancel[dayOnly]) {
+          monthOrderCancel[dayOnly] = { date: dayOnly, ordersCancel: 0 };
+        }
+        monthOrderCancel[dayOnly].ordersCancel += 1;
+      }
+    }
+});
+
   // Tickets
   ticket.forEach((t) => {
-    trips.forEach((r) => {
-      if (t.Trip === (r.id - 1)) {
-        const [day, monthStr] = r.DateReceive.split('/');
+      if (t.Trip === "ยกเลิก") {
+        const [day, monthStr] = t.Date.split('/');
         const monthIndex = parseInt(monthStr, 10) - 1;
         const monthName = months[monthIndex];
-        const ticketDate = dayjs(r.DateReceive, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
+        const ticketDate = dayjs(t.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
 
         // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
         if (allDatesInMonth.includes(ticketDate.format('DD/MM/YYYY'))) {
           const dayOnly = ticketDate.format('DD'); // ใช้เพียงแค่วันที่
-          if (!monthTickets[dayOnly]) {
-            monthTickets[dayOnly] = { date: dayOnly, ticket: 0 };
+          if (!monthTicketCancel[dayOnly]) {
+            monthTicketCancel[dayOnly] = { date: dayOnly, ticketCancel: 0 };
           }
-          monthTickets[dayOnly].ticket += 1;
+          monthTicketCancel[dayOnly].ticketCancel += 1;
         }
       }
-    });
   });
 
   // Trips
@@ -175,7 +211,9 @@ const Dashboard = () => {
       date: day,  // แสดงแค่วัน
       orders: monthOrders[day]?.orders || 0,
       ticket: monthTickets[day]?.ticket || 0,
-      trips: monthTrips[day]?.trips || 0
+      trips: monthTrips[day]?.trips || 0,
+      ordersCancel: monthOrderCancel[day]?.ordersCancel || 0,
+      ticketCancel: monthTicketCancel[day]?.ticketCancel || 0
     };
   });
   
@@ -183,6 +221,10 @@ const Dashboard = () => {
     setVolumeAll(fullOrders); // ตั้งค่าข้อมูลที่ใช้แสดง
     setCheckDate(true);
   };  
+
+  const handleClearDate = () => {
+    setCheckDate(false);
+  };
 
   console.log("trip : ", trips.length);
   console.log("orders : ", orders);
@@ -205,6 +247,8 @@ const Dashboard = () => {
   const monthTickets = {};
   const monthTrips = {};
   const monthStats = {};
+  const monthOrderCancel = {};
+  const monthTicketCancel = {};
 
   // Orders
   orders.forEach((o) => {
@@ -219,11 +263,23 @@ const Dashboard = () => {
     monthOrders[monthName].orders += 1;
   });
 
+  orders.forEach((o) => {
+    if(o.Trip === "ยกเลิก"){
+    const [day, monthStr] = o.Date.split('/');
+    const monthIndex = parseInt(monthStr, 10) - 1;
+    const monthName = months[monthIndex];
+
+    if (!monthOrderCancel[monthName]) {
+      monthOrderCancel[monthName] = { month: monthName, ordersCancel: 0 };
+    }
+
+    monthOrderCancel[monthName].ordersCancel += 1;
+  }
+  });
+
   // Tickets
   ticket.forEach((t) => {
-    trips.forEach((r) => {
-      if (t.Trip === (r.id - 1)) {
-        const [day, monthStr] = r.DateReceive.split('/');
+        const [day, monthStr] = t.Date.split('/');
         const monthIndex = parseInt(monthStr, 10) - 1;
         const monthName = months[monthIndex];
 
@@ -232,9 +288,21 @@ const Dashboard = () => {
         }
 
         monthTickets[monthName].ticket += 1;
-      }
-    });
   });
+
+  ticket.forEach((t) => {
+    if(t.Trip === "ยกเลิก"){
+    const [day, monthStr] = t.Date.split('/');
+    const monthIndex = parseInt(monthStr, 10) - 1;
+    const monthName = months[monthIndex];
+
+    if (!monthTicketCancel[monthName]) {
+      monthTicketCancel[monthName] = { month: monthName, ticketCancel: 0 };
+    }
+
+    monthTicketCancel[monthName].ticketCancel += 1;
+  }
+});
 
   trips.forEach((r) => {
     const [day, monthStr] = r.DateStart.split('/');
@@ -254,7 +322,9 @@ const Dashboard = () => {
       month,
       orders: monthOrders[month]?.orders || 0,
       ticket: monthTickets[month]?.ticket || 0,
-      trips: monthTrips[month]?.trips || 0
+      trips: monthTrips[month]?.trips || 0,
+      ordersCancel: monthOrderCancel[month]?.ordersCancel || 0,
+      ticketCancel: monthTicketCancel[month]?.ticketCancel || 0
     };
   });
 
@@ -345,7 +415,7 @@ const Dashboard = () => {
         <Grid item xs={12} sm={12} lg={9.5}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} lg={4}>
-              <Paper sx={{ height: "29vh", borderRadius: 5, backgroundColor: theme.palette.info.light, color: "white", paddingTop: 5 }}>
+              <Paper sx={{ height: "29vh", borderRadius: 5, backgroundColor: theme.palette.info.main, color: "white", paddingTop: 5 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" gutterBottom>
                     จำนวนรถ
@@ -358,7 +428,7 @@ const Dashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={6} lg={4}>
-              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.success.main, borderRadius: 5, color: "white", paddingTop: 5 }}>
+              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.success.dark, borderRadius: 5, color: "white", paddingTop: 5 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" gutterBottom>
                     จำนวนลูกค้า
@@ -371,7 +441,7 @@ const Dashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={6} lg={4}>
-              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.error.light, borderRadius: 5, color: "white", paddingTop: 5 }}>
+              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.error.main, borderRadius: 5, color: "white", paddingTop: 5 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" gutterBottom>
                     จำนวนปั้ม
@@ -384,7 +454,7 @@ const Dashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={6} lg={4}>
-              <Paper sx={{ height: "29vh", borderRadius: 5, backgroundColor: theme.palette.primary.light, color: "white", paddingTop: 5 }}>
+              <Paper sx={{ height: "29vh", borderRadius: 5, backgroundColor: theme.palette.primary.main, color: "white", paddingTop: 5 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" gutterBottom>
                     จำนวนเที่ยววิ่ง
@@ -397,7 +467,7 @@ const Dashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={6} lg={4}>
-              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.success.light, borderRadius: 5, color: "white", paddingTop: 5 }}>
+              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.secondary.main, borderRadius: 5, color: "white", paddingTop: 5 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" gutterBottom>
                     จำนวนรายการสินค้า
@@ -410,7 +480,7 @@ const Dashboard = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={6} lg={4}>
-              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.warning.light, borderRadius: 5, color: "white", paddingTop: 5 }}>
+              <Paper sx={{ height: "29vh", backgroundColor: theme.palette.warning.dark, borderRadius: 5, color: "white", paddingTop: 5 }}>
                 <Box textAlign="center">
                   <Typography variant="h4" gutterBottom>
                     จำนวนรายการตั๋วสินค้า
@@ -532,9 +602,10 @@ const Dashboard = () => {
               }}
             >
               <Grid container spacing={2}>
-                <Grid item xs={1.5} sm={2} lg={2.5} />
-                <Grid item xs={9} sm={8} lg={7}>
-                  <Paper component="form" sx={{ width: "100%" }}>
+                <Grid item xs={1.5} sm={2.5} lg={3.5} />
+                <Grid item xs={9} sm={7} lg={5}>
+                  <Paper component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center",backgroundColor: theme.palette.error.main }}>
+                    <Paper component="form">
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
                         openTo="month"  // เปิดเฉพาะเดือน
@@ -576,9 +647,16 @@ const Dashboard = () => {
                         }}
                       />
                     </LocalizationProvider>
+                    </Paper>
+                    {
+                      checkDate &&
+                      <IconButton onClick={handleClearDate} size="small" sx={{ color: "white" }} >
+                                    <ClearIcon fontSize="small" />
+                                  </IconButton>
+                    }
                   </Paper>
                 </Grid>
-                <Grid item xs={1.5} sm={2} lg={2.5} />
+                <Grid item xs={1.5} sm={2.5} lg={3.5} />
               </Grid>
             </Box>
             <Box
@@ -598,9 +676,11 @@ const Dashboard = () => {
                 dataset={checkDate ? volumeAll : fullOrders}
                 xAxis={[{ scaleType: 'band', dataKey: checkDate ? 'date' : 'month' }]}
                 series={[
-                  { dataKey: 'orders', label: 'จำนวนออร์เดอร์', valueFormatter },
-                  { dataKey: 'ticket', label: 'จำนวนตั๋วน้ำมัน', valueFormatter },
-                  { dataKey: 'trips', label: 'จำนวนเที่ยววิ่ง', valueFormatter },
+                  { dataKey: 'orders', label: 'จำนวนออร์เดอร์', valueFormatter, color: '#1976d2' },
+                  { dataKey: 'ticket', label: 'จำนวนตั๋วน้ำมัน', valueFormatter, color: '#2e7d32' },
+                  { dataKey: 'trips', label: 'จำนวนเที่ยววิ่ง', valueFormatter, color: '#ff9800' },
+                  { dataKey: 'ordersCancel', label: 'จำนวนออเดอร์ที่ยกเลิก', valueFormatter, color: '#d32f2f' },
+                  { dataKey: 'ticketCancel', label: 'จำนวนตั๋วที่ยกเลิก', valueFormatter, color: '#f44336' },
                 ]}
               />
             </Box>

@@ -72,6 +72,9 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import ReplyAllIcon from '@mui/icons-material/ReplyAll';
 import ListIcon from '@mui/icons-material/List';
 import PaidIcon from '@mui/icons-material/Paid';
+import ContactPageIcon from '@mui/icons-material/ContactPage';
+import BadgeIcon from '@mui/icons-material/Badge';
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import Cookies from 'js-cookie';
 const drawerWidth = 200;
 
@@ -203,8 +206,8 @@ export default function Navbar() {
   const [notify, setNotify] = React.useState(false);
   const [activeButton, setActiveButton] = useState(null); // เก็บสถานะของปุ่มที่ถูกคลิก
   const [openData, setOpenData] = useState(false);
-  const [operation, setOperation] = useState(false);
-  const [report, setReport] = useState(false);
+  const [operation, setOperation] = useState(true);
+  const [report, setReport] = useState(true);
 
   console.log("OpenData : ", openData);
 
@@ -408,6 +411,7 @@ export default function Navbar() {
                     { to: "/trips-smalltruck", icon: <ListAltIcon fontSize="medium" /> },
                     { to: "/invoice", icon: <ListItemIcon fontSize="medium" /> },
                     { to: "/report", icon: <ListItemIcon fontSize="medium" /> },
+                    { to: "/close-financial", icon: <ListItemIcon fontSize="medium" /> },
                     { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
                   ].map((item, index) => (
                     <Button
@@ -854,9 +858,12 @@ export default function Navbar() {
               </IconButton>
             </DrawerHeader>
             <Divider />
-            <Box
+            {
+              (openData || operation || report ) && 
+              <>
+              <Box
               sx={{
-                height: shouldDrawerOpen ? 100 : 100,
+                height: shouldDrawerOpen ? 60 : 60,
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -870,46 +877,17 @@ export default function Navbar() {
               >
                 <Avatar
               /*alt={token.split("#")[0]}*/ src="/static/images/avatar/2.jpg"
-                  sx={{ width: shouldDrawerOpen ? 100 : 40, height: shouldDrawerOpen ? 100 : 40 }}
+                  sx={{ width: shouldDrawerOpen ? 60 : 40, height: shouldDrawerOpen ? 60 : 40 }}
                 />
               </StyledBadge>
             </Box>
             {
               shouldDrawerOpen &&
               <Box sx={{ textAlign: "center" }}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>User : {Cookies.get('user')}</Typography>
+                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>User : {Cookies.get('user')}</Typography>
               </Box>
             }
-            {
-              !open ?
-                <Divider sx={{ border: 1, color: theme.palette.primary.contrastText }} />
-                :
-                <Divider sx={{ marginTop: -3, marginBottom: !openData ? 0 : 5 }}>
-                    {
-                      !openData ?
-                        <IconButton
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column", // จัดให้อยู่แนวตั้ง
-                            alignItems: "center", // จัดให้อยู่กึ่งกลางแนวนอน
-                          }}
-                          onClick={() => setOpenData(true)}>
-                          <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" textAlign="center" fontSize="12px" gutterBottom>ข้อมูล</Typography>
-                          <KeyboardArrowDownIcon sx={{ marginTop: -1.5 }} />
-                        </IconButton>
-                        :
-                        <IconButton
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column", // จัดให้อยู่แนวตั้ง
-                            alignItems: "center", // จัดให้อยู่กึ่งกลางแนวนอน
-                          }}
-                          onClick={() => setOpenData(false)}>
-                          <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" textAlign="center" fontSize="12px" gutterBottom>ข้อมูล</Typography>
-                          <KeyboardArrowUpIcon sx={{ marginTop: -1.5 }} />
-                        </IconButton>
-                    }
-                  </Divider>
+              </>
             }
             <List
               sx={
@@ -918,10 +896,96 @@ export default function Navbar() {
                   color: theme.palette.primary.contrastText,
                 }
                   : {
-                    marginTop: -3
+                    marginTop: -1
                   }
               }
             >
+              <Collapse in={!openData}>
+                {
+                  open &&
+                  <ListItem
+                    key={"ข้อมูล"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setOpenData(true)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <BadgeIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="ข้อมูลทั่วไป"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowDownIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
+              <Collapse in={openData}>
+                {
+                  open &&
+                  <ListItem
+                    key={"ข้อมูล"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setOpenData(false)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <BadgeIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="ข้อมูลทั่วไป"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowUpIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
               <Collapse in={!openData}>
                 {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
                   <ListItem
@@ -929,7 +993,7 @@ export default function Navbar() {
                     disablePadding
                     sx={{
                       backgroundColor: show1 === index && theme.palette.panda.dark,
-                      height: 40, // กำหนดความสูงให้ ListItem
+                      height: 35, // กำหนดความสูงให้ ListItem
                       paddingY: 1,
                     }}
                   >
@@ -940,14 +1004,14 @@ export default function Navbar() {
                           : index === 1 ? "/employee"
                             : index === 2 ? "/trucks"
                               : index === 3 ? "/depots"
-                              : index === 4 ? "/ticket"
-                                : index === 5 ? "/transports"
-                                  : index === 6 ? "/customer-bigtrucks"
-                                    : index === 7 ? "/customer-smalltrucks"
-                                      : "/creditor"
+                                : index === 4 ? "/ticket"
+                                  : index === 5 ? "/transports"
+                                    : index === 6 ? "/customer-bigtrucks"
+                                      : index === 7 ? "/customer-smalltrucks"
+                                        : "/creditor"
                       }
                       sx={{
-                        height: 40, // กำหนดความสูงให้ ListItem
+                        height: 35, // กำหนดความสูงให้ ListItem
                       }}
                       onClick={() => (setShow1(index), setSetting(false))}
                       onMouseUp={() => (setShow1(index), setSetting(false))}
@@ -957,7 +1021,7 @@ export default function Navbar() {
                         sx={{
                           color: !open || show1 === index ? theme.palette.primary.contrastText : theme.palette.dark,
                           mr: !open || show1 === index ? -3 : -2,
-                          ml: !open || show1 === index ? 2 : 0,
+                          ml: !open || show1 === index ? 3 : 2,
                         }}
                       >
                         {index === 0 ? (
@@ -986,7 +1050,7 @@ export default function Navbar() {
                           color: show1 === index && theme.palette.primary.contrastText, fontSize: "15px"
                         }}
                         primaryTypographyProps={{
-                          fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+                          fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
 
                         }}
                       />
@@ -995,37 +1059,7 @@ export default function Navbar() {
                 ))}
               </Collapse>
             </List>
-            {
-              !open ?
-                <Divider sx={{ border: 1, color: theme.palette.primary.contrastText }} />
-                :
-                <Divider sx={{ marginTop: -3, marginBottom: !operation ? 0 : 5 }}>
-                    {
-                      !operation ?
-                        <IconButton
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column", // จัดให้อยู่แนวตั้ง
-                            alignItems: "center", // จัดให้อยู่กึ่งกลางแนวนอน
-                          }}
-                          onClick={() => setOperation(true)}>
-                          <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" textAlign="center" fontSize="12px" gutterBottom>ปฎิบัติงาน</Typography>
-                          <KeyboardArrowDownIcon sx={{ marginTop: -1.5 }} />
-                        </IconButton>
-                        :
-                        <IconButton
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column", // จัดให้อยู่แนวตั้ง
-                            alignItems: "center", // จัดให้อยู่กึ่งกลางแนวนอน
-                          }}
-                          onClick={() => setOperation(false)}>
-                          <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" textAlign="center" fontSize="12px" gutterBottom>ปฎิบัติงาน</Typography>
-                          <KeyboardArrowUpIcon sx={{ marginTop: -1.5 }} />
-                        </IconButton>
-                    }
-                  </Divider>
-            }
+            <Divider sx={{ marginTop: -1, marginBottom: 1 }}/>
             <List
               sx={
                 !open ? {
@@ -1033,10 +1067,96 @@ export default function Navbar() {
                   color: theme.palette.primary.contrastText,
                 }
                   : {
-                    marginTop: -3
+                    marginTop: -1
                   }
               }
             >
+              <Collapse in={!operation}>
+                {
+                  open &&
+                  <ListItem
+                    key={"ข้อมูล"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setOperation(true)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <ContactPageIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="ปฎิบัติงาน"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowDownIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
+              <Collapse in={operation}>
+                {
+                  open &&
+                  <ListItem
+                    key={"ปฎิบัติงาน"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setOperation(false)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <ContactPageIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="ปฎิบัติงาน"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowUpIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
               <Collapse in={!operation}>
                 {["สต็อกหน้าลาน", "เที่ยววิ่งรถใหญ่", "เที่ยววิ่งรถเล็ก"].map((text, index) => (
                   <ListItem
@@ -1044,7 +1164,7 @@ export default function Navbar() {
                     disablePadding
                     sx={{
                       backgroundColor: show2 === index && theme.palette.panda.dark,
-                      height: 40, // กำหนดความสูงให้ ListItem
+                      height: 35, // กำหนดความสูงให้ ListItem
                       paddingY: 1,
                     }}
                   >
@@ -1054,7 +1174,7 @@ export default function Navbar() {
                         index === 0 ? "/gasstations" : index === 1 ? "/trips-bigtruck" : "/trips-smalltruck"
                       }
                       sx={{
-                        height: 40, // กำหนดความสูงให้ ListItem
+                        height: 35, // กำหนดความสูงให้ ListItem
                       }}
                       onClick={() => (setShow2(index), setSetting(false))}
                       onMouseUp={() => (setShow2(index), setSetting(false))}
@@ -1064,7 +1184,7 @@ export default function Navbar() {
                         sx={{
                           color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.dark,
                           mr: !open || show2 === index ? -3 : -2,
-                          ml: !open || show2 === index ? 2 : 0,
+                          ml: !open || show2 === index ? 3 : 2,
                         }}
                       >
                         {index === 0 ? (
@@ -1079,7 +1199,7 @@ export default function Navbar() {
                           color: show2 === index && theme.palette.primary.contrastText, fontSize: "15px"
                         }}
                         primaryTypographyProps={{
-                          fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+                          fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
 
                         }}
                       />
@@ -1088,37 +1208,93 @@ export default function Navbar() {
                 ))}
               </Collapse>
             </List>
-            {
-              !open ?
-                <Divider sx={{ border: 1, color: theme.palette.primary.contrastText }} />
-                :
-                  <Divider sx={{ marginTop: -3, marginBottom: !report ? 0 : 5 }}>
-                    {
-                      !report ?
-                        <IconButton
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column", // จัดให้อยู่แนวตั้ง
-                            alignItems: "center", // จัดให้อยู่กึ่งกลางแนวนอน
-                          }}
-                          onClick={() => setReport(true)}>
-                          <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" textAlign="center" fontSize="12px" gutterBottom>รายงาน</Typography>
-                          <KeyboardArrowDownIcon sx={{ marginTop: -1.5 }} />
-                        </IconButton>
-                        :
-                        <IconButton
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column", // จัดให้อยู่แนวตั้ง
-                            alignItems: "center", // จัดให้อยู่กึ่งกลางแนวนอน
-                          }}
-                          onClick={() => setReport(false)}>
-                          <Typography variant="subtitle1" fontWeight="bold" color="textDisabled" textAlign="center" fontSize="12px" gutterBottom>รายงาน</Typography>
-                          <KeyboardArrowUpIcon sx={{ marginTop: -1.5 }} />
-                        </IconButton>
-                    }
-                  </Divider>
-            }
+            <Divider sx={{ marginTop: -1, marginBottom: 1 }}/>
+            <Collapse in={!report}>
+                {
+                  open &&
+                  <ListItem
+                    key={"รายงาน"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setReport(true)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <SummarizeIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="รายงาน"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowDownIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
+              <Collapse in={report}>
+                {
+                  open &&
+                  <ListItem
+                    key={"รายงาน"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setReport(false)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <SummarizeIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="รายงาน"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowUpIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
             <List
               sx={
                 !open ? {
@@ -1126,28 +1302,28 @@ export default function Navbar() {
                   color: theme.palette.primary.contrastText,
                 }
                   : {
-                    marginTop: -3
+                    marginTop: -1
                   }
               }
             >
               <Collapse in={!report}>
-                {["ชำระค่าน้ำมัน", "ชำระค่าขนส่ง"].map((text, index) => (
+                {["ชำระค่าน้ำมัน", "ชำระค่าขนส่ง", "ปิดงบบัญชีการเงิน"].map((text, index) => (
                   <ListItem
                     key={text}
                     disablePadding
                     sx={{
                       backgroundColor: show3 === index && theme.palette.panda.dark,
-                      height: 40, // กำหนดความสูงให้ ListItem
+                      height: 35, // กำหนดความสูงให้ ListItem
                       paddingY: 1,
                     }}
                   >
                     <ListItemButton
                       component={Link}
                       to={
-                        index === 0 ? "/invoice" : "/report"
+                        index === 0 ? "/invoice" : index === 1 ? "/report" : "/close-financial"
                       }
                       sx={{
-                        height: 40, // กำหนดความสูงให้ ListItem
+                        height: 35, // กำหนดความสูงให้ ListItem
                       }}
                       onClick={() => (setShow3(index), setSetting(false))}
                       onMouseUp={() => (setShow3(index), setSetting(false))}
@@ -1157,7 +1333,7 @@ export default function Navbar() {
                         sx={{
                           color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
                           mr: !open || show3 === index ? -3 : -2,
-                          ml: !open || show3 === index ? 2 : 0,
+                          ml: !open || show3 === index ? 3 : 2,
                         }}
                       >
                         {index === 0 ? (

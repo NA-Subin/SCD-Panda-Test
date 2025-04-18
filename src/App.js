@@ -35,6 +35,7 @@ import PrintTrips from "./components/selling/PrintTrips";
 import Report from "./components/report/Report";
 import PrintReport from "./components/report/PrintReport";
 import Driver from "./components/driver/Driver";
+import CloseFS from "./components/financial/CloseFS";
 
 const MySwal = withReactContent(Swal);
 
@@ -154,6 +155,9 @@ function App() {
                 </Routes>
                 <Routes>
                   <Route path="/customer-smalltrucks" element={<TicketSmallTruck />} />
+                </Routes>
+                <Routes>
+                  <Route path="/close-financial" element={<CloseFS />} />
                 </Routes>
               </Box>
             </Box>
