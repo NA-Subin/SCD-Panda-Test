@@ -202,9 +202,25 @@ const UpdateGasStations = (props) => {
 
         const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
         const twoDaysAgoDate = dayjs(selectedDate).subtract(2, "day").format("DD-MM-YYYY");
+        const threeDaysAgoDate = dayjs(selectedDate).subtract(3, "day").format("DD-MM-YYYY");
+        const fourDaysAgoDate = dayjs(selectedDate).subtract(4, "day").format("DD-MM-YYYY");
+        const fiveDaysAgoDate = dayjs(selectedDate).subtract(5, "day").format("DD-MM-YYYY");
+        const sixDaysAgoDate = dayjs(selectedDate).subtract(6, "day").format("DD-MM-YYYY");
+        const sevenDaysAgoDate = dayjs(selectedDate).subtract(7, "day").format("DD-MM-YYYY");
+        const eightDaysAgoDate = dayjs(selectedDate).subtract(8, "day").format("DD-MM-YYYY");
+        const nineDaysAgoDate = dayjs(selectedDate).subtract(9, "day").format("DD-MM-YYYY");
+        const tenDaysAgoDate = dayjs(selectedDate).subtract(10, "day").format("DD-MM-YYYY");
 
         const yesterdayData = gasStation?.Report?.[yesterdayDate];
         const twoDaysAgoData = gasStation?.Report?.[twoDaysAgoDate];
+        const threeDaysAgoData = gasStation?.Report?.[threeDaysAgoDate];
+        const fourDaysAgoData = gasStation?.Report?.[fourDaysAgoDate];
+        const fiveDaysAgoData = gasStation?.Report?.[fiveDaysAgoDate];
+        const sixDaysAgoData = gasStation?.Report?.[sixDaysAgoDate];
+        const sevenDaysAgoData = gasStation?.Report?.[sevenDaysAgoDate];
+        const eightDaysAgoData = gasStation?.Report?.[eightDaysAgoDate];
+        const nineDaysAgoData = gasStation?.Report?.[nineDaysAgoDate];
+        const tenDaysAgoData = gasStation?.Report?.[tenDaysAgoDate];
 
         setYesterdayData(yesterdayData);
         setTwoDaysAgoData(twoDaysAgoData);
@@ -233,12 +249,12 @@ const UpdateGasStations = (props) => {
                         Capacity: value?.Capacity || 0,
                         Color: value?.Color || "",
                         Volume: (yesterdayEntry?.Difference || yesterdayEntry?.OilBalance) || 0,
-                        Squeeze: value?.Squeeze ?? yesterdayEntry?.Squeeze ?? Squeeze,
+                        Squeeze: value?.Squeeze ?? (yesterdayEntry?.Squeeze || twoDaysAgoEntry?.Squeeze ) ?? Squeeze,
                         Delivered: value?.Delivered || 0,
                         Pending1: value?.Pending1 || 0,
                         Pending2: value?.Pending2 || 0,
                         Pending3: value?.Pending3 || 0,
-                        EstimateSell: value?.EstimateSell ?? yesterdayEntry?.EstimateSell ?? 0,
+                        EstimateSell: value?.EstimateSell ?? (yesterdayEntry?.EstimateSell || twoDaysAgoEntry?.EstimateSell ) ?? 0,
                         Period: value?.Period || 0,
                         DownHole: value?.DownHole || 0,
                         YesterDay: (Number(twoDaysAgoEntry?.Difference || twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,
@@ -267,12 +283,12 @@ const UpdateGasStations = (props) => {
                                 Capacity: Number(row.Capacity) || 0,
                                 Color: row.Color || "",
                                 Volume: yesterdayEntry?.Difference || yesterdayEntry?.OilBalance || 0,
-                                Squeeze: values.find(v => v?.ProductName === key)?.Squeeze ?? yesterdayEntry?.Squeeze ?? Squeeze,
+                                Squeeze: values.find(v => v?.ProductName === key)?.Squeeze ?? (yesterdayEntry?.Squeeze  || twoDaysAgoEntry?.Squeeze) ?? Squeeze,
                                 Delivered: 0,
                                 Pending1: 0,
                                 Pending2: 0,
                                 Pending3: 0,
-                                EstimateSell: values.find(v => v?.ProductName === key)?.EstimateSell ?? yesterdayEntry?.EstimateSell ?? 0,
+                                EstimateSell: values.find(v => v?.ProductName === key)?.EstimateSell ?? (yesterdayEntry?.EstimateSell || twoDaysAgoEntry?.EstimateSell) ?? 0,
                                 Period: 0,
                                 DownHole: 0,
                                 YesterDay: (Number(yesterdayEntry?.Difference || twoDaysAgoEntry?.OilBalance) + Number(yesterdayEntry?.Delivered)) || 0,

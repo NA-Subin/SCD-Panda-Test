@@ -93,7 +93,7 @@ const Invoice = () => {
   console.log("Order : ", orders);
 
   const groupedOrders = orders.reduce((acc, curr) => {
-    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime } = curr;
+    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime, CustomerType } = curr;
 
     // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
     if (!acc[TicketName]) {
@@ -105,7 +105,8 @@ const Invoice = () => {
         Volume: 0,
         Amount: 0,
         OverdueTransfer: 0,
-        CreditTime
+        CreditTime,
+        CustomerType
       };
     }
 
@@ -129,10 +130,15 @@ const Invoice = () => {
   // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ bigtruck
   const resultBigTruck = Object.values(groupedOrders)
   .map((item, index) => {
+    console.log("Customer Type : ",item.CustomerType);
+
     if (item.CustomerType !== "ตั๋วรถใหญ่") return null;
 
     const ticketParts = item.TicketName?.split(":");
     const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+
+    console.log("Ticket Parts : ",ticketParts);
+    console.log("Ticket ID : ",ticketId);
 
     const matchedTruck = bigtruck.find(entry => (entry.id - 1) === ticketId);
     if (!matchedTruck) return null;
@@ -367,15 +373,15 @@ const Invoice = () => {
                       <TableBody>
                         {
                           checkOverdueTransfer ?
-                          resultBigTruck.map((row) => (
-                            row.TotalOverdueTransfer !== 0 &&
+                          resultBigTruck.map((row,index) => (
+                            (row.TotalOverdueTransfer !== 0 || (row.Amount === 0 && row.TotalOverdueTransfer === 0)) && (
                             <TableRow
                               key={row.id}
                               onClick={() => handleRowClick(row)}
                               sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
                             >
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{index+1}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
                               <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
                                 {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
                               </TableCell>
@@ -384,16 +390,17 @@ const Invoice = () => {
                               <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
                               </TableCell>
                             </TableRow>
+                            )
                           ))
                           
-                          : resultBigTruck.map((row) => (
+                          : resultBigTruck.map((row,index) => (
                             <TableRow
                               key={row.id}
                               onClick={() => handleRowClick(row)}
                               sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
                             >
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.id}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{index+1}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
                               <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
                                 {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
                               </TableCell>

@@ -216,6 +216,8 @@ const TripsDetail = (props) => {
                     <UpdateTrip
                         tripID={trips.id}
                         dateStart={trips.DateStart}
+                        dateReceive={trips.DateReceive}
+                        dateDelivery={trips.DateDelivery}
                         weightHigh={trips.WeightHigh}
                         weightLow={trips.WeightLow}
                         totalWeight={trips.TotalWeight}

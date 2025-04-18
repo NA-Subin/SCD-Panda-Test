@@ -374,7 +374,7 @@ const InsertTruck = (props) => {
                                                     {
                                                         company.map((row) => (
                                                             row.id != 1 &&
-                                                            <MenuItem value={row.Name}>{row.Name}</MenuItem>
+                                                            <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                                         ))
                                                     }
                                                 </Select>

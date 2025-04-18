@@ -57,17 +57,17 @@ const UpdateRegHead = (props) => {
         setOpen(false);
     };
 
-     const { regtail, company, drivers } = useData();
-            const dataregtail = Object.values(regtail); 
-            const dataCompany = Object.values(company); 
-            const dataDrivers = Object.values(drivers);
-      const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
-      const employees = dataDrivers.filter(row => row.Registration && row.Registration === "ไม่มี" && row.TruckType === "รถใหญ่");
+    const { regtail, company, drivers } = useData();
+    const dataregtail = Object.values(regtail);
+    const dataCompany = Object.values(company);
+    const dataDrivers = Object.values(drivers);
+    const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
+    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "ไม่มี" && row.TruckType === "รถใหญ่");
 
     const [companies, setCompanies] = React.useState(truck.Company);
-    const [driver, setDriver] = React.useState("0:"+truck.Driver);
+    const [driver, setDriver] = React.useState("0:" + truck.Driver);
     const [regHead, setRegHead] = React.useState(truck.RegHead);
-    const [regTail, setRegTail] = React.useState("0:"+truck.RegTail+"::");
+    const [regTail, setRegTail] = React.useState("0:" + truck.RegTail + "::");
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
     const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration);
@@ -81,7 +81,7 @@ const UpdateRegHead = (props) => {
                 RegHead: regHead,
                 RegTail: regTail.split(":")[1],
                 Weight: weight,
-                TotalWeight:  (parseFloat(weight) + parseFloat(regTail.split(":")[3])),
+                TotalWeight: (parseFloat(weight) + parseFloat(regTail.split(":")[3])),
                 Insurance: insurance,
                 VehicleRegistration: vehicleRegistration,
                 VehExpirationDate: vehExpirationDate,
@@ -90,18 +90,18 @@ const UpdateRegHead = (props) => {
             })
             .then(() => {
                 database
-                                              .ref("/truck/registrationTail/")
-                                              .child(regTail.split(":")[0] - 1)
-                                              .update({
-                                                Status: "เชื่อมทะเบียนหัวแล้ว",
-                                              })
-                                              .then(() => {
-                                                console.log("Data pushed successfully");
-                                              })
-                                              .catch((error) => {
-                                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                                console.error("Error pushing data:", error);
-                                              });
+                    .ref("/truck/registrationTail/")
+                    .child(regTail.split(":")[0] - 1)
+                    .update({
+                        Status: "เชื่อมทะเบียนหัวแล้ว",
+                    })
+                    .then(() => {
+                        console.log("Data pushed successfully");
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
                 database
                     .ref("/employee/drivers/")
                     .child(driver.split(":")[0] - 1)
@@ -124,11 +124,11 @@ const UpdateRegHead = (props) => {
             });
     }
 
-    console.log("registrationTail :",registrationTail);
+    console.log("registrationTail :", registrationTail);
 
     return (
         <React.Fragment>
-            <TableCell sx={{ textAlign: "center",width: 20 }}>
+            <TableCell sx={{ textAlign: "center", width: 20 }}>
                 <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpen(regHead)}><InfoIcon color="info" fontSize="12px" /></IconButton>
             </TableCell>
             <Dialog
@@ -199,36 +199,36 @@ const UpdateRegHead = (props) => {
                             <Grid item xs={1.5}>
                                 {
                                     update ?
-                                    <TextField fullWidth variant="standard" value={regTail.split(":")[1]} disabled />
-                                    :
-                                    <FormControl variant="standard" fullWidth>
-                                    <Select
-                                      id="demo-simple-select"
-                                      value={regTail}
-                                      size="small"
-                                      MenuProps={{
-                                        PaperProps: {
-                                          sx: {
-                                            '& .MuiMenuItem-root': {
-                                              fontSize: "14px", // ขนาดตัวอักษรในรายการเมนู
-                                            },
-                                          },
-                                        },
-                                      }}
-                                      sx={{ textAlign: "left", height: 25, fontSize: "14px" }}
-                                      onChange={(e) => setRegTail(e.target.value)}
-                                      fullWidth
-                                    >
-                                      <MenuItem value={regTail}>
-                                      {regTail.split(":")[1]}
-                                      </MenuItem>
-                                      {
-                                        registrationTail.map((row) => (
-                                          <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
-                                        ))
-                                      }
-                                    </Select>
-                                    </FormControl>
+                                        <TextField fullWidth variant="standard" value={regTail.split(":")[1]} disabled />
+                                        :
+                                        <FormControl variant="standard" fullWidth>
+                                            <Select
+                                                id="demo-simple-select"
+                                                value={regTail}
+                                                size="small"
+                                                MenuProps={{
+                                                    PaperProps: {
+                                                        sx: {
+                                                            '& .MuiMenuItem-root': {
+                                                                fontSize: "14px", // ขนาดตัวอักษรในรายการเมนู
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                                sx={{ textAlign: "left", height: 25, fontSize: "14px" }}
+                                                onChange={(e) => setRegTail(e.target.value)}
+                                                fullWidth
+                                            >
+                                                <MenuItem value={regTail}>
+                                                    {regTail.split(":")[1]}
+                                                </MenuItem>
+                                                {
+                                                    registrationTail.map((row) => (
+                                                        <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
+                                                    ))
+                                                }
+                                            </Select>
+                                        </FormControl>
                                 }
                             </Grid>
                             <Grid item xs={1}>
@@ -249,7 +249,7 @@ const UpdateRegHead = (props) => {
                             <Grid item xs={4}>
                                 {
                                     update ?
-                                        <TextField fullWidth variant="standard" value={companies} disabled />
+                                        <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
                                         :
                                         <FormControl variant="standard" fullWidth>
                                             <Select
@@ -258,10 +258,11 @@ const UpdateRegHead = (props) => {
                                                 value={companies}
                                                 onChange={(e) => setCompanies(e.target.value)}
                                             >
-                                                <MenuItem value={companies}>{companies}</MenuItem>
+                                                <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
                                                 {
                                                     dataCompany.map((truck) => (
-                                                        <MenuItem value={truck.Name}>{truck.Name}</MenuItem>
+                                                        (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
+                                                        <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
@@ -304,8 +305,8 @@ const UpdateRegHead = (props) => {
                                             <Button variant="contained" color="info" >เพิ่มรูปภาพ</Button>
                                         :
                                         <>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
-                                        <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
+                                            <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
                                         </>
                                 }
                             </Grid>

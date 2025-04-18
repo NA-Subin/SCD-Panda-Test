@@ -917,12 +917,12 @@ const InsertTrips = () => {
             // แปลง object เป็น array ของ entries
             const entries = Object.entries(prev);
 
-            // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น order1)
-            const filtered = entries.filter(([key]) => key !== `order${parseInt(indexToDelete, 10) + 1}`);
+            // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น Order1)
+            const filtered = entries.filter(([key]) => key !== `Order${parseInt(indexToDelete, 10) + 1}`);
 
-            // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก order1
+            // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก Order1
             const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
-                acc[`order${index + 1}`] = value;
+                acc[`Order${index + 1}`] = value;
                 return acc;
             }, {});
 

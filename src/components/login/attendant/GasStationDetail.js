@@ -33,19 +33,35 @@ import 'dayjs/locale/th';
 const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
 const GasStationDetail = (props) => {
-    const { stock, gasStationID, selectedDate, gas, gasID, first, last, reportOilBalance, oilBalance,status } = props;
+    const { stock, gasStationID, selectedDate, gas, gasID, first, last, reportOilBalance, oilBalance, status } = props;
     // const [selectedDates, setSelectedDates] = React.useState(dayjs(selectedDate));
     const [product, setProduct] = React.useState([]);
     const [notReport, setNotReport] = React.useState([]);
     const [reports, setReports] = React.useState([]);
     const [save, setSave] = React.useState(false);
-    const [yesterday,setYesterdayData] = React.useState("");
-    const [towDayAgo,setTowDaysAgoData] = React.useState("");
+    const [yesterday, setYesterdayData] = React.useState("");
+    const [twoDayAgo, setTwoDaysAgoData] = React.useState("");
+    const [threeDayAgo, setThreeDaysAgoData] = React.useState("");
+    const [fourDayAgo, setFourDaysAgoData] = React.useState("");
+    const [fiveDayAgo, setFiveDaysAgoData] = React.useState("");
+    const [sixDayAgo, setSixDaysAgoData] = React.useState("");
+    const [sevenDayAgo, setSevenDaysAgoData] = React.useState("");
+    const [eightDayAgo, setEightDaysAgoData] = React.useState("");
+    const [nineDayAgo, setNineDaysAgoData] = React.useState("");
+    const [tenDayAgo, setTenDaysAgoData] = React.useState("");
 
-    console.log("วันก่อนหน้า : ",yesterday);
-    console.log("2 วันก่อนหน้า : ",towDayAgo);
+    console.log("วันก่อนหน้า : ", yesterday);
+    console.log("2 วันก่อนหน้า : ", twoDayAgo);
+    console.log("3 วันก่อนหน้า : ", threeDayAgo);
+    console.log("4 วันก่อนหน้า : ", fourDayAgo);
+    console.log("5 วันก่อนหน้า : ", fiveDayAgo);
+    console.log("6 วันก่อนหน้า : ", sixDayAgo);
+    console.log("7 วันก่อนหน้า : ", sevenDayAgo);
+    console.log("8 วันก่อนหน้า : ", eightDayAgo);
+    console.log("9 วันก่อนหน้า : ", nineDayAgo);
+    console.log("10 วันก่อนหน้า : ", tenDayAgo);
 
-    console.log("Status : ",save);
+    console.log("Status : ", save);
 
     const getGasStations = async () => {
         database.ref("/depot/gasStations/" + (gas.id - 1)).on("value", (snapshot) => {
@@ -78,14 +94,39 @@ const GasStationDetail = (props) => {
             setReports(dataReport);
         });
 
-        
-                const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
-                        const twoDaysAgoDate = dayjs(selectedDate).subtract(2, "day").format("DD-MM-YYYY");
-                
-                        const yesterdayData = gas?.Report?.[yesterdayDate];
-                        const twoDaysAgoData = gas?.Report?.[twoDaysAgoDate];
-                setYesterdayData(yesterdayData);
-                setTowDaysAgoData(twoDaysAgoData)
+
+        const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+        const twoDaysAgoDate = dayjs(selectedDate).subtract(2, "day").format("DD-MM-YYYY");
+        const threeDaysAgoDate = dayjs(selectedDate).subtract(3, "day").format("DD-MM-YYYY");
+        const fourDaysAgoDate = dayjs(selectedDate).subtract(4, "day").format("DD-MM-YYYY");
+        const fiveDaysAgoDate = dayjs(selectedDate).subtract(5, "day").format("DD-MM-YYYY");
+        const sixDaysAgoDate = dayjs(selectedDate).subtract(6, "day").format("DD-MM-YYYY");
+        const sevenDaysAgoDate = dayjs(selectedDate).subtract(7, "day").format("DD-MM-YYYY");
+        const eightDaysAgoDate = dayjs(selectedDate).subtract(8, "day").format("DD-MM-YYYY");
+        const nineDaysAgoDate = dayjs(selectedDate).subtract(9, "day").format("DD-MM-YYYY");
+        const tenDaysAgoDate = dayjs(selectedDate).subtract(10, "day").format("DD-MM-YYYY");
+
+        const yesterdayData = gas?.Report?.[yesterdayDate];
+        const twoDaysAgoData = gas?.Report?.[twoDaysAgoDate];
+        const threeDaysAgoData = gas?.Report?.[threeDaysAgoDate];
+        const fourDaysAgoData = gas?.Report?.[fourDaysAgoDate];
+        const fiveDaysAgoData = gas?.Report?.[fiveDaysAgoDate];
+        const sixDaysAgoData = gas?.Report?.[sixDaysAgoDate];
+        const sevenDaysAgoData = gas?.Report?.[sevenDaysAgoDate];
+        const eightDaysAgoData = gas?.Report?.[eightDaysAgoDate];
+        const nineDaysAgoData = gas?.Report?.[nineDaysAgoDate];
+        const tenDaysAgoData = gas?.Report?.[tenDaysAgoDate];
+
+        setYesterdayData(yesterdayData);
+        setTwoDaysAgoData(twoDaysAgoData);
+        setThreeDaysAgoData(threeDaysAgoData);
+        setFourDaysAgoData(fourDaysAgoData);
+        setFiveDaysAgoData(fiveDaysAgoData);
+        setSixDaysAgoData(sixDaysAgoData);
+        setSevenDaysAgoData(sevenDaysAgoData);
+        setEightDaysAgoData(eightDaysAgoData);
+        setNineDaysAgoData(nineDaysAgoData);
+        setTenDaysAgoData(tenDaysAgoData);
 
         setSave(status)
     };
@@ -162,12 +203,20 @@ const GasStationDetail = (props) => {
             .map(({ ProductName, Volume }) => { // ✅ ใช้ destructuring ถูกต้อง
                 const matchingStock = stock.find((s) => s.ProductName === ProductName);
                 const yesterdayEntry = Object.values(yesterday || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
-                const twoDaysAgoEntry = Object.values(towDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const twoDaysAgoEntry = Object.values(twoDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const threeDaysAgoEntry = Object.values(threeDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const fourDaysAgoEntry = Object.values(fourDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const fiveDaysAgoEntry = Object.values(fiveDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const sixDaysAgoEntry = Object.values(sixDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const sevenDaysAgoEntry = Object.values(sevenDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const eightDaysAgoEntry = Object.values(eightDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const nineDaysAgoEntry = Object.values(nineDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
+                const tenDaysAgoEntry = Object.values(tenDayAgo || {}).find(entry => entry?.ProductName === ProductName) || { OilBalance: 0 };
 
-                console.log("Squeeze วันก่อน : ",yesterdayEntry?.Squeeze)
-                console.log("EstimateSell วันก่อน : ",yesterdayEntry?.EstimateSell)
-                console.log("Squeeze 2 วันก่อน : ",twoDaysAgoEntry?.Squeeze)
-                console.log("EstimateSell 2 วันก่อน : ",twoDaysAgoEntry?.EstimateSell)
+                console.log("Squeeze วันก่อน : ", yesterdayEntry?.Squeeze)
+                console.log("EstimateSell วันก่อน : ", yesterdayEntry?.EstimateSell)
+                console.log("Squeeze 2 วันก่อน : ", twoDaysAgoEntry?.Squeeze)
+                console.log("EstimateSell 2 วันก่อน : ", twoDaysAgoEntry?.EstimateSell)
 
                 if (!matchingStock) return null; // ถ้าไม่มีข้อมูล ให้ return null (แต่ filter ทิ้งภายหลัง)
                 console.log("differenceAdd : ", (difference[ProductName] ?? 0))
@@ -179,8 +228,8 @@ const GasStationDetail = (props) => {
                     Volume: Number(Volume ?? 0),
                     Delivered: Number(volumes?.[ProductName] ?? 0),
                     OilBalance: Number(stocks?.[ProductName] ?? 0),
-                    Squeeze: yesterdayEntry?.Squeeze || twoDaysAgoEntry?.Squeeze,
-                    EstimateSell : yesterdayEntry?.EstimateSell || twoDaysAgoEntry?.EstimateSell
+                    Squeeze: yesterdayEntry?.Squeeze || twoDaysAgoEntry?.Squeeze || threeDaysAgoEntry?.Squeeze || fourDaysAgoEntry?.Squeeze || fiveDaysAgoEntry?.Squeeze || sixDaysAgoEntry?.Squeeze || sevenDaysAgoEntry?.Squeeze || eightDaysAgoEntry?.Squeeze || nineDaysAgoEntry?.Squeeze || tenDaysAgoEntry?.Squeeze,
+                    EstimateSell: yesterdayEntry?.EstimateSell || twoDaysAgoEntry?.EstimateSell || threeDaysAgoEntry?.EstimateSell || fourDaysAgoEntry?.EstimateSell || fiveDaysAgoEntry?.EstimateSell || sixDaysAgoEntry?.EstimateSell || sevenDaysAgoEntry?.EstimateSell || eightDaysAgoEntry?.EstimateSell || nineDaysAgoEntry?.EstimateSell || tenDaysAgoEntry?.EstimateSell
                 };
             })
             .filter(Boolean); // กรองค่าที่เป็น null ออกไป
@@ -193,7 +242,7 @@ const GasStationDetail = (props) => {
             return acc;
         }, {}); // เริ่มต้นเป็น object ว่าง
 
-        console.log("Update : ",updatedProducts)
+        console.log("Update : ", updatedProducts)
 
         setSave(true);
 
@@ -338,14 +387,14 @@ const GasStationDetail = (props) => {
         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
     });
 
-    console.log("reports : ",reports);
-    console.log("sortReport : ",sortedReport);
-    console.log("not report : ",notReport);
+    console.log("reports : ", reports);
+    console.log("sortReport : ", sortedReport);
+    console.log("not report : ", notReport);
 
-    console.log("stock : ",stocks);
-    console.log("volume : ",volumes);
-    console.log("update stock : ",updateStocks);
-    console.log("update volume : ",updateVolumes);
+    console.log("stock : ", stocks);
+    console.log("volume : ", volumes);
+    console.log("update stock : ", updateStocks);
+    console.log("update volume : ", updateVolumes);
 
     // useEffect(() => {
     //     const newDifference = sortedOilBalance.reduce((acc, item) => {
@@ -488,10 +537,10 @@ const GasStationDetail = (props) => {
                                             value={updateVolumes[row.ProductName] ?? row.Delivered} // ใช้ ?? ป้องกัน undefined
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
-                                        
+
                                                 // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
                                                 newValue = newValue.replace(/^0+(?=\d)/, "");
-                                        
+
                                                 // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
                                                 if (newValue === "" || newValue === "0") {
                                                     handleUpdateVolumeChange(row.ProductName, "");
@@ -523,10 +572,10 @@ const GasStationDetail = (props) => {
                                             value={updateStocks[row.ProductName] ?? row.OilBalance} // ใช้ ?? ป้องกัน undefined
                                             onChange={(e) => {
                                                 let newValue = e.target.value;
-                                        
+
                                                 // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
                                                 newValue = newValue.replace(/^0+(?=\d)/, "");
-                                        
+
                                                 // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
                                                 if (newValue === "" || newValue === "0") {
                                                     handleUpdateStockChange(row.ProductName, "");

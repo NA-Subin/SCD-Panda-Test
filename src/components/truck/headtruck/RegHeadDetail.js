@@ -176,7 +176,7 @@ const RegHeadDetail = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{truck.VehicleRegistration}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.RepairTruck.split(":")[1]}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.Status}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.Company}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{truck.Company.split(":")[1]}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.Driver.split(":")[1]}</TableCell>
                         <UpdateRegHead key={truck.id} truck={truck}/>
                         <TruckRepair key={truck.RepairTruck.split(":")[1]} row={truck} />

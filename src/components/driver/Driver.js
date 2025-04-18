@@ -161,13 +161,17 @@ const Driver = () => {
 
     const today = dayjs(new Date()).format("DD/MM/YYYY");
     const tripDetail = trips.filter(t =>
-        t.StatusTrips === "กำลังจัดเที่ยววิ่ง" ||
-        (t.StatusTrips === "จบทริป" && t.DateEnd === today)
+        t.StatusTrip === "กำลังจัดเที่ยววิ่ง" 
+        ||
+        (t.StatusTrip === "จบทริป" && t.DateEnd === today)
     );
 
     useEffect(() => {
-        const check = tripDetail.find((item) => item.Driver === truck.split(":")[0]) || {};
+        console.log("driver and truck : ",truck);
+        const check = tripDetail.find((item) => Number(item.Driver.split(":")[0]) === Number(truck.split(":")[0])) || {};
+        console.log("check : ",check);
         const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
+        console.log("checkOrder : ",checkOrder);
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
@@ -206,18 +210,22 @@ const Driver = () => {
                 });
         }
 
-    }, [trip, order, depot]); // อัปเดตเมื่อ orderNew เปลี่ยน
+    }, [truck]); // อัปเดตเมื่อ orderNew เปลี่ยน
 
     const handleChangeDriver = (e) => {
         const trucks = e.target.value;
+        console.log("trucks : ",trucks);
         setTruck(e.target.value);
-        const check = tripDetail.find((item) => item.Driver === trucks.split(":")[0]) || {};
+        const check = tripDetail.find((item) => Number(item.Driver.split(":")[0]) === Number(trucks.split(":")[0])) || {};
+        console.log("check : ",check);
         const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
+        console.log("checkOrder : ",checkOrder);
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
 
-        console.log("check : ", check);
+        console.log("depotZone : ", depotZone);
+        console.log("checkDepot : ", checkDepot);
 
         const tripNew = Object.keys(check)
             .filter(key => key.startsWith("Order")) // เอาเฉพาะ Order1, Order2, Order3
@@ -252,7 +260,7 @@ const Driver = () => {
         }
     }
 
-    const handleSaveStatus = (no, ticketname) => {
+    const handleSaveStatus = (no) => {
         database
             .ref("order/")
             .child(no)
@@ -408,7 +416,7 @@ const Driver = () => {
                                 <MenuItem value={"0:0:0"}>กรุณาเลือกรถบรรทุก</MenuItem>
                                 {
                                     driver.map((row) => (
-                                        <MenuItem value={`${row.Driver}:${row.RegHead}:${row.RegTail}`}>{`${row.Driver}:${row.RegHead}:${row.RegTail}`}</MenuItem>
+                                        <MenuItem value={`${row.Driver}:${row.RegHead}:${row.RegTail}`}>{`${row.Driver.split(":")[1]} / ${row.RegHead}:${row.RegTail}`}</MenuItem>
                                     ))
                                 }
                             </Select>
@@ -485,7 +493,7 @@ const Driver = () => {
                                                                         {value.No + 1}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                                        {row.TicketName}
+                                                                        {row.TicketName.split(":")[1]}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }}>
                                                                         {row.Product.G95 === undefined ? "-" : row.Product.G95.Volume * 1000}
@@ -514,7 +522,7 @@ const Driver = () => {
                                                                                     fontSize: { xs: "16px", sm: "14px", md: "12px" },
                                                                                     padding: { xs: "12px 20px", sm: "10px 18px", md: "8px 16px" },
                                                                                     whiteSpace: "nowrap"
-                                                                                }} color="primary" onClick={() => handleSaveStatus(row.No, row.TicketName)}>จัดส่งแล้ว</Button>
+                                                                                }} color="primary" onClick={() => handleSaveStatus(row.No)}>จัดส่งแล้ว</Button>
                                                                         }
                                                                     </TableCell>
                                                                 </TableRow>
@@ -545,11 +553,11 @@ const Driver = () => {
                                                             let modifiedTicketName = row.TicketName;
 
                                                             // ตัดค่า branch ออกจาก TicketName
-                                                            branches.forEach(branch => {
-                                                                if (row.TicketName.includes(branch)) {
-                                                                    modifiedTicketName = row.TicketName.split(branch).pop().trim();
-                                                                }
-                                                            });
+                                                            // branches.forEach(branch => {
+                                                            //     if (row.TicketName.includes(branch)) {
+                                                            //         modifiedTicketName = row.TicketName.split(branch).pop().trim();
+                                                            //     }
+                                                            // });
 
                                                             return modifiedTicketName === value.Name;
                                                         })
@@ -607,11 +615,11 @@ const Driver = () => {
                                                         // หาค่าที่ต้อง split
                                                         let modifiedTicketName = row.TicketName;
 
-                                                        branches.forEach(branch => {
-                                                            if (row.TicketName.includes(branch)) {
-                                                                modifiedTicketName = row.TicketName.split(branch).pop().trim(); // เอาค่าหลังจาก branch และตัดช่องว่างออก
-                                                            }
-                                                        });
+                                                        // branches.forEach(branch => {
+                                                        //     if (row.TicketName.includes(branch)) {
+                                                        //         modifiedTicketName = row.TicketName.split(branch).pop().trim(); // เอาค่าหลังจาก branch และตัดช่องว่างออก
+                                                        //     }
+                                                        // });
 
                                                         return modifiedTicketName === value.Name && (
                                                             <React.Fragment key={key}>
@@ -627,7 +635,7 @@ const Driver = () => {
                                                                         <Grid item xs={5.5}>
                                                                             <Paper sx={{ p: 2, borderLeft: row.Status === undefined ? "15px solid " + theme.palette.warning.main : "15px solid " + theme.palette.success.main }}>
                                                                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{`สินค้าลำดับที่ ${value.No + 1}`}</Typography>
-                                                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{row.TicketName}</Typography>
+                                                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{row.TicketName.split(":")[1]}</Typography>
                                                                                 {
                                                                                     Object.entries(row.Product).map(([key, value]) => (
                                                                                         key !== "P" &&
@@ -647,7 +655,7 @@ const Driver = () => {
                                                                         <Grid item xs={5.5}>
                                                                             <Paper sx={{ p: 2, borderRight: row.Status === undefined ? "15px solid " + theme.palette.warning.main : "15px solid " + theme.palette.success.main }}>
                                                                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{`สินค้าลำดับที่ ${value.No + 1}`}</Typography>
-                                                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{row.TicketName}</Typography>
+                                                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{row.TicketName.split(":")[1]}</Typography>
                                                                                 {
                                                                                     Object.entries(row.Product).map(([key, value]) => (
                                                                                         key !== "P" &&

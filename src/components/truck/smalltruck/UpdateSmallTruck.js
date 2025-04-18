@@ -60,7 +60,7 @@ const UpdateSmallTruck = (props) => {
     const [openTab, setOpenTab] = React.useState(true);
 
     const { company, drivers } = useData();
-    const dataCompany = Object.values(company); 
+    const dataCompany = Object.values(company);
     const dataDrivers = Object.values(drivers);
     const employees = dataDrivers.filter(row => row.Registration && row.Registration === "ไม่มี" && row.TruckType === "รถเล็ก");
 
@@ -69,7 +69,7 @@ const UpdateSmallTruck = (props) => {
     };
 
     const [companies, setCompanies] = React.useState(truck.Company);
-    const [driver, setDriver] = React.useState("0:"+truck.Driver);
+    const [driver, setDriver] = React.useState("0:" + truck.Driver);
     const [registration, setRegistration] = React.useState(truck.Registration);
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
@@ -197,7 +197,7 @@ const UpdateSmallTruck = (props) => {
                             <Grid item xs={4}>
                                 {
                                     update ?
-                                        <TextField fullWidth variant="standard" value={companies} disabled />
+                                        <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
                                         :
                                         <FormControl variant="standard" fullWidth>
                                             <Select
@@ -206,10 +206,11 @@ const UpdateSmallTruck = (props) => {
                                                 value={companies}
                                                 onChange={(e) => setCompanies(e.target.value)}
                                             >
-                                                <MenuItem value={companies}>{companies}</MenuItem>
+                                                <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
                                                 {
-                                                    dataCompany.map((row) => (
-                                                        <MenuItem value={row.Name}>{row.Name}</MenuItem>
+                                                    dataCompany.map((truck) => (
+                                                        (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
+                                                        <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
@@ -252,8 +253,8 @@ const UpdateSmallTruck = (props) => {
                                             <Button variant="contained" color="info" >เพิ่มรูปภาพ</Button>
                                         :
                                         <>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
-                                        <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
+                                            <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
                                         </>
                                 }
                             </Grid>

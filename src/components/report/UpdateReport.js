@@ -54,8 +54,8 @@ import html2canvas from "html2canvas";
 import BankDetail from "./BankDetail";
 
 const UpdateReport = (props) => {
-    const { ticket } = props;
-    const [open, setOpen] = useState(false);
+    const { ticket,open } = props;
+    // const [open, setOpen] = useState(false);
     const [price, setPrice] = useState([]);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
@@ -80,41 +80,85 @@ const UpdateReport = (props) => {
     const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {});
 
-    const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName);
+    // const ticketsList = showTickets.filter(item => {
+    //     if (open === 1) return item.CustomerType === "ตั๋วน้ำมัน";
+    //     if (open === 2) return item.CustomerType === "ตั๋วรับจ้างขนส่ง";
+    //     if (open === 3) return item.CustomerType === "ตั๋วปั้ม";
+    //     return true; // หรือเปลี่ยนเป็น `false` ถ้าไม่ต้องการให้แสดงกรณีอื่น
+    //   });
+
+    const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName && item.Trip !== "ยกเลิก");
+
+    console.log("Show tickets List : ",ticket);
+    console.log("Id : ",ticket.TicketName.split(":")[0]);
+    console.log("Name : ",ticket.TicketName.split(":")[1]);
+    console.log("Customer Type : ",ticket.CustomerType);
+    console.log("Transport : ",customertransport.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก" ));
+    console.log("GasStation : ",customergasstation.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก" ));
+    console.log("Ticket : ",customerTickets.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก" ));
 
     const getPrice = () => {
         let foundItem;
         let refPath = "";
         let initialPrice = [];
 
-        if (ticket?.TicketName) {
-            foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+        if(ticket.CustomerType === "ตั๋วรับจ้างขนส่ง"){
+            console.log("Customer Type : ",ticket.CustomerType);
+            foundItem = customertransport.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
+            console.log("🔍 Found Item:", foundItem);
             if (foundItem) {
                 refPath = `/customers/transports/${foundItem.id - 1}/Price`;
                 initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
             }
-
-            if (!foundItem) {
-                foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) {
-                    refPath = `/customers/gasstations/${foundItem.id - 1}/Price`;
-                    initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
-                }
+        }else if (ticket.CustomerType === "ตั๋วปั้ม"){
+            console.log("Customer Type : ",ticket.CustomerType);
+            foundItem = customergasstation.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
+            console.log("🔍 Found Item:", foundItem);
+            if (foundItem) {
+                refPath = `/customers/gasstations/${foundItem.id - 1}/Price`;
+                initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
             }
-
-            if (!foundItem) {
-                foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) {
-                    refPath = `/customers/tickets/${foundItem.id - 1}/Price`;
-                    initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
-                }
+        }else if (ticket.CustomerType === "ตั๋วน้ำมัน"){
+            console.log("Customer Type : ",ticket.CustomerType);
+            foundItem = customerTickets.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
+            console.log("🔍 Found Item:", foundItem);
+            if (foundItem) {
+                refPath = `/customers/tickets/${foundItem.id - 1}/Price`;
+                initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
             }
-        } else {
+        }else{
             ShowError("Ticket Name ไม่ถูกต้อง");
             return;
         }
 
-        console.log("🔍 Found Item:", foundItem);
+        // if (ticket?.TicketName) {
+        //     foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+        //     if (foundItem) {
+        //         refPath = `/customers/transports/${foundItem.id - 1}/Price`;
+        //         initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+        //     }
+
+        //     if (!foundItem) {
+        //         foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
+        //         if (foundItem) {
+        //             refPath = `/customers/gasstations/${foundItem.id - 1}/Price`;
+        //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+        //         }
+        //     }
+
+        //     if (!foundItem) {
+        //         foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
+        //         if (foundItem) {
+        //             refPath = `/customers/tickets/${foundItem.id - 1}/Price`;
+        //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+        //         }
+        //     }
+        // } else {
+        //     ShowError("Ticket Name ไม่ถูกต้อง");
+        //     return;
+        // }
+
+        // console.log("🔍 Found Item:", foundItem);
         console.log("📌 Ref Path:", refPath);
         console.log("📊 Initial Price Data:", initialPrice);
 
@@ -128,9 +172,9 @@ const UpdateReport = (props) => {
     const trips = showTrips.filter(item => item.id === (ticket.Trip + 1));
 
     console.log("Report ID : ", ticket);
-    console.log("customer transport : ", customertransport);
-    console.log("customer gasStation : ", customergasstations);
-    console.log("customer tickets : ", customerTickets);
+    // console.log("customer transport : ", customertransport);
+    // console.log("customer gasStation : ", customergasstations);
+    // console.log("customer tickets : ", customerTickets);
     console.log("Trips : ", trips);
 
     console.log("Price : ", price);
@@ -160,13 +204,13 @@ const UpdateReport = (props) => {
 
     console.log("ticketsList : ", ticketsList);
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    // const handleClickOpen = () => {
+    //     setOpen(true);
+    // };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    // const handleClose = () => {
+    //     setOpen(false);
+    // };
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -216,13 +260,13 @@ const UpdateReport = (props) => {
         return tickets.flatMap((row) => {
             const matchedTrip = showTrips.find(trip => trip.id === row.Trip + 1);
 
-            const company = registrationHead.find(trip => trip.RegHead === matchedTrip.Registration);
+            const company = registrationHead.find(trip => trip.id === Number(matchedTrip.Registration.split(":")[0]));
 
             console.log("Company (raw):", `"${company.Company}"`);
             console.log("Company (trim):", `"${company.Company.trim()}"`);
             console.log("Company (length):", company.Company.length);
 
-            const companyAddress = companies.find(trip => trip.Name === company.Company);
+            const companyAddress = companies.find(com => com.id === Number(company.Company.split(":")[0]));
 
             console.log("Address (raw):", `"${companyAddress.Name}"`);
             console.log("Address (trim):", `"${companyAddress.Name.trim()}"`);
@@ -244,7 +288,7 @@ const UpdateReport = (props) => {
                     Registration: matchedTrip ? matchedTrip.Registration : row.Registration,
                     ProductName: productName,
                     Volume: Volume.Volume * 1000,
-                    Company: companyAddress.Name,
+                    Company: `${companyAddress.id}:${companyAddress.Name}`,
                     CompanyAddress: companyAddress.Address,
                     CardID: companyAddress.CardID,
                     Phone: companyAddress.Phone,
@@ -258,10 +302,12 @@ const UpdateReport = (props) => {
         showTrips
     );
 
+    console.log("processedTickets  : ", processedTickets);
+
     // แยก processedTickets ออกเป็น 2 ส่วนตาม Company และเริ่ม No ใหม่ให้แต่ละส่วน
     const splitByCompany = (processedTickets) => {
-        const company1Tickets = processedTickets.filter(row => row.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)");
-        const company2Tickets = processedTickets.filter(row => row.Company === "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)");
+        const company1Tickets = processedTickets.filter(row => row.Company.split(":")[0] === "2");
+        const company2Tickets = processedTickets.filter(row => row.Company.split(":")[0] === "3");
 
         // รีเซ็ต No ให้กับแต่ละส่วน
         const resetNo = (tickets) => {
@@ -463,7 +509,7 @@ const UpdateReport = (props) => {
         // อัพเดต companies โดยใช้ข้อมูลจาก price
         const updatedCompanies = companies.map(company => {
             // ค้นหารายการของ price ที่ตรงกับ company.Name
-            const matchingPrices = price.filter(row => row.Transport === company.Name);
+            const matchingPrices = price.filter(row => Number(row.Transport.split(":")[0]) === company.id);
 
             return {
                 ...company,
@@ -496,23 +542,37 @@ const UpdateReport = (props) => {
         let foundItem;
         let refPath = "";
 
-        if (ticket?.TicketName) {
-            foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+        if(ticket.CustomerType === "ตั๋วรับจ้างขนส่ง"){
+            foundItem = customertransport.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
             if (foundItem) refPath = "/customers/transports/";
-
-            if (!foundItem) {
-                foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) refPath = "/customers/gasstations/";
-            }
-
-            if (!foundItem) {
-                foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
-                if (foundItem) refPath = "/customers/tickets/";
-            }
-        } else {
+        }else if (ticket.CustomerType === "ตั๋วปั้ม"){
+            foundItem = customergasstation.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
+            if (foundItem) refPath = "/customers/gasstations/";
+        }else if (ticket.CustomerType === "ตั๋วน้ำมัน"){
+            foundItem = customerTickets.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
+            if (foundItem) refPath = "/customers/tickets/";
+        }else{
             ShowError("Ticket Name ไม่ถูกต้อง");
             return;
         }
+
+        // if (ticket?.TicketName) {
+        //     foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+        //     if (foundItem) refPath = "/customers/transports/";
+
+        //     if (!foundItem) {
+        //         foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
+        //         if (foundItem) refPath = "/customers/gasstations/";
+        //     }
+
+        //     if (!foundItem) {
+        //         foundItem = customerTickets.find(item => item.TicketsName === ticket.TicketName);
+        //         if (foundItem) refPath = "/customers/tickets/";
+        //     }
+        // } else {
+        //     ShowError("Ticket Name ไม่ถูกต้อง");
+        //     return;
+        // }
 
         console.log("Item :", foundItem);
         console.log("Path :", refPath);
@@ -562,7 +622,7 @@ const UpdateReport = (props) => {
     return (
         <React.Fragment>
             <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName}
+                รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName.split(":")[1]}
             </Typography>
             <Box>
                 <Grid container spacing={2}>
@@ -690,7 +750,7 @@ const UpdateReport = (props) => {
                                                     sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle" }}
                                                 >
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {row.Driver} : {row.Registration}
+                                                        {row.Driver.split(":")[1]} : {row.Registration.split(":")[1]}
                                                     </Typography>
                                                 </TableCell>
                                             )}
@@ -1118,7 +1178,7 @@ const UpdateReport = (props) => {
                                                     sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle" }}
                                                 >
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {row.Driver} : {row.Registration}
+                                                        {row.Driver.split(":")[1]} : {row.Registration.split(":")[1]}
                                                     </Typography>
                                                 </TableCell>
                                             )}
@@ -1539,8 +1599,14 @@ const UpdateReport = (props) => {
                                                         value={row.Transport || ""}
                                                         onChange={(e) => handleChange(row.id, "Transport", e.target.value)}
                                                     >
-                                                        <MenuItem value="บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
-                                                        <MenuItem value="หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
+                                                        {
+                                                            companies.map((row) => (
+                                                                row.id !== 1 &&
+                                                                <MenuItem value={`${row.id}:${row.Name}`} sx={{ fontSize: "14px", }}>{row.Name}</MenuItem>
+                                                            ))
+                                                        }
+                                                        {/* <MenuItem value="บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
+                                                        <MenuItem value="หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem> */}
                                                     </Select>
                                                 </FormControl>
                                             </Paper>

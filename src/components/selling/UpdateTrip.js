@@ -57,6 +57,8 @@ const UpdateTrip = (props) => {
         totalWeight,
         weightTruck,
         dateStart,
+        dateReceive,
+        dateDelivery,
         depotTrip,
         registrations
     } = props;
@@ -78,15 +80,13 @@ const UpdateTrip = (props) => {
     const [ticketsB, setTicketsB] = React.useState([]);
     const [ticketsS, setTicketsS] = React.useState([]);
     const [ticketLength, setTicketLength] = React.useState(0);
-    const [costTrip, setCostTrip] = useState(trip.CostTrip);
-    const [status, setStatus] = useState(trip.Status || "-");
-    const [weightTrucks, setWeightTrucks] = useState(weightTruck || 0);
+    const [selectedDateReceive, setSelectedDateReceive] = useState(dateReceive);
+    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dateDelivery);
 
     const { depots, reghead } = useData();
     const depotOptions = Object.values(depots || {});
     const registrationTruck = Object.values(reghead || {});
 
-    console.log("Status : ", status);
     console.log("registrationTruck : ", registrationTruck);
 
     // โหลด html2canvas จาก CDN
@@ -271,7 +271,8 @@ const UpdateTrip = (props) => {
             // const dataTrip = [];
             // for (let id in datas) {
             //     if (datas[id].id === tripID) {
-            //         dataTrip.push({ id, ...datas[id] })
+            //         setSelectedDateReceive(datas[id].DateReceive)
+            //         setSelectedDateDelivery(datas[id].DateDelivery)
             //     }
             // }
             setTrip(datas);
@@ -293,13 +294,25 @@ const UpdateTrip = (props) => {
     const [editableOrders, setEditableOrders] = useState([]);
     const [orderTrip, setOrderTrip] = useState([]);
     const [ticketTrip, setTicketTrip] = useState([]);
+    const [costTrip, setCostTrip] = useState(trip.CostTrip);
+    const [status, setStatus] = useState(trip.Status || "-");
+    const [weightTrucks, setWeightTrucks] = useState(weightTruck || 0);
 
     const [depot, setDepot] = useState(depotTrip);
     const [registration, setRegistration] = useState(registrations);
 
+    console.log("editMode : ", !editMode);
+
+    console.log("order : ",order);
     console.log("orderTrip : ", orderTrip);
+    console.log("ticketTrip : ", ticketTrip);
     console.log("registrations : ", registrations);
     console.log("registration : ", registration);
+
+    console.log("1.วันที่รับ : ", trip.DateReceive);
+    console.log("2.วันที่รับ : ", selectedDateReceive);
+    console.log("3.วันที่ส่ง : ", trip.DateDelivery);
+    console.log("3.วันที่ส่ง : ", selectedDateDelivery);
 
     useEffect(() => {
         if (ticket && ticket.length > 0) {
@@ -697,14 +710,22 @@ const UpdateTrip = (props) => {
         database
             .ref("/trip")
             .child(Number(tripID) - 1)  // ใช้ No ในการเลือก Child
-            .update({
-                WeightHigh: totalVolumesTicket.oilHeavy,
-                WeightLow: totalVolumesTicket.oilLight,
-                TotalWeight: totalVolumesTicket.totalWeight,
-                CostTrip: costTrip,
-                Status: status,
+            .set({
+                id: tripID,
+                DateReceive: selectedDateReceive,
+                DateDelivery: selectedDateDelivery,
+                DateStart: trip.DateStart,
                 Driver: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
                 Registration: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
+                Depot: depot,
+                CostTrip: costTrip,
+                WeightHigh: totalVolumesTicket.oilHeavy,
+                WeightLow: totalVolumesTicket.oilLight,
+                WeightTruck: weightTrucks,
+                TotalWeight: totalVolumesTicket.totalWeight,
+                Status: status,
+                StatusTrip: "กำลังจัดเที่ยววิ่ง",
+                TruckType: "รถใหญ่",
                 ...orderTrip,
                 ...ticketTrip
             })    // อัปเดตข้อมูลของแต่ละ order
@@ -715,37 +736,37 @@ const UpdateTrip = (props) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
-            database
-                    .ref("truck/registration/")
-                    .child(Number(registrations.split(":")[2]) - 1)
-                    .update({
-                        Status: "ว่าง"
-                    })
-                    .then(() => {
-                        setOpen(false);
-                        console.log("Data pushed successfully");
+        database
+            .ref("truck/registration/")
+            .child(Number(registrations.split(":")[2]) - 1)
+            .update({
+                Status: "ว่าง"
+            })
+            .then(() => {
+                setOpen(false);
+                console.log("Data pushed successfully");
 
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
 
-            database
-                    .ref("truck/registration/")
-                    .child(Number(registration.split(":")[2]) - 1)
-                    .update({
-                        Status: "TR:" + (tripID - 1)
-                    })
-                    .then(() => {
-                        setOpen(false);
-                        console.log("Data pushed successfully");
+        database
+            .ref("truck/registration/")
+            .child(Number(registration.split(":")[2]) - 1)
+            .update({
+                Status: "TR:" + (tripID - 1)
+            })
+            .then(() => {
+                setOpen(false);
+                console.log("Data pushed successfully");
 
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
 
         setEditMode(false);
     };
@@ -782,194 +803,269 @@ const UpdateTrip = (props) => {
         return customers.filter((item) => item.id || item.TicketsCode);
     };
 
+    // const handleDeleteTickets = (indexToDelete) => {
+    //     console.log("Show Index Tickets : ", indexToDelete);
+
+    //     setEditableTickets((prev) => {
+    //         // แปลง object เป็น array ก่อน
+    //         const prevArray = Object.values(prev);
+
+    //         // ลบ ticket ตาม id ที่ต้องการ แล้วจัดเรียง id ใหม่
+    //         const updatedArray = prevArray
+    //             .filter((ticket) => ticket.id !== indexToDelete)
+    //             .map((ticket, index) => ({ ...ticket, id: index }));
+
+    //         return updatedArray;
+    //     });
+
+    //     setTicketTrip((prev) => {
+    //         // แปลง object เป็น array ของ entries
+    //         const entries = Object.entries(prev);
+
+    //         // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น Ticket1)
+    //         const filtered = entries.filter(([key]) => key !== `Ticket${parseInt(indexToDelete, 10) + 1}`);
+
+    //         // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก Ticket1
+    //         const newTicketTrip = filtered.reduce((acc, [_, value], index) => {
+    //             acc[`Ticket${index + 1}`] = value;
+    //             return acc;
+    //         }, {});
+
+    //         return newTicketTrip;
+    //     });
+    // };
+
     const handleDeleteTickets = (indexToDelete) => {
-        console.log("Show Index Tickets : ", indexToDelete);
-        // setEditableTickets((prev) => {
-        //     const newOrder = {};
-        //     let newIndex = 0;
+        ShowConfirm(
+            `ต้องการยกเลิกตั๋วลำดับที่ ${indexToDelete + 1} ใช่หรือไม่`,
+            () => {
+                const ticketRef = database.ref("tickets/").child(indexToDelete);
 
-        //     Object.keys(prev).forEach((key) => {
-        //         if (parseInt(key) !== indexToDelete) {
-        //             newOrder[newIndex] = { ...prev[key], id: newIndex };
-        //             newIndex++;
-        //         }
-        //     });
+                ticketRef.once("value").then((snapshot) => {
+                    const ticketData = snapshot.val();
 
-        //     // คำนวณค่า Volume ใหม่จาก newOrder (ข้อมูลหลังจากลบ)
-        //     let totalG95 = 0;
-        //     let totalG91 = 0;
-        //     let totalB7 = 0;
-        //     let totalB95 = 0;
-        //     let totalE20 = 0;
-        //     let totalPWD = 0;
+                    if (ticketData && ticketData.id === indexToDelete) {
+                        // กรณีข้อมูลใน child ตรงกับ indexToDelete
+                        ticketRef.update({
+                            Trip: "ยกเลิก",
+                        })
+                            .then(() => {
+                                console.log("Data pushed successfully");
+                                updateStateAfterTicketDelete(indexToDelete);
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                    } else {
+                        // ถ้าไม่ตรงก็ลบออกจาก state อย่างเดียว
+                        updateStateAfterTicketDelete(indexToDelete);
+                    }
+                });
+            },
+            () => {
+                console.log("ยกเลิกลบตั๋ว");
+            }
+        );
+    };
 
-        //     Object.values(newOrder).forEach((ticket) => {
-        //         if (ticket.Product) {
-        //             totalG95 += ticket.Product?.G95?.Volume || 0;
-        //             totalG91 += ticket.Product?.G91?.Volume || 0;
-        //             totalB7 += ticket.Product?.B7?.Volume || 0;
-        //             totalB95 += ticket.Product?.B95?.Volume || 0;
-        //             totalE20 += ticket.Product?.E20?.Volume || 0;
-        //             totalPWD += ticket.Product?.PWD?.Volume || 0;
-        //         }
-        //     });
+    const updateStateAfterTicketDelete = (indexToDelete) => {
+        setEditableTickets((prev) => {
+            const prevArray = Object.values(prev);
+            const updatedArray = prevArray
+                .filter((ticket) => ticket.id !== indexToDelete)
+                .map((ticket, index) => ({ ...ticket, id: index }));
 
-        //     return newOrder;
-        // });
+            return updatedArray;
+        });
 
-        // setOrderTrip((prev) => {
-        //     // แปลง object เป็น array ของ entries
-        //     const entries = Object.entries(prev);
+        setTicketTrip((prev) => {
+            const entries = Object.entries(prev);
+            const filtered = entries.filter(([key]) => key !== `Ticket${parseInt(indexToDelete, 10) + 1}`);
 
-        //     // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น order1)
-        //     const filtered = entries.filter(([key]) => key !== `order${parseInt(indexToDelete, 10) + 1}`);
+            const newTicketTrip = filtered.reduce((acc, [_, value], index) => {
+                acc[`Ticket${index + 1}`] = value;
+                return acc;
+            }, {});
 
-        //     // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก order1
-        //     const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
-        //         acc[`order${index + 1}`] = value;
-        //         return acc;
-        //     }, {});
-
-        //     return newOrderTrip;
-        // });
-
-
-        // // ลด costTrip -200 เมื่อมีการยกเลิก (กดปุ่ม "ยกเลิก")
-        // if (depots) {
-        //     // ตรวจสอบค่า depot ที่เลือก
-        //     const depotName = depots.split(":")[1]; // สมมุติรูปแบบ depots = "xx:ลำปาง" เป็นต้น
-        //     if (depotName === "ลำปาง") {
-        //         setCostTrip((prev) => (prev === 750 ? 0 : prev - 200));
-        //     } else if (depotName === "พิจิตร") {
-        //         setCostTrip((prev) => (prev === 2000 ? 0 : prev - 200));
-        //     } else if (depotName === "สระบุรี" || depotName === "บางปะอิน" || depotName === "IR") {
-        //         setCostTrip((prev) => (prev === 3200 ? 0 : prev - 200));
-        //     }
-        // }
+            return newTicketTrip;
+        });
     };
 
     const handleDeleteOrder = (indexToDelete) => {
-        console.log("Show Index Order : ", indexToDelete);
-        // setEditableOrders((prev) => {
-        //     const newOrder = {};
-        //     let newIndex = 0;
+        ShowConfirm(
+            `ต้องการยกเลิกออเดอร์ลำดับที่ ${indexToDelete + 1} ใช่หรือไม่`,
+            () => {
+                const ticketRef = database.ref("order/").child(indexToDelete);
 
-        //     Object.keys(prev).forEach((key) => {
-        //         if (parseInt(key) !== indexToDelete) {
-        //             newOrder[newIndex] = { ...prev[key], id: newIndex };
-        //             newIndex++;
-        //         }
-        //     });
+                ticketRef.once("value").then((snapshot) => {
+                    const ticketData = snapshot.val();
 
-        //     // คำนวณค่า Volume ใหม่จาก newOrder (ข้อมูลหลังจากลบ)
-        //     let totalG95 = 0;
-        //     let totalG91 = 0;
-        //     let totalB7 = 0;
-        //     let totalB95 = 0;
-        //     let totalE20 = 0;
-        //     let totalPWD = 0;
-
-        //     Object.values(newOrder).forEach((ticket) => {
-        //         if (ticket.Product) {
-        //             totalG95 += ticket.Product?.G95?.Volume || 0;
-        //             totalG91 += ticket.Product?.G91?.Volume || 0;
-        //             totalB7 += ticket.Product?.B7?.Volume || 0;
-        //             totalB95 += ticket.Product?.B95?.Volume || 0;
-        //             totalE20 += ticket.Product?.E20?.Volume || 0;
-        //             totalPWD += ticket.Product?.PWD?.Volume || 0;
-        //         }
-        //     });
-
-        //     // อัปเดตค่า volumeT ใหม่
-        //     setVolumeT({
-        //         G91: totalG91,
-        //         G95: totalG95,
-        //         B7: totalB7,
-        //         B95: totalB95,
-        //         E20: totalE20,
-        //         PWD: totalPWD
-        //     });
-
-        //     setVolumeG95(totalG95);
-        //     setVolumeG91(totalG91);
-        //     setVolumeB7(totalB7);
-        //     setVolumeB95(totalB95);
-        //     setVolumeE20(totalE20);
-        //     setVolumePWD(totalPWD);
-
-        //     return newOrder;
-        // });
+                    if (ticketData && ticketData.id === indexToDelete) {
+                        // กรณีข้อมูลใน child ตรงกับ indexToDelete
+                        ticketRef.update({
+                            Trip: "ยกเลิก",
+                        })
+                            .then(() => {
+                                console.log("Data pushed successfully");
+                                updateStateAfterOrderDelete(indexToDelete);
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                    } else {
+                        // ถ้าไม่ตรงก็ลบออกจาก state อย่างเดียว
+                        updateStateAfterOrderDelete(indexToDelete);
+                    }
+                });
+            },
+            () => {
+                // ❌ ยกเลิกการลบ (ไม่จำเป็นต้องใส่ก็ได้)
+                console.log("ยกเลิกลบออเดอร์");
+            }
+        );
     };
 
+    const updateStateAfterOrderDelete = (indexToDelete) => {
+        setEditableOrders((prev) => {
+            const prevArray = Object.values(prev);
+            const updatedArray = prevArray
+                .filter((order) => order.id !== indexToDelete)
+                .map((order, index) => ({ ...order, id: index }));
+
+            return updatedArray;
+        });
+
+        setOrderTrip((prev) => {
+            const entries = Object.entries(prev);
+            const filtered = entries.filter(([key]) => key !== `Order${parseInt(indexToDelete, 10) + 1}`);
+
+            const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
+                acc[`Order${index + 1}`] = value;
+                return acc;
+            }, {});
+
+            return newOrderTrip;
+        });
+    };
+
+    // const handleDeleteOrder = (indexToDelete) => {
+    //     setEditableOrders((prev) => {
+    //         // แปลง object เป็น array ก่อน
+    //         const prevArray = Object.values(prev);
+
+    //         // ลบ order ตาม id ที่ต้องการ แล้วจัดเรียง id ใหม่
+    //         const updatedArray = prevArray
+    //             .filter((order) => order.id !== indexToDelete)
+    //             .map((order, index) => ({ ...order, id: index }));
+
+    //         return updatedArray;
+    //     });
+
+    //     setOrderTrip((prev) => {
+    //         // แปลง object เป็น array ของ entries
+    //         const entries = Object.entries(prev);
+
+    //         // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น Order1)
+    //         const filtered = entries.filter(([key]) => key !== `Order${parseInt(indexToDelete, 10) + 1}`);
+
+    //         // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก Order1
+    //         const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
+    //             acc[`Order${index + 1}`] = value;
+    //             return acc;
+    //         }, {});
+
+    //         return newOrderTrip;
+    //     });
+
+    // };
+
+
+
     const handleChangeStatus = () => {
-            database
-                        .ref("truck/registration/")
-                        .child(Number(registration.split(":")[2]) - 1)
+        database
+            .ref("truck/registration/")
+            .child(Number(registration.split(":")[2]) - 1)
+            .update({
+                Status: "ว่าง"
+            })
+            .then(() => {
+                setOpen(false);
+                console.log("Data pushed successfully");
+
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            })
+
+        database
+            .ref("trip/")
+            .child(Number(tripID) - 1)
+            .update({
+                StatusTrip: "จบทริป",
+                DateEnd: dayjs(new Date).format("DD/MM/YYYY")
+            })
+            .then(() => {
+                order.map((row) => (
+                    database
+                        .ref("order/")
+                        .child(row.No)
                         .update({
-                            Status: "ว่าง"
+                            Status: "จัดส่งสำเร็จ"
                         })
                         .then(() => {
-                            setOpen(false);
                             console.log("Data pushed successfully");
-
                         })
                         .catch((error) => {
                             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                             console.error("Error pushing data:", error);
                         })
-
-            database
-                .ref("trip/")
-                .child(Number(tripID) - 1)
-                .update({
-                    StatusTrips: "จบทริป"
-                })
-                .then(() => {
-                    setOpen(false);
-                    console.log("Data pushed successfully");
-
-                })
-                .catch((error) => {
-                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                    console.error("Error pushing data:", error);
-                })
+                ))
+                console.log("Data pushed successfully");
+                setOpen(false);
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            })
     }
 
-    const handleRegistration = (event,weight) => {
+    const handleRegistration = (event, weight) => {
         const registrationValue = event;
         setRegistration(registrationValue);
         setWeightTrucks(weight);
-        console.log("show registration : ",registrationValue);
+        console.log("show registration : ", registrationValue);
 
         if (Object.keys(editableTickets).length > 0) {
             const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
             const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
-        
+
             const updatedTicketsArray = Object.values(editableTickets).map((item) => ({
                 ...item,
                 Registration: registration,
                 Driver: driver,
             }));
-        
+
             // ถ้าคุณต้องการ set เป็น array:
             setEditableTickets(updatedTicketsArray);
         }
 
-    // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
-    if (Object.keys(editableOrders).length > 0) {
-        const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
-        const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
-    
-        const updatedOrdersArray = Object.values(editableOrders).map((item) => ({
-            ...item,
-            Registration: registration,
-            Driver: driver,
-        }));
-    
-        // ถ้าคุณต้องการ set เป็น array:
-        setEditableOrders(updatedOrdersArray);
-    }
+        // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
+        if (Object.keys(editableOrders).length > 0) {
+            const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
 
+            const updatedOrdersArray = Object.values(editableOrders).map((item) => ({
+                ...item,
+                Registration: registration,
+                Driver: driver,
+            }));
+
+            // ถ้าคุณต้องการ set เป็น array:
+            setEditableOrders(updatedOrdersArray);
+        }
     }
 
     console.log("Updated Tickets : ", editableTickets);
@@ -980,7 +1076,7 @@ const UpdateTrip = (props) => {
     return (
         <React.Fragment>
             {
-                trip.StatusTrips !== "จบทริป" &&
+                trip.StatusTrip !== "จบทริป" &&
                 <Tooltip title="กดเพื่อจบทริป" placement="left">
                     <IconButton color="success" size="small" onClick={handleChangeStatus}>
                         <TaskIcon />
@@ -997,7 +1093,13 @@ const UpdateTrip = (props) => {
             <Dialog
                 open={open}
                 keepMounted
-                onClose={handleCancle}
+                onClose={() => {
+                    if (!editMode) {
+                        handleCancle();
+                    } else {
+                        ShowWarning("กรุณาบันทึกข้อมูลก่อนปิดหน้าต่าง");
+                    }
+                }}
                 sx={{
                     "& .MuiDialog-paper": {
                         width: "1200px", // กำหนดความสูงของ Dialog
@@ -1012,7 +1114,13 @@ const UpdateTrip = (props) => {
                             <Typography variant="h6" fontWeight="bold" color="white" >บันทึกข้อมูลการขนส่งน้ำมัน</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
-                            <IconButtonError size="small" onClick={handleCancle}>
+                            <IconButtonError size="small" onClick={() => {
+                                if (!editMode) {
+                                    handleCancle();
+                                } else {
+                                    ShowWarning("กรุณาบันทึกข้อมูลก่อนปิดหน้าต่าง");
+                                }
+                            }}>
                                 <CancelIcon fontSize="small" />
                             </IconButtonError>
                         </Grid>
@@ -1036,9 +1144,15 @@ const UpdateTrip = (props) => {
                                                             <DatePicker
                                                                 openTo="day"
                                                                 views={["year", "month", "day"]}
-                                                                value={dayjs(trip.DateReceive, "DD/MM/YYYY")}
+                                                                value={dayjs(selectedDateReceive, "DD/MM/YYYY")}
                                                                 format="DD/MM/YYYY"
-                                                                //onChange={handleDateChangeReceive}
+                                                                onChange={(newValue) => {
+                                                                    if (newValue) {
+                                                                        setSelectedDateReceive(newValue.format("DD/MM/YYYY"));
+                                                                    } else {
+                                                                        setSelectedDateReceive(""); // หรือ null แล้วแต่คุณต้องการ
+                                                                    }
+                                                                }}
                                                                 slotProps={{
                                                                     textField: {
                                                                         size: "small",
@@ -1088,7 +1202,7 @@ const UpdateTrip = (props) => {
                                                                 if (newValue) {
                                                                     const value = `${newValue.Driver}:${newValue.id}:${newValue.RegHead}`;
                                                                     console.log("Truck : ", value);
-                                                                    handleRegistration(value,newValue.TotalWeight)
+                                                                    handleRegistration(value, newValue.TotalWeight)
                                                                 } else {
                                                                     setRegistration("0:0:0:0");
                                                                 }
@@ -1125,14 +1239,14 @@ const UpdateTrip = (props) => {
                                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
                                                 {
                                                     trip.Driver !== undefined &&
-                                                    trip.Driver.split(":")[1] !== undefined ?
+                                                        trip.Driver.split(":")[1] !== undefined ?
                                                         trip.Driver.split(":")[1]
                                                         :
                                                         trip.Driver
                                                 }/
                                                 {
                                                     trip.Registration !== undefined &&
-                                                    trip.Registration.split(":")[1] !== undefined ?
+                                                        trip.Registration.split(":")[1] !== undefined ?
                                                         trip.Registration.split(":")[1]
                                                         :
                                                         trip.Registration
@@ -1569,14 +1683,24 @@ const UpdateTrip = (props) => {
 
                                                                 // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
                                                                 updatedTickets.push({
-                                                                    id: updatedTickets.length, // ลำดับ id
-                                                                    No: ticketLength, // คำนวณจำนวน order
-                                                                    Trip: (Number(tripID) - 1),
-                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                    OrderID: "",
+                                                                    Address: newValue.Address || "-",
+                                                                    Bill: newValue.Bill || "-",
+                                                                    CodeID: newValue.CodeID || "-",
+                                                                    CompanyName: newValue.CompanyName || "-",
+                                                                    CreditTime: newValue.CreditTime || "-",
+                                                                    Date: trip.DateStart,
+                                                                    Driver: trip.Driver,
+                                                                    Lat: newValue.Lat || 0,
+                                                                    Lng: newValue.Lng || 0,
+                                                                    Product: newValue.Product || "-",
                                                                     Rate1: newValue.Rate1,
                                                                     Rate2: newValue.Rate2,
                                                                     Rate3: newValue.Rate3,
+                                                                    Registration: trip.Registration,
+                                                                    id: updatedTickets.length, // ลำดับ id ใหม่
+                                                                    No: ticketLength, // คำนวณจำนวน order
+                                                                    Trip: (Number(tripID) - 1),
+                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
                                                                     Product: {
                                                                         P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                     }
@@ -1630,7 +1754,7 @@ const UpdateTrip = (props) => {
                                             value={new Intl.NumberFormat("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
-                                            }).format(parseFloat(editMode ? totalVolumesTicket.oilHeavy || trip.WeightHigh : trip.WeightHigh))}
+                                            }).format(parseFloat(editMode ? totalVolumesTicket.oilHeavy : trip.WeightHigh))}
                                         />
                                     </Paper>
                                 </Grid>
@@ -1656,7 +1780,7 @@ const UpdateTrip = (props) => {
                                             value={new Intl.NumberFormat("en-US", {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
-                                            }).format(parseFloat(editMode ? totalVolumesTicket.oilLight || trip.WeightLow : trip.WeightLow))}
+                                            }).format(parseFloat(editMode ? totalVolumesTicket.oilLight : trip.WeightLow))}
                                         />
                                     </Paper>
                                 </Grid>
@@ -1711,7 +1835,7 @@ const UpdateTrip = (props) => {
                                                 value={new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
-                                                }).format(editMode ? totalVolumesTicket.totalWeight || totalWeight : totalWeight)}
+                                                }).format(editMode ? totalVolumesTicket.totalWeight : totalWeight)}
                                             />
                                         </Paper>
                                     </Grid>
@@ -1719,50 +1843,101 @@ const UpdateTrip = (props) => {
                             </Grid>
                         </Paper>
                         <Grid container spacing={1}>
-                            <Grid item sm={1} xs={4} textAlign="left">
+                            <Grid item sm={1.5} xs={4} textAlign="left">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                             </Grid>
-                            <Grid item sm={editMode ? 8 : 11} xs={editMode ? 11 : 8} display="flex" alignItems="center" justifyContent='center'>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
+                            <Grid item sm={editMode ? 7.5 : 11} xs={editMode ? 11 : 8} display="flex" alignItems="center" justifyContent='center'>
                                 {
                                     editMode ?
-                                        <Paper
-                                            component="form" sx={{ height: "30px", width: "100%" }}>
-                                            <TextField size="small" fullWidth
-                                                sx={{
-                                                    "& .MuiOutlinedInput-root": { height: "30px" },
-                                                    "& .MuiInputBase-input": {
-                                                        fontSize: "14px",
-                                                        padding: "1px 4px",
-                                                    },
-                                                    borderRadius: 10
-                                                }}
-                                                value={(() => {
-                                                    const selectedItem = registrationTruck.find(item =>
-                                                        `${item.Driver}:${item.id}:${item.RegHead}` === registration
-                                                    );
-                                                    return selectedItem && selectedItem.Driver !== "ไม่มี" &&
-                                                        `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถใหญ่)`;
-                                                })()}
-                                            />
-                                        </Paper>
+                                        <Grid container spacing={2}>
+                                            <Grid item sm={3.5} xs={12} textAlign="right">
+                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่ส่ง</Typography>
+                                                    <Paper component="form" sx={{ width: "100%" }}>
+                                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                            <DatePicker
+                                                                openTo="day"
+                                                                views={["year", "month", "day"]}
+                                                                value={dayjs(selectedDateDelivery, "DD/MM/YYYY")}
+                                                                format="DD/MM/YYYY"
+                                                                onChange={(newValue) => {
+                                                                    if (newValue) {
+                                                                        setSelectedDateDelivery(newValue.format("DD/MM/YYYY"));
+                                                                    } else {
+                                                                        setSelectedDateDelivery(""); // หรือ null แล้วแต่คุณต้องการ
+                                                                    }
+                                                                }}
+                                                                slotProps={{
+                                                                    textField: {
+                                                                        size: "small",
+                                                                        fullWidth: true,
+                                                                        sx: {
+                                                                            "& .MuiOutlinedInput-root": {
+                                                                                height: "30px",
+                                                                                paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง 
+                                                                            },
+                                                                            "& .MuiInputBase-input": {
+                                                                                fontSize: "14px",
+                                                                            },
+                                                                            "& .MuiInputAdornment-root": {
+                                                                                marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอนปฏิทิน
+                                                                                paddingLeft: "0px"  // เอาพื้นที่ด้านซ้ายของไอคอนออก
+                                                                            }
+                                                                        },
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </LocalizationProvider>
+                                                    </Paper>
+                                                </Box>
+                                            </Grid>
+                                            <Grid item sm={8.5} xs={12} >
+                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                                    <Paper
+                                                        component="form" sx={{ height: "30px", width: "100%" }}>
+                                                        <TextField size="small" fullWidth
+                                                            sx={{
+                                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                "& .MuiInputBase-input": {
+                                                                    fontSize: "14px",
+                                                                    padding: "1px 4px",
+                                                                },
+                                                                borderRadius: 10
+                                                            }}
+                                                            value={(() => {
+                                                                const selectedItem = registrationTruck.find(item =>
+                                                                    `${item.Driver}:${item.id}:${item.RegHead}` === registration
+                                                                );
+                                                                return selectedItem && selectedItem.Driver !== "ไม่มี" &&
+                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถใหญ่)`;
+                                                            })()}
+                                                        />
+                                                    </Paper>
+                                                </Box>
+                                            </Grid>
+                                        </Grid>
+
                                         :
-                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
-                                            {
+                                        <>
+                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
+                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
+                                                {
                                                     trip.Driver !== undefined &&
-                                                    trip.Driver.split(":")[1] !== undefined ?
+                                                        trip.Driver.split(":")[1] !== undefined ?
                                                         trip.Driver.split(":")[1]
                                                         :
                                                         trip.Driver
                                                 }/
                                                 {
                                                     trip.Registration !== undefined &&
-                                                    trip.Registration.split(":")[1] !== undefined ?
+                                                        trip.Registration.split(":")[1] !== undefined ?
                                                         trip.Registration.split(":")[1]
                                                         :
                                                         trip.Registration
                                                 }
-                                        </Typography>
+                                            </Typography>
+                                        </>
                                 }
                             </Grid>
                             {
@@ -1791,7 +1966,7 @@ const UpdateTrip = (props) => {
                                                 value={new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
-                                                }).format(editMode ? (totalVolumesTicket.totalWeight || totalWeight) : totalWeight)}
+                                                }).format(editMode ? (totalVolumesTicket.totalWeight) : totalWeight)}
                                             // InputProps={{
                                             //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
                                             // }}
@@ -2261,14 +2436,14 @@ const UpdateTrip = (props) => {
                         !editMode ?
                             <>
                                 {
-                                    trip.StatusTrips !== "จบทริป" ?
+                                    trip.StatusTrip !== "จบทริป" ?
                                         <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*ถ้าต้องการเพิ่มตั๋วหรือลูกค้าให้กดปุ่มแก้ไข*</Typography>
                                         :
                                         <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*บันทึกรูปภาพ*</Typography>
                                 }
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
                                     {
-                                        trip.StatusTrips !== "จบทริป" &&
+                                        trip.StatusTrip !== "จบทริป" &&
                                         <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate}>แก้ไข</Button>
                                     }
                                     <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>

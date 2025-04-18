@@ -90,6 +90,31 @@ const PrintInvoice = () => {
     return `วันที่ ${day} เดือน ${formattedDate} พ.ศ. ${buddhistYear}`;
   };
 
+  const formatAddress = (address) => {
+    // แยกข้อมูลจาก address โดยใช้ , หรือ เว้นวรรคเป็นตัวแบ่ง
+    const parts = address.split(/,|\s+/).filter(Boolean);
+
+    if (parts.length < 5) return "รูปแบบที่อยู่ไม่ถูกต้อง";
+
+    const [houseNo, moo, subdistrict, district, province, postalCode] = parts;
+
+    return `${houseNo} หมู่ ${moo} ต.${subdistrict} อ.${district} จ.${province} ${postalCode}`;
+  };
+
+  const formatTaxID = (taxID) => {
+    if (!taxID || taxID === "-") {
+      return "-";
+    }
+    return String(taxID).replace(/(\d{3})(\d{4})(\d{5})(\d{1})/, "$1 $2 $3 $4");
+  };
+
+  const formatPhoneNumber = (phone) => {
+    if (!phone || phone === "-") {
+      return "-";
+    }
+    return String(phone).replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+  };
+
   console.log("invoiceData: ", invoiceData?.Report);
   console.log("Reagistration : ", invoiceData?.Registration);
   console.log("order: ", invoiceData?.Order[0].Address);
@@ -114,23 +139,24 @@ const PrintInvoice = () => {
   return (
     <React.Fragment>
       <Box
-          id="invoiceContent"
-          sx={{
-            width: "21cm",  // ใช้หน่วย cm
-            height: "14.8cm",
-            backgroundColor: "#f9f9f9", // สีพื้นหลังอ่อนๆ
-            p: 2
-          }}
-        >
+        id="invoiceContent"
+        sx={{
+          width: "21cm",  // ใช้หน่วย cm
+          height: "14.8cm",
+          backgroundColor: "#f9f9f9", // สีพื้นหลังอ่อนๆ
+          p: 2
+        }}
+      >
         <Grid container spacing={2}>
           <Grid item xs={8}>
             {
               invoiceData &&
               (
                 <React.Fragment>
-                  <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>บริษัท แพนด้า สตาร์ ออยล์ จำกัด (สำนักงานใหญ่)</Typography>
-                  <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>261 หมู่ 2 ต.สันพระเนตร อ.สันทราย จ.เชียงใหม่ 50210</Typography>
-                  <Typography variant="subtitle1" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : 050 5562 00472 6</Typography>
+                  <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>{invoiceData?.Company}</Typography>
+                  <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>
+                    {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}</Typography>
+                  <Typography variant="subtitle1" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
                 </React.Fragment>
               )
             }
@@ -251,19 +277,19 @@ const PrintInvoice = () => {
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={5}>
-<Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด กสิกรไทย</Typography>
-                      <Typography variant="subtitle2" gutterBottom>1. เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
-                      <Typography variant="subtitle2" gutterBottom>2. ป่าแดด...เชียงราย 062-8-16524-6</Typography>
-                      <Typography variant="subtitle2" gutterBottom>3. พะเยา - แม่ต่ำ 065-1-88088-2</Typography>
+                  <Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด กสิกรไทย</Typography>
+                  <Typography variant="subtitle2" gutterBottom>1. เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
+                  <Typography variant="subtitle2" gutterBottom>2. ป่าแดด...เชียงราย 062-8-16524-6</Typography>
+                  <Typography variant="subtitle2" gutterBottom>3. พะเยา - แม่ต่ำ 065-1-88088-2</Typography>
                 </Grid>
                 <Grid item xs={4}>
-                <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
-                      <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
+                  <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
+                  <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
                 </Grid>
-                <Grid item xs={3} sx={{ textAlign: "center",marginTop: 4 }}>
-                                    <Typography variant="subtitle2" gutterBottom>_________________________</Typography>
-                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
-                                    </Grid>
+                <Grid item xs={3} sx={{ textAlign: "center", marginTop: 4 }}>
+                  <Typography variant="subtitle2" gutterBottom>_________________________</Typography>
+                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

@@ -100,6 +100,8 @@ const UpdateRegTail = (props) => {
             });
     }
 
+    console.log("Company : ",companies);
+
     return (
         <React.Fragment>
             <TableCell sx={{ textAlign: "center" }}>
@@ -157,7 +159,7 @@ const UpdateRegTail = (props) => {
                             <Grid item xs={4}>
                                 {
                                     update ?
-                                        <TextField fullWidth variant="standard" value={companies} disabled />
+                                        <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
                                         :
                                         <FormControl variant="standard" fullWidth>
                                             <Select
@@ -166,10 +168,11 @@ const UpdateRegTail = (props) => {
                                                 value={companies}
                                                 onChange={(e) => setCompanies(e.target.value)}
                                             >
-                                                <MenuItem value={companies}>{companies}</MenuItem>
+                                                <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
                                                 {
                                                     dataCompany.map((truck) => (
-                                                        <MenuItem value={truck.Name}>{truck.Name}</MenuItem>
+                                                        (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
+                                                        <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
