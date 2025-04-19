@@ -27,7 +27,9 @@ export const DataProvider = ({ children }) => {
         customertransports: {},
         customergasstations: {},
         customerbigtruck: {},
-        customersmalltruck: {}
+        customersmalltruck: {},
+        reportFinancial: {},
+        typeFinancial: {}
     });
 
     // 🔹 ใช้ useMemo เพื่อป้องกันไม่ให้ ref ถูกสร้างใหม่ทุกครั้งที่ Component re-render
@@ -50,7 +52,9 @@ export const DataProvider = ({ children }) => {
         customergasstations: ref(database, "/customers/gasstations/"),
         customerbigtruck: ref(database, "/customers/bigtruck/"),
         customersmalltruck: ref(database, "/customers/smalltruck/"),
-        customertickets: ref(database, "/customers/tickets/")
+        customertickets: ref(database, "/customers/tickets/"),
+        typeFinancial: ref(database, "/financial/type/"),
+        reportFinancial: ref(database, "/financial/report/")
     }), []);
 
     // ฟังก์ชันโหลดข้อมูลทั้งหมดครั้งแรก

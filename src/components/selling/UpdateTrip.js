@@ -1039,8 +1039,8 @@ const UpdateTrip = (props) => {
         console.log("show registration : ", registrationValue);
 
         if (Object.keys(editableTickets).length > 0) {
-            const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
-            const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+            const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
 
             const updatedTicketsArray = Object.values(editableTickets).map((item) => ({
                 ...item,
@@ -1054,8 +1054,8 @@ const UpdateTrip = (props) => {
 
         // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
         if (Object.keys(editableOrders).length > 0) {
-            const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
-            const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+            const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
 
             const updatedOrdersArray = Object.values(editableOrders).map((item) => ({
                 ...item,

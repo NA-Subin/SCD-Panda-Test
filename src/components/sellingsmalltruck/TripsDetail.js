@@ -107,7 +107,7 @@ const TripsDetail = (props) => {
                     maximumFractionDigits: 2,
                 }).format(trips.TotalWeight)}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
-                    {trips.StatusTrips}
+                    {trips.StatusTrip}
                 </TableCell>
                 <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white"  }}>
                     <UpdateTrip 
