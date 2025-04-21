@@ -101,10 +101,10 @@ const TicketsStock = () => {
                         </TableHead>
                         <TableBody>
                             {
-                                ticket.map((row) => (
+                                ticket.sort((a, b) => a.Name.localeCompare(b.Name)).map((row,index) => (
                                     <TableRow>
                                         <TableCell sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                            {row.TicketsCode}
+                                            {index + 1}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontSize: 16 }}>
                                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>

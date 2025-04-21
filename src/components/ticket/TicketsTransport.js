@@ -247,11 +247,11 @@ const TicketsTransport = () => {
                                                 <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
                                             </TableRow>
                                             :
-                                            transport.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                                                <TableRow key={row.id} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
+                                            transport.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
+                                                <TableRow key={index} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                            {row.id}
+                                                            {index + 1}
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
@@ -523,8 +523,8 @@ const TicketsTransport = () => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        gasStation.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                                            <TicketsGasStation key={row.id} row={row} />
+                                        gasStation.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
+                                            <TicketsGasStation key={row.id} row={row} index={index} />
                                         ))
                                     }
                                 </TableBody>

@@ -671,7 +671,7 @@ const GasStationDetail = (props) => {
                                             paddingTop: 2,
                                             paddingBottom: 1
                                         }}
-                                        disabled
+                                        //disabled
                                     >
                                         <Typography variant="h5" fontWeight="bold" gutterBottom>
                                             {item.ProductName}
@@ -679,7 +679,7 @@ const GasStationDetail = (props) => {
                                     </Box>
                                 </Grid>
                                 <Grid item xs={3} md={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold" color={!save && "textDisabled"} gutterBottom>
+                                    <Typography variant="subtitle2" fontWeight="bold"  gutterBottom>
                                         {first.ShortName || "N/A"}
                                     </Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
@@ -688,12 +688,12 @@ const GasStationDetail = (props) => {
                                             type="text"
                                             fullWidth
                                             value={new Intl.NumberFormat("en-US").format(item.PrevOilBalance)}
-                                            disabled={save ? false : true}
+                                            //disabled={save ? false : true}
                                         />
                                     </Paper>
                                 </Grid>
                                 <Grid item xs={3} md={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold" color={!save && "textDisabled"} gutterBottom>
+                                    <Typography variant="subtitle2" fontWeight="bold"  gutterBottom>
                                         {last.ShortName || "N/A"}
                                     </Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
@@ -702,12 +702,12 @@ const GasStationDetail = (props) => {
                                             type="text"
                                             fullWidth
                                             value={new Intl.NumberFormat("en-US").format(item.LatestOilBalance)}
-                                            disabled={save ? false : true}
+                                            //disabled={save ? false : true}
                                         />
                                     </Paper>
                                 </Grid>
                                 <Grid item xs={3} md={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold" color={!save && "textDisabled"} gutterBottom>
+                                    <Typography variant="subtitle2" fontWeight="bold"  gutterBottom>
                                         ผลลัพธ์
                                     </Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
@@ -716,20 +716,17 @@ const GasStationDetail = (props) => {
                                             type="text"
                                             fullWidth
                                             value={new Intl.NumberFormat("en-US").format(item.Difference)}
-                                            disabled={save ? false : true}
+                                            //disabled={save ? false : true}
                                         />
                                     </Paper>
                                 </Grid>
                             </React.Fragment>
                         ))}
-                        {
-                            save &&
                             <Grid item xs={12} textAlign="center">
                                 <Button variant="contained" color="success" onClick={handleSave}>
                                     บันทึก
                                 </Button>
                             </Grid>
-                        }
                     </Grid>
                     <Box sx={{
                         backgroundColor:

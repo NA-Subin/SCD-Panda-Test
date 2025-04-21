@@ -51,34 +51,35 @@ const CloseFS = () => {
     const [years, setYears] = React.useState(dayjs(new Date));
     const [driverDetail, setDriver] = React.useState([]);
 
-    const { company, drivers, typeFinancial, order, reghead } = useData();
+    const { company, drivers, typeFinancial, order, reghead, trip } = useData();
     const companies = Object.values(company || {});
     const driver = Object.values(drivers || {});
     const typeF = Object.values(typeFinancial || {});
     const orders = Object.values(order || {});
     const registration = Object.values(reghead || {});
+    const trips = Object.values(trip || {});
 
     const formatmonth = (dateString) => {
         if (!dateString) return "ไม่พบข้อมูลวันที่"; // ถ้า undefined หรือ null ให้คืนค่าเริ่มต้น
-    
+
         const [day, month, year] = dateString.split("/").map(Number);
         const date = new Date(year, month - 1, day); // month - 1 เพราะ JavaScript นับเดือนจาก 0-11
-    
-        const formattedDate = new Intl.DateTimeFormat("th-TH", {
-          month: "long",
-        }).format(date); // ดึงชื่อเดือนภาษาไทย
-    
-        return `${formattedDate}`;
-      };
 
-      const formatyear = (dateString) => {
+        const formattedDate = new Intl.DateTimeFormat("th-TH", {
+            month: "long",
+        }).format(date); // ดึงชื่อเดือนภาษาไทย
+
+        return `${formattedDate}`;
+    };
+
+    const formatyear = (dateString) => {
         if (!dateString || !dateString.includes("/")) return "ไม่พบข้อมูลวันที่";
-      
+
         const [day, month, year] = dateString.split("/").map(Number);
         if (!day || !month || !year) return "รูปแบบวันที่ไม่ถูกต้อง";
-      
+
         return `${year}`;
-      };
+    };
 
     //const [driverData, setDriverData] = useState([]);
 
@@ -102,9 +103,13 @@ const CloseFS = () => {
             return acc;
         }, []);
 
+    // const tripdetail = trips.find((row) => orders.find((r) => r.Trip === row.id-1));
+
+    // console.log("tripdetail : ", tripdetail.Depot);
+
     const detail = filtered.map((row) => {
         const regId = Number(row.Registration.split(":")[0]); // สมมติว่า Registration = "123:1กข1234"
-        const regInfo = registration.find((r) => r.id === regId && formatmonth(row.Date) === dayjs(months).format("MMMM"));
+        const regInfo = registration.find((r) => r.id === regId && (formatmonth(row.Date) === dayjs(months).format("MMMM")));
 
         return {
             Date: row.Date,
@@ -117,7 +122,7 @@ const CloseFS = () => {
     const [driverData, setDriverData] = useState([])
     const [driverDataNotCancel, setDriverDataNotCancel] = useState([])
     const [data, setData] = useState([])
-    const [dataNotCancel,setDataNotCancel] = useState([]);
+    const [dataNotCancel, setDataNotCancel] = useState([]);
 
     //setDriverData(detail);
     //};
@@ -128,7 +133,7 @@ const CloseFS = () => {
 
     console.log("detail  : ", detail);
     console.log("data : ", data);
-    console.log("Data Not Cancel : ",dataNotCancel);
+    console.log("Data Not Cancel : ", dataNotCancel);
 
     const [companyName, setCompanyName] = React.useState("");
 
@@ -153,25 +158,59 @@ const CloseFS = () => {
                 return acc;
             }, []);
 
-            const filteredsDetail = orders.map((row) => {
-                if (row.Trip !== "ยกเลิก") {
-                  const regId = Number(row.Registration.split(":")[0]);
-                  const companyId = Number(data.split(":")[0]);
-              
-                  const found = registration.find(
+        const filteredsDetail = orders.map((row) => {
+            if (row.Trip !== "ยกเลิก" && row.CustomerType === "ตั๋วรับจ้างขนส่ง") {
+                const regId = Number(row.Registration.split(":")[0]);
+                const companyId = Number(data.split(":")[0]);
+
+                const found = registration.find(
                     (r) =>
-                      r.id === regId &&
-                      Number(r.Company.split(":")[0]) === companyId &&
-                      formatmonth(row.Date) === dayjs(months).format("MMMM")
-                  );
-              
-                  return found ? {
-                    ...row
-                  } : null;
-                }
-                return null;
-              }).filter(Boolean); // ลบค่าที่เป็น null ออก
-              
+                        r.id === regId &&
+                        Number(r.Company.split(":")[0]) === companyId &&
+                        formatmonth(row.Date) === dayjs(months).format("MMMM")
+                );
+
+                const matchedTrip = trips.find((trip) => (trip.id - 1) === row.Trip);
+                console.log("matchedTrip : ", matchedTrip);
+                const depot = matchedTrip ? matchedTrip.Depot : null;
+
+                const Total = (
+                    depot.split(":")[1] === "ลำปาง" ?
+                        Object.values(row.Product || {}).reduce((sum, product) => {
+                            const volume = product?.Volume || 0;
+                            return sum + (volume * 1000 * row.Rate1);
+                        }, 0)
+                        : depot.split(":")[1] === "พิจิตร" ?
+                            Object.values(row.Product || {}).reduce((sum, product) => {
+                                const volume = product?.Volume || 0;
+                                return sum + (volume * 1000 * row.Rate2);
+                            }, 0)
+                            : ["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1]) ?
+                                Object.values(row.Product || {}).reduce((sum, product) => {
+                                    const volume = product?.Volume || 0;
+                                    return sum + (volume * 1000 * row.Rate3);
+                                }, 0)
+                                : ""
+                )
+
+                console.log("Total : ", Total); // 👉 300
+
+                return found ? {
+                    Driver: row.Driver,
+                    Registration: row.Registration,
+                    Date: row.Date,
+                    TicketName: row.TicketName,
+                    Amount: Total,
+                    Rate: depot.split(":")[1] === "ลำปาง" ? row.Rate1
+                        : depot.split(":")[1] === "พิจิตร" ? row.Rate2
+                            : ["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1]) ? row.Rate3
+                                : "",
+                    Depot: depot
+                } : null;
+            }
+            return null;
+        }).filter(Boolean); // ลบค่าที่เป็น null ออก
+
 
         const details = filtereds
             .map((row) => {
@@ -181,7 +220,7 @@ const CloseFS = () => {
 
                 // หาข้อมูลทะเบียนที่ตรงกับ regId และ companyId
                 const regInfo = registration.find(
-                    (r) => r.id === regId && Number(r.Company.split(":")[0]) === companyId  && formatmonth(row.Date) === dayjs(months).format("MMMM")
+                    (r) => r.id === regId && Number(r.Company.split(":")[0]) === companyId && formatmonth(row.Date) === dayjs(months).format("MMMM")
                 );
 
                 // ถ้าพบข้อมูลตรงกัน ให้ return รายการรายละเอียด
@@ -199,52 +238,72 @@ const CloseFS = () => {
             })
             .filter(Boolean); // กรองค่า null ออก (เหลือแต่รายการที่เจอ regInfo)
 
+        const grouped = {};
+
+        filteredsDetail.forEach((item) => {
+            const key = item.TicketName;
+
+            if (!grouped[key]) {
+                grouped[key] = {
+                    ...item,
+                    amounts: {} // key เป็น `${Driver}-${Registration}`
+                };
+            }
+
+            const driverKey = `${item.Driver}:${item.Registration}`; // สร้าง key สำหรับ driver
+            grouped[key].amounts[driverKey] = item.Amount;
+        });
+
+        console.log("grouped : ", Object.values(grouped));
+
         setDriverData(details)
-        setDriverDataNotCancel(filteredsDetail)
+        setDriverDataNotCancel(Object.values(grouped))
         setData(details)
-        setDataNotCancel(filteredsDetail)
+        setDataNotCancel(Object.values(grouped))
     }
 
     const handleMonth = (newValue) => {
-        console.log("1.Month : ",dayjs(newValue).format("MMMM"));
-            if (newValue) {
-                const month = driverData.filter((row) => (
-                    console.log("2.Month : ",formatmonth(row.Date)),
-                    formatmonth(row.Date) === dayjs(newValue).format("MMMM")
-                ))
-                console.log("Date Month : ",month);
+        console.log("1.Month : ", dayjs(newValue).format("MMMM"));
+        if (newValue) {
+            const month = driverData.filter((row) => (
+                console.log("2.Month : ", formatmonth(row.Date)),
+                formatmonth(row.Date) === dayjs(newValue).format("MMMM")
+            ))
+            console.log("Date Month : ", month);
 
-                const notCancel = driverDataNotCancel.filter((row) => (
-                    console.log("2.Month : ",formatmonth(row.Date)),
-                    formatmonth(row.Date) === dayjs(newValue).format("MMMM")
-                ))
+            const notCancel = driverDataNotCancel.filter((row) => (
+                console.log("2.Month : ", formatmonth(row.Date)),
+                formatmonth(row.Date) === dayjs(newValue).format("MMMM")
+            ))
 
-                setData(month)
-                setMonths(newValue)
-                setDataNotCancel(notCancel)
-            }
-        };
+            setData(month)
+            setMonths(newValue)
+            setDataNotCancel(notCancel)
+        }
+    };
 
-        const handleYear = (newValue) => {
-            console.log("1.Year : ",dayjs(newValue).format("YYYY"));
-                if (newValue) {
-                    const year = driverData.filter((row) => (
-                        console.log("2.Year : ",formatyear(row.Date).toString()),
-                        formatyear(row.Date).toString() === dayjs(newValue).format("YYYY")
-                    ))
-                    console.log("Date Year : ",year);
+    const handleYear = (newValue) => {
+        console.log("1.Year : ", dayjs(newValue).format("YYYY"));
+        if (newValue) {
+            const year = driverData.filter((row) => (
+                console.log("2.Year : ", formatyear(row.Date).toString()),
+                formatyear(row.Date).toString() === dayjs(newValue).format("YYYY")
+            ))
+            console.log("Date Year : ", year);
 
-                    const notCancel = driverDataNotCancel.filter((row) => (
-                        console.log("2.Month : ",formatyear(row.Date).toString() ),
-                        formatyear(row.Date).toString() === dayjs(newValue).format("MMMM")
-                    ))
-                    setData(year)
-                    setYears(newValue)
-                    setDataNotCancel(notCancel)
-                }
-            };
+            const notCancel = driverDataNotCancel.filter((row) => (
+                console.log("2.Month : ", formatyear(row.Date).toString()),
+                formatyear(row.Date).toString() === dayjs(newValue).format("YYYY")
+            ))
+            setData(year)
+            setYears(newValue)
+            setDataNotCancel(notCancel)
+        }
+    };
 
     console.log("company : ", companyName);
+    console.log("months : ", months);
+    console.log("years : ", years);
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -460,24 +519,37 @@ const CloseFS = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                                {
-                                    dataNotCancel.map((row,index) => (
-                                        <TableRow>
-                                            <TableCell sx={{ textAlign: "center" }}>
-                                                {index+1}
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>
-                                                รายได้
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>
-                                                {row.TicketName.split(":")[1]}
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>
-                                                {row.Rate3}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                }
+                            {
+                                dataNotCancel.map((row, index) => (
+                                    <TableRow>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {index + 1}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            รายได้
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {row.TicketName.split(":")[1]}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {
+                                                row.Depot.split(":")[1] === "ลำปาง" ? row.Rate1
+                                                    : row.Depot.split(":")[1] === "พิจิตร" ? row.Rate2
+                                                        : ["สระบุรี", "บางปะอิน", "IR"].includes(row.Depot.split(":")[1]) ? row.Rate3
+                                                            : ""
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            -
+                                        </TableCell>
+                                        {data.map((h) => (
+                                        <TableCell key={`${h.Driver}:${h.Registration}`}  sx={{ textAlign: "center" }}>
+                                            {row.amounts[`${h.Driver}:${h.Registration}`] || "-"}
+                                        </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            }
                         </TableBody>
                     </Table>
                 </TableContainer>

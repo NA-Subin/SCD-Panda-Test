@@ -1322,7 +1322,8 @@ const InsertTrips = () => {
                 onClose={handleCancle}
                 sx={{
                     "& .MuiDialog-paper": {
-                        width: "1200px", // กำหนดความสูงของ Dialog
+                        width: "1300px", // กำหนดความสูงของ Dialog
+                        maxHeight: "98vh",
                     },
                     zIndex: 1000,
                 }}
@@ -1343,12 +1344,10 @@ const InsertTrips = () => {
                 <DialogContent>
                     <Box sx={{ p: 2 }} ref={dialogRef}>
                         <Grid container spacing={1} marginTop={0.5}>
-                            <Grid item sm={1} xs={4} textAlign="left">
-                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
-                            </Grid>
-                            <Grid item sm={2} xs={8} textAlign="right">
+                            <Grid item sm={3.5} xs={12} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
+                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.success.dark, marginTop: 0.5 }} gutterBottom>ตั๋วน้ำมัน</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>วันที่รับ</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
@@ -1367,10 +1366,11 @@ const InsertTrips = () => {
                                                                 paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง 
                                                             },
                                                             "& .MuiInputBase-input": {
-                                                                fontSize: "14px",
+                                                                fontSize: "16px",
+                                                                marginLeft: -1,
                                                             },
                                                             "& .MuiInputAdornment-root": {
-                                                                marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอนปฏิทิน
+                                                                marginLeft: -2, // ลดช่องว่างด้านซ้ายของไอคอนปฏิทิน
                                                                 paddingLeft: "0px"  // เอาพื้นที่ด้านซ้ายของไอคอนออก
                                                             }
                                                         },
@@ -1384,7 +1384,7 @@ const InsertTrips = () => {
                             </Grid>
                             <Grid item sm={6} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
                                         component="form" sx={{ height: "30px", width: "100%" }}>
                                         <Autocomplete
@@ -1414,7 +1414,7 @@ const InsertTrips = () => {
                                                     size="small"
                                                     sx={{
                                                         "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "1px 2px" },
+                                                        "& .MuiInputBase-input": { fontSize: "16px",marginLeft: -1 },
                                                     }}
                                                 />
                                             )}
@@ -1423,9 +1423,9 @@ const InsertTrips = () => {
                                                 <li {...props}>
                                                     {
                                                         option.type === "รถใหญ่" ?
-                                                            <Typography fontSize="14px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
+                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
                                                             :
-                                                            <Typography fontSize="14px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (${option.type})`}</Typography>
+                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (${option.type})`}</Typography>
                                                     }
                                                 </li>
                                             )}
@@ -1433,8 +1433,8 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item sm={3} xs={12} display="flex" alignItems="center" justifyContent="center">
-                                <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} fontWeight="bold" gutterBottom>คลัง</Typography>
+                            <Grid item sm={2.5} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Typography variant="h6" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 0.5 }} fontWeight="bold" gutterBottom>คลัง</Typography>
                                 <Paper sx={{ width: "100%" }}
                                     component="form">
                                     <Autocomplete
@@ -1454,20 +1454,20 @@ const InsertTrips = () => {
                                                 size="small"
                                                 sx={{
                                                     "& .MuiOutlinedInput-root": { height: "30px" },
-                                                    "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
+                                                    "& .MuiInputBase-input": { fontSize: "16px",marginLeft: -1 },
                                                 }}
                                             />
                                         )}
                                         sx={{
                                             "& .MuiOutlinedInput-root": { height: "30px" },
                                             "& .MuiInputBase-input": {
-                                                fontSize: "14px",
+                                                fontSize: "16px",
                                                 padding: "2px 6px",
                                             },
                                         }}
                                         renderOption={(props, option) => (
                                             <li {...props}>
-                                                <Typography fontSize="14px">{option.Name}</Typography>
+                                                <Typography fontSize="16px">{option.Name}</Typography>
                                             </li>
                                         )}
                                     />
@@ -1503,16 +1503,16 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
-                                                <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
-                                                <TablecellTickets width={150} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
-                                                <TablecellTickets width={100} sx={{ textAlign: "center", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
+                                                <TablecellTickets width={50} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
+                                                <TablecellTickets width={350} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
+                                                <TablecellTickets width={150} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
+                                                <TablecellTickets width={100} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
+                                                <TableCellG95 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>G95</TableCellG95>
+                                                <TableCellB95 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>B95</TableCellB95>
+                                                <TableCellB7 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>B7(D)</TableCellB7>
+                                                <TableCellG91 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>G91</TableCellG91>
+                                                <TableCellE20 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>E20</TableCellE20>
+                                                <TableCellPWD width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>PWD</TableCellPWD>
                                                 <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} />
                                             </TableRow>
                                         </TableHead>
@@ -1568,8 +1568,8 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellTickets width={650} sx={{ textAlign: "center", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
-                                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปริมาณรวม</Typography>
+                                                <TablecellTickets width={650} sx={{ textAlign: "center",fontSize: "16px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
+                                                    ปริมาณรวม
                                                 </TablecellTickets>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
                                                     {
@@ -1579,17 +1579,17 @@ const InsertTrips = () => {
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
@@ -1601,7 +1601,7 @@ const InsertTrips = () => {
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G95 || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="16px" color="black" fontWeight="bold" gutterBottom>{volumeT.G95 || 0}</Typography>
                                                     }
                                                 </TableCellG95>
                                                 <TableCellB95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1612,17 +1612,17 @@ const InsertTrips = () => {
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
@@ -1634,7 +1634,7 @@ const InsertTrips = () => {
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.B95 || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="16px" color="black" fontWeight="bold" gutterBottom>{volumeT.B95 || 0}</Typography>
                                                     }
                                                 </TableCellB95>
                                                 <TableCellB7 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1645,17 +1645,17 @@ const InsertTrips = () => {
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
@@ -1667,7 +1667,7 @@ const InsertTrips = () => {
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.B7 || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="16px" color="black" fontWeight="bold" gutterBottom>{volumeT.B7 || 0}</Typography>
                                                     }
                                                 </TableCellB7>
                                                 <TableCellG91 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1678,17 +1678,17 @@ const InsertTrips = () => {
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
@@ -1700,7 +1700,7 @@ const InsertTrips = () => {
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.G91 || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="16px" color="black" fontWeight="bold" gutterBottom>{volumeT.G91 || 0}</Typography>
                                                     }
                                                 </TableCellG91>
                                                 <TableCellE20 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1711,17 +1711,17 @@ const InsertTrips = () => {
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
@@ -1733,7 +1733,7 @@ const InsertTrips = () => {
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.E20 || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="16px" color="black" fontWeight="bold" gutterBottom>{volumeT.E20 || 0}</Typography>
                                                     }
                                                 </TableCellE20>
                                                 <TableCellPWD width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1744,17 +1744,17 @@ const InsertTrips = () => {
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
@@ -1766,7 +1766,7 @@ const InsertTrips = () => {
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{volumeT.PWD || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="16px" color="black" fontWeight="bold" gutterBottom>{volumeT.PWD || 0}</Typography>
                                                     }
                                                 </TableCellPWD>
                                                 <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} >
@@ -1797,17 +1797,17 @@ const InsertTrips = () => {
                                                                         type="number"
                                                                         InputLabelProps={{
                                                                             sx: {
-                                                                                fontSize: '12px',
+                                                                                fontSize: '16px',
                                                                             },
                                                                         }}
                                                                         sx={{
                                                                             '& .MuiOutlinedInput-root': {
-                                                                                height: '22px', // ปรับความสูงของ TextField
+                                                                                height: '25px', // ปรับความสูงของ TextField
                                                                                 display: 'flex', // ใช้ flexbox
                                                                                 alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                             },
                                                                             '& .MuiInputBase-input': {
-                                                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                                fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                                 fontWeight: 'bold',
                                                                                 padding: '2px 6px', // ปรับ padding ภายใน input
                                                                                 textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
@@ -1820,7 +1820,7 @@ const InsertTrips = () => {
                                                                     />
                                                                 </Paper>
                                                                 :
-                                                                <Typography variant="subtitle2" fontSize="12px" fontWeight="bold" color="black" gutterBottom>{(volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD) || 0}</Typography>
+                                                                <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" color="black" gutterBottom>{(volumeT.G91 + volumeT.G95 + volumeT.B7 + volumeT.B95 + volumeT.E20 + volumeT.PWD) || 0}</Typography>
                                                         }
                                                     </Box>
                                                 </TablecellTickets>
@@ -1859,13 +1859,13 @@ const InsertTrips = () => {
                                                     size="small"
                                                     sx={{
                                                         "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "2px 6px" },
+                                                        "& .MuiInputBase-input": { fontSize: "16px",marginLeft: -1 },
                                                     }}
                                                 />
                                             )}
                                             renderOption={(props, option) => (
                                                 <li {...props}>
-                                                    <Typography fontSize="14px">{`${option.Name}`}</Typography>
+                                                    <Typography fontSize="16px">{`${option.Name}`}</Typography>
                                                 </li>
                                             )}
                                             disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
@@ -1873,9 +1873,9 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 <Grid item sm={2} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำมันหนัก</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>น้ำมันหนัก</Typography>
                                     <Paper
-                                        component="form">
+                                        component="form" sx={{ width: "100%", marginTop: -1 }}>
                                         <TextField size="small" fullWidth
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
@@ -1902,9 +1902,9 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 <Grid item sm={2} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำมันเบา</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>น้ำมันเบา</Typography>
                                     <Paper
-                                        component="form">
+                                        component="form" sx={{ width: "100%", marginTop: -1 }}>
                                         <TextField size="small" fullWidth
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
@@ -1934,9 +1934,9 @@ const InsertTrips = () => {
                                 regHead.map((row) => (
                                     row.RegHead === registration.split(":")[1] ? */}
                                 <Grid item sm={2} xs={6} display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>น้ำหนักรถ</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>น้ำหนักรถ</Typography>
                                     <Paper
-                                        component="form">
+                                        component="form" sx={{ width: "100%", marginTop: -1 }}>
                                         <TextField size="small" fullWidth
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
@@ -1980,12 +1980,10 @@ const InsertTrips = () => {
                             ""
                     }*/}
                         <Grid container spacing={1}>
-                            <Grid item sm={1} xs={4} textAlign="left">
-                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.info.main }} gutterBottom>จัดเที่ยววิ่ง</Typography>
-                            </Grid>
-                            <Grid item sm={2} xs={8} textAlign="right">
+                            <Grid item sm={3.5} xs={12} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่ส่ง</Typography>
+                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.info.main, marginTop: 0.5 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>วันที่ส่ง</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
@@ -2004,10 +2002,11 @@ const InsertTrips = () => {
                                                                 paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง 
                                                             },
                                                             "& .MuiInputBase-input": {
-                                                                fontSize: "14px",
+                                                                fontSize: "16px",
+                                                                marginLeft: -1
                                                             },
                                                             "& .MuiInputAdornment-root": {
-                                                                marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอนปฏิทิน
+                                                                marginLeft: -2, // ลดช่องว่างด้านซ้ายของไอคอนปฏิทิน
                                                                 paddingLeft: "0px"  // เอาพื้นที่ด้านซ้ายของไอคอนออก
                                                             }
                                                         },
@@ -2021,14 +2020,14 @@ const InsertTrips = () => {
                             </Grid>
                             <Grid item sm={6} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
                                         component="form" sx={{ height: "30px", width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             sx={{
                                                 "& .MuiOutlinedInput-root": { height: "30px" },
                                                 "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
+                                                    fontSize: "16px",
                                                     padding: "1px 4px",
                                                 },
                                                 borderRadius: 10
@@ -2083,11 +2082,11 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item sm={3} xs={12}>
+                            <Grid item sm={2.5} xs={12}>
                                 <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
                                     <Paper
-                                        component="form" sx={{ width: "100%" }}>
+                                        component="form" sx={{ width: "100%", marginTop: 0.5 }}>
                                         <TextField size="small" fullWidth
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
@@ -2098,9 +2097,7 @@ const InsertTrips = () => {
                                                 '& .MuiInputBase-input': {
                                                     fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                     fontWeight: 'bold',
-                                                    padding: '1px 4px', // ปรับ padding ภายใน input
                                                     textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                    paddingLeft: 2
                                                 },
                                                 borderRadius: 10
                                             }}
@@ -2144,31 +2141,31 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     ลำดับ
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     ลูกค้า
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     ค่าบรรทุก
                                                 </TablecellCustomers>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     G95
                                                 </TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     B95
                                                 </TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     B7(D)
                                                 </TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     G91
                                                 </TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     E20
                                                 </TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px" }}>
+                                                <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
                                                     PWD
                                                 </TableCellPWD>
                                                 <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", borderLeft: "3px solid white" }} />
@@ -2183,7 +2180,7 @@ const InsertTrips = () => {
                                     sx={{
                                         position: "absolute",
                                         top: "35px", // เริ่มจากด้านล่าง header
-                                        bottom: "25px", // จนถึงด้านบนของ footer
+                                        bottom: "50px", // จนถึงด้านบนของ footer
                                         overflowY: "auto",
                                     }}
                                 >
@@ -2218,35 +2215,33 @@ const InsertTrips = () => {
                                 <Box
                                     sx={{
                                         position: "absolute",
-                                        height: "25px",
                                         bottom: "25px", // จนถึงด้านบนของ footer
                                         backgroundColor: theme.palette.info.main,
                                         zIndex: 2,
-                                        marginBottom: 0.5
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main, }}>
-                                                <TablecellCustomers width={500} sx={{ textAlign: "center" }}>
+                                                <TablecellCustomers width={500} sx={{ textAlign: "center", fontSize: "16px" }}>
                                                     รวม
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", fontSize: "16px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.G95 || 0}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", fontSize: "16px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.B95 || 0}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", fontSize: "16px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.B7 || 0}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", fontSize: "16px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.G91 || 0}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", fontSize: "16px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.E20 || 0}
                                                 </TablecellCustomers>
-                                                <TablecellCustomers width={60} sx={{ textAlign: "center", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                <TablecellCustomers width={60} sx={{ textAlign: "center", fontSize: "16px", color: "black", fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {volumeS.PWD || 0}
                                                 </TablecellCustomers>
                                                 <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
@@ -2257,21 +2252,19 @@ const InsertTrips = () => {
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
-                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
                                                                         },
                                                                     }}
                                                                     value={(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}
@@ -2279,7 +2272,7 @@ const InsertTrips = () => {
                                                                 />
                                                             </Paper>
                                                             :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="16px" color="black" fontWeight="bold" gutterBottom>{(volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0}</Typography>
                                                     }
                                                 </TablecellCustomers>
                                             </TableRow>
@@ -2296,13 +2289,12 @@ const InsertTrips = () => {
                                         backgroundColor: theme.palette.info.main,
                                         zIndex: 2,
                                         borderTop: "2px solid white",
-                                        marginBottom: 0.5
                                     }}
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
-                                            <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "35px" }}>
+                                            <TableRow sx={{ position: "sticky", zIndex: 3, backgroundColor: theme.palette.panda.main }}>
+                                                <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px", fontSize: "16px" }}>
                                                     คงเหลือ
                                                 </TablecellCustomers>
                                                 {
@@ -2315,10 +2307,11 @@ const InsertTrips = () => {
                                                                 sx={{
                                                                     textAlign: "center",
                                                                     color: "black",
-                                                                    height: "35px",
+                                                                    height: "25px",
                                                                     fontWeight: "bold",
                                                                     backgroundColor: getBackgroundColor(value),
                                                                     borderLeft: "2px solid white",
+                                                                    fontSize: "16px"
                                                                 }}
                                                             >
                                                                 {value || 0}
@@ -2329,26 +2322,24 @@ const InsertTrips = () => {
                                                 <TablecellCustomers width={Object.keys(selling).length > 4 ? 90 : 80} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
                                                     {
                                                         editMode ?
-                                                            <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
+                                                            <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
                                                                     type="number"
                                                                     InputLabelProps={{
                                                                         sx: {
-                                                                            fontSize: '12px',
+                                                                            fontSize: '16px',
                                                                         },
                                                                     }}
                                                                     sx={{
                                                                         '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            height: '25px', // ปรับความสูงของ TextField
                                                                             display: 'flex', // ใช้ flexbox
                                                                             alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
                                                                         },
                                                                         '& .MuiInputBase-input': {
-                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
-                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            paddingLeft: 2
                                                                         },
                                                                     }}
                                                                     value={totalVolume}
@@ -2397,13 +2388,13 @@ const InsertTrips = () => {
                                                             size="small"
                                                             sx={{
                                                                 "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                "& .MuiInputBase-input": { fontSize: "14px", padding: "4px 8px" },
+                                                                "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
                                                             }}
                                                         />
                                                     )}
                                                     renderOption={(props, option) => (
                                                         <li {...props}>
-                                                            <Typography fontSize="14px">{`${option.Name}`}</Typography>
+                                                            <Typography fontSize="16px">{`${option.Name}`}</Typography>
                                                         </li>
                                                     )}
                                                     disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
@@ -2451,8 +2442,8 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 <Grid item sm={2} xs={12} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
-                                    <Paper sx={{ width: "100%" }}
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
+                                    <Paper sx={{ width: "100%",marginTop: -1 }}
                                         component="form">
                                         <TextField
                                             size="small"
@@ -2464,7 +2455,7 @@ const InsertTrips = () => {
                                             sx={{
                                                 "& .MuiOutlinedInput-root": { height: "30px" },
                                                 "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
+                                                    fontSize: "16px",
                                                     padding: "2px 6px",
                                                 },
                                                 borderRadius: 10
@@ -2473,8 +2464,8 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 <Grid item sm={4} xs={12} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
-                                    <Paper sx={{ width: "100%" }}
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
+                                    <Paper sx={{ width: "100%",marginTop: -1 }}
                                         component="form">
                                         <TextField
                                             size="small"
@@ -2483,7 +2474,7 @@ const InsertTrips = () => {
                                             sx={{
                                                 "& .MuiOutlinedInput-root": { height: "30px" },
                                                 "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
+                                                    fontSize: "16px",
                                                     padding: "2px 6px",
                                                 },
                                                 borderRadius: 10,

@@ -35,7 +35,7 @@ import theme from "../../theme/theme";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const TicketsGasStation = (props) => {
-    const { row } = props;
+    const { row, index } = props;
     const [update, setUpdate] = React.useState(true);
     const [name, setName] = React.useState(row.Name);
     const [rate1, setRate1] = React.useState(row.Rate1);
@@ -71,8 +71,8 @@ const TicketsGasStation = (props) => {
         <React.Fragment>
             {
                 !open ?
-                    <TableRow key={row.id} >
-                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
+                    <TableRow key={index} >
+                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{creditTime}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate1}</TableCell>
@@ -94,8 +94,8 @@ const TicketsGasStation = (props) => {
                         </TableCell>
                     </TableRow>
                     :
-                    <TableRow key={row.id} sx={{ backgroundColor: "#fff59d" }}>
-                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{row.id}</TableCell>
+                    <TableRow key={index} sx={{ backgroundColor: "#fff59d" }}>
+                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{index + 1}</TableCell>
                         {/* <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{name}</TableCell> */}
                         <TableCell sx={{ textAlign: "center" }}>
                             <Paper sx={{ width: "100%" }}>
