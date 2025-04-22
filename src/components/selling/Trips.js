@@ -36,6 +36,7 @@ import { RateOils, TablecellHeader } from "../../theme/style";
 import { database } from "../../server/firebase";
 import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
+import { useData } from "../../server/path";
 
 const TripsBigTruck = () => {
     const [menu, setMenu] = React.useState(0);
@@ -50,29 +51,34 @@ const TripsBigTruck = () => {
         setOpen(false);
     };
 
-    const [trip, setTrip] = useState([]);
+    const {trip} = useData();
+    const trips = Object.values(trip || {});
 
-    const getTrip = async () => {
-        database.ref("/trip").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setTrip([]);
-            } else {
-                const dataTrip = [];
-                for (let id in datas) {
-                    datas[id].TruckType === "รถใหญ่" &&
-                    dataTrip.push({ id, ...datas[id] })
-                }
-                setTrip(dataTrip);
-            }
-        });
-    };
+    const tripDetail = trips.filter((item) => item.TruckType === "รถใหญ่" && item.StatusTrip !== "ยกเลิก" );
 
-    useEffect(() => {
-        getTrip();
-    }, []);
+    // const [trip, setTrip] = useState([]);
 
-    console.log("Trip : ",trip);
+    // const getTrip = async () => {
+    //     database.ref("/trip").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setTrip([]);
+    //         } else {
+    //             const dataTrip = [];
+    //             for (let id in datas) {
+    //                 datas[id].TruckType === "รถใหญ่" &&
+    //                 dataTrip.push({ id, ...datas[id] })
+    //             }
+    //             setTrip(dataTrip);
+    //         }
+    //     });
+    // };
+
+    // useEffect(() => {
+    //     getTrip();
+    // }, []);
+
+    console.log("Trip : ",tripDetail);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -215,19 +221,19 @@ const TripsBigTruck = () => {
                                         </TableHead>
                                         <TableBody>
                                             {
-                                                trip.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                                                    <TripsDetail key={row.id} trips={row} windowWidth={windowWidth} />
+                                                tripDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
+                                                    <TripsDetail key={row.id} trips={row} windowWidth={windowWidth} index={index} />
                                                 ))
                                             }
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
                                 {
-                                    trip.length < 10 ? null :
+                                    tripDetail.length < 10 ? null :
                                         <TablePagination
                                             rowsPerPageOptions={[10, 25, 30]}
                                             component="div"
-                                            count={trip.length}
+                                            count={tripDetail.length}
                                             rowsPerPage={rowsPerPage}
                                             page={page}
                                             onPageChange={handleChangePage}

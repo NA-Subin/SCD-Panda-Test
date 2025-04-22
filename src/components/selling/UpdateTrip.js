@@ -304,6 +304,7 @@ const UpdateTrip = (props) => {
     console.log("editMode : ", !editMode);
 
     console.log("order : ", order);
+    console.log("ticket : ", ticket);
     console.log("orderTrip : ", orderTrip);
     console.log("ticketTrip : ", ticketTrip);
     console.log("registrations : ", registrations);
@@ -835,45 +836,78 @@ const UpdateTrip = (props) => {
     //     });
     // };
 
-    const handleDeleteTickets = (indexToDelete) => {
+    const handleDeleteTickets = (indexToDelete, id) => {
+        const ticketIndex = Number(id) - 1;
+        const tickets = ticket[ticketIndex];
+        if (!tickets || tickets.No === undefined || tickets.No === null) {
+            setEditableTickets((prev) => {
+                const newTicket = [];
+                let newIndex = 0;
+
+                Object.keys(prev).forEach((key) => {
+                    if (parseInt(key) !== ticketIndex) {
+                        newTicket[newIndex] = { ...prev[key], id: newIndex };
+                        newIndex++;
+                    }
+                });
+
+                return newTicket;
+            });
+
+            // ลบจาก orderTrip
+            setTicketTrip((prev) => {
+                const entries = Object.entries(prev);
+                const filtered = entries.filter(([key]) => key !== `Ticket${Number(id) + 1}`);
+
+                const newTicketTrip = filtered.reduce((acc, [_, value], index) => {
+                    acc[`Ticket${index + 1}`] = value;
+                    return acc;
+                }, {});
+
+                return newTicketTrip;
+            });
+
+            return;
+        }
+
+        const ticketKey = tickets.No;
+
         ShowConfirm(
-            `ต้องการยกเลิกตั๋วลำดับที่ ${indexToDelete + 1} ใช่หรือไม่`,
+            `ต้องการยกเลิกออเดอร์ลำดับที่ ${id} ใช่หรือไม่`,
             () => {
-                const ticketRef = database.ref("tickets/").child(indexToDelete);
+                const ticketRef = database.ref("tickets/").child(ticketKey);
 
                 ticketRef.once("value").then((snapshot) => {
                     const ticketData = snapshot.val();
 
-                    if (ticketData && ticketData.id === indexToDelete) {
-                        // กรณีข้อมูลใน child ตรงกับ indexToDelete
+                    if (ticketData && ticketData.No === ticketKey) {
                         ticketRef.update({
                             Trip: "ยกเลิก",
                         })
                             .then(() => {
                                 console.log("Data pushed successfully");
-                                updateStateAfterTicketDelete(indexToDelete);
+                                updateStateAfterTicketDelete(indexToDelete, id);
                             })
                             .catch((error) => {
                                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                                 console.error("Error pushing data:", error);
                             });
                     } else {
-                        // ถ้าไม่ตรงก็ลบออกจาก state อย่างเดียว
-                        updateStateAfterTicketDelete(indexToDelete);
+                        updateStateAfterTicketDelete(indexToDelete, id);
                     }
                 });
             },
             () => {
-                console.log("ยกเลิกลบตั๋ว");
+                console.log(`ยกเลิกลบตั๋วที่ ${id}`);
             }
         );
     };
 
-    const updateStateAfterTicketDelete = (indexToDelete) => {
+    const updateStateAfterTicketDelete = (indexToDelete, id) => {
         setEditableTickets((prev) => {
             const prevArray = Object.values(prev);
             const updatedArray = prevArray
-                .filter((ticket) => ticket.id !== indexToDelete)
+                .filter((ticket) => ticket.No !== indexToDelete)
                 .map((ticket, index) => ({ ...ticket, id: index }));
 
             return updatedArray;
@@ -881,7 +915,7 @@ const UpdateTrip = (props) => {
 
         setTicketTrip((prev) => {
             const entries = Object.entries(prev);
-            const filtered = entries.filter(([key]) => key !== `Ticket${parseInt(indexToDelete, 10) + 1}`);
+            const filtered = entries.filter(([key]) => key !== `Ticket${parseInt(id, 10) + 1}`);
 
             const newTicketTrip = filtered.reduce((acc, [_, value], index) => {
                 acc[`Ticket${index + 1}`] = value;
@@ -892,46 +926,98 @@ const UpdateTrip = (props) => {
         });
     };
 
-    const handleDeleteOrder = (indexToDelete) => {
+    const handleDeleteOrder = (indexToDelete, id) => {
+        const orderIndex = Number(id) - 1;
+        const orders = order[orderIndex];
+
+        console.log("Show Index Order : ", orders);
+
+        if (!orders || orders.No === undefined || orders.No === null) {
+            // console.error("ไม่พบข้อมูลออเดอร์หรือคีย์ไม่ถูกต้อง");
+            // ShowError("ไม่สามารถยกเลิกออเดอร์ได้ เนื่องจากข้อมูลผิดพลาด");
+
+            // ลบจาก editableOrders
+            setEditableOrders((prev) => {
+                const newOrder = [];
+                let newIndex = 0;
+
+                Object.keys(prev).forEach((key) => {
+                    if (parseInt(key) !== orderIndex) {
+                        newOrder[newIndex] = { ...prev[key], id: newIndex };
+                        newIndex++;
+                    }
+                });
+
+                return newOrder;
+            });
+
+            // ลบจาก orderTrip
+            setOrderTrip((prev) => {
+                const entries = Object.entries(prev);
+                const filtered = entries.filter(([key]) => key !== `Order${Number(id) + 1}`);
+
+                const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
+                    acc[`Order${index + 1}`] = value;
+                    return acc;
+                }, {});
+
+                return newOrderTrip;
+            });
+
+            return;
+        }
+
+        const orderKey = orders.No;
+        // console.log("Show Order No : ", orderKey);
+        // console.log("Show Order No : ", orders.No);
+
+        // const orderRef = database.ref("order/").child(orderKey);
+        // console.log("Show Order Ref : ", orderRef);
+
+        // orderRef.once("value").then((snapshot) => {
+        //     const orderData = snapshot.val();
+        //     console.log("Show Order Data : ", orderData.No);
+        //  })
+
+
         ShowConfirm(
-            `ต้องการยกเลิกออเดอร์ลำดับที่ ${indexToDelete + 1} ใช่หรือไม่`,
+            `ต้องการยกเลิกออเดอร์ลำดับที่ ${id} ใช่หรือไม่`,
             () => {
-                const ticketRef = database.ref("order/").child(indexToDelete);
+                const orderRef = database.ref("order/").child(orderKey);
 
-                ticketRef.once("value").then((snapshot) => {
-                    const ticketData = snapshot.val();
+                orderRef.once("value").then((snapshot) => {
+                    const orderData = snapshot.val();
 
-                    if (ticketData && ticketData.id === indexToDelete) {
-                        // กรณีข้อมูลใน child ตรงกับ indexToDelete
-                        ticketRef.update({
+                    if (orderData && orderData.No === orderKey) {
+                        orderRef.update({
                             Trip: "ยกเลิก",
                         })
                             .then(() => {
                                 console.log("Data pushed successfully");
-                                updateStateAfterOrderDelete(indexToDelete);
+                                updateStateAfterOrderDelete(indexToDelete, id);
                             })
                             .catch((error) => {
                                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                                 console.error("Error pushing data:", error);
                             });
                     } else {
-                        // ถ้าไม่ตรงก็ลบออกจาก state อย่างเดียว
-                        updateStateAfterOrderDelete(indexToDelete);
+                        updateStateAfterOrderDelete(indexToDelete, id);
                     }
                 });
             },
             () => {
-                // ❌ ยกเลิกการลบ (ไม่จำเป็นต้องใส่ก็ได้)
-                console.log("ยกเลิกลบออเดอร์");
+                console.log(`ยกเลิกลบออเดอร์ที่ ${id}`);
             }
         );
     };
 
-    const updateStateAfterOrderDelete = (indexToDelete) => {
+
+
+    const updateStateAfterOrderDelete = (indexToDelete, id) => {
         setEditableOrders((prev) => {
             const prevArray = Object.values(prev);
             const updatedArray = prevArray
-                .filter((order) => order.id !== indexToDelete)
+                .filter((order) => order.No !== indexToDelete)
                 .map((order, index) => ({ ...order, id: index }));
 
             return updatedArray;
@@ -939,7 +1025,7 @@ const UpdateTrip = (props) => {
 
         setOrderTrip((prev) => {
             const entries = Object.entries(prev);
-            const filtered = entries.filter(([key]) => key !== `Order${parseInt(indexToDelete, 10) + 1}`);
+            const filtered = entries.filter(([key]) => key !== `Order${parseInt(id, 10) + 1}`);
 
             const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
                 acc[`Order${index + 1}`] = value;
@@ -1437,7 +1523,7 @@ const UpdateTrip = (props) => {
                                                     <TableRow key={rowIdx}>
                                                         {/* ลำดับ */}
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: totalVolumesTicket.totalWeight > 50300 ? theme.palette.error.main : theme.palette.success.dark, color: "white" }}>
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{Number(row.id) + 1}</Typography>
+                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">{rowIdx + 1}</Typography>
                                                         </TableCell>
 
                                                         {/* Ticket Name */}
@@ -1670,7 +1756,7 @@ const UpdateTrip = (props) => {
                                                             editMode ?
                                                                 <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
                                                                     <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }}
-                                                                        onClick={() => handleDeleteTickets(rowIdx)}
+                                                                        onClick={() => handleDeleteTickets(row.No, (rowIdx + 1))}
                                                                     >ยกเลิก</Button>
                                                                 </TableCell>
                                                                 :
@@ -2131,7 +2217,7 @@ const UpdateTrip = (props) => {
                                                     <TableRow key={rowIdx}>
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50, backgroundColor: theme.palette.info.main, color: "white" }}>
                                                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                                {Number(row.id) + 1}
+                                                                {rowIdx + 1}
                                                             </Typography>
                                                         </TableCell>
 
@@ -2249,7 +2335,7 @@ const UpdateTrip = (props) => {
                                                             editMode ?
                                                                 <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
                                                                     <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }}
-                                                                        onClick={() => handleDeleteOrder(rowIdx)}
+                                                                        onClick={() => handleDeleteOrder(row.No, (rowIdx + 1))}
                                                                     >ยกเลิก</Button>
                                                                 </TableCell>
                                                                 :

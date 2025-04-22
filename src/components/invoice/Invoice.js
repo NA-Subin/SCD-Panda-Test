@@ -77,10 +77,12 @@ const Invoice = () => {
   }, []);
 
   const [selectedRow, setSelectedRow] = useState(0);
-
-  const handleRowClick = (row) => {
-    setSelectedRow(row);
-  };
+    const [indexes, setIndex] = useState(0);
+  
+    const handleRowClick = (row,index) => {
+      setSelectedRow(row);
+      setIndex(index);
+    };
 
   console.log("selectedRow : ", selectedRow);
 
@@ -377,17 +379,17 @@ const Invoice = () => {
                             (row.TotalOverdueTransfer !== 0 || (row.Amount === 0 && row.TotalOverdueTransfer === 0)) && (
                             <TableRow
                               key={row.id}
-                              onClick={() => handleRowClick(row)}
-                              sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+                              onClick={() => handleRowClick(row,index)}
+                              sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
                             >
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{index+1}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{index+1}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>
                                 {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
                               </TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
                               </TableCell>
                             </TableRow>
                             )
@@ -396,17 +398,17 @@ const Invoice = () => {
                           : resultBigTruck.map((row,index) => (
                             <TableRow
                               key={row.id}
-                              onClick={() => handleRowClick(row)}
-                              sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: selectedRow.id === row.id ? "#fff59d" : "" }}
+                              onClick={() => handleRowClick(row,index)}
+                              sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
                             >
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{index+1}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{index+1}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>
                                 {new Intl.NumberFormat("en-US").format(row.Volume || 0)}
                               </TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                              <TableCell sx={{ textAlign: "center", fontWeight: selectedRow.id === row.id ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount || 0)}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
+                              <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer || 0)}
                               </TableCell>
                             </TableRow>
                           ))
@@ -417,8 +419,8 @@ const Invoice = () => {
                 </Grid>
                 <Grid item xs={12}>
                   {
-                    resultBigTruck.map((row) => (
-                      selectedRow && selectedRow.id === row.id ?
+                    resultBigTruck.map((row,index) => (
+                      (selectedRow && selectedRow.id === row.id) || indexes === index ?
                         <UpdateInvoice key={row.id} ticket={row} />
                         : ""
                     ))

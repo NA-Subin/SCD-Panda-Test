@@ -38,7 +38,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import UpdateTrip from "./UpdateTrip";
 
 const TripsDetail = (props) => {
-    const { trips, windowWidth } = props;
+    const { trips, windowWidth, index } = props;
     const [approve, setApprove] = React.useState(false);
 
     const handleApprove = () => {
@@ -78,7 +78,7 @@ const TripsDetail = (props) => {
     return (
         <React.Fragment>
             <TableRow>
-                <TableCell sx={{ textAlign: "center" }}>{trips.id}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateReceive}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateDelivery}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Depot.split(":")[0]}</TableCell>
