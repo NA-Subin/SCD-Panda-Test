@@ -78,7 +78,10 @@ const UpdateInvoice = (props) => {
     const bankDetail = Object.values(banks || {});
 
     const companyName = companies.find(item => item.id === 1);
-    const orderList = orders.filter(item => item.TicketName === ticket.TicketName && item.Trip !== "ยกเลิก");
+    const orderList = orders.filter(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
+
+    console.log("orderList : ", orderList);
+    console.log("ticket : ", ticket);
 
     const getPrice = () => {
         let foundItem;
@@ -87,10 +90,10 @@ const UpdateInvoice = (props) => {
 
         if (ticket.CustomerType === "ตั๋วรถใหญ่") {
             console.log("Customer Type : ", ticket.CustomerType);
-            foundItem = customerbigtrucks.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
+            foundItem = orders.find(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
             console.log("🔍 Found Item:", foundItem);
             if (foundItem) {
-                refPath = `/customers/bigtruck/${foundItem.id - 1}/Price`;
+                refPath = `/order/${foundItem.No}/Price`;
                 initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
             }
         } else {
@@ -195,12 +198,12 @@ const UpdateInvoice = (props) => {
     // ฟังก์ชันคำนวณยอดเงิน
     const handlePriceChange = (value, no, uniqueRowId, ticketName, productName, date, driver, registration, volume) => {
 
-        const price = parseFloat(value);
+        const rateOil = parseFloat(value);
 
         setReport((prevReport) => {
             const newReport = { ...prevReport };
 
-            if (value === "" || price === 0 || isNaN(price)) {
+            if (value === "" || rateOil === 0 || isNaN(rateOil)) {
                 // ถ้าค่าว่าง หรือ 0 ให้ลบออกจาก report
                 delete newReport[uniqueRowId];
             } else {
@@ -212,8 +215,8 @@ const UpdateInvoice = (props) => {
                     Date: date,
                     Driver: driver,
                     Registration: registration,
-                    Price: price,
-                    Amount: price * volume,
+                    RateOil: rateOil,
+                    Amount: rateOil * volume,
                 };
             }
 
@@ -232,8 +235,8 @@ const UpdateInvoice = (props) => {
                         RateOil: Volume.RateOil || 0,
                         Amount: Volume.Amount || 0,
                         Date: row.Date,
-                        Driver: row.Driver,
-                        Registration: row.Registration,
+                        Driver: row.Driver.split(":")[1],
+                        Registration: row.Registration.split(":")[1],
                         ProductName: productName,
                         Volume: Volume.Volume * 1000,
                         uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
@@ -246,8 +249,8 @@ const UpdateInvoice = (props) => {
                 }
                 return acc;
             }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
-            Volume: ticket.Volume || 0,
-            Amount: ticket.Amount || 0,
+            Volume: ticket.TotalVolume || 0,
+            Amount: ticket.TotalAmount || 0,
             DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
             Company: companyName.Name,
             Address: companyName.Address,
@@ -290,7 +293,7 @@ const UpdateInvoice = (props) => {
 
             const path = `order/${data.No}/Product/${data.ProductName}`;
             update(ref(database, path), {
-                RateOil: data.Price,
+                RateOil: data.RateOil,
                 Amount: data.Amount,
                 OverdueTransfer: data.Amount
             })
@@ -354,8 +357,8 @@ const UpdateInvoice = (props) => {
         let refPath = "";
 
         if (ticket.CustomerType === "ตั๋วรถใหญ่") {
-            foundItem = customerbigtrucks.find(item => item.id === Number(ticket.TicketName.split(":")[0]));
-            if (foundItem) refPath = "/customers/bigtruck/";
+            foundItem = orders.find(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
+            if (foundItem) refPath = "/order";
         } else {
             ShowError("Ticket Name ไม่ถูกต้อง");
             return;
@@ -394,7 +397,7 @@ const UpdateInvoice = (props) => {
         if (foundItem) {
             database
                 .ref(refPath)
-                .child(`${foundItem.id - 1}/Price/`)
+                .child(`${foundItem.No}/Price/`)
                 .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
                 .then(() => {
 
@@ -573,7 +576,7 @@ const UpdateInvoice = (props) => {
                                                             },
                                                             borderRadius: 10,
                                                         }}
-                                                        value={report[row.uniqueRowId]?.Price || row.RateOil || ""}
+                                                        value={report[row.uniqueRowId]?.RateOil || row.RateOil || ""}
                                                         onChange={(e) => {
                                                             let newValue = e.target.value.replace(/^0+(?=\d)/, "");  // ลบเลข 0 ข้างหน้า
                                                             if (newValue === "") newValue = "";  // ถ้าว่างให้แสดงค่าว่าง
@@ -643,7 +646,7 @@ const UpdateInvoice = (props) => {
                             </TableCell>
                             <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
                                 <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                    {new Intl.NumberFormat("en-US").format(ticket.Volume)}
+                                    {new Intl.NumberFormat("en-US").format(ticket.TotalVolume)}
                                 </Typography>
                             </TableCell>
                             <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 100, backgroundColor: "#616161", color: "white" }}>
@@ -653,7 +656,7 @@ const UpdateInvoice = (props) => {
                             </TableCell>
                             <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
                                 <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                    {new Intl.NumberFormat("en-US").format(ticket.Amount)}
+                                    {new Intl.NumberFormat("en-US").format(ticket.TotalAmount)}
                                 </Typography>
                             </TableCell>
                         </TableRow>

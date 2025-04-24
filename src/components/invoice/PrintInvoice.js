@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Button, Grid, TableHead, TableCell, TableRow, Table, Paper, TableContainer, TableBody, Box } from "@mui/material";
 import html2canvas from 'html2canvas';
+import dayjs from "dayjs";
 
 const PrintInvoice = () => {
   const [invoiceData, setInvoiceData] = useState(null);
@@ -171,7 +172,6 @@ const PrintInvoice = () => {
           <Grid container spacing={2} marginTop={2} sx={{ px: 2 }}>
             {/* ส่วนข้อมูลบริษัท */}
             <Grid item xs={10} sx={{ border: "2px solid black", height: "140px" }}>
-              <Typography variant="subtitle2" sx={{ marginTop: 1 }}><b>รหัส:</b> </Typography>
               <Typography variant="subtitle2"><b>ชื่อบริษัท:</b> {invoiceData?.Order[0].CompanyName}</Typography>
               <Typography variant="subtitle2"><b>ที่อยู่:</b> {formattedAddress}</Typography>
               <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b> {invoiceData?.Order[0].CodeID}</Typography>
@@ -184,7 +184,7 @@ const PrintInvoice = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>วันที่</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
-                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>{invoiceData?.Order[0].Date}</Typography>
+                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>{dayjs(new Date).format("DD/MM/YYYY")}</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>เลขที่เอกสาร</Typography>

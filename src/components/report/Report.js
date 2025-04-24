@@ -79,7 +79,7 @@ const Report = () => {
   const [selectedRow, setSelectedRow] = useState(0);
   const [indexes, setIndex] = useState(0);
 
-  const handleRowClick = (row,index) => {
+  const handleRowClick = (row, index) => {
     setSelectedRow(row);
     setIndex(index);
   };
@@ -94,197 +94,327 @@ const Report = () => {
   const ticketsOrder = Object.values(customertickets || {});
   const trips = Object.values(trip || {});
 
+  const [dateRangesA, setDateRangesA] = useState({});
+  const [dateRangesT, setDateRangesT] = useState({});
+  const [dateRangesG, setDateRangesG] = useState({});
+
   console.log("Ticket : ", ticket);
+  const resultTransport = ticket
+    .filter((item) => (
+      item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
+      item.Trip !== "ยกเลิก"
+    ))
+    .map((item) => {
+      let totalVolume = 0;
+      let totalAmount = 0;
+      let totalOverdue = 0;
 
-  const groupedTickets = ticket.reduce((acc, curr) => {
-    const { TicketName, Date, Product, TransferAmount, TotalOverdueTransfer, CreditTime, Trip, CustomerType } = curr;
+      Object.entries(item.Product).forEach(([key, value]) => {
+        if (key !== "P") {
+          totalVolume += parseFloat(value.Volume || 0) * 1000;
+          totalAmount += parseFloat(value.Amount || 0);
+        }
+      });
 
-    // ถ้ายังไม่มี TicketName นี้ ให้สร้าง object ใหม่
-    if (!acc[TicketName]) {
-      acc[TicketName] = {
-        TicketName,
-        Date,
-        TotalOverdueTransfer,
-        TransferAmount,
-        Volume: 0,
-        Amount: 0,
-        OverdueTransfer: 0,
-        CreditTime,
-        Trip,
-        CustomerType
+      if (item.Price === undefined) {
+        totalOverdue = 0;
+      } else {
+        Object.entries(item.Price).forEach(([key, value]) => {
+          totalOverdue += parseFloat(value.IncomingMoney || 0);
+        });
+      }
+      const tripdetail = trips.find((trip) => trip.No === item.Trip);
+      const depotName = tripdetail?.Depot?.split(":")[1] || "";
+      let Rate = "";
+
+      if (depotName === "ลำปาง") {
+        Rate = item.Rate1;
+      } else if (depotName === "พิจิตร") {
+        Rate = item.Rate2;
+      } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) {
+        Rate = item.Rate3;
+      }
+
+      return {
+        ...item,
+        TotalVolume: totalVolume,
+        TotalPrice: totalVolume * Rate,
+        VatOnePercent: (totalVolume * Rate) * 0.01,
+        TotalAmount: (totalVolume * Rate) - (totalVolume * Rate) * 0.01,
+        TotalOverdue: totalOverdue,
+        Depot: tripdetail?.Depot || "-",
+        Rate: Rate || "-"
+      };
+    });
+
+  const resultGasStation = ticket
+    .filter((item) => (
+      item.CustomerType === "ตั๋วปั้ม" &&
+      item.Trip !== "ยกเลิก"
+    ))
+    .map((item) => {
+      let totalVolume = 0;
+      let totalAmount = 0;
+      let totalOverdue = 0;
+
+      Object.entries(item.Product).forEach(([key, value]) => {
+        if (key !== "P") {
+          totalVolume += parseFloat(value.Volume || 0) * 1000;
+          totalAmount += parseFloat(value.Amount || 0);
+        }
+      });
+
+      if (item.Price !== undefined) {
+        Object.entries(item.Price).forEach(([key, value]) => {
+          totalOverdue += parseFloat(value.IncomingMoney || 0);
+        });
+      }
+
+      const tripdetail = trips.find((trip) => trip.No === item.Trip);
+      const depotName = tripdetail?.Depot?.split(":")[1] || "";
+      let Rate = "";
+
+      if (depotName === "ลำปาง") {
+        Rate = item.Rate1;
+      } else if (depotName === "พิจิตร") {
+        Rate = item.Rate2;
+      } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) {
+        Rate = item.Rate3;
+      }
+
+      return {
+        ...item,
+        TotalVolume: totalVolume,
+        TotalPrice: totalVolume * Rate,
+        VatOnePercent: (totalVolume * Rate) * 0.01,
+        TotalAmount: (totalVolume * Rate) - (totalVolume * Rate) * 0.01,
+        TotalOverdue: totalOverdue,
+        Depot: tripdetail?.Depot || "-",
+        Rate: Rate || "-"
+      };
+    });
+
+  const resultTickets = ticket
+    .filter((item) => (
+      item.CustomerType === "ตั๋วน้ำมัน" &&
+      item.Trip !== "ยกเลิก"
+    ))
+    .map((item) => {
+      let totalVolume = 0;
+      let totalAmount = 0;
+      let totalOverdue = 0;
+
+      Object.entries(item.Product).forEach(([key, value]) => {
+        if (key !== "P") {
+          totalVolume += parseFloat(value.Volume || 0) * 1000;
+          totalAmount += parseFloat(value.Amount || 0);
+        }
+      });
+
+      if (item.Price !== undefined) {
+        Object.entries(item.Price).forEach(([key, value]) => {
+          totalOverdue += parseFloat(value.IncomingMoney || 0);
+        });
+      }
+
+      const tripdetail = trips.find((trip) => trip.No === item.Trip);
+      const depotName = tripdetail?.Depot?.split(":")[1] || "";
+      let Rate = "";
+
+      if (depotName === "ลำปาง") {
+        Rate = item.Rate1;
+      } else if (depotName === "พิจิตร") {
+        Rate = item.Rate2;
+      } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) {
+        Rate = item.Rate3;
+      }
+
+      return {
+        ...item,
+        TotalVolume: totalVolume,
+        TotalPrice: totalVolume * Rate,
+        VatOnePercent: (totalVolume * Rate) * 0.01,
+        TotalAmount: (totalVolume * Rate) - (totalVolume * Rate) * 0.01,
+        TotalOverdue: totalOverdue,
+        Depot: tripdetail?.Depot || "-",
+        Rate: Rate || "-"
+      };
+    });
+
+
+  const resultArrayTickets = resultTickets.reduce((acc, item, index) => {
+    let totalVolume = 0;
+    let totalAmount = 0;
+    let totalOverdue = 0;
+    let totalPrice = 0;
+    let vatOnePercent = 0;
+
+    totalVolume += parseFloat(item.TotalVolume || 0);
+    totalAmount += parseFloat(item.TotalAmount || 0);
+    totalOverdue += parseFloat(item.TotalOverdue || 0);
+    totalPrice += parseFloat(item.TotalPrice || 0);
+    vatOnePercent += parseFloat(item.VatOnePercent || 0);
+
+    const key = item.TicketName;
+
+    if (!acc[key]) {
+      acc[key] = {
+        No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
+        TicketName: key,
+        TotalVolume: 0,
+        TotalAmount: 0,
+        TotalOverdue: 0,
+        TotalPrice: 0,
+        VatOnePercent: 0
       };
     }
 
-    // รวมค่า Volume จาก Product
-    Object.entries(Product).forEach(([key, value]) => {
-      acc[TicketName].Volume += value.Volume * 1000;
-      acc[TicketName].Amount += parseFloat(value.Amount) || 0;
-      acc[TicketName].OverdueTransfer += (value.OverdueTransfer || 0);
-    });
+    dateRangesA[index + 1] = {
+      dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+      dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+    }
+
+    acc[key].TotalVolume += totalVolume;
+    acc[key].TotalAmount += totalAmount;
+    acc[key].TotalOverdue += totalOverdue;
+    acc[key].TotalPrice += totalPrice;
+    acc[key].VatOnePercent += vatOnePercent;
 
     return acc;
   }, {});
 
+  // แปลงจาก object เป็น array ถ้าจะใช้กับ .map() แสดงผลในตาราง
+  const TicketsDetail = Object.values(resultArrayTickets);
 
-  // แปลง Object กลับเป็น Array และเพิ่ม id
-  const result = Object.values(groupedTickets).map((item, index) => ({
-    id: index + 1, // เริ่ม id จาก 1
-    ...item
-  }));
+  const resultArrayGasStation = resultGasStation.reduce((acc, item, index) => {
+    let totalVolume = 0;
+    let totalAmount = 0;
+    let totalOverdue = 0;
+    let totalPrice = 0;
+    let vatOnePercent = 0;
 
-  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ transports
-  const resultTransport = Object.values(groupedTickets)
-    .filter(item => {
+    totalVolume += parseFloat(item.TotalVolume || 0);
+    totalAmount += parseFloat(item.TotalAmount || 0);
+    totalOverdue += parseFloat(item.TotalOverdue || 0);
+    totalPrice += parseFloat(item.TotalPrice || 0);
+    vatOnePercent += parseFloat(item.VatOnePercent || 0);
 
-      
-      if (item.CustomerType !== "ตั๋วรับจ้างขนส่ง") return null;
+    const key = item.TicketName;
 
-      const ticketParts = item.TicketName?.split(":");
-    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
-
-    const matchedTruck = transports.find(entry => (entry.id - 1) === ticketId)
-      const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
-
-      return matchedTruck && matchedTrip &&
-        dayjs(matchedTrip?.DateDelivery, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]');
-    })
-    .map((item, index) => {
-      const ticketParts = item.TicketName?.split(":");
-    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
-
-      const matchedTruck = transports.find(entry => (entry.id - 1) === ticketId)
-      const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
-
-      console.log("ticketParts : ", ticketParts);
-      console.log("Number(ticketParts[0]) - 1 ", Number(ticketParts[0]) - 1);
-      console.log("ticketId : ", ticketId);
-      console.log("matchedTruck : ", matchedTruck);
-      console.log("matchedTrip DateDelivery : ", matchedTrip?.DateDelivery);
-
-      const Amount = matchedTrip?.Depot?.split(":")[1] === "ลำปาง" ? item.Volume * matchedTruck.Rate1
-        : matchedTrip?.Depot?.split(":")[1] === "พิจิตร" ? item.Volume * matchedTruck.Rate2
-          : ["สระบุรี", "บางปะอิน", "IR"].includes(matchedTrip?.Depot?.split(":")[1]) ? item.Volume * matchedTruck.Rate3
-            : 0;
-
-      const Price = Array.isArray(matchedTruck.Price)
-        ? matchedTruck.Price.reduce((acc, p) => acc + (Number(p.IncomingMoney) || 0), 0)
-        : 0;
-
-      console.log("Amount : ", Amount);
-
-      return {
-        id: index + 1,
-        ...item,
-        Amount: Amount,
-        TotalTax: Amount * 0.01,
-        TotalPayment: Amount - (Amount * 0.01),
-        TransferAmount: Price,
-        TotalOverdueTransfer: (Amount - (Amount * 0.01)) - Price,
-        Price: matchedTruck.Price
+    if (!acc[key]) {
+      acc[key] = {
+        No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
+        TicketName: key,
+        TotalVolume: 0,
+        TotalAmount: 0,
+        TotalOverdue: 0,
+        TotalPrice: 0,
+        VatOnePercent: 0
       };
-    });
+    }
 
-  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ ticketsOrder
-  const resultTickets = Object.values(groupedTickets)
-    .filter(item => {
-      if (item.CustomerType !== "ตั๋วน้ำมัน") return null;
+    dateRangesG[index + 1] = {
+      dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+      dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+    }
 
-      const ticketParts = item.TicketName?.split(":");
-    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+    acc[key].TotalVolume += totalVolume;
+    acc[key].TotalAmount += totalAmount;
+    acc[key].TotalOverdue += totalOverdue;
+    acc[key].TotalPrice += totalPrice;
+    acc[key].VatOnePercent += vatOnePercent;
 
-    const matchedTruck = ticketsOrder.find(entry => (entry.id - 1) === ticketId)
-      const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
+    return acc;
+  }, {});
 
-      return matchedTruck && matchedTrip &&
-        dayjs(matchedTrip?.DateDelivery, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]');
-    })
-    .map((item, index) => {
-      const ticketParts = item.TicketName?.split(":");
-    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+  // แปลงจาก object เป็น array ถ้าจะใช้กับ .map() แสดงผลในตาราง
+  const GasStationDetail = Object.values(resultArrayGasStation);
 
-      const matchedTruck = ticketsOrder.find(entry => (entry.id - 1) === ticketId)
-      const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
+  const resultArrayTransport = resultTransport.reduce((acc, item, index) => {
+    let totalVolume = 0;
+    let totalAmount = 0;
+    let totalOverdue = 0;
+    let totalPrice = 0;
+    let vatOnePercent = 0;
 
-      console.log("ticketParts : ", ticketParts);
-      console.log("Number(ticketParts[0]) - 1 ", Number(ticketParts[0]) - 1);
-      console.log("ticketId : ", ticketId);
-      console.log("matchedTruck : ", matchedTruck);
-      console.log("matchedTrip DateDelivery : ", matchedTrip?.DateDelivery);
+    totalVolume += parseFloat(item.TotalVolume || 0);
+    totalAmount += parseFloat(item.TotalAmount || 0);
+    totalOverdue += parseFloat(item.TotalOverdue || 0);
+    totalPrice += parseFloat(item.TotalPrice || 0);
+    vatOnePercent += parseFloat(item.VatOnePercent || 0);
 
-      const Amount = matchedTrip?.Depot?.split(":")[1] === "ลำปาง" ? item.Volume * matchedTruck.Rate1
-        : matchedTrip?.Depot?.split(":")[1] === "พิจิตร" ? item.Volume * matchedTruck.Rate2
-          : ["สระบุรี", "บางปะอิน", "IR"].includes(matchedTrip?.Depot?.split(":")[1]) ? item.Volume * matchedTruck.Rate3
-            : 0;
+    const key = item.TicketName;
 
-      const Price = Array.isArray(matchedTruck.Price)
-        ? matchedTruck.Price.reduce((acc, p) => acc + (Number(p.IncomingMoney) || 0), 0)
-        : 0;
-
-      console.log("Amount : ", Amount);
-
-      return {
-        id: index + 1,
-        ...item,
-        Amount: Amount,
-        TotalTax: Amount * 0.01,
-        TotalPayment: Amount - (Amount * 0.01),
-        TransferAmount: Price,
-        TotalOverdueTransfer: (Amount - (Amount * 0.01)) - Price,
-        Price: matchedTruck.Price
+    if (!acc[key]) {
+      acc[key] = {
+        No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
+        TicketName: key,
+        TotalVolume: 0,
+        TotalAmount: 0,
+        TotalOverdue: 0,
+        TotalPrice: 0,
+        VatOnePercent: 0,
       };
-    });
+    }
 
-  // ตรวจสอบและบันทึกเฉพาะรายการที่ตรงกับ gasstations
-  const resultGasStation = Object.values(groupedTickets)
-    .filter(item => {
-      if (item.CustomerType !== "ตั๋วปั้ม") return null;
+    acc[key].TotalVolume += totalVolume;
+    acc[key].TotalAmount += totalAmount;
+    acc[key].TotalOverdue += totalOverdue;
+    acc[key].TotalPrice += totalPrice;
+    acc[key].VatOnePercent += vatOnePercent;
 
-      const ticketParts = item.TicketName?.split(":");
-    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+    dateRangesT[index + 1] = {
+      dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+      dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+    }
 
-    const matchedTruck = gasstations.find(entry => (entry.id - 1) === ticketId)
-      const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
+    return acc;
+  }, {});
 
-      return matchedTruck && matchedTrip &&
-        dayjs(matchedTrip?.DateDelivery, "DD/MM/YYYY").isBetween(selectedDateStart, selectedDateEnd, 'day', '[]');
-    })
-    .map((item, index) => {
-      const ticketParts = item.TicketName?.split(":");
-    const ticketId = ticketParts?.length ? Number(ticketParts[0]) - 1 : null;
+  // แปลงจาก object เป็น array ถ้าจะใช้กับ .map() แสดงผลในตาราง
+  const TransportDetail = Object.values(resultArrayTransport);
 
-      const matchedTruck = gasstations.find(entry => (entry.id - 1) === ticketId)
-      const matchedTrip = trips.find(entry => entry.id === item.Trip + 1);
+  const handleDateAChange = (index, type, value) => {
+    setDateRangesA(prev => ({
+      ...prev,
+      [index]: {
+        ...prev[index], // ดึงค่าที่เคยมีอยู่เดิม (ถ้ามี)
+        [type]: dayjs(value).format("DD/MM/YYYY"), // อัปเดต field ที่ส่งมา (dateStart หรือ dateEnd)
+      },
+    }));
+  };
 
-      console.log("matchedTruck : ", matchedTruck);
-      console.log("matchedTrip DateDelivery : ", matchedTrip?.DateDelivery);
+  const handleDateTChange = (index, type, value) => {
+    setDateRangesT(prev => ({
+      ...prev,
+      [index]: {
+        ...prev[index], // ดึงค่าที่เคยมีอยู่เดิม (ถ้ามี)
+        [type]: dayjs(value).format("DD/MM/YYYY"), // อัปเดต field ที่ส่งมา (dateStart หรือ dateEnd)
+      },
+    }));
+  };
 
-      const Amount = matchedTrip?.Depot?.split(":")[1] === "ลำปาง" ? item.Volume * matchedTruck.Rate1
-        : matchedTrip?.Depot?.split(":")[1] === "พิจิตร" ? item.Volume * matchedTruck.Rate2
-          : ["สระบุรี", "บางปะอิน", "IR"].includes(matchedTrip?.Depot?.split(":")[1]) ? item.Volume * matchedTruck.Rate3
-            : 0;
+  const handleDateGChange = (index, type, value) => {
+    setDateRangesG(prev => ({
+      ...prev,
+      [index]: {
+        ...prev[index], // ดึงค่าที่เคยมีอยู่เดิม (ถ้ามี)
+        [type]: dayjs(value).format("DD/MM/YYYY"), // อัปเดต field ที่ส่งมา (dateStart หรือ dateEnd)
+      },
+    }));
+  };
+  
 
-      const Price = Array.isArray(matchedTruck.Price)
-        ? matchedTruck.Price.reduce((acc, p) => acc + (Number(p.IncomingMoney) || 0), 0)
-        : 0;
 
-      console.log("Amount : ", Amount);
-
-      return {
-        id: index + 1,
-        ...item,
-        Amount: Amount,
-        TotalTax: Amount * 0.01,
-        TotalPayment: Amount - (Amount * 0.01),
-        TransferAmount: Price,
-        TotalOverdueTransfer: (Amount - (Amount * 0.01)) - Price,
-        Price: matchedTruck.Price
-      };
-    });
-
-  console.log(groupedTickets);
+  console.log("dateRanges A : ", dateRangesA);
+  console.log("dateRanges T : ", dateRangesT);
+  console.log("dateRanges G : ", dateRangesG);
+  console.log("TicketsDetail : ", TicketsDetail);
+  console.log("GasStationDetail : ", GasStationDetail);
+  console.log("TransportDetail : ", TransportDetail);
   console.log("resultTickets : ", resultTickets);
-  console.log("resultGasStaiton : ", resultGasStation);
   console.log("resultTransport : ", resultTransport);
+  console.log("resultGasStation : ", resultGasStation);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -444,7 +574,13 @@ const Report = () => {
                             <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                               ลำดับ
                             </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              วันที่รับ
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              จนถึง
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                               ชื่อตั๋ว
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
@@ -467,35 +603,205 @@ const Report = () => {
                         <TableBody>
                           {
                             checkOverdueTransfer ?
-                              resultTickets.map((row,index) => (
+                              TicketsDetail.map((row, index) => (
                                 row.TotalOverdueTransfer !== 0 &&
-                                <TableRow
-                                  key={row.id}
-                                  onClick={() => handleRowClick(row,index)}
-                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
+                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.id}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalTax || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalPayment || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer)}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {index + 1}
+                                  </TableCell>
+                                  {/* วันที่เริ่มต้น */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesA[row.No].dateStart,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateAChange(row.No, "dateStart", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+
+                                  {/* วันที่สิ้นสุด */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesA[row.No].dateEnd,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateAChange(row.No, "dateEnd", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {row.TicketName.split(":")[1]}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                  </TableCell>
                                 </TableRow>
                               ))
-                              : resultTickets.map((row,index) => (
-                                <TableRow
-                                  key={row.id}
-                                  onClick={() => handleRowClick(row,index)}
-                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
+                              : TicketsDetail.map((row, index) => (
+                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.id}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalTax || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalPayment || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer)}</TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {index + 1}
+                                  </TableCell>
+                                  {/* วันที่เริ่มต้น */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesA[row.No].dateStart,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateAChange(row.No, "dateStart", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+
+                                  {/* วันที่สิ้นสุด */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesA[row.No].dateEnd,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateAChange(row.No, "dateEnd", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {row.TicketName.split(":")[1]}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                  </TableCell>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                  </TableCell>
                                 </TableRow>
                               ))
                           }
@@ -505,9 +811,9 @@ const Report = () => {
                   </Grid>
                   <Grid item xs={12}>
                     {
-                      resultTickets.map((row,index) => (
-                        (selectedRow && selectedRow.id === row.id) || indexes === index ?
-                          <UpdateReport key={row.id} ticket={row} open={open}/>
+                      resultTickets.map((row, index) => (
+                        (selectedRow && selectedRow === row.No) || indexes === index ?
+                          <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesA} />
                           : ""
                       ))
                     }
@@ -545,7 +851,13 @@ const Report = () => {
                               <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                 ลำดับ
                               </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                วันที่รับ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                จนถึง
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                 ชื่อตั๋ว
                               </TablecellHeader>
                               <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
@@ -568,35 +880,203 @@ const Report = () => {
                           <TableBody>
                             {
                               checkOverdueTransfer ?
-                                resultTransport.map((row,index) => (
+                                TransportDetail.map((row, index) => (
                                   row.TotalOverdueTransfer !== 0 &&
-                                  <TableRow
-                                    key={row.id}
-                                    onClick={() => handleRowClick(row,index)}
-                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.id}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalTax || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalPayment || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer)}</TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {index + 1}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesT[row.No].dateStart,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateTChange(row.No, "dateStart", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+
+                                  {/* วันที่สิ้นสุด */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesT[row.No].dateEnd,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateTChange(row.No, "dateEnd", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {row.TicketName.split(":")[1]}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                    </TableCell>
                                   </TableRow>
                                 ))
-                                : resultTransport.map((row,index) => (
-                                  <TableRow
-                                    key={row.id}
-                                    onClick={() => handleRowClick(row,index)}
-                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
+                                : TransportDetail.map((row, index) => (
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.id}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalTax || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalPayment || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer)}</TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {index + 1}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesT[row.No].dateStart,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateTChange(row.No, "dateStart", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+
+                                  {/* วันที่สิ้นสุด */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesT[row.No].dateEnd,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateTChange(row.No, "dateEnd", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {row.TicketName.split(":")[1]}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                    </TableCell>
                                   </TableRow>
                                 ))
                             }
@@ -606,9 +1086,9 @@ const Report = () => {
                     </Grid>
                     <Grid item xs={12}>
                       {
-                        resultTransport.map((row,index) => (
-                          (selectedRow && selectedRow.id === row.id) || indexes === index ?
-                            <UpdateReport key={row.id} ticket={row} open={open} />
+                        resultTransport.map((row, index) => (
+                          (selectedRow && selectedRow === row.No) || indexes === index ?
+                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesT} />
                             : ""
                         ))
                       }
@@ -646,7 +1126,13 @@ const Report = () => {
                               <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                 ลำดับ
                               </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                วันที่รับ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                จนถึง
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                 ชื่อตั๋ว
                               </TablecellHeader>
                               <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
@@ -669,35 +1155,203 @@ const Report = () => {
                           <TableBody>
                             {
                               checkOverdueTransfer ?
-                                resultGasStation.map((row,index) => (
+                                GasStationDetail.map((row, index) => (
                                   row.TotalOverdueTransfer !== 0 &&
-                                  <TableRow
-                                    key={row.id}
-                                    onClick={() => handleRowClick(row,index)}
-                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.id}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalTax || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalPayment || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer)}</TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {index + 1}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesG[row.No].dateStart,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateGChange(row.No, "dateStart", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+
+                                  {/* วันที่สิ้นสุด */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesG[row.No].dateEnd,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateGChange(row.No, "dateEnd", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {row.TicketName.split(":")[1]}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                    </TableCell>
                                   </TableRow>
                                 ))
-                                : resultGasStation.map((row,index) => (
-                                  <TableRow
-                                    key={row.id}
-                                    onClick={() => handleRowClick(row,index)}
-                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.id === row.id) || (indexes === index) ? "#fff59d" : "" }}
+                                : GasStationDetail.map((row, index) => (
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.id}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{row.TicketName.split(":")[1]}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalTax || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalPayment || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TransferAmount || 0)}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.id === row.id) || (indexes === index) ? "bold" : "" }}>{new Intl.NumberFormat("en-US").format(row.TotalOverdueTransfer)}</TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {index + 1}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesG[row.No].dateStart,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateGChange(row.No, "dateStart", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+
+                                  {/* วันที่สิ้นสุด */}
+                                  <TableCell sx={{ textAlign: "center" }}>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                          openTo="day"
+                                          views={["year", "month", "day"]}
+                                          value={dayjs(dateRangesG[row.No].dateEnd,"DD/MM/YYYY")}
+                                          format="DD/MM/YYYY"
+                                          onChange={(newDate) =>
+                                            handleDateGChange(row.No, "dateEnd", newDate)
+                                          }
+                                          slotProps={{
+                                            textField: {
+                                              size: "small",
+                                              fullWidth: true,
+                                              sx: {
+                                                "& .MuiOutlinedInput-root": {
+                                                  height: "30px",
+                                                  paddingRight: "8px",
+                                                },
+                                                "& .MuiInputBase-input": {
+                                                  fontSize: "16px",
+                                                  marginLeft: -1,
+                                                },
+                                                "& .MuiInputAdornment-root": {
+                                                  marginLeft: -2,
+                                                  paddingLeft: "0px"
+                                                }
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </LocalizationProvider>
+                                    </Paper>
+                                  </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {row.TicketName.split(":")[1]}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                    </TableCell>
                                   </TableRow>
                                 ))
                             }
@@ -707,9 +1361,9 @@ const Report = () => {
                     </Grid>
                     <Grid item xs={12}>
                       {
-                        resultGasStation.map((row,index) => (
-                          (selectedRow && selectedRow.id === row.id) || indexes === index ?
-                            <UpdateReport key={row.id} ticket={row} open={open} />
+                        resultGasStation.map((row, index) => (
+                          (selectedRow && selectedRow === row.No) || indexes === index ?
+                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} />
                             : ""
                         ))
                       }
