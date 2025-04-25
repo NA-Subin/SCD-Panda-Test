@@ -163,8 +163,8 @@ const PrintInvoice = () => {
             }
           </Grid>
           <Grid item xs={4} textAlign="right">
-            <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
-              ใบวางบิล/ใบแจ้งหนี้
+            <Typography variant="h6" sx={{ marginRight: 2,fontWeight: "Light" }}>
+              ใบวางบิล / ใบแจ้งหนี้
             </Typography>
           </Grid>
         </Grid>
@@ -190,7 +190,7 @@ const PrintInvoice = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>เลขที่เอกสาร</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
-                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>DDDDD</Typography>
+                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom></Typography>
                 </Grid>
               </Grid>
             </Grid>
@@ -275,7 +275,7 @@ const PrintInvoice = () => {
             </Table>
 
             <Grid item xs={12}>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} justifyContent="center" alignItems="center">
                 <Grid item xs={5}>
                   <Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด กสิกรไทย</Typography>
                   <Typography variant="subtitle2" gutterBottom>1. เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
@@ -286,7 +286,7 @@ const PrintInvoice = () => {
                   <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
                   <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
                 </Grid>
-                <Grid item xs={3} sx={{ textAlign: "center", marginTop: 4 }}>
+                <Grid item xs={3} sx={{ textAlign: "center"}}>
                   <Typography variant="subtitle2" gutterBottom>_________________________</Typography>
                   <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
                 </Grid>

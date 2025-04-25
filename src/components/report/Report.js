@@ -36,6 +36,11 @@ import theme from "../../theme/theme";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const Report = () => {
   const [update, setUpdate] = React.useState(true);
@@ -123,7 +128,7 @@ const Report = () => {
           totalOverdue += parseFloat(value.IncomingMoney || 0);
         });
       }
-      const tripdetail = trips.find((trip) => trip.No === item.Trip);
+      const tripdetail = trips.find((trip) => (trip.id - 1) === item.Trip);
       const depotName = tripdetail?.Depot?.split(":")[1] || "";
       let Rate = "";
 
@@ -134,6 +139,8 @@ const Report = () => {
       } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) {
         Rate = item.Rate3;
       }
+
+      console.log("Rate : ",Rate);
 
       return {
         ...item,
@@ -170,7 +177,7 @@ const Report = () => {
         });
       }
 
-      const tripdetail = trips.find((trip) => trip.No === item.Trip);
+      const tripdetail = trips.find((trip) => (trip.id - 1) === item.Trip);
       const depotName = tripdetail?.Depot?.split(":")[1] || "";
       let Rate = "";
 
@@ -217,7 +224,7 @@ const Report = () => {
         });
       }
 
-      const tripdetail = trips.find((trip) => trip.No === item.Trip);
+      const tripdetail = trips.find((trip) => (trip.id - 1) === item.Trip);
       const depotName = tripdetail?.Depot?.split(":")[1] || "";
       let Rate = "";
 
@@ -261,6 +268,7 @@ const Report = () => {
       acc[key] = {
         No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
         TicketName: key,
+        Date: item.Date,
         TotalVolume: 0,
         TotalAmount: 0,
         TotalOverdue: 0,
@@ -269,10 +277,10 @@ const Report = () => {
       };
     }
 
-    dateRangesA[index + 1] = {
-      dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
-      dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
-    }
+    // dateRangesA[index + 1] = {
+    //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+    //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+    // }
 
     acc[key].TotalVolume += totalVolume;
     acc[key].TotalAmount += totalAmount;
@@ -305,6 +313,7 @@ const Report = () => {
       acc[key] = {
         No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
         TicketName: key,
+        Date: item.Date,
         TotalVolume: 0,
         TotalAmount: 0,
         TotalOverdue: 0,
@@ -313,10 +322,10 @@ const Report = () => {
       };
     }
 
-    dateRangesG[index + 1] = {
-      dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
-      dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
-    }
+    // dateRangesG[index + 1] = {
+    //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+    //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+    // }
 
     acc[key].TotalVolume += totalVolume;
     acc[key].TotalAmount += totalAmount;
@@ -349,6 +358,7 @@ const Report = () => {
       acc[key] = {
         No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
         TicketName: key,
+        Date: item.Date,
         TotalVolume: 0,
         TotalAmount: 0,
         TotalOverdue: 0,
@@ -363,10 +373,10 @@ const Report = () => {
     acc[key].TotalPrice += totalPrice;
     acc[key].VatOnePercent += vatOnePercent;
 
-    dateRangesT[index + 1] = {
-      dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
-      dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
-    }
+    // dateRangesT[index + 1] = {
+    //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+    //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+    // }
 
     return acc;
   }, {});
@@ -403,8 +413,6 @@ const Report = () => {
       },
     }));
   };
-  
-
 
   console.log("dateRanges A : ", dateRangesA);
   console.log("dateRanges T : ", dateRangesT);
@@ -566,7 +574,7 @@ const Report = () => {
                     </Grid>
                     <TableContainer
                       component={Paper}
-                      sx={resultTickets.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                      sx={TicketsDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
                     >
                       <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
                         <TableHead sx={{ height: "5vh" }}>
@@ -618,7 +626,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No].dateStart,"DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateStart", newDate)
@@ -633,7 +641,7 @@ const Report = () => {
                                                   paddingRight: "8px",
                                                 },
                                                 "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
+                                                  fontSize: "14px",
                                                   marginLeft: -1,
                                                 },
                                                 "& .MuiInputAdornment-root": {
@@ -655,7 +663,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No].dateEnd,"DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateEnd", newDate)
@@ -670,7 +678,7 @@ const Report = () => {
                                                   paddingRight: "8px",
                                                 },
                                                 "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
+                                                  fontSize: "14px",
                                                   marginLeft: -1,
                                                 },
                                                 "& .MuiInputAdornment-root": {
@@ -718,7 +726,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No].dateStart,"DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateStart", newDate)
@@ -733,7 +741,7 @@ const Report = () => {
                                                   paddingRight: "8px",
                                                 },
                                                 "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
+                                                  fontSize: "14px",
                                                   marginLeft: -1,
                                                 },
                                                 "& .MuiInputAdornment-root": {
@@ -755,7 +763,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No].dateEnd,"DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateEnd", newDate)
@@ -770,7 +778,7 @@ const Report = () => {
                                                   paddingRight: "8px",
                                                 },
                                                 "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
+                                                  fontSize: "14px",
                                                   marginLeft: -1,
                                                 },
                                                 "& .MuiInputAdornment-root": {
@@ -843,7 +851,7 @@ const Report = () => {
                       </Grid>
                       <TableContainer
                         component={Paper}
-                        sx={resultTransport.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                        sx={TransportDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
                       >
                         <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
                           <TableHead sx={{ height: "5vh" }}>
@@ -889,77 +897,77 @@ const Report = () => {
                                       {index + 1}
                                     </TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesT[row.No].dateStart,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateTChange(row.No, "dateStart", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateTChange(row.No, "dateStart", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
 
-                                  {/* วันที่สิ้นสุด */}
-                                  <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesT[row.No].dateEnd,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateTChange(row.No, "dateEnd", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                    {/* วันที่สิ้นสุด */}
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateTChange(row.No, "dateEnd", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                       {row.TicketName.split(":")[1]}
                                     </TableCell>
@@ -988,77 +996,77 @@ const Report = () => {
                                       {index + 1}
                                     </TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesT[row.No].dateStart,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateTChange(row.No, "dateStart", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateTChange(row.No, "dateStart", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
 
-                                  {/* วันที่สิ้นสุด */}
-                                  <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesT[row.No].dateEnd,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateTChange(row.No, "dateEnd", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                    {/* วันที่สิ้นสุด */}
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateTChange(row.No, "dateEnd", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                       {row.TicketName.split(":")[1]}
                                     </TableCell>
@@ -1085,13 +1093,15 @@ const Report = () => {
                       </TableContainer>
                     </Grid>
                     <Grid item xs={12}>
-                      {
+                      <Grid item xs={12}>
+                        {
                         resultTransport.map((row, index) => (
                           (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesT} />
+                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} />
                             : ""
                         ))
                       }
+                      </Grid>
                     </Grid>
                   </Grid>
                   :
@@ -1118,7 +1128,7 @@ const Report = () => {
                       </Grid>
                       <TableContainer
                         component={Paper}
-                        sx={resultGasStation.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                        sx={GasStationDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
                       >
                         <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
                           <TableHead sx={{ height: "5vh" }}>
@@ -1164,77 +1174,77 @@ const Report = () => {
                                       {index + 1}
                                     </TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesG[row.No].dateStart,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateGChange(row.No, "dateStart", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateGChange(row.No, "dateStart", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
 
-                                  {/* วันที่สิ้นสุด */}
-                                  <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesG[row.No].dateEnd,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateGChange(row.No, "dateEnd", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                    {/* วันที่สิ้นสุด */}
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateGChange(row.No, "dateEnd", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "16px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                       {row.TicketName.split(":")[1]}
                                     </TableCell>
@@ -1263,77 +1273,77 @@ const Report = () => {
                                       {index + 1}
                                     </TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesG[row.No].dateStart,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateGChange(row.No, "dateStart", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateGChange(row.No, "dateStart", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
 
-                                  {/* วันที่สิ้นสุด */}
-                                  <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesG[row.No].dateEnd,"DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateGChange(row.No, "dateEnd", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
+                                    {/* วันที่สิ้นสุด */}
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Paper component="form" sx={{ width: "100%" }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                          <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            format="DD/MM/YYYY"
+                                            onChange={(newDate) =>
+                                              handleDateGChange(row.No, "dateEnd", newDate)
+                                            }
+                                            slotProps={{
+                                              textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                sx: {
+                                                  "& .MuiOutlinedInput-root": {
+                                                    height: "30px",
+                                                    paddingRight: "8px",
+                                                  },
+                                                  "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    marginLeft: -1,
+                                                  },
+                                                  "& .MuiInputAdornment-root": {
+                                                    marginLeft: -2,
+                                                    paddingLeft: "0px"
+                                                  }
                                                 },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "16px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
                                               },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
+                                            }}
+                                          />
+                                        </LocalizationProvider>
+                                      </Paper>
+                                    </TableCell>
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                       {row.TicketName.split(":")[1]}
                                     </TableCell>

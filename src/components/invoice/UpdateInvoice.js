@@ -79,7 +79,9 @@ const UpdateInvoice = (props) => {
 
     const companyName = companies.find(item => item.id === 1);
     const orderList = orders.filter(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
+    const [code, setCode] = React.useState(`lV${dayjs(new Date).format("YYYYMM")}`)
 
+    console.log("code : ", code);
     console.log("orderList : ", orderList);
     console.log("ticket : ", ticket);
 
@@ -94,7 +96,16 @@ const UpdateInvoice = (props) => {
             console.log("🔍 Found Item:", foundItem);
             if (foundItem) {
                 refPath = `/order/${foundItem.No}/Price`;
-                initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+                initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [{
+                    id: 0,
+                    Code: dayjs(new Date).format("YYYYMM"),
+                    Number: "",
+                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                    BankName: "",
+                    Transport: `${companyName.id}:${companyName.Name}`,
+                    IncomingMoney: "",
+                    Note: "",
+                }];
             }
         } else {
             ShowError("Ticket Name ไม่ถูกต้อง");
@@ -313,6 +324,8 @@ const UpdateInvoice = (props) => {
             const newRow = {
                 id: newIndex,
                 DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                Code: dayjs(new Date).format("YYYYMM"),
+                Number: "",
                 BankName: "",
                 Transport: `${companyName.id}:${companyName.Name}`,
                 IncomingMoney: "",
@@ -428,11 +441,83 @@ const UpdateInvoice = (props) => {
     return (
         <React.Fragment>
             <Grid container spacing={2}>
-                <Grid item xs={9.5}>
-                    <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                        รายละเอียด : วันที่ส่ง : {ticket.Date} จากลูกค้าชื่อ : {ticket.TicketName.split(":")[1]}
+                <Grid item xs={12}>
+                    <Typography variant="subtitle1" sx={{ fontSize: "18px", marginBottom: -2 }} fontWeight="bold" gutterBottom>
+                        รายละเอียด : วันที่ส่ง : {ticket.Date} ตั๋ว : {ticket.TicketName.split(":")[1]}
                     </Typography>
-                    <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography>
+                    {/* <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -2.5, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography> */}
+                </Grid>
+                <Grid item xs={5.5}></Grid>
+                <Grid item xs={4.5} textAlign="right">
+                    <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 0.5 }}>
+                        <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }}>
+                            NEW
+                        </Button>
+                        <TextField size="small"
+                            fullWidth
+                            InputLabelProps={{
+                                sx: {
+                                    fontSize: '14px',
+                                },
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    height: '25px', // ปรับความสูงของ TextField
+                                    display: 'flex', // ใช้ flexbox
+                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                },
+                                '& .MuiInputBase-input': {
+                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                    marginLeft: -1
+                                },
+                            }}
+                            value={code}
+                        />
+                        <Typography variant="subtitle1" sx={{ marginLeft: 1, marginRight: 1 }} fontWeight="bold" gutterBottom>-</Typography>
+                        <TextField size="small"
+                            fullWidth
+                            InputLabelProps={{
+                                sx: {
+                                    fontSize: '14px',
+                                },
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    height: '25px', // ปรับความสูงของ TextField
+                                    display: 'flex', // ใช้ flexbox
+                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                },
+                                '& .MuiInputBase-input': {
+                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                    marginRight: -2
+                                },
+                                marginRight: 1,
+                                width: "250px"
+                            }}
+                        />
+                        <TextField size="small"
+                        disabled
+                            InputLabelProps={{
+                                sx: {
+                                    fontSize: '14px',
+                                },
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    height: '25px', // ปรับความสูงของ TextField
+                                    display: 'flex', // ใช้ flexbox
+                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                },
+                                '& .MuiInputBase-input': {
+                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                },
+                                width: "700px"
+                            }}
+                            value={"สาขาสำนักงานใหญ่"}
+                        />
+                    </Box>
                 </Grid>
                 <Grid item xs={1.5}>
                     <Tooltip title="พิมพ์ใบวางบิล" placement="top">
@@ -454,7 +539,7 @@ const UpdateInvoice = (props) => {
                         </Button>
                     </Tooltip>
                 </Grid>
-                <Grid item xs={1}>
+                {/* <Grid item xs={1}>
                     <Tooltip title="บันทึกข้อมูล" placement="top">
                         <Button
                             color="success"
@@ -473,197 +558,215 @@ const UpdateInvoice = (props) => {
                             </Typography>
                         </Button>
                     </Tooltip>
+                </Grid> */}
+                <Grid item xs={11.5}>
+                    <TableContainer
+                        component={Paper}
+                        sx={{ borderRadius: 2, marginTop: -1 }}
+                    >
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                            <TableHead>
+                                <TableRow>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        ลำดับ
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        วันที่
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        ผู้ขับ/ป้ายทะเบียน
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        ชนิดน้ำมัน
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        จำนวนลิตร
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        ราคาน้ำมัน
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        ยอดเงิน
+                                    </TablecellSelling>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {
+                                    orderList
+                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .flatMap((row, rowIndex) =>
+                                            Object.entries(row.Product)
+                                                .filter(([productName]) => productName !== "P") // กรองก่อน map
+                                                .map(([productName, Volume], index) => ({
+                                                    No: row.No,
+                                                    TicketName: row.TicketName,
+                                                    RateOil: Volume.RateOil || 0,
+                                                    Amount: Volume.Amount || 0,
+                                                    Date: row.Date,
+                                                    Driver: row.Driver,
+                                                    Registration: row.Registration,
+                                                    ProductName: productName,
+                                                    Volume: Volume.Volume * 1000,
+                                                    uniqueRowId: `${index}:${productName}:${row.No}`,
+                                                }))
+                                        )
+                                        .map((row, index) => (
+                                            <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Date || row.Date}</Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
+                                                </TableCell>
+                                                <TableCell sx={{
+                                                    textAlign: "center", height: '30px', width: 100,
+                                                    backgroundColor: row.ProductName === "G91" ? "#92D050" :
+                                                        row.ProductName === "G95" ? "#FFC000" :
+                                                            row.ProductName === "B7" ? "#FFFF99" :
+                                                                row.ProductName === "B95" ? "#B7DEE8" :
+                                                                    row.ProductName === "B10" ? "#32CD32" :
+                                                                        row.ProductName === "B20" ? "#228B22" :
+                                                                            row.ProductName === "E20" ? "#C4BD97" :
+                                                                                row.ProductName === "E85" ? "#0000FF" :
+                                                                                    row.ProductName === "PWD" ? "#F141D8" :
+                                                                                        "#FFFFFF"
+                                                }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.ProductName || row.ProductName}</Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {new Intl.NumberFormat("en-US").format(row.Volume)}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 100 }}>
+                                                    <Paper component="form" sx={{ marginTop: -1, marginBottom: -1 }}>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                type="number"
+                                                                size="small"
+                                                                fullWidth
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '22px',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: "14px",
+                                                                        padding: '1px 4px',
+                                                                        textAlign: 'center',
+                                                                    },
+                                                                    borderRadius: 10,
+                                                                }}
+                                                                value={report[row.uniqueRowId]?.RateOil || row.RateOil || ""}
+                                                                onChange={(e) => {
+                                                                    let newValue = e.target.value.replace(/^0+(?=\d)/, "");  // ลบเลข 0 ข้างหน้า
+                                                                    if (newValue === "") newValue = "";  // ถ้าว่างให้แสดงค่าว่าง
+                                                                    handlePriceChange(
+                                                                        newValue,  // ใช้ค่าใหม่ที่ไม่มี 0 ข้างหน้า
+                                                                        row.No,
+                                                                        row.uniqueRowId,
+                                                                        row.TicketName,
+                                                                        row.ProductName,
+                                                                        row.Date,
+                                                                        row.Driver,
+                                                                        row.Registration,
+                                                                        row.Volume
+                                                                    );
+                                                                }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") { // ถ้าเป็น "0" ให้เคลียร์
+                                                                        handlePriceChange(
+                                                                            "",
+                                                                            row.No,
+                                                                            row.uniqueRowId,
+                                                                            row.TicketName,
+                                                                            row.ProductName,
+                                                                            row.Date,
+                                                                            row.Driver,
+                                                                            row.Registration,
+                                                                            row.Volume
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") { // ถ้าว่างให้ตั้งค่าเป็น "0"
+                                                                        handlePriceChange(
+                                                                            "0",
+                                                                            row.No,
+                                                                            row.uniqueRowId,
+                                                                            row.TicketName,
+                                                                            row.ProductName,
+                                                                            row.Date,
+                                                                            row.Driver,
+                                                                            row.Registration,
+                                                                            row.Volume
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </Paper>
+                                                    </Paper>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {new Intl.NumberFormat("en-US").format(report[row.uniqueRowId]?.Amount || row.Amount)}
+                                                    </Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                }
+                            </TableBody>
+                        </Table>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={4}>
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            รวม
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            {new Intl.NumberFormat("en-US").format(ticket.TotalVolume)}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 100, backgroundColor: "#616161", color: "white" }}>
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            0
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            {new Intl.NumberFormat("en-US").format(ticket.TotalAmount)}
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                        </Table>
+                    </TableContainer>
+                </Grid>
+                <Grid item xs={0.5}>
+                    <Tooltip title="บันทึกข้อมูล" placement="top">
+                        <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
+                            <Button
+                                color="inherit"
+                                fullWidth
+                                onClick={handleSave}
+                                sx={{ flexDirection: "column", gap: 0.5 }}
+                            >
+                                <SaveIcon fontSize="small" sx={{ color: "white" }} />
+                                <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                    บันทึก
+                                </Typography>
+                            </Button>
+                        </Paper>
+                    </Tooltip>
                 </Grid>
             </Grid>
-            <TableContainer
-                component={Paper}
-                sx={{ marginBottom: 2, borderRadius: 2 }}
-            >
-                <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                    <TableHead>
-                        <TableRow>
-                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                ลำดับ
-                            </TablecellSelling>
-                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                วันที่
-                            </TablecellSelling>
-                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                ผู้ขับ/ป้ายทะเบียน
-                            </TablecellSelling>
-                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                ชนิดน้ำมัน
-                            </TablecellSelling>
-                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                จำนวนลิตร
-                            </TablecellSelling>
-                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                ราคาน้ำมัน
-                            </TablecellSelling>
-                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                ยอดเงิน
-                            </TablecellSelling>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {
-                            orderList
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .flatMap((row, rowIndex) =>
-                                    Object.entries(row.Product)
-                                        .filter(([productName]) => productName !== "P") // กรองก่อน map
-                                        .map(([productName, Volume], index) => ({
-                                            No: row.No,
-                                            TicketName: row.TicketName,
-                                            RateOil: Volume.RateOil || 0,
-                                            Amount: Volume.Amount || 0,
-                                            Date: row.Date,
-                                            Driver: row.Driver,
-                                            Registration: row.Registration,
-                                            ProductName: productName,
-                                            Volume: Volume.Volume * 1000,
-                                            uniqueRowId: `${index}:${productName}:${row.No}`,
-                                        }))
-                                )
-                                .map((row, index) => (
-                                    <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
-                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Date || row.Date}</Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px' }}>
-                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
-                                        </TableCell>
-                                        <TableCell sx={{
-                                            textAlign: "center", height: '30px', width: 100,
-                                            backgroundColor: row.ProductName === "G91" ? "#92D050" :
-                                                row.ProductName === "G95" ? "#FFC000" :
-                                                    row.ProductName === "B7" ? "#FFFF99" :
-                                                        row.ProductName === "B95" ? "#B7DEE8" :
-                                                            row.ProductName === "B10" ? "#32CD32" :
-                                                                row.ProductName === "B20" ? "#228B22" :
-                                                                    row.ProductName === "E20" ? "#C4BD97" :
-                                                                        row.ProductName === "E85" ? "#0000FF" :
-                                                                            row.ProductName === "PWD" ? "#F141D8" :
-                                                                                "#FFFFFF"
-                                        }}>
-                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.ProductName || row.ProductName}</Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {new Intl.NumberFormat("en-US").format(row.Volume)}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 100 }}>
-                                            <Paper component="form" sx={{ marginTop: -1, marginBottom: -1 }}>
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField
-                                                        type="number"
-                                                        size="small"
-                                                        fullWidth
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-root': {
-                                                                height: '22px',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                            },
-                                                            '& .MuiInputBase-input': {
-                                                                fontSize: "14px",
-                                                                padding: '1px 4px',
-                                                                textAlign: 'center',
-                                                            },
-                                                            borderRadius: 10,
-                                                        }}
-                                                        value={report[row.uniqueRowId]?.RateOil || row.RateOil || ""}
-                                                        onChange={(e) => {
-                                                            let newValue = e.target.value.replace(/^0+(?=\d)/, "");  // ลบเลข 0 ข้างหน้า
-                                                            if (newValue === "") newValue = "";  // ถ้าว่างให้แสดงค่าว่าง
-                                                            handlePriceChange(
-                                                                newValue,  // ใช้ค่าใหม่ที่ไม่มี 0 ข้างหน้า
-                                                                row.No,
-                                                                row.uniqueRowId,
-                                                                row.TicketName,
-                                                                row.ProductName,
-                                                                row.Date,
-                                                                row.Driver,
-                                                                row.Registration,
-                                                                row.Volume
-                                                            );
-                                                        }}
-                                                        onFocus={(e) => {
-                                                            if (e.target.value === "0") { // ถ้าเป็น "0" ให้เคลียร์
-                                                                handlePriceChange(
-                                                                    "",
-                                                                    row.No,
-                                                                    row.uniqueRowId,
-                                                                    row.TicketName,
-                                                                    row.ProductName,
-                                                                    row.Date,
-                                                                    row.Driver,
-                                                                    row.Registration,
-                                                                    row.Volume
-                                                                );
-                                                            }
-                                                        }}
-                                                        onBlur={(e) => {
-                                                            if (e.target.value === "") { // ถ้าว่างให้ตั้งค่าเป็น "0"
-                                                                handlePriceChange(
-                                                                    "0",
-                                                                    row.No,
-                                                                    row.uniqueRowId,
-                                                                    row.TicketName,
-                                                                    row.ProductName,
-                                                                    row.Date,
-                                                                    row.Driver,
-                                                                    row.Registration,
-                                                                    row.Volume
-                                                                );
-                                                            }
-                                                        }}
-                                                    />
-                                                </Paper>
-                                            </Paper>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {new Intl.NumberFormat("en-US").format(report[row.uniqueRowId]?.Amount || row.Amount)}
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                        }
-                    </TableBody>
-                </Table>
-                <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={4}>
-                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                    รวม
-                                </Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
-                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                    {new Intl.NumberFormat("en-US").format(ticket.TotalVolume)}
-                                </Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 100, backgroundColor: "#616161", color: "white" }}>
-                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                    0
-                                </Typography>
-                            </TableCell>
-                            <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
-                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                    {new Intl.NumberFormat("en-US").format(ticket.TotalAmount)}
-                                </Typography>
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                </Table>
-            </TableContainer>
-
             <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: 5, fontSize: "18px" }} gutterBottom>ข้อมูลการโอน</Typography>
             <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red", textAlign: "right", marginRight: 7 }} gutterBottom>*เพิ่มข้อมูลการโอนเงินตรงนี้*</Typography>
             <Grid container spacing={2}>
@@ -676,10 +779,11 @@ const UpdateInvoice = (props) => {
                             <TableHead>
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 200, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 120, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}><BankDetail /></TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 200, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
                                     <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                         <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                             <IconButton color="success"
@@ -695,14 +799,56 @@ const UpdateInvoice = (props) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {price.map((row) => (
+                                {price.map((row, index) => (
                                     <TableRow key={row.id}>
                                         <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {row.id + 1}
+                                                {index + 1}
                                             </Typography>
                                         </TableCell>
-
+                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                            <Paper component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                <TextField
+                                                    value={row.Code || ""}
+                                                    onChange={(e) => handleChange(row.id, "Code", e.target.value)}
+                                                    size="small"
+                                                    fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                    }}
+                                                />
+                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginRight: 1 }} gutterBottom>-</Typography>
+                                                <TextField
+                                                    value={row.Number || ""}
+                                                    onChange={(e) => handleChange(row.id, "Number", e.target.value)}
+                                                    size="small"
+                                                    fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                        width: "100px"
+                                                    }}
+                                                />
+                                                <Button
+                                                    variant="contained"
+                                                    disableElevation
+                                                    sx={{
+                                                        padding: 0.5,
+                                                        minWidth: 'auto',
+                                                        height: 'auto',
+                                                        fontSize: '0.75rem',
+                                                        textTransform: 'none',
+                                                        marginLeft: 1
+                                                    }}
+                                                >
+                                                    NEW
+                                                </Button>
+                                            </Paper>
+                                            {/* <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                                {row.DateStart ? dayjs(row.DateStart).format("DD/MM/YYYY") : "-"}
+                                                            </Typography> */}
+                                        </TableCell>
                                         {/* DatePicker */}
                                         <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                             <Paper component="form" sx={{ width: "100%" }}>
@@ -724,6 +870,8 @@ const UpdateInvoice = (props) => {
                                                                     },
                                                                     "& .MuiInputBase-input": {
                                                                         fontSize: "14px",
+                                                                        marginLeft: -1,
+                                                                        marginRight: -1
                                                                     },
                                                                 },
                                                             },
@@ -740,24 +888,24 @@ const UpdateInvoice = (props) => {
                                         <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                                 <FormControl
-                                                                                                    fullWidth
-                                                                                                    size="small"
-                                                                                                    sx={{
-                                                                                                        '& .MuiOutlinedInput-root': { height: '25px' },
-                                                                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <Select
-                                                                                                        value={row.BankName || ""}
-                                                                                                        onChange={(e) => handleChange(row.id, "BankName", e.target.value)}
-                                                                                                    >
-                                                                                                        {
-                                                                                                            bankDetail.map((row) => (
-                                                                                                                <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
-                                                                                                            ))
-                                                                                                        }
-                                                                                                    </Select>
-                                                                                                </FormControl>
+                                                    fullWidth
+                                                    size="small"
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
+                                                    }}
+                                                >
+                                                    <Select
+                                                        value={row.BankName || ""}
+                                                        onChange={(e) => handleChange(row.id, "BankName", e.target.value)}
+                                                    >
+                                                        {
+                                                            bankDetail.map((row) => (
+                                                                <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                            ))
+                                                        }
+                                                    </Select>
+                                                </FormControl>
                                             </Paper>
                                         </TableCell>
 
@@ -795,7 +943,7 @@ const UpdateInvoice = (props) => {
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 700 }} colSpan={4}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 720 }} colSpan={4}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             รวม
                                         </Typography>
@@ -805,7 +953,7 @@ const UpdateInvoice = (props) => {
 
                                         </Typography>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 260, backgroundColor: "#616161", color: "white" }} colSpan={2}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 210, backgroundColor: "#616161", color: "white" }} colSpan={2}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
 
                                         </Typography>

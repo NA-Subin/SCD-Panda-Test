@@ -54,7 +54,7 @@ import html2canvas from "html2canvas";
 import BankDetail from "./BankDetail";
 
 const UpdateReport = (props) => {
-    const { ticket,open } = props;
+    const { ticket,open, dateRanges } = props;
     // const [open, setOpen] = useState(false);
     const [price, setPrice] = useState([]);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
@@ -89,6 +89,7 @@ const UpdateReport = (props) => {
 
     const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName && item.Trip !== "ยกเลิก");
 
+    console.log("ticketsList: ",ticketsList)
     console.log("Show tickets List : ",ticket);
     console.log("Id : ",ticket.TicketName.split(":")[0]);
     console.log("Name : ",ticket.TicketName.split(":")[1]);
