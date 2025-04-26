@@ -40,6 +40,7 @@ import { IconButtonError, IconButtonSuccess, RateOils, TablecellHeader, Tablecel
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import AddCardIcon from '@mui/icons-material/AddCard';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
@@ -137,21 +138,21 @@ const BankDetail = () => {
 
     return (
         <React.Fragment>
-            <Box display="flex" justifyContent="center" alignItems="center">
-                เลขที่บัญชี
-                <Box textAlign="right">
-                    <Tooltip title="เพิ่มบัญชีธนาคาร" placement="right">
-                        <IconButton color="inherit"
-                            size="small"
-                            fullWidth
-                            onClick={handleClickOpen}
-                            sx={{ borderRadius: 2 }}
-                        >
-                            <AddBoxIcon />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            </Box>
+            <Tooltip title="เพิ่มเลขที่บัญชี" placement="left">
+                <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.primary.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
+                    <Button
+                        color="inherit"
+                        fullWidth
+                        onClick={handleClickOpen}
+                        sx={{ flexDirection: "column", gap: 0.5 }}
+                    >
+                        <AddCardIcon fontSize="small" sx={{ color: "white" }} />
+                        <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                            เพิ่มบัญชี
+                        </Typography>
+                    </Button>
+                </Paper>
+            </Tooltip>
             <Dialog
                 open={open}
                 keepMounted

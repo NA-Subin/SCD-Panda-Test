@@ -190,7 +190,7 @@ const PrintInvoice = () => {
                   <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>เลขที่เอกสาร</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
-                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom></Typography>
+                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>{invoiceData.Code}</Typography>
                 </Grid>
               </Grid>
             </Grid>

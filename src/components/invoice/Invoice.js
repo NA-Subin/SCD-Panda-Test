@@ -87,8 +87,11 @@ const Invoice = () => {
   console.log("selectedRow : ", selectedRow);
   console.log("indexes : ", indexes);
 
-  const { order } = useData();
+  const { order,transferMoney } = useData();
   const orders = Object.values(order || {});
+  const transferMoneyDetail = Object.values(transferMoney || {});
+
+  console.log("Transfer Money : ", transferMoneyDetail);
   
   const orderDetail = orders
     .filter((item) => {
@@ -104,6 +107,13 @@ const Invoice = () => {
       let totalAmount = 0;
       let totalOverdue = 0;
 
+      const totalIncomingMoney = transferMoneyDetail
+      .filter(trans => trans.TicketNo === item.No)
+      .reduce((sum, trans) => {
+        const value = parseFloat(trans.IncomingMoney) || 0;
+        return sum + value;
+      }, 0);
+
       Object.entries(item.Product).forEach(([key, value]) => {
         if (key !== "P") {
           totalVolume += parseFloat(value.Volume || 0) * 1000;
@@ -111,19 +121,19 @@ const Invoice = () => {
         }
       });
 
-      if (item.Price === undefined) {
-        totalOverdue = 0;
-      } else {
-        Object.entries(item.Price).forEach(([key, value]) => {
-          totalOverdue += parseFloat(value.IncomingMoney || 0);
-        });
-      }
+      // if (item.Price === undefined) {
+      //   totalOverdue = 0;
+      // } else {
+      //   Object.entries(item.Price).forEach(([key, value]) => {
+      //     totalOverdue += parseFloat(value.IncomingMoney || 0);
+      //   });
+      // }
 
       return {
         ...item,
         TotalVolume: totalVolume,
         TotalAmount: totalAmount,
-        TotalOverdue: totalOverdue,
+        TotalOverdue: totalIncomingMoney,
       };
     });
 

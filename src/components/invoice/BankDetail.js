@@ -41,6 +41,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import AddCardIcon from '@mui/icons-material/AddCard';
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
 import { useData } from "../../server/path";
@@ -137,7 +138,7 @@ const BankDetail = () => {
 
     return (
         <React.Fragment>
-            <Box display="flex" justifyContent="center" alignItems="center">
+            {/* <Box display="flex" justifyContent="center" alignItems="center">
                 เลขที่บัญชี
                 <Box textAlign="right">
                     <Tooltip title="เพิ่มบัญชีธนาคาร" placement="right">
@@ -151,7 +152,22 @@ const BankDetail = () => {
                         </IconButton>
                     </Tooltip>
                 </Box>
-            </Box>
+            </Box> */}
+            <Tooltip title="เพิ่มเลขที่บัญชี" placement="left">
+                <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.primary.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
+                    <Button
+                        color="inherit"
+                        fullWidth
+                        onClick={handleClickOpen}
+                        sx={{ flexDirection: "column", gap: 0.5 }}
+                    >
+                        <AddCardIcon fontSize="small" sx={{ color: "white" }} />
+                        <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                            เพิ่มบัญชี
+                        </Typography>
+                    </Button>
+                </Paper>
+            </Tooltip>
             <Dialog
                 open={open}
                 keepMounted
@@ -210,7 +226,7 @@ const BankDetail = () => {
 
                                                 {updateId === row.id ? (
                                                     <>
-                                                        <TableCell sx={{ textAlign: "center",height: "30px" }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "30px" }}>
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     value={editedData.BankID}
@@ -224,7 +240,7 @@ const BankDetail = () => {
                                                                 />
                                                             </Paper>
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: "center",height: "30px" }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "30px" }}>
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     value={editedData.BankName}
@@ -238,7 +254,7 @@ const BankDetail = () => {
                                                                 />
                                                             </Paper>
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: "center",height: "30px" }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "30px" }}>
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     value={editedData.Bank}
@@ -252,7 +268,7 @@ const BankDetail = () => {
                                                                 />
                                                             </Paper>
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: "center",height: "30px" }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "30px" }}>
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField
                                                                     value={editedData.BankShortName}
@@ -266,7 +282,7 @@ const BankDetail = () => {
                                                                 />
                                                             </Paper>
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: "center",height: "30px" }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "30px" }}>
                                                             <Paper component="form" sx={{ width: "100%", height: "25px" }}>
                                                                 <Select
                                                                     value={editedData.Status}

@@ -12,6 +12,7 @@ import {
     FormControl,
     Grid,
     IconButton,
+    InputAdornment,
     InputLabel,
     MenuItem,
     Paper,
@@ -51,112 +52,175 @@ import jsPDF from "jspdf";
 import notoSansThaiRegular from "@fontsource/noto-sans-thai";
 import html2canvas from "html2canvas";
 import BankDetail from "./BankDetail";
+import "dayjs/locale/th"; // โหลดภาษาไทย
+import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
+
+dayjs.locale('th');
+dayjs.extend(buddhistEra);
 
 const UpdateInvoice = (props) => {
     const { ticket } = props;
     const [open, setOpen] = useState(false);
-    const [price, setPrice] = useState([]);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
     const [test, setTest] = useState([]);
     const {
         order,
-        customertransports,
-        customergasstations,
-        customerbigtruck,
-        customersmalltruck,
         company,
-        banks
+        banks,
+        transferMoney,
+        invoiceReport
     } = useData();
 
     const orders = Object.values(order || {});
-    const customertransport = Object.values(customertransports || {});
-    const customergasstation = Object.values(customergasstations || {});
-    const customerbigtrucks = Object.values(customerbigtruck || {});
-    const customersmalltrucks = Object.values(customersmalltruck || {});
     const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {});
+    const transferMoneyDetail = Object.values(transferMoney || {});
+    const invoiceDetail = Object.values(invoiceReport || {});
+
+    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No);
+    const invoices = invoiceDetail.filter((row) => row.TicketNo === ticket.No);
+
+    console.log("invoice : ", invoices);
+
+    const totalIncomingMoney = transferMoneyDetail
+        .filter(trans => trans.TicketNo === ticket.No)
+        .reduce((sum, trans) => {
+            const value = parseFloat(trans.IncomingMoney) || 0;
+            return sum + value;
+        }, 0);
+
+    console.log("Money : ", transfer);
+    console.log("totalIncomingMoney : ", totalIncomingMoney);
 
     const companyName = companies.find(item => item.id === 1);
     const orderList = orders.filter(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
     const [code, setCode] = React.useState(`lV${dayjs(new Date).format("YYYYMM")}`)
 
+    console.log("transferMoneyDetail : ", transferMoneyDetail.length)
     console.log("code : ", code);
     console.log("orderList : ", orderList);
     console.log("ticket : ", ticket);
 
-    const getPrice = () => {
-        let foundItem;
-        let refPath = "";
-        let initialPrice = [];
+    const formatThaiDate = (date) => {
+        const d = dayjs(date);
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
+        const day = d.date();
+        const month = thaiMonths[d.month()];
+        const year = d.year() + 543; // บวกเป็น พ.ศ.
 
-        if (ticket.CustomerType === "ตั๋วรถใหญ่") {
-            console.log("Customer Type : ", ticket.CustomerType);
-            foundItem = orders.find(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
-            console.log("🔍 Found Item:", foundItem);
-            if (foundItem) {
-                refPath = `/order/${foundItem.No}/Price`;
-                initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [{
-                    id: 0,
-                    Code: dayjs(new Date).format("YYYYMM"),
-                    Number: "",
-                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                    BankName: "",
-                    Transport: `${companyName.id}:${companyName.Name}`,
-                    IncomingMoney: "",
-                    Note: "",
-                }];
-            }
-        } else {
-            ShowError("Ticket Name ไม่ถูกต้อง");
-            return;
-        }
-
-        // if (ticket?.TicketName) {
-        //     foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
-        //     if (foundItem) {
-        //         refPath = `/customers/transports/${foundItem.id - 1}/Price`;
-        //         initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
-        //     }
-
-        //     if (!foundItem) {
-        //         foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
-        //         if (foundItem) {
-        //             refPath = `/customers/gasstations/${foundItem.id - 1}/Price`;
-        //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
-        //         }
-        //     }
-
-        //     if (!foundItem) {
-        //         foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
-        //         if (foundItem) {
-        //             refPath = `/customers/bigtruck/${foundItem.id - 1}/Price`;
-        //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
-        //         }
-        //     }
-
-        //     if (!foundItem) {
-        //         foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
-        //         if (foundItem) {
-        //             refPath = `/customers/smalltruck/${foundItem.id - 1}/Price`;
-        //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
-        //         }
-        //     }
-        // } else {
-        //     ShowError("Ticket Name ไม่ถูกต้อง");
-        //     return;
-        // }
-
-        console.log("🔍 Found Item:", foundItem);
-        console.log("📌 Ref Path:", refPath);
-        console.log("📊 Initial Price Data:", initialPrice);
-
-        setPrice(initialPrice);
+        return `${day} ${month} ${year}`;
     };
 
-    useEffect(() => {
-        getPrice();
-    }, [ticket]);
+    const currentCode = dayjs(new Date()).format("YYYYMM");
+
+    // ดึงรายการล่าสุด
+    const lastItem = transferMoneyDetail[transferMoneyDetail.length - 1];
+
+    // ตรวจสอบ Number และ Code
+    let newNumber = 1;
+
+    if (lastItem && lastItem.Number && lastItem.Code === currentCode) {
+        newNumber = Number(lastItem.Number) + 1;
+    }
+
+    // แปลงให้เป็น string 4 หลัก เช่น "0001"
+    const formattedNumber = String(newNumber).padStart(4, "0");
+
+    const [price, setPrice] = useState({
+        id: transferMoneyDetail.length,
+        Code: currentCode,
+        Number: formattedNumber,
+        DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+        BankName: "",
+        Transport: `${companyName.id}:${companyName.Name}`,
+        IncomingMoney: "",
+        TicketName: ticket.TicketName,
+        TicketNo: ticket.No,
+        TicketType: ticket.CustomerType,
+        Note: "",
+    });
+
+    const [invoice, setInvoice] = React.useState({});
+
+    // const getPrice = () => {
+    //     let foundItem;
+    //     let refPath = "";
+    //     let initialPrice = [];
+
+    //     if (ticket.CustomerType === "ตั๋วรถใหญ่") {
+    //         console.log("Customer Type : ", ticket.CustomerType);
+    //         foundItem = orders.find(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
+    //         console.log("🔍 Found Item:", foundItem);
+    //         if (foundItem) {
+    //             refPath = `/order/${foundItem.No}/Price`;
+    //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [{
+    //                 id: transferMoneyDetail.length,
+    //                 Code: dayjs(new Date).format("YYYYMM"),
+    //                 Number: "",
+    //                 DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+    //                 BankName: "",
+    //                 Transport: `${companyName.id}:${companyName.Name}`,
+    //                 IncomingMoney: "",
+    //                 TicketName: ticket.TicketName,
+    //                 TicketNo: ticket.No,
+    //                 TicketType: ticket.CustomerType,
+    //                 Note: "",
+    //             }];
+    //         }
+    //     } else {
+    //         ShowError("Ticket Name ไม่ถูกต้อง");
+    //         return;
+    //     }
+
+    //     // if (ticket?.TicketName) {
+    //     //     foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
+    //     //     if (foundItem) {
+    //     //         refPath = `/customers/transports/${foundItem.id - 1}/Price`;
+    //     //         initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+    //     //     }
+
+    //     //     if (!foundItem) {
+    //     //         foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
+    //     //         if (foundItem) {
+    //     //             refPath = `/customers/gasstations/${foundItem.id - 1}/Price`;
+    //     //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+    //     //         }
+    //     //     }
+
+    //     //     if (!foundItem) {
+    //     //         foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
+    //     //         if (foundItem) {
+    //     //             refPath = `/customers/bigtruck/${foundItem.id - 1}/Price`;
+    //     //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+    //     //         }
+    //     //     }
+
+    //     //     if (!foundItem) {
+    //     //         foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
+    //     //         if (foundItem) {
+    //     //             refPath = `/customers/smalltruck/${foundItem.id - 1}/Price`;
+    //     //             initialPrice = foundItem.Price ? Object.values(foundItem.Price) : [];
+    //     //         }
+    //     //     }
+    //     // } else {
+    //     //     ShowError("Ticket Name ไม่ถูกต้อง");
+    //     //     return;
+    //     // }
+
+    //     console.log("🔍 Found Item:", foundItem);
+    //     console.log("📌 Ref Path:", refPath);
+    //     console.log("📊 Initial Price Data:", initialPrice);
+
+    //     setPrice(initialPrice);
+    // };
+
+    // useEffect(() => {
+    //     getPrice();
+    // }, [ticket]);
 
     const calculateDueDate = (dateString, creditDays) => {
         if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่"; // ตรวจสอบค่าว่าง
@@ -236,6 +300,41 @@ const UpdateInvoice = (props) => {
     };
 
     const generatePDF = () => {
+        let Code = ""
+        if (invoices.length !== 0) {
+            Code = `${invoices[0].Code}-${invoices[0].Number}`
+        } else {
+            const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
+            let newNumberInvoice = 1;
+            if (lastItemInvoice && lastItemInvoice.Number && lastItemInvoice.Code === `lV${currentCode}`) {
+                newNumberInvoice = Number(lastItemInvoice.Number) + 1;
+            }
+            const formattedNumberInvoice = String(newNumberInvoice).padStart(4, "0");
+
+            Code = `lV${currentCode}-${formattedNumberInvoice}`;
+
+            database
+                .ref("invoice/")
+                .child(invoiceDetail.length)
+                .update({
+                    id: invoiceDetail.length,
+                    Code: `lV${currentCode}`,
+                    Number: formattedNumberInvoice,
+                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                    Transport: `${companyName.id}:${companyName.Name}`,
+                    TicketName: ticket.TicketName,
+                    TicketNo: ticket.No,
+                    TicketType: ticket.CustomerType,
+                }) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+                .then(() => {
+                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                })
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        }
+
         const invoiceData = {
             Report: orderList.flatMap((row, rowIndex) =>
                 Object.entries(row.Product)
@@ -266,7 +365,8 @@ const UpdateInvoice = (props) => {
             Company: companyName.Name,
             Address: companyName.Address,
             CardID: companyName.CardID,
-            Phone: companyName.Phone
+            Phone: companyName.Phone,
+            Code: Code
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -335,15 +435,22 @@ const UpdateInvoice = (props) => {
         });
     };
 
-    const handleChange = (id, field, value) => {
-        setPrice(prevPrice =>
-            prevPrice.map(row =>
-                row.id === id ? {
-                    ...row,
-                    [field]: field === "DateStart" ? dayjs(value).format("DD/MM/YYYY") : value
-                } : row
-            )
-        );
+    // const handleChange = (id, field, value) => {
+    //     setPrice(prevPrice =>
+    //         prevPrice.map(row =>
+    //             row.id === id ? {
+    //                 ...row,
+    //                 [field]: field === "DateStart" ? dayjs(value).format("DD/MM/YYYY") : value
+    //             } : row
+    //         )
+    //     );
+    // };
+
+    const handleChange = (field, value) => {
+        setPrice(prev => ({
+            ...prev,
+            [field]: field === "DateStart" ? dayjs(value).format("DD/MM/YYYY") : value
+        }));
     };
 
     // ลบแถวออกจาก price
@@ -358,84 +465,88 @@ const UpdateInvoice = (props) => {
     };
 
     const handleSubmit = () => {
-        console.log("Using Price:", price);
-        console.log("Ticket Name:", ticket?.TicketName);
+        database
+            .ref("transfermoney/")
+            .child(transferMoneyDetail.length)
+            .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+            .then(() => {
+                let total = Number(newNumber) + 1
+                let formattedNumber = String(total).padStart(4, "0");
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                setPrice({
+                    id: transferMoneyDetail.length,
+                    Code: currentCode,
+                    Number: formattedNumber,
+                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                    BankName: "",
+                    Transport: `${companyName.id}:${companyName.Name}`,
+                    IncomingMoney: "",
+                    TicketName: ticket.TicketName,
+                    TicketNo: ticket.No,
+                    TicketType: ticket.CustomerType,
+                    Note: "",
+                })
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+        // console.log("Using Price:", price);
+        // console.log("Ticket Name:", ticket?.TicketName);
 
-        if (!price || price.length === 0) {
-            ShowError("Price เป็นค่าว่าง");
-            return;
-        }
+        // if (!price || price.length === 0) {
+        //     ShowError("Price เป็นค่าว่าง");
+        //     return;
+        // }
 
-        let foundItem;
-        let refPath = "";
+        // let foundItem;
+        // let refPath = "";
 
-        if (ticket.CustomerType === "ตั๋วรถใหญ่") {
-            foundItem = orders.find(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
-            if (foundItem) refPath = "/order";
-        } else {
-            ShowError("Ticket Name ไม่ถูกต้อง");
-            return;
-        }
-
-        // if (ticket?.TicketName) {
-        //     foundItem = customertransport.find(item => item.TicketsName === ticket.TicketName);
-        //     if (foundItem) refPath = "/customers/transports/";
-
-        //     if (!foundItem) {
-        //         foundItem = customergasstation.find(item => item.TicketsName === ticket.TicketName);
-        //         if (foundItem) refPath = "/customers/gasstations/";
-        //     }
-
-        //     if (!foundItem) {
-        //         foundItem = customerbigtrucks.find(item => item.TicketsName === ticket.TicketName);
-        //         if (foundItem) refPath = "/customers/bigtruck/";
-        //     }
-
-        //     if (!foundItem) {
-        //         foundItem = customersmalltrucks.find(item => item.TicketsName === ticket.TicketName);
-        //         if (foundItem) refPath = "/customers/smalltruck/";
-        //     }
+        // if (ticket.CustomerType === "ตั๋วรถใหญ่") {
+        //     foundItem = orders.find(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
+        //     if (foundItem) refPath = "/order";
         // } else {
         //     ShowError("Ticket Name ไม่ถูกต้อง");
         //     return;
         // }
 
-        console.log("Item :", foundItem);
-        console.log("Path :", refPath);
+        // console.log("Item :", foundItem);
+        // console.log("Path :", refPath);
 
-        const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
+        // const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
 
-        console.log("price : ", TotalPrice);
+        // console.log("price : ", TotalPrice);
 
-        if (foundItem) {
-            database
-                .ref(refPath)
-                .child(`${foundItem.No}/Price/`)
-                .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-                .then(() => {
+        // if (foundItem) {
+        //     database
+        //         .ref(refPath)
+        //         .child(`${foundItem.No}/Price/`)
+        //         .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+        //         .then(() => {
 
-                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
-                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                    // const pathOrder = `order/${ticket.id - 1}`;
-                    // update(ref(database, pathOrder), {
-                    //     TransferAmount: TotalPrice,
-                    //     TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
-                    // })
-                    //     .then(() => {
-                    //         console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                    //     })
-                    //     .catch((error) => {
-                    //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                    //         console.error("Error pushing data:", error);
-                    //     });
-                })
-                .catch((error) => {
-                    ShowError("ไม่สำเร็จ");
-                    console.error("Error updating data:", error);
-                });
-        } else {
-            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
-        }
+        //             ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+        //             console.log("บันทึกข้อมูลเรียบร้อย ✅");
+        //             // const pathOrder = `order/${ticket.id - 1}`;
+        //             // update(ref(database, pathOrder), {
+        //             //     TransferAmount: TotalPrice,
+        //             //     TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
+        //             // })
+        //             //     .then(() => {
+        //             //         console.log("บันทึกข้อมูลเรียบร้อย ✅");
+        //             //     })
+        //             //     .catch((error) => {
+        //             //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+        //             //         console.error("Error pushing data:", error);
+        //             //     });
+        //         })
+        //         .catch((error) => {
+        //             ShowError("ไม่สำเร็จ");
+        //             console.error("Error updating data:", error);
+        //         });
+        // } else {
+        //     ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+        // }
     };
 
     return (
@@ -472,7 +583,7 @@ const UpdateInvoice = (props) => {
                                     marginLeft: -1
                                 },
                             }}
-                            value={code}
+                            value={invoices[0]?.Code || `lV${currentCode}`}
                         />
                         <Typography variant="subtitle1" sx={{ marginLeft: 1, marginRight: 1 }} fontWeight="bold" gutterBottom>-</Typography>
                         <TextField size="small"
@@ -495,9 +606,10 @@ const UpdateInvoice = (props) => {
                                 marginRight: 1,
                                 width: "250px"
                             }}
+                            value={invoices[0]?.Number || ""}
                         />
                         <TextField size="small"
-                        disabled
+                            disabled
                             InputLabelProps={{
                                 sx: {
                                     fontSize: '14px',
@@ -768,23 +880,23 @@ const UpdateInvoice = (props) => {
                 </Grid>
             </Grid>
             <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: 5, fontSize: "18px" }} gutterBottom>ข้อมูลการโอน</Typography>
-            <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red", textAlign: "right", marginRight: 7 }} gutterBottom>*เพิ่มข้อมูลการโอนเงินตรงนี้*</Typography>
             <Grid container spacing={2}>
-                <Grid item xs={11.5}>
+                <Grid item xs={12}>
                     <TableContainer
                         component={Paper}
                         sx={{ marginBottom: 2, borderRadius: 2 }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                            <TableHead>
-                                <TableRow>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 200, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 120, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}><BankDetail /></TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
-                                    <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
+                        <Box>
+                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 170, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                        {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                         <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                             <IconButton color="success"
                                                 size="small"
@@ -795,193 +907,414 @@ const UpdateInvoice = (props) => {
                                                 <AddBoxIcon />
                                             </IconButton>
                                         </Tooltip>
-                                    </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {price.map((row, index) => (
-                                    <TableRow key={row.id}>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
-                                            <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {index + 1}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                            <Paper component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                <TextField
-                                                    value={row.Code || ""}
-                                                    onChange={(e) => handleChange(row.id, "Code", e.target.value)}
-                                                    size="small"
-                                                    fullWidth
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': { height: '25px' },
-                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
-                                                    }}
-                                                />
-                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginRight: 1 }} gutterBottom>-</Typography>
-                                                <TextField
-                                                    value={row.Number || ""}
-                                                    onChange={(e) => handleChange(row.id, "Number", e.target.value)}
-                                                    size="small"
-                                                    fullWidth
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': { height: '25px' },
-                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
-                                                        width: "100px"
-                                                    }}
-                                                />
-                                                <Button
-                                                    variant="contained"
-                                                    disableElevation
-                                                    sx={{
-                                                        padding: 0.5,
-                                                        minWidth: 'auto',
-                                                        height: 'auto',
-                                                        fontSize: '0.75rem',
-                                                        textTransform: 'none',
-                                                        marginLeft: 1
-                                                    }}
-                                                >
-                                                    NEW
-                                                </Button>
-                                            </Paper>
-                                            {/* <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                                {row.DateStart ? dayjs(row.DateStart).format("DD/MM/YYYY") : "-"}
-                                                            </Typography> */}
-                                        </TableCell>
-                                        {/* DatePicker */}
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                    <DatePicker
-                                                        openTo="day"
-                                                        views={["year", "month", "day"]}
-                                                        value={dayjs(row.DateStart, "DD/MM/YYYY")}  // กำหนดรูปแบบที่ต้องการ
-                                                        format="DD/MM/YYYY"
-                                                        onChange={(newValue) => handleChange(row.id, "DateStart", newValue)}
-                                                        slotProps={{
-                                                            textField: {
-                                                                size: "small",
-                                                                fullWidth: true,
-                                                                sx: {
-                                                                    "& .MuiOutlinedInput-root": {
-                                                                        height: "25px",
-                                                                        paddingRight: "8px",
-                                                                    },
-                                                                    "& .MuiInputBase-input": {
-                                                                        fontSize: "14px",
-                                                                        marginLeft: -1,
-                                                                        marginRight: -1
-                                                                    },
-                                                                },
-                                                            },
-                                                        }}
-                                                    />
-                                                </LocalizationProvider>
-                                            </Paper>
-                                            {/* <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                                {row.DateStart ? dayjs(row.DateStart).format("DD/MM/YYYY") : "-"}
-                                                            </Typography> */}
-                                        </TableCell>
-
-                                        {/* Select Bank Name */}
-                                        <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>
-                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                <FormControl
-                                                    fullWidth
-                                                    size="small"
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': { height: '25px' },
-                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
-                                                    }}
-                                                >
-                                                    <Select
-                                                        value={row.BankName || ""}
-                                                        onChange={(e) => handleChange(row.id, "BankName", e.target.value)}
-                                                    >
-                                                        {
-                                                            bankDetail.map((row) => (
-                                                                <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
-                                                            ))
-                                                        }
-                                                    </Select>
-                                                </FormControl>
-                                            </Paper>
-                                        </TableCell>
-
-                                        {/* Input Fields */}
-                                        {["IncomingMoney", "Note"].map((field) => (
-                                            <TableCell key={field} sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField
-                                                        value={row[field] || ""}
-                                                        onChange={(e) => handleChange(row.id, field, e.target.value)}
-                                                        size="small"
-                                                        fullWidth
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-root': { height: '25px' },
-                                                            '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
-                                                        }}
-                                                    />
-                                                </Paper>
-                                            </TableCell>
-                                        ))}
-
-                                        {/* Action Buttons */}
-                                        <TableCell sx={{ textAlign: "center", width: 60, height: "30px" }}>
-                                            <Tooltip title="ยกเลิก" placement="left">
-                                                <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
-                                                    <BackspaceIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </TableCell>
+                                    </TableCell> */}
                                     </TableRow>
-                                ))}
-
-                            </TableBody>
-                        </Table>
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        transfer.map((row, index) => (
+                                            <TableRow>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.DateStart}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>{row.BankName}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.IncomingMoney}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
+                                            </TableRow>
+                                        ))
+                                    }
+                                </TableBody>
+                            </Table>
+                        </Box>
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                            <TableHead>
+                            <TableBody>
                                 <TableRow>
                                     <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 720 }} colSpan={4}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             รวม
                                         </Typography>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 300, backgroundColor: "#616161", color: "white" }} colSpan={2}>
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                        </Typography>
+                                    </TableCell>
+                                    {/* <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 210, backgroundColor: "#616161", color: "white" }}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
 
                                         </Typography>
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 210, backgroundColor: "#616161", color: "white" }} colSpan={2}>
-                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-
-                                        </Typography>
-                                    </TableCell>
+                                    </TableCell> */}
                                 </TableRow>
-                            </TableHead>
+                            </TableBody>
                         </Table>
                     </TableContainer>
                 </Grid>
-                <Grid item xs={0.5}>
-                    {
-                        price.length > 0 &&
-                        <Tooltip title="บันทึก" placement="left">
-                            <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
-                                <Button
-                                    color="inherit"
-                                    fullWidth
-                                    onClick={handleSubmit}
-                                    sx={{ flexDirection: "column", gap: 0.5 }}
-                                >
-                                    <SaveIcon fontSize="small" sx={{ color: "white" }} />
-                                    <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
-                                        บันทึก
-                                    </Typography>
-                                </Button>
-                            </Paper>
-                        </Tooltip>
-                    }
+                <Grid item xs={11.5}>
+                    <Paper component="form" sx={{ borderRadius: 2, p: 2, backgroundColor: "#bdbdbd" }}>
+                        <Typography variant="h6" fontWeight="bold" sx={{ marginLeft: 2 }} gutterBottom>กรอกข้อมูลการโอนเงินตรงนี้</Typography>
+                        <Divider sx={{ marginBottom: 1, backgroundColor: "white" }} />
+                        <Grid container spacing={2}>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1 }} gutterBottom>Statement</Typography>
+                                    <Grid container>
+                                        <Grid item xs={4.5}>
+                                            <Paper sx={{ height: "25px", width: "100%" }}>
+                                                <TextField
+                                                    value={price.Code || ""}
+                                                    onChange={(e) => handleChange("Code", e.target.value)}
+                                                    size="small"
+                                                    fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", fontWeight: "bold", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                        '& .MuiInputBase-input.Mui-disabled': {
+                                                            color: "#424242", // เปลี่ยนสีตัวอักษรเมื่อ disabled
+                                                            WebkitTextFillColor: "#424242", // สำหรับบางเบราว์เซอร์ที่ไม่อ่าน color เมื่อ disabled 
+                                                        }
+                                                    }}
+                                                    disabled
+                                                />
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={0.5}>
+                                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>-</Typography>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <Paper sx={{ height: "25px", width: "100%" }}>
+                                                <TextField
+                                                    value={price.Number || ""}
+                                                    onChange={(e) => handleChange("Number", e.target.value)}
+                                                    size="small"
+                                                    fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", fontWeight: "bold", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                        '& .MuiInputBase-input.Mui-disabled': {
+                                                            color: "#424242", // เปลี่ยนสีตัวอักษรเมื่อ disabled
+                                                            WebkitTextFillColor: "#424242", // สำหรับบางเบราว์เซอร์ที่ไม่อ่าน color เมื่อ disabled 
+                                                        }
+                                                    }}
+                                                    disabled
+                                                />
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Button
+                                                variant="contained"
+                                                disableElevation
+                                                sx={{
+                                                    padding: 0.5,
+                                                    minWidth: 'auto',
+                                                    height: "25px",
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'none',
+                                                    marginLeft: 1
+                                                }}
+                                            >
+                                                NEW
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                    {/* <Box sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", height: "25px" }}>
+                                <Paper sx={{ height: "25px" }}>
+                                    <TextField
+                                        value={price.Code || ""}
+                                        onChange={(e) => handleChange("Code", e.target.value)}
+                                        size="small"
+                                        fullWidth
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '25px' },
+                                            '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                        }}
+                                    />
+                                    </Paper>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginRight: 1 }} gutterBottom>-</Typography>
+                                    <Paper sx={{ height: "25px" }}>
+                                    <TextField
+                                        value={price.Number || ""}
+                                        onChange={(e) => handleChange("Number", e.target.value)}
+                                        size="small"
+                                        fullWidth
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { height: '25px' },
+                                            '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                            width: "100px"
+                                        }}
+                                    />
+                                    </Paper>
+                                    <Button
+                                        variant="contained"
+                                        disableElevation
+                                        sx={{
+                                            padding: 0.5,
+                                            minWidth: 'auto',
+                                            height: "25px",
+                                            fontSize: '0.75rem',
+                                            textTransform: 'none',
+                                            marginLeft: 1
+                                        }}
+                                    >
+                                        NEW
+                                    </Button>
+                                </Box> */}
+                                </Box>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>เงินเข้า</Typography>
+                                    <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(price.DateStart, "DD/MM/YYYY")}
+                                                onChange={(newValue) => handleChange("DateStart", newValue)}
+                                                format="DD MMMM YYYY" // ใช้ BBBB แทนปี พ.ศ.
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        sx: {
+                                                            "& .MuiOutlinedInput-root": { height: "30px", paddingRight: "8px" },
+                                                            "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1, marginRight: -1 },
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    วันที่ :
+                                                                </InputAdornment>
+                                                            ),
+                                                        }
+                                                    },
+                                                }}
+                                            />
+                                        </LocalizationProvider>
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6}></Grid>
+                        </Grid>
+                        <Grid container spacing={2}>
+                            <Grid item xs={0.5}>
+
+                            </Grid>
+                            <Grid item xs={5.5}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>บัญชี</Typography>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <FormControl
+                                            fullWidth
+                                            size="small"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                            }}
+                                        >
+                                            <Select
+                                                value={price.BankName || ""}
+                                                onChange={(e) => handleChange("BankName", e.target.value)}
+                                            >
+                                                {
+                                                    bankDetail.map((row) => (
+                                                        <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                    ))
+                                                }
+                                            </Select>
+                                        </FormControl>
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>จำนวนเงิน</Typography>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField
+                                            type="number"
+                                            value={price.IncomingMoney || ""}
+                                            onChange={(e) => handleChange("IncomingMoney", e.target.value)}
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                            }}
+                                        />
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>หมายเหตุ</Typography>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField
+                                            value={price.Note || ""}
+                                            onChange={(e) => handleChange("Note", e.target.value)}
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                            }}
+                                        />
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </Paper>
+                    {/* <TableContainer component={Paper}
+                        sx={{ borderRadius: 2, height: "10vh" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" } }}>
+                            <TableBody>
+                                <TableRow sx={{ backgroundColor: "#bdbdbd" }}>
+                                    <TableCell colSpan={6} width={1020}>
+                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 2 }} gutterBottom>กรอกข้อมูลการโอนเงินตรงนี้</Typography>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow sx={{ backgroundColor: "#bdbdbd" }}>
+                                    <TableCell sx={{ textAlign: "center", height: '35px', width: 220 }} colSpan={2}>
+                                        <Paper component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", height: "25px" }}>
+                                            <TextField
+                                                value={price.Code || ""}
+                                                onChange={(e) => handleChange("Code", e.target.value)}
+                                                size="small"
+                                                fullWidth
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': { height: '25px' },
+                                                    '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                }}
+                                            />
+                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginRight: 1 }} gutterBottom>-</Typography>
+                                            <TextField
+                                                value={price.Number || ""}
+                                                onChange={(e) => handleChange("Number", e.target.value)}
+                                                size="small"
+                                                fullWidth
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': { height: '25px' },
+                                                    '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                    width: "100px"
+                                                }}
+                                            />
+                                            <Button
+                                                variant="contained"
+                                                disableElevation
+                                                sx={{
+                                                    padding: 0.5,
+                                                    minWidth: 'auto',
+                                                    height: "25px",
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'none',
+                                                    marginLeft: 1
+                                                }}
+                                            >
+                                                NEW
+                                            </Button>
+                                        </Paper>
+                                        {/* <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                                {row.DateStart ? dayjs(row.DateStart).format("DD/MM/YYYY") : "-"}
+                                                            </Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", height: '35px', width: 150 }}>
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                    openTo="day"
+                                                    views={["year", "month", "day"]}
+                                                    value={dayjs(price.DateStart, "DD/MM/YYYY")}  // กำหนดรูปแบบที่ต้องการ
+                                                    format="DD/MM/YYYY"
+                                                    onChange={(newValue) => handleChange("DateStart", newValue)}
+                                                    slotProps={{
+                                                        textField: {
+                                                            size: "small",
+                                                            fullWidth: true,
+                                                            sx: {
+                                                                "& .MuiOutlinedInput-root": {
+                                                                    height: "25px",
+                                                                    paddingRight: "8px",
+                                                                },
+                                                                "& .MuiInputBase-input": {
+                                                                    fontSize: "14px",
+                                                                    marginLeft: -1,
+                                                                    marginRight: -1
+                                                                },
+                                                            },
+                                                        },
+                                                    }}
+                                                />
+                                            </LocalizationProvider>
+                                        </Paper>
+                                    </TableCell>
+
+                                    <TableCell sx={{ textAlign: "center", height: '35px', width: 350 }}>
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <FormControl
+                                                fullWidth
+                                                size="small"
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': { height: '25px' },
+                                                    '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
+                                                }}
+                                            >
+                                                <Select
+                                                    value={price.BankName || ""}
+                                                    onChange={(e) => handleChange("BankName", e.target.value)}
+                                                >
+                                                    {
+                                                        bankDetail.map((row) => (
+                                                            <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                        ))
+                                                    }
+                                                </Select>
+                                            </FormControl>
+                                        </Paper>
+                                    </TableCell>
+
+                                    {["IncomingMoney", "Note"].map((field) => (
+                                        <TableCell key={field} sx={{ textAlign: "center", height: '35px', width: 150 }}>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField
+                                                    value={price[field] || ""}
+                                                    onChange={(e) => handleChange(field, e.target.value)}
+                                                    size="small"
+                                                    fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
+                                                    }}
+                                                />
+                                            </Paper>
+                                        </TableCell>
+                                    ))}
+                                    <TableCell sx={{ textAlign: "center", width: 60, height: "30px" }}>
+                                            <Tooltip title="ยกเลิก" placement="left">
+                                                <IconButton color="error" size="small" onClick={() => handleDelete(row.id)}>
+                                                    <BackspaceIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </TableContainer> */}
+                </Grid>
+                <Grid item xs={0.5} sx={{ marginTop: 0.5 }}>
+                    <BankDetail />
+                    <Tooltip title="บันทึก" placement="left">
+                        <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
+                            <Button
+                                color="inherit"
+                                fullWidth
+                                onClick={handleSubmit}
+                                sx={{ flexDirection: "column", gap: 0.5 }}
+                            >
+                                <SaveIcon fontSize="small" sx={{ color: "white" }} />
+                                <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                    บันทึก
+                                </Typography>
+                            </Button>
+                        </Paper>
+                    </Tooltip>
                 </Grid>
             </Grid>
         </React.Fragment>
