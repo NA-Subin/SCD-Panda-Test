@@ -522,13 +522,13 @@ const CloseFS = () => {
                             {
                                 dataNotCancel.map((row, index) => (
                                     <TableRow>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white",backgroundColor: "white" }}>
                                             {index + 1}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
                                             รายได้
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white",backgroundColor: "white"  }}>
                                             {row.TicketName.split(":")[1]}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
@@ -539,7 +539,7 @@ const CloseFS = () => {
                                                             : ""
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white",backgroundColor: "white"  }}>
                                             -
                                         </TableCell>
                                         {data.map((h) => (

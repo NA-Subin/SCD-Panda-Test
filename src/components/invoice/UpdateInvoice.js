@@ -918,7 +918,7 @@ const UpdateInvoice = (props) => {
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.DateStart}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>{row.BankName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.IncomingMoney}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{new Intl.NumberFormat("en-US").format(row.IncomingMoney)}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
                                             </TableRow>
                                         ))

@@ -45,7 +45,6 @@ const Invoice = () => {
   const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
   const [checkOverdueTransfer, setCheckOverdueTransfer] = useState(true);
 
-
   const handleDateChangeDateStart = (newValue) => {
     if (newValue) {
       const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
@@ -78,6 +77,12 @@ const Invoice = () => {
 
   const [selectedRow, setSelectedRow] = useState(0);
   const [indexes, setIndex] = useState(0);
+
+  const handleChangeCheck = () => {
+    setCheckOverdueTransfer(!checkOverdueTransfer);
+    setSelectedRow(0)
+    setIndex(0)
+  }
 
   const handleRowClick = (row, index) => {
     setSelectedRow(row);
@@ -135,7 +140,7 @@ const Invoice = () => {
         TotalAmount: totalAmount,
         TotalOverdue: totalIncomingMoney,
       };
-    });
+    }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
 
   console.log("Order : ", orders);
   console.log("Order Detail : ", orderDetail);
@@ -283,7 +288,8 @@ const Invoice = () => {
                       <FormControlLabel control={
                         <Checkbox
                           value={checkOverdueTransfer}
-                          onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                          //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                          onChange={handleChangeCheck}
                           defaultChecked />
                       }
                         label={
@@ -329,8 +335,8 @@ const Invoice = () => {
                       <TableBody>
                         {
                           checkOverdueTransfer ?
-                            orderDetail.map((row, index) => (
-                              (row.TotalOverdueTransfer !== 0 || (row.TotalAmount === 0 && row.TotalOverdueTransfer === 0)) && (
+                            orderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
+                            .map((row, index) => (
                                 <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
                                 sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
@@ -361,7 +367,7 @@ const Invoice = () => {
                                     {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
                                   </TableCell>
                                 </TableRow>
-                              ))
+                              )
                             )
                             :
                             orderDetail.map((row, index) => (
@@ -443,6 +449,14 @@ const Invoice = () => {
                 </Grid>
                 <Grid item xs={12}>
                   {
+                    checkOverdueTransfer ?
+                    orderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
+                            .map((row, index) => (
+                              (selectedRow && selectedRow === row.No) || indexes === index ?
+                        <UpdateInvoice key={row.No} ticket={row} />
+                        : ""
+                    ))
+                    :
                     orderDetail.map((row, index) => (
                       (selectedRow && selectedRow === row.No) || indexes === index ?
                         <UpdateInvoice key={row.No} ticket={row} />

@@ -59,7 +59,7 @@ dayjs.locale('th');
 dayjs.extend(buddhistEra);
 
 const UpdateReport = (props) => {
-    const { ticket,open, dateRanges } = props;
+    const { ticket, open, dateRanges, months } = props;
     // const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
@@ -90,13 +90,13 @@ const UpdateReport = (props) => {
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName);
     const invoices = invoiceDetail.filter((row) => row.TicketName === ticket.TicketName);
-const totalIncomingMoney = transferMoneyDetail
+    const totalIncomingMoney = transferMoneyDetail
         .filter(trans => trans.TicketName === ticket.TicketName)
         .reduce((sum, trans) => {
             const value = parseFloat(trans.IncomingMoney) || 0;
             return sum + value;
         }, 0);
-const currentCode = dayjs(new Date()).format("YYYYMM");
+    const currentCode = dayjs(new Date()).format("YYYYMM");
 
     // ดึงรายการล่าสุด
     const lastItem = transferMoneyDetail[transferMoneyDetail.length - 1];
@@ -132,17 +132,30 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
     //     return true; // หรือเปลี่ยนเป็น `false` ถ้าไม่ต้องการให้แสดงกรณีอื่น
     //   });
 
-    const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName && item.Trip !== "ยกเลิก");
+    //const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName && item.Trip !== "ยกเลิก");
 
+    const startDate = dayjs(months, "YYYY-MM").startOf("month");
+const endDate = dayjs(months, "YYYY-MM").endOf("month");
 
-    console.log("ticketsList: ",ticketsList)
-    console.log("Show tickets List : ",ticket);
-    console.log("Id : ",ticket.TicketName.split(":")[0]);
-    console.log("Name : ",ticket.TicketName.split(":")[1]);
-    console.log("Customer Type : ",ticket.CustomerType);
-    console.log("Transport : ",customertransport.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก" ));
-    console.log("GasStation : ",customergasstation.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก" ));
-    console.log("Ticket : ",customerTickets.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก" ));
+const ticketsList = showTickets.filter(item => {
+  const itemDate = dayjs(item.Date, "DD/MM/YYYY"); // แปลง item.Date ก่อนนะ
+  
+  return (
+    item.TicketName === ticket.TicketName &&
+    item.Trip !== "ยกเลิก" &&
+    itemDate.isBetween(startDate, endDate, "day", "[]") // [] คือรวมวันแรกกับวันสุดท้ายด้วย
+  );
+});
+
+console.log(" Month : ",months);
+    console.log("ticketsList: ", ticketsList)
+    console.log("Show tickets List : ", ticket);
+    console.log("Id : ", ticket.TicketName.split(":")[0]);
+    console.log("Name : ", ticket.TicketName.split(":")[1]);
+    console.log("Customer Type : ", ticket.CustomerType);
+    console.log("Transport : ", customertransport.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
+    console.log("GasStation : ", customergasstation.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
+    console.log("Ticket : ", customerTickets.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
 
     console.log("Price : ", price);
 
@@ -451,11 +464,11 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
     };
 
     const handleChange = (field, value) => {
-            setPrice(prev => ({
-                ...prev,
-                [field]: field === "DateStart" ? dayjs(value).format("DD/MM/YYYY") : value
-            }));
-        };
+        setPrice(prev => ({
+            ...prev,
+            [field]: field === "DateStart" ? dayjs(value).format("DD/MM/YYYY") : value
+        }));
+    };
 
     // ลบแถวออกจาก price
     const handleDelete = (indexToDelete) => {
@@ -469,33 +482,33 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
     };
 
     const handleSubmit = () => {
-            database
-                .ref("transfermoney/")
-                .child(transferMoneyDetail.length)
-                .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-                .then(() => {
-                    let total = Number(newNumber) + 1
-                    let formattedNumber = String(total).padStart(4, "0");
-                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
-                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                    setPrice({
-                        id: transferMoneyDetail.length,
-                        Code: currentCode,
-                        Number: formattedNumber,
-                        DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                        BankName: "",
-                        Transport: "",
-                        IncomingMoney: "",
-                        TicketName: ticket.TicketName,
-                        TicketNo: ticket.No,
-                        TicketType: ticket.CustomerType,
-                        Note: "",
-                    })
+        database
+            .ref("transfermoney/")
+            .child(transferMoneyDetail.length)
+            .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+            .then(() => {
+                let total = Number(newNumber) + 1
+                let formattedNumber = String(total).padStart(4, "0");
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                setPrice({
+                    id: transferMoneyDetail.length,
+                    Code: currentCode,
+                    Number: formattedNumber,
+                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                    BankName: "",
+                    Transport: "",
+                    IncomingMoney: "",
+                    TicketName: ticket.TicketName,
+                    TicketNo: ticket.No,
+                    TicketType: ticket.CustomerType,
+                    Note: "",
                 })
-                .catch((error) => {
-                    ShowError("ไม่สำเร็จ");
-                    console.error("Error updating data:", error);
-                });
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
     }
 
     const rowSpanMap1 = company1Tickets.reduce((acc, row) => {
@@ -517,16 +530,82 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
 
     return (
         <React.Fragment>
-            <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName.split(":")[1]}
-            </Typography>
             <Box>
-                <Grid container spacing={2}>
-                    <Grid item xs={10.5}>
+                <Grid container spacing={1}>
+                    <Grid item xs={7}>
+                        <Typography variant="subtitle1" sx={{ marginBottom: -2, fontSize: "18px" }} fontWeight="bold" gutterBottom>
+                            รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName.split(":")[1]}
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                        <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -3, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของบจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
+                    </Grid>
+                    <Grid item xs={7.5}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                             บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
                         </Typography>
-                        <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของบจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
+                    </Grid>
+                    <Grid item xs={3} textAlign="right">
+                        <Grid container sx={{ marginTop: 1 }}>
+                            <Grid item xs={3}>
+                                <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }}>
+                                    NEW
+                                </Button>
+                            </Grid>
+                            <Grid item xs={5}>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <TextField size="small"
+                                        fullWidth
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px',
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                marginLeft: -1
+                                            },
+                                        }}
+                                    //value={invoices[0]?.Code || `lV${currentCode}`}
+                                    />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={0.5}>
+                                <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>- </Typography>
+                            </Grid>
+                            <Grid item xs={3.5}>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <TextField size="small"
+                                        fullWidth
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px',
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                marginRight: -2
+                                            },
+                                            marginRight: 1,
+                                        }}
+                                    //value={invoices[0]?.Number || ""}
+                                    />
+                                </Paper>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item xs={1.5}>
                         <Tooltip title="พิมพ์ใบวางบิล" placement="top">
@@ -949,12 +1028,76 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
                 </Paper>
             </Box>
             <Box marginTop={3}>
-                <Grid container spacing={2}>
-                    <Grid item xs={10.5}>
+                <Grid container spacing={1}>
+                    <Grid item xs={12}>
+                        <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "right", marginBottom: -1 }} gutterBottom>*พิมพ์ใบวางบิลของหจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
+                    </Grid>
+                    <Grid item xs={7.5}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                             หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
                         </Typography>
-                        <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -4, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของหจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
+                    </Grid>
+                    <Grid item xs={3} textAlign="right">
+                        <Grid container sx={{ marginTop: 1 }}>
+                            <Grid item xs={3}>
+                                <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }}>
+                                    NEW
+                                </Button>
+                            </Grid>
+                            <Grid item xs={5}>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <TextField size="small"
+                                        fullWidth
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px',
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                marginLeft: -1
+                                            },
+                                        }}
+                                    //value={invoices[0]?.Code || `lV${currentCode}`}
+                                    />
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={0.5}>
+                                <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>- </Typography>
+                            </Grid>
+                            <Grid item xs={3.5}>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <TextField size="small"
+                                        fullWidth
+                                        InputLabelProps={{
+                                            sx: {
+                                                fontSize: '14px',
+                                            },
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                marginRight: -2
+                                            },
+                                            marginRight: 1,
+                                        }}
+                                    //value={invoices[0]?.Number || ""}
+                                    />
+                                </Paper>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item xs={1.5}>
                         <Tooltip title="พิมพ์ใบวางบิล" placement="top">
@@ -976,6 +1119,26 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
                             </Button>
                         </Tooltip>
                     </Grid>
+                    {/* <Grid item xs={1.5}>
+                        <Tooltip title="พิมพ์ใบวางบิล" placement="top">
+                            <Button
+                                color="primary"
+                                variant='contained'
+                                fullWidth
+                                sx={{
+                                    flexDirection: "row",
+                                    gap: 0.5,
+                                    borderRadius: 2
+                                }}
+                                onClick={generatePDFCompany2}
+                            >
+                                <PrintIcon sx={{ color: "white" }} />
+                                <Typography sx={{ fontSize: "12px", fontWeight: "bold", color: "white", whiteSpace: "nowrap" }}>
+                                    พิมพ์ใบวางบิล
+                                </Typography>
+                            </Button>
+                        </Tooltip>
+                    </Grid> */}
                 </Grid>
                 <Paper
                     className="custom-scrollbar"
@@ -1377,24 +1540,24 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
                 </Paper>
             </Box >
             <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: 5, fontSize: "18px" }} gutterBottom>ข้อมูลการโอน</Typography>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <TableContainer
-                                    component={Paper}
-                                    sx={{ marginBottom: 2, borderRadius: 2 }}
-                                >
-                                    <Box>
-                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 170, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทรับจ้างขนส่ง</TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
-                                                    {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <TableContainer
+                        component={Paper}
+                        sx={{ marginBottom: 2, borderRadius: 2 }}
+                    >
+                        <Box>
+                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 170, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทรับจ้างขนส่ง</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                        {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                                     <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                                         <IconButton color="success"
                                                             size="small"
@@ -1406,268 +1569,268 @@ const currentCode = dayjs(new Date()).format("YYYYMM");
                                                         </IconButton>
                                                     </Tooltip>
                                                 </TableCell> */}
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {
-                                                    transfer.map((row, index) => (
-                                                        <TableRow>
-                                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.DateStart}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 300 }}>{row.BankName}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 200 }}>{row.Transport}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.IncomingMoney}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                }
-                                            </TableBody>
-                                        </Table>
-                                    </Box>
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableBody>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        transfer.map((row, index) => (
                                             <TableRow>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 870 }} colSpan={4}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        รวม
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 300, backgroundColor: "#616161", color: "white" }} colSpan={2}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
-                                                    </Typography>
-                                                </TableCell>
-                                                {/* <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 210, backgroundColor: "#616161", color: "white" }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.DateStart}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 300 }}>{row.BankName}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 200 }}>{row.Transport}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.IncomingMoney}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
+                                            </TableRow>
+                                        ))
+                                    }
+                                </TableBody>
+                            </Table>
+                        </Box>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 870 }} colSpan={4}>
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            รวม
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 300, backgroundColor: "#616161", color: "white" }} colSpan={2}>
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                        </Typography>
+                                    </TableCell>
+                                    {/* <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 210, backgroundColor: "#616161", color: "white" }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
             
                                                     </Typography>
                                                 </TableCell> */}
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Grid>
-                            <Grid item xs={11.5}>
-                                <Paper component="form" sx={{ borderRadius: 2, p: 2, backgroundColor: "#bdbdbd" }}>
-                                    <Typography variant="h6" fontWeight="bold" sx={{ marginLeft: 2 }} gutterBottom>กรอกข้อมูลการโอนเงินตรงนี้</Typography>
-                                    <Divider sx={{ marginBottom: 1, backgroundColor: "white" }} />
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={3}>
-                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1 }} gutterBottom>Statement</Typography>
-                                                <Grid container>
-                                                    <Grid item xs={4.5}>
-                                                        <Paper sx={{ height: "25px", width: "100%" }}>
-                                                            <TextField
-                                                                value={price.Code || ""}
-                                                                onChange={(e) => handleChange("Code", e.target.value)}
-                                                                size="small"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': { height: '25px' },
-                                                                    '& .MuiInputBase-input': { fontSize: "14px", fontWeight: "bold", textAlign: 'center', marginLeft: -1, marginRight: -1 },
-                                                                    '& .MuiInputBase-input.Mui-disabled': {
-                                                                        color: "#424242", // เปลี่ยนสีตัวอักษรเมื่อ disabled
-                                                                        WebkitTextFillColor: "#424242", // สำหรับบางเบราว์เซอร์ที่ไม่อ่าน color เมื่อ disabled 
-                                                                    }
-                                                                }}
-                                                                disabled
-                                                            />
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={0.5}>
-                                                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>-</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={3}>
-                                                        <Paper sx={{ height: "25px", width: "100%" }}>
-                                                            <TextField
-                                                                value={price.Number || ""}
-                                                                onChange={(e) => handleChange("Number", e.target.value)}
-                                                                size="small"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': { height: '25px' },
-                                                                    '& .MuiInputBase-input': { fontSize: "14px", fontWeight: "bold", textAlign: 'center', marginLeft: -1, marginRight: -1 },
-                                                                    '& .MuiInputBase-input.Mui-disabled': {
-                                                                        color: "#424242", // เปลี่ยนสีตัวอักษรเมื่อ disabled
-                                                                        WebkitTextFillColor: "#424242", // สำหรับบางเบราว์เซอร์ที่ไม่อ่าน color เมื่อ disabled 
-                                                                    }
-                                                                }}
-                                                                disabled
-                                                            />
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={4}>
-                                                        <Button
-                                                            variant="contained"
-                                                            disableElevation
-                                                            sx={{
-                                                                padding: 0.5,
-                                                                minWidth: 'auto',
-                                                                height: "25px",
-                                                                fontSize: '0.75rem',
-                                                                textTransform: 'none',
-                                                                marginLeft: 1
-                                                            }}
-                                                        >
-                                                            NEW
-                                                        </Button>
-                                                    </Grid>
-                                                </Grid>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>เงินเข้า</Typography>
-                                                <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
-                                                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
-                                                        <DatePicker
-                                                            openTo="day"
-                                                            views={["year", "month", "day"]}
-                                                            value={dayjs(price.DateStart, "DD/MM/YYYY")}
-                                                            onChange={(newValue) => handleChange("DateStart", newValue)}
-                                                            format="DD MMMM YYYY" // ใช้ BBBB แทนปี พ.ศ.
-                                                            slotProps={{
-                                                                textField: {
-                                                                    size: "small",
-                                                                    fullWidth: true,
-                                                                    sx: {
-                                                                        "& .MuiOutlinedInput-root": { height: "30px", paddingRight: "8px" },
-                                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1, marginRight: -1 },
-                                                                    },
-                                                                    InputProps: {
-                                                                        startAdornment: (
-                                                                            <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                                                วันที่ :
-                                                                            </InputAdornment>
-                                                                        ),
-                                                                    }
-                                                                },
-                                                            }}
-                                                        />
-                                                    </LocalizationProvider>
-                                                </Paper>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>บริษัทรับจ้างขนส่ง</Typography>
-                                            
-                                        <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
-                                                <FormControl
-                                                    fullWidth
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Grid>
+                <Grid item xs={11.5}>
+                    <Paper component="form" sx={{ borderRadius: 2, p: 2, backgroundColor: "#bdbdbd" }}>
+                        <Typography variant="h6" fontWeight="bold" sx={{ marginLeft: 2 }} gutterBottom>กรอกข้อมูลการโอนเงินตรงนี้</Typography>
+                        <Divider sx={{ marginBottom: 1, backgroundColor: "white" }} />
+                        <Grid container spacing={2}>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1 }} gutterBottom>Statement</Typography>
+                                    <Grid container>
+                                        <Grid item xs={4.5}>
+                                            <Paper sx={{ height: "25px", width: "100%" }}>
+                                                <TextField
+                                                    value={price.Code || ""}
+                                                    onChange={(e) => handleChange("Code", e.target.value)}
                                                     size="small"
+                                                    fullWidth
                                                     sx={{
-                                                        '& .MuiOutlinedInput-root': { height: '30px' },
-                                                        '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
-                                                    }}
-                                                >
-                                                    <Select
-                                                        value={price.Transport || ""}
-                                                        onChange={(e) => handleChange("Transport", e.target.value)}
-                                                    >
-                                                        {
-                                                            companies.map((row) => (
-                                                                row.id !== 1 &&
-                                                                <MenuItem value={`${row.id}:${row.Name}`} sx={{ fontSize: "14px", }}>{row.Name}</MenuItem>
-                                                            ))
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", fontWeight: "bold", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                        '& .MuiInputBase-input.Mui-disabled': {
+                                                            color: "#424242", // เปลี่ยนสีตัวอักษรเมื่อ disabled
+                                                            WebkitTextFillColor: "#424242", // สำหรับบางเบราว์เซอร์ที่ไม่อ่าน color เมื่อ disabled 
                                                         }
-                                                        {/* <MenuItem value="บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
-                                                        <MenuItem value="หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem> */}
-                                                    </Select>
-                                                </FormControl>
+                                                    }}
+                                                    disabled
+                                                />
                                             </Paper>
-                                            </Box>
                                         </Grid>
-                                    </Grid>
-                                    <Grid container spacing={2}>
                                         <Grid item xs={0.5}>
-            
-                                        </Grid>
-                                        <Grid item xs={5.5}>
-                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>บัญชี</Typography>
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <FormControl
-                                                        fullWidth
-                                                        size="small"
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-root': { height: '30px' },
-                                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
-                                                        }}
-                                                    >
-                                                        <Select
-                                                            value={price.BankName || ""}
-                                                            onChange={(e) => handleChange("BankName", e.target.value)}
-                                                        >
-                                                            {
-                                                                bankDetail.map((row) => (
-                                                                    <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
-                                                                ))
-                                                            }
-                                                        </Select>
-                                                    </FormControl>
-                                                </Paper>
-                                            </Box>
+                                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>-</Typography>
                                         </Grid>
                                         <Grid item xs={3}>
-                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>จำนวนเงิน</Typography>
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField
-                                                        type="number"
-                                                        value={price.IncomingMoney || ""}
-                                                        onChange={(e) => handleChange("IncomingMoney", e.target.value)}
-                                                        size="small"
-                                                        fullWidth
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-root': { height: '30px' },
-                                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
-                                                        }}
-                                                    />
-                                                </Paper>
-                                            </Box>
+                                            <Paper sx={{ height: "25px", width: "100%" }}>
+                                                <TextField
+                                                    value={price.Number || ""}
+                                                    onChange={(e) => handleChange("Number", e.target.value)}
+                                                    size="small"
+                                                    fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': { height: '25px' },
+                                                        '& .MuiInputBase-input': { fontSize: "14px", fontWeight: "bold", textAlign: 'center', marginLeft: -1, marginRight: -1 },
+                                                        '& .MuiInputBase-input.Mui-disabled': {
+                                                            color: "#424242", // เปลี่ยนสีตัวอักษรเมื่อ disabled
+                                                            WebkitTextFillColor: "#424242", // สำหรับบางเบราว์เซอร์ที่ไม่อ่าน color เมื่อ disabled 
+                                                        }
+                                                    }}
+                                                    disabled
+                                                />
+                                            </Paper>
                                         </Grid>
-                                        <Grid item xs={3}>
-                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>หมายเหตุ</Typography>
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField
-                                                        value={price.Note || ""}
-                                                        onChange={(e) => handleChange("Note", e.target.value)}
-                                                        size="small"
-                                                        fullWidth
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-root': { height: '30px' },
-                                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
-                                                        }}
-                                                    />
-                                                </Paper>
-                                            </Box>
+                                        <Grid item xs={4}>
+                                            <Button
+                                                variant="contained"
+                                                disableElevation
+                                                sx={{
+                                                    padding: 0.5,
+                                                    minWidth: 'auto',
+                                                    height: "25px",
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'none',
+                                                    marginLeft: 1
+                                                }}
+                                            >
+                                                NEW
+                                            </Button>
                                         </Grid>
                                     </Grid>
-                                </Paper>
+                                </Box>
                             </Grid>
-                            <Grid item xs={0.5} sx={{ marginTop: 0.5 }}>
-                                <BankDetail />
-                                <Tooltip title="บันทึก" placement="left">
-                                    <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
-                                        <Button
-                                            color="inherit"
-                                            fullWidth
-                                            onClick={handleSubmit}
-                                            sx={{ flexDirection: "column", gap: 0.5 }}
-                                        >
-                                            <SaveIcon fontSize="small" sx={{ color: "white" }} />
-                                            <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
-                                                บันทึก
-                                            </Typography>
-                                        </Button>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>เงินเข้า</Typography>
+                                    <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(price.DateStart, "DD/MM/YYYY")}
+                                                onChange={(newValue) => handleChange("DateStart", newValue)}
+                                                format="DD MMMM YYYY" // ใช้ BBBB แทนปี พ.ศ.
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        sx: {
+                                                            "& .MuiOutlinedInput-root": { height: "30px", paddingRight: "8px" },
+                                                            "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1, marginRight: -1 },
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    วันที่ :
+                                                                </InputAdornment>
+                                                            ),
+                                                        }
+                                                    },
+                                                }}
+                                            />
+                                        </LocalizationProvider>
                                     </Paper>
-                                </Tooltip>
+                                </Box>
                             </Grid>
+                            <Grid item xs={6}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>บริษัทรับจ้างขนส่ง</Typography>
+
+                                    <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
+                                        <FormControl
+                                            fullWidth
+                                            size="small"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "14px", textAlign: 'center' },
+                                            }}
+                                        >
+                                            <Select
+                                                value={price.Transport || ""}
+                                                onChange={(e) => handleChange("Transport", e.target.value)}
+                                            >
+                                                {
+                                                    companies.map((row) => (
+                                                        row.id !== 1 &&
+                                                        <MenuItem value={`${row.id}:${row.Name}`} sx={{ fontSize: "14px", }}>{row.Name}</MenuItem>
+                                                    ))
+                                                }
+                                                {/* <MenuItem value="บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
+                                                        <MenuItem value="หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem> */}
+                                            </Select>
+                                        </FormControl>
+                                    </Paper>
+                                </Box>
                             </Grid>
+                        </Grid>
+                        <Grid container spacing={2}>
+                            <Grid item xs={0.5}>
+
+                            </Grid>
+                            <Grid item xs={5.5}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>บัญชี</Typography>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <FormControl
+                                            fullWidth
+                                            size="small"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                            }}
+                                        >
+                                            <Select
+                                                value={price.BankName || ""}
+                                                onChange={(e) => handleChange("BankName", e.target.value)}
+                                            >
+                                                {
+                                                    bankDetail.map((row) => (
+                                                        <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                    ))
+                                                }
+                                            </Select>
+                                        </FormControl>
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>จำนวนเงิน</Typography>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField
+                                            type="number"
+                                            value={price.IncomingMoney || ""}
+                                            onChange={(e) => handleChange("IncomingMoney", e.target.value)}
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                            }}
+                                        />
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>หมายเหตุ</Typography>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField
+                                            value={price.Note || ""}
+                                            onChange={(e) => handleChange("Note", e.target.value)}
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                            }}
+                                        />
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </Paper>
+                </Grid>
+                <Grid item xs={0.5} sx={{ marginTop: 0.5 }}>
+                    <BankDetail />
+                    <Tooltip title="บันทึก" placement="left">
+                        <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
+                            <Button
+                                color="inherit"
+                                fullWidth
+                                onClick={handleSubmit}
+                                sx={{ flexDirection: "column", gap: 0.5 }}
+                            >
+                                <SaveIcon fontSize="small" sx={{ color: "white" }} />
+                                <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                    บันทึก
+                                </Typography>
+                            </Button>
+                        </Paper>
+                    </Tooltip>
+                </Grid>
+            </Grid>
         </React.Fragment >
     );
 };

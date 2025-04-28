@@ -83,8 +83,12 @@ const Report = () => {
 
   const [selectedRow, setSelectedRow] = useState(0);
   const [indexes, setIndex] = useState(0);
+  const [month, setMonth] = useState("");
 
-  const handleRowClick = (row, index) => {
+  console.log("Show Month of click ",month);
+
+  const handleRowClick = (row, index, newMonth) => {
+    setMonth(newMonth);
     setSelectedRow(row);
     setIndex(index);
   };
@@ -104,6 +108,10 @@ const Report = () => {
   const [dateRangesG, setDateRangesG] = useState({});
 
   console.log("Ticket : ", ticket);
+  console.log("Ticket A : ",ticket.filter((item) => ( item.CustomerType === "ตั๋วน้ำมัน" && item.Trip !== "ยกเลิก" )));
+  console.log("Ticket T : ",ticket.filter((item) => ( item.CustomerType === "ตั๋วรับจ้างขนส่ง" && item.Trip !== "ยกเลิก" )));
+  console.log("Ticket G : ",ticket.filter((item) => ( item.CustomerType === "ตั๋วปั้ม" && item.Trip !== "ยกเลิก" )));
+
   const resultTransport = ticket
     .filter((item) => (
       item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
@@ -249,26 +257,32 @@ const Report = () => {
     });
 
 
-  const resultArrayTickets = resultTickets.reduce((acc, item, index) => {
-    let totalVolume = 0;
-    let totalAmount = 0;
-    let totalOverdue = 0;
-    let totalPrice = 0;
-    let vatOnePercent = 0;
+  // 1. Group by year-month ก่อน
+const groupedByMonthTickets = resultTickets.reduce((groups, item) => {
+  const monthKey = dayjs(item.Date,"DD/MM/YYYY").format("YYYY-MM"); // ใช้ format "2025-04" ประมาณนี้
+  if (!groups[monthKey]) {
+    groups[monthKey] = [];
+  }
+  groups[monthKey].push(item);
+  return groups;
+}, {});
 
-    totalVolume += parseFloat(item.TotalVolume || 0);
-    totalAmount += parseFloat(item.TotalAmount || 0);
-    totalOverdue += parseFloat(item.TotalOverdue || 0);
-    totalPrice += parseFloat(item.TotalPrice || 0);
-    vatOnePercent += parseFloat(item.VatOnePercent || 0);
+// 2. แล้ว Reduce ในแต่ละกลุ่ม
+let resultArrayTickets = Object.entries(groupedByMonthTickets).flatMap(([month, items]) => {
+  const grouped = items.reduce((acc, item) => {
+    let totalVolume = parseFloat(item.TotalVolume || 0);
+    let totalAmount = parseFloat(item.TotalAmount || 0);
+    let totalOverdue = parseFloat(item.TotalOverdue || 0);
+    let totalPrice = parseFloat(item.TotalPrice || 0);
+    let vatOnePercent = parseFloat(item.VatOnePercent || 0);
 
     const key = item.TicketName;
 
     if (!acc[key]) {
       acc[key] = {
-        No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
-        TicketName: key,
+        TicketName: item.TicketName,
         Date: item.Date,
+        Month: month,
         TotalVolume: 0,
         TotalAmount: 0,
         TotalOverdue: 0,
@@ -276,11 +290,6 @@ const Report = () => {
         VatOnePercent: 0
       };
     }
-
-    // dateRangesA[index + 1] = {
-    //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
-    //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
-    // }
 
     acc[key].TotalVolume += totalVolume;
     acc[key].TotalAmount += totalAmount;
@@ -290,30 +299,45 @@ const Report = () => {
 
     return acc;
   }, {});
+
+  return Object.values(grouped);
+});
+
+// ⭐ ใส่ No ตอนสุดท้าย
+resultArrayTickets = resultArrayTickets.map((item, idx) => ({
+  No: idx + 1,
+  ...item
+}));
 
   // แปลงจาก object เป็น array ถ้าจะใช้กับ .map() แสดงผลในตาราง
   const TicketsDetail = Object.values(resultArrayTickets);
 
-  const resultArrayGasStation = resultGasStation.reduce((acc, item, index) => {
-    let totalVolume = 0;
-    let totalAmount = 0;
-    let totalOverdue = 0;
-    let totalPrice = 0;
-    let vatOnePercent = 0;
+   // 1. Group by year-month ก่อน
+const groupedByMonthGasStation = resultGasStation.reduce((groups, item) => {
+  const monthKey = dayjs(item.Date,"DD/MM/YYYY").format("YYYY-MM"); // ใช้ format "2025-04" ประมาณนี้
+  if (!groups[monthKey]) {
+    groups[monthKey] = [];
+  }
+  groups[monthKey].push(item);
+  return groups;
+}, {});
 
-    totalVolume += parseFloat(item.TotalVolume || 0);
-    totalAmount += parseFloat(item.TotalAmount || 0);
-    totalOverdue += parseFloat(item.TotalOverdue || 0);
-    totalPrice += parseFloat(item.TotalPrice || 0);
-    vatOnePercent += parseFloat(item.VatOnePercent || 0);
+// 2. แล้ว Reduce ในแต่ละกลุ่ม
+let resultArrayGasStation = Object.entries(groupedByMonthGasStation).flatMap(([month, items]) => {
+  const grouped = items.reduce((acc, item) => {
+    let totalVolume = parseFloat(item.TotalVolume || 0);
+    let totalAmount = parseFloat(item.TotalAmount || 0);
+    let totalOverdue = parseFloat(item.TotalOverdue || 0);
+    let totalPrice = parseFloat(item.TotalPrice || 0);
+    let vatOnePercent = parseFloat(item.VatOnePercent || 0);
 
     const key = item.TicketName;
 
     if (!acc[key]) {
       acc[key] = {
-        No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
-        TicketName: key,
+        TicketName: item.TicketName,
         Date: item.Date,
+        Month: month,
         TotalVolume: 0,
         TotalAmount: 0,
         TotalOverdue: 0,
@@ -322,11 +346,6 @@ const Report = () => {
       };
     }
 
-    // dateRangesG[index + 1] = {
-    //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
-    //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
-    // }
-
     acc[key].TotalVolume += totalVolume;
     acc[key].TotalAmount += totalAmount;
     acc[key].TotalOverdue += totalOverdue;
@@ -336,34 +355,91 @@ const Report = () => {
     return acc;
   }, {});
 
+  return Object.values(grouped);
+});
+
+// ⭐ ใส่ No ตอนสุดท้าย
+resultArrayGasStation = resultArrayGasStation.map((item, idx) => ({
+  No: idx + 1,
+  ...item
+}));
+
+  // const resultArrayGasStation = resultGasStation.reduce((acc, item, index) => {
+  //   let totalVolume = 0;
+  //   let totalAmount = 0;
+  //   let totalOverdue = 0;
+  //   let totalPrice = 0;
+  //   let vatOnePercent = 0;
+
+  //   totalVolume += parseFloat(item.TotalVolume || 0);
+  //   totalAmount += parseFloat(item.TotalAmount || 0);
+  //   totalOverdue += parseFloat(item.TotalOverdue || 0);
+  //   totalPrice += parseFloat(item.TotalPrice || 0);
+  //   vatOnePercent += parseFloat(item.VatOnePercent || 0);
+
+  //   const key = item.TicketName;
+
+  //   if (!acc[key]) {
+  //     acc[key] = {
+  //       No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
+  //       TicketName: key,
+  //       Date: item.Date,
+  //       TotalVolume: 0,
+  //       TotalAmount: 0,
+  //       TotalOverdue: 0,
+  //       TotalPrice: 0,
+  //       VatOnePercent: 0
+  //     };
+  //   }
+
+  //   // dateRangesG[index + 1] = {
+  //   //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+  //   //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+  //   // }
+
+  //   acc[key].TotalVolume += totalVolume;
+  //   acc[key].TotalAmount += totalAmount;
+  //   acc[key].TotalOverdue += totalOverdue;
+  //   acc[key].TotalPrice += totalPrice;
+  //   acc[key].VatOnePercent += vatOnePercent;
+
+  //   return acc;
+  // }, {});
+
   // แปลงจาก object เป็น array ถ้าจะใช้กับ .map() แสดงผลในตาราง
   const GasStationDetail = Object.values(resultArrayGasStation);
 
-  const resultArrayTransport = resultTransport.reduce((acc, item, index) => {
-    let totalVolume = 0;
-    let totalAmount = 0;
-    let totalOverdue = 0;
-    let totalPrice = 0;
-    let vatOnePercent = 0;
+  // 1. Group by year-month ก่อน
+const groupedByMonthTransport = resultTransport.reduce((groups, item) => {
+  const monthKey = dayjs(item.Date,"DD/MM/YYYY").format("YYYY-MM"); // ใช้ format "2025-04" ประมาณนี้
+  if (!groups[monthKey]) {
+    groups[monthKey] = [];
+  }
+  groups[monthKey].push(item);
+  return groups;
+}, {});
 
-    totalVolume += parseFloat(item.TotalVolume || 0);
-    totalAmount += parseFloat(item.TotalAmount || 0);
-    totalOverdue += parseFloat(item.TotalOverdue || 0);
-    totalPrice += parseFloat(item.TotalPrice || 0);
-    vatOnePercent += parseFloat(item.VatOnePercent || 0);
+// 2. แล้ว Reduce ในแต่ละกลุ่ม
+let resultArrayTransport = Object.entries(groupedByMonthTransport).flatMap(([month, items]) => {
+  const grouped = items.reduce((acc, item) => {
+    let totalVolume = parseFloat(item.TotalVolume || 0);
+    let totalAmount = parseFloat(item.TotalAmount || 0);
+    let totalOverdue = parseFloat(item.TotalOverdue || 0);
+    let totalPrice = parseFloat(item.TotalPrice || 0);
+    let vatOnePercent = parseFloat(item.VatOnePercent || 0);
 
     const key = item.TicketName;
 
     if (!acc[key]) {
       acc[key] = {
-        No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
-        TicketName: key,
+        TicketName: item.TicketName,
         Date: item.Date,
+        Month: month,
         TotalVolume: 0,
         TotalAmount: 0,
         TotalOverdue: 0,
         TotalPrice: 0,
-        VatOnePercent: 0,
+        VatOnePercent: 0
       };
     }
 
@@ -373,13 +449,59 @@ const Report = () => {
     acc[key].TotalPrice += totalPrice;
     acc[key].VatOnePercent += vatOnePercent;
 
-    // dateRangesT[index + 1] = {
-    //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
-    //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
-    // }
-
     return acc;
   }, {});
+
+  return Object.values(grouped);
+});
+
+// ⭐ ใส่ No ตอนสุดท้าย
+resultArrayTransport = resultArrayTransport.map((item, idx) => ({
+  No: idx + 1,
+  ...item
+}));
+
+  // const resultArrayTransport = resultTransport.reduce((acc, item, index) => {
+  //   let totalVolume = 0;
+  //   let totalAmount = 0;
+  //   let totalOverdue = 0;
+  //   let totalPrice = 0;
+  //   let vatOnePercent = 0;
+
+  //   totalVolume += parseFloat(item.TotalVolume || 0);
+  //   totalAmount += parseFloat(item.TotalAmount || 0);
+  //   totalOverdue += parseFloat(item.TotalOverdue || 0);
+  //   totalPrice += parseFloat(item.TotalPrice || 0);
+  //   vatOnePercent += parseFloat(item.VatOnePercent || 0);
+
+  //   const key = item.TicketName;
+
+  //   if (!acc[key]) {
+  //     acc[key] = {
+  //       No: index + 1, // <--- เพิ่ม No (index เริ่มจาก 1)
+  //       TicketName: key,
+  //       Date: item.Date,
+  //       TotalVolume: 0,
+  //       TotalAmount: 0,
+  //       TotalOverdue: 0,
+  //       TotalPrice: 0,
+  //       VatOnePercent: 0,
+  //     };
+  //   }
+
+  //   acc[key].TotalVolume += totalVolume;
+  //   acc[key].TotalAmount += totalAmount;
+  //   acc[key].TotalOverdue += totalOverdue;
+  //   acc[key].TotalPrice += totalPrice;
+  //   acc[key].VatOnePercent += vatOnePercent;
+
+  //   // dateRangesT[index + 1] = {
+  //   //   dateStart: dayjs().startOf("month").format("DD/MM/YYYY"),
+  //   //   dateEnd: dayjs().endOf("month").format("DD/MM/YYYY"),
+  //   // }
+
+  //   return acc;
+  // }, {});
 
   // แปลงจาก object เป็น array ถ้าจะใช้กับ .map() แสดงผลในตาราง
   const TransportDetail = Object.values(resultArrayTransport);
@@ -613,7 +735,7 @@ const Report = () => {
                             checkOverdueTransfer ?
                               TicketsDetail.map((row, index) => (
                                 row.TotalOverdueTransfer !== 0 &&
-                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.Month)}
                                   sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
@@ -626,7 +748,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.Month,"YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateStart", newDate)
@@ -663,7 +785,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.Month,"YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateEnd", newDate)
@@ -713,7 +835,7 @@ const Report = () => {
                                 </TableRow>
                               ))
                               : TicketsDetail.map((row, index) => (
-                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.Month)}
                                   sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
@@ -726,7 +848,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.Month,"YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateStart", newDate)
@@ -763,7 +885,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.Month,"YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateEnd", newDate)
@@ -821,7 +943,7 @@ const Report = () => {
                     {
                       resultTickets.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?
-                          <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesA} />
+                          <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesA} months={month} />
                           : ""
                       ))
                     }
@@ -890,7 +1012,7 @@ const Report = () => {
                               checkOverdueTransfer ?
                                 TransportDetail.map((row, index) => (
                                   row.TotalOverdueTransfer !== 0 &&
-                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.Month)}
                                     sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
@@ -902,7 +1024,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.Month,"YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateTChange(row.No, "dateStart", newDate)
@@ -939,7 +1061,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.Month,"YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateTChange(row.No, "dateEnd", newDate)
@@ -989,7 +1111,7 @@ const Report = () => {
                                   </TableRow>
                                 ))
                                 : TransportDetail.map((row, index) => (
-                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.Month)}
                                     sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
@@ -1001,7 +1123,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.Month,"YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateTChange(row.No, "dateStart", newDate)
@@ -1038,7 +1160,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.Month,"YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateTChange(row.No, "dateEnd", newDate)
@@ -1097,7 +1219,7 @@ const Report = () => {
                         {
                         resultTransport.map((row, index) => (
                           (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} />
+                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} months={month} />
                             : ""
                         ))
                       }
@@ -1167,7 +1289,7 @@ const Report = () => {
                               checkOverdueTransfer ?
                                 GasStationDetail.map((row, index) => (
                                   row.TotalOverdueTransfer !== 0 &&
-                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.Month)}
                                     sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
@@ -1179,7 +1301,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.Month,"YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateGChange(row.No, "dateStart", newDate)
@@ -1216,7 +1338,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.Month,"YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateGChange(row.No, "dateEnd", newDate)
@@ -1266,7 +1388,7 @@ const Report = () => {
                                   </TableRow>
                                 ))
                                 : GasStationDetail.map((row, index) => (
-                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
+                                  <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.Month)}
                                     sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                   >
                                     <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
@@ -1278,7 +1400,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs().startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.Month,"YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateGChange(row.No, "dateStart", newDate)
@@ -1315,7 +1437,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs().endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.Month,"YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateGChange(row.No, "dateEnd", newDate)
@@ -1373,7 +1495,7 @@ const Report = () => {
                       {
                         resultGasStation.map((row, index) => (
                           (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} />
+                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} months={month} />
                             : ""
                         ))
                       }
