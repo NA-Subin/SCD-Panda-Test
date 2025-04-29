@@ -1,23 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Button, Grid, TableHead, TableCell, TableRow, Table, Paper, TableContainer, TableBody, Box } from "@mui/material";
 import html2canvas from 'html2canvas';
+import html2pdf from "html2pdf.js";
 import dayjs from "dayjs";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const PrintInvoice = () => {
-  const [invoiceData, setInvoiceData] = useState(null);
-
   useEffect(() => {
-    // ดึงข้อมูลจาก sessionStorage
-    const storedData = sessionStorage.getItem("invoiceData");
-
-    if (storedData) {
-      try {
-        setInvoiceData(JSON.parse(storedData));
-      } catch (error) {
-        console.error("Error parsing invoiceData:", error);
-      }
-    }
-  }, []);
+      const data = JSON.parse(sessionStorage.getItem("invoiceData"));
+  
+      // หน่วงให้ DOM render ก่อน
+      const timer = setTimeout(() => {
+        const element = document.querySelector("#invoiceContent");
+      
+        const opt = {
+          margin:       0, // ไม่ต้องเว้น margin นอก page ถ้าใน element มี padding แล้ว
+          filename:     `O-${data.Code}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  {
+            scale: 2,           // เพิ่มความคมชัด
+            useCORS: true       // รองรับภาพจาก URL ต่างโดเมน (ถ้ามี)
+          },
+          jsPDF: {
+            unit: 'cm',         // ใช้หน่วยเดียวกับ CSS
+            format: 'a4',
+            orientation: 'portrait'
+          }
+        };
+      
+        html2pdf().set(opt).from(element).save();
+      }, 500);
+      
+  
+      return () => clearTimeout(timer);
+    }, []);
+  
+    const invoiceData = JSON.parse(sessionStorage.getItem("invoiceData"));
+    if (!invoiceData) return <div>กำลังโหลด...</div>;
 
   const address = invoiceData?.Order[0].Address || ''; // ดึงที่อยู่จาก invoiceData
 
@@ -142,11 +162,12 @@ const PrintInvoice = () => {
       <Box
         id="invoiceContent"
         sx={{
-          width: "21cm",  // ใช้หน่วย cm
-          height: "14.8cm",
-          backgroundColor: "#f9f9f9", // สีพื้นหลังอ่อนๆ
-          p: 2
-        }}
+          width: "21cm",
+          minHeight: "27cm", // ใช้ minHeight เผื่อเนื้อหาเกิน
+          backgroundColor: "#fff",
+          padding: "1cm",      // เว้น margin ภายในเนื้อหา
+          boxSizing: "border-box"
+        }}  
       >
         <Grid container spacing={2}>
           <Grid item xs={8}>
@@ -181,16 +202,16 @@ const PrintInvoice = () => {
             <Grid item xs={2}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>วันที่</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
-                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>{dayjs(new Date).format("DD/MM/YYYY")}</Typography>
+                  <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{dayjs(new Date).format("DD/MM/YYYY")}</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>เลขที่เอกสาร</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
                 </Grid>
                 <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
-                  <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>{invoiceData.Code}</Typography>
+                  <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{invoiceData.Code}</Typography>
                 </Grid>
               </Grid>
             </Grid>
@@ -206,7 +227,7 @@ const PrintInvoice = () => {
                     <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                   </TableCell>
                   <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "8%" }}>
-                    <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>ชนิดน้ำมัน</Typography>
+                    <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: -0.5 }} gutterBottom>ชนิดน้ำมัน</Typography>
                   </TableCell>
                   <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "11%" }}>
                     <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>จำนวนลิตร</Typography>

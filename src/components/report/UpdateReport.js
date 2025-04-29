@@ -29,7 +29,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { IconButtonError, IconButtonInfo, IconButtonSuccess, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
+import { IconButtonError, IconButtonInfo, IconButtonSuccess, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD, TablecellSelling } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import CancelIcon from '@mui/icons-material/Cancel';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -77,6 +77,8 @@ const UpdateReport = (props) => {
         invoiceReport
     } = useData();
 
+    console.log("Show Data ", ticket);
+
     const showTickets = Object.values(tickets || {});
     const customertransport = Object.values(customertransports || {});
     const customergasstation = Object.values(customergasstations || {});
@@ -88,8 +90,28 @@ const UpdateReport = (props) => {
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName);
-    const invoices = invoiceDetail.filter((row) => row.TicketName === ticket.TicketName);
+    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);
+
+    console.log("Ticket No ", ticket.No);
+    console.log("Tranfer : ", transfer);
+
+    let CountCompany1 = 0;
+    let CountCompany2 = 0;
+
+    transfer.forEach(row => {
+        const transportType = row.Transport.split(":")[0]; // แยกเอาเลขหน้ามาก่อน
+        const incoming = Number(row.IncomingMoney) || 0; // แปลงเป็นตัวเลข เผื่อเจอ undefined
+
+        if (transportType === "2") {
+            CountCompany1 += incoming;
+        } else if (transportType === "3") {
+            CountCompany2 += incoming;
+        }
+    });
+
+    console.log("ยอดบริษัท 1:", CountCompany1);
+    console.log("ยอดบริษัท 2:", CountCompany2);
+
     const totalIncomingMoney = transferMoneyDetail
         .filter(trans => trans.TicketName === ticket.TicketName)
         .reduce((sum, trans) => {
@@ -135,27 +157,27 @@ const UpdateReport = (props) => {
     //const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName && item.Trip !== "ยกเลิก");
 
     const startDate = dayjs(months, "YYYY-MM").startOf("month");
-const endDate = dayjs(months, "YYYY-MM").endOf("month");
+    const endDate = dayjs(months, "YYYY-MM").endOf("month");
 
-const ticketsList = showTickets.filter(item => {
-  const itemDate = dayjs(item.Date, "DD/MM/YYYY"); // แปลง item.Date ก่อนนะ
-  
-  return (
-    item.TicketName === ticket.TicketName &&
-    item.Trip !== "ยกเลิก" &&
-    itemDate.isBetween(startDate, endDate, "day", "[]") // [] คือรวมวันแรกกับวันสุดท้ายด้วย
-  );
-});
+    const ticketsList = showTickets.filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY"); // แปลง item.Date ก่อนนะ
 
-console.log(" Month : ",months);
+        return (
+            item.TicketName === ticket.TicketName &&
+            item.Trip !== "ยกเลิก" &&
+            itemDate.isBetween(startDate, endDate, "day", "[]") // [] คือรวมวันแรกกับวันสุดท้ายด้วย
+        );
+    });
+
+    console.log(" Month : ", months);
     console.log("ticketsList: ", ticketsList)
     console.log("Show tickets List : ", ticket);
-    console.log("Id : ", ticket.TicketName.split(":")[0]);
-    console.log("Name : ", ticket.TicketName.split(":")[1]);
-    console.log("Customer Type : ", ticket.CustomerType);
-    console.log("Transport : ", customertransport.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
-    console.log("GasStation : ", customergasstation.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
-    console.log("Ticket : ", customerTickets.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
+    // console.log("Id : ", ticket.TicketName.split(":")[0]);
+    // console.log("Name : ", ticket.TicketName.split(":")[1]);
+    // console.log("Customer Type : ", ticket.CustomerType);
+    //console.log("Transport : ", customertransport.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
+    //console.log("GasStation : ", customergasstation.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
+    //console.log("Ticket : ", customerTickets.find(item => item.id === Number(ticket.TicketName.split(":")[0]) && item.Trip !== "ยกเลิก"));
 
     console.log("Price : ", price);
 
@@ -178,9 +200,9 @@ console.log(" Month : ",months);
     };
 
     // 🔥 ทดสอบโค้ด
-    console.log("Date:", ticket.Date);
-    console.log("Credit Time:", ticket.CreditTime);
-    console.log(calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime));
+    // console.log("Date:", ticket.Date);
+    // console.log("Credit Time:", ticket.CreditTime);
+    // console.log(calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime));
 
     console.log("ticketsList : ", ticketsList);
 
@@ -313,8 +335,8 @@ console.log(" Month : ",months);
             (acc, row) => {
                 const amount = row.Volume * row.Rate;
 
-                console.log("Row Price : ", ticket.Price);
-                console.log("Row Company : ", row.Company);
+                //console.log("Row Price : ", ticket.Price);
+                //console.log("Row Company : ", row.Company);
 
                 // คำนวณยอดโอนจาก Price ที่ตรงกับ Company
                 const totalIncomingMoney = Array.isArray(ticket.Price)
@@ -353,14 +375,56 @@ console.log(" Month : ",months);
 
     console.log("processedTickets : ", processedTickets);
 
+    const invoices1 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company1Tickets[0].Company);
+    const invoices2 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company2Tickets[0].Company);
+
+    console.log("invoices1 : ",invoices1);
+    console.log("invoices2 : ",invoices2);
+
     const generatePDFCompany1 = () => {
+        let Code = ""
+                if (invoices1.length !== 0) {
+                    Code = `${invoices1[0].Code}-${invoices1[0].Number}`
+                } else {
+                    const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
+                    let newNumberInvoice = 1;
+                    if (lastItemInvoice && lastItemInvoice.Number && lastItemInvoice.Code === `lV${currentCode}`) {
+                        newNumberInvoice = Number(lastItemInvoice.Number) + 1;
+                    }
+                    const formattedNumberInvoice = String(newNumberInvoice).padStart(4, "0");
+        
+                    Code = `lV${currentCode}-${formattedNumberInvoice}`;
+        
+                    database
+                        .ref("invoice/")
+                        .child(invoiceDetail.length)
+                        .update({
+                            id: invoiceDetail.length,
+                            Code: `lV${currentCode}`,
+                            Number: formattedNumberInvoice,
+                            DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                            Transport: company1Tickets[0].Company,
+                            TicketName: ticket.TicketName,
+                            TicketNo: ticket.No,
+                            TicketType: ticket.CustomerType,
+                        }) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+                        .then(() => {
+                            console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                        })
+                        .catch((error) => {
+                            ShowError("ไม่สำเร็จ");
+                            console.error("Error updating data:", error);
+                        });
+                }
+
         const invoiceData = {
             Report: company1Tickets,
             Total: total1,
-            Company: company1Tickets[0].Company,
+            Company: company1Tickets[0].Company.split(":")[1],
             Address: company1Tickets[0].CompanyAddress,
             CardID: company1Tickets[0].CardID,
-            Phone: company1Tickets[0].Phone
+            Phone: company1Tickets[0].Phone,
+            Code: Code
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -388,13 +452,49 @@ console.log(" Month : ",months);
     };
 
     const generatePDFCompany2 = () => {
+        let Code = ""
+                if (invoices2.length !== 0) {
+                    Code = `${invoices2[0].Code}-${invoices2[0].Number}`
+                } else {
+                    const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
+                    let newNumberInvoice = 1;
+                    if (lastItemInvoice && lastItemInvoice.Number && lastItemInvoice.Code === `lV${currentCode}`) {
+                        newNumberInvoice = Number(lastItemInvoice.Number) + 1;
+                    }
+                    const formattedNumberInvoice = String(newNumberInvoice).padStart(4, "0");
+        
+                    Code = `lV${currentCode}-${formattedNumberInvoice}`;
+        
+                    database
+                        .ref("invoice/")
+                        .child(invoiceDetail.length)
+                        .update({
+                            id: invoiceDetail.length,
+                            Code: `lV${currentCode}`,
+                            Number: formattedNumberInvoice,
+                            DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                            Transport: company1Tickets[0].Company,
+                            TicketName: ticket.TicketName,
+                            TicketNo: ticket.No,
+                            TicketType: ticket.CustomerType,
+                        }) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+                        .then(() => {
+                            console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                        })
+                        .catch((error) => {
+                            ShowError("ไม่สำเร็จ");
+                            console.error("Error updating data:", error);
+                        });
+                }
+
         const invoiceData = {
             Report: company2Tickets,
             Total: total2,
-            Company: company2Tickets[0].Company,
+            Company: company2Tickets[0].Company.split(":")[1],
             Address: company2Tickets[0].CompanyAddress,
             CardID: company2Tickets[0].CardID,
-            Phone: company2Tickets[0].Phone
+            Phone: company2Tickets[0].Phone,
+            Code: Code
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -528,6 +628,9 @@ console.log(" Month : ",months);
     let displayIndex1 = 0;
     let displayIndex2 = 0;
 
+    console.log("Show Company 1 ",company1Tickets);
+    console.log("show company 2 ",company2Tickets);
+
     return (
         <React.Fragment>
             <Box>
@@ -573,7 +676,7 @@ console.log(" Month : ",months);
                                                 marginLeft: -1
                                             },
                                         }}
-                                    //value={invoices[0]?.Code || `lV${currentCode}`}
+                                    value={invoices1[0]?.Code || `lV${currentCode}`}
                                     />
                                 </Paper>
                             </Grid>
@@ -601,7 +704,7 @@ console.log(" Month : ",months);
                                             },
                                             marginRight: 1,
                                         }}
-                                    //value={invoices[0]?.Number || ""}
+                                    value={invoices1[0]?.Number || ""}
                                     />
                                 </Paper>
                             </Grid>
@@ -651,6 +754,50 @@ console.log(" Month : ",months);
                     >
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                             <TableHead>
+                            {/* <TableRow>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        ลำดับ
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        วันที่
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        พขร
+                                    </TablecellSelling>
+                                    <TableCellG95 sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px' }}>
+                                        G95
+                                    </TableCellG95>
+                                    <TableCellB95 sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px' }}>
+                                        B95
+                                    </TableCellB95>
+                                    <TableCellB7 sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px' }}>
+                                        B7(D)
+                                    </TableCellB7>
+                                    <TableCellG91 sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px' }}>
+                                        G91
+                                    </TableCellG91>
+                                    <TableCellE20 sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px' }}>
+                                        E20
+                                    </TableCellE20>
+                                    <TableCellPWD sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px' }}>
+                                        PWD
+                                    </TableCellPWD>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        จำนวนลิตร
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        ค่าบรรทุก
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 120, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        ยอดเงิน
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 70, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        หักภาษี 1%
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '35px', backgroundColor: theme.palette.primary.dark }}>
+                                        ยอดชำระ
+                                    </TablecellSelling>
+                                </TableRow> */}
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '35px', backgroundColor: theme.palette.primary.dark }}>
                                         ลำดับ
@@ -694,6 +841,86 @@ console.log(" Month : ",months);
                     >
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                             <TableBody>
+                            {/* {company1Tickets.map((row, index) => {
+                                    const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
+                                    const rowSpan = rowSpanMap1[key] && !mergedCells1[key] ? rowSpanMap1[key] : 0;
+                                    if (rowSpan) {
+                                        mergedCells1[key] = true;
+                                        displayIndex1++;
+                                    }
+
+                                    return (
+                                        <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
+                                            {rowSpan > 0 && (
+                                                <TableCell rowSpan={rowSpan}
+                                                    sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle" }}>
+                                                    {displayIndex1}
+                                                </TableCell>
+                                            )}
+                                            {rowSpan > 0 && (
+                                                <TableCell
+                                                    rowSpan={rowSpan}
+                                                    sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle" }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {row.Date}
+                                                    </Typography>
+                                                </TableCell>
+                                            )}
+                                            {rowSpan > 0 && (
+                                                <TableCell
+                                                    rowSpan={rowSpan}
+                                                    sx={{ textAlign: "center", height: '30px', width: 150, verticalAlign: "middle" }}
+                                                >
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {row.Registration.split(":")[1]}
+                                                    </Typography>
+                                                </TableCell>
+                                            )}
+                                            <TableCell sx={{
+                                                textAlign: "center", height: '30px', width: 100,
+                                                backgroundColor: row.ProductName === "G91" ? "#92D050" :
+                                                    row.ProductName === "G95" ? "#FFC000" :
+                                                        row.ProductName === "B7" ? "#FFFF99" :
+                                                            row.ProductName === "B95" ? "#B7DEE8" :
+                                                                row.ProductName === "B10" ? "#32CD32" :
+                                                                    row.ProductName === "B20" ? "#228B22" :
+                                                                        row.ProductName === "E20" ? "#C4BD97" :
+                                                                            row.ProductName === "E85" ? "#0000FF" :
+                                                                                row.ProductName === "PWD" ? "#F141D8" :
+                                                                                    "#FFFFFF"
+                                            }}>
+                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {row.ProductName}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {new Intl.NumberFormat("en-US").format(row.Volume)}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {new Intl.NumberFormat("en-US").format(row.Rate)}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {new Intl.NumberFormat("en-US").format(row.Volume * row.Rate)}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {new Intl.NumberFormat("en-US").format((row.Volume * row.Rate) * (0.01))}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                    {new Intl.NumberFormat("en-US").format((row.Volume * row.Rate) - ((row.Volume * row.Rate) * (0.01)))}
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })} */}
                                 {company1Tickets.map((row, index) => {
                                     const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
                                     const rowSpan = rowSpanMap1[key] && !mergedCells1[key] ? rowSpanMap1[key] : 0;
@@ -725,7 +952,7 @@ console.log(" Month : ",months);
                                                     sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle" }}
                                                 >
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {row.Driver.split(":")[1]} : {row.Registration.split(":")[1]}
+                                                        {row.Registration.split(":")[1]}
                                                     </Typography>
                                                 </TableCell>
                                             )}
@@ -953,7 +1180,7 @@ console.log(" Month : ",months);
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US").format(total1.totalIncomingMoney)}
+                                                value={new Intl.NumberFormat("en-US").format(CountCompany1)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -988,7 +1215,7 @@ console.log(" Month : ",months);
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US").format(total1.totalOverdueTransfer)}
+                                                value={new Intl.NumberFormat("en-US").format(Number(total1.totalPayment) - Number(CountCompany1))}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1065,7 +1292,7 @@ console.log(" Month : ",months);
                                                 marginLeft: -1
                                             },
                                         }}
-                                    //value={invoices[0]?.Code || `lV${currentCode}`}
+                                    value={invoices2[0]?.Code || `lV${currentCode}`}
                                     />
                                 </Paper>
                             </Grid>
@@ -1093,7 +1320,7 @@ console.log(" Month : ",months);
                                             },
                                             marginRight: 1,
                                         }}
-                                    //value={invoices[0]?.Number || ""}
+                                    value={invoices2[0]?.Number || ""}
                                     />
                                 </Paper>
                             </Grid>
@@ -1237,7 +1464,7 @@ console.log(" Month : ",months);
                                                     sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle" }}
                                                 >
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {row.Driver.split(":")[1]} : {row.Registration.split(":")[1]}
+                                                        {row.Registration.split(":")[1]}
                                                     </Typography>
                                                 </TableCell>
                                             )}
@@ -1465,7 +1692,7 @@ console.log(" Month : ",months);
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US").format(total2.totalIncomingMoney)}
+                                                value={new Intl.NumberFormat("en-US").format(CountCompany2)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1500,7 +1727,7 @@ console.log(" Month : ",months);
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US").format(total2.totalOverdueTransfer)}
+                                                value={new Intl.NumberFormat("en-US").format(Number(total2.totalPayment) - Number(CountCompany2))}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1551,11 +1778,11 @@ console.log(" Month : ",months);
                                 <TableHead>
                                     <TableRow>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 170, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทรับจ้างขนส่ง</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 120, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 250, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 250, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทรับจ้างขนส่ง</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 130, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
                                         {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                                     <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
@@ -1576,11 +1803,11 @@ console.log(" Month : ",months);
                                         transfer.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.DateStart}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 300 }}>{row.BankName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 200 }}>{row.Transport}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.IncomingMoney}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 120 }}>{`${row.Code} - ${row.Number}`}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>{row.DateStart}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.BankName}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.Transport.split(":")[1]}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 130 }}>{new Intl.NumberFormat("en-US").format(row.IncomingMoney)}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
                                             </TableRow>
                                         ))
@@ -1591,12 +1818,12 @@ console.log(" Month : ",months);
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 870 }} colSpan={4}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 770 }} colSpan={4}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             รวม
                                         </Typography>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 300, backgroundColor: "#616161", color: "white" }} colSpan={2}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 280, backgroundColor: "#616161", color: "white" }} colSpan={2}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                         </Typography>

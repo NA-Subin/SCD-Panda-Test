@@ -1,22 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Button, Grid, TableHead, TableCell, TableRow, Table, Paper, TableContainer, TableBody, Box } from "@mui/material";
 import html2canvas from 'html2canvas';
+import html2pdf from "html2pdf.js";
+import dayjs from "dayjs";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const PrintReport = () => {
-  const [invoiceData, setInvoiceData] = useState(null);
-
+  
   useEffect(() => {
-    // ดึงข้อมูลจาก sessionStorage
-    const storedData = sessionStorage.getItem("invoiceData");
+    const data = JSON.parse(sessionStorage.getItem("invoiceData"));
 
-    if (storedData) {
-      try {
-        setInvoiceData(JSON.parse(storedData));
-      } catch (error) {
-        console.error("Error parsing invoiceData:", error);
-      }
-    }
+    // หน่วงให้ DOM render ก่อน
+    const timer = setTimeout(() => {
+      const element = document.querySelector("#invoiceContent");
+    
+      const opt = {
+        margin:       0, // ไม่ต้องเว้น margin นอก page ถ้าใน element มี padding แล้ว
+        filename:     `T-${data.Code}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  {
+          scale: 2,           // เพิ่มความคมชัด
+          useCORS: true       // รองรับภาพจาก URL ต่างโดเมน (ถ้ามี)
+        },
+        jsPDF: {
+          unit: 'cm',         // ใช้หน่วยเดียวกับ CSS
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+    
+      html2pdf().set(opt).from(element).save();
+    }, 500);
+    
+
+    return () => clearTimeout(timer);
   }, []);
+
+  const invoiceData = JSON.parse(sessionStorage.getItem("invoiceData"));
+  if (!invoiceData) return <div>กำลังโหลด...</div>;
 
   const formatAddress = (address) => {
     // แยกข้อมูลจาก address โดยใช้ , หรือ เว้นวรรคเป็นตัวแบ่ง
@@ -119,11 +141,12 @@ const PrintReport = () => {
         <Box
           id="invoiceContent"
           sx={{
-            width: "21cm",  // ใช้หน่วย cm
-            height: "14.8cm",
-            backgroundColor: "#f9f9f9", // สีพื้นหลังอ่อนๆ
-            p: 2
-          }}
+            width: "21cm",
+            minHeight: "27cm", // ใช้ minHeight เผื่อเนื้อหาเกิน
+            backgroundColor: "#fff",
+            padding: "1cm",      // เว้น margin ภายในเนื้อหา
+            boxSizing: "border-box"
+          }}          
         >
           <Grid container spacing={2}>
             <Grid item xs={9}>
@@ -140,7 +163,7 @@ const PrintReport = () => {
               }
             </Grid>
             <Grid item xs={3} textAlign="right">
-              <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
+              <Typography variant="h6" sx={{ marginRight: 2 }}>
                 ใบวางบิล/ใบแจ้งหนี้
               </Typography>
             </Grid>
@@ -149,7 +172,6 @@ const PrintReport = () => {
             <Grid container spacing={2} marginTop={2} sx={{ px: 2 }}>
               {/* ส่วนข้อมูลบริษัท */}
               <Grid item xs={10} sx={{ border: "2px solid black", height: "140px" }}>
-                <Typography variant="subtitle2" sx={{ marginTop: 1 }}><b>รหัส:</b> </Typography>
                 <Typography variant="subtitle2"><b>ชื่อบริษัท:</b> {invoiceData?.Company}</Typography>
                 <Typography variant="subtitle2"><b>ที่อยู่:</b> {formatAddress(invoiceData?.Address)}</Typography>
                 <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b> {formatTaxID(invoiceData?.CardID)}</Typography>
@@ -159,16 +181,16 @@ const PrintReport = () => {
               <Grid item xs={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>วันที่</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>{ }</Typography>
+                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{dayjs(new Date).format("DD/MM/YYYY")}</Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5 }} gutterBottom>เลขที่เอกสาร</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>DDDDD</Typography>
+                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{invoiceData?.Code}</Typography>
                   </Grid>
                 </Grid>
               </Grid>
@@ -219,7 +241,7 @@ const PrintReport = () => {
                               rowSpan={rowSpan}
                               sx={{ textAlign: "center", height: '30px', verticalAlign: "middle" }}
                             >
-                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver} : {row.Registration}</Typography>
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Driver.split(":")[1]} : {row.Registration.split(":")[1]}</Typography>
                             </TableCell>
                           )}
                           <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
