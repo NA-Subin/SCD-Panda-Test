@@ -361,6 +361,7 @@ const UpdateInvoice = (props) => {
             }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
             Volume: ticket.TotalVolume || 0,
             Amount: ticket.TotalAmount || 0,
+            Date: invoices[0].DateStart,
             DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
             Company: companyName.Name,
             Address: companyName.Address,

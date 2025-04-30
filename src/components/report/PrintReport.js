@@ -133,6 +133,7 @@ const PrintReport = () => {
   let mergedCells = {};
   let displayIndex = 0;
 
+  console.log("invoiceData : ",invoiceData);
   console.log("Tickets Order : ", invoiceData?.Report);
   console.log("Total Order : ", invoiceData?.Total);
 
@@ -184,7 +185,7 @@ const PrintReport = () => {
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{dayjs(new Date).format("DD/MM/YYYY")}</Typography>
+                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{invoiceData?.Date}</Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
@@ -277,7 +278,7 @@ const PrintReport = () => {
                   </TableRow>
                   <TableRow sx={{ height: "25px" }}>
                     <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={3} rowSpan={2}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>กำหนดชำระ</Typography>
+                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>{invoiceData?.DateEnd}</Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }} >
                       <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>

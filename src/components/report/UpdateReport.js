@@ -185,27 +185,26 @@ const UpdateReport = (props) => {
     console.log("Price : ", price);
 
     const calculateDueDate = (dateString, creditDays) => {
-        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่"; // ตรวจสอบค่าว่าง
-
+        if (!dateString || creditDays === null || creditDays === undefined) return "ไม่พบข้อมูลวันที่";
+    
         const [day, month, year] = dateString.split("/").map(Number);
-        const date = new Date(year, month - 1, day); // สร้าง Date object (month - 1 เพราะเริ่มที่ 0-11)
-
-        date.setDate(date.getDate() + Number(creditDays)); // เพิ่มจำนวนวัน
-
-        // แปลงเป็นวันที่ภาษาไทย
+        const date = new Date(year, month - 1, day);
+    
+        date.setDate(date.getDate() + creditDays);
+    
         const formattedDate = new Intl.DateTimeFormat("th-TH", {
             year: "numeric",
             month: "long",
             day: "numeric",
         }).format(date);
-
-        return `กำหนดชำระเงิน: ${formattedDate}`;
+    
+        return `กำหนดชำระเงินวันที่ ${formattedDate}`;
     };
 
     // 🔥 ทดสอบโค้ด
-    // console.log("Date:", ticket.Date);
-    // console.log("Credit Time:", ticket.CreditTime);
-    // console.log(calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime));
+     console.log("Date:", ticket.Date);
+     console.log("Credit Time:", ticket.CreditTime);
+     console.log(calculateDueDate(ticket.Date, ticket.CreditTime));
 
     console.log("ticketsList : ", ticketsList);
 
@@ -428,7 +427,10 @@ const UpdateReport = (props) => {
             Address: company1Tickets[0].CompanyAddress,
             CardID: company1Tickets[0].CardID,
             Phone: company1Tickets[0].Phone,
-            Code: Code
+            Code: Code,
+            Date: invoices1[0].DateStart,
+            DateStart: ticket.Date,
+            DateEnd: calculateDueDate(ticket.Date,ticket.CreditTime)
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -498,7 +500,10 @@ const UpdateReport = (props) => {
             Address: company2Tickets[0].CompanyAddress,
             CardID: company2Tickets[0].CardID,
             Phone: company2Tickets[0].Phone,
-            Code: Code
+            Code: Code,
+            Date: invoices2[0].DateStart,
+            DateStart: ticket.Date,
+            DateEnd: calculateDueDate(ticket.Date,ticket.CreditTime)
         };
 
         // บันทึกข้อมูลลง sessionStorage
