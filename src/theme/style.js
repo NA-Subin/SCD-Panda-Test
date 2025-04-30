@@ -35,6 +35,22 @@ const TablecellTickets = styled(TableCell)(({ theme }) => ({
   fontWeight: "bold",
 }));
 
+const TablecellFinancial = styled(TableCell)(({ theme }) => ({
+  backgroundColor: "#689f38",
+  color: theme.palette.primary.contrastText,
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
+const TablecellFinancialHead = styled(TableCell)(({ theme }) => ({
+  backgroundColor: "#558b2f",
+  color: theme.palette.primary.contrastText,
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
 const TablecellCustomers = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.info.main,
   color: theme.palette.primary.contrastText,
@@ -193,5 +209,7 @@ export {
   TableCellE20,
   TableCellPWD,
   TablecellTickets,
-  TablecellCustomers
+  TablecellCustomers,
+  TablecellFinancial,
+  TablecellFinancialHead
 };

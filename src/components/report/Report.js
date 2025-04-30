@@ -257,6 +257,32 @@ const Report = () => {
       };
     });
 
+    const groupedByPeriodTickets = resultTickets.reduce((groups, item) => {
+      const date = dayjs(item.Date, "DD/MM/YYYY");
+      const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
+      const monthKey = date.format("YYYY-MM");
+    
+      // กำหนดช่วงที่ 1-3
+      let period = "";
+      if (day >= 1 && day <= 10) {
+        period = "ช่วงที่ 1"; // 1-10
+      } else if (day >= 11 && day <= 20) {
+        period = "ช่วงที่ 2"; // 11-20
+      } else {
+        period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+      }
+    
+      // สร้าง key เช่น "2025-04_ช่วงที่ 1"
+      const groupKey = `${monthKey}_${period}`;
+    
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(item);
+      return groups;
+    }, {});
+
+    console.log("groupedByPeriodTickets ",groupedByPeriodTickets);
 
   // 1. Group by year-month ก่อน
   const groupedByMonthTickets = resultTickets.reduce((groups, item) => {
@@ -268,8 +294,25 @@ const Report = () => {
     return groups;
   }, {});
 
+  console.log("groupedByMonthTickets ",groupedByMonthTickets);
+
   // 2. แล้ว Reduce ในแต่ละกลุ่ม
-  let resultArrayTickets = Object.entries(groupedByMonthTickets).flatMap(([month, items]) => {
+  let resultArrayTickets = Object.entries(groupedByPeriodTickets).flatMap(([month, items]) => {
+    const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
+
+  // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
+  let DateStart, DateEnd;
+  if (period === "ช่วงที่ 1") {
+    DateStart = dayjs(monthKey + "-01","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey + "-10","YYYY-MM-DD").format("DD/MM/YYYY");
+  } else if (period === "ช่วงที่ 2") {
+    DateStart = dayjs(monthKey + "-11","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey + "-20","YYYY-MM-DD").format("DD/MM/YYYY");
+  } else if (period === "ช่วงที่ 3") {
+    DateStart = dayjs(monthKey + "-21","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey,"YYYY-MM").endOf("month").format("DD/MM/YYYY");
+  }
+
     const grouped = items.reduce((acc, item) => {
       let totalVolume = parseFloat(item.TotalVolume || 0);
       let totalAmount = parseFloat(item.TotalAmount || 0);
@@ -282,6 +325,8 @@ const Report = () => {
       if (!acc[key]) {
         acc[key] = {
           TicketName: item.TicketName,
+          DateStart: DateStart,
+          DateEnd: DateEnd,
           Date: item.Date,
           Month: month,
           CustomerType: item.CustomerType,
@@ -304,7 +349,7 @@ const Report = () => {
     }, {});
 
     return Object.values(grouped);
-  });
+  }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
 
   // ⭐ ใส่ No ตอนสุดท้าย
   resultArrayTickets = resultArrayTickets.map((item, idx) => ({
@@ -316,6 +361,33 @@ const Report = () => {
   //const [TicketsDetail,setTicketsDetail] = useState(Object.values(resultArrayTickets));
   const TicketsDetail = Object.values(resultArrayTickets);
 
+  const groupedByPeriodGasStation = resultGasStation.reduce((groups, item) => {
+    const date = dayjs(item.Date, "DD/MM/YYYY");
+    const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
+    const monthKey = date.format("YYYY-MM");
+  
+    // กำหนดช่วงที่ 1-3
+    let period = "";
+    if (day >= 1 && day <= 10) {
+      period = "ช่วงที่ 1"; // 1-10
+    } else if (day >= 11 && day <= 20) {
+      period = "ช่วงที่ 2"; // 11-20
+    } else {
+      period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+    }
+  
+    // สร้าง key เช่น "2025-04_ช่วงที่ 1"
+    const groupKey = `${monthKey}_${period}`;
+  
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push(item);
+    return groups;
+  }, {});
+
+  console.log("groupedByPeriodGasStation ",groupedByPeriodGasStation);
+
   // 1. Group by year-month ก่อน
   const groupedByMonthGasStation = resultGasStation.reduce((groups, item) => {
     const monthKey = dayjs(item.Date, "DD/MM/YYYY").format("YYYY-MM"); // ใช้ format "2025-04" ประมาณนี้
@@ -326,8 +398,25 @@ const Report = () => {
     return groups;
   }, {});
 
+  console.log("groupedByMonthGasStation ",groupedByMonthGasStation);
+
   // 2. แล้ว Reduce ในแต่ละกลุ่ม
-  let resultArrayGasStation = Object.entries(groupedByMonthGasStation).flatMap(([month, items]) => {
+  let resultArrayGasStation = Object.entries(groupedByPeriodGasStation).flatMap(([month, items]) => {
+    const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
+
+  // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
+  let DateStart, DateEnd;
+  if (period === "ช่วงที่ 1") {
+    DateStart = dayjs(monthKey + "-01","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey + "-10","YYYY-MM-DD").format("DD/MM/YYYY");
+  } else if (period === "ช่วงที่ 2") {
+    DateStart = dayjs(monthKey + "-11","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey + "-20","YYYY-MM-DD").format("DD/MM/YYYY");
+  } else if (period === "ช่วงที่ 3") {
+    DateStart = dayjs(monthKey + "-21","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey,"YYYY-MM").endOf("month").format("DD/MM/YYYY");
+  }
+
     const grouped = items.reduce((acc, item) => {
       let totalVolume = parseFloat(item.TotalVolume || 0);
       let totalAmount = parseFloat(item.TotalAmount || 0);
@@ -340,6 +429,8 @@ const Report = () => {
       if (!acc[key]) {
         acc[key] = {
           TicketName: item.TicketName,
+          DateStart: DateStart,
+          DateEnd: DateEnd,
           Date: item.Date,
           Month: month,
           CustomerType: item.CustomerType,
@@ -362,7 +453,7 @@ const Report = () => {
     }, {});
 
     return Object.values(grouped);
-  });
+  }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
 
   // ⭐ ใส่ No ตอนสุดท้าย
   resultArrayGasStation = resultArrayGasStation.map((item, idx) => ({
@@ -416,6 +507,33 @@ const Report = () => {
   //const [GasStationDetail,setGasStationDetail] = useState(Object.values(resultArrayGasStation));
   const GasStationDetail = Object.values(resultArrayGasStation);
 
+  const groupedByPeriodTransport = resultTransport.reduce((groups, item) => {
+    const date = dayjs(item.Date, "DD/MM/YYYY");
+    const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
+    const monthKey = date.format("YYYY-MM");
+  
+    // กำหนดช่วงที่ 1-3
+    let period = "";
+    if (day >= 1 && day <= 10) {
+      period = "ช่วงที่ 1"; // 1-10
+    } else if (day >= 11 && day <= 20) {
+      period = "ช่วงที่ 2"; // 11-20
+    } else {
+      period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+    }
+  
+    // สร้าง key เช่น "2025-04_ช่วงที่ 1"
+    const groupKey = `${monthKey}_${period}`;
+  
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push(item);
+    return groups;
+  }, {});
+
+  console.log("groupedByPeriodTransport ",groupedByPeriodTransport);
+
   // 1. Group by year-month ก่อน
   const groupedByMonthTransport = resultTransport.reduce((groups, item) => {
     const monthKey = dayjs(item.Date, "DD/MM/YYYY").format("YYYY-MM"); // ใช้ format "2025-04" ประมาณนี้
@@ -426,8 +544,26 @@ const Report = () => {
     return groups;
   }, {});
 
+  console.log("groupedByMonthTransport ",groupedByMonthTransport);
+
   // 2. แล้ว Reduce ในแต่ละกลุ่ม
-  let resultArrayTransport = Object.entries(groupedByMonthTransport).flatMap(([month, items]) => {
+  let resultArrayTransport = Object.entries(groupedByPeriodTransport).flatMap(([month, items]) => {
+    const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
+
+  // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
+  let DateStart, DateEnd;
+  if (period === "ช่วงที่ 1") {
+    DateStart = dayjs(monthKey + "-01","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey + "-10","YYYY-MM-DD").format("DD/MM/YYYY");
+  } else if (period === "ช่วงที่ 2") {
+    DateStart = dayjs(monthKey + "-11","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey + "-20","YYYY-MM-DD").format("DD/MM/YYYY");
+  } else if (period === "ช่วงที่ 3") {
+    DateStart = dayjs(monthKey + "-21","YYYY-MM-DD").format("DD/MM/YYYY");
+    DateEnd = dayjs(monthKey,"YYYY-MM").endOf("month").format("DD/MM/YYYY");
+  }
+
+
     const grouped = items.reduce((acc, item) => {
       let totalVolume = parseFloat(item.TotalVolume || 0);
       let totalAmount = parseFloat(item.TotalAmount || 0);
@@ -440,6 +576,8 @@ const Report = () => {
       if (!acc[key]) {
         acc[key] = {
           TicketName: item.TicketName,
+          DateStart: DateStart,
+          DateEnd: DateEnd,
           Date: item.Date,
           Month: month,
           CustomerType: item.CustomerType,
@@ -462,7 +600,7 @@ const Report = () => {
     }, {});
 
     return Object.values(grouped);
-  });
+  }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
 
   // ⭐ ใส่ No ตอนสุดท้าย
   resultArrayTransport = resultArrayTransport.map((item, idx) => ({
@@ -517,6 +655,9 @@ const Report = () => {
   const TransportDetail = Object.values(resultArrayTransport);
 
   const handleDateAChange = (index, type, value) => {
+    console.log("Show Index ",index);
+    console.log("Show Type ",type);
+    console.log("Show Value ",value);
     setDateRangesA(prev => ({
       ...prev,
       [index]: {
@@ -527,6 +668,9 @@ const Report = () => {
   };
 
   const handleDateTChange = (index, type, value) => {
+    console.log("Show Index ",index);
+    console.log("Show Type ",type);
+    console.log("Show Value ",value);
     setDateRangesT(prev => ({
       ...prev,
       [index]: {
@@ -537,6 +681,9 @@ const Report = () => {
   };
 
   const handleDateGChange = (index, type, value) => {
+    console.log("Show Index ",index);
+    console.log("Show Type ",type);
+    console.log("Show Value ",value);
     setDateRangesG(prev => ({
       ...prev,
       [index]: {
@@ -769,7 +916,7 @@ const Report = () => {
                                             <DatePicker
                                               openTo="day"
                                               views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.Month, "YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                              value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                               format="DD/MM/YYYY"
                                               onChange={(newDate) =>
                                                 handleDateAChange(row.No, "dateStart", newDate)
@@ -806,7 +953,7 @@ const Report = () => {
                                             <DatePicker
                                               openTo="day"
                                               views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.Month, "YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                              value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                               format="DD/MM/YYYY"
                                               onChange={(newDate) =>
                                                 handleDateAChange(row.No, "dateEnd", newDate)
@@ -881,7 +1028,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.Month, "YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateStart", newDate)
@@ -918,7 +1065,7 @@ const Report = () => {
                                         <DatePicker
                                           openTo="day"
                                           views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.Month, "YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                           format="DD/MM/YYYY"
                                           onChange={(newDate) =>
                                             handleDateAChange(row.No, "dateEnd", newDate)
@@ -1072,7 +1219,7 @@ const Report = () => {
                                             <DatePicker
                                               openTo="day"
                                               views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.Month, "YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                              value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                               format="DD/MM/YYYY"
                                               onChange={(newDate) =>
                                                 handleDateTChange(row.No, "dateStart", newDate)
@@ -1109,7 +1256,7 @@ const Report = () => {
                                             <DatePicker
                                               openTo="day"
                                               views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.Month, "YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                              value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                               format="DD/MM/YYYY"
                                               onChange={(newDate) =>
                                                 handleDateTChange(row.No, "dateEnd", newDate)
@@ -1183,7 +1330,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.Month, "YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateTChange(row.No, "dateStart", newDate)
@@ -1220,7 +1367,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.Month, "YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateTChange(row.No, "dateEnd", newDate)
@@ -1376,7 +1523,7 @@ const Report = () => {
                                             <DatePicker
                                               openTo="day"
                                               views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.Month, "YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                              value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                               format="DD/MM/YYYY"
                                               onChange={(newDate) =>
                                                 handleDateGChange(row.No, "dateStart", newDate)
@@ -1413,7 +1560,7 @@ const Report = () => {
                                             <DatePicker
                                               openTo="day"
                                               views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.Month, "YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                              value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                               format="DD/MM/YYYY"
                                               onChange={(newDate) =>
                                                 handleDateGChange(row.No, "dateEnd", newDate)
@@ -1487,7 +1634,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.Month, "YYYY-MM").startOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateGChange(row.No, "dateStart", newDate)
@@ -1524,7 +1671,7 @@ const Report = () => {
                                           <DatePicker
                                             openTo="day"
                                             views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.Month, "YYYY-MM").endOf("month").format("DD/MM/YYYY"), "DD/MM/YYYY")}
+                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
                                             format="DD/MM/YYYY"
                                             onChange={(newDate) =>
                                               handleDateGChange(row.No, "dateEnd", newDate)

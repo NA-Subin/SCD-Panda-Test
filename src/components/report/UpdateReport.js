@@ -156,8 +156,11 @@ const UpdateReport = (props) => {
 
     //const ticketsList = showTickets.filter(item => item.TicketName === ticket.TicketName && item.Trip !== "ยกเลิก");
 
-    const startDate = dayjs(months, "YYYY-MM").startOf("month");
-    const endDate = dayjs(months, "YYYY-MM").endOf("month");
+    const startDate = dayjs(ticket.DateStart, "DD/MM/YYYY");
+    const endDate = dayjs(ticket.DateEnd, "DD/MM/YYYY");
+
+    console.log("DateStart : ",startDate);
+    console.log("DateEnd ",endDate);
 
     const ticketsList = showTickets.filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY"); // แปลง item.Date ก่อนนะ
@@ -285,7 +288,8 @@ const UpdateReport = (props) => {
                                 : 0,
                     Amount: Volume.Amount || 0,
                     Depot: matchedTrip ? matchedTrip.Depot : row.Depot,
-                    Date: matchedTrip ? matchedTrip.DateDelivery : row.DateDelivery,
+                    //Date: matchedTrip ? matchedTrip.DateDelivery : row.DateDelivery,
+                    Date: row.Date,
                     Driver: matchedTrip ? matchedTrip.Driver : row.Driver,
                     Registration: matchedTrip ? matchedTrip.Registration : row.Registration,
                     ProductName: productName,
