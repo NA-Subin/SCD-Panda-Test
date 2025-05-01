@@ -72,6 +72,8 @@ const UpdateDriver = (props) => {
     const [license, setLicense] = React.useState(driver.DrivingLicense);
     const [expiration, setExpiration] = React.useState(driver.DrivingLicenseExpiration);
     const [picture, setPicture] = React.useState(driver.DrivingLicensePicture);
+    const [phone, setPhone] =  React.useState(driver.Phone);
+    const [user,setUser] = React.useState(driver.User);
     const [registrationHead, setRegistrationHead] = React.useState([]);
     const [registrationSmallTruck, setRegistrationSmallTruck] = React.useState([]);
 
@@ -285,6 +287,18 @@ const UpdateDriver = (props) => {
                             </Grid>
                             <Grid item xs={2}>
                                 <TextField fullWidth variant="standard" type="number" value={pointCost} disabled={update ? true : false} onChange={(e) => setPointCost(e.target.value)} />
+                            </Grid>
+                            <Grid item xs={1}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>User</Typography>
+                            </Grid>
+                            <Grid item xs={5}>
+                                <TextField fullWidth variant="standard" type="number" value={user} disabled/>
+                            </Grid>
+                            <Grid item xs={1}>
+                                <Typography variant="subtitle1" fontWeight="bold" whiteSpace="nowrap" gutterBottom>เบอร์โทร</Typography>
+                            </Grid>
+                            <Grid item xs={5}>
+                                <TextField fullWidth variant="standard" type="number" value={phone} disabled={update ? true : false} onChange={(e) => setPhone(e.target.value)} />
                             </Grid>
                             <Grid item xs={12} marginTop={2} marginBottom={2}>
                                 <Divider>

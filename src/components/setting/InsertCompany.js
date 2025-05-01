@@ -34,11 +34,15 @@ import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { useData } from "../../server/path";
 
 const InsertCompany = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [depots, setDepots] = useState("");
+
+    const { company } = useData();
+      const companyDetail = Object.values(company || {});
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -50,7 +54,7 @@ const InsertCompany = () => {
 
     const [companyType,setCompanyType] = React.useState("")
     const [name, setName] = React.useState("");
-    const [company, setCompany] = React.useState([]);
+    //const [company, setCompany] = React.useState([]);
     const [no, setNo] = React.useState("");
     const [village, setVillage] = React.useState("");
     const [subDistrict, setSubDistrict] = React.useState("");
@@ -60,23 +64,25 @@ const InsertCompany = () => {
     const [lng,setLng] = React.useState("");
     const [zipCode, setZipCode] = React.useState("");
 
-    const getCompany = async () => {
-        database.ref("/company").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setCompany(datas.length);
-        });
-    };
+    // const getCompany = async () => {
+    //     database.ref("/company").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         setCompany(datas.length);
+    //     });
+    // };
 
-    useEffect(() => {
-        getCompany();
-    }, []);
+    // useEffect(() => {
+    //     getCompany();
+    // }, []);
+
+    console.log("Company : ",companyDetail);
 
     const handlePost = () => {
         database
             .ref("company")
-            .child(company)
+            .child(companyDetail.length)
             .update({
-                id: company + 1,
+                id: (companyDetail.length) + 1,
                 Name: name,
                 Address: 
                     (no === "-" ? "-" : no)+

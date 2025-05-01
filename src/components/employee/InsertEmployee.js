@@ -31,13 +31,15 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
 import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
-import CancelIcon from '@mui/icons-material/Cancel';
 import UploadButton from "./UploadButton";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
@@ -45,15 +47,16 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useData } from "../../server/path";
 
 const InsertEmployee = (props) => {
-    const { type, driver,officer,truck,smallTruck } = props;
+    const { type, driver, officer, truck, smallTruck } = props;
     const [menu, setMenu] = React.useState(type);
 
     React.useEffect(() => {
         setMenu(type);  // อัปเดต state เมื่อ props.type เปลี่ยน
     }, [type]);
 
-    const { gasstation } = useData();
-    const gasStation = Object.values(gasstation); 
+    const { gasstation, positions } = useData();
+    const gasStation = Object.values(gasstation);
+    const positionDetail = Object.values(positions);
 
     const [open, setOpen] = React.useState(false);
     const [prefix, setPrefix] = React.useState(0);
@@ -85,8 +88,17 @@ const InsertEmployee = (props) => {
     const [gasStations, setGasStations] = useState("");
 
     const [position, setPosition] = React.useState("");
+    const [newPosition, setNewPosition] = React.useState("");
     const [phone, setPhone] = React.useState("");
     const [password, setPassword] = React.useState("1234567")
+    const [openPosition, setOpenPosition] = React.useState(false);
+    const [check,setCheck] = React.useState(1);
+
+    const handleAddPosition = () => {
+        database.ref("positions/").child(positionDetail.length).set(newPosition)
+        setOpenPosition(false);
+        setNewPosition("");
+    }
 
     const handlePost = () => {
         if (menu === 1) {
@@ -102,7 +114,8 @@ const InsertEmployee = (props) => {
                             Password: password,
                             Position: position,
                             Phone: phone,
-                            GasStation: gasStations
+                            GasStation: gasStations,
+                            Rights: check === 1 ? "แอดมิน" : check === 2 ? "หน้าลาน" : check === 3 ? "เจ้าหนี้น้ำมัน" : ""
                         })
                         .then(() => {
                             ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -122,12 +135,17 @@ const InsertEmployee = (props) => {
                 }
             )
         } else {
+            createUserWithEmailAndPassword(auth, (user + "@gmail.com"), password).then(
+                (userCredential) => {
             database
                 .ref("employee/drivers/")
                 .child(driver.length)
                 .update({
                     id: driver.length + 1,
                     Name: prefix + name + " " + lastname,
+                    User: user,
+                    Password: password,
+                    Phone: phone,
                     Registration: regTruck,
                     BankID: bankID,
                     BankName: bank,
@@ -145,39 +163,39 @@ const InsertEmployee = (props) => {
                     DrivingLicensePicture: "ไม่มี"
                 })
                 .then(() => {
-                    if(trucks === "รถใหญ่" && regTruck !== "0:ไม่มี"){
-                                        database
-                                        .ref("/truck/registration/")
-                                        .child(regTruck.split(":")[0] - 1)
-                                        .update({
-                                            Driver: prefix + name + " " + lastname,
-                                        })
-                                        .then(() => {
-                                            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                                            console.log("Data pushed successfully");
-                                        })
-                                        .catch((error) => {
-                                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                            console.error("Error pushing data:", error);
-                                        });
-                                    }else if(trucks === "รถเล็ก" && regTruck !== "0:ไม่มี"){
-                                        database
-                                        .ref("/truck/registrationTail/")
-                                        .child(regTruck.split(":")[0] - 1)
-                                        .update({
-                                            Driver: prefix + name + " " + lastname,
-                                        })
-                                        .then(() => {
-                                            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                                            console.log("Data pushed successfully");
-                                        })
-                                        .catch((error) => {
-                                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                            console.error("Error pushing data:", error);
-                                        });
-                                    }else{
-                    
-                                    }
+                    if (trucks === "รถใหญ่" && regTruck !== "0:ไม่มี") {
+                        database
+                            .ref("/truck/registration/")
+                            .child(regTruck.split(":")[0] - 1)
+                            .update({
+                                Driver: prefix + name + " " + lastname,
+                            })
+                            .then(() => {
+                                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                console.log("Data pushed successfully");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                    } else if (trucks === "รถเล็ก" && regTruck !== "0:ไม่มี") {
+                        database
+                            .ref("/truck/registrationTail/")
+                            .child(regTruck.split(":")[0] - 1)
+                            .update({
+                                Driver: prefix + name + " " + lastname,
+                            })
+                            .then(() => {
+                                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                console.log("Data pushed successfully");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                    } else {
+
+                    }
                     ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                     console.log("Data pushed successfully");
                     setPrefix("");
@@ -196,11 +214,14 @@ const InsertEmployee = (props) => {
                     setLoan("");
                     setDrivingLicense("");
                     setExpiration("")
+                    setPhone("")
+                    setUser("")
                 })
                 .catch((error) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                     console.error("Error pushing data:", error);
                 });
+            })
         }
     };
 
@@ -335,22 +356,77 @@ const InsertEmployee = (props) => {
                                                     <MenuItem value={0}>
                                                         กรุณาเลือกตำแหน่ง
                                                     </MenuItem>
-                                                    <MenuItem value={"แอดมิน"}>แอดมิน</MenuItem>
-                                                    <MenuItem value={"พนักงานขายหน้าลาน"}>พนักงานขายหน้าลาน</MenuItem>
+                                                    {
+                                                        positionDetail.map((p) => (
+                                                            <MenuItem value={p}>{p}</MenuItem>
+                                                        ))
+                                                    }
                                                 </Select>
                                             </Paper>
+                                            <Tooltip title="เพิ่มตำแหน่ง" placement="right" onClick={() => setOpenPosition(true)}>
+                                                <IconButton color="primary">
+                                                    <AddBoxIcon />
+                                                </IconButton>
+                                            </Tooltip>
                                         </Box>
                                     </Grid>
                                     <Grid item md={6} sm={6} xs={12}>
+                                        {
+                                            openPosition &&
+                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เพิ่มตำแหน่ง</Typography>
+                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                    <TextField size="small" fullWidth value={newPosition} onChange={(e) => setNewPosition(e.target.value)} />
+                                                </Paper>
+                                                <Tooltip title="ยกเลิก" placement="right" onClick={() => setOpenPosition(false)}>
+                                                    <IconButton color="error">
+                                                        <CancelIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="บันทึก" placement="right" onClick={handleAddPosition}>
+                                                    <IconButton color="success">
+                                                        <CheckCircleIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        }
+                                    </Grid>
+                                    <Grid item md={6} sm={6} xs={12}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เบอร์โทร</Typography>
-                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
-                                            </Paper>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ให้สิทธิ์</Typography>
+                                            <FormGroup row>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            checked={check === 1 ? true : false}
+                                                            onChange={() => setCheck(1)}
+                                                            size="small"
+                                                        />
+                                                    }
+                                                    label="แอดมิน" />
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            checked={check === 2 ? true : false}
+                                                            onChange={() => setCheck(2)}
+                                                            size="small"
+                                                        />
+                                                    }
+                                                    label="หน้าลาน" />
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            checked={check === 3 ? true : false}
+                                                            onChange={() => setCheck(3)}
+                                                            size="small"
+                                                        />
+                                                    }
+                                                    label="เจ้าหนี้น้ำมัน" />
+                                            </FormGroup>
                                         </Box>
                                     </Grid>
                                     {
-                                        position === "พนักงานขายหน้าลาน" &&
+                                        check === 3 &&
                                         <>
                                             <Grid item md={6} sm={6} xs={12}>
                                                 <Box display="flex" justifyContent="center" alignItems="center">
@@ -379,6 +455,14 @@ const InsertEmployee = (props) => {
                                             </Grid>
                                         </>
                                     }
+                                    <Grid item md={6} sm={6} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เบอร์โทร</Typography>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
                                 </>
                                 : menu === 2 ?
                                     <>
@@ -435,6 +519,26 @@ const InsertEmployee = (props) => {
                                                     }
                                                 </Select>
                                             </Paper>
+                                        </Grid>
+                                        <Grid item md={2} sm={2} xs={3}>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
+                                        </Grid>
+                                        <Grid item md={4} sm={4} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
+                                            </Paper>
+                                        </Box>
+                                        </Grid>
+                                        <Grid item md={2} sm={2} xs={3}>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
+                                        </Grid>
+                                        <Grid item md={4} sm={4} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                            </Paper>
+                                        </Box>
                                         </Grid>
                                         <Grid item md={12} sm={12} xs={12}>
                                             <Divider>

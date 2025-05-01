@@ -590,6 +590,40 @@ const UpdateReport = (props) => {
         });
     };
 
+    const handleNewInvoice1 = () => {
+            database
+                .ref("invoice/")
+                .child(invoices1[0].id)
+                .update({
+                    TicketNo: "ยกเลิก"
+                })
+                .then(() => {
+                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                })
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        }
+
+    const handleNewInvoice2 = () => {
+            database
+                .ref("invoice/")
+                .child(invoices2[0].id)
+                .update({
+                    TicketNo: "ยกเลิก"
+                })
+                .then(() => {
+                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                })
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        }
+
     const handleSubmit = () => {
         database
             .ref("transfermoney/")
@@ -660,7 +694,7 @@ const UpdateReport = (props) => {
                     <Grid item xs={3} textAlign="right">
                         <Grid container sx={{ marginTop: 1 }}>
                             <Grid item xs={3}>
-                                <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }}>
+                                <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice1}>
                                     NEW
                                 </Button>
                             </Grid>
@@ -1276,7 +1310,7 @@ const UpdateReport = (props) => {
                     <Grid item xs={3} textAlign="right">
                         <Grid container sx={{ marginTop: 1 }}>
                             <Grid item xs={3}>
-                                <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }}>
+                                <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice2}>
                                     NEW
                                 </Button>
                             </Grid>

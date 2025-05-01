@@ -13,6 +13,7 @@ export const DataProvider = ({ children }) => {
     const [data, setData] = useState({
         company: {},
         customer: {},
+        positions: {},
         officers: {},
         drivers: {},
         creditors: {},
@@ -39,6 +40,7 @@ export const DataProvider = ({ children }) => {
         company: ref(database, "/company"),
         banks: ref(database, "/banks"),
         customer: ref(database, "/customer"),
+        positions: ref(database, "/positions"),
         officers: ref(database, "/employee/officers"),
         drivers: ref(database, "/employee/drivers"),
         creditors: ref(database, "/employee/creditors"),

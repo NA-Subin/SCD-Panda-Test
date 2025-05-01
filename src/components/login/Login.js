@@ -94,10 +94,12 @@ const Login = () => {
             Cookies.set("sessionToken", `${user}$${datas[id].id}`, { expires: 30, secure: true, sameSite: "Lax" });
             Cookies.set("password", encryptedPassword, { expires: 30, secure: true, sameSite: "Lax" });
 
-            if (datas[id].Position === "พนักงานขายหน้าลาน") {
+            if (datas[id].Rights === "หน้าลาน") {
               navigate("/gasstation-attendant", { state: { Employee: datas[id] } });
-            } else {
+            } else if (datas[id].Rights === "แอดมิน")  {
               navigate("/choose");
+            } else {
+              navigate("/financial");
             }
             return;
           }
@@ -123,6 +125,30 @@ const Login = () => {
             Cookies.set("password", encryptedPassword, { expires: 30, secure: true, sameSite: "Lax" });
 
             navigate("/trade-payable", { state: { Creditor: creditorDatas[id] } });
+            return;
+          }
+        }
+        ShowError("กรุณากรอกรหัสผ่านใหม่อีกครั้ง");
+        return;
+      }
+
+      // ถ้าไม่เจอใน officers ให้เช็ค creditors
+      const driverSnapshot = await database
+        .ref("/employee/drivers")
+        .orderByChild("User")
+        .equalTo(user)
+        .once("value");
+
+      const driverDatas = driverSnapshot.val();
+      if (driverDatas) {
+        for (let id in driverDatas) {
+          if (driverDatas[id].Password === password) {
+            // บันทึก Cookies โดยใช้รหัสผ่านที่เข้ารหัส
+            Cookies.set("user", user, { expires: 30, secure: true, sameSite: "Lax" });
+            Cookies.set("sessionToken", `${user}$${driverDatas[id].id}`, { expires: 30, secure: true, sameSite: "Lax" });
+            Cookies.set("password", encryptedPassword, { expires: 30, secure: true, sameSite: "Lax" });
+
+            navigate("/driver-detail", { state: { Creditor: driverDatas[id] } });
             return;
           }
         }

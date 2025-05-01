@@ -36,6 +36,7 @@ import Report from "./components/report/Report";
 import PrintReport from "./components/report/PrintReport";
 import Driver from "./components/driver/Driver";
 import CloseFS from "./components/financial/CloseFS";
+import DriverDetail from "./components/driver/DriverDetail";
 
 const MySwal = withReactContent(Swal);
 
@@ -89,6 +90,7 @@ function App() {
         <Route path="/print-trips" element={<PrintTrips />} />
         <Route path="/print-report" element={<PrintReport />} />
         <Route path="/gasstation-attendant" element={<GasStationA />} />
+        <Route path="/driver-Detail" element={<DriverDetail />} />
         <Route path="/driver" element={<Driver />} />
         <Route path="/trade-payable" element={<TradePayable />} />
         <Route path="/choose" element={<Choose />} />

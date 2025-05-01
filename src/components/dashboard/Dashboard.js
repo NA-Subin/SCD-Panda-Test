@@ -90,86 +90,90 @@ const Dashboard = () => {
   const Cbigtruck = Object.values(customerbigtruck || {});
   const Csmalltruck = Object.values(customersmalltruck || {});
   const Ctickets = Object.values(customertickets || {});
+  const Cbigtruck1 = Cbigtruck.filter((row) => (row.Type === "เชียงใหม่"));
+  const Cbigtruck2 = Cbigtruck.filter((row) => (row.Type === "เชียงราย"));
+  const Csmalltruck1 = Csmalltruck.filter((row) => (row.Type === "เชียงใหม่"));
+  const Csmalltruck2 = Csmalltruck.filter((row) => (row.Type === "บ้านโฮ่ง"));
   const [date, setDate] = useState(dayjs(new Date())); // เก็บชื่อเดือน
   const [volumeAll, setVolumeAll] = useState([]); // เก็บข้อมูลทั้งหมด
   const [checkDate, setCheckDate] = useState(false); // เก็บข้อมูลทั้งหมด
 
   const handleDateChangeDate = (newValue) => {
     const monthName = newValue.format("MMMM"); // แปลงเป็นชื่อเดือนที่เลือก
-  // เตรียมโครงสร้างเก็บผลรวม
-  const monthOrders = {};
-  const monthTickets = {};
-  const monthTrips = {};
-  const monthOrderCancel = {};
-  const monthTicketCancel = {};
-  const monthStats = {};
+    // เตรียมโครงสร้างเก็บผลรวม
+    const monthOrders = {};
+    const monthTickets = {};
+    const monthTrips = {};
+    const monthOrderCancel = {};
+    const monthTicketCancel = {};
+    const monthStats = {};
 
-  const startOfMonth = newValue.startOf('month');  // วันเริ่มต้นของเดือนที่เลือก
-  const endOfMonth = newValue.endOf('month');  // วันสิ้นสุดของเดือนที่เลือก
+    const startOfMonth = newValue.startOf('month');  // วันเริ่มต้นของเดือนที่เลือก
+    const endOfMonth = newValue.endOf('month');  // วันสิ้นสุดของเดือนที่เลือก
 
-  // สร้างวันที่ทั้งหมดในเดือนที่เลือก
-  const allDatesInMonth = [];
-  let currentDate = startOfMonth;
+    // สร้างวันที่ทั้งหมดในเดือนที่เลือก
+    const allDatesInMonth = [];
+    let currentDate = startOfMonth;
 
-  // Loop สร้างวันที่ทั้งหมดจากวันที่เริ่มต้นถึงสิ้นเดือน
-  while (currentDate.isBefore(endOfMonth) || currentDate.isSame(endOfMonth)) {
-    allDatesInMonth.push(currentDate.format('DD/MM/YYYY')); // เก็บวันที่ในรูปแบบ 'DD/MM/YYYY'
-    currentDate = currentDate.add(1, 'day'); // เพิ่มวันไปทีละวัน
-  }
-
-  // Orders
-  orders.forEach((o) => {
-    const [day, monthStr] = o.Date.split('/');
-    const monthIndex = parseInt(monthStr, 10) - 1;
-    const monthName = months[monthIndex];
-    const orderDate = dayjs(o.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
-
-    // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
-    if (allDatesInMonth.includes(orderDate.format('DD/MM/YYYY'))) {
-      const dayOnly = orderDate.format('DD'); // ใช้เพียงแค่วันที่
-      if (!monthOrders[dayOnly]) {
-        monthOrders[dayOnly] = { date: dayOnly, orders: 0 };
-      }
-      monthOrders[dayOnly].orders += 1;
+    // Loop สร้างวันที่ทั้งหมดจากวันที่เริ่มต้นถึงสิ้นเดือน
+    while (currentDate.isBefore(endOfMonth) || currentDate.isSame(endOfMonth)) {
+      allDatesInMonth.push(currentDate.format('DD/MM/YYYY')); // เก็บวันที่ในรูปแบบ 'DD/MM/YYYY'
+      currentDate = currentDate.add(1, 'day'); // เพิ่มวันไปทีละวัน
     }
-  });
 
-  ticket.forEach((t) => {
-    const [day, monthStr] = t.Date.split('/');
-    const monthIndex = parseInt(monthStr, 10) - 1;
-    const monthName = months[monthIndex];
-    const orderDate = dayjs(t.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
-
-    // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
-    if (allDatesInMonth.includes(orderDate.format('DD/MM/YYYY'))) {
-      const dayOnly = orderDate.format('DD'); // ใช้เพียงแค่วันที่
-      if (!monthTickets[dayOnly]) {
-        monthTickets[dayOnly] = { date: dayOnly, ticket: 0 };
-      }
-      monthTickets[dayOnly].ticket += 1;
-    }
-  });
-
-  orders.forEach((o) => {
-    if (o.Trip === "ยกเลิก") {
+    // Orders
+    orders.forEach((o) => {
       const [day, monthStr] = o.Date.split('/');
       const monthIndex = parseInt(monthStr, 10) - 1;
       const monthName = months[monthIndex];
-      const ordersDate = dayjs(o.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
+      const orderDate = dayjs(o.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
 
       // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
-      if (allDatesInMonth.includes(ordersDate.format('DD/MM/YYYY'))) {
-        const dayOnly = ordersDate.format('DD'); // ใช้เพียงแค่วันที่
-        if (!monthOrderCancel[dayOnly]) {
-          monthOrderCancel[dayOnly] = { date: dayOnly, ordersCancel: 0 };
+      if (allDatesInMonth.includes(orderDate.format('DD/MM/YYYY'))) {
+        const dayOnly = orderDate.format('DD'); // ใช้เพียงแค่วันที่
+        if (!monthOrders[dayOnly]) {
+          monthOrders[dayOnly] = { date: dayOnly, orders: 0 };
         }
-        monthOrderCancel[dayOnly].ordersCancel += 1;
+        monthOrders[dayOnly].orders += 1;
       }
-    }
-});
+    });
 
-  // Tickets
-  ticket.forEach((t) => {
+    ticket.forEach((t) => {
+      const [day, monthStr] = t.Date.split('/');
+      const monthIndex = parseInt(monthStr, 10) - 1;
+      const monthName = months[monthIndex];
+      const orderDate = dayjs(t.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
+
+      // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
+      if (allDatesInMonth.includes(orderDate.format('DD/MM/YYYY'))) {
+        const dayOnly = orderDate.format('DD'); // ใช้เพียงแค่วันที่
+        if (!monthTickets[dayOnly]) {
+          monthTickets[dayOnly] = { date: dayOnly, ticket: 0 };
+        }
+        monthTickets[dayOnly].ticket += 1;
+      }
+    });
+
+    orders.forEach((o) => {
+      if (o.Trip === "ยกเลิก") {
+        const [day, monthStr] = o.Date.split('/');
+        const monthIndex = parseInt(monthStr, 10) - 1;
+        const monthName = months[monthIndex];
+        const ordersDate = dayjs(o.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
+
+        // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
+        if (allDatesInMonth.includes(ordersDate.format('DD/MM/YYYY'))) {
+          const dayOnly = ordersDate.format('DD'); // ใช้เพียงแค่วันที่
+          if (!monthOrderCancel[dayOnly]) {
+            monthOrderCancel[dayOnly] = { date: dayOnly, ordersCancel: 0 };
+          }
+          monthOrderCancel[dayOnly].ordersCancel += 1;
+        }
+      }
+    });
+
+    // Tickets
+    ticket.forEach((t) => {
       if (t.Trip === "ยกเลิก") {
         const [day, monthStr] = t.Date.split('/');
         const monthIndex = parseInt(monthStr, 10) - 1;
@@ -185,42 +189,42 @@ const Dashboard = () => {
           monthTicketCancel[dayOnly].ticketCancel += 1;
         }
       }
-  });
+    });
 
-  // Trips
-  trips.forEach((r) => {
-    const [day, monthStr] = r.DateStart.split('/');
-    const monthIndex = parseInt(monthStr, 10) - 1;
-    const monthName = months[monthIndex];
-    const tripDate = dayjs(r.DateStart, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
+    // Trips
+    trips.forEach((r) => {
+      const [day, monthStr] = r.DateStart.split('/');
+      const monthIndex = parseInt(monthStr, 10) - 1;
+      const monthName = months[monthIndex];
+      const tripDate = dayjs(r.DateStart, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
 
-    // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
-    if (allDatesInMonth.includes(tripDate.format('DD/MM/YYYY'))) {
-      const dayOnly = tripDate.format('DD'); // ใช้เพียงแค่วันที่
-      if (!monthTrips[dayOnly]) {
-        monthTrips[dayOnly] = { date: dayOnly, trips: 0 };
+      // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
+      if (allDatesInMonth.includes(tripDate.format('DD/MM/YYYY'))) {
+        const dayOnly = tripDate.format('DD'); // ใช้เพียงแค่วันที่
+        if (!monthTrips[dayOnly]) {
+          monthTrips[dayOnly] = { date: dayOnly, trips: 0 };
+        }
+        monthTrips[dayOnly].trips += 1;
       }
-      monthTrips[dayOnly].trips += 1;
-    }
-  });
+    });
 
-  // สร้าง array สำหรับ BarChart ตามวันที่ที่เลือก
-  const fullOrders = allDatesInMonth.map((date) => {
-    const day = dayjs(date, 'DD/MM/YYYY').format('DD'); // แสดงแค่วันที่
-    return {
-      date: day,  // แสดงแค่วัน
-      orders: monthOrders[day]?.orders || 0,
-      ticket: monthTickets[day]?.ticket || 0,
-      trips: monthTrips[day]?.trips || 0,
-      ordersCancel: monthOrderCancel[day]?.ordersCancel || 0,
-      ticketCancel: monthTicketCancel[day]?.ticketCancel || 0
-    };
-  });
-  
+    // สร้าง array สำหรับ BarChart ตามวันที่ที่เลือก
+    const fullOrders = allDatesInMonth.map((date) => {
+      const day = dayjs(date, 'DD/MM/YYYY').format('DD'); // แสดงแค่วันที่
+      return {
+        date: day,  // แสดงแค่วัน
+        orders: monthOrders[day]?.orders || 0,
+        ticket: monthTickets[day]?.ticket || 0,
+        trips: monthTrips[day]?.trips || 0,
+        ordersCancel: monthOrderCancel[day]?.ordersCancel || 0,
+        ticketCancel: monthTicketCancel[day]?.ticketCancel || 0
+      };
+    });
+
     setDate(newValue); // ตั้งค่าชื่อเดือนที่เลือก
     setVolumeAll(fullOrders); // ตั้งค่าข้อมูลที่ใช้แสดง
     setCheckDate(true);
-  };  
+  };
 
   const handleClearDate = () => {
     setCheckDate(false);
@@ -236,6 +240,13 @@ const Dashboard = () => {
     margin: { right: 5 },
     slotProps: { legend: { hidden: true } },
   };
+
+  const pieParamsNewSize = {
+    width: 250,
+    height: 250,
+    margin: { right: 5 },
+    slotProps: { legend: { hidden: true } },
+  }
 
   const months = [
     'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
@@ -264,45 +275,45 @@ const Dashboard = () => {
   });
 
   orders.forEach((o) => {
-    if(o.Trip === "ยกเลิก"){
-    const [day, monthStr] = o.Date.split('/');
-    const monthIndex = parseInt(monthStr, 10) - 1;
-    const monthName = months[monthIndex];
+    if (o.Trip === "ยกเลิก") {
+      const [day, monthStr] = o.Date.split('/');
+      const monthIndex = parseInt(monthStr, 10) - 1;
+      const monthName = months[monthIndex];
 
-    if (!monthOrderCancel[monthName]) {
-      monthOrderCancel[monthName] = { month: monthName, ordersCancel: 0 };
+      if (!monthOrderCancel[monthName]) {
+        monthOrderCancel[monthName] = { month: monthName, ordersCancel: 0 };
+      }
+
+      monthOrderCancel[monthName].ordersCancel += 1;
     }
-
-    monthOrderCancel[monthName].ordersCancel += 1;
-  }
   });
 
   // Tickets
   ticket.forEach((t) => {
-        const [day, monthStr] = t.Date.split('/');
-        const monthIndex = parseInt(monthStr, 10) - 1;
-        const monthName = months[monthIndex];
-
-        if (!monthTickets[monthName]) {
-          monthTickets[monthName] = { month: monthName, ticket: 0 };
-        }
-
-        monthTickets[monthName].ticket += 1;
-  });
-
-  ticket.forEach((t) => {
-    if(t.Trip === "ยกเลิก"){
     const [day, monthStr] = t.Date.split('/');
     const monthIndex = parseInt(monthStr, 10) - 1;
     const monthName = months[monthIndex];
 
-    if (!monthTicketCancel[monthName]) {
-      monthTicketCancel[monthName] = { month: monthName, ticketCancel: 0 };
+    if (!monthTickets[monthName]) {
+      monthTickets[monthName] = { month: monthName, ticket: 0 };
     }
 
-    monthTicketCancel[monthName].ticketCancel += 1;
-  }
-});
+    monthTickets[monthName].ticket += 1;
+  });
+
+  ticket.forEach((t) => {
+    if (t.Trip === "ยกเลิก") {
+      const [day, monthStr] = t.Date.split('/');
+      const monthIndex = parseInt(monthStr, 10) - 1;
+      const monthName = months[monthIndex];
+
+      if (!monthTicketCancel[monthName]) {
+        monthTicketCancel[monthName] = { month: monthName, ticketCancel: 0 };
+      }
+
+      monthTicketCancel[monthName].ticketCancel += 1;
+    }
+  });
 
   trips.forEach((r) => {
     const [day, monthStr] = r.DateStart.split('/');
@@ -517,7 +528,7 @@ const Dashboard = () => {
                 justifyContent: "center"
               }}
             >
-              <Typography variant="subtitle1" textAlign="center" fontWeight="bold" gutterBottom>
+              <Typography variant="h6" textAlign="center" fontWeight="bold" gutterBottom>
                 จำนวนพนักงาน
               </Typography>
             </Box>
@@ -536,7 +547,7 @@ const Dashboard = () => {
                 gap: 1
               }}
             >
-              <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ทั้งหมด {officer.length + driver.length + creditor.length} คน</Typography>
+              <Typography variant="h5" fontWeight="bold" textAlign="center" gutterBottom>ทั้งหมด {officer.length + driver.length + creditor.length} คน</Typography>
               <PieChart
                 series={[
                   {
@@ -604,55 +615,55 @@ const Dashboard = () => {
               <Grid container spacing={2}>
                 <Grid item xs={1.5} sm={2.5} lg={3.5} />
                 <Grid item xs={9} sm={7} lg={5}>
-                  <Paper component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center",backgroundColor: theme.palette.error.main }}>
+                  <Paper component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: theme.palette.error.main }}>
                     <Paper component="form">
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        openTo="month"  // เปิดเฉพาะเดือน
-                        views={["month"]}  // เลือกเดือนเท่านั้น
-                        value={dayjs(date)}  // แสดงเดือนปัจจุบัน
-                        onChange={handleDateChangeDate}  // ตั้งค่าเมื่อเลือกเดือน
-                        format="MMMM"  // รูปแบบเป็นชื่อเดือนเต็ม
-                        slotProps={{
-                          textField: {
-                            size: "small",
-                            fullWidth: true,
-                            sx: {
-                              "& .MuiOutlinedInput-root": {
-                                height: "30px",
-                                paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง
-                              },
-                              "& .MuiInputBase-input": {
-                                fontSize: "14px", // ปรับขนาดตัวอักษรภายใน Input
-                              },
-                              "& .MuiInputAdornment-root": {
-                                marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอน
-                                paddingLeft: "0px", // เอาพื้นที่ด้านซ้ายของไอคอนออก
-                              },
-                            },
-                            InputProps: {
-                              startAdornment: (
-                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                  กรุณาเลือกเดือน :
-                                </InputAdornment>
-                              ),
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          openTo="month"  // เปิดเฉพาะเดือน
+                          views={["month"]}  // เลือกเดือนเท่านั้น
+                          value={dayjs(date)}  // แสดงเดือนปัจจุบัน
+                          onChange={handleDateChangeDate}  // ตั้งค่าเมื่อเลือกเดือน
+                          format="MMMM"  // รูปแบบเป็นชื่อเดือนเต็ม
+                          slotProps={{
+                            textField: {
+                              size: "small",
+                              fullWidth: true,
                               sx: {
-                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                height: "40px", // ความสูงของ Input
-                                padding: "10px", // Padding ภายใน Input
-                                fontWeight: "bold", // น้ำหนักตัวอักษร
+                                "& .MuiOutlinedInput-root": {
+                                  height: "30px",
+                                  paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง
+                                },
+                                "& .MuiInputBase-input": {
+                                  fontSize: "14px", // ปรับขนาดตัวอักษรภายใน Input
+                                },
+                                "& .MuiInputAdornment-root": {
+                                  marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอน
+                                  paddingLeft: "0px", // เอาพื้นที่ด้านซ้ายของไอคอนออก
+                                },
+                              },
+                              InputProps: {
+                                startAdornment: (
+                                  <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                    กรุณาเลือกเดือน :
+                                  </InputAdornment>
+                                ),
+                                sx: {
+                                  fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                  height: "40px", // ความสูงของ Input
+                                  padding: "10px", // Padding ภายใน Input
+                                  fontWeight: "bold", // น้ำหนักตัวอักษร
+                                },
                               },
                             },
-                          },
-                        }}
-                      />
-                    </LocalizationProvider>
+                          }}
+                        />
+                      </LocalizationProvider>
                     </Paper>
                     {
                       checkDate &&
                       <IconButton onClick={handleClearDate} size="small" sx={{ color: "white" }} >
-                                    <ClearIcon fontSize="small" />
-                                  </IconButton>
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
                     }
                   </Paper>
                 </Grid>
@@ -697,7 +708,113 @@ const Dashboard = () => {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={12} lg={4}>
-          <Paper sx={{ height: "60vh", backgroundColor: theme.palette.panda.contrastText, borderRadius: 5 }}></Paper>
+          <Paper
+            sx={{
+              height: "60vh",
+              backgroundColor: theme.palette.panda.contrastText,
+              borderRadius: 5
+            }}
+          >
+            {/* Top Header */}
+            <Box
+              sx={{
+                backgroundColor: theme.palette.panda.main,
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+                color: "white",
+                height: "5vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              <Typography variant="h6" textAlign="center" fontWeight="bold" gutterBottom>
+                จำนวนตั๋ว
+              </Typography>
+            </Box>
+
+            {/* Middle Content */}
+            <Box
+              sx={{
+                backgroundColor: "white",
+                flex: 1,
+                mx: 0.5,
+                py: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1,
+                height: "50vh"
+              }}
+            >
+              
+              <PieChart
+                series={[
+                  {
+                    data: [
+                      { id: 0, value: Ctransport.length, label: 'ตั๋วรับจ้างขนส่ง', color: theme.palette.secondary.main },
+                      { id: 1, value: Cgasstations.length, label: 'ตั๋วปั้มน้ำมัน', color: theme.palette.warning.light },
+                      { id: 2, value: Ctickets.length, label: 'ตั๋วน้ำมัน', color: theme.palette.error.dark },
+                      { id: 3, value: Cbigtruck1.length, label: 'ตั๋วรถใหญ่ เชียงใหม่', color: theme.palette.primary.dark },
+                      { id: 4, value: Cbigtruck2.length, label: 'ตั๋วรถใหญ่ เชียงราย', color: theme.palette.primary.light },
+                      { id: 5, value: Csmalltruck1.length, label: 'ตั๋วรถเล็ก เชียงใหม่', color: theme.palette.success.dark },
+                      { id: 6, value: Csmalltruck2.length, label: 'ตั๋วรถเล็ก บ้านโฮ่ง', color: theme.palette.success.light },
+                    ],
+                    innerRadius: 70,
+                  },
+                ]}
+                {...pieParamsNewSize}
+              />
+              {/* Legend */}
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box sx={{ backgroundColor: theme.palette.secondary.main, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
+                  <Typography fontSize="12px" fontWeight="bold" mr={1}>ตั๋วรับจ้างขนส่ง</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box sx={{ backgroundColor: theme.palette.warning.light, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
+                  <Typography fontSize="12px" fontWeight="bold" mr={1}>ตั๋วปั้มน้ำมัน</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center", marginRight: 2 }}>
+                  <Box sx={{ backgroundColor: theme.palette.primary.dark, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
+                  <Typography fontSize="12px" fontWeight="bold">ตั๋วรถใหญ่ เชียงใหม่</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box sx={{ backgroundColor: theme.palette.primary.light, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
+                  <Typography fontSize="12px" fontWeight="bold">ตั๋วรถใหญ่ เชียงราย</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center",marginRight: 2 }}>
+                  <Box sx={{ backgroundColor: theme.palette.success.dark, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
+                  <Typography fontSize="12px" fontWeight="bold">ตั๋วรถเล็ก เชียงใหม่</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box sx={{ backgroundColor: theme.palette.success.light, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
+                  <Typography fontSize="12px" fontWeight="bold">ตั๋วรถเล็ก บ้านโฮ่ง</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ backgroundColor: theme.palette.error.dark, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
+                <Typography fontSize="12px" fontWeight="bold">ตั๋วน้ำมัน</Typography>
+              </Box>
+            </Box>
+
+            {/* Bottom Footer */}
+            <Box
+              sx={{
+                backgroundColor: theme.palette.panda.main,
+                borderBottomLeftRadius: 15,
+                borderBottomRightRadius: 15,
+                color: "white",
+                height: "5vh"
+              }}
+            />
+            <Typography variant="h2" fontWeight="bold" textAlign="center" sx={{ marginTop: -39 }} gutterBottom>{Ctransport.length + Cgasstations.length + Ctickets.length + Cbigtruck1.length + Cbigtruck2.length + Csmalltruck1.length + Csmalltruck2.length}</Typography>
+          </Paper>
         </Grid>
       </Grid>
     </Container>

@@ -78,8 +78,8 @@ const UpdateInvoice = (props) => {
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No);
-    const invoices = invoiceDetail.filter((row) => row.TicketNo === ticket.No);
+    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName );
+    const invoices = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);
 
     console.log("invoice : ", invoices);
 
@@ -465,6 +465,23 @@ const UpdateInvoice = (props) => {
         });
     };
 
+    const handleNewInvoice = () => {
+        database
+            .ref("invoice/")
+            .child(invoices[0].id)
+            .update({
+                TicketNo: "ยกเลิก"
+            })
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+    }
+
     const handleSubmit = () => {
         database
             .ref("transfermoney/")
@@ -562,7 +579,7 @@ const UpdateInvoice = (props) => {
                 <Grid item xs={5.5}></Grid>
                 <Grid item xs={4.5} textAlign="right">
                     <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 0.5 }}>
-                        <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }}>
+                        <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice}>
                             NEW
                         </Button>
                         <TextField size="small"
