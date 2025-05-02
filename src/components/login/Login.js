@@ -165,49 +165,62 @@ const Login = () => {
   };
 
   useEffect(() => {
-    const token = Cookies.get("user"); // ตรวจสอบว่ามี Cookie ที่ชื่อ 'auth_token' หรือไม่
+    const token = Cookies.get("user");
     const encryptedPassword = Cookies.get("password");
-
+  
     if (token && encryptedPassword) {
-      // ถ้ามี token และรหัสผ่านใน cookies ให้เข้าสู่ระบบ
-      const password = decryptPassword(encryptedPassword); // ถอดรหัสรหัสผ่าน
-      signInWithEmailAndPassword(auth, `${token}@gmail.com`, password) // ใช้ password ที่ถอดรหัสจาก cookie
-        .then((userCredential) => {
-          // ตรวจสอบฐานข้อมูล Firebase หลังจากเข้าสู่ระบบสำเร็จ
-          database
-            .ref("/employee/officers/")
-            .orderByChild("User")
-            .equalTo(token)
-            .once("value") // ใช้ .once เพื่อดึงข้อมูลแค่ครั้งเดียว
-            .then((snapshot) => {
-              const datas = snapshot.val();
-              if (datas) {
-                for (let id in datas) {
-                  // ตรวจสอบตำแหน่งของผู้ใช้ในระบบ
-                  if (datas[id].Position === "พนักงานขายหน้าลาน") {
-                    navigate("/gasstation-attendant", {
-                      state: { Employee: datas[id] },
-                    });
-                  } else {
-                    navigate("/choose");
+      const password = decryptPassword(encryptedPassword);
+  
+      signInWithEmailAndPassword(auth, `${token}@gmail.com`, password)
+        .then(() => {
+          // ฟังก์ชันช่วยสำหรับค้นหาข้อมูลจาก path ต่าง ๆ
+          const checkPaths = async () => {
+            const paths = [
+              { ref: "/employee/officers/", route: (data) =>
+                  data.Position === "พนักงานขายหน้าลาน"
+                    ? { path: "/gasstation-attendant", state: { Employee: data } }
+                    : { path: "/choose" }
+              },
+              { ref: "/employee/creditors/", route: () => ({ path: "/trade-payable" }) },
+              { ref: "/employee/drivers/", route: () => ({ path: "/driver-Detail" }) },
+            ];
+  
+            for (const { ref, route } of paths) {
+              try {
+                const snapshot = await database
+                  .ref(ref)
+                  .orderByChild("User")
+                  .equalTo(token)
+                  .once("value");
+  
+                const datas = snapshot.val();
+                if (datas) {
+                  for (let id in datas) {
+                    const target = route(datas[id]);
+                    navigate(target.path, { state: target.state });
+                    return;
                   }
                 }
+              } catch (error) {
+                console.error(`Error fetching data from ${ref}:`, error);
               }
-            })
-            .catch((error) => {
-              console.error("Error fetching employee data:", error);
-              navigate("/");
-            });
+            }
+  
+            // ถ้าไม่เจอในทุก path
+            navigate("/");
+          };
+  
+          checkPaths();
         })
         .catch((error) => {
           console.error("Error signing in:", error);
           navigate("/");
         });
     } else {
-      // ถ้าไม่มี cookie 'user' หรือ 'password' ให้ไปหน้า login
       navigate("/");
     }
   }, [navigate]);
+  
 
   return (
     <Container sx={{ p: { xs: 3, sm: 6, md: 9 }, maxWidth: { xs: "lg", sm: "md", md: "sm" }}}>

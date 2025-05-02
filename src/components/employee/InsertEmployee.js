@@ -426,7 +426,7 @@ const InsertEmployee = (props) => {
                                         </Box>
                                     </Grid>
                                     {
-                                        check === 3 &&
+                                        check === 2 &&
                                         <>
                                             <Grid item md={6} sm={6} xs={12}>
                                                 <Box display="flex" justifyContent="center" alignItems="center">
@@ -446,7 +446,7 @@ const InsertEmployee = (props) => {
                                                             </MenuItem>
                                                             {
                                                                 gasStation.map((row) => (
-                                                                    <MenuItem value={row.Name}>{row.Name}</MenuItem>
+                                                                    <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                                                 ))
                                                             }
                                                         </Select>

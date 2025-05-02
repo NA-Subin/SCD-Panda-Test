@@ -44,6 +44,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ReplyAllIcon from '@mui/icons-material/ReplyAll';
+import SettingsIcon from '@mui/icons-material/Settings';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import dayjs from 'dayjs';
@@ -92,35 +93,61 @@ const DriverDetail = () => {
 
     const { reghead, trip, order, depots, drivers } = useData();
     const regheads = Object.values(reghead || {});
-  const trips = Object.values(trip || {});
-  const orders = Object.values(order || {});
-  const depot = Object.values(depots || {});
-  const driverDetails = Object.values(drivers || {});
+    const trips = Object.values(trip || {});
+    const orders = Object.values(order || {});
+    const depot = Object.values(depots || {});
+    const driverDetails = Object.values(drivers || {});
 
-  const driverDeetail = driverDetails.find((row) => (row.id === Number(userId.split("$")[1])))
-  const registrationDetail = regheads.find((reg) => (reg.id === Number(driverDeetail.Registration.split(":")[0])))
+    const driverDeetail = driverDetails.find((row) => (row.id === Number(userId.split("$")[1])))
+    const registrationDetail = regheads.find((reg) => (reg.id === Number(driverDeetail.Registration.split(":")[0])))
 
-  console.log("Driver Detail ",driverDeetail);
-  console.log("Registration Detail ",registrationDetail);
+    console.log("Driver Detail ", driverDeetail);
+    console.log("Registration Detail ", registrationDetail);
 
     // กรองตามเงื่อนไขที่ต้องการหลังจาก data มาแล้ว
     const driver = regheads.filter(d => d.Driver !== "ไม่มี");
 
     const today = dayjs(new Date()).format("DD/MM/YYYY");
     const tripDetail = trips.filter(t =>
-        t.StatusTrip === "กำลังจัดเที่ยววิ่ง" 
+        t.StatusTrip === "กำลังจัดเที่ยววิ่ง"
         ||
         (t.StatusTrip === "จบทริป" && t.DateEnd === today)
     );
 
+    const PREFIXES = ["นาย", "นาง", "นางสาว", "เด็กชาย", "เด็กหญิง", "ด.ช.", "ด.ญ."];
+
+    const splitThaiName = (fullName) => {
+        if (!fullName) return { prefix: "", firstName: "", lastName: "" };
+
+        const prefix = PREFIXES.find(p => fullName.startsWith(p));
+        if (!prefix) return { prefix: "", firstName: "", lastName: "" };
+
+        // ตัดคำนำหน้าออกจากชื่อเต็ม
+        const rest = fullName.slice(prefix.length).trim();
+        const nameParts = rest.split(" ");
+
+        return {
+            prefix,
+            firstName: nameParts[0] || "",
+            lastName: nameParts[1] || "",
+        };
+    };
+
+    // ตัวอย่างการใช้งาน
+    const { prefix, firstName, lastName } = splitThaiName(driverDeetail?.Name);
+
+    console.log("คำนำหน้า:", prefix);     // นางสาว
+    console.log("ชื่อ:", firstName);       // สมส่วน
+    console.log("นามสกุล:", lastName);     // สามสี
+
     const [truck, setTruck] = React.useState(`${registrationDetail.Driver}:${registrationDetail.RegHead}:${registrationDetail.RegTail}`);
 
     useEffect(() => {
-        console.log("driver and truck : ",truck);
+        console.log("driver and truck : ", truck);
         const check = tripDetail.find((item) => Number(item.Driver.split(":")[0]) === Number(truck.split(":")[0])) || {};
-        console.log("check : ",check);
+        console.log("check : ", check);
         const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
-        console.log("checkOrder : ",checkOrder);
+        console.log("checkOrder : ", checkOrder);
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
@@ -163,12 +190,12 @@ const DriverDetail = () => {
 
     const handleChangeDriver = (e) => {
         const trucks = e.target.value;
-        console.log("trucks : ",trucks);
+        console.log("trucks : ", trucks);
         setTruck(e.target.value);
         const check = tripDetail.find((item) => Number(item.Driver.split(":")[0]) === Number(trucks.split(":")[0])) || {};
-        console.log("check : ",check);
+        console.log("check : ", check);
         const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
-        console.log("checkOrder : ",checkOrder);
+        console.log("checkOrder : ", checkOrder);
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
@@ -227,30 +254,30 @@ const DriverDetail = () => {
 
     const handleBack = () => {
         withReactContent(Swal)
-      .fire({
-        title: "ต้องการออกจากระบบใช่หรือไม่",
-        icon: "error",
-        confirmButtonText: "ตกลง",
-        cancelButtonText: "ยกเลิก",
-        showCancelButton: true,
-      })
-      .then((result) => {
-        if (result.isConfirmed) {
-          signOut(auth)
-            .then(() => {
-              Cookies.remove('user');
-              Cookies.remove('sessionToken');
-              Cookies.remove('password');
-              navigate("/");
-              Swal.fire("ออกจากระบบเรียบร้อย", "", "success");
+            .fire({
+                title: "ต้องการออกจากระบบใช่หรือไม่",
+                icon: "error",
+                confirmButtonText: "ตกลง",
+                cancelButtonText: "ยกเลิก",
+                showCancelButton: true,
             })
-            .catch((error) => {
-              Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");
+            .then((result) => {
+                if (result.isConfirmed) {
+                    signOut(auth)
+                        .then(() => {
+                            Cookies.remove('user');
+                            Cookies.remove('sessionToken');
+                            Cookies.remove('password');
+                            navigate("/");
+                            Swal.fire("ออกจากระบบเรียบร้อย", "", "success");
+                        })
+                        .catch((error) => {
+                            Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");
+                        });
+                } else if (result.isDenied) {
+                    Swal.fire("ออกจากระบบล้มเหลว", "", "error");
+                }
             });
-        } else if (result.isDenied) {
-          Swal.fire("ออกจากระบบล้มเหลว", "", "error");
-        }
-      });
     }
 
     const formatAddress = (address) => {
@@ -270,7 +297,7 @@ const DriverDetail = () => {
     console.log("TripNew length : ", Object.keys(tripNew).length);
     console.log("DepotNew : ", depotNew);
     console.log("OrderNew : ", orderNew);
-    console.log("check : ",check);
+    console.log("check : ", check);
 
     return (
         <Container sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: { xs: "lg", sm: "lg", md: "lg" } }}>
@@ -294,6 +321,7 @@ const DriverDetail = () => {
                     marginBottom: { xs: -1, sm: -2, md: -3 },
                 }}>
                     <Box textAlign="right" marginTop={-6.5} marginBottom={4} sx={{ marginRight: { xs: -2, sm: -3, md: -4 } }}>
+                    <Button variant="contained" color="warning" sx={{ border: "3px solid white" }} endIcon={<SettingsIcon fontSize="small" />} onClick={handleBack}>ตั้งค่า</Button>
                         {
                             //    isMobile ?
                             //        <>
@@ -364,10 +392,200 @@ const DriverDetail = () => {
                     </Box>
                 </Box>
                 <Grid container spacing={2}>
+                    <Grid item xs={12} lg={12}>
+                        <Grid container spacing={1} paddingLeft={5} paddingRight={5} marginBottom={-3}>
+                            <Grid item xs={6} lg={2}>
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>คำนำหน้า : </Typography>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        variant="standard"
+                                        value={prefix}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                marginLeft: 2,
+                                                color: "#616161"
+                                            },
+                                            "& .MuiInput-underline:before": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            },
+                                            "& .MuiInput-underline:after": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6} lg={3}>
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ชื่อ : </Typography>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        variant="standard"
+                                        value={firstName}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                marginLeft: 2,
+                                                color: "#616161"
+                                            },
+                                            "& .MuiInput-underline:before": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            },
+                                            "& .MuiInput-underline:after": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6} lg={3}>
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>สกุล : </Typography>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        variant="standard"
+                                        value={lastName}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                marginLeft: 2,
+                                                color: "#616161"
+                                            },
+                                            "& .MuiInput-underline:before": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            },
+                                            "& .MuiInput-underline:after": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} lg={4}>
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ตำแหน่ง : </Typography>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        variant="standard"
+                                        value={driverDeetail.Position}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                marginLeft: 2,
+                                                color: "#616161"
+                                            },
+                                            "& .MuiInput-underline:before": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            },
+                                            "& .MuiInput-underline:after": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6} lg={4}>
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ทะเบียนหัว : </Typography>
+                            <TextField
+                                size="small"
+                                fullWidth
+                                variant="standard"
+                                value={registrationDetail.RegHead}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        height: '25px', // ปรับความสูงของ TextField
+                                        display: 'flex', // ใช้ flexbox
+                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                        fontWeight: 'bold',
+                                        padding: '2px 6px', // ปรับ padding ภายใน input
+                                        marginLeft: 2,
+                                        color: "#616161"
+                                    },
+                                    "& .MuiInput-underline:before": {
+                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                    },
+                                    "& .MuiInput-underline:after": {
+                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                    }
+                                }}
+                            />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={6} lg={4}>
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ทะเบียนหาง : </Typography>
+                            <TextField
+                                size="small"
+                                fullWidth
+                                variant="standard"
+                                value={registrationDetail.RegTail}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        height: '25px', // ปรับความสูงของ TextField
+                                        display: 'flex', // ใช้ flexbox
+                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                        fontWeight: 'bold',
+                                        padding: '2px 6px', // ปรับ padding ภายใน input
+                                        marginLeft: 2,
+                                        color: "#616161"
+                                    },
+                                    "& .MuiInput-underline:before": {
+                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                    },
+                                    "& .MuiInput-underline:after": {
+                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                    }
+                                }}
+                            />
+                        </Box>
+                    </Grid>
+                        </Grid>
+                    </Grid>
                     <Grid item xs={0.5} lg={1} />
                     <Grid item xs={11} lg={10} display="flex" justifyContent="center" alignItems="center">
-                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ชื่อพนักงานขับรถ/ทะเบียนรถ : {`${registrationDetail.Driver.split(":")[1]}:${registrationDetail.RegHead}:${registrationDetail.RegTail}`} </Typography>
-                        {/* <FormControl variant="standard" sx={{ m: 1, width: "100%" }}>
+                        {/* <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ชื่อพนักงานขับรถ/ทะเบียนรถ : {`${registrationDetail.Driver.split(":")[1]}:${registrationDetail.RegHead}:${registrationDetail.RegTail}`} </Typography>
+                        <FormControl variant="standard" sx={{ m: 1, width: "100%" }}>
                             <Select
                                 labelId="demo-simple-select-standard-label"
                                 id="demo-simple-select-standard"
@@ -517,43 +735,43 @@ const DriverDetail = () => {
                                                 เช็คลำดับในการจัดส่งสินค้า
                                             </Button>
                                             {
-                                            !showTrip &&
-                                            (() => {
-                                                // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
-                                                const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
-                                                    orderNew
-                                                        .filter(row => {
-                                                            let modifiedTicketName = row.TicketName;
+                                                !showTrip &&
+                                                (() => {
+                                                    // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
+                                                    const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
+                                                        orderNew
+                                                            .filter(row => {
+                                                                let modifiedTicketName = row.TicketName;
 
-                                                            // ตัดค่า branch ออกจาก TicketName
-                                                            // branches.forEach(branch => {
-                                                            //     if (row.TicketName.includes(branch)) {
-                                                            //         modifiedTicketName = row.TicketName.split(branch).pop().trim();
-                                                            //     }
-                                                            // });
+                                                                // ตัดค่า branch ออกจาก TicketName
+                                                                // branches.forEach(branch => {
+                                                                //     if (row.TicketName.includes(branch)) {
+                                                                //         modifiedTicketName = row.TicketName.split(branch).pop().trim();
+                                                                //     }
+                                                                // });
 
-                                                            return modifiedTicketName === value.Name;
-                                                        })
-                                                        .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
-                                                        .filter(Boolean) // ลบค่า null ออก
-                                                );
-
-                                                // ถ้ามีพิกัดให้สร้างลิงก์
-                                                if (coordinates.length > 0) {
-                                                    const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
-                                                    const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
-
-                                                    return (
-                                                        <Typography sx={{ marginTop: 2 }}>
-                                                            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
-                                                            คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
-                                                            </a>
-                                                        </Typography>
+                                                                return modifiedTicketName === value.Name;
+                                                            })
+                                                            .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
+                                                            .filter(Boolean) // ลบค่า null ออก
                                                     );
-                                                }
 
-                                                return null;
-                                            })()}
+                                                    // ถ้ามีพิกัดให้สร้างลิงก์
+                                                    if (coordinates.length > 0) {
+                                                        const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
+                                                        const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
+
+                                                        return (
+                                                            <Typography sx={{ marginTop: 2 }}>
+                                                                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                                                                    คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
+                                                                </a>
+                                                            </Typography>
+                                                        );
+                                                    }
+
+                                                    return null;
+                                                })()}
                                         </Grid>
                                         {!showTrip &&
                                             <>
@@ -685,43 +903,43 @@ const DriverDetail = () => {
                                                     เช็คลำดับในการจัดส่งสินค้า
                                                 </Button>
                                                 {
-                                                !showTrip &&
-                                                (() => {
-                                                // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
-                                                const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
-                                                    orderNew
-                                                        .filter(row => {
-                                                            let modifiedTicketName = row.TicketName;
+                                                    !showTrip &&
+                                                    (() => {
+                                                        // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
+                                                        const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
+                                                            orderNew
+                                                                .filter(row => {
+                                                                    let modifiedTicketName = row.TicketName;
 
-                                                            // ตัดค่า branch ออกจาก TicketName
-                                                            branches.forEach(branch => {
-                                                                if (row.TicketName.includes(branch)) {
-                                                                    modifiedTicketName = row.TicketName.split(branch).pop().trim();
-                                                                }
-                                                            });
+                                                                    // ตัดค่า branch ออกจาก TicketName
+                                                                    branches.forEach(branch => {
+                                                                        if (row.TicketName.includes(branch)) {
+                                                                            modifiedTicketName = row.TicketName.split(branch).pop().trim();
+                                                                        }
+                                                                    });
 
-                                                            return modifiedTicketName === value.Name;
-                                                        })
-                                                        .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
-                                                        .filter(Boolean) // ลบค่า null ออก
-                                                );
+                                                                    return modifiedTicketName === value.Name;
+                                                                })
+                                                                .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
+                                                                .filter(Boolean) // ลบค่า null ออก
+                                                        );
 
-                                                // ถ้ามีพิกัดให้สร้างลิงก์
-                                                if (coordinates.length > 0) {
-                                                    const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
-                                                    const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
+                                                        // ถ้ามีพิกัดให้สร้างลิงก์
+                                                        if (coordinates.length > 0) {
+                                                            const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
+                                                            const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
 
-                                                    return (
-                                                        <Typography  sx={{ marginTop: 2 }}>
-                                                            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
-                                                                คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
-                                                            </a>
-                                                        </Typography>
-                                                    );
-                                                }
+                                                            return (
+                                                                <Typography sx={{ marginTop: 2 }}>
+                                                                    <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                                                                        คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
+                                                                    </a>
+                                                                </Typography>
+                                                            );
+                                                        }
 
-                                                return null;
-                                            })()}
+                                                        return null;
+                                                    })()}
 
                                             </Grid>
                                             {
