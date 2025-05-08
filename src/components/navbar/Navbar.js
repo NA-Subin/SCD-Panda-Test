@@ -202,12 +202,14 @@ export default function Navbar() {
   const [show1, setShow1] = React.useState(false);
   const [show2, setShow2] = React.useState(false);
   const [show3, setShow3] = React.useState(false);
+  const [show4, setShow4] = React.useState(false);
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
   const [activeButton, setActiveButton] = useState(null); // เก็บสถานะของปุ่มที่ถูกคลิก
   const [openData, setOpenData] = useState(false);
   const [operation, setOperation] = useState(true);
   const [report, setReport] = useState(true);
+  const [financial, setFinacieal] = useState(true);
 
   console.log("OpenData : ", openData);
 
@@ -230,6 +232,7 @@ export default function Navbar() {
     setOpenData(false);
     setOperation(false);
     setReport(false);
+    setFinacieal(false);
     if (isMobileMD) {
       // จอเท่ากับโทรศัพท์
       setOpen((prevOpen) => !prevOpen);
@@ -859,7 +862,7 @@ export default function Navbar() {
             </DrawerHeader>
             <Divider />
             {
-              (openData || operation || report ) && 
+              ([!openData, !operation, !report, !financial].filter(Boolean).length === 1 ) && 
               <>
               <Box
               sx={{
@@ -1015,7 +1018,7 @@ export default function Navbar() {
                       }}
                       onClick={() => (setShow1(index), setSetting(false))}
                       onMouseUp={() => (setShow1(index), setSetting(false))}
-                      onMouseDown={() => (setShow2(null), setShow3(null))}
+                      onMouseDown={() => (setShow2(null), setShow3(null), setShow4(null))}
                     >
                       <ListItemIcon
                         sx={{
@@ -1178,7 +1181,7 @@ export default function Navbar() {
                       }}
                       onClick={() => (setShow2(index), setSetting(false))}
                       onMouseUp={() => (setShow2(index), setSetting(false))}
-                      onMouseDown={() => (setShow1(null), setShow3(null))}
+                      onMouseDown={() => (setShow1(null), setShow3(null), setShow4(null))}
                     >
                       <ListItemIcon
                         sx={{
@@ -1200,6 +1203,155 @@ export default function Navbar() {
                         }}
                         primaryTypographyProps={{
                           fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
+
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </Collapse>
+            </List>
+            <Divider sx={{ marginTop: -1, marginBottom: 1 }}/>
+            <Collapse in={!financial}>
+                {
+                  open &&
+                  <ListItem
+                    key={"การชำระเงิน"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setFinacieal(true)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <PaidIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="การชำระเงิน"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowDownIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
+              <Collapse in={financial}>
+                {
+                  open &&
+                  <ListItem
+                    key={"การชำระเงิน"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setFinacieal(false)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <PaidIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="การชำระเงิน"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowUpIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
+            <List
+              sx={
+                !open ? {
+                  backgroundColor: theme.palette.panda.dark,
+                  color: theme.palette.primary.contrastText,
+                }
+                  : {
+                    marginTop: -1
+                  }
+              }
+            >
+              <Collapse in={!financial}>
+                {["ชำระค่าน้ำมัน", "ชำระค่าขนส่ง"].map((text, index) => (
+                  <ListItem
+                    key={text}
+                    disablePadding
+                    sx={{
+                      backgroundColor: show3 === index && theme.palette.panda.dark,
+                      height: 35, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      component={Link}
+                      to={
+                        index === 0 ? "/invoice" : "/report"
+                      }
+                      sx={{
+                        height: 35, // กำหนดความสูงให้ ListItem
+                      }}
+                      onClick={() => (setShow3(index), setSetting(false))}
+                      onMouseUp={() => (setShow3(index), setSetting(false))}
+                      onMouseDown={() => (setShow1(null), setShow2(null), setShow4(null))}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                          mr: !open || show3 === index ? -3 : -2,
+                          ml: !open || show3 === index ? 3 : 2,
+                        }}
+                      >
+                        {index === 0 ? (
+                          <PaidIcon />
+                        ) : (
+                          <PaidIcon />
+                        )}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={text}
+                        sx={{
+                          color: show3 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                        }}
+                        primaryTypographyProps={{
+                          fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
 
                         }}
                       />
@@ -1252,7 +1404,7 @@ export default function Navbar() {
                   </ListItem>
                 }
               </Collapse>
-              <Collapse in={report}>
+            <Collapse in={report}>
                 {
                   open &&
                   <ListItem
@@ -1295,7 +1447,7 @@ export default function Navbar() {
                   </ListItem>
                 }
               </Collapse>
-            <List
+              <List
               sx={
                 !open ? {
                   backgroundColor: theme.palette.panda.dark,
@@ -1307,12 +1459,12 @@ export default function Navbar() {
               }
             >
               <Collapse in={!report}>
-                {["ชำระค่าน้ำมัน", "ชำระค่าขนส่ง", "ปิดงบบัญชีการเงิน"].map((text, index) => (
+                {["รายได้รายหัก","บิลค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
                   <ListItem
                     key={text}
                     disablePadding
                     sx={{
-                      backgroundColor: show3 === index && theme.palette.panda.dark,
+                      backgroundColor: show4 === index && theme.palette.panda.dark,
                       height: 35, // กำหนดความสูงให้ ListItem
                       paddingY: 1,
                     }}
@@ -1320,32 +1472,32 @@ export default function Navbar() {
                     <ListItemButton
                       component={Link}
                       to={
-                        index === 0 ? "/invoice" : index === 1 ? "/report" : "/close-financial"
+                        index === 0 ? "/financial/deduction" : index === 1 ? "/invoice-financial" : "/close-financial"
                       }
                       sx={{
                         height: 35, // กำหนดความสูงให้ ListItem
                       }}
-                      onClick={() => (setShow3(index), setSetting(false))}
-                      onMouseUp={() => (setShow3(index), setSetting(false))}
-                      onMouseDown={() => (setShow1(null), setShow2(null))}
+                      onClick={() => (setShow4(index), setSetting(false))}
+                      onMouseUp={() => (setShow4(index), setSetting(false))}
+                      onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null))}
                     >
                       <ListItemIcon
                         sx={{
-                          color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                          mr: !open || show3 === index ? -3 : -2,
-                          ml: !open || show3 === index ? 3 : 2,
+                          color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                          mr: !open || show4 === index ? -3 : -2,
+                          ml: !open || show4 === index ? 3 : 2,
                         }}
                       >
                         {index === 0 ? (
-                          <PaidIcon />
+                          <SummarizeIcon />
                         ) : (
-                          <PaidIcon />
+                          <SummarizeIcon />
                         )}
                       </ListItemIcon>
                       <ListItemText
                         primary={text}
                         sx={{
-                          color: show3 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                          color: show4 === index && theme.palette.primary.contrastText, fontSize: "15px"
                         }}
                         primaryTypographyProps={{
                           fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่

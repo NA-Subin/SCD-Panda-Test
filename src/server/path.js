@@ -32,7 +32,10 @@ export const DataProvider = ({ children }) => {
         reportFinancial: {},
         typeFinancial: {},
         transferMoney: {},
-        invoiceReport: {}
+        invoiceReport: {},
+        report: {},
+        reportType: {},
+        deductionIncome: {}
     });
 
     // 🔹 ใช้ useMemo เพื่อป้องกันไม่ให้ ref ถูกสร้างใหม่ทุกครั้งที่ Component re-render
@@ -61,6 +64,9 @@ export const DataProvider = ({ children }) => {
         reportFinancial: ref(database, "/financial/report/"),
         transferMoney: ref(database, "/transfermoney/"),
         invoiceReport: ref(database, "/invoice/"),
+        report: ref(database, "/report/invoice"),
+        reportType: ref(database, "/report/type"),
+        deductionIncome: ref(database, "/financial/deduction")
     }), []);
 
     // ฟังก์ชันโหลดข้อมูลทั้งหมดครั้งแรก

@@ -274,7 +274,7 @@ const Invoice = () => {
           }
         </Grid> */}
         <Grid item xs={12}>
-          <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -3 }}>
+          {/* <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -3 }}> */}
             {
               //open === 1 ?
               <Grid container spacing={2} sx={{ marginTop: -5, }}>
@@ -596,7 +596,7 @@ const Invoice = () => {
               //         </Grid>
               //       </Grid>
             }
-          </Paper>
+          {/* </Paper> */}
         </Grid>
       </Grid>
     </Container>
