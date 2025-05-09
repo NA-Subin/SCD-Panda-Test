@@ -12,12 +12,14 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    FormControl,
     FormControlLabel,
     FormGroup,
     Grid,
     IconButton,
     InputAdornment,
     InputBase,
+    InputLabel,
     MenuItem,
     Paper,
     Popover,
@@ -47,11 +49,14 @@ import { useData } from "../../server/path";
 import dayjs from "dayjs";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const InsertSpendingAbout = ({ onSend }) => {
+const InsertTypeDeduction = ({ onSend }) => {
     const [open, setOpen] = React.useState(false);
     const [type, setType] = React.useState("");
-    const { reportType } = useData();
-    const reportTypeDetail = Object.values(reportType);
+    const [name, setName] = React.useState("");
+    const [openMain, setOpenMain] = useState(false);
+    const [openSub, setOpenSub] = useState(false);
+    const { typeFinancial } = useData();
+    const typeFinancialDetail = Object.values(typeFinancial);
 
     console.log("Type : ", type);
 
@@ -79,16 +84,18 @@ const InsertSpendingAbout = ({ onSend }) => {
 
     const handlePost = () => {
         database
-            .ref("report/type")
-            .child(reportTypeDetail.length)
+            .ref("financial/type")
+            .child(typeFinancialDetail.length)
             .update({
-                id: reportTypeDetail.length,
-                Name: type,
+                id: typeFinancialDetail.length,
+                Name: name,
+                Type: type,
                 Status: "อยู่ในระบบ"
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
+                setName("");
                 setType("");
             })
             .catch((error) => {
@@ -102,7 +109,7 @@ const InsertSpendingAbout = ({ onSend }) => {
             `ต้องการลบบิลลำดับที่ ${id + 1} ใช่หรือไม่`,
             () => {
                 database
-                    .ref("report/type")
+                    .ref("/financial/type")
                     .child(id)
                     .update({
                         Status: "ยกเลิก"
@@ -125,9 +132,12 @@ const InsertSpendingAbout = ({ onSend }) => {
 
     return (
         <React.Fragment>
-            <IconButton color="primary" size="large" onClick={handleClickOpen}>
-                <AddBoxIcon />
-            </IconButton>
+            {/* <IconButton color="primary" size="large" sx={{ marginTop: -1.5 }} onClick={handleClickOpen}>
+                <AddBoxIcon fontSize="large"/>
+            </IconButton> */}
+            <Button variant="contained" color="primary" fullWidth onClick={handleClickOpen}>
+                เพิ่มประเภทรายได้รายรับ
+            </Button>
             <Dialog
                 open={open}
                 keepMounted
@@ -145,7 +155,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                 <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark, height: "50px" }}>
                     <Grid container spacing={2}>
                         <Grid item xs={10}>
-                            <Typography variant="h6" fontWeight="bold" color="white" sx={{ marginTop: -1 }}>เพิ่มประเภท</Typography>
+                            <Typography variant="h6" fontWeight="bold" color="white" sx={{ marginTop: -1 }} >เพิ่มประเภท</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
                             <IconButtonError onClick={handleClose} sx={{ marginTop: -2 }}>
@@ -160,29 +170,32 @@ const InsertSpendingAbout = ({ onSend }) => {
                             <TableContainer
                                 component={Paper}
                                 sx={{
-                                    height: "37vh",
+                                    height: "50vh",
                                     marginTop: 2,
                                 }}
                             >
                                 <Table
                                     stickyHeader
                                     size="small"
-                                    sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" } }}
+                                    sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
                                 >
                                     <TableHead sx={{ height: "5vh" }}>
                                         <TableRow>
-                                            <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: "16px", height: "30px" }}>
+                                            <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                                 ลำดับ
                                             </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "16px", height: "30px" }}>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                                                 ชื่อ
                                             </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", width: 100, position: "sticky", right: 0, height: "30px" }} />
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                ประเภท
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", width: 100, position: "sticky", right: 0 }} />
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {
-                                            reportTypeDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            typeFinancialDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle1" fontSize="14px" sx={{ lineHeight: 1, whiteSpace: "nowrap" }} gutterBottom>{index + 1}</Typography>
@@ -191,7 +204,12 @@ const InsertSpendingAbout = ({ onSend }) => {
                                                         <Typography variant="subtitle1" fontSize="14px" sx={{ lineHeight: 1, whiteSpace: "nowrap" }} gutterBottom>{row.Name}</Typography>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
-                                                        <Button variant="contained" size="small" color="error" sx={{ height: "22px" }} fullWidth onClick={() => handleChangDelete(row.id)}>ลบ</Button>
+                                                        <Typography variant="subtitle1" fontSize="14px" sx={{ lineHeight: 1, whiteSpace: "nowrap" }} gutterBottom>{row.Type}</Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Button variant="contained" size="small" sx={{ height: "22px" }} color="error" fullWidth
+                                                            onClick={() => handleChangDelete(row.id)}
+                                                        >ลบ</Button>
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -199,11 +217,11 @@ const InsertSpendingAbout = ({ onSend }) => {
                                     </TableBody>
                                 </Table>
                                 {
-                                    reportTypeDetail.length <= 10 ? null :
+                                    typeFinancialDetail.length <= 10 ? null :
                                         <TablePagination
                                             rowsPerPageOptions={[10, 25, 30]}
                                             component="div"
-                                            count={reportTypeDetail.length}
+                                            count={typeFinancialDetail.length}
                                             rowsPerPage={rowsPerPage}
                                             page={page}
                                             onPageChange={handleChangePage}
@@ -245,17 +263,39 @@ const InsertSpendingAbout = ({ onSend }) => {
                                 }
                             </TableContainer>
                         </Grid>
-                        <Grid item xs={10}>
+                        <Grid item xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ประเภทค่าใช้จ่าย</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ชื่อ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={type} onChange={(e) => setType(e.target.value)} />
+                                    <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ประเภท</Typography>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <FormControl size="small" fullWidth>
+                                        <InputLabel id="demo-simple-select-label">เลือกประเภท</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={type}
+                                            label="เลือกประเภท"
+                                            onChange={(e) => setType(e.target.value)}
+                                        >
+                                            <MenuItem value={"รายได้"}>รายได้</MenuItem>
+                                            <MenuItem value={"รายหัก"}>รายหัก</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={4} />
+                        <Grid item xs={4}>
                             <Button onClick={handlePost} variant="contained" fullWidth color="success">บันทึก</Button>
                         </Grid>
+                        <Grid item xs={4} />
                     </Grid>
                 </DialogContent>
             </Dialog>
@@ -264,4 +304,4 @@ const InsertSpendingAbout = ({ onSend }) => {
     );
 };
 
-export default InsertSpendingAbout;
+export default InsertTypeDeduction;

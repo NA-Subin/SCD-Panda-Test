@@ -66,7 +66,7 @@ export const DataProvider = ({ children }) => {
         invoiceReport: ref(database, "/invoice/"),
         report: ref(database, "/report/invoice"),
         reportType: ref(database, "/report/type"),
-        deductionIncome: ref(database, "/financial/deduction")
+        deductionIncome: ref(database, "/financial/deductionIncome")
     }), []);
 
     // ฟังก์ชันโหลดข้อมูลทั้งหมดครั้งแรก

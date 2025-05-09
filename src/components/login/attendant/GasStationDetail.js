@@ -228,8 +228,8 @@ const GasStationDetail = (props) => {
                     Volume: Number(Volume ?? 0),
                     Delivered: Number(volumes?.[ProductName] ?? 0),
                     OilBalance: Number(stocks?.[ProductName] ?? 0),
-                    Squeeze: yesterdayEntry?.Squeeze || twoDaysAgoEntry?.Squeeze || threeDaysAgoEntry?.Squeeze || fourDaysAgoEntry?.Squeeze || fiveDaysAgoEntry?.Squeeze || sixDaysAgoEntry?.Squeeze || sevenDaysAgoEntry?.Squeeze || eightDaysAgoEntry?.Squeeze || nineDaysAgoEntry?.Squeeze || tenDaysAgoEntry?.Squeeze,
-                    EstimateSell: yesterdayEntry?.EstimateSell || twoDaysAgoEntry?.EstimateSell || threeDaysAgoEntry?.EstimateSell || fourDaysAgoEntry?.EstimateSell || fiveDaysAgoEntry?.EstimateSell || sixDaysAgoEntry?.EstimateSell || sevenDaysAgoEntry?.EstimateSell || eightDaysAgoEntry?.EstimateSell || nineDaysAgoEntry?.EstimateSell || tenDaysAgoEntry?.EstimateSell
+                    Squeeze: yesterdayEntry?.Squeeze || twoDaysAgoEntry?.Squeeze || threeDaysAgoEntry?.Squeeze || fourDaysAgoEntry?.Squeeze || fiveDaysAgoEntry?.Squeeze || sixDaysAgoEntry?.Squeeze || sevenDaysAgoEntry?.Squeeze || eightDaysAgoEntry?.Squeeze || nineDaysAgoEntry?.Squeeze || tenDaysAgoEntry?.Squeeze || 0,
+                    EstimateSell: yesterdayEntry?.EstimateSell || twoDaysAgoEntry?.EstimateSell || threeDaysAgoEntry?.EstimateSell || fourDaysAgoEntry?.EstimateSell || fiveDaysAgoEntry?.EstimateSell || sixDaysAgoEntry?.EstimateSell || sevenDaysAgoEntry?.EstimateSell || eightDaysAgoEntry?.EstimateSell || nineDaysAgoEntry?.EstimateSell || tenDaysAgoEntry?.EstimateSell || 0
                 };
             })
             .filter(Boolean); // กรองค่าที่เป็น null ออกไป

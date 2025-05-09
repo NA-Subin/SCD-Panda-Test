@@ -1472,7 +1472,7 @@ export default function Navbar() {
                     <ListItemButton
                       component={Link}
                       to={
-                        index === 0 ? "/financial/deduction" : index === 1 ? "/invoice-financial" : "/close-financial"
+                        index === 0 ? "/financial-deduction" : index === 1 ? "/invoice-financial" : "/close-financial"
                       }
                       sx={{
                         height: 35, // กำหนดความสูงให้ ListItem

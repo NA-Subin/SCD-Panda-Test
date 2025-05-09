@@ -167,7 +167,7 @@ function App() {
                   <Route path="/close-financial" element={<CloseFS />} />
                 </Routes>
                 <Routes>
-                  <Route path="/financial/deduction" element={<DeductionOfIncome />} />
+                  <Route path="/financial-deduction" element={<DeductionOfIncome />} />
                 </Routes>
               </Box>
             </Box>

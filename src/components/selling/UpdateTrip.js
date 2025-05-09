@@ -781,7 +781,7 @@ const UpdateTrip = (props) => {
 
     const getTickets = () => {
         const tickets = [
-            { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: "1" },  // เพิ่มตั๋วเปล่าเข้าไป
+            { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
             ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
             ...ticketsT
@@ -1528,66 +1528,64 @@ const UpdateTrip = (props) => {
 
                                                         {/* Ticket Name */}
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
-                                                            {editMode && row.TicketName === "ตั๋วเปล่า" ? (
+                                                            {editMode && row.TicketName === "1:ตั๋วเปล่า" ? (
                                                                 <Autocomplete
-                                                                    size="small"
-                                                                    fullWidth
-                                                                    options={getTickets()}  // ใช้ ticket.map หรือ ticket โดยตรงเป็น options
-                                                                    getOptionLabel={(option) => {
-                                                                        const branches = [
-                                                                            "( สาขาที่  00001)/",
-                                                                            "( สาขาที่  00002)/",
-                                                                            "( สาขาที่  00003)/",
-                                                                            "( สำนักงานใหญ่)/"
-                                                                        ];
-
-                                                                        for (const branch of branches) {
-                                                                            if (option.Name.includes(branch)) {
-                                                                                return option.Name.split(branch)[1];
-                                                                            }
-                                                                        }
-
-                                                                        return option.Name;
-                                                                    }}  // ใช้ OrderID หรือค่าที่ต้องการแสดง
-                                                                    isOptionEqualToValue={(option, value) => option.Name === value.Name}  // ตรวจสอบค่าที่เลือก
-                                                                    value={row.TicketName ? getTickets().find(item => `${item.id}:${item.Name}` === row.TicketName) : null} // ค่าที่เลือก
-                                                                    onChange={(e, newValue) => {
-                                                                        if (newValue) {
-                                                                            handleEditChange(rowIdx, "TicketName", `${newValue.id}:${newValue.Name}`); // อัปเดตค่า TicketName
-                                                                        } else {
-                                                                            handleEditChange(rowIdx, "TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
-                                                                        }
-                                                                    }}
-                                                                    renderInput={(params) => (
-                                                                        <TextField
-                                                                            {...params}
-                                                                            InputLabelProps={{
-                                                                                sx: {
-                                                                                    fontSize: '12px',
-                                                                                },
-                                                                            }}
-                                                                            sx={{
-                                                                                '& .MuiOutlinedInput-root': {
-                                                                                    height: '22px', // ปรับความสูงของ TextField
-                                                                                },
-                                                                                '& .MuiInputBase-input': {
-                                                                                    fontSize: '12px', // ขนาด font เวลาพิมพ์
-                                                                                    fontWeight: 'bold',
-                                                                                    padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                                    paddingLeft: 2,
-                                                                                },
-                                                                            }}
-                                                                        />
-                                                                    )}
-                                                                    renderOption={(props, option) => (
-                                                                        <li {...props}>
-                                                                            <Typography fontSize="14px">
-                                                                                {option.Name}
-                                                                            </Typography>
-                                                                        </li>
-                                                                    )}
-                                                                />
-                                                            ) : (
+                                                                id="autocomplete-tickets"
+                                                                options={getTickets()}
+                                                                getOptionLabel={(option) => `${option.Name}`}
+                                                                isOptionEqualToValue={(option, value) => option.Name === value.Name}
+                                                                value={getTickets().find(item => `${item.id}:${item.Name}` === row.TicketName) || null}
+                                                                onChange={(event, newValue) => {
+                                                                    if (newValue) {
+                                                                        setEditableTickets((prev) => {
+                                                                            const updatedTickets = [...prev];
+                                                                            updatedTickets[rowIdx] = {
+                                                                                Address: newValue.Address || "-",
+                                                                                Bill: newValue.Bill || "-",
+                                                                                CodeID: newValue.CodeID || "-",
+                                                                                CompanyName: newValue.CompanyName || "-",
+                                                                                CreditTime: newValue.CreditTime || "-",
+                                                                                Date: trip.DateStart,
+                                                                                Driver: trip.Driver,
+                                                                                Lat: newValue.Lat || 0,
+                                                                                Lng: newValue.Lng || 0,
+                                                                                Product: newValue.Product || "-",
+                                                                                Rate1: newValue.Rate1,
+                                                                                Rate2: newValue.Rate2,
+                                                                                Rate3: newValue.Rate3,
+                                                                                Registration: trip.Registration,
+                                                                                id: row.id,
+                                                                                No: row.No,
+                                                                                Trip: row.Trip,
+                                                                                TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                                CustomerType: newValue.CustomerType || "-",
+                                                                                Product: {
+                                                                                    P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                                }
+                                                                            };
+                                                                            return updatedTickets;
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                renderInput={(params) => (
+                                                                    <TextField
+                                                                        {...params}
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        sx={{
+                                                                            "& .MuiOutlinedInput-root": { height: "22px" },
+                                                                            "& .MuiInputBase-input": { fontSize: "16px", textAlign: "center" },
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                                renderOption={(props, option) => (
+                                                                    <li {...props}>
+                                                                        <Typography fontSize="16px">{`${option.Name}`}</Typography>
+                                                                    </li>
+                                                                )}
+                                                            />
+                                                            )
+                                                                : (
                                                                 <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
                                                                     {
                                                                         // (() => {

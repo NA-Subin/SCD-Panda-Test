@@ -46,7 +46,7 @@ import InsertType from "./InsertType";
 const CloseFS = () => {
 
     const [date, setDate] = React.useState(false);
-    const [check, setCheck] = React.useState(false);
+    const [check, setCheck] = React.useState(1);
     const [months, setMonths] = React.useState(dayjs(new Date));
     const [years, setYears] = React.useState(dayjs(new Date));
     const [driverDetail, setDriver] = React.useState([]);
@@ -450,8 +450,8 @@ const CloseFS = () => {
                         <FormControlLabel
                             control={
                                 <Checkbox
-                                    checked={check === false ? true : false}
-                                    onChange={() => setCheck(false)}
+                                    checked={check === 1 ? true : false}
+                                    onChange={() => setCheck(1)}
                                 />
                             }
                             label={
@@ -460,7 +460,33 @@ const CloseFS = () => {
                                 </Typography>
                             }
                         />
-                        {
+                        <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={check === 2 ? true : false}
+                                            onChange={() => setCheck(2)}
+                                        />
+                                    }
+                                    label={
+                                        <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                            รายได้
+                                        </Typography>
+                                    }
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={check === 3 ? true : false}
+                                            onChange={() => setCheck(3)}
+                                        />
+                                    }
+                                    label={
+                                        <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                            ค่าใช้จ่าย
+                                        </Typography>
+                                    }
+                                />
+                        {/* {
                             Object.entries(typeF).map(([key, label]) => (
                                 <FormControlLabel
                                     key={key}
@@ -478,7 +504,7 @@ const CloseFS = () => {
                                 />
                             ))
                         }
-                        <InsertType typeFinancial={typeF} />
+                        <InsertType typeFinancial={typeF} /> */}
                     </FormGroup>
                 </Grid>
             </Grid>

@@ -66,6 +66,12 @@ const InsertFinancial = () => {
     const [total, setTotal] = React.useState(0);
     const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
+    const [result, setResult] = useState(false);
+
+    const handleReceiveData = (data) => {
+        console.log('Data from child:', data);
+        setResult(data);
+    };
 
     console.log("Date Invoice : ", dayjs(selectedDateInvoice));
     console.log("Date Transfer : ", dayjs(selectedDateTransfer));
@@ -105,7 +111,7 @@ const InsertFinancial = () => {
     };
 
     console.log("Show Registration : ", getRegistration());
-    console.log("spendingAbout : ",spendingAbout);
+    console.log("spendingAbout : ", spendingAbout);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -137,8 +143,8 @@ const InsertFinancial = () => {
                 Price: price,
                 Vat: vat,
                 Total: total,
-                SelectedDateInvoice: dayjs(selectedDateInvoice,"DD/MM/YYYY").format("DD/MM/YYYY"),
-                SelectedDateTransfer: dayjs(selectedDateTransfer,"DD/MM/YYYY").format("DD/MM/YYYY"),
+                SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
                 Status: "อยู่ในระบบ"
             })
             .then(() => {
@@ -171,16 +177,29 @@ const InsertFinancial = () => {
                 keepMounted
                 onClose={handleClose}
                 maxWidth="md"
-                sx={{ zIndex: 1000 }}
+                sx={
+                    !result ?
+                        {
+                            zIndex: 1200,
+                        }
+                        :
+                        {
+                            '& .MuiDialog-container': {
+                                justifyContent: 'flex-start', // 👈 ชิดซ้าย
+            alignItems: 'center',
+                            },
+                            zIndex: 1200,
+                        }
+                }
             >
-                <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
+                <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark, height: "50px" }}>
                     <Grid container spacing={2}>
                         <Grid item xs={10}>
-                            <Typography variant="h6" fontWeight="bold" color="white" >เพิ่มบิล</Typography>
+                            <Typography variant="h6" fontWeight="bold" color="white" sx={{ marginTop: -1 }} >เพิ่มบิล</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
-                            <IconButtonError onClick={handleClose}>
-                                <CancelIcon />
+                            <IconButtonError onClick={handleClose} sx={{ marginTop: -2 }}>
+                                <CancelIcon fontSize="small" />
                             </IconButtonError>
                         </Grid>
                     </Grid>
@@ -326,7 +345,7 @@ const InsertFinancial = () => {
                                     <Autocomplete
                                         id="autocomplete-tickets"
                                         options={reportTypeDetail}
-                                        getOptionLabel={(option) => option.Name }
+                                        getOptionLabel={(option) => option?.Name || ""}
                                         value={spendingAbout} // registrationTruck เป็น object แล้ว
                                         onChange={(event, newValue) => {
                                             if (newValue) {
@@ -358,7 +377,7 @@ const InsertFinancial = () => {
 
                                 </Paper>
                                 <Tooltip title="เพิ่มข้อมูลประเภทค่าใช้จ่าย" placement="top">
-                                <InsertSpendingAbout />
+                                    <InsertSpendingAbout onSend={handleReceiveData} />
                                 </Tooltip>
                             </Box>
                         </Grid>
