@@ -38,6 +38,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import UploadButton from "./UploadButton";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { useData } from "../../server/path";
 
 const InsertTruck = (props) => {
     const { openMenu } = props;
@@ -60,10 +61,10 @@ const InsertTruck = (props) => {
         setOpen(false);
     };
 
-    const [company, setCompany] = useState([]);
-    const [driver, setDriver] = useState([]);
+    // const [company, setCompany] = useState([]);
+    // const [driver, setDriver] = useState([]);
     const [registrationTail, setRegistrationTail] = useState([]);
-    const [drivers, setDrivers] = useState(0);
+    // const [drivers, setDrivers] = useState(0);
     const [companies, setCompanies] = useState(0);
     const [tail, setTail] = useState("ไม่มี:::");
     const [regHead, setRegHead] = React.useState("");
@@ -110,74 +111,26 @@ const InsertTruck = (props) => {
     });
   };
 
-    const getCompany = async () => {
-        database.ref("/company").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataCompany = [];
-            for (let id in datas) {
-                dataCompany.push({ id, ...datas[id] })
-            }
-            setCompany(dataCompany);
-        });
-    };
+  const { company, drivers, reghead , regtail, small } = useData();
+      const dataCompany = Object.values(company);
+      const dataDrivers = Object.values(drivers);
+      const regheads = Object.values(reghead);
+      const regtails = Object.values(regtail);
+      const smalls = Object.values(small);
 
-    const getDriver = async () => {
-        database.ref("/employee/drivers/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataDriver = [];
-            for (let id in datas) {
-                if(datas[id].Status === "ว่าง"){
-                    dataDriver.push({ id, ...datas[id] })
-                }
-            }
-            setDriver(dataDriver);
-        });
-    };
+      const driverDetail = dataDrivers.filter((row) => row.Status === "ว่าง");
+      const regtailsDetail = regtails.filter((row) => row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว" );
 
-    const [regHeadLength,setRegHeadLength] = React.useState("");
-    const [regTailLength,setRegTailLength] = React.useState("");
-    const [regSmallLength,setRegSmallLength] = React.useState("");
-
-    const getRegitrationTail = async () => {
-        database.ref("/truck/registration/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setRegHeadLength(datas.length);
-        });
-
-        database.ref("/truck/registrationTail/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataRegistrationTail = [];
-            for (let id in datas) {
-                if(datas[id].Status === "ยังไม่เชื่อมต่อทะเบียนหัว"){
-                    dataRegistrationTail.push({ id, ...datas[id] })
-                }
-            }
-            setRegTailLength(datas.length);
-            setRegistrationTail(dataRegistrationTail);
-        });
-
-        database.ref("/truck/small/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            setRegSmallLength(datas.length);
-        });
-    };
-
-    useEffect(() => {
-        getCompany();
-        getDriver();
-        getRegitrationTail();
-    }, []);
-
-    console.log("registrationTail : ",registrationTail);
+    console.log("registrationTail : ",regtailsDetail);
     console.log("Comapy : ",companies);
 
     const handlePost = () => {
         if(menu === 1){
             database
             .ref("/truck/registration/")
-            .child(regHeadLength)
+            .child(regheads.length)
             .update({
-                id: regHeadLength + 1,
+                id: regheads.length + 1,
                 Company: companies,
                 RegHead: regHead,
                 RegTail: tail.split(":")[1],
@@ -232,9 +185,9 @@ const InsertTruck = (props) => {
 
             database
             .ref("/truck/registrationTail/")
-            .child(regTailLength)
+            .child(regtails.length)
             .update({
-                id: regTailLength + 1,
+                id: regtails.length + 1,
                 Company: companies,
                 RegTail: regTail,
                 Weight: tailWeight,
@@ -267,9 +220,9 @@ const InsertTruck = (props) => {
         }else{
             database
             .ref("/truck/small/")
-            .child(regSmallLength)
+            .child(smalls.length)
             .update({
-                id: regSmallLength + 1,
+                id: smalls.length + 1,
                 Company: companies,
                 RegHead: registration,
                 RepairTruck: "00/00/0000:ยังไม่ตรวจสอบสภาพรถ",
@@ -372,8 +325,13 @@ const InsertTruck = (props) => {
                                                         กรุณาเลือกบริษัท
                                                     </MenuItem>
                                                     {
-                                                        company.map((row) => (
+                                                        menu !== 3 ?
+                                                        dataCompany.map((row) => (
                                                             row.id != 1 &&
+                                                            <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
+                                                        ))
+                                                        :
+                                                        dataCompany.map((row) => (
                                                             <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                                         ))
                                                     }
@@ -435,7 +393,7 @@ const InsertTruck = (props) => {
                                                     ไม่มี
                                                 </MenuItem>
                                                 {
-                                                    registrationTail.map((row) => (
+                                                    regtailsDetail.map((row) => (
                                                         // row.Company === companies &&
                                                         <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
                                                     ))

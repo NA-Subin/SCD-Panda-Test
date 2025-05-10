@@ -40,7 +40,7 @@ const SellingDetail = (props) => {
         onSendBack,
         onDelete,
         onAddProduct,
-        onUpdateOrderID,
+        onUpdateOrder,
         editMode,
         depots
     } = props;
@@ -53,12 +53,12 @@ const SellingDetail = (props) => {
     const [orderPWD, setOrderPWD] = React.useState([]);
 
     const [isFocused, setIsFocused] = useState(false);
-    
-        const formatNumber = (value) => {
-            const number = parseInt(value, 10);
-            if (isNaN(number)) return "";
-            return number.toLocaleString(); // => 3000 -> "3,000"
-        };
+
+    const formatNumber = (value) => {
+        const number = parseInt(value, 10);
+        if (isNaN(number)) return "";
+        return number.toLocaleString(); // => 3000 -> "3,000"
+    };
 
     const getOrder = async () => {
         database.ref("order/" + (detail.id - 1) + "/Product/G91").on("value", (snapshot) => {
@@ -125,23 +125,53 @@ const SellingDetail = (props) => {
                 </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 60, padding: "1px 4px" }}>
                     {
-                        depots.split(":")[1] === "ลำปาง" ?
-                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate1}</Typography>
-                            : depots.split(":")[1] === "พิจิตร" ?
-                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate2}</Typography>
-                                :
-                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate3}</Typography>
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '12px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Rate ?? ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        //onUpdateOrder("Rate", newValue);
+                                        onUpdateOrder("Rate", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onUpdateOrder("Rate", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onUpdateOrder("Rate", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Rate || "-"}</Typography>
                     }
                 </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 50 }} >
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom> - </Typography>
+                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.CreditTime}</Typography>
                 </TableCell>
                 <TableCellG95 sx={{ textAlign: "center", height: "20px", width: 70 }}>
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
-                                <TextField size="small" fullWidth 
-                                type={isFocused ? "number" : "text" }
+                                <TextField size="small" fullWidth
+                                    type={isFocused ? "number" : "text"}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px'
@@ -183,8 +213,8 @@ const SellingDetail = (props) => {
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
-                                <TextField size="small" fullWidth 
-                                type={isFocused ? "number" : "text" }
+                                <TextField size="small" fullWidth
+                                    type={isFocused ? "number" : "text"}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px'
@@ -200,7 +230,7 @@ const SellingDetail = (props) => {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            textAlign: 'center', 
+                                            textAlign: 'center',
                                         },
                                     }}
                                     value={isFocused ? (detail.Product?.B95?.Volume || "") : formatNumber(detail.Product?.B95?.Volume || "")}
@@ -226,8 +256,8 @@ const SellingDetail = (props) => {
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
-                                <TextField size="small" fullWidth 
-                                type={ isFocused ? "number" : "text" }
+                                <TextField size="small" fullWidth
+                                    type={isFocused ? "number" : "text"}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px'
@@ -243,7 +273,7 @@ const SellingDetail = (props) => {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            textAlign: 'center', 
+                                            textAlign: 'center',
                                         },
                                     }}
                                     value={isFocused ? (detail.Product?.B7?.Volume || "") : formatNumber(detail.Product?.B7?.Volume || "")}
@@ -269,8 +299,8 @@ const SellingDetail = (props) => {
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
-                                <TextField size="small" fullWidth 
-                                type={ isFocused ? "number" : "text" }
+                                <TextField size="small" fullWidth
+                                    type={isFocused ? "number" : "text"}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px'
@@ -286,7 +316,7 @@ const SellingDetail = (props) => {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            textAlign: 'center', 
+                                            textAlign: 'center',
                                         },
                                     }}
                                     value={isFocused ? (detail.Product?.G91?.Volume || "") : formatNumber(detail.Product?.G91?.Volume || "")}
@@ -312,8 +342,8 @@ const SellingDetail = (props) => {
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
-                                <TextField size="small" fullWidth 
-                                type={ isFocused ? "number" : "text" }
+                                <TextField size="small" fullWidth
+                                    type={isFocused ? "number" : "text"}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px'
@@ -329,7 +359,7 @@ const SellingDetail = (props) => {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            textAlign: 'center', 
+                                            textAlign: 'center',
                                         },
                                     }}
                                     value={isFocused ? (detail.Product?.E20?.Volume || "") : formatNumber(detail.Product?.E20?.Volume || "")}
@@ -355,8 +385,8 @@ const SellingDetail = (props) => {
                     {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
-                                <TextField size="small" fullWidth 
-                                type={ isFocused ? "number" : "text" }
+                                <TextField size="small" fullWidth
+                                    type={isFocused ? "number" : "text"}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px'
@@ -372,7 +402,7 @@ const SellingDetail = (props) => {
                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                             fontWeight: 'bold',
                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                            textAlign: 'center', 
+                                            textAlign: 'center',
                                         },
                                     }}
                                     value={isFocused ? (detail.Product?.PWD?.Volume || "") : formatNumber(detail.Product?.PWD?.Volume || "")}
@@ -394,6 +424,46 @@ const SellingDetail = (props) => {
                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.PWD?.Volume || "-"}</Typography>
                     }
                 </TableCellPWD>
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 70 }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '12px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.Travel ?? ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        //onUpdateOrder("Travel", newValue);
+                                        onUpdateOrder("Travel", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onUpdateOrder("Travel", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onUpdateOrder("Travel", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Travel || "-"}</Typography>
+                    }
+                </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 80 }} >
                     {
                         editMode ?

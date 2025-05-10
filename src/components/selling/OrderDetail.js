@@ -179,7 +179,7 @@ const OrderDetail = (props) => {
                         editMode ?
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth
-                                    type="number"
+                                    //type="number"
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '12px',
@@ -199,14 +199,15 @@ const OrderDetail = (props) => {
                                     value={detail.OrderID ?? ""}
                                     onChange={(e) => {
                                         let newValue = e.target.value;
-                                        onUpdateOrderID("OrderID", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                        onUpdateOrderID("OrderID", newValue);
+                                        //onUpdateOrderID("OrderID", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
                                     }}
-                                    onFocus={(e) => {
-                                        if (e.target.value === "0") onUpdateOrderID("OrderID", "");
-                                    }}
-                                    onBlur={(e) => {
-                                        if (e.target.value === "") onUpdateOrderID("OrderID", 0);
-                                    }}
+                                    // onFocus={(e) => {
+                                    //     if (e.target.value === "0") onUpdateOrderID("OrderID", "");
+                                    // }}
+                                    // onBlur={(e) => {
+                                    //     if (e.target.value === "") onUpdateOrderID("OrderID", 0);
+                                    // }}
                                 />
                             </Paper>
                             :

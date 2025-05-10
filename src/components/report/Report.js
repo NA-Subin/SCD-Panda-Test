@@ -50,7 +50,6 @@ const Report = () => {
   const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
   const [checkOverdueTransfer, setCheckOverdueTransfer] = useState(true);
 
-
   const handleDateChangeDateStart = (newValue) => {
     if (newValue) {
       const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
@@ -114,10 +113,14 @@ const Report = () => {
   console.log("Ticket G : ", ticket.filter((item) => (item.CustomerType === "ตั๋วปั้ม" && item.Trip !== "ยกเลิก")));
 
   const resultTransport = ticket
-    .filter((item) => (
-      item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
-      item.Trip !== "ยกเลิก"
-    ))
+    .filter((item) => {
+          const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+          return (
+            item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
+            item.Trip !== "ยกเลิก" &&
+            itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+          );
+        })
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
@@ -164,10 +167,14 @@ const Report = () => {
     });
 
   const resultGasStation = ticket
-    .filter((item) => (
-      item.CustomerType === "ตั๋วปั้ม" &&
-      item.Trip !== "ยกเลิก"
-    ))
+    .filter((item) => {
+          const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+          return (
+            item.CustomerType === "ตั๋วปั้ม" &&
+            item.Trip !== "ยกเลิก" &&
+            itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+          );
+        })
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
@@ -211,10 +218,14 @@ const Report = () => {
     });
 
   const resultTickets = ticket
-    .filter((item) => (
-      item.CustomerType === "ตั๋วน้ำมัน" &&
-      item.Trip !== "ยกเลิก"
-    ))
+    .filter((item) => {
+          const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+          return (
+            item.CustomerType === "ตั๋วน้ำมัน" &&
+            item.Trip !== "ยกเลิก" &&
+            itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+          );
+        })
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;

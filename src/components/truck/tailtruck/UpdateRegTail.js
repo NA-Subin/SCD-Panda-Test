@@ -228,23 +228,21 @@ const UpdateRegTail = (props) => {
                             </Grid>
                         </Grid>
                     </Paper>
-                    {
-                        update ?
-                            <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="info" sx={{ marginRight: 2 }}>พิมพ์</Button>
-                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)} >แก้ไข</Button>
-                            </Box>
-                            :
-                            <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="success" sx={{ marginRight: 2 }} onClick={handleUpdate} >บันทึก</Button>
-                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} >ยกเลิก</Button>
-                            </Box>
-                    }
-                </DialogContent>
-                <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                    <Button onClick={handleClose} variant="contained" color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
-                </DialogActions>
+                    </DialogContent>
+                <DialogActions sx={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
+                                    {
+                                        update ?
+                                            <Box marginBottom={2} textAlign="center">
+                                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)}  sx={{ marginRight: 2 }}>แก้ไข</Button>
+                                                <Button variant="contained" color="info">พิมพ์</Button>
+                                            </Box>
+                                            :
+                                            <Box marginBottom={2} textAlign="center">
+                                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} sx={{ marginRight: 2 }}>ยกเลิก</Button>
+                                                <Button variant="contained" color="success" onClick={handleUpdate} >บันทึก</Button>
+                                            </Box>
+                                    }
+                                </DialogActions>
             </Dialog>
         </React.Fragment>
     );

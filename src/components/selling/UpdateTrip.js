@@ -34,6 +34,11 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
+import LocationOffIcon from '@mui/icons-material/LocationOff';
+import EditLocationIcon from '@mui/icons-material/EditLocation';
+import FmdBadIcon from '@mui/icons-material/FmdBad';
+import SatelliteIcon from '@mui/icons-material/Satellite';
 import theme from "../../theme/theme";
 import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TableCellPWD, TablecellSelling, TablecellTickets, TablecellCustomers } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -883,6 +888,7 @@ const UpdateTrip = (props) => {
                     if (ticketData && ticketData.No === ticketKey) {
                         ticketRef.update({
                             Trip: "ยกเลิก",
+                            Status: "ยกเลิก",
                         })
                             .then(() => {
                                 console.log("Data pushed successfully");
@@ -991,6 +997,7 @@ const UpdateTrip = (props) => {
                     if (orderData && orderData.No === orderKey) {
                         orderRef.update({
                             Trip: "ยกเลิก",
+                            Status: "ยกเลิก",
                         })
                             .then(() => {
                                 console.log("Data pushed successfully");
@@ -1110,6 +1117,21 @@ const UpdateTrip = (props) => {
                                     console.error("Error pushing data:", error);
                                 })
                         ))
+                        ticket.map((row) => (
+                            database
+                                .ref("tickets/")
+                                .child(row.No)
+                                .update({
+                                    Status: "จัดส่งสำเร็จ"
+                                })
+                                .then(() => {
+                                    console.log("Data pushed successfully");
+                                })
+                                .catch((error) => {
+                                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                    console.error("Error pushing data:", error);
+                                })
+                        ))
                         console.log("Data pushed successfully");
                         setOpen(false);
                     })
@@ -1157,8 +1179,22 @@ const UpdateTrip = (props) => {
                                 .ref("order/")
                                 .child(row.No)
                                 .update({
-                                    Status: "ยกเลิก",
-                                    Trip: "ยกเลิก"
+                                    Status: "ยกเลิก"
+                                })
+                                .then(() => {
+                                    console.log("Data pushed successfully");
+                                })
+                                .catch((error) => {
+                                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                    console.error("Error pushing data:", error);
+                                })
+                        ))
+                        ticket.map((row) => (
+                            database
+                                .ref("tickets/")
+                                .child(row.No)
+                                .update({
+                                    Status: "ยกเลิก"
                                 })
                                 .then(() => {
                                     console.log("Data pushed successfully");
@@ -1227,19 +1263,19 @@ const UpdateTrip = (props) => {
         <React.Fragment>
             <Box display="flex" justifyContent="center" alignItems="center">
                 {
-                    trip.StatusTrip !== "จบทริป" &&
+                    trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
                     <Tooltip title="กดเพื่อยกเลิกเที่ยววิ่ง" placement="left">
                         <IconButton color="error" size="small" onClick={handleChangeCancelTrip}>
-                            <TaskIcon />
+                            <LocationOffIcon />
                         </IconButton>
                     </Tooltip>
                     // <Button variant="contained" size="small" color="success" sx={{ height: 20,marginRight: 0.5 }} onClick={handleChangeStatus}>จบทริป</Button>
                 }
                 {
-                    trip.StatusTrip !== "จบทริป" &&
+                    trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
                     <Tooltip title="กดเพื่อจบทริป" placement="top">
                         <IconButton color="success" size="small" onClick={handleChangeStatus}>
-                            <TaskIcon />
+                            <WhereToVoteIcon />
                         </IconButton>
                     </Tooltip>
                     // <Button variant="contained" size="small" color="success" sx={{ height: 20,marginRight: 0.5 }} onClick={handleChangeStatus}>จบทริป</Button>
@@ -1247,7 +1283,7 @@ const UpdateTrip = (props) => {
                 {/* <Button variant="contained" size="small" color="info" sx={{ height: 20 }} onClick={handleClickOpen}>ตรวจสอบ</Button> */}
                 <Tooltip title="กดเพื่อดูรายละเอียด" placement="bottom">
                     <IconButton color="info" size="small" onClick={handleClickOpen}>
-                        <PlagiarismIcon />
+                        <FmdBadIcon />
                     </IconButton>
                 </Tooltip>
             </Box>
@@ -2598,29 +2634,29 @@ const UpdateTrip = (props) => {
                         !editMode ?
                             <>
                                 {
-                                    trip.StatusTrip !== "จบทริป" ?
+                                    trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" ?
                                         <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*ถ้าต้องการเพิ่มตั๋วหรือลูกค้าให้กดปุ่มแก้ไข*</Typography>
                                         :
                                         <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*บันทึกรูปภาพ*</Typography>
                                 }
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
                                     {
-                                        trip.StatusTrip !== "จบทริป" &&
-                                        <Button variant="contained" color="success" size="small" sx={{ marginRight: 1 }} onClick={handleChangeStatus}>
+                                        trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        <Button variant="contained" color="success" size="small" sx={{ marginRight: 1 }} onClick={handleChangeStatus} endIcon={<WhereToVoteIcon/>}>
                                             จบเที่ยววิ่ง
                                         </Button>
                                     }
                                     {
-                                        trip.StatusTrip !== "จบทริป" &&
-                                        <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={handleChangeCancelTrip}>
+                                        trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={handleChangeCancelTrip} endIcon={<LocationOffIcon/>} >
                                             ยกเลิกเที่ยววิ่ง
                                         </Button>
                                     }
                                     {
-                                        trip.StatusTrip !== "จบทริป" &&
-                                        <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate}>แก้ไข</Button>
+                                        trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon/>} >แก้ไข</Button>
                                     }
-                                    <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon/>} >บันทึกรูปภาพ</Button>
                                 </Box>
                             </>
                             :

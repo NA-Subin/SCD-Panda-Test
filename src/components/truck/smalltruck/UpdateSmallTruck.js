@@ -62,15 +62,15 @@ const UpdateSmallTruck = (props) => {
     const { company, drivers } = useData();
     const dataCompany = Object.values(company);
     const dataDrivers = Object.values(drivers);
-    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "ไม่มี" && row.TruckType === "รถเล็ก");
+    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && row.TruckType === "รถเล็ก");
 
     const toggleDrawer = (newOpen) => () => {
         setOpenTab(newOpen);
     };
 
     const [companies, setCompanies] = React.useState(truck.Company);
-    const [driver, setDriver] = React.useState("0:" + truck.Driver);
-    const [registration, setRegistration] = React.useState(truck.Registration);
+    const [driver, setDriver] = React.useState(truck.Driver);
+    const [registration, setRegistration] = React.useState(truck.RegHead);
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
     const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration);
@@ -81,13 +81,13 @@ const UpdateSmallTruck = (props) => {
             .ref("/truck/small/")
             .child(truck.id - 1)
             .update({
-                Registration: registration,
+                RegHead: registration,
                 Weight: weight,
                 Insurance: insurance,
                 VehicleRegistration: vehicleRegistration,
                 VehExpirationDate: vehExpirationDate,
                 Company: companies,
-                Driver: driver.split(":")[1]
+                Driver: driver
             })
             .then(() => {
                 database
@@ -154,7 +154,7 @@ const UpdateSmallTruck = (props) => {
                             <Grid item xs={4}>
                                 {
                                     update ?
-                                        <TextField fullWidth variant="standard" value={driver.split(":")[1]} disabled />
+                                        <TextField fullWidth variant="standard" value={driver === "ไม่มี" ? driver : driver.split(":")[1]} disabled />
                                         :
                                         <FormControl variant="standard" fullWidth>
                                             <Select
@@ -163,9 +163,14 @@ const UpdateSmallTruck = (props) => {
                                                 value={driver}
                                                 onChange={(e) => setDriver(e.target.value)}
                                             >
-                                                <MenuItem value={driver}>{driver.split(":")[1]}</MenuItem>
+                                                <MenuItem value={driver}>{driver === "ไม่มี" ? driver : driver.split(":")[1]}</MenuItem>
+                                                {
+                                                    driver !== "ไม่มี" &
+                                                    <MenuItem value={"ไม่มี"}>ไม่มี</MenuItem>
+                                                }
                                                 {
                                                     employees.map((row) => (
+                                                        row.id !== driver.split(":")[0] &&
                                                         <MenuItem value={row.id + ":" + row.Name}>{row.Name}</MenuItem>
                                                     ))
                                                 }
@@ -177,19 +182,19 @@ const UpdateSmallTruck = (props) => {
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ทะเบียน</Typography>
                             </Grid>
                             <Grid item xs={1.5}>
-                                <TextField fullWidth variant="standard" value={registration} disabled={update ? true : false} />
+                                <TextField fullWidth variant="standard" value={registration} onChange={(e) => setRegistration(e.target.value)} disabled={update ? true : false} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>น้ำหนัก</Typography>
                             </Grid>
                             <Grid item xs={2}>
-                                <TextField fullWidth variant="standard" value={weight} disabled={update ? true : false} />
+                                <TextField fullWidth variant="standard" value={weight} onChange={(e) => setWeight(e.target.value)} disabled={update ? true : false} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ประกัน</Typography>
                             </Grid>
                             <Grid item xs={2}>
-                                <TextField fullWidth variant="standard" value={insurance} disabled={update ? true : false} />
+                                <TextField fullWidth variant="standard" value={insurance} onChange={((e) => setInsurance(e.target.value))} disabled={update ? true : false} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>บริษัท</Typography>
@@ -260,22 +265,20 @@ const UpdateSmallTruck = (props) => {
                             </Grid>
                         </Grid>
                     </Paper>
+                </DialogContent>
+                <DialogActions sx={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
                     {
                         update ?
                             <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="info" sx={{ marginRight: 2 }}>พิมพ์</Button>
-                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)} >แก้ไข</Button>
+                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)}  sx={{ marginRight: 2 }}>แก้ไข</Button>
+                                <Button variant="contained" color="info">พิมพ์</Button>
                             </Box>
                             :
                             <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="success" sx={{ marginRight: 2 }} onClick={handleUpdate} >บันทึก</Button>
-                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} >ยกเลิก</Button>
+                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} sx={{ marginRight: 2 }}>ยกเลิก</Button>
+                                <Button variant="contained" color="success" onClick={handleUpdate} >บันทึก</Button>
                             </Box>
                     }
-                </DialogContent>
-                <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                    <Button onClick={handleClose} variant="contained" color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

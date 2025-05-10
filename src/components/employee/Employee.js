@@ -3,12 +3,15 @@ import {
   Badge,
   Box,
   Button,
+  Checkbox,
   Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
+  FormControlLabel,
+  FormGroup,
   Grid,
   IconButton,
   MenuItem,
@@ -52,6 +55,7 @@ const Employee = () => {
   const [open, setOpen] = useState(1);
   const [openMenu, setOpenMenu] = useState(1);
   const [openOfficeDetail, setOpenOfficeDetail] = useState(false);
+  const [check, setCheck] = useState(1);
 
   const handleClose = () => {
     setOpenOfficeDetail(false);
@@ -65,6 +69,12 @@ const Employee = () => {
 
   const registrationHead = datareghead.filter(row => row.Driver && row.Driver === "ไม่มี");
   const registrationSmallTruck = datasmall.filter(row => row.Driver && row.Driver === "ไม่มี");
+  const driverDetail = datadrivers.filter((row) =>
+    check === 2 ? row.TruckType === "รถใหญ่"
+      : check === 3 ? row.TruckType === "รถเล็ก"
+        : true // แสดงทั้งหมดถ้าไม่ใช่ check === 2 หรือ check === 3
+  );
+
 
   const [openTab, setOpenTab] = React.useState(true);
 
@@ -124,7 +134,7 @@ const Employee = () => {
             .ref("/truck/registration/")
             .child(truck.split(":")[0] - 1)
             .update({
-              Driver: setting.split(":")[1],
+              Driver: setting,
             })
             .then(() => {
               ShowSuccess("เปลี่ยนทะเบียนสำเร็จ");
@@ -140,7 +150,7 @@ const Employee = () => {
             .ref("/truck/small/")
             .child(truck.split(":")[0] - 1)
             .update({
-              Driver: setting.split(":")[1],
+              Driver: setting,
             })
             .then(() => {
               ShowSuccess("เปลี่ยนทะเบียนสำเร็จ");
@@ -214,11 +224,22 @@ const Employee = () => {
       </Grid>
       <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5 }}>
         <Grid container spacing={2}>
-          <Grid item xs={9}>
+          <Grid item xs={3}>
             <Typography variant="h6" fontWeight="bold" gutterBottom>รายชื่อพนักงาน{open === 1 ? "ภายในบริษัท" : "ขับรถ"}</Typography>
           </Grid>
+          <Grid item xs={6}>
+            {
+              open === 2 &&
+              <FormGroup row sx={{ marginBottom: -2 }}>
+                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกประเภทที่ต้องการ : </Typography>
+                <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="รถใหญ่" />
+                <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="รถเล็ก" />
+              </FormGroup>
+            }
+          </Grid>
           <Grid item xs={3}>
-            <InsertEmployee type={open} driver={datadrivers} officer={dataofficers} truck={registrationHead} smallTruck={registrationSmallTruck} />
+            <InsertEmployee type={open} driver={driverDetail} officer={dataofficers} truck={registrationHead} smallTruck={registrationSmallTruck} />
           </Grid>
         </Grid>
         <Divider sx={{ marginBottom: 1, marginTop: 2 }} />
@@ -254,9 +275,9 @@ const Employee = () => {
                 </TableHead>
                 <TableBody>
                   {
-                    dataofficers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    dataofficers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                       <TableRow>
-                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{index+1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Position}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
@@ -348,9 +369,9 @@ const Employee = () => {
                 </TableHead>
                 <TableBody>
                   {
-                    datadrivers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    driverDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
                       <TableRow >
-                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{index+1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>
                         {
@@ -394,7 +415,7 @@ const Employee = () => {
                                             ))
                                             : row.TruckType === "รถเล็ก" ?
                                               registrationSmallTruck.map((small) => (
-                                                <MenuItem value={small.id + ":" + small.Registration + ":รถเล็ก"}>{small.Registration}</MenuItem>
+                                                <MenuItem value={small.id + ":" + small.RegHead + ":รถเล็ก"}>{small.RegHead}</MenuItem>
                                               ))
                                               :
                                               <>
@@ -433,11 +454,11 @@ const Employee = () => {
                 </TableBody>
               </Table>
               {
-                datadrivers.length <= 10 ? null :
+                driverDetail.length <= 10 ? null :
                   <TablePagination
                     rowsPerPageOptions={[10, 25, 30]}
                     component="div"
-                    count={datadrivers.length}
+                    count={driverDetail.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}

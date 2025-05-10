@@ -70,19 +70,121 @@ const DeductionOfIncome = () => {
         }
     };
 
-    const { report } = useData();
-    const reports = Object.values(report || {});
+    const { reportFinancial, drivers } = useData();
+    const reports = Object.values(reportFinancial || {});
+    const driver = Object.values(drivers || {});
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
+    // const formatted = [];
+
+    // drivers.forEach(driver => {
+    //     formatted.push({
+    //         name: driver.Name,
+    //         item: "เงินเดือน (Salary)",
+    //         income: driver.Salary !== "-" ? driver.Salary : "",
+    //         expense: "",
+    //     });
+    //     formatted.push({
+    //         name: driver.Name,
+    //         item: "ค่าโทรศัพท์ (Security)",
+    //         income: "",
+    //         expense: driver.Security !== "-" ? driver.Security : "",
+    //     });
+    //     formatted.push({
+    //         name: driver.Name,
+    //         item: "เงินประกัน (Deposit)",
+    //         income: "",
+    //         expense: driver.Deposit !== "-" ? driver.Deposit : "",
+    //     });
+    //     formatted.push({
+    //         name: driver.Name,
+    //         item: "เงินกู้ (Loan)",
+    //         income: "",
+    //         expense: driver.Loan !== "-" ? driver.Loan : "",
+    //     });
+    // });
+
+    // console.table("Driver formatted : ", formatted);
+    console.log("Driver : ", driver);
+    console.log("Report : ", reports);
 
     const reportDetail = reports
         .filter((item) => {
-            const itemDate = dayjs(item.SelectedDateInvoice, "DD/MM/YYYY");
+            const itemDate = dayjs(item.Date, "DD/MM/YYYY");
             return (
                 itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") &&
                 item.Status !== "ยกเลิก"
             );
         });
 
+    let table = [];
+
+    drivers.forEach((driver) => {
+        table.push({
+            name: driver.Name,
+            item: "เงินเดือน",
+            income: driver.Salary !== "-" ? driver.Salary : "-",
+            expense: "-",
+        });
+        table.push({
+            name: driver.Name,
+            item: "ค่าโทรศัพท์",
+            income: driver.TelephoneBill !== "-" ? driver.TelephoneBill : "-",
+            expense: "-",
+        });
+        table.push({
+            name: driver.Name,
+            item: "ประกันสังคม",
+            income: "-",
+            expense: driver.Security !== "-" ? driver.Security : "-",
+        });
+        // table.push({
+        //     name: driver.Name,
+        //     item: "เงินประกัน",
+        //     income: "-",
+        //     expense: driver.Deposit !== "-" ? driver.Deposit : "-",
+        // });
+        // table.push({
+        //     name: driver.Name,
+        //     item: "เงินกู้",
+        //     income: "-",
+        //     expense: driver.Loan !== "-" ? driver.Loan : "-",
+        // });
+    });
+
+    // ฟังก์ชันจับชื่อจริงจาก report.Driver
+    const extractName = (full) => full.split(":")[1]?.trim() ?? full;
+
+    // ฟังก์ชันจับชื่อ item จาก report.Name
+    const extractItem = (full) => full.split(":")[1]?.trim() ?? full;
+
+    // อัปเดตหรือเพิ่มข้อมูลจาก report
+    reportDetail.forEach((report) => {
+        const name = extractName(report.Driver);
+        const item = extractItem(report.Name);
+
+        const index = table.findIndex(
+            (row) => row.name === name && row.item === item
+        );
+
+        const value = report.Money;
+        const isIncome = report.Type === "รายได้";
+
+        if (index >= 0) {
+            // อัปเดตรายได้/รายหัก ในรายการที่ตรงกัน
+            if (isIncome) table[index].income = value;
+            else table[index].expense = value;
+        } else {
+            // เพิ่มรายการใหม่
+            table.push({
+                name,
+                item,
+                income: isIncome ? value : "",
+                expense: isIncome ? "" : value,
+            });
+        }
+    });
+
+    console.log("Report Table : ", table);
     console.log("Report : ", reports);
     console.log("Report Detail : ", reportDetail);
 
@@ -256,9 +358,6 @@ const DeductionOfIncome = () => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                         พนักงานขับรถ
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                        เลขที่
-                                    </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                         ชื่อรายการที่หัก
                                     </TablecellSelling>
@@ -268,27 +367,26 @@ const DeductionOfIncome = () => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                         รายหัก
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                        รวม
-                                    </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell sx={{ textAlign: "center" }}> </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}> </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}> </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}> </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}> </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}> </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}> </TableCell>
+                                {
+                                    table.map((row,index) => (
+                                        <TableRow>
+                                    <TableCell sx={{ textAlign: "center" }}>{index+1}</TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>{row.name}</TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>{row.item}</TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>{row.income !== "-" ? new Intl.NumberFormat("en-US").format(row.income) : "-"}</TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>{row.expense !== "-" ? new Intl.NumberFormat("en-US").format(row.expense) : "-"}</TableCell>
                                     <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
-                                        <Button variant="contained" size="small" color="error" fullWidth
+                                        {/* <Button variant="contained" size="small" color="error" fullWidth
                                         //onClick={() => handleChangDelete(row.id)}
-                                        >ลบ</Button>
+                                        >ลบ</Button> */}
                                     </TableCell>
                                 </TableRow>
+                                    ))
+                                }
                             </TableBody>
                         </Table>
                         {/* {

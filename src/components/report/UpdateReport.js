@@ -266,15 +266,15 @@ const UpdateReport = (props) => {
 
             const company = registrationHead.find(trip => trip.id === Number(matchedTrip.Registration.split(":")[0]));
 
-            console.log("Company (raw):", `"${company.Company}"`);
-            console.log("Company (trim):", `"${company.Company.trim()}"`);
-            console.log("Company (length):", company.Company.length);
+            // console.log("Company (raw):", `"${company.Company}"`);
+            // console.log("Company (trim):", `"${company.Company.trim()}"`);
+            // console.log("Company (length):", company.Company.length);
 
             const companyAddress = companies.find(com => com.id === Number(company.Company.split(":")[0]));
 
-            console.log("Address (raw):", `"${companyAddress.Name}"`);
-            console.log("Address (trim):", `"${companyAddress.Name.trim()}"`);
-            console.log("Address (length):", companyAddress.Name.length);
+            // console.log("Address (raw):", `"${companyAddress.Name}"`);
+            // console.log("Address (trim):", `"${companyAddress.Name.trim()}"`);
+            // console.log("Address (length):", companyAddress.Name.length);
 
             return Object.entries(row.Product)
                 .filter(([productName]) => productName !== "P")

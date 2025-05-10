@@ -86,6 +86,7 @@ const InsertEmployee = (props) => {
     const [drivingLicense, setDrivingLicense] = React.useState("");
     const [expiration, setExpiration] = React.useState("");
     const [gasStations, setGasStations] = useState("");
+    const [telephoneBill, setTelephoneBill] = useState("");
 
     const [position, setPosition] = React.useState("");
     const [newPosition, setNewPosition] = React.useState("");
@@ -155,6 +156,7 @@ const InsertEmployee = (props) => {
                     TripCost: tripCost,
                     PointCost: pointCost,
                     Security: security,
+                    TelephoneBill: telephoneBill,
                     TruckType: trucks,
                     Deposit: deposit,
                     Loan: loan,
@@ -213,9 +215,10 @@ const InsertEmployee = (props) => {
                     setDeposit("");
                     setLoan("");
                     setDrivingLicense("");
-                    setExpiration("")
-                    setPhone("")
-                    setUser("")
+                    setExpiration("");
+                    setPhone("");
+                    setUser("");
+                    setTelephoneBill("");
                 })
                 .catch((error) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -570,6 +573,14 @@ const InsertEmployee = (props) => {
                                             </Paper>
                                         </Grid>
                                         <Grid item md={2} sm={2} xs={3}>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประกันสังคม</Typography>
+                                        </Grid>
+                                        <Grid item md={4} sm={4} xs={9}>
+                                            <Paper component="form">
+                                                <TextField size="small" fullWidth value={security} onChange={(e) => setSecurity(e.target.value)} />
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าเที่ยว</Typography>
                                         </Grid>
                                         <Grid item md={4} sm={4} xs={9}>
@@ -590,7 +601,7 @@ const InsertEmployee = (props) => {
                                         </Grid>
                                         <Grid item md={4} sm={4} xs={9}>
                                             <Paper component="form">
-                                                <TextField size="small" fullWidth value={security} onChange={(e) => setSecurity(e.target.value)} />
+                                                <TextField size="small" fullWidth value={telephoneBill} onChange={(e) => setTelephoneBill(e.target.value)} />
                                             </Paper>
                                         </Grid>
                                         <Grid item md={2} sm={2} xs={3}>
@@ -609,6 +620,7 @@ const InsertEmployee = (props) => {
                                                 <TextField size="small" fullWidth value={loan} onChange={(e) => setLoan(e.target.value)} />
                                             </Paper>
                                         </Grid>
+                                        <Grid item md={6} sm={6} xs={12}/>
                                         <Grid item md={12} sm={12} xs={12}>
                                             <Divider>
                                                 <Chip label="ใบอนุญาตการขับขี่รถ" size="small" />

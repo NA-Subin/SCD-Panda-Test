@@ -424,6 +424,12 @@ const InsertTrips = () => {
     console.log("ข้อมูลตั๋ว : ", Object.values(ordersTickets));
     console.log("ข้อมูลลูกค้า : ", Object.values(selling));
 
+    useEffect(() => {
+    // คำนวณผลรวมค่า Travel ทุกครั้งที่ selling เปลี่ยน
+    const totalTravel = Object.values(selling).reduce((sum, item) => sum + (item.Travel || 0), 0);
+    setCostTrip(totalTravel);
+  }, [selling]);
+
     const handlePost = (event) => {
         const ticketValue = event.target.value;
         setTickets(ticketValue);
@@ -455,9 +461,8 @@ const InsertTrips = () => {
                 [newIndex]: {
                     TicketName: ticketValue,
                     id: newIndex,
-                    Rate1: ticketData.Rate1,
-                    Rate2: ticketData.Rate2,
-                    Rate3: ticketData.Rate3,
+                    Rate: ticketData.Rate || 0,
+                    Travel: ticketData.Travel || 0,
                     OrderID: "",
                     Trip: trip.length,
                     Product: {
@@ -483,19 +488,19 @@ const InsertTrips = () => {
 
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
         // let newRate = 0;
-        if (ticketData && depots) {
-            // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
-            if (depots.split(":")[1] === "ลำปาง") {
-                // newRate = ticketData.Rate1;
-                setCostTrip((prev) => (prev === 0 ? 750 : prev + 200));
-            } else if (depots.split(":")[1] === "พิจิตร") {
-                // newRate = ticketData.Rate2;
-                setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
-            } else if (depots.split(":")[1] === "สระบุรี" || depots.split(":")[1] === "บางปะอิน" || depots.split(":")[1] === "IR") {
-                // newRate = ticketData.Rate3;
-                setCostTrip((prev) => (prev === 0 ? (2000 + 1200) : prev + 200));
-            }
-        }
+        // if (ticketData && depots) {
+        //     // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
+        //     if (depots.split(":")[1] === "ลำปาง") {
+        //         // newRate = ticketData.Rate1;
+        //         setCostTrip((prev) => (prev === 0 ? 750 : prev + 200));
+        //     } else if (depots.split(":")[1] === "พิจิตร") {
+        //         // newRate = ticketData.Rate2;
+        //         setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
+        //     } else if (depots.split(":")[1] === "สระบุรี" || depots.split(":")[1] === "บางปะอิน" || depots.split(":")[1] === "IR") {
+        //         // newRate = ticketData.Rate3;
+        //         setCostTrip((prev) => (prev === 0 ? (2000 + 1200) : prev + 200));
+        //     }
+        // }
 
         setSelling((prev) => {
             const newIndex = Object.keys(prev).length;
@@ -510,13 +515,12 @@ const InsertTrips = () => {
                     CodeID: ticketData.CodeID || "-",
                     CreditTime: ticketData.CreditTime || "-",
                     Bill: ticketData.Bill || "-",
-                    Rate1: ticketData.Rate1,
-                    Rate2: ticketData.Rate2,
-                    Rate3: ticketData.Rate3,
+                    Rate: ticketData.Rate || 0,
                     Trip: trip.length,
                     Date: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
                     Registration: registration.split(":")[1],
                     Driver: registration.split(":")[2],
+                    Travel: ticketData.Travel || 0,
                     id: newIndex,
                     Product: {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
@@ -537,8 +541,8 @@ const InsertTrips = () => {
 
     };
 
-    const handleUpdateOrderID = (ticketIndex, field, value) => {
-        setOrdersTickets((prev) => {
+    const handleUpdateOrder = (ticketIndex, field, value) => {
+        setSelling((prev) => {
             return {
                 ...prev,
                 [ticketIndex]: {
@@ -550,77 +554,77 @@ const InsertTrips = () => {
     };
 
     // ฟังก์ชันอัพเดตราคาใน ordersTickets เมื่อมีการเปลี่ยน depot
-    const updateRatesByDepot = (selectedDepot) => {
-        setCostTrip(0);
-        setOrdersTickets((prevOrders) => {
-            return Object.keys(prevOrders).reduce((acc, key) => {
-                const order = prevOrders[key];
-                const ticketData = getTickets().find(
-                    (item) => item.TicketsName === order.TicketName
-                );
-                // let newRate = 0;
-                // if (ticketData) {
-                //     if (selectedDepot === "ลำปาง") {
-                //         newRate = ticketData.Rate1;
-                //     } else if (selectedDepot === "พิจิตร") {
-                //         newRate = ticketData.Rate2;
-                //     } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
-                //         newRate = ticketData.Rate3;
-                //     }
-                // }
-                acc[key] = {
-                    ...order,
-                    Rate1: ticketData.Rate1,
-                    Rate2: ticketData.Rate2,
-                    Rate3: ticketData.Rate3,
-                };
-                return acc;
-            }, {});
-        });
+    // const updateRatesByDepot = (selectedDepot) => {
+    //     setCostTrip(0);
+    //     setOrdersTickets((prevOrders) => {
+    //         return Object.keys(prevOrders).reduce((acc, key) => {
+    //             const order = prevOrders[key];
+    //             const ticketData = getTickets().find(
+    //                 (item) => item.TicketsName === order.TicketName
+    //             );
+    //             // let newRate = 0;
+    //             // if (ticketData) {
+    //             //     if (selectedDepot === "ลำปาง") {
+    //             //         newRate = ticketData.Rate1;
+    //             //     } else if (selectedDepot === "พิจิตร") {
+    //             //         newRate = ticketData.Rate2;
+    //             //     } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
+    //             //         newRate = ticketData.Rate3;
+    //             //     }
+    //             // }
+    //             acc[key] = {
+    //                 ...order,
+    //                 Rate1: ticketData.Rate1,
+    //                 Rate2: ticketData.Rate2,
+    //                 Rate3: ticketData.Rate3,
+    //             };
+    //             return acc;
+    //         }, {});
+    //     });
 
-        // คำนวณ costTrip ครั้งเดียว โดยดูจากจำนวน ordersTickets ที่มีอยู่และค่า depot
-        // สมมุติว่า ordersTickets มี 3 รายการ
-        // เราคำนวณตามเงื่อนไข depot แต่ละครั้ง
-        setSelling((prevOrders) => {
-            const updatedOrders = Object.keys(prevOrders).reduce((acc, key) => {
-                const order = prevOrders[key];
-                const ticketData = getCustomers().find(
-                    (item) => item.TicketsName === order.TicketName
-                );
-                // let newRate = 0;
-                // if (ticketData) {
-                //     if (selectedDepot === "ลำปาง") {
-                //         newRate = ticketData.Rate1;
-                //     } else if (selectedDepot === "พิจิตร") {
-                //         newRate = ticketData.Rate2;
-                //     } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
-                //         newRate = ticketData.Rate3;
-                //     }
-                // }
-                acc[key] = {
-                    ...order,
-                    Rate1: ticketData.Rate1,
-                    Rate2: ticketData.Rate2,
-                    Rate3: ticketData.Rate3,
-                };
-                return acc;
-            }, {});
+    //     // คำนวณ costTrip ครั้งเดียว โดยดูจากจำนวน ordersTickets ที่มีอยู่และค่า depot
+    //     // สมมุติว่า ordersTickets มี 3 รายการ
+    //     // เราคำนวณตามเงื่อนไข depot แต่ละครั้ง
+    //     setSelling((prevOrders) => {
+    //         const updatedOrders = Object.keys(prevOrders).reduce((acc, key) => {
+    //             const order = prevOrders[key];
+    //             const ticketData = getCustomers().find(
+    //                 (item) => item.TicketsName === order.TicketName
+    //             );
+    //             // let newRate = 0;
+    //             // if (ticketData) {
+    //             //     if (selectedDepot === "ลำปาง") {
+    //             //         newRate = ticketData.Rate1;
+    //             //     } else if (selectedDepot === "พิจิตร") {
+    //             //         newRate = ticketData.Rate2;
+    //             //     } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
+    //             //         newRate = ticketData.Rate3;
+    //             //     }
+    //             // }
+    //             acc[key] = {
+    //                 ...order,
+    //                 Rate1: ticketData.Rate1,
+    //                 Rate2: ticketData.Rate2,
+    //                 Rate3: ticketData.Rate3,
+    //             };
+    //             return acc;
+    //         }, {});
 
-            // หลังจากอัพเดต orders แล้ว คำนวณ costTrip รวม
-            let cost = 0;
-            Object.keys(updatedOrders).forEach((key) => {
-                if (selectedDepot === "ลำปาง") {
-                    cost += cost === 0 ? 750 : 200;
-                } else if (selectedDepot === "พิจิตร") {
-                    cost += cost === 0 ? 2000 : 200;
-                } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
-                    cost += cost === 0 ? 2000 + 1200 : 200;
-                }
-            });
-            setCostTrip(cost);
-            return updatedOrders;
-        });
-    };
+    //         // หลังจากอัพเดต orders แล้ว คำนวณ costTrip รวม
+    //         let cost = 0;
+    //         Object.keys(updatedOrders).forEach((key) => {
+    //             if (selectedDepot === "ลำปาง") {
+    //                 cost += cost === 0 ? 750 : 200;
+    //             } else if (selectedDepot === "พิจิตร") {
+    //                 cost += cost === 0 ? 2000 : 200;
+    //             } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
+    //                 cost += cost === 0 ? 2000 + 1200 : 200;
+    //             }
+    //         });
+    //         setCostTrip(cost);
+    //         return updatedOrders;
+    //     });
+    // };
 
 
     const handleAddProduct = (ticketIndex, productName, field, value) => {
@@ -991,8 +995,8 @@ const InsertTrips = () => {
                 id: trip.length + 1,
                 DateReceive: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
                 DateDelivery: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
-                Registration: registration.split(":")[1],
-                Driver: registration.split(":")[2],
+                Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
+                Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                 Depot: depots,
                 CostTrip: costTrip,
                 WeightHigh: parseFloat(weightH).toFixed(2),
@@ -1094,7 +1098,7 @@ const InsertTrips = () => {
 
     React.useEffect(() => {
         const currentRow = smallTruck.find(item =>
-            `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration)
+            `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration)
         console.log("Current : ", currentRow);
 
         if (currentRow) {
@@ -1171,7 +1175,7 @@ const InsertTrips = () => {
 
     console.log("Check : ", isNegative);
 
-    console.log("Show Registration : ", smallTruck.find(item => `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration && `${item.Driver}:${item.Registration}:(${item.type})`))
+    console.log("Show Registration : ", smallTruck.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration && `${item.Driver}:${item.Registration}:(${item.type})`))
 
     return (
         <React.Fragment>
@@ -1251,13 +1255,13 @@ const InsertTrips = () => {
                                             id="autocomplete-registration-1"
                                             options={smallTruck}
                                             getOptionLabel={(option) =>
-                                                `${option.Driver ? option.Driver : ""} : ${option.Registration ? option.Registration : ""} (${option.type ? option.type : ""})`
+                                                `${option.Driver ? option.Driver : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
                                             }
                                             isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
-                                            value={registration ? smallTruck.find(item => `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration) : null}
+                                            value={registration ? smallTruck.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration) : null}
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
-                                                    const value = `${newValue.id}:${newValue.Registration}:${newValue.Driver}:${newValue.type}`;
+                                                    const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.type}`;
                                                     setRegistration(value);
                                                 } else {
                                                     setRegistration("0:0:0:0");
@@ -1279,7 +1283,7 @@ const InsertTrips = () => {
                                             renderOption={(props, option) => (
                                                 <li {...props}>
                                                     {
-                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.Registration} (${option.type})`}</Typography>
+                                                        <Typography fontSize="14px">{`${option.Driver} : ${option.RegHead} (${option.type})`}</Typography>
                                                     }
                                                 </li>
                                             )}
@@ -1358,9 +1362,9 @@ const InsertTrips = () => {
                                                     onAddProduct={(productName, field, value) =>
                                                         handleAddProduct(parseInt(key), productName, field, value)
                                                     }
-                                                    onUpdateOrderID={(field, value) =>
-                                                        handleUpdateOrderID(parseInt(key), field, value)
-                                                    }
+                                                    // onUpdateOrderID={(field, value) =>
+                                                    //     handleUpdateOrderID(parseInt(key), field, value)
+                                                    // }
                                                 />
                                             ))}
                                         </TableBody>
@@ -1771,7 +1775,7 @@ const InsertTrips = () => {
                                             }}
                                             value={(() => {
                                                 const selectedItem = smallTruck.find(item =>
-                                                    `${item.id}:${item.Registration}:${item.Driver}:${item.type}` === registration
+                                                    `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
                                                 );
                                                 return selectedItem && `${selectedItem.Driver ? selectedItem.Driver : ""} : ${selectedItem.Registration ? selectedItem.Registration : ""} (${selectedItem.type ? selectedItem.type : ""})`;
                                             })()}
@@ -1838,7 +1842,8 @@ const InsertTrips = () => {
                                                 <TableCellPWD width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                     PWD
                                                 </TableCellPWD>
-                                                <TablecellCustomers width={Object.keys(selling).length > 6 ? 90 : 80} sx={{ textAlign: "center" }} />
+                                                <TablecellCustomers width={70} sx={{ textAlign: "center", height: "35px" }}>ค่าเที่ยว</TablecellCustomers>
+                                                <TablecellCustomers width={Object.keys(selling).length > 6 ? 80 : 70} sx={{ textAlign: "center" }} />
                                             </TableRow>
                                         </TableHead>
                                     </Table>
@@ -1871,8 +1876,8 @@ const InsertTrips = () => {
                                                         onAddProduct={(productName, field, value) =>
                                                             handleAddCustomer(parseInt(key), productName, field, value)
                                                         }
-                                                        onUpdateOrderID={(field, value) =>
-                                                            handleUpdateOrderID(parseInt(key), field, value) // ✅ ฟังก์ชันอัปเดต orderID
+                                                        onUpdateOrder={(field, value) =>
+                                                            handleUpdateOrder(parseInt(key), field, value) // ✅ ฟังก์ชันอัปเดต orderID
                                                         }
                                                     />
                                                 ))

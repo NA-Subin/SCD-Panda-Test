@@ -191,12 +191,12 @@ const SmallTruck = (props) => {
                     truck.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow >
                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.RegHead}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.VehicleRegistration}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.RepairTruck.split(":")[1]}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Company}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Driver}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Company.split(":")[1]}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Driver === "ไม่มี" ? row.Driver : row.Driver.split(":")[1]}</TableCell>
                         <UpdateSmallTruck key={row.id} truck={row} />
                       </TableRow>
                     ))

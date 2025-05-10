@@ -3,13 +3,17 @@ import {
     Badge,
     Box,
     Button,
+    Checkbox,
     Container,
     Dialog,
     DialogContent,
     DialogTitle,
     Divider,
+    FormControlLabel,
+    FormGroup,
     Grid,
     IconButton,
+    InputAdornment,
     InputBase,
     MenuItem,
     Paper,
@@ -32,15 +36,33 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { RateOils, TablecellHeader } from "../../theme/style";
+import { RateOils, TablecellHeader, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
+import { useData } from "../../server/path";
 
 const TripsSmallTruck = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [approve, setApprove] = React.useState(false);
+    const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
+        const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
+        const [check, setCheck] = useState(2);
+    
+        const handleDateChangeDateStart = (newValue) => {
+            if (newValue) {
+                const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+                setSelectedDateStart(formattedDate);
+            }
+        };
+    
+        const handleDateChangeDateEnd = (newValue) => {
+            if (newValue) {
+                const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+                setSelectedDateEnd(formattedDate);
+            }
+        };
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -50,29 +72,44 @@ const TripsSmallTruck = () => {
         setOpen(false);
     };
 
-    const [trip, setTrip] = useState([]);
-
-    const getTrip = async () => {
-        database.ref("/trip").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setTrip([]);
-            } else {
-                const dataTrip = [];
-                for (let id in datas) {
-                    datas[id].TruckType === "รถเล็ก" &&
-                    dataTrip.push({ id, ...datas[id] })
-                }
-                setTrip(dataTrip);
-            }
+    const { trip } = useData();
+        const trips = Object.values(trip || {});
+    
+        //const tripDetail = trips.filter((item) => item.TruckType === "รถเล็ก" && item.StatusTrip !== "ยกเลิก" );
+        const tripDetail = trips.filter((item) => {
+            const itemDateR = dayjs(item.DateReceive, "DD/MM/YYYY");
+            const itemDateD = dayjs(item.DateDelivery, "DD/MM/YYYY");
+            return (
+                check === 2 ?
+                    item.TruckType === "รถเล็ก" &&
+                    item.StatusTrip === "กำลังจัดเที่ยววิ่ง" &&
+                    (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                    : check === 3 ?
+                        item.TruckType === "รถเล็ก" &&
+                        item.StatusTrip === "ยกเลิก" &&
+                        (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                        : check === 4 ?
+                            item.TruckType === "รถเล็ก" &&
+                            item.StatusTrip === "จบทริป" &&
+                            (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                            :
+                            item.TruckType === "รถเล็ก" &&
+                            (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+            );
+        }).sort((a, b) => {
+            const dateA = dayjs(a.DateReceive, "DD/MM/YYYY");
+            const dateB = dayjs(b.DateReceive, "DD/MM/YYYY");
+    
+            if (dateB.isAfter(dateA)) return 1;
+            if (dateB.isBefore(dateA)) return -1;
+    
+            // ถ้าวันเท่ากัน ให้เรียงตาม id มากไปน้อย
+            return b.id - a.id;
         });
-    };
+    
+        console.log("Trip Detail : ", tripDetail);
 
-    useEffect(() => {
-        getTrip();
-    }, []);
-
-    console.log("Trip : ",trip);
+    console.log("Trip : ",tripDetail);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -103,7 +140,7 @@ const TripsSmallTruck = () => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
-            <Typography
+            {/* <Typography
                 variant="h3"
                 fontWeight="bold"
                 textAlign="center"
@@ -113,9 +150,104 @@ const TripsSmallTruck = () => {
             </Typography>
             <Box textAlign="right" marginTop={-8} marginBottom={4} marginRight={5}>
                 <InsertTrips />
+            </Box> */}
+            <Grid container spacing={2}>
+                <Grid item xs={4}>
+
+                </Grid>
+                <Grid item xs={6}>
+                    <Typography
+                        variant="h3"
+                        fontWeight="bold"
+                        textAlign="center"
+                        gutterBottom
+                    >
+                        เที่ยววิ่งรถเล็ก
+                    </Typography>
+                </Grid>
+                <Grid item xs={2}>
+                    <InsertTrips />
+                </Grid>
+            </Grid>
+            <Box
+                sx={{
+                    width: "100%", // กำหนดความกว้างของ Paper
+                    height: "40px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: -8,
+                    marginBottom: 3,
+                    width: 550
+                }}
+            >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                        openTo="day"
+                        views={["year", "month", "day"]}
+                        value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                        format="DD/MM/YYYY"
+                        onChange={handleDateChangeDateStart}
+                        sx={{ marginRight: 2, }}
+                        slotProps={{
+                            textField: {
+                                size: "small",
+                                fullWidth: true,
+                                InputProps: {
+                                    startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                            วันที่เริ่มต้น :
+                                        </InputAdornment>
+                                    ),
+                                    sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                    },
+                                },
+                            },
+                        }}
+                    />
+                    <DatePicker
+                        openTo="day"
+                        views={["year", "month", "day"]}
+                        value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                        format="DD/MM/YYYY"
+                        onChange={handleDateChangeDateEnd}
+                        slotProps={{
+                            textField: {
+                                size: "small",
+                                fullWidth: true,
+                                InputProps: {
+                                    startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                            วันที่สิ้นสุด :
+                                        </InputAdornment>
+                                    ),
+                                    sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                    },
+                                },
+                            },
+                        }}
+                    />
+                </LocalizationProvider>
             </Box>
             <Divider sx={{ marginBottom: 2 }} />
                         <Grid container spacing={2} width="100%">
+                            <Grid item xs={12}>
+                                                <FormGroup row sx={{ marginBottom: -2 }}>
+                                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+                                                    <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                                                    <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
+                                                    <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ยกเลิก" />
+                                                    <FormControlLabel control={<Checkbox checked={check === 4 ? true : false} />} onChange={() => setCheck(4)} label="จบทริป" />
+                                                </FormGroup>
+                                            </Grid>
                             <Grid item xs={12}>
                                 <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -2, fontSize: "12px", color: "red",textAlign: "right", marginRight: 7 }} gutterBottom>*ดูรายละเอียด/แก้ไขการจัดเที่ยววิ่ง/กดจบทริปตรงนี้*</Typography>
                                 <TableContainer
@@ -133,58 +265,55 @@ const TripsSmallTruck = () => {
                                     >
                                         <TableHead>
                                             <TableRow sx={{ height: "7vh" }}>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                                     ลำดับ
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                                     วันที่
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
-                                                    คลังรับน้ำมัน
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
                                                     ชื่อ/ทะเบียนรถ
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 1
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 2
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 3
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 4
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 5
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 6
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 7
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                                     ลำดับที่ 8
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                                     ค่าเที่ยว
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                                     ปริมาณน้ำมัน
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                                     น้ำหนักรถ
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                                     น้ำหนักรวม
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                                     สถานะ
-                                                </TablecellHeader>
-                                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", right: 0 }}/>
+                                                </TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", right: 0 }}/>
                                                 {/* <TablecellHeader sx={{
                                                     textAlign: "center", fontSize: 16, width: 100, position: "sticky",
                                                     right: windowWidth <= 900 ? 0 : "200px", // ติดซ้ายสุด
@@ -212,19 +341,19 @@ const TripsSmallTruck = () => {
                                         </TableHead>
                                         <TableBody>
                                             {
-                                                trip.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                                                    <TripsDetail key={row.id} trips={row} windowWidth={windowWidth} />
+                                                tripDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                                    <TripsDetail key={row.id} trips={row} index={index} windowWidth={windowWidth} />
                                                 ))
                                             }
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
                                 {
-                                    trip.length < 10 ? null :
+                                    tripDetail.length < 10 ? null :
                                         <TablePagination
                                             rowsPerPageOptions={[10, 25, 30]}
                                             component="div"
-                                            count={trip.length}
+                                            count={tripDetail.length}
                                             rowsPerPage={rowsPerPage}
                                             page={page}
                                             onPageChange={handleChangePage}
