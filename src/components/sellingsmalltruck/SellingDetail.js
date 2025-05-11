@@ -163,9 +163,49 @@ const SellingDetail = (props) => {
                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Rate || "-"}</Typography>
                     }
                 </TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", width: 50 }} >
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.CreditTime}</Typography>
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 50, padding: "1px 4px" }}>
+                    {
+                        editMode ?
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth
+                                    type="number"
+                                    InputLabelProps={{
+                                        sx: {
+                                            fontSize: '12px',
+                                        },
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            height: '22px', // ปรับความสูงของ TextField
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                            fontWeight: 'bold',
+                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                            paddingLeft: 2
+                                        },
+                                    }}
+                                    value={detail.CreditTime ?? ""}
+                                    onChange={(e) => {
+                                        let newValue = e.target.value;
+                                        //onUpdateOrder("CreditTime", newValue);
+                                        onUpdateOrder("CreditTime", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === "0") onUpdateOrder("CreditTime", "");
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === "") onUpdateOrder("CreditTime", 0);
+                                    }}
+                                />
+                            </Paper>
+                            :
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.CreditTime || "-"}</Typography>
+                    }
                 </TableCell>
+                {/* <TableCell sx={{ textAlign: "center", height: "20px", width: 50 }} >
+                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.CreditTime}</Typography>
+                </TableCell> */}
                 <TableCellG95 sx={{ textAlign: "center", height: "20px", width: 70 }}>
                     {
                         editMode ?
@@ -464,7 +504,7 @@ const SellingDetail = (props) => {
                             <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Travel || "-"}</Typography>
                     }
                 </TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", width: 80 }} >
+                <TableCell sx={{ textAlign: "center", height: "20px", width: 70 }} >
                     {
                         editMode ?
                             <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }} onClick={onDelete}>ยกเลิก</Button>

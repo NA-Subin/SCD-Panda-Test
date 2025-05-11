@@ -611,6 +611,18 @@ const InsertTrips = () => {
         });
     };
 
+    const handleUpdateOrder = (ticketIndex, field, value) => {
+        setSelling((prev) => {
+            return {
+                ...prev,
+                [ticketIndex]: {
+                    ...prev[ticketIndex],
+                    [field]: value
+                }
+            };
+        });
+    };
+
     // ฟังก์ชันอัพเดตราคาใน ordersTickets เมื่อมีการเปลี่ยน depot
     const updateRatesByDepot = (selectedDepot) => {
         setCostTrip(0);
@@ -2201,8 +2213,8 @@ const InsertTrips = () => {
                                                         onAddProduct={(productName, field, value) =>
                                                             handleAddCustomer(parseInt(key), productName, field, value)
                                                         }
-                                                        onUpdateOrderID={(field, value) =>
-                                                            handleUpdateOrderID(parseInt(key), field, value) // ✅ ฟังก์ชันอัปเดต orderID
+                                                        onUpdateOrder={(field, value) =>
+                                                            handleUpdateOrder(parseInt(key), field, value) // ✅ ฟังก์ชันอัปเดต orderID
                                                         }
                                                     />
                                                 ))

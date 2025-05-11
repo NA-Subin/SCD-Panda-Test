@@ -577,29 +577,44 @@ const UpdateTrip = (props) => {
         // คำนวณน้ำมันเบาและน้ำมันหนัก
         const calculateOil = (volume, factor) => (volume * factor) * 1000; // สูตรคำนวณน้ำมัน
 
-        const oilLight =
-            calculateOil(totalsTicket["G91"], 0.740) +
-            calculateOil(totalsTicket["G95"], 0.740) +
-            calculateOil(totalsTicket["B95"], 0.740) +
-            calculateOil(totalsTicket["E20"], 0.740) +
-            calculateOil(totalsTicket["PWD"], 0.740);
+        // const oilLight =
+        //     calculateOil(totalsTicket["G91"], 0.740) +
+        //     calculateOil(totalsTicket["G95"], 0.740) +
+        //     calculateOil(totalsTicket["B95"], 0.740) +
+        //     calculateOil(totalsTicket["E20"], 0.740) +
+        //     calculateOil(totalsTicket["PWD"], 0.740);
 
-        const oilHeavy =
-            calculateOil(totalsTicket["B7"], 0.837);
+        // const oilHeavy =
+        //     calculateOil(totalsTicket["B7"], 0.837);
+
+        // const totalWeight = parseFloat(weightTrucks) +
+        //     calculateOil(totalsTicket["G91"], 0.740) +
+        //     calculateOil(totalsTicket["G95"], 0.740) +
+        //     calculateOil(totalsTicket["B95"], 0.740) +
+        //     calculateOil(totalsTicket["E20"], 0.740) +
+        //     calculateOil(totalsTicket["PWD"], 0.740) +
+        //     calculateOil(totalsTicket["B7"], 0.837);
+
+        const totalOil =
+            totalsTicket["G91"] +
+            totalsTicket["G95"] +
+            totalsTicket["B95"] +
+            totalsTicket["E20"] +
+            totalsTicket["PWD"] +
+            totalsTicket["B7"];
 
         const totalWeight = parseFloat(weightTrucks) +
-            calculateOil(totalsTicket["G91"], 0.740) +
-            calculateOil(totalsTicket["G95"], 0.740) +
-            calculateOil(totalsTicket["B95"], 0.740) +
-            calculateOil(totalsTicket["E20"], 0.740) +
-            calculateOil(totalsTicket["PWD"], 0.740) +
-            calculateOil(totalsTicket["B7"], 0.837);
+            totalsTicket["G91"] +
+            totalsTicket["G95"] +
+            totalsTicket["B95"] +
+            totalsTicket["E20"] +
+            totalsTicket["PWD"] +
+            totalsTicket["B7"];
 
         // ตั้งค่าผลลัพธ์
         setTotalVolumesTicket({
             ...totalsTicket,
-            oilLight: oilLight,
-            oilHeavy: oilHeavy,
+            totalOil: totalOil,
             totalWeight: totalWeight
         });
 
@@ -607,11 +622,14 @@ const UpdateTrip = (props) => {
             ...totalsOrder
         });
 
-        setCostTrip((prevCost) => {
-            console.log("🔄 Previous CostTrip:", prevCost);
-            console.log("✅ New CostTrip:", newCostTrip);
-            return newCostTrip;
-        });
+        // setCostTrip((prevCost) => {
+        //     console.log("🔄 Previous CostTrip:", prevCost);
+        //     console.log("✅ New CostTrip:", newCostTrip);
+        //     return newCostTrip;
+        // });
+            // คำนวณผลรวมค่า Travel ทุกครั้งที่ selling เปลี่ยน
+            const totalTravel = Object.values(editableOrders).reduce((sum, item) => sum + (item.Travel || 0), 0);
+            setCostTrip(totalTravel);
 
     }, [editableTickets, editableOrders, depot, weightTrucks]);
     // คำนวณใหม่ทุกครั้งที่ editableOrders เปลี่ยน
@@ -725,13 +743,12 @@ const UpdateTrip = (props) => {
                 Registration: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                 Depot: depot,
                 CostTrip: costTrip,
-                WeightHigh: totalVolumesTicket.oilHeavy,
-                WeightLow: totalVolumesTicket.oilLight,
+                WeightOil: totalVolumesTicket.totalOil,
                 WeightTruck: weightTrucks,
                 TotalWeight: totalVolumesTicket.totalWeight,
                 Status: status,
                 StatusTrip: "กำลังจัดเที่ยววิ่ง",
-                TruckType: "รถใหญ่",
+                TruckType: "รถเล็ก",
                 ...orderTrip,
                 ...ticketTrip
             })    // อัปเดตข้อมูลของแต่ละ order
@@ -743,7 +760,7 @@ const UpdateTrip = (props) => {
                 console.error("Error pushing data:", error);
             });
         database
-            .ref("truck/registration/")
+            .ref("truck/small/")
             .child(Number(registrations.split(":")[2]) - 1)
             .update({
                 Status: "ว่าง"
@@ -759,7 +776,7 @@ const UpdateTrip = (props) => {
             });
 
         database
-            .ref("truck/registration/")
+            .ref("truck/small/")
             .child(Number(registration.split(":")[2]) - 1)
             .update({
                 Status: "TR:" + (tripID - 1)
@@ -799,11 +816,11 @@ const UpdateTrip = (props) => {
 
     const getCustomers = () => {
         const customers = [
-            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
-            ...ticketsT
-                .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
-            ...ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" }))
+            // ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+            // ...ticketsT
+            //     .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+            //     .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+            ...ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" }))
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);
@@ -1079,7 +1096,7 @@ const UpdateTrip = (props) => {
             `ต้องการจบเที่ยววิ่งใช่หรือไม่`,
             () => {
                 database
-                    .ref("truck/registration/")
+                    .ref("truck/small/")
                     .child(Number(registration.split(":")[2]) - 1)
                     .update({
                         Status: "ว่าง"
@@ -1327,7 +1344,7 @@ const UpdateTrip = (props) => {
                 <DialogContent>
                     <Box sx={{ p: 2 }} ref={dialogRef}>
                         <Grid container spacing={1} marginTop={0.5}>
-                            <Grid item sm={editMode ? 8.5 : 12} xs={editMode ? 12 : 12} display="flex" alignItems="center" justifyContent='center'>
+                            <Grid item sm={12} xs={12} display="flex" alignItems="center" justifyContent='center'>
                                 {
                                     editMode ?
                                         <Grid container spacing={2}>
@@ -1453,7 +1470,7 @@ const UpdateTrip = (props) => {
                                         </>
                                 }
                             </Grid>
-                            {
+                            {/* {
                                 editMode &&
                                 <Grid item sm={3.5} xs={12} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
@@ -1496,7 +1513,7 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                            }
+                            } */}
                         </Grid>
                         <Paper
                             sx={{ p: 1, backgroundColor: totalVolumesTicket.totalWeight > 50300 ? "red" : "lightgray", marginBottom: 1 }}
@@ -1527,17 +1544,15 @@ const UpdateTrip = (props) => {
                                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                             <TableHead>
                                                 <TableRow>
-                                                    <TablecellTickets width={50} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
-                                                    <TablecellTickets width={350} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
-                                                    <TablecellTickets width={150} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
-                                                    <TablecellTickets width={100} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
-                                                    <TableCellG95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G95</TableCellG95>
-                                                    <TableCellB95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B95</TableCellB95>
-                                                    <TableCellB7 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B7(D)</TableCellB7>
-                                                    <TableCellG91 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G91</TableCellG91>
-                                                    <TableCellE20 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>E20</TableCellE20>
-                                                    <TableCellPWD width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>PWD</TableCellPWD>
-                                                    <TablecellTickets width={60} sx={{ backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }} />
+                                                    <TablecellTickets width={50} sx={{ textAlign: "center", height: "35px" }}>ลำดับ</TablecellTickets>
+                                                    <TablecellTickets width={350} sx={{ textAlign: "center", height: "35px" }}>ตั๋ว</TablecellTickets>
+                                                    <TableCellG95 width={70} sx={{ textAlign: "center", height: "35px" }}>G95</TableCellG95>
+                                                    <TableCellB95 width={70} sx={{ textAlign: "center", height: "35px" }}>B95</TableCellB95>
+                                                    <TableCellB7 width={70} sx={{ textAlign: "center", height: "35px" }}>B7(D)</TableCellB7>
+                                                    <TableCellG91 width={70} sx={{ textAlign: "center", height: "35px" }}>G91</TableCellG91>
+                                                    <TableCellE20 width={70} sx={{ textAlign: "center", height: "35px" }}>E20</TableCellE20>
+                                                    <TableCellPWD width={70} sx={{ textAlign: "center", height: "35px" }}>PWD</TableCellPWD>
+                                                    <TablecellTickets width={80} />
                                                 </TableRow>
                                             </TableHead>
                                         </Table>
@@ -1566,93 +1581,93 @@ const UpdateTrip = (props) => {
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
                                                             {editMode && row.TicketName === "1:ตั๋วเปล่า" ? (
                                                                 <Autocomplete
-                                                                id="autocomplete-tickets"
-                                                                options={getTickets()}
-                                                                getOptionLabel={(option) => `${option.Name}`}
-                                                                isOptionEqualToValue={(option, value) => option.Name === value.Name}
-                                                                value={getTickets().find(item => `${item.id}:${item.Name}` === row.TicketName) || null}
-                                                                onChange={(event, newValue) => {
-                                                                    if (newValue) {
-                                                                        setEditableTickets((prev) => {
-                                                                            const updatedTickets = [...prev];
-                                                                            updatedTickets[rowIdx] = {
-                                                                                Address: newValue.Address || "-",
-                                                                                Bill: newValue.Bill || "-",
-                                                                                CodeID: newValue.CodeID || "-",
-                                                                                CompanyName: newValue.CompanyName || "-",
-                                                                                CreditTime: newValue.CreditTime || "-",
-                                                                                Date: trip.DateStart,
-                                                                                Driver: trip.Driver,
-                                                                                Lat: newValue.Lat || 0,
-                                                                                Lng: newValue.Lng || 0,
-                                                                                Product: newValue.Product || "-",
-                                                                                Rate1: newValue.Rate1,
-                                                                                Rate2: newValue.Rate2,
-                                                                                Rate3: newValue.Rate3,
-                                                                                Registration: trip.Registration,
-                                                                                id: row.id,
-                                                                                No: row.No,
-                                                                                Trip: row.Trip,
-                                                                                TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                                CustomerType: newValue.CustomerType || "-",
-                                                                                Product: {
-                                                                                    P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                                }
-                                                                            };
-                                                                            return updatedTickets;
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                renderInput={(params) => (
-                                                                    <TextField
-                                                                        {...params}
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        sx={{
-                                                                            "& .MuiOutlinedInput-root": { height: "22px" },
-                                                                            "& .MuiInputBase-input": { fontSize: "16px", textAlign: "center" },
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                                renderOption={(props, option) => (
-                                                                    <li {...props}>
-                                                                        <Typography fontSize="16px">{`${option.Name}`}</Typography>
-                                                                    </li>
-                                                                )}
-                                                            />
+                                                                    id="autocomplete-tickets"
+                                                                    options={getTickets()}
+                                                                    getOptionLabel={(option) => `${option.Name}`}
+                                                                    isOptionEqualToValue={(option, value) => option.Name === value.Name}
+                                                                    value={getTickets().find(item => `${item.id}:${item.Name}` === row.TicketName) || null}
+                                                                    onChange={(event, newValue) => {
+                                                                        if (newValue) {
+                                                                            setEditableTickets((prev) => {
+                                                                                const updatedTickets = [...prev];
+                                                                                updatedTickets[rowIdx] = {
+                                                                                    Address: newValue.Address || "-",
+                                                                                    Bill: newValue.Bill || "-",
+                                                                                    CodeID: newValue.CodeID || "-",
+                                                                                    CompanyName: newValue.CompanyName || "-",
+                                                                                    CreditTime: newValue.CreditTime || "-",
+                                                                                    Date: trip.DateStart,
+                                                                                    Driver: trip.Driver,
+                                                                                    Lat: newValue.Lat || 0,
+                                                                                    Lng: newValue.Lng || 0,
+                                                                                    Product: newValue.Product || "-",
+                                                                                    Rate1: newValue.Rate1,
+                                                                                    Rate2: newValue.Rate2,
+                                                                                    Rate3: newValue.Rate3,
+                                                                                    Registration: trip.Registration,
+                                                                                    id: row.id,
+                                                                                    No: row.No,
+                                                                                    Trip: row.Trip,
+                                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                                    CustomerType: newValue.CustomerType || "-",
+                                                                                    Product: {
+                                                                                        P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                                    }
+                                                                                };
+                                                                                return updatedTickets;
+                                                                            });
+                                                                        }
+                                                                    }}
+                                                                    renderInput={(params) => (
+                                                                        <TextField
+                                                                            {...params}
+                                                                            variant="outlined"
+                                                                            size="small"
+                                                                            sx={{
+                                                                                "& .MuiOutlinedInput-root": { height: "22px" },
+                                                                                "& .MuiInputBase-input": { fontSize: "16px", textAlign: "center" },
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    renderOption={(props, option) => (
+                                                                        <li {...props}>
+                                                                            <Typography fontSize="16px">{`${option.Name}`}</Typography>
+                                                                        </li>
+                                                                    )}
+                                                                />
                                                             )
                                                                 : (
-                                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                    {
-                                                                        // (() => {
-                                                                        //     const branches = [
-                                                                        //         "( สาขาที่  00001)/",
-                                                                        //         "( สาขาที่  00002)/",
-                                                                        //         "( สาขาที่  00003)/",
-                                                                        //         "(สำนักงานใหญ่)/"
-                                                                        //     ];
+                                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                        {
+                                                                            // (() => {
+                                                                            //     const branches = [
+                                                                            //         "( สาขาที่  00001)/",
+                                                                            //         "( สาขาที่  00002)/",
+                                                                            //         "( สาขาที่  00003)/",
+                                                                            //         "(สำนักงานใหญ่)/"
+                                                                            //     ];
 
-                                                                        //     for (const branch of branches) {
-                                                                        //         if (row.TicketName.includes(branch)) {
-                                                                        //             return row.TicketName.split(branch)[1];
-                                                                        //         }
-                                                                        //     }
+                                                                            //     for (const branch of branches) {
+                                                                            //         if (row.TicketName.includes(branch)) {
+                                                                            //             return row.TicketName.split(branch)[1];
+                                                                            //         }
+                                                                            //     }
 
-                                                                        //     return row.TicketName;
-                                                                        // })()
-                                                                        row.TicketName.split(":")[1] !== undefined ?
-                                                                            row.TicketName.split(":")[1]
-                                                                            :
-                                                                            row.TicketName
+                                                                            //     return row.TicketName;
+                                                                            // })()
+                                                                            row.TicketName.split(":")[1] !== undefined ?
+                                                                                row.TicketName.split(":")[1]
+                                                                                :
+                                                                                row.TicketName
 
-                                                                    }
-                                                                </Typography>
-                                                            )}
+                                                                        }
+                                                                    </Typography>
+                                                                )}
                                                         </TableCell>
 
 
                                                         {/* OrderID */}
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 150 }}>
+                                                        {/* <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 150 }}>
                                                             {editMode ? (
                                                                 <TextField
                                                                     value={row.OrderID}
@@ -1680,7 +1695,6 @@ const UpdateTrip = (props) => {
                                                             )}
                                                         </TableCell>
 
-                                                        {/* Rate */}
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
                                                             {editMode ? (
                                                                 depot.split(":")[1] === "ลำปาง" ?
@@ -1763,10 +1777,10 @@ const UpdateTrip = (props) => {
                                                                     }
                                                                 </Typography>
                                                             )}
-                                                        </TableCell>
+                                                        </TableCell> */}
                                                         {/* Product Data */}
                                                         {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
-                                                            <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
+                                                            <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 70 }}>
                                                                 {editMode ? (
                                                                     <TextField
                                                                         value={editableTickets[rowIdx]?.Product[productType]?.Volume || ""}
@@ -1788,7 +1802,7 @@ const UpdateTrip = (props) => {
                                                         ))}
                                                         {
                                                             editMode ?
-                                                                <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
+                                                                <TableCell sx={{ textAlign: "center", height: "25px", width: 80 }} >
                                                                     <Button variant="contained" color="error" size="small" sx={{ height: "20px", width: "30px" }}
                                                                         onClick={() => handleDeleteTickets(row.No, (rowIdx + 1))}
                                                                     >ยกเลิก</Button>
@@ -1817,18 +1831,18 @@ const UpdateTrip = (props) => {
                                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                             <TableFooter>
                                                 <TableRow>
-                                                    <TablecellTickets width={650} sx={{ textAlign: "center", fontSize: "16px", height: "30px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>
+                                                    <TablecellTickets width={400} sx={{ textAlign: "center", fontSize: "16px", height: "30px", backgroundColor: totalVolumesTicket.totalWeight > 50300 && theme.palette.error.main }}>
                                                         ปริมาณรวม
                                                     </TablecellTickets>
                                                     {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                        <TablecellTickets key={product} width={60} sx={{
+                                                        <TablecellTickets key={product} width={70} sx={{
                                                             textAlign: "center", height: "30px", fontSize: "16px", color: "black",
                                                             fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                         }}>
                                                             {totalVolumesTicket[product]}
                                                         </TablecellTickets>
                                                     ))}
-                                                    <TablecellTickets width={60} sx={{
+                                                    <TablecellTickets width={80} sx={{
                                                         textAlign: "center", height: "30px", fontSize: "16px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
@@ -1929,7 +1943,7 @@ const UpdateTrip = (props) => {
                                         </Paper>
                                     </Grid>
                                 }
-                                <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                {/* <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 0.5 }} gutterBottom>น้ำมันหนัก</Typography>
                                     <Paper
                                         component="form">
@@ -2036,11 +2050,11 @@ const UpdateTrip = (props) => {
                                             />
                                         </Paper>
                                     </Grid>
-                                }
+                                } */}
                             </Grid>
                         </Paper>
                         <Grid container spacing={1}>
-                            <Grid item sm={editMode ? 9.5 : 11} xs={editMode ? 11 : 8} display="flex" alignItems="center" justifyContent='center'>
+                            <Grid item sm={12} xs={12} display="flex" alignItems="center" justifyContent='center'>
                                 {
                                     editMode ?
                                         <Grid container spacing={2}>
@@ -2137,7 +2151,7 @@ const UpdateTrip = (props) => {
                                         </>
                                 }
                             </Grid>
-                            {
+                            {/* {
                                 editMode &&
                                 <Grid item sm={2.5} xs={12}>
                                     <Box sx={{ backgroundColor: editMode ? (totalVolumesTicket.totalWeight || totalWeight) > 50300 ? "red" : "lightgray" : totalWeight > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
@@ -2171,7 +2185,7 @@ const UpdateTrip = (props) => {
                                         </Paper>
                                     </Box>
                                 </Grid>
-                            }
+                            } */}
                         </Grid>
                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
                             <Paper
@@ -2202,33 +2216,37 @@ const UpdateTrip = (props) => {
                                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                             <TableHead>
                                                 <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                    <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         ลำดับ
                                                     </TablecellCustomers>
-                                                    <TablecellCustomers width={350} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
-                                                        ลูกค้า
+                                                    <TablecellCustomers width={240} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
+                                                        รายการส่ง
                                                     </TablecellCustomers>
-                                                    <TablecellCustomers width={100} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TablecellCustomers width={60} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         ค่าบรรทุก
                                                     </TablecellCustomers>
-                                                    <TableCellG95 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TablecellCustomers width={50} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
+                                                        Credit
+                                                    </TablecellCustomers>
+                                                    <TableCellG95 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         G95
                                                     </TableCellG95>
-                                                    <TableCellB95 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TableCellB95 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         B95
                                                     </TableCellB95>
-                                                    <TableCellB7 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TableCellB7 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         B7(D)
                                                     </TableCellB7>
-                                                    <TableCellG91 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TableCellG91 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         G91
                                                     </TableCellG91>
-                                                    <TableCellE20 width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TableCellE20 width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         E20
                                                     </TableCellE20>
-                                                    <TableCellPWD width={60} sx={{ textAlign: "center", height: "35px", fontSize: "16px" }}>
+                                                    <TableCellPWD width={70} sx={{ textAlign: "center", height: "35px", borderLeft: "2px solid white" }}>
                                                         PWD
                                                     </TableCellPWD>
+                                                    <TablecellCustomers width={70} sx={{ textAlign: "center", height: "35px" }}>ค่าเที่ยว</TablecellCustomers>
                                                     <TablecellCustomers width={60} />
                                                 </TableRow>
                                             </TableHead>
@@ -2255,7 +2273,7 @@ const UpdateTrip = (props) => {
                                                             </Typography>
                                                         </TableCell>
 
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 240 }}>
                                                             {/* {editMode ? (
                                                             <TextField
                                                                 value={editableOrders[rowIdx]?.TicketName || ""}
@@ -2297,56 +2315,86 @@ const UpdateTrip = (props) => {
                                                             </Typography>
                                                         </TableCell>
 
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
                                                             {editMode ? (
-                                                                depot.split(":")[1] === "ลำปาง" ?
-                                                                    <TextField
-                                                                        value={editableOrders[rowIdx]?.Rate1 || ""}
-                                                                        type="number"
-                                                                        fullWidth
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                            '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                        }}
-                                                                        onChange={(e) => handleOrderChange(rowIdx, "Rate1", e.target.value)}
-                                                                    />
-                                                                    : depot.split(":")[1] === "พิจิตร" ?
-                                                                        <TextField
-                                                                            value={editableOrders[rowIdx]?.Rate2 || ""}
-                                                                            type="number"
-                                                                            fullWidth
-                                                                            sx={{
-                                                                                '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                                '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                            }}
-                                                                            onChange={(e) => handleOrderChange(rowIdx, "Rate2", e.target.value)}
-                                                                        />
-                                                                        : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ?
-                                                                            <TextField
-                                                                                value={editableOrders[rowIdx]?.Rate3 || ""}
+                                                                // depot.split(":")[1] === "ลำปาง" ?
+                                                                //     <TextField
+                                                                //         value={editableOrders[rowIdx]?.Rate1 || ""}
+                                                                //         type="number"
+                                                                //         fullWidth
+                                                                //         sx={{
+                                                                //             '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                //             '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                //         }}
+                                                                //         onChange={(e) => handleOrderChange(rowIdx, "Rate1", e.target.value)}
+                                                                //     />
+                                                                //     : depot.split(":")[1] === "พิจิตร" ?
+                                                                //         <TextField
+                                                                //             value={editableOrders[rowIdx]?.Rate2 || ""}
+                                                                //             type="number"
+                                                                //             fullWidth
+                                                                //             sx={{
+                                                                //                 '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                //                 '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                //             }}
+                                                                //             onChange={(e) => handleOrderChange(rowIdx, "Rate2", e.target.value)}
+                                                                //         />
+                                                                //         : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ?
+                                                                //             <TextField
+                                                                //                 value={editableOrders[rowIdx]?.Rate3 || ""}
+                                                                //                 type="number"
+                                                                //                 fullWidth
+                                                                //                 sx={{
+                                                                //                     '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                //                     '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                //                 }}
+                                                                //                 onChange={(e) => handleOrderChange(rowIdx, "Rate3", e.target.value)}
+                                                                //             />
+                                                                //             : ""
+                                                                <TextField
+                                                                                value={editableOrders[rowIdx]?.Rate || ""}
                                                                                 type="number"
                                                                                 fullWidth
                                                                                 sx={{
                                                                                     '& .MuiOutlinedInput-root': { height: '22px' },
                                                                                     '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
                                                                                 }}
-                                                                                onChange={(e) => handleOrderChange(rowIdx, "Rate3", e.target.value)}
+                                                                                onChange={(e) => handleOrderChange(rowIdx, "Rate", e.target.value)}
                                                                             />
-                                                                            : ""
                                                             ) : (
                                                                 <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                    {
+                                                                    {/* {
                                                                         depot.split(":")[1] === "ลำปาง" ? row.Rate1
                                                                             : depot.split(":")[1] === "พิจิตร" ? row.Rate2
                                                                                 : depot.split(":")[1] === "สระบุรี" || depot.split(":")[1] === "บางปะอิน" || depot.split(":")[1] === "IR" ? row.Rate3
                                                                                     : ""
-                                                                    }
+                                                                    } */}
+                                                                    {row.Rate}
+                                                                </Typography>
+                                                            )}
+                                                        </TableCell>
+
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 50 }}>
+                                                            {editMode ? (
+                                                                <TextField
+                                                                                value={editableOrders[rowIdx]?.CreditTime || ""}
+                                                                                type="number"
+                                                                                fullWidth
+                                                                                sx={{
+                                                                                    '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                                    '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                                }}
+                                                                                onChange={(e) => handleOrderChange(rowIdx, "CreditTime", e.target.value)}
+                                                                            />
+                                                            ) : (
+                                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                    {row.CreditTime}
                                                                 </Typography>
                                                             )}
                                                         </TableCell>
 
                                                         {["G95", "B95", "B7", "G91", "E20", "PWD"].map((productType) => (
-                                                            <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>
+                                                            <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 70 }}>
                                                                 {editMode ? (
                                                                     <TextField
                                                                         value={editableOrders[rowIdx]?.Product[productType]?.Volume || ""}
@@ -2365,6 +2413,24 @@ const UpdateTrip = (props) => {
                                                                 )}
                                                             </TableCell>
                                                         ))}
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 70 }}>
+                                                            {editMode ? (
+                                                                <TextField
+                                                                                value={editableOrders[rowIdx]?.Travel || ""}
+                                                                                type="number"
+                                                                                fullWidth
+                                                                                sx={{
+                                                                                    '& .MuiOutlinedInput-root': { height: '22px' },
+                                                                                    '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
+                                                                                }}
+                                                                                onChange={(e) => handleOrderChange(rowIdx, "Travel", e.target.value)}
+                                                                            />
+                                                            ) : (
+                                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                    {row.Travel}
+                                                                </Typography>
+                                                            )}
+                                                        </TableCell>
                                                         {
                                                             editMode ?
                                                                 <TableCell sx={{ textAlign: "center", height: "25px", width: 60 }} >
@@ -2400,19 +2466,19 @@ const UpdateTrip = (props) => {
                                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                             <TableFooter>
                                                 <TableRow>
-                                                    <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px", fontSize: "16px" }}>
+                                                    <TablecellCustomers width={400} sx={{ textAlign: "center", height: "25px", fontSize: "16px" }}>
                                                         รวม
                                                     </TablecellCustomers>
 
                                                     {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                        <TablecellCustomers key={product} width={60} sx={{
+                                                        <TablecellCustomers key={product} width={70} sx={{
                                                             textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                             fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                         }}>
                                                             {totalVolumesOrder[product]}
                                                         </TablecellCustomers>
                                                     ))}
-                                                    <TablecellCustomers width={60} sx={{
+                                                    <TablecellCustomers width={130} colSpan={2} sx={{
                                                         textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
@@ -2440,19 +2506,19 @@ const UpdateTrip = (props) => {
                                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                             <TableFooter>
                                                 <TableRow>
-                                                    <TablecellCustomers width={500} sx={{ textAlign: "center", height: "25px", fontSize: "16px" }}>
+                                                    <TablecellCustomers width={400} sx={{ textAlign: "center", height: "25px", fontSize: "16px" }}>
                                                         คงเหลือ
                                                     </TablecellCustomers>
 
                                                     {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                        <TablecellCustomers key={product} width={60} sx={{
+                                                        <TablecellCustomers key={product} width={70} sx={{
                                                             textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                             fontWeight: "bold", backgroundColor: (totalVolumesTicket[product] - totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product] - totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
                                                         }}>
                                                             {totalVolumesTicket[product] - totalVolumesOrder[product]}
                                                         </TablecellCustomers>
                                                     ))}
-                                                    <TablecellCustomers width={60} sx={{
+                                                    <TablecellCustomers width={130} colSpan={2} sx={{
                                                         textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
@@ -2466,7 +2532,7 @@ const UpdateTrip = (props) => {
                             </Paper>
                             <Grid container spacing={1}>
                                 {
-                                    editMode ?
+                                    editMode &&
                                         <>
                                             <Grid item sm={6} xs={12} marginBottom={-0.5}>
                                                 <Paper
@@ -2555,30 +2621,30 @@ const UpdateTrip = (props) => {
                                                 </Paper>
                                             </Grid>
                                         </>
-                                        :
-                                        <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
-                                            <Paper sx={{ width: "100%", marginTop: -0.5 }}
-                                                component="form">
-                                                <TextField size="small" fullWidth
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            height: '30px', // ปรับความสูงของ TextField
-                                                            display: 'flex', // ใช้ flexbox
-                                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                        },
-                                                        '& .MuiInputBase-input': {
-                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                            fontWeight: 'bold',
-                                                            padding: '1px 4px', // ปรับ padding ภายใน input
-                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                        },
-                                                        borderRadius: 10
-                                                    }}
-                                                    value={depot.split(":")[0]}
-                                                />
-                                            </Paper>
-                                        </Grid>
+                                        // :
+                                        // <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                        //     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
+                                        //     <Paper sx={{ width: "100%", marginTop: -0.5 }}
+                                        //         component="form">
+                                        //         <TextField size="small" fullWidth
+                                        //             sx={{
+                                        //                 '& .MuiOutlinedInput-root': {
+                                        //                     height: '30px', // ปรับความสูงของ TextField
+                                        //                     display: 'flex', // ใช้ flexbox
+                                        //                     alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                        //                 },
+                                        //                 '& .MuiInputBase-input': {
+                                        //                     fontSize: '16px', // ขนาด font เวลาพิมพ์
+                                        //                     fontWeight: 'bold',
+                                        //                     padding: '1px 4px', // ปรับ padding ภายใน input
+                                        //                     textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                        //                 },
+                                        //                 borderRadius: 10
+                                        //             }}
+                                        //             value={depot.split(":")[0]}
+                                        //         />
+                                        //     </Paper>
+                                        // </Grid>
                                 }
                                 <Grid item sm={editMode ? 2 : 3} xs={12} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
@@ -2642,21 +2708,21 @@ const UpdateTrip = (props) => {
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
                                     {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
-                                        <Button variant="contained" color="success" size="small" sx={{ marginRight: 1 }} onClick={handleChangeStatus} endIcon={<WhereToVoteIcon/>}>
+                                        <Button variant="contained" color="success" size="small" sx={{ marginRight: 1 }} onClick={handleChangeStatus} endIcon={<WhereToVoteIcon />}>
                                             จบเที่ยววิ่ง
                                         </Button>
                                     }
                                     {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
-                                        <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={handleChangeCancelTrip} endIcon={<LocationOffIcon/>} >
+                                        <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={handleChangeCancelTrip} endIcon={<LocationOffIcon />} >
                                             ยกเลิกเที่ยววิ่ง
                                         </Button>
                                     }
                                     {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
-                                        <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon/>} >แก้ไข</Button>
+                                        <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
-                                    <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon/>} >บันทึกรูปภาพ</Button>
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>
                                 </Box>
                             </>
                             :

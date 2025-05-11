@@ -40,7 +40,7 @@ const SellingDetail = (props) => {
         onSendBack,
         onDelete,
         onAddProduct,
-        onUpdateOrderID,
+        onUpdateOrder,
         editMode,
         depots
     } = props;
@@ -243,13 +243,120 @@ const SellingDetail = (props) => {
                 </TableCell>
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 100, padding: "1px 4px" }}>
                     {
-                        depots.split(":")[1] === "ลำปาง" ?
-                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate1}</Typography>
-                        : depots.split(":")[1] === "พิจิตร" ?
-                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate2}</Typography>
-                        :
-                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.Rate3}</Typography>
-                    }
+                                            editMode ?
+                                                (
+                                                    depots.split(":")[1] === "ลำปาง" ?
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField size="small" fullWidth
+                                                                type="number"
+                                                                InputLabelProps={{
+                                                                    sx: {
+                                                                        fontSize: '12px',
+                                                                    },
+                                                                }}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '22px', // ปรับความสูงของ TextField
+                                                                        display: 'flex', // ใช้ flexbox
+                                                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                        fontWeight: 'bold',
+                                                                        padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                        paddingLeft: 2
+                                                                    },
+                                                                }}
+                                                                value={detail.Rate1 ?? 0.75}
+                                                                onChange={(e) => {
+                                                                    let newValue = e.target.value;
+                                                                    onUpdateOrder("Rate1", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                                                }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") onUpdateOrder("Rate1", "");
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") onUpdateOrder("Rate1", 0.75);
+                                                                }}
+                                                            />
+                                                        </Paper>
+                                                        : depots.split(":")[1] === "พิจิตร" ?
+                                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                                <TextField size="small" fullWidth
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '12px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            display: 'flex', // ใช้ flexbox
+                                                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={detail.Rate2 ?? 0.75}
+                                                                    onChange={(e) => {
+                                                                        let newValue = e.target.value;
+                                                                        onUpdateOrder("Rate2", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                                                    }}
+                                                                    onFocus={(e) => {
+                                                                        if (e.target.value === "0") onUpdateOrder("Rate2", "");
+                                                                    }}
+                                                                    onBlur={(e) => {
+                                                                        if (e.target.value === "") onUpdateOrder("Rate2", 0.75);
+                                                                    }}
+                                                                />
+                                                            </Paper>
+                                                            : 
+                                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                                <TextField size="small" fullWidth
+                                                                    type="number"
+                                                                    InputLabelProps={{
+                                                                        sx: {
+                                                                            fontSize: '12px',
+                                                                        },
+                                                                    }}
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            height: '22px', // ปรับความสูงของ TextField
+                                                                            display: 'flex', // ใช้ flexbox
+                                                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                                        },
+                                                                        '& .MuiInputBase-input': {
+                                                                            fontSize: '12px', // ขนาด font เวลาพิมพ์
+                                                                            fontWeight: 'bold',
+                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                            paddingLeft: 2
+                                                                        },
+                                                                    }}
+                                                                    value={detail.Rate3 ?? 0.75}
+                                                                    onChange={(e) => {
+                                                                        let newValue = e.target.value;
+                                                                        onUpdateOrder("Rate3", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
+                                                                    }}
+                                                                    onFocus={(e) => {
+                                                                        if (e.target.value === "0") onUpdateOrder("Rate3", "");
+                                                                    }}
+                                                                    onBlur={(e) => {
+                                                                        if (e.target.value === "") onUpdateOrder("Rate3", 0.75);
+                                                                    }}
+                                                                />
+                                                            </Paper>
+                                                )
+                                                :
+                                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Rate || 0.75}</Typography>
+                                        }
                 </TableCell>
                 {/* <TableCellG95 sx={{ textAlign: "center" }}>
                         {           <Paper component="form" sx={{ width: "100%" }}>
