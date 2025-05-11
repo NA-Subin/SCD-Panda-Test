@@ -88,9 +88,9 @@ const UpdateTrip = (props) => {
     const [selectedDateReceive, setSelectedDateReceive] = useState(dateReceive);
     const [selectedDateDelivery, setSelectedDateDelivery] = useState(dateDelivery);
 
-    const { depots, reghead } = useData();
+    const { depots, small } = useData();
     const depotOptions = Object.values(depots || {});
-    const registrationTruck = Object.values(reghead || {});
+    const registrationTruck = Object.values(small || {});
 
     console.log("registrationTruck : ", registrationTruck);
 
@@ -1405,9 +1405,8 @@ const UpdateTrip = (props) => {
 
                                                                 const driverName = option.Driver?.split(":")[1] ?? option.Driver ?? "";
                                                                 const regHead = option.RegHead ?? "";
-                                                                const regTail = option.RegTail ?? "";
 
-                                                                return `${driverName} : ${regHead}/${regTail} (รถใหญ่)`;
+                                                                return `${driverName} : ${regHead} (รถเล็ก)`;
                                                             }}
                                                             value={registrationTruck.find(
                                                                 (d) => `${d.Driver}:${d.id}:${d.RegHead}` === registration
@@ -1438,7 +1437,7 @@ const UpdateTrip = (props) => {
                                                                 <li {...props}>
                                                                     {
                                                                         option.Driver !== "ไม่มี" && option.Status === "ว่าง" &&
-                                                                        <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail} (รถใหญ่)`}</Typography>
+                                                                        <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (รถเล็ก)`}</Typography>
                                                                     }
                                                                 </li>
                                                             )}
@@ -2120,7 +2119,7 @@ const UpdateTrip = (props) => {
                                                                     `${item.Driver}:${item.id}:${item.RegHead}` === registration
                                                                 );
                                                                 return selectedItem && selectedItem.Driver !== "ไม่มี" &&
-                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถใหญ่)`;
+                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถเล็ก)`;
                                                             })()}
                                                         />
                                                     </Paper>
