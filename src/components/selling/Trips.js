@@ -174,10 +174,10 @@ const TripsBigTruck = () => {
                 <InsertTrips />
             </Box> */}
             <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid item md={4} xs={12}>
 
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item md={6} xs={12}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -187,79 +187,81 @@ const TripsBigTruck = () => {
                         เที่ยววิ่งรถใหญ่
                     </Typography>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item md={2} xs={12} sx={{ textAlign: {xs: "center"}, marginBottom: {xs: 2, md: 0}, marginTop: {xs: -2, md: 0} }}>
                     <InsertTrips />
                 </Grid>
+                <Grid item md={5} xs={12}>
+                          <Box
+                            sx={{
+                              width: "100%", // กำหนดความกว้างของ Paper
+                              height: "40px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginTop: { md: -10, xs: 2 },
+                              marginBottom: 3
+                            }}
+                          >
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                                format="DD/MM/YYYY"
+                                onChange={handleDateChangeDateStart}
+                                sx={{ marginRight: 2, }}
+                                slotProps={{
+                                  textField: {
+                                    size: "small",
+                                    fullWidth: true,
+                                    InputProps: {
+                                      startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                          วันที่เริ่มต้น :
+                                        </InputAdornment>
+                                      ),
+                                      sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                      },
+                                    },
+                                  },
+                                }}
+                              />
+                              <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                                format="DD/MM/YYYY"
+                                onChange={handleDateChangeDateEnd}
+                                slotProps={{
+                                  textField: {
+                                    size: "small",
+                                    fullWidth: true,
+                                    InputProps: {
+                                      startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                          วันที่สิ้นสุด :
+                                        </InputAdornment>
+                                      ),
+                                      sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                      },
+                                    },
+                                  },
+                                }}
+                              />
+                            </LocalizationProvider>
+                          </Box>
+                        </Grid>
             </Grid>
-            <Box
-                sx={{
-                    width: "100%", // กำหนดความกว้างของ Paper
-                    height: "40px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: -8,
-                    marginBottom: 3,
-                    width: 550
-                }}
-            >
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                        openTo="day"
-                        views={["year", "month", "day"]}
-                        value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                        format="DD/MM/YYYY"
-                        onChange={handleDateChangeDateStart}
-                        sx={{ marginRight: 2, }}
-                        slotProps={{
-                            textField: {
-                                size: "small",
-                                fullWidth: true,
-                                InputProps: {
-                                    startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                            วันที่เริ่มต้น :
-                                        </InputAdornment>
-                                    ),
-                                    sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                    },
-                                },
-                            },
-                        }}
-                    />
-                    <DatePicker
-                        openTo="day"
-                        views={["year", "month", "day"]}
-                        value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                        format="DD/MM/YYYY"
-                        onChange={handleDateChangeDateEnd}
-                        slotProps={{
-                            textField: {
-                                size: "small",
-                                fullWidth: true,
-                                InputProps: {
-                                    startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                            วันที่สิ้นสุด :
-                                        </InputAdornment>
-                                    ),
-                                    sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                    },
-                                },
-                            },
-                        }}
-                    />
-                </LocalizationProvider>
-            </Box>
             <Divider sx={{ marginBottom: 2 }} />
+            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260)  }}>
             <Grid container spacing={1} width="100%">
                 <Grid item xs={12}>
                     <FormGroup row sx={{ marginBottom: -2 }}>
@@ -275,7 +277,7 @@ const TripsBigTruck = () => {
                     <TableContainer
                         component={Paper}
                         sx={{
-                            maxWidth: "1200px",
+                            maxWidth: "1350px",
                             overflowX: "auto", // แสดง scrollbar แนวนอน
                             marginTop: 2,
                         }}
@@ -283,7 +285,7 @@ const TripsBigTruck = () => {
                         <Table
                             stickyHeader
                             size="small"
-                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" },width: "1350px" }}
                         >
                             <TableHead>
                                 <TableRow sx={{ height: "7vh" }}>
@@ -423,6 +425,7 @@ const TripsBigTruck = () => {
                     }
                 </Grid>
             </Grid>
+            </Box>
         </Container>
 
     );

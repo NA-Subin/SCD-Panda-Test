@@ -54,24 +54,24 @@ const BigTruckRegTail = (props) => {
   const truck = Object.values(regtail || {});
 
   const isMobile = useMediaQuery("(max-width:1100px)");
-        
-          const shouldDrawerOpen = React.useMemo(() => {
-            if (isMobile) {
-              return !openTab; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
-            } else {
-              return openTab; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
-            }
-          }, [openTab, isMobile]);
-        
-          const handleDrawerOpen = () => {
-            if (isMobile) {
-              // จอเท่ากับโทรศัพท์
-              setOpenTab((prevOpen) => !prevOpen);
-            } else {
-              // จอไม่เท่ากับโทรศัพท์
-              setOpenTab((prevOpen) => !prevOpen);
-            }
-          };
+
+  const shouldDrawerOpen = React.useMemo(() => {
+    if (isMobile) {
+      return !openTab; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
+    } else {
+      return openTab; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
+    }
+  }, [openTab, isMobile]);
+
+  const handleDrawerOpen = () => {
+    if (isMobile) {
+      // จอเท่ากับโทรศัพท์
+      setOpenTab((prevOpen) => !prevOpen);
+    } else {
+      // จอไม่เท่ากับโทรศัพท์
+      setOpenTab((prevOpen) => !prevOpen);
+    }
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -86,16 +86,16 @@ const BigTruckRegTail = (props) => {
   };
 
   const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-  
-    const handleChangePage = (event, newPage) => {
-      setPage(newPage);
-    };
-  
-    const handleChangeRowsPerPage = (event) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      setPage(0);
-    };
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <React.Fragment>
@@ -167,7 +167,7 @@ const BigTruckRegTail = (props) => {
               component={Paper}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small"  sx={{ width: "1050px" }}>
+              <Table stickyHeader size="small" sx={{ width: "1050px" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
@@ -176,28 +176,28 @@ const BigTruckRegTail = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       ทะเบียนหาง
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง1
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง2
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง3
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง4
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง5
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง6
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง7
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 40 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 40 }}>
                       ช่อง8
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
@@ -206,7 +206,7 @@ const BigTruckRegTail = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       สถานะ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ width: 30 }}/>
+                    <TablecellHeader sx={{ width: 30, position: "sticky", right: 0 }} />
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -233,50 +233,50 @@ const BigTruckRegTail = (props) => {
               </Table>
             </TableContainer>
             {
-  truck.length <= 10 ? null :
-    <TablePagination
-      rowsPerPageOptions={[10, 25, 30]}
-      component="div"
-      count={truck.length}
-      rowsPerPage={rowsPerPage}
-      page={page}
-      onPageChange={handleChangePage}
-      onRowsPerPageChange={handleChangeRowsPerPage}
-      labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
-      labelDisplayedRows={({ from, to, count }) =>
-        `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
-      }
-      sx={{
-        overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
-        borderBottomLeftRadius: 5,
-        borderBottomRightRadius: 5,
-        '& .MuiTablePagination-toolbar': {
-          backgroundColor: "lightgray",
-          height: "20px", // กำหนดความสูงของ toolbar
-          alignItems: "center",
-          paddingY: 0, // ลด padding บนและล่างให้เป็น 0
-          overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
-          fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
-        },
-        '& .MuiTablePagination-select': {
-          paddingY: 0,
-          fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
-        },
-        '& .MuiTablePagination-actions': {
-          '& button': {
-            paddingY: 0,
-            fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
-          },
-        },
-        '& .MuiTablePagination-displayedRows': {
-          fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
-        },
-        '& .MuiTablePagination-selectLabel': {
-          fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
-        }
-      }}
-    />
-}
+              truck.length <= 10 ? null :
+                <TablePagination
+                  rowsPerPageOptions={[10, 25, 30]}
+                  component="div"
+                  count={truck.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+                  }
+                  sx={{
+                    overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+                    borderBottomLeftRadius: 5,
+                    borderBottomRightRadius: 5,
+                    '& .MuiTablePagination-toolbar': {
+                      backgroundColor: "lightgray",
+                      height: "20px", // กำหนดความสูงของ toolbar
+                      alignItems: "center",
+                      paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+                      overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+                      fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+                    },
+                    '& .MuiTablePagination-select': {
+                      paddingY: 0,
+                      fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                    },
+                    '& .MuiTablePagination-actions': {
+                      '& button': {
+                        paddingY: 0,
+                        fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+                      },
+                    },
+                    '& .MuiTablePagination-displayedRows': {
+                      fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+                    },
+                    '& .MuiTablePagination-selectLabel': {
+                      fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                    }
+                  }}
+                />
+            }
 
           </Paper>
         </Grid>

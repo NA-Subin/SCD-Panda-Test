@@ -44,6 +44,21 @@ const TicketsBigTruck = () => {
     const [selectedRowId, setSelectedRowId] = useState(null); // จับ ID ของแถวที่ต้องการแก้ไข
     const [ticketM, setTicketM] = React.useState([]);
     const [ticketR, setTicketR] = React.useState([]);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    
+        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+        useEffect(() => {
+            const handleResize = () => {
+                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            };
+    
+            window.addEventListener('resize', handleResize); // เพิ่ม event listener
+    
+            // ลบ event listener เมื่อ component ถูกทำลาย
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }, []);
 
     console.log("ticketM", ticketM);
     console.log("ticketR", ticketR);
@@ -206,12 +221,12 @@ const TicketsBigTruck = () => {
                     }
                 </Grid>
             </Grid>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5 }}>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5,width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260)  }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={9}>
+                    <Grid item md={9} xs={12}>
                         <Typography variant="h6" fontWeight="bold" gutterBottom>ลูกค้าของ{open === 1 ? "เชียงใหม่" : "เชียงราย"}</Typography>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item md={3} xs={12}>
                         <InsertCustomerBigTruck show={open} />
                     </Grid>
                 </Grid>
@@ -220,13 +235,13 @@ const TicketsBigTruck = () => {
                     component={Paper}
                     sx={{ marginTop: 2 }}
                 >
-                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" },width: "1250px" }}>
                         <TableHead sx={{ height: "7vh" }}>
                             <TableRow>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                     ลำดับ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                     ชื่อตั๋ว
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100, whiteSpace: "nowrap" }}>
@@ -244,7 +259,7 @@ const TicketsBigTruck = () => {
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
                                     สถานะ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ width: 80 }} />
+                                <TablecellHeader sx={{ width: 80,position: "sticky", right: 0 }} />
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -472,7 +487,7 @@ const TicketsBigTruck = () => {
                                                                     </>
                                                             }
                                                     </TableCell>
-                                                    <TableCell width={70}>
+                                                    <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
                                                         <Box sx={{ textAlign: "center", marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
@@ -711,7 +726,7 @@ const TicketsBigTruck = () => {
                                                                     </>
                                                             }
                                                     </TableCell>
-                                                    <TableCell width={70}>
+                                                    <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
                                                         <Box sx={{ marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?

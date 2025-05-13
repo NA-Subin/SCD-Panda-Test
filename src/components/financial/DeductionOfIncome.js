@@ -55,6 +55,21 @@ const DeductionOfIncome = () => {
     const [driverDetail, setDriver] = React.useState([]);
     const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
     const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    
+        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+        useEffect(() => {
+            const handleResize = () => {
+                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            };
+    
+            window.addEventListener('resize', handleResize); // เพิ่ม event listener
+    
+            // ลบ event listener เมื่อ component ถูกทำลาย
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }, []);
 
     const handleDateChangeDateStart = (newValue) => {
         if (newValue) {
@@ -250,10 +265,10 @@ const DeductionOfIncome = () => {
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
             <Grid container>
-                <Grid item xs={4}>
+                <Grid item md={4} xs={12}>
 
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item md={6} xs={12}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -263,79 +278,83 @@ const DeductionOfIncome = () => {
                         รายการหักค่าใช้จ่าย
                     </Typography>
                 </Grid>
-                <Grid item xs={2}>
-                    <InsertDeducetionIncome />
+                <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
+                    <Box sx={{ width: "200px" }}>
+                        <InsertDeducetionIncome />
+                    </Box>
                 </Grid>
+                <Grid item md={5} xs={12}>
+                          <Box
+                            sx={{
+                              width: "100%", // กำหนดความกว้างของ Paper
+                              height: "40px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginTop: { md: -8, xs: 2 },
+                              marginBottom: 3
+                            }}
+                          >
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                                format="DD/MM/YYYY"
+                                onChange={handleDateChangeDateStart}
+                                sx={{ marginRight: 2, }}
+                                slotProps={{
+                                  textField: {
+                                    size: "small",
+                                    fullWidth: true,
+                                    InputProps: {
+                                      startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                          วันที่เริ่มต้น :
+                                        </InputAdornment>
+                                      ),
+                                      sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                      },
+                                    },
+                                  },
+                                }}
+                              />
+                              <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                                format="DD/MM/YYYY"
+                                onChange={handleDateChangeDateEnd}
+                                slotProps={{
+                                  textField: {
+                                    size: "small",
+                                    fullWidth: true,
+                                    InputProps: {
+                                      startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                          วันที่สิ้นสุด :
+                                        </InputAdornment>
+                                      ),
+                                      sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                      },
+                                    },
+                                  },
+                                }}
+                              />
+                            </LocalizationProvider>
+                          </Box>
+                        </Grid>
             </Grid>
-            <Box
-                sx={{
-                    width: "100%", // กำหนดความกว้างของ Paper
-                    height: "40px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: -8,
-                    marginBottom: 3,
-                    width: 550
-                }}
-            >
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                        openTo="day"
-                        views={["year", "month", "day"]}
-                        value={dayjs(selectedDateStart, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
-                        format="DD/MM/YYYY"
-                        onChange={handleDateChangeDateStart}
-                        sx={{ marginRight: 2, }}
-                        slotProps={{
-                            textField: {
-                                size: "small",
-                                fullWidth: true,
-                                InputProps: {
-                                    startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                            วันที่เริ่มต้น :
-                                        </InputAdornment>
-                                    ),
-                                    sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                    },
-                                },
-                            },
-                        }}
-                    />
-                    <DatePicker
-                        openTo="day"
-                        views={["year", "month", "day"]}
-                        value={dayjs(selectedDateEnd, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
-                        format="DD/MM/YYYY"
-                        onChange={handleDateChangeDateEnd}
-                        slotProps={{
-                            textField: {
-                                size: "small",
-                                fullWidth: true,
-                                InputProps: {
-                                    startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                            วันที่สิ้นสุด :
-                                        </InputAdornment>
-                                    ),
-                                    sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                    },
-                                },
-                            },
-                        }}
-                    />
-                </LocalizationProvider>
-            </Box>
             <Divider sx={{ marginBottom: 1 }} />
+            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Grid container spacing={2} width="100%">
                 <Grid item xs={12}>
                     <TableContainer
@@ -348,26 +367,26 @@ const DeductionOfIncome = () => {
                         <Table
                             stickyHeader
                             size="small"
-                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1300px" }}
                         >
                             <TableHead sx={{ height: "5vh" }}>
                                 <TableRow>
-                                    <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                    <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
                                         ลำดับ
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
                                         พนักงานขับรถ
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                         ชื่อรายการที่หัก
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                         รายได้
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                         รายหัก
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
+                                    <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -375,11 +394,11 @@ const DeductionOfIncome = () => {
                                     table.map((row,index) => (
                                         <TableRow>
                                     <TableCell sx={{ textAlign: "center" }}>{index+1}</TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}>{row.name}</TableCell>
+                                    <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white", borderRight: "2px solid white" }}>{row.name}</TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>{row.item}</TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>{row.income !== "-" ? new Intl.NumberFormat("en-US").format(row.income) : "-"}</TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>{row.expense !== "-" ? new Intl.NumberFormat("en-US").format(row.expense) : "-"}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
+                                    <TableCell sx={{ textAlign: "center" }}>
                                         {/* <Button variant="contained" size="small" color="error" fullWidth
                                         //onClick={() => handleChangDelete(row.id)}
                                         >ลบ</Button> */}
@@ -437,6 +456,7 @@ const DeductionOfIncome = () => {
                     </TableContainer>
                 </Grid>
             </Grid>
+            </Box>
         </Container>
 
     );

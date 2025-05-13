@@ -55,6 +55,21 @@ const Financial = () => {
     const [driverDetail, setDriver] = React.useState([]);
     const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
     const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const handleDateChangeDateStart = (newValue) => {
         if (newValue) {
@@ -148,10 +163,10 @@ const Financial = () => {
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
             <Grid container>
-                <Grid item xs={3.5}>
+                <Grid item md={3.5} xs={12}>
 
                 </Grid>
-                <Grid item xs={6.5}>
+                <Grid item md={6.5} xs={12}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -161,85 +176,89 @@ const Financial = () => {
                         บิลค่าใช้จ่าย
                     </Typography>
                 </Grid>
-                <Grid item xs={2}>
-                    <InsertFinancial />
+                <Grid item md={2} xs={12} display="flex" justifyContent="center" alignItems="center">
+                    <Box width="200px">
+                        <InsertFinancial />
+                    </Box>
                 </Grid>
+                <Grid item md={5} xs={12}>
+                          <Box
+                            sx={{
+                              width: "100%", // กำหนดความกว้างของ Paper
+                              height: "40px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginTop: { md: -8, xs: 2 },
+                              marginBottom: 3
+                            }}
+                          >
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                                format="DD/MM/YYYY"
+                                onChange={handleDateChangeDateStart}
+                                sx={{ marginRight: 2, }}
+                                slotProps={{
+                                  textField: {
+                                    size: "small",
+                                    fullWidth: true,
+                                    InputProps: {
+                                      startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                          วันที่เริ่มต้น :
+                                        </InputAdornment>
+                                      ),
+                                      sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                      },
+                                    },
+                                  },
+                                }}
+                              />
+                              <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                                format="DD/MM/YYYY"
+                                onChange={handleDateChangeDateEnd}
+                                slotProps={{
+                                  textField: {
+                                    size: "small",
+                                    fullWidth: true,
+                                    InputProps: {
+                                      startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                          วันที่สิ้นสุด :
+                                        </InputAdornment>
+                                      ),
+                                      sx: {
+                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                        height: "40px",  // ความสูงของ Input
+                                        padding: "10px", // Padding ภายใน Input
+                                        fontWeight: "bold",
+                                      },
+                                    },
+                                  },
+                                }}
+                              />
+                            </LocalizationProvider>
+                          </Box>
+                        </Grid>
             </Grid>
-            <Box
-                sx={{
-                    width: "100%", // กำหนดความกว้างของ Paper
-                    height: "40px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: -8,
-                    marginBottom: 3,
-                    width: 550
-                }}
-            >
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                        openTo="day"
-                        views={["year", "month", "day"]}
-                        value={dayjs(selectedDateStart, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
-                        format="DD/MM/YYYY"
-                        onChange={handleDateChangeDateStart}
-                        sx={{ marginRight: 2, }}
-                        slotProps={{
-                            textField: {
-                                size: "small",
-                                fullWidth: true,
-                                InputProps: {
-                                    startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                            วันที่เริ่มต้น :
-                                        </InputAdornment>
-                                    ),
-                                    sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                    },
-                                },
-                            },
-                        }}
-                    />
-                    <DatePicker
-                        openTo="day"
-                        views={["year", "month", "day"]}
-                        value={dayjs(selectedDateEnd, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
-                        format="DD/MM/YYYY"
-                        onChange={handleDateChangeDateEnd}
-                        slotProps={{
-                            textField: {
-                                size: "small",
-                                fullWidth: true,
-                                InputProps: {
-                                    startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                            วันที่สิ้นสุด :
-                                        </InputAdornment>
-                                    ),
-                                    sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                    },
-                                },
-                            },
-                        }}
-                    />
-                </LocalizationProvider>
-            </Box>
             <Divider sx={{ marginBottom: 1 }} />
+            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Grid container spacing={2} width="100%">
                 <Grid item xs={12}>
                     <TableContainer
                         component={Paper}
                         sx={{
-                            maxWidth: "1250px",
+                            maxWidth: "1350px",
                             height: "65vh",
                             overflowX: "auto", // แสดง scrollbar แนวนอน
                             marginTop: 2,
@@ -248,7 +267,7 @@ const Financial = () => {
                         <Table
                             stickyHeader
                             size="small"
-                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" },width: "1350px" }}
                         >
                             <TableHead sx={{ height: "5vh" }}>
                                 <TableRow>
@@ -364,6 +383,7 @@ const Financial = () => {
                     </TableContainer>
                 </Grid>
             </Grid>
+            </Box>
         </Container>
 
     );

@@ -70,6 +70,21 @@ const InsertTrips = () => {
     const dialogRef = useRef(null);
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
     const [editMode, setEditMode] = useState(true);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // โหลด html2canvas จาก CDN
     useEffect(() => {
@@ -404,12 +419,12 @@ const InsertTrips = () => {
     console.log("Order : ", orders);
 
     const [isFocused, setIsFocused] = useState(false);
-    
-        const formatNumber = (value) => {
-            const number = parseInt(value, 10);
-            if (isNaN(number)) return "";
-            return number.toLocaleString(); // => 3000 -> "3,000"
-        };
+
+    const formatNumber = (value) => {
+        const number = parseInt(value, 10);
+        if (isNaN(number)) return "";
+        return number.toLocaleString(); // => 3000 -> "3,000"
+    };
 
     const [ordersTickets, setOrdersTickets] = React.useState({});
     const [selling, setSelling] = React.useState({});
@@ -425,10 +440,10 @@ const InsertTrips = () => {
     console.log("ข้อมูลลูกค้า : ", Object.values(selling));
 
     useEffect(() => {
-    // คำนวณผลรวมค่า Travel ทุกครั้งที่ selling เปลี่ยน
-    const totalTravel = Object.values(selling).reduce((sum, item) => sum + (item.Travel || 0), 0);
-    setCostTrip(totalTravel);
-  }, [selling]);
+        // คำนวณผลรวมค่า Travel ทุกครั้งที่ selling เปลี่ยน
+        const totalTravel = Object.values(selling).reduce((sum, item) => sum + (item.Travel || 0), 0);
+        setCostTrip(totalTravel);
+    }, [selling]);
 
     const handlePost = (event) => {
         const ticketValue = event.target.value;
@@ -1032,6 +1047,16 @@ const InsertTrips = () => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+        setOrdersTickets({});
+        setSelling({});
+        setVolumeT({});
+        setVolumeS({});
+        setWeightA({});
+        setOrderTrip({});
+        setWeightH(0);
+        setWeightL(0);
+        setCostTrip(0);
+        setRegistration("0:0:0:0");
     };
 
     const handleCancle = () => {
@@ -1208,10 +1233,10 @@ const InsertTrips = () => {
                 <DialogContent>
                     <Box sx={{ p: 2 }} ref={dialogRef}>
                         <Grid container spacing={1} marginTop={0.5}>
-                            <Grid item sm={1} xs={4} textAlign="left">
+                            <Grid item md={1} xs={2} textAlign="left">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                             </Grid>
-                            <Grid item sm={3} xs={8} textAlign="right">
+                            <Grid item md={3} xs={10} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -1247,7 +1272,7 @@ const InsertTrips = () => {
 
                                 </Box>
                             </Grid>
-                            <Grid item sm={8} xs={12}>
+                            <Grid item md={8} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
@@ -1363,9 +1388,9 @@ const InsertTrips = () => {
                                                     onAddProduct={(productName, field, value) =>
                                                         handleAddProduct(parseInt(key), productName, field, value)
                                                     }
-                                                    // onUpdateOrderID={(field, value) =>
-                                                    //     handleUpdateOrderID(parseInt(key), field, value)
-                                                    // }
+                                                // onUpdateOrderID={(field, value) =>
+                                                //     handleUpdateOrderID(parseInt(key), field, value)
+                                                // }
                                                 />
                                             ))}
                                         </TableBody>
@@ -1393,7 +1418,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1409,7 +1434,7 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber(volumeT.G95 || 0)}
@@ -1425,7 +1450,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1441,7 +1466,7 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber(volumeT.B95 || 0)}
@@ -1457,7 +1482,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1473,7 +1498,7 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber(volumeT.B7 || 0)}
@@ -1489,7 +1514,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1505,7 +1530,7 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber(volumeT.G91 || 0)}
@@ -1521,7 +1546,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1537,7 +1562,7 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber(volumeT.E20 || 0)}
@@ -1553,7 +1578,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1569,7 +1594,7 @@ const InsertTrips = () => {
                                                                             fontSize: '12px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber(volumeT.PWD || 0)}
@@ -1605,7 +1630,7 @@ const InsertTrips = () => {
                                                             editMode ?
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     <TextField size="small" fullWidth
-                                                                        
+
                                                                         InputLabelProps={{
                                                                             sx: {
                                                                                 fontSize: '12px',
@@ -1641,7 +1666,7 @@ const InsertTrips = () => {
                                 </Box>
                             </Paper>
                             <Grid container spacing={1} marginBottom={-1}>
-                                <Grid item sm={6} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <Paper
                                         component="form"
                                         sx={{ height: "30px", width: "100%" }}
@@ -1683,7 +1708,7 @@ const InsertTrips = () => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={6} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={6} xs={12} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>หมายเหตุ</Typography>
                                     <Paper
                                         component="form" sx={{ width: "100%" }}>
@@ -1721,10 +1746,10 @@ const InsertTrips = () => {
                             ""
                     }*/}
                         <Grid container spacing={1}>
-                            <Grid item sm={1} xs={4} textAlign="left">
+                            <Grid item md={1} xs={2} textAlign="left">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.info.main }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                             </Grid>
-                            <Grid item sm={3} xs={8} textAlign="right">
+                            <Grid item md={3} xs={10} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่ส่ง</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -1760,7 +1785,7 @@ const InsertTrips = () => {
 
                                 </Box>
                             </Grid>
-                            <Grid item sm={8} xs={12}>
+                            <Grid item md={8} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
@@ -1927,7 +1952,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1943,7 +1968,7 @@ const InsertTrips = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber((volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD) || 0)}
@@ -2003,7 +2028,7 @@ const InsertTrips = () => {
                                                         editMode ?
                                                             <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
                                                                 <TextField size="small" fullWidth
-                                                                    
+
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -2019,7 +2044,7 @@ const InsertTrips = () => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center', 
+                                                                            textAlign: 'center',
                                                                         },
                                                                     }}
                                                                     value={formatNumber(totalVolume)}
@@ -2038,7 +2063,7 @@ const InsertTrips = () => {
                                 </Box>
                             </Paper>
                             <Grid container spacing={1}>
-                                <Grid item sm={6} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <Paper
                                         component="form"
                                     >
@@ -2083,7 +2108,7 @@ const InsertTrips = () => {
                                         </Grid>
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={2} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
@@ -2105,7 +2130,7 @@ const InsertTrips = () => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={4} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={4} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">

@@ -97,7 +97,7 @@ const TicketsTransport = () => {
     const [rate2Edit, setRate2Edit] = useState("");
     const [rate3Edit, setRate3Edit] = useState("");
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
-    const [name,setName] = useState("");
+    const [name, setName] = useState("");
 
     // ฟังก์ชันสำหรับกดแก้ไข
     const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname) => {
@@ -195,12 +195,12 @@ const TicketsTransport = () => {
                     }
                 </Grid>
             </Grid>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5 }}>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={9}>
-                        <Typography variant="h6" fontWeight="bold" gutterBottom>{open === 1 ? "ลูกค้ารับจ้างขนส่ง" : "ปั้มน้ำมัน"}</Typography>
+                    <Grid item md={9} xs={12}>
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>{open === 1 ? "รายการลูกค้ารับจ้างขนส่ง" : "รายการปั้มน้ำมัน"}</Typography>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item md={3} xs={12}>
                         {
                             open === 1 ? <InsertTicketsTransport show={open} /> : <InsertTicketsGasStations show={open} />
                         }
@@ -213,13 +213,13 @@ const TicketsTransport = () => {
                             component={Paper}
                             sx={{ marginTop: 2 }}
                         >
-                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                                 <TableHead sx={{ height: "7vh" }}>
                                     <TableRow>
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                             ลำดับ
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                             ชื่อตั๋ว
                                         </TablecellHeader>
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100, whiteSpace: "nowrap" }}>
@@ -237,7 +237,7 @@ const TicketsTransport = () => {
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
                                             สถานะ
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ width: 80 }} />
+                                        <TablecellHeader sx={{ width: 80, position: "sticky", right: 0 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -247,7 +247,7 @@ const TicketsTransport = () => {
                                                 <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
                                             </TableRow>
                                             :
-                                            transport.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
+                                            transport.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow key={index} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
@@ -460,7 +460,7 @@ const TicketsTransport = () => {
                                                             }
                                                         </Box>
                                                     </TableCell>
-                                                    <TableCell width={70}>
+                                                    <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
                                                         <Box sx={{ marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
@@ -494,13 +494,13 @@ const TicketsTransport = () => {
                             component={Paper}
                             sx={{ marginTop: 2 }}
                         >
-                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                                 <TableHead sx={{ height: "7vh" }} >
                                     <TableRow>
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                             ลำดับ
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                             ชื่อตั๋ว
                                         </TablecellHeader>
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
@@ -518,12 +518,12 @@ const TicketsTransport = () => {
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             สถานะ
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ width: 80 }} />
+                                        <TablecellHeader sx={{ width: 80, position: "sticky", right: 0 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        gasStation.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
+                                        gasStation.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                             <TicketsGasStation key={row.id} row={row} index={index} />
                                         ))
                                     }

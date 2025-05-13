@@ -220,7 +220,7 @@ const BigTruckRegHead = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       พนักงานขับรถ
                     </TablecellHeader>
-                    <TablecellHeader colSpan={2} width={50} />
+                    <TablecellHeader colSpan={2} width={50} sx={{ position: "sticky", right: 0}}/>
                   </TableRow>
                 </TableHead>
                 <TableBody>

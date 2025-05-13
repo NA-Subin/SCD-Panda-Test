@@ -104,7 +104,7 @@ const UpdateRegTail = (props) => {
 
     return (
         <React.Fragment>
-            <TableCell sx={{ textAlign: "center" }}>
+            <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                 <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpen(regTail)}><InfoIcon color="info" fontSize="12px" /></IconButton>
             </TableCell>
             <Dialog

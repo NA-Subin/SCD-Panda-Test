@@ -64,6 +64,22 @@ const UpdateReport = (props) => {
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
     const [test, setTest] = useState([]);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     const {
         tickets,
         customertransports,
@@ -159,8 +175,8 @@ const UpdateReport = (props) => {
     const startDate = dayjs(ticket.DateStart, "DD/MM/YYYY");
     const endDate = dayjs(ticket.DateEnd, "DD/MM/YYYY");
 
-    console.log("DateStart : ",startDate);
-    console.log("DateEnd ",endDate);
+    console.log("DateStart : ", startDate);
+    console.log("DateEnd ", endDate);
 
     const ticketsList = showTickets.filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY"); // แปลง item.Date ก่อนนะ
@@ -186,25 +202,25 @@ const UpdateReport = (props) => {
 
     const calculateDueDate = (dateString, creditDays) => {
         if (!dateString || creditDays === null || creditDays === undefined) return "ไม่พบข้อมูลวันที่";
-    
+
         const [day, month, year] = dateString.split("/").map(Number);
         const date = new Date(year, month - 1, day);
-    
+
         date.setDate(date.getDate() + creditDays);
-    
+
         const formattedDate = new Intl.DateTimeFormat("th-TH", {
             year: "numeric",
             month: "long",
             day: "numeric",
         }).format(date);
-    
+
         return `กำหนดชำระเงินวันที่ ${formattedDate}`;
     };
 
     // 🔥 ทดสอบโค้ด
-     console.log("Date:", ticket.Date);
-     console.log("Credit Time:", ticket.CreditTime);
-     console.log(calculateDueDate(ticket.Date, ticket.CreditTime));
+    console.log("Date:", ticket.Date);
+    console.log("Credit Time:", ticket.CreditTime);
+    console.log(calculateDueDate(ticket.Date, ticket.CreditTime));
 
     console.log("ticketsList : ", ticketsList);
 
@@ -381,44 +397,44 @@ const UpdateReport = (props) => {
     const invoices1 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company1Tickets[0].Company);
     const invoices2 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company2Tickets[0].Company);
 
-    console.log("invoices1 : ",invoices1);
-    console.log("invoices2 : ",invoices2);
+    console.log("invoices1 : ", invoices1);
+    console.log("invoices2 : ", invoices2);
 
     const generatePDFCompany1 = () => {
         let Code = ""
-                if (invoices1.length !== 0) {
-                    Code = `${invoices1[0].Code}-${invoices1[0].Number}`
-                } else {
-                    const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
-                    let newNumberInvoice = 1;
-                    if (lastItemInvoice && lastItemInvoice.Number && lastItemInvoice.Code === `lV${currentCode}`) {
-                        newNumberInvoice = Number(lastItemInvoice.Number) + 1;
-                    }
-                    const formattedNumberInvoice = String(newNumberInvoice).padStart(4, "0");
-        
-                    Code = `lV${currentCode}-${formattedNumberInvoice}`;
-        
-                    database
-                        .ref("invoice/")
-                        .child(invoiceDetail.length)
-                        .update({
-                            id: invoiceDetail.length,
-                            Code: `lV${currentCode}`,
-                            Number: formattedNumberInvoice,
-                            DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                            Transport: company1Tickets[0].Company,
-                            TicketName: ticket.TicketName,
-                            TicketNo: ticket.No,
-                            TicketType: ticket.CustomerType,
-                        }) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-                        .then(() => {
-                            console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                        })
-                        .catch((error) => {
-                            ShowError("ไม่สำเร็จ");
-                            console.error("Error updating data:", error);
-                        });
-                }
+        if (invoices1.length !== 0) {
+            Code = `${invoices1[0].Code}-${invoices1[0].Number}`
+        } else {
+            const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
+            let newNumberInvoice = 1;
+            if (lastItemInvoice && lastItemInvoice.Number && lastItemInvoice.Code === `lV${currentCode}`) {
+                newNumberInvoice = Number(lastItemInvoice.Number) + 1;
+            }
+            const formattedNumberInvoice = String(newNumberInvoice).padStart(4, "0");
+
+            Code = `lV${currentCode}-${formattedNumberInvoice}`;
+
+            database
+                .ref("invoice/")
+                .child(invoiceDetail.length)
+                .update({
+                    id: invoiceDetail.length,
+                    Code: `lV${currentCode}`,
+                    Number: formattedNumberInvoice,
+                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                    Transport: company1Tickets[0].Company,
+                    TicketName: ticket.TicketName,
+                    TicketNo: ticket.No,
+                    TicketType: ticket.CustomerType,
+                }) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+                .then(() => {
+                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                })
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        }
 
         const invoiceData = {
             Report: company1Tickets,
@@ -430,7 +446,7 @@ const UpdateReport = (props) => {
             Code: Code,
             Date: invoices1[0].DateStart,
             DateStart: ticket.Date,
-            DateEnd: calculateDueDate(ticket.Date,ticket.CreditTime)
+            DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -459,39 +475,39 @@ const UpdateReport = (props) => {
 
     const generatePDFCompany2 = () => {
         let Code = ""
-                if (invoices2.length !== 0) {
-                    Code = `${invoices2[0].Code}-${invoices2[0].Number}`
-                } else {
-                    const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
-                    let newNumberInvoice = 1;
-                    if (lastItemInvoice && lastItemInvoice.Number && lastItemInvoice.Code === `lV${currentCode}`) {
-                        newNumberInvoice = Number(lastItemInvoice.Number) + 1;
-                    }
-                    const formattedNumberInvoice = String(newNumberInvoice).padStart(4, "0");
-        
-                    Code = `lV${currentCode}-${formattedNumberInvoice}`;
-        
-                    database
-                        .ref("invoice/")
-                        .child(invoiceDetail.length)
-                        .update({
-                            id: invoiceDetail.length,
-                            Code: `lV${currentCode}`,
-                            Number: formattedNumberInvoice,
-                            DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                            Transport: company1Tickets[0].Company,
-                            TicketName: ticket.TicketName,
-                            TicketNo: ticket.No,
-                            TicketType: ticket.CustomerType,
-                        }) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-                        .then(() => {
-                            console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                        })
-                        .catch((error) => {
-                            ShowError("ไม่สำเร็จ");
-                            console.error("Error updating data:", error);
-                        });
-                }
+        if (invoices2.length !== 0) {
+            Code = `${invoices2[0].Code}-${invoices2[0].Number}`
+        } else {
+            const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
+            let newNumberInvoice = 1;
+            if (lastItemInvoice && lastItemInvoice.Number && lastItemInvoice.Code === `lV${currentCode}`) {
+                newNumberInvoice = Number(lastItemInvoice.Number) + 1;
+            }
+            const formattedNumberInvoice = String(newNumberInvoice).padStart(4, "0");
+
+            Code = `lV${currentCode}-${formattedNumberInvoice}`;
+
+            database
+                .ref("invoice/")
+                .child(invoiceDetail.length)
+                .update({
+                    id: invoiceDetail.length,
+                    Code: `lV${currentCode}`,
+                    Number: formattedNumberInvoice,
+                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                    Transport: company1Tickets[0].Company,
+                    TicketName: ticket.TicketName,
+                    TicketNo: ticket.No,
+                    TicketType: ticket.CustomerType,
+                }) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+                .then(() => {
+                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                })
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        }
 
         const invoiceData = {
             Report: company2Tickets,
@@ -503,7 +519,7 @@ const UpdateReport = (props) => {
             Code: Code,
             Date: invoices2[0].DateStart,
             DateStart: ticket.Date,
-            DateEnd: calculateDueDate(ticket.Date,ticket.CreditTime)
+            DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -591,38 +607,38 @@ const UpdateReport = (props) => {
     };
 
     const handleNewInvoice1 = () => {
-            database
-                .ref("invoice/")
-                .child(invoices1[0].id)
-                .update({
-                    TicketNo: "ยกเลิก"
-                })
-                .then(() => {
-                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
-                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                })
-                .catch((error) => {
-                    ShowError("ไม่สำเร็จ");
-                    console.error("Error updating data:", error);
-                });
-        }
+        database
+            .ref("invoice/")
+            .child(invoices1[0].id)
+            .update({
+                TicketNo: "ยกเลิก"
+            })
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+    }
 
     const handleNewInvoice2 = () => {
-            database
-                .ref("invoice/")
-                .child(invoices2[0].id)
-                .update({
-                    TicketNo: "ยกเลิก"
-                })
-                .then(() => {
-                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
-                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                })
-                .catch((error) => {
-                    ShowError("ไม่สำเร็จ");
-                    console.error("Error updating data:", error);
-                });
-        }
+        database
+            .ref("invoice/")
+            .child(invoices2[0].id)
+            .update({
+                TicketNo: "ยกเลิก"
+            })
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+    }
 
     const handleSubmit = () => {
         database
@@ -671,27 +687,31 @@ const UpdateReport = (props) => {
     let displayIndex1 = 0;
     let displayIndex2 = 0;
 
-    console.log("Show Company 1 ",company1Tickets);
-    console.log("show company 2 ",company2Tickets);
+    console.log("Show Company 1 ", company1Tickets);
+    console.log("show company 2 ", company2Tickets);
 
     return (
         <React.Fragment>
-            <Box>
+            <Box sx={{ width: "100%" }}>
                 <Grid container spacing={1}>
-                    <Grid item xs={7}>
+                    <Grid item md={7} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginBottom: -2, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                             รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName.split(":")[1]}
                         </Typography>
                     </Grid>
-                    <Grid item xs={5}>
+                    {
+                        windowWidth >= 900 && 
+                        <Grid item md={5} xs={12}>
                         <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -3, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของบจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
                     </Grid>
-                    <Grid item xs={7.5}>
+                    }
+                    
+                    <Grid item md={7.5} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                             บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
                         </Typography>
                     </Grid>
-                    <Grid item xs={3} textAlign="right">
+                    <Grid item md={3} xs={8} textAlign="right">
                         <Grid container sx={{ marginTop: 1 }}>
                             <Grid item xs={3}>
                                 <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice1}>
@@ -719,7 +739,7 @@ const UpdateReport = (props) => {
                                                 marginLeft: -1
                                             },
                                         }}
-                                    value={invoices1[0]?.Code || `lV${currentCode}`}
+                                        value={invoices1[0]?.Code || `lV${currentCode}`}
                                     />
                                 </Paper>
                             </Grid>
@@ -747,13 +767,13 @@ const UpdateReport = (props) => {
                                             },
                                             marginRight: 1,
                                         }}
-                                    value={invoices1[0]?.Number || ""}
+                                        value={invoices1[0]?.Number || ""}
                                     />
                                 </Paper>
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={1.5}>
+                    <Grid item md={1.5} xs={4}>
                         <Tooltip title="พิมพ์ใบวางบิล" placement="top">
                             <Button
                                 color="primary"
@@ -795,9 +815,9 @@ const UpdateReport = (props) => {
                             zIndex: 3,
                         }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                             <TableHead>
-                            {/* <TableRow>
+                                {/* <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '35px', backgroundColor: theme.palette.primary.dark }}>
                                         ลำดับ
                                     </TablecellSelling>
@@ -882,9 +902,9 @@ const UpdateReport = (props) => {
                             overflowY: "auto",
                         }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                             <TableBody>
-                            {/* {company1Tickets.map((row, index) => {
+                                {/* {company1Tickets.map((row, index) => {
                                     const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
                                     const rowSpan = rowSpanMap1[key] && !mergedCells1[key] ? rowSpanMap1[key] : 0;
                                     if (rowSpan) {
@@ -1056,7 +1076,7 @@ const UpdateReport = (props) => {
                             zIndex: 2,
                         }}
                     >
-                        <Grid container spacing={2} sx={{ backgroundColor: "#616161", color: "white", paddingLeft: 2, paddingRight: 2 }}>
+                        <Grid container spacing={2} sx={{ backgroundColor: "#616161", color: "white", paddingLeft: 2, paddingRight: 2, width: "1270px" }}>
                             <Grid item xs={2} sx={{ borderRight: "1px solid white" }}>
                                 <Grid container spacing={2} sx={{ paddingLeft: 1, paddingRight: 1 }}>
                                     <Grid item xs={5}>
@@ -1297,17 +1317,20 @@ const UpdateReport = (props) => {
                     </Box>
                 </Paper>
             </Box>
-            <Box marginTop={3}>
+            <Box marginTop={3} sx={{ width: "100%" }}>
                 <Grid container spacing={1}>
-                    <Grid item xs={12}>
-                        <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "right", marginBottom: -1 }} gutterBottom>*พิมพ์ใบวางบิลของหจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
-                    </Grid>
-                    <Grid item xs={7.5}>
+                    {
+                        windowWidth >= 900 &&
+                        <Grid item md={12} xs={12}>
+                            <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "right", marginBottom: -1 }} gutterBottom>*พิมพ์ใบวางบิลของหจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
+                        </Grid>
+                    }
+                    <Grid item md={7.5} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                             หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
                         </Typography>
                     </Grid>
-                    <Grid item xs={3} textAlign="right">
+                    <Grid item md={3} xs={8} textAlign="right">
                         <Grid container sx={{ marginTop: 1 }}>
                             <Grid item xs={3}>
                                 <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice2}>
@@ -1335,7 +1358,7 @@ const UpdateReport = (props) => {
                                                 marginLeft: -1
                                             },
                                         }}
-                                    value={invoices2[0]?.Code || `lV${currentCode}`}
+                                        value={invoices2[0]?.Code || `lV${currentCode}`}
                                     />
                                 </Paper>
                             </Grid>
@@ -1363,13 +1386,13 @@ const UpdateReport = (props) => {
                                             },
                                             marginRight: 1,
                                         }}
-                                    value={invoices2[0]?.Number || ""}
+                                        value={invoices2[0]?.Number || ""}
                                     />
                                 </Paper>
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={1.5}>
+                    <Grid item md={1.5} xs={4}>
                         <Tooltip title="พิมพ์ใบวางบิล" placement="top">
                             <Button
                                 color="primary"
@@ -1431,7 +1454,7 @@ const UpdateReport = (props) => {
                             zIndex: 3,
                         }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                             <TableHead>
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '35px', backgroundColor: theme.palette.primary.dark }}>
@@ -1474,7 +1497,7 @@ const UpdateReport = (props) => {
                             overflowY: "auto",
                         }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px", width: "1250px" } }}>
                             <TableBody>
                                 {company2Tickets.map((row, index) => {
                                     const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
@@ -1568,7 +1591,7 @@ const UpdateReport = (props) => {
                             zIndex: 2,
                         }}
                     >
-                        <Grid container spacing={2} sx={{ backgroundColor: "#616161", color: "white", paddingLeft: 2, paddingRight: 2 }}>
+                        <Grid container spacing={2} sx={{ backgroundColor: "#616161", color: "white", paddingLeft: 2, paddingRight: 2, width: "1270px" }}>
                             <Grid item xs={2} sx={{ borderRight: "1px solid white" }}>
                                 <Grid container spacing={2} sx={{ paddingLeft: 1, paddingRight: 1 }}>
                                     <Grid item xs={5}>
@@ -1810,14 +1833,15 @@ const UpdateReport = (props) => {
                 </Paper>
             </Box >
             <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: 5, fontSize: "18px" }} gutterBottom>ข้อมูลการโอน</Typography>
+            <Box sx={{ width: "100%" }}>
             <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item md={12} xs={12}>
                     <TableContainer
                         component={Paper}
                         sx={{ marginBottom: 2, borderRadius: 2 }}
                     >
                         <Box>
-                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                                 <TableHead>
                                     <TableRow>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
@@ -1858,7 +1882,7 @@ const UpdateReport = (props) => {
                                 </TableBody>
                             </Table>
                         </Box>
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                             <TableBody>
                                 <TableRow>
                                     <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 770 }} colSpan={4}>
@@ -1881,12 +1905,12 @@ const UpdateReport = (props) => {
                         </Table>
                     </TableContainer>
                 </Grid>
-                <Grid item xs={11.5}>
+                <Grid item md={11.5} xs={12}>
                     <Paper component="form" sx={{ borderRadius: 2, p: 2, backgroundColor: "#bdbdbd" }}>
                         <Typography variant="h6" fontWeight="bold" sx={{ marginLeft: 2 }} gutterBottom>กรอกข้อมูลการโอนเงินตรงนี้</Typography>
                         <Divider sx={{ marginBottom: 1, backgroundColor: "white" }} />
                         <Grid container spacing={2}>
-                            <Grid item xs={3}>
+                            <Grid item md={3} xs={6}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1 }} gutterBottom>Statement</Typography>
                                     <Grid container>
@@ -1950,7 +1974,7 @@ const UpdateReport = (props) => {
                                     </Grid>
                                 </Box>
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item md={3} xs={6}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>เงินเข้า</Typography>
                                     <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
@@ -1983,7 +2007,7 @@ const UpdateReport = (props) => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item md={6} xs={12}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>บริษัทรับจ้างขนส่ง</Typography>
 
@@ -2015,10 +2039,10 @@ const UpdateReport = (props) => {
                             </Grid>
                         </Grid>
                         <Grid container spacing={2}>
-                            <Grid item xs={0.5}>
-
-                            </Grid>
-                            <Grid item xs={5.5}>
+                            {
+                                windowWidth >= 900 && <Grid item md={0.5} xs={12}/>
+                            }
+                            <Grid item md={5.5} xs={6}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>บัญชี</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -2044,7 +2068,7 @@ const UpdateReport = (props) => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item md={3} xs={6}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>จำนวนเงิน</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -2062,7 +2086,7 @@ const UpdateReport = (props) => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item md={3} xs={12}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginRight: 1, whiteSpace: "nowrap" }} gutterBottom>หมายเหตุ</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
@@ -2082,8 +2106,30 @@ const UpdateReport = (props) => {
                         </Grid>
                     </Paper>
                 </Grid>
-                <Grid item xs={0.5} sx={{ marginTop: 0.5 }}>
-                    <BankDetail />
+                <Grid item md={0.5} xs={12} sx={{ marginTop: 0.5 }}>
+                    {
+                        windowWidth <= 900 ?
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <BankDetail />
+                    <Tooltip title="บันทึก" placement="left">
+                        <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: 3, marginRight: -1, marginTop: 1 }}>
+                            <Button
+                                color="inherit"
+                                fullWidth
+                                onClick={handleSubmit}
+                                sx={{ flexDirection: "column", gap: 0.5 }}
+                            >
+                                <SaveIcon fontSize="small" sx={{ color: "white" }} />
+                                <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                    บันทึก
+                                </Typography>
+                            </Button>
+                        </Paper>
+                    </Tooltip>
+                        </Box>
+                        :
+                        <>
+                        <BankDetail />
                     <Tooltip title="บันทึก" placement="left">
                         <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1 }}>
                             <Button
@@ -2099,8 +2145,11 @@ const UpdateReport = (props) => {
                             </Button>
                         </Paper>
                     </Tooltip>
+                        </>
+                    }
                 </Grid>
             </Grid>
+            </Box>
         </React.Fragment >
     );
 };

@@ -92,12 +92,12 @@ const Invoice = () => {
   console.log("selectedRow : ", selectedRow);
   console.log("indexes : ", indexes);
 
-  const { order,transferMoney } = useData();
+  const { order, transferMoney } = useData();
   const orders = Object.values(order || {});
   const transferMoneyDetail = Object.values(transferMoney || {});
 
   console.log("Transfer Money : ", transferMoneyDetail);
-  
+
   const orderDetail = orders
     .filter((item) => {
       const itemDate = dayjs(item.Date, "DD/MM/YYYY");
@@ -113,11 +113,11 @@ const Invoice = () => {
       let totalOverdue = 0;
 
       const totalIncomingMoney = transferMoneyDetail
-      .filter(trans => trans.TicketNo === item.No)
-      .reduce((sum, trans) => {
-        const value = parseFloat(trans.IncomingMoney) || 0;
-        return sum + value;
-      }, 0);
+        .filter(trans => trans.TicketNo === item.No)
+        .reduce((sum, trans) => {
+          const value = parseFloat(trans.IncomingMoney) || 0;
+          return sum + value;
+        }, 0);
 
       Object.entries(item.Product).forEach(([key, value]) => {
         if (key !== "P") {
@@ -160,10 +160,10 @@ const Invoice = () => {
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
       <Grid container>
-        <Grid item xs={3}>
+        <Grid item md={3} xs={12}>
 
         </Grid>
-        <Grid item xs={9}>
+        <Grid item md={9} xs={12}>
           <Typography
             variant="h3"
             fontWeight="bold"
@@ -173,78 +173,80 @@ const Invoice = () => {
             ชำระค่าน้ำมัน
           </Typography>
         </Grid>
+        <Grid item md={5} xs={12}>
+          <Box
+            sx={{
+              width: "100%", // กำหนดความกว้างของ Paper
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: { md: -8, xs: 2 },
+              marginBottom: 3
+            }}
+          >
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                openTo="day"
+                views={["year", "month", "day"]}
+                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                format="DD/MM/YYYY"
+                onChange={handleDateChangeDateStart}
+                sx={{ marginRight: 2, }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                          วันที่เริ่มต้น :
+                        </InputAdornment>
+                      ),
+                      sx: {
+                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                        height: "40px",  // ความสูงของ Input
+                        padding: "10px", // Padding ภายใน Input
+                        fontWeight: "bold",
+                      },
+                    },
+                  },
+                }}
+              />
+              <DatePicker
+                openTo="day"
+                views={["year", "month", "day"]}
+                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                format="DD/MM/YYYY"
+                onChange={handleDateChangeDateEnd}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                          วันที่สิ้นสุด :
+                        </InputAdornment>
+                      ),
+                      sx: {
+                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                        height: "40px",  // ความสูงของ Input
+                        padding: "10px", // Padding ภายใน Input
+                        fontWeight: "bold",
+                      },
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Box>
+        </Grid>
       </Grid>
-      <Box
-        sx={{
-          width: "100%", // กำหนดความกว้างของ Paper
-          height: "40px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: -8,
-          marginBottom: 3,
-          width: 550
-        }}
-      >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            openTo="day"
-            views={["year", "month", "day"]}
-            value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-            format="DD/MM/YYYY"
-            onChange={handleDateChangeDateStart}
-            sx={{ marginRight: 2, }}
-            slotProps={{
-              textField: {
-                size: "small",
-                fullWidth: true,
-                InputProps: {
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                      วันที่เริ่มต้น :
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                    height: "40px",  // ความสูงของ Input
-                    padding: "10px", // Padding ภายใน Input
-                    fontWeight: "bold",
-                  },
-                },
-              },
-            }}
-          />
-          <DatePicker
-            openTo="day"
-            views={["year", "month", "day"]}
-            value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-            format="DD/MM/YYYY"
-            onChange={handleDateChangeDateEnd}
-            slotProps={{
-              textField: {
-                size: "small",
-                fullWidth: true,
-                InputProps: {
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                      วันที่สิ้นสุด :
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                    height: "40px",  // ความสูงของ Input
-                    padding: "10px", // Padding ภายใน Input
-                    fontWeight: "bold",
-                  },
-                },
-              },
-            }}
-          />
-        </LocalizationProvider>
-      </Box>
       <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} marginTop={3}>
-        {/*  <Grid item xs={4}>
+      <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+        <Grid container spacing={2} marginTop={3}>
+          {/*  <Grid item xs={4}>
           <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ลูกค้า</Button>
         </Grid>
         <Grid item xs={4}>
@@ -273,37 +275,57 @@ const Invoice = () => {
             open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
           }
         </Grid> */}
-        <Grid item xs={12}>
-          {/* <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -3 }}> */}
+          <Grid item xs={12}>
+            {/* <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -3 }}> */}
             {
               //open === 1 ?
               <Grid container spacing={2} sx={{ marginTop: -5, }}>
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
-                    </Grid>
-                    <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
-                      <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
-                      <FormControlLabel control={
-                        <Checkbox
-                          value={checkOverdueTransfer}
-                          //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
-                          onChange={handleChangeCheck}
-                          defaultChecked />
-                      }
-                        label={
-                          <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
-                            ค้างโอน
-                          </Typography>
-                        } />
-                    </Grid>
+                    {
+                      windowWidth <= 900 ?
+                        <Grid item xs={12} display="flex" justifyContent="right" alignItems="center">
+                          <FormControlLabel control={
+                            <Checkbox
+                              value={checkOverdueTransfer}
+                              //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                              onChange={handleChangeCheck}
+                              defaultChecked />
+                          }
+                            label={
+                              <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                ค้างโอน
+                              </Typography>
+                            } />
+                        </Grid>
+                        :
+                        <>
+                          <Grid item xs={6}>
+                            <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+                          </Grid>
+                          <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
+                            <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
+                            <FormControlLabel control={
+                              <Checkbox
+                                value={checkOverdueTransfer}
+                                //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                                onChange={handleChangeCheck}
+                                defaultChecked />
+                            }
+                              label={
+                                <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                  ค้างโอน
+                                </Typography>
+                              } />
+                          </Grid>
+                        </>
+                    }
                   </Grid>
                   <TableContainer
                     component={Paper}
                     sx={orderDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
                   >
-                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1330px" }}>
                       <TableHead sx={{ height: "5vh" }}>
                         <TableRow>
                           <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -315,7 +337,7 @@ const Invoice = () => {
                           <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             กำหนดชำระเงิน
                           </TablecellHeader>
-                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 300 }}>
+                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                             ชื่อ-สกุล
                           </TablecellHeader>
                           <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
@@ -336,9 +358,9 @@ const Invoice = () => {
                         {
                           checkOverdueTransfer ?
                             orderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
-                            .map((row, index) => (
+                              .map((row, index) => (
                                 <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
-                                sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                     {index + 1}
@@ -368,11 +390,11 @@ const Invoice = () => {
                                   </TableCell>
                                 </TableRow>
                               )
-                            )
+                              )
                             :
                             orderDetail.map((row, index) => (
                               <TableRow key={row.No} onClick={() => handleRowClick(row.No, index)}
-                              sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                               >
                                 <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                   {index + 1}
@@ -450,18 +472,18 @@ const Invoice = () => {
                 <Grid item xs={12}>
                   {
                     checkOverdueTransfer ?
-                    orderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
-                            .map((row, index) => (
-                              (selectedRow && selectedRow === row.No) || indexes === index ?
-                        <UpdateInvoice key={row.No} ticket={row} />
-                        : ""
-                    ))
-                    :
-                    orderDetail.map((row, index) => (
-                      (selectedRow && selectedRow === row.No) || indexes === index ?
-                        <UpdateInvoice key={row.No} ticket={row} />
-                        : ""
-                    ))
+                      orderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
+                        .map((row, index) => (
+                          (selectedRow && selectedRow === row.No) || indexes === index ?
+                            <UpdateInvoice key={row.No} ticket={row} />
+                            : ""
+                        ))
+                      :
+                      orderDetail.map((row, index) => (
+                        (selectedRow && selectedRow === row.No) || indexes === index ?
+                          <UpdateInvoice key={row.No} ticket={row} />
+                          : ""
+                      ))
                   }
                 </Grid>
               </Grid>
@@ -596,9 +618,10 @@ const Invoice = () => {
               //         </Grid>
               //       </Grid>
             }
-          {/* </Paper> */}
+            {/* </Paper> */}
+          </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Container>
   );
 };

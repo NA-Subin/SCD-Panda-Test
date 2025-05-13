@@ -128,9 +128,7 @@ const UpdateRegHead = (props) => {
 
     return (
         <React.Fragment>
-            <TableCell sx={{ textAlign: "center", width: 20 }}>
-                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpen(regHead)}><InfoIcon color="info" fontSize="12px" /></IconButton>
-            </TableCell>
+                <IconButton size="small" sx={{ marginTop: -0.5,marginRight: 1 }} onClick={() => setOpen(regHead)}><InfoIcon color="info" fontSize="12px" /></IconButton>
             <Dialog
                 open={open === regHead ? true : false}
                 keepMounted

@@ -178,8 +178,12 @@ const RegHeadDetail = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{truck.Status}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.Company.split(":")[1]}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{truck.Driver === "ไม่มี" ? truck.Driver : truck.Driver.split(":")[1]}</TableCell>
-                        <UpdateRegHead key={truck.id} truck={truck}/>
+                        <TableCell sx={{ width: 40, position: "sticky", right: 0, backgroundColor: "white" }} colSpan={2}>
+                          <Box display="flex" justifyContent="center" alignItems="center">
+                            <UpdateRegHead key={truck.id} truck={truck}/>
                         <TruckRepair key={truck.RepairTruck.split(":")[1]} row={truck} />
+                          </Box>
+                        </TableCell>
                       </TableRow>
     </React.Fragment>
   );

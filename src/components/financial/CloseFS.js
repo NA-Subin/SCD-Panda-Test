@@ -50,6 +50,21 @@ const CloseFS = () => {
     const [months, setMonths] = React.useState(dayjs(new Date));
     const [years, setYears] = React.useState(dayjs(new Date));
     const [driverDetail, setDriver] = React.useState([]);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const { company, drivers, typeFinancial, order, reghead, trip } = useData();
     const companies = Object.values(company || {});
@@ -316,8 +331,9 @@ const CloseFS = () => {
                 ปิดงบการเงิน
             </Typography>
             <Divider sx={{ marginBottom: 2 }} />
+            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Grid container spacing={2}>
-                <Grid item xs={2}>
+                <Grid item md={2} xs={6}>
                     <FormGroup row>
                         <FormControlLabel
                             control={
@@ -347,7 +363,7 @@ const CloseFS = () => {
                         />
                     </FormGroup>
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item md={3} xs={6}>
                     {
                         date ?
                             <Paper component="form" sx={{ width: "100%", height: "30px", marginTop: 1 }}>
@@ -415,7 +431,7 @@ const CloseFS = () => {
                             </Paper>
                     }
                 </Grid>
-                <Grid item xs={7}>
+                <Grid item md={7} xs={12}>
                     <FormControl fullWidth size="small" sx={{ marginTop: 1 }}>
                         <InputLabel id="demo-simple-select-label" sx={{ fontSize: "16px" }}>กรุณาเลือกบริษัท</InputLabel>
                         <Select
@@ -444,7 +460,7 @@ const CloseFS = () => {
                     </FormControl>
 
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item md={12} xs={12}>
                     <FormGroup row sx={{ marginTop: -2 }}>
                         <Typography variant="subtitle2" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography>
                         <FormControlLabel
@@ -461,31 +477,31 @@ const CloseFS = () => {
                             }
                         />
                         <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={check === 2 ? true : false}
-                                            onChange={() => setCheck(2)}
-                                        />
-                                    }
-                                    label={
-                                        <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                            รายได้
-                                        </Typography>
-                                    }
+                            control={
+                                <Checkbox
+                                    checked={check === 2 ? true : false}
+                                    onChange={() => setCheck(2)}
                                 />
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={check === 3 ? true : false}
-                                            onChange={() => setCheck(3)}
-                                        />
-                                    }
-                                    label={
-                                        <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                            ค่าใช้จ่าย
-                                        </Typography>
-                                    }
+                            }
+                            label={
+                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                    รายได้
+                                </Typography>
+                            }
+                        />
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={check === 3 ? true : false}
+                                    onChange={() => setCheck(3)}
                                 />
+                            }
+                            label={
+                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                    ค่าใช้จ่าย
+                                </Typography>
+                            }
+                        />
                         {/* {
                             Object.entries(typeF).map(([key, label]) => (
                                 <FormControlLabel
@@ -508,7 +524,8 @@ const CloseFS = () => {
                     </FormGroup>
                 </Grid>
             </Grid>
-            <Box display="flex" justifyContent="center" alignItems="center" width="100%">
+            </Box>
+            <Box display="flex" justifyContent="center" alignItems="center" width="100%" sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <TableContainer
                     component={Paper}
                     sx={{
@@ -516,7 +533,7 @@ const CloseFS = () => {
                         overflowX: "auto"
                     }}
                 >
-                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
+                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
                         <TableHead sx={{ height: "5vh" }}>
                             <TableRow>
                                 <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
@@ -548,13 +565,13 @@ const CloseFS = () => {
                             {
                                 dataNotCancel.map((row, index) => (
                                     <TableRow>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white",backgroundColor: "white" }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>
                                             {index + 1}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
                                             รายได้
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white",backgroundColor: "white"  }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>
                                             {row.TicketName.split(":")[1]}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
@@ -565,13 +582,13 @@ const CloseFS = () => {
                                                             : ""
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white",backgroundColor: "white"  }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>
                                             -
                                         </TableCell>
                                         {data.map((h) => (
-                                        <TableCell key={`${h.Driver}:${h.Registration}`}  sx={{ textAlign: "center" }}>
-                                            {row.amounts[`${h.Driver}:${h.Registration}`] || "-"}
-                                        </TableCell>
+                                            <TableCell key={`${h.Driver}:${h.Registration}`} sx={{ textAlign: "center" }}>
+                                                {row.amounts[`${h.Driver}:${h.Registration}`] || "-"}
+                                            </TableCell>
                                         ))}
                                     </TableRow>
                                 ))

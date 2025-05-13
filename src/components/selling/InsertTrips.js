@@ -70,6 +70,21 @@ const InsertTrips = () => {
     const dialogRef = useRef(null);
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
     const [editMode, setEditMode] = useState(true);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    
+        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+        useEffect(() => {
+            const handleResize = () => {
+                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            };
+    
+            window.addEventListener('resize', handleResize); // เพิ่ม event listener
+    
+            // ลบ event listener เมื่อ component ถูกทำลาย
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }, []);
 
     // โหลด html2canvas จาก CDN
     useEffect(() => {
@@ -415,8 +430,8 @@ const InsertTrips = () => {
     console.log("ข้อมูลตั๋ว : ", Object.values(ordersTickets));
     console.log("ข้อมูลลูกค้า : ", Object.values(selling));
 
-    console.log("Order on Trip : ",orderTrip);
-    console.log("Ticket on Trip : ",ticketTrip);
+    console.log("Order on Trip : ", orderTrip);
+    console.log("Ticket on Trip : ", ticketTrip);
 
     const handlePost = (event) => {
         const ticketValue = event.target.value;
@@ -558,12 +573,12 @@ const InsertTrips = () => {
     const handleRegistration = (event) => {
         const registrationValue = event;
         setRegistration(registrationValue);
-        console.log("show registration : ",registrationValue);
+        console.log("show registration : ", registrationValue);
 
         if (Object.keys(ordersTickets).length > 0) {
             const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
             const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
-    
+
             setOrdersTickets((prevSelling) =>
                 Object.fromEntries(
                     Object.entries(prevSelling).map(([key, item]) => [
@@ -578,24 +593,24 @@ const InsertTrips = () => {
             );
         }
 
-    // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
-    if (Object.keys(selling).length > 0) {
-        const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
-        const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+        // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
+        if (Object.keys(selling).length > 0) {
+            const registration = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            const driver = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
 
-        setSelling((prevSelling) =>
-            Object.fromEntries(
-                Object.entries(prevSelling).map(([key, item]) => [
-                    key,
-                    {
-                        ...item,
-                        Registration: registration,
-                        Driver: driver,
-                    },
-                ])
-            )
-        );
-    }
+            setSelling((prevSelling) =>
+                Object.fromEntries(
+                    Object.entries(prevSelling).map(([key, item]) => [
+                        key,
+                        {
+                            ...item,
+                            Registration: registration,
+                            Driver: driver,
+                        },
+                    ])
+                )
+            );
+        }
 
     }
 
@@ -1114,6 +1129,16 @@ const InsertTrips = () => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+        setOrdersTickets({});
+        setSelling({});
+        setVolumeT({});
+        setVolumeS({});
+        setWeightA({});
+        setOrderTrip({});
+        setWeightH(0);
+        setWeightL(0);
+        setCostTrip(0);
+        setRegistration("0:0:0:0:0");
     };
 
     const handleCancle = () => {
@@ -1356,9 +1381,9 @@ const InsertTrips = () => {
                 <DialogContent>
                     <Box sx={{ p: 2 }} ref={dialogRef}>
                         <Grid container spacing={1} marginTop={0.5}>
-                            <Grid item sm={3.5} xs={12} textAlign="right">
+                            <Grid item md={3.5} xs={12} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.success.dark, marginTop: 0.5 }} gutterBottom>ตั๋วน้ำมัน</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.success.dark, marginTop: 0.5 }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>วันที่รับ</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -1394,7 +1419,7 @@ const InsertTrips = () => {
 
                                 </Box>
                             </Grid>
-                            <Grid item sm={6} xs={12}>
+                            <Grid item md={6} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
@@ -1426,7 +1451,7 @@ const InsertTrips = () => {
                                                     size="small"
                                                     sx={{
                                                         "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "16px",marginLeft: -1 },
+                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
                                                     }}
                                                 />
                                             )}
@@ -1445,7 +1470,7 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item sm={2.5} xs={12} display="flex" alignItems="center" justifyContent="center">
+                            <Grid item md={2.5} xs={12} display="flex" alignItems="center" justifyContent="center">
                                 <Typography variant="h6" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 0.5 }} fontWeight="bold" gutterBottom>คลัง</Typography>
                                 <Paper sx={{ width: "100%" }}
                                     component="form">
@@ -1466,7 +1491,7 @@ const InsertTrips = () => {
                                                 size="small"
                                                 sx={{
                                                     "& .MuiOutlinedInput-root": { height: "30px" },
-                                                    "& .MuiInputBase-input": { fontSize: "16px",marginLeft: -1 },
+                                                    "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
                                                 }}
                                             />
                                         )}
@@ -1515,16 +1540,16 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableHead>
                                             <TableRow>
-                                                <TablecellTickets width={50} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
-                                                <TablecellTickets width={350} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
-                                                <TablecellTickets width={150} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
-                                                <TablecellTickets width={100} sx={{ textAlign: "center",fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
-                                                <TableCellG95 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>G95</TableCellG95>
-                                                <TableCellB95 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>B95</TableCellB95>
-                                                <TableCellB7 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>B7(D)</TableCellB7>
-                                                <TableCellG91 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>G91</TableCellG91>
-                                                <TableCellE20 width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>E20</TableCellE20>
-                                                <TableCellPWD width={60} sx={{ textAlign: "center",fontSize: "16px", height: "35px" }}>PWD</TableCellPWD>
+                                                <TablecellTickets width={50} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ลำดับ</TablecellTickets>
+                                                <TablecellTickets width={350} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ตั๋ว</TablecellTickets>
+                                                <TablecellTickets width={150} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>เลขที่ออเดอร์</TablecellTickets>
+                                                <TablecellTickets width={100} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>ค่าบรรทุก</TablecellTickets>
+                                                <TableCellG95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G95</TableCellG95>
+                                                <TableCellB95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B95</TableCellB95>
+                                                <TableCellB7 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B7(D)</TableCellB7>
+                                                <TableCellG91 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G91</TableCellG91>
+                                                <TableCellE20 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>E20</TableCellE20>
+                                                <TableCellPWD width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>PWD</TableCellPWD>
                                                 <TablecellTickets width={Object.keys(ordersTickets).length > 5 ? 90 : 80} sx={{ textAlign: "center", height: "35px", borderLeft: "3px solid white", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }} />
                                             </TableRow>
                                         </TableHead>
@@ -1580,7 +1605,7 @@ const InsertTrips = () => {
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
                                             <TableRow>
-                                                <TablecellTickets width={650} sx={{ textAlign: "center",fontSize: "16px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
+                                                <TablecellTickets width={650} sx={{ textAlign: "center", fontSize: "16px", backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 && theme.palette.error.main }}>
                                                     ปริมาณรวม
                                                 </TablecellTickets>
                                                 <TableCellG95 width={60} sx={{ textAlign: "center", backgroundColor: editMode ? "" : "lightgray" }}>
@@ -1842,7 +1867,7 @@ const InsertTrips = () => {
                                 </Box>
                             </Paper>
                             <Grid container spacing={1} marginBottom={-1}>
-                                <Grid item sm={6} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <Paper
                                         component="form"
                                         sx={{ height: "30px", width: "100%" }}
@@ -1871,7 +1896,7 @@ const InsertTrips = () => {
                                                     size="small"
                                                     sx={{
                                                         "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "16px",marginLeft: -1 },
+                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
                                                     }}
                                                 />
                                             )}
@@ -1884,7 +1909,7 @@ const InsertTrips = () => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={2} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>น้ำมันหนัก</Typography>
                                     <Paper
                                         component="form" sx={{ width: "100%", marginTop: -1 }}>
@@ -1913,7 +1938,7 @@ const InsertTrips = () => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={2} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>น้ำมันเบา</Typography>
                                     <Paper
                                         component="form" sx={{ width: "100%", marginTop: -1 }}>
@@ -1945,7 +1970,7 @@ const InsertTrips = () => {
                                 {/* {
                                 regHead.map((row) => (
                                     row.RegHead === registration.split(":")[1] ? */}
-                                <Grid item sm={2} xs={6} display="flex" justifyContent="center" alignItems="center">
+                                <Grid item md={2} xs={6} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>น้ำหนักรถ</Typography>
                                     <Paper
                                         component="form" sx={{ width: "100%", marginTop: -1 }}>
@@ -1975,6 +2000,39 @@ const InsertTrips = () => {
                                         />
                                     </Paper>
                                 </Grid>
+                                {
+                                    windowWidth <= 900 &&
+                                    <Grid item xs>
+                                        <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
+                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
+                                            <Paper
+                                                component="form" sx={{ width: "100%", marginTop: 0.5 }}>
+                                                <TextField size="small" fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            height: '30px', // ปรับความสูงของ TextField
+                                                            display: 'flex', // ใช้ flexbox
+                                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                        },
+                                                        '& .MuiInputBase-input': {
+                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
+                                                            fontWeight: 'bold',
+                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                        },
+                                                        borderRadius: 10
+                                                    }}
+                                                    value={new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    }).format((parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) || 0)}
+                                                // InputProps={{
+                                                //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
+                                                // }}
+                                                />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
+                                }
                                 {/* :
                                         null
                                 ))
@@ -1992,9 +2050,9 @@ const InsertTrips = () => {
                             ""
                     }*/}
                         <Grid container spacing={1}>
-                            <Grid item sm={3.5} xs={12} textAlign="right">
+                            <Grid item md={3.5} xs={12} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.info.main, marginTop: 0.5 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, color: theme.palette.info.main, marginTop: 0.5 }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>วันที่ส่ง</Typography>
                                     <Paper component="form" sx={{ width: "100%" }}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -2030,7 +2088,7 @@ const InsertTrips = () => {
 
                                 </Box>
                             </Grid>
-                            <Grid item sm={6} xs={12}>
+                            <Grid item md={6} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 0.5 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
@@ -2094,7 +2152,9 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Box>
                             </Grid>
-                            <Grid item sm={2.5} xs={12}>
+                            {
+                                 windowWidth >= 900 &&
+<Grid item md={2.5} xs={12}>
                                 <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
                                     <Paper
@@ -2124,6 +2184,7 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Box>
                             </Grid>
+                            }
                         </Grid>
                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>
                             <Paper
@@ -2370,7 +2431,7 @@ const InsertTrips = () => {
                                 </Box>
                             </Paper>
                             <Grid container spacing={1}>
-                                <Grid item sm={6} xs={12}>
+                                <Grid item md={6} xs={12}>
                                     <Paper
                                         component="form"
                                     >
@@ -2453,9 +2514,9 @@ const InsertTrips = () => {
                                         </Grid>
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={2} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
-                                    <Paper sx={{ width: "100%",marginTop: -1 }}
+                                    <Paper sx={{ width: "100%", marginTop: -1 }}
                                         component="form">
                                         <TextField
                                             size="small"
@@ -2475,9 +2536,9 @@ const InsertTrips = () => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={4} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={4} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
-                                    <Paper sx={{ width: "100%",marginTop: -1 }}
+                                    <Paper sx={{ width: "100%", marginTop: -1 }}
                                         component="form">
                                         <TextField
                                             size="small"

@@ -93,7 +93,7 @@ const InsertEmployee = (props) => {
     const [phone, setPhone] = React.useState("");
     const [password, setPassword] = React.useState("1234567")
     const [openPosition, setOpenPosition] = React.useState(false);
-    const [check,setCheck] = React.useState(1);
+    const [check, setCheck] = React.useState(1);
 
     const handleAddPosition = () => {
         database.ref("positions/").child(positionDetail.length).set(newPosition)
@@ -138,99 +138,110 @@ const InsertEmployee = (props) => {
         } else {
             createUserWithEmailAndPassword(auth, (user + "@gmail.com"), password).then(
                 (userCredential) => {
-            database
-                .ref("employee/drivers/")
-                .child(driver.length)
-                .update({
-                    id: driver.length + 1,
-                    Name: prefix + name + " " + lastname,
-                    User: user,
-                    Password: password,
-                    Phone: phone,
-                    Registration: regTruck,
-                    BankID: bankID,
-                    BankName: bank,
-                    IDCard: idCard,
-                    Position: "พนักงานขับรถ",
-                    Salary: salary,
-                    TripCost: tripCost,
-                    PointCost: pointCost,
-                    Security: security,
-                    TelephoneBill: telephoneBill,
-                    TruckType: trucks,
-                    Deposit: deposit,
-                    Loan: loan,
-                    DrivingLicense: drivingLicense,
-                    DrivingLicenseExpiration: expiration,
-                    DrivingLicensePicture: "ไม่มี"
-                })
-                .then(() => {
-                    if (trucks === "รถใหญ่" && regTruck !== "0:ไม่มี") {
-                        database
-                            .ref("/truck/registration/")
-                            .child(regTruck.split(":")[0] - 1)
-                            .update({
-                                Driver: prefix + name + " " + lastname,
-                            })
-                            .then(() => {
-                                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                                console.log("Data pushed successfully");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
-                    } else if (trucks === "รถเล็ก" && regTruck !== "0:ไม่มี") {
-                        database
-                            .ref("/truck/registrationTail/")
-                            .child(regTruck.split(":")[0] - 1)
-                            .update({
-                                Driver: prefix + name + " " + lastname,
-                            })
-                            .then(() => {
-                                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                                console.log("Data pushed successfully");
-                            })
-                            .catch((error) => {
-                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                console.error("Error pushing data:", error);
-                            });
-                    } else {
+                    database
+                        .ref("employee/drivers/")
+                        .child(driver.length)
+                        .update({
+                            id: driver.length + 1,
+                            Name: prefix + name + " " + lastname,
+                            User: user,
+                            Password: password,
+                            Phone: phone,
+                            Registration: regTruck,
+                            BankID: bankID,
+                            BankName: bank,
+                            IDCard: idCard,
+                            Position: "พนักงานขับรถ",
+                            Salary: salary,
+                            TripCost: tripCost,
+                            PointCost: pointCost,
+                            Security: security,
+                            TelephoneBill: telephoneBill,
+                            TruckType: trucks,
+                            Deposit: deposit,
+                            Loan: loan,
+                            DrivingLicense: drivingLicense,
+                            DrivingLicenseExpiration: expiration,
+                            DrivingLicensePicture: "ไม่มี"
+                        })
+                        .then(() => {
+                            if (trucks === "รถใหญ่" && regTruck !== "0:ไม่มี") {
+                                database
+                                    .ref("/truck/registration/")
+                                    .child(regTruck.split(":")[0] - 1)
+                                    .update({
+                                        Driver: prefix + name + " " + lastname,
+                                    })
+                                    .then(() => {
+                                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                        console.log("Data pushed successfully");
+                                    })
+                                    .catch((error) => {
+                                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                        console.error("Error pushing data:", error);
+                                    });
+                            } else if (trucks === "รถเล็ก" && regTruck !== "0:ไม่มี") {
+                                database
+                                    .ref("/truck/registrationTail/")
+                                    .child(regTruck.split(":")[0] - 1)
+                                    .update({
+                                        Driver: prefix + name + " " + lastname,
+                                    })
+                                    .then(() => {
+                                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                        console.log("Data pushed successfully");
+                                    })
+                                    .catch((error) => {
+                                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                        console.error("Error pushing data:", error);
+                                    });
+                            } else {
 
-                    }
-                    ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                    console.log("Data pushed successfully");
-                    setPrefix("");
-                    setName("");
-                    setLastname("");
-                    setRegTruck("");
-                    setBankID("");
-                    setBank("");
-                    setIDCard("");
-                    setSalary("");
-                    setTripCost("");
-                    setPointCost("");
-                    setSecurity("");
-                    setTrucks("");
-                    setDeposit("");
-                    setLoan("");
-                    setDrivingLicense("");
-                    setExpiration("");
-                    setPhone("");
-                    setUser("");
-                    setTelephoneBill("");
+                            }
+                            ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                            console.log("Data pushed successfully");
+                            setPrefix("");
+                            setName("");
+                            setLastname("");
+                            setRegTruck("");
+                            setBankID("");
+                            setBank("");
+                            setIDCard("");
+                            setSalary("");
+                            setTripCost("");
+                            setPointCost("");
+                            setSecurity("");
+                            setTrucks("");
+                            setDeposit("");
+                            setLoan("");
+                            setDrivingLicense("");
+                            setExpiration("");
+                            setPhone("");
+                            setUser("");
+                            setTelephoneBill("");
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error("Error pushing data:", error);
+                        });
                 })
-                .catch((error) => {
-                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                    console.error("Error pushing data:", error);
-                });
-            })
         }
     };
 
     return (
         <React.Fragment>
-            <Box textAlign="right" marginBottom={-6}>
+            <Box
+                sx={{
+                    textAlign: {
+                        sm: 'left',
+                        md: 'right',
+                    },
+                    marginBottom: {
+                        sm: 0,
+                        md: -6,
+                    },
+                }}
+            >
                 <Button variant="contained" color="info" onClick={handleClickOpen}>เพิ่มพนักงาน</Button>
             </Box>
             <Dialog
@@ -527,21 +538,21 @@ const InsertEmployee = (props) => {
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
                                         </Grid>
                                         <Grid item md={4} sm={4} xs={12}>
-                                        <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
-                                            </Paper>
-                                        </Box>
+                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                    <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
+                                                </Paper>
+                                            </Box>
                                         </Grid>
                                         <Grid item md={2} sm={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
                                         </Grid>
                                         <Grid item md={4} sm={4} xs={12}>
-                                        <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
-                                            </Paper>
-                                        </Box>
+                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                    <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                                </Paper>
+                                            </Box>
                                         </Grid>
                                         <Grid item md={12} sm={12} xs={12}>
                                             <Divider>
@@ -620,7 +631,7 @@ const InsertEmployee = (props) => {
                                                 <TextField size="small" fullWidth value={loan} onChange={(e) => setLoan(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item md={6} sm={6} xs={12}/>
+                                        <Grid item md={6} sm={6} xs={12} />
                                         <Grid item md={12} sm={12} xs={12}>
                                             <Divider>
                                                 <Chip label="ใบอนุญาตการขับขี่รถ" size="small" />

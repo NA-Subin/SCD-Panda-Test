@@ -141,17 +141,18 @@ const Tickets = () => {
                 <InsertTickets />
             </Box>
             <Divider sx={{ marginBottom: 1, marginTop: 5 }} />
+            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <TableContainer
                 component={Paper}
                 sx={{ marginTop: 2 }}
             >
-                <Table stickyHeader size="small">
+                <Table stickyHeader size="small" sx={{ width: "1330px" }}>
                     <TableHead sx={{ height: "7vh" }}>
                         <TableRow>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                 ลำดับ
                             </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                 ชื่อตั๋ว
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
@@ -166,7 +167,7 @@ const Tickets = () => {
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                 ประเภทรถ
                             </TablecellHeader>
-                            <TablecellHeader sx={{ width: 50 }} />
+                            <TablecellHeader sx={{ width: 50,position: "sticky", right: 0 }} />
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -341,7 +342,7 @@ const Tickets = () => {
                                                 }
                                             </Box>
                                         </TableCell>
-                                        <TableCell width={70} sx={{ height: "30px" }}>
+                                        <TableCell width={70} sx={{ height: "30px",position: "sticky", right: 0, backgroundColor: "white" }}>
                                             <Box sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", marginTop: -0.5 }}>
                                                 {
                                                     !setting || row.id !== selectedRowId ?
@@ -373,6 +374,7 @@ const Tickets = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            </Box>
         </Container>
     );
 };

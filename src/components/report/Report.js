@@ -114,13 +114,13 @@ const Report = () => {
 
   const resultTransport = ticket
     .filter((item) => {
-          const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-          return (
-            item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
-            item.Trip !== "ยกเลิก" &&
-            itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
-          );
-        })
+      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+      return (
+        item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
+        item.Trip !== "ยกเลิก" &&
+        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+      );
+    })
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
@@ -168,13 +168,13 @@ const Report = () => {
 
   const resultGasStation = ticket
     .filter((item) => {
-          const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-          return (
-            item.CustomerType === "ตั๋วปั้ม" &&
-            item.Trip !== "ยกเลิก" &&
-            itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
-          );
-        })
+      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+      return (
+        item.CustomerType === "ตั๋วปั้ม" &&
+        item.Trip !== "ยกเลิก" &&
+        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+      );
+    })
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
@@ -219,13 +219,13 @@ const Report = () => {
 
   const resultTickets = ticket
     .filter((item) => {
-          const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-          return (
-            item.CustomerType === "ตั๋วน้ำมัน" &&
-            item.Trip !== "ยกเลิก" &&
-            itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
-          );
-        })
+      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+      return (
+        item.CustomerType === "ตั๋วน้ำมัน" &&
+        item.Trip !== "ยกเลิก" &&
+        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+      );
+    })
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
@@ -268,32 +268,32 @@ const Report = () => {
       };
     });
 
-    const groupedByPeriodTickets = resultTickets.reduce((groups, item) => {
-      const date = dayjs(item.Date, "DD/MM/YYYY");
-      const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
-      const monthKey = date.format("YYYY-MM");
-    
-      // กำหนดช่วงที่ 1-3
-      let period = "";
-      if (day >= 1 && day <= 10) {
-        period = "ช่วงที่ 1"; // 1-10
-      } else if (day >= 11 && day <= 20) {
-        period = "ช่วงที่ 2"; // 11-20
-      } else {
-        period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
-      }
-    
-      // สร้าง key เช่น "2025-04_ช่วงที่ 1"
-      const groupKey = `${monthKey}_${period}`;
-    
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
-      }
-      groups[groupKey].push(item);
-      return groups;
-    }, {});
+  const groupedByPeriodTickets = resultTickets.reduce((groups, item) => {
+    const date = dayjs(item.Date, "DD/MM/YYYY");
+    const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
+    const monthKey = date.format("YYYY-MM");
 
-    console.log("groupedByPeriodTickets ",groupedByPeriodTickets);
+    // กำหนดช่วงที่ 1-3
+    let period = "";
+    if (day >= 1 && day <= 10) {
+      period = "ช่วงที่ 1"; // 1-10
+    } else if (day >= 11 && day <= 20) {
+      period = "ช่วงที่ 2"; // 11-20
+    } else {
+      period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+    }
+
+    // สร้าง key เช่น "2025-04_ช่วงที่ 1"
+    const groupKey = `${monthKey}_${period}`;
+
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push(item);
+    return groups;
+  }, {});
+
+  console.log("groupedByPeriodTickets ", groupedByPeriodTickets);
 
   // 1. Group by year-month ก่อน
   const groupedByMonthTickets = resultTickets.reduce((groups, item) => {
@@ -305,24 +305,24 @@ const Report = () => {
     return groups;
   }, {});
 
-  console.log("groupedByMonthTickets ",groupedByMonthTickets);
+  console.log("groupedByMonthTickets ", groupedByMonthTickets);
 
   // 2. แล้ว Reduce ในแต่ละกลุ่ม
   let resultArrayTickets = Object.entries(groupedByPeriodTickets).flatMap(([month, items]) => {
     const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
 
-  // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
-  let DateStart, DateEnd;
-  if (period === "ช่วงที่ 1") {
-    DateStart = dayjs(monthKey + "-01","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey + "-10","YYYY-MM-DD").format("DD/MM/YYYY");
-  } else if (period === "ช่วงที่ 2") {
-    DateStart = dayjs(monthKey + "-11","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey + "-20","YYYY-MM-DD").format("DD/MM/YYYY");
-  } else if (period === "ช่วงที่ 3") {
-    DateStart = dayjs(monthKey + "-21","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey,"YYYY-MM").endOf("month").format("DD/MM/YYYY");
-  }
+    // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
+    let DateStart, DateEnd;
+    if (period === "ช่วงที่ 1") {
+      DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
+    } else if (period === "ช่วงที่ 2") {
+      DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
+    } else if (period === "ช่วงที่ 3") {
+      DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
+    }
 
     const grouped = items.reduce((acc, item) => {
       let totalVolume = parseFloat(item.TotalVolume || 0);
@@ -376,7 +376,7 @@ const Report = () => {
     const date = dayjs(item.Date, "DD/MM/YYYY");
     const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
     const monthKey = date.format("YYYY-MM");
-  
+
     // กำหนดช่วงที่ 1-3
     let period = "";
     if (day >= 1 && day <= 10) {
@@ -386,10 +386,10 @@ const Report = () => {
     } else {
       period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
     }
-  
+
     // สร้าง key เช่น "2025-04_ช่วงที่ 1"
     const groupKey = `${monthKey}_${period}`;
-  
+
     if (!groups[groupKey]) {
       groups[groupKey] = [];
     }
@@ -397,7 +397,7 @@ const Report = () => {
     return groups;
   }, {});
 
-  console.log("groupedByPeriodGasStation ",groupedByPeriodGasStation);
+  console.log("groupedByPeriodGasStation ", groupedByPeriodGasStation);
 
   // 1. Group by year-month ก่อน
   const groupedByMonthGasStation = resultGasStation.reduce((groups, item) => {
@@ -409,24 +409,24 @@ const Report = () => {
     return groups;
   }, {});
 
-  console.log("groupedByMonthGasStation ",groupedByMonthGasStation);
+  console.log("groupedByMonthGasStation ", groupedByMonthGasStation);
 
   // 2. แล้ว Reduce ในแต่ละกลุ่ม
   let resultArrayGasStation = Object.entries(groupedByPeriodGasStation).flatMap(([month, items]) => {
     const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
 
-  // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
-  let DateStart, DateEnd;
-  if (period === "ช่วงที่ 1") {
-    DateStart = dayjs(monthKey + "-01","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey + "-10","YYYY-MM-DD").format("DD/MM/YYYY");
-  } else if (period === "ช่วงที่ 2") {
-    DateStart = dayjs(monthKey + "-11","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey + "-20","YYYY-MM-DD").format("DD/MM/YYYY");
-  } else if (period === "ช่วงที่ 3") {
-    DateStart = dayjs(monthKey + "-21","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey,"YYYY-MM").endOf("month").format("DD/MM/YYYY");
-  }
+    // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
+    let DateStart, DateEnd;
+    if (period === "ช่วงที่ 1") {
+      DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
+    } else if (period === "ช่วงที่ 2") {
+      DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
+    } else if (period === "ช่วงที่ 3") {
+      DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
+    }
 
     const grouped = items.reduce((acc, item) => {
       let totalVolume = parseFloat(item.TotalVolume || 0);
@@ -522,7 +522,7 @@ const Report = () => {
     const date = dayjs(item.Date, "DD/MM/YYYY");
     const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
     const monthKey = date.format("YYYY-MM");
-  
+
     // กำหนดช่วงที่ 1-3
     let period = "";
     if (day >= 1 && day <= 10) {
@@ -532,10 +532,10 @@ const Report = () => {
     } else {
       period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
     }
-  
+
     // สร้าง key เช่น "2025-04_ช่วงที่ 1"
     const groupKey = `${monthKey}_${period}`;
-  
+
     if (!groups[groupKey]) {
       groups[groupKey] = [];
     }
@@ -543,7 +543,7 @@ const Report = () => {
     return groups;
   }, {});
 
-  console.log("groupedByPeriodTransport ",groupedByPeriodTransport);
+  console.log("groupedByPeriodTransport ", groupedByPeriodTransport);
 
   // 1. Group by year-month ก่อน
   const groupedByMonthTransport = resultTransport.reduce((groups, item) => {
@@ -555,24 +555,24 @@ const Report = () => {
     return groups;
   }, {});
 
-  console.log("groupedByMonthTransport ",groupedByMonthTransport);
+  console.log("groupedByMonthTransport ", groupedByMonthTransport);
 
   // 2. แล้ว Reduce ในแต่ละกลุ่ม
   let resultArrayTransport = Object.entries(groupedByPeriodTransport).flatMap(([month, items]) => {
     const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
 
-  // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
-  let DateStart, DateEnd;
-  if (period === "ช่วงที่ 1") {
-    DateStart = dayjs(monthKey + "-01","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey + "-10","YYYY-MM-DD").format("DD/MM/YYYY");
-  } else if (period === "ช่วงที่ 2") {
-    DateStart = dayjs(monthKey + "-11","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey + "-20","YYYY-MM-DD").format("DD/MM/YYYY");
-  } else if (period === "ช่วงที่ 3") {
-    DateStart = dayjs(monthKey + "-21","YYYY-MM-DD").format("DD/MM/YYYY");
-    DateEnd = dayjs(monthKey,"YYYY-MM").endOf("month").format("DD/MM/YYYY");
-  }
+    // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
+    let DateStart, DateEnd;
+    if (period === "ช่วงที่ 1") {
+      DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
+    } else if (period === "ช่วงที่ 2") {
+      DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
+    } else if (period === "ช่วงที่ 3") {
+      DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
+      DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
+    }
 
 
     const grouped = items.reduce((acc, item) => {
@@ -666,9 +666,9 @@ const Report = () => {
   const TransportDetail = Object.values(resultArrayTransport);
 
   const handleDateAChange = (index, type, value) => {
-    console.log("Show Index ",index);
-    console.log("Show Type ",type);
-    console.log("Show Value ",value);
+    console.log("Show Index ", index);
+    console.log("Show Type ", type);
+    console.log("Show Value ", value);
     setDateRangesA(prev => ({
       ...prev,
       [index]: {
@@ -679,9 +679,9 @@ const Report = () => {
   };
 
   const handleDateTChange = (index, type, value) => {
-    console.log("Show Index ",index);
-    console.log("Show Type ",type);
-    console.log("Show Value ",value);
+    console.log("Show Index ", index);
+    console.log("Show Type ", type);
+    console.log("Show Value ", value);
     setDateRangesT(prev => ({
       ...prev,
       [index]: {
@@ -692,9 +692,9 @@ const Report = () => {
   };
 
   const handleDateGChange = (index, type, value) => {
-    console.log("Show Index ",index);
-    console.log("Show Type ",type);
-    console.log("Show Value ",value);
+    console.log("Show Index ", index);
+    console.log("Show Type ", type);
+    console.log("Show Value ", value);
     setDateRangesG(prev => ({
       ...prev,
       [index]: {
@@ -729,10 +729,10 @@ const Report = () => {
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
       <Grid container spacing={2}>
-        <Grid item xs={3}>
+        <Grid item md={3} xs={12}>
 
         </Grid>
-        <Grid item xs={9}>
+        <Grid item md={9} xs={12}>
           <Typography
             variant="h3"
             fontWeight="bold"
@@ -742,167 +742,300 @@ const Report = () => {
             ชำระค่าขนส่ง
           </Typography>
         </Grid>
+        <Grid item md={5} xs={12}>
+          <Box
+            sx={{
+              width: "100%", // กำหนดความกว้างของ Paper
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: { md: -10, xs: 2 },
+              marginBottom: 3
+            }}
+          >
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                openTo="day"
+                views={["year", "month", "day"]}
+                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                format="DD/MM/YYYY"
+                onChange={handleDateChangeDateStart}
+                sx={{ marginRight: 2, }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                          วันที่เริ่มต้น :
+                        </InputAdornment>
+                      ),
+                      sx: {
+                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                        height: "40px",  // ความสูงของ Input
+                        padding: "10px", // Padding ภายใน Input
+                        fontWeight: "bold",
+                      },
+                    },
+                  },
+                }}
+              />
+              <DatePicker
+                openTo="day"
+                views={["year", "month", "day"]}
+                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                format="DD/MM/YYYY"
+                onChange={handleDateChangeDateEnd}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                          วันที่สิ้นสุด :
+                        </InputAdornment>
+                      ),
+                      sx: {
+                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                        height: "40px",  // ความสูงของ Input
+                        padding: "10px", // Padding ภายใน Input
+                        fontWeight: "bold",
+                      },
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Box>
+        </Grid>
       </Grid>
-      <Box
-        sx={{
-          width: "100%", // กำหนดความกว้างของ Paper
-          height: "40px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: -8,
-          marginBottom: 3,
-          width: 550
-        }}
-      >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            openTo="day"
-            views={["year", "month", "day"]}
-            value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-            format="DD/MM/YYYY"
-            onChange={handleDateChangeDateStart}
-            sx={{ marginRight: 2, }}
-            slotProps={{
-              textField: {
-                size: "small",
-                fullWidth: true,
-                InputProps: {
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                      วันที่เริ่มต้น :
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                    height: "40px",  // ความสูงของ Input
-                    padding: "10px", // Padding ภายใน Input
-                    fontWeight: "bold",
-                  },
-                },
-              },
-            }}
-          />
-          <DatePicker
-            openTo="day"
-            views={["year", "month", "day"]}
-            value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-            format="DD/MM/YYYY"
-            onChange={handleDateChangeDateEnd}
-            slotProps={{
-              textField: {
-                size: "small",
-                fullWidth: true,
-                InputProps: {
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                      วันที่สิ้นสุด :
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                    height: "40px",  // ความสูงของ Input
-                    padding: "10px", // Padding ภายใน Input
-                    fontWeight: "bold",
-                  },
-                },
-              },
-            }}
-          />
-        </LocalizationProvider>
-      </Box>
       <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} marginTop={1}>
-        <Grid item xs={4}>
-          <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ตั๋วน้ำมัน</Button>
-        </Grid>
-        <Grid item xs={4}>
-          <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ตั๋วรับจ้างขนส่ง</Button>
-        </Grid>
-        <Grid item xs={4}>
-          <Button variant="contained" color={open === 3 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 3 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(3)}>ตั๋วปั้ม</Button>
-        </Grid>
-        <Grid item xs={4} sx={{ marginTop: -3 }}>
-          {
-            open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.loght} gutterBottom>||</Typography>
-          }
-        </Grid>
-        <Grid item xs={4} sx={{ marginTop: -3 }}>
-          {
-            open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
-          }
-        </Grid>
-        <Grid item xs={4} sx={{ marginTop: -3 }}>
-          {
-            open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
-          }
-        </Grid>
-        <Grid item xs={12}>
-          <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -5 }}>
+      <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+        <Grid container spacing={2} marginTop={1}>
+          <Grid item xs={4}>
+            <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ตั๋วน้ำมัน</Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ตั๋วรับจ้างขนส่ง</Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button variant="contained" color={open === 3 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 3 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(3)}>ตั๋วปั้ม</Button>
+          </Grid>
+          <Grid item xs={4} sx={{ marginTop: -3 }}>
             {
-              open === 1 ?
-                <Grid container spacing={2} sx={{ marginTop: -5, }}>
-                  <Grid item xs={12}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
-                      </Grid>
-                      <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
-                        <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
-                        <FormControlLabel control={
-                          <Checkbox
-                            value={checkOverdueTransfer}
-                            onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
-                            defaultChecked />
-                        }
-                          label={
-                            <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
-                              ค้างโอน
-                            </Typography>
-                          } />
-                      </Grid>
-                    </Grid>
-                    <TableContainer
-                      component={Paper}
-                      sx={TicketsDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
-                    >
-                      <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
-                        <TableHead sx={{ height: "5vh" }}>
-                          <TableRow>
-                            <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                              ลำดับ
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              วันที่รับ
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              จนถึง
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
-                              ชื่อตั๋ว
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              ยอดเงิน
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              หักภาษี 1%
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              ยอดชำระ
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              ยอดโอน
-                            </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                              ค้างโอน
-                            </TablecellHeader>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {
-                            checkOverdueTransfer ?
-                              TicketsDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0))
-                                .map((row, index) => {
+              open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.loght} gutterBottom>||</Typography>
+            }
+          </Grid>
+          <Grid item xs={4} sx={{ marginTop: -3 }}>
+            {
+              open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+            }
+          </Grid>
+          <Grid item xs={4} sx={{ marginTop: -3 }}>
+            {
+              open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+            }
+          </Grid>
+          <Grid item xs={12}>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+              {
+                open === 1 ?
+                  <Grid container spacing={2} sx={{ marginTop: -5, }}>
+                    <Grid item xs={12}>
+                      {
+                        windowWidth <= 900 ?
+                          <Grid container spacing={2} textAlign="right">
+                            <Grid item xs={12}>
+                              <FormControlLabel control={
+                                <Checkbox
+                                  value={checkOverdueTransfer}
+                                  onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                                  defaultChecked />
+                              }
+                                label={
+                                  <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                    ค้างโอน
+                                  </Typography>
+                                } />
+                            </Grid>
+                          </Grid>
+                          :
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                              <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+                            </Grid>
+                            <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
+                              <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
+                              <FormControlLabel control={
+                                <Checkbox
+                                  value={checkOverdueTransfer}
+                                  onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                                  defaultChecked />
+                              }
+                                label={
+                                  <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                    ค้างโอน
+                                  </Typography>
+                                } />
+                            </Grid>
+                          </Grid>
+                      }
+                      <TableContainer
+                        component={Paper}
+                        sx={TicketsDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                      >
+                        <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
+                          <TableHead sx={{ height: "5vh" }}>
+                            <TableRow>
+                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                ลำดับ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                วันที่รับ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                จนถึง
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                ชื่อตั๋ว
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ยอดเงิน
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                หักภาษี 1%
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ยอดชำระ
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ยอดโอน
+                              </TablecellHeader>
+                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                ค้างโอน
+                              </TablecellHeader>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {
+                              checkOverdueTransfer ?
+                                TicketsDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0))
+                                  .map((row, index) => {
+                                    // <<<<<< เพิ่มตรงนี้
+                                    const transfer = transferMoneyDetail.filter((transferRow) =>
+                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                    );
+
+                                    const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                      return sum + (Number(transferRow.IncomingMoney) || 0);
+                                    }, 0);
+                                    // <<<<<<
+
+                                    return (
+                                      <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
+                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                      >
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {index + 1}
+                                        </TableCell>
+                                        {/* วันที่เริ่มต้น */}
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                          <Paper component="form" sx={{ width: "100%" }}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                              <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                format="DD/MM/YYYY"
+                                                onChange={(newDate) =>
+                                                  handleDateAChange(row.No, "dateStart", newDate)
+                                                }
+                                                slotProps={{
+                                                  textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    sx: {
+                                                      "& .MuiOutlinedInput-root": {
+                                                        height: "30px",
+                                                        paddingRight: "8px",
+                                                      },
+                                                      "& .MuiInputBase-input": {
+                                                        fontSize: "14px",
+                                                        marginLeft: -1,
+                                                      },
+                                                      "& .MuiInputAdornment-root": {
+                                                        marginLeft: -2,
+                                                        paddingLeft: "0px"
+                                                      }
+                                                    },
+                                                  },
+                                                }}
+                                              />
+                                            </LocalizationProvider>
+                                          </Paper>
+                                        </TableCell>
+
+                                        {/* วันที่สิ้นสุด */}
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                          <Paper component="form" sx={{ width: "100%" }}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                              <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                format="DD/MM/YYYY"
+                                                onChange={(newDate) =>
+                                                  handleDateAChange(row.No, "dateEnd", newDate)
+                                                }
+                                                slotProps={{
+                                                  textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    sx: {
+                                                      "& .MuiOutlinedInput-root": {
+                                                        height: "30px",
+                                                        paddingRight: "8px",
+                                                      },
+                                                      "& .MuiInputBase-input": {
+                                                        fontSize: "14px",
+                                                        marginLeft: -1,
+                                                      },
+                                                      "& .MuiInputAdornment-root": {
+                                                        marginLeft: -2,
+                                                        paddingLeft: "0px"
+                                                      }
+                                                    },
+                                                  },
+                                                }}
+                                              />
+                                            </LocalizationProvider>
+                                          </Paper>
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {row.TicketName.split(":")[1]}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })
+                                : TicketsDetail.map((row, index) => {
                                   // <<<<<< เพิ่มตรงนี้
                                   const transfer = transferMoneyDetail.filter((transferRow) =>
                                     transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
@@ -1014,724 +1147,6 @@ const Report = () => {
                                     </TableRow>
                                   );
                                 })
-                              : TicketsDetail.map((row, index) => {
-                                // <<<<<< เพิ่มตรงนี้
-                                const transfer = transferMoneyDetail.filter((transferRow) =>
-                                  transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
-                                );
-
-                                const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                  return sum + (Number(transferRow.IncomingMoney) || 0);
-                                }, 0);
-                                // <<<<<<
-
-                                return (
-                                <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
-                                >
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {index + 1}
-                                  </TableCell>
-                                  {/* วันที่เริ่มต้น */}
-                                  <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateAChange(row.No, "dateStart", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
-                                                },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "14px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
-                                              },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
-
-                                  {/* วันที่สิ้นสุด */}
-                                  <TableCell sx={{ textAlign: "center" }}>
-                                    <Paper component="form" sx={{ width: "100%" }}>
-                                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                          openTo="day"
-                                          views={["year", "month", "day"]}
-                                          value={dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                          format="DD/MM/YYYY"
-                                          onChange={(newDate) =>
-                                            handleDateAChange(row.No, "dateEnd", newDate)
-                                          }
-                                          slotProps={{
-                                            textField: {
-                                              size: "small",
-                                              fullWidth: true,
-                                              sx: {
-                                                "& .MuiOutlinedInput-root": {
-                                                  height: "30px",
-                                                  paddingRight: "8px",
-                                                },
-                                                "& .MuiInputBase-input": {
-                                                  fontSize: "14px",
-                                                  marginLeft: -1,
-                                                },
-                                                "& .MuiInputAdornment-root": {
-                                                  marginLeft: -2,
-                                                  paddingLeft: "0px"
-                                                }
-                                              },
-                                            },
-                                          }}
-                                        />
-                                      </LocalizationProvider>
-                                    </Paper>
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {row.TicketName.split(":")[1]}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })
-                          }
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </Grid>
-                  <Grid item xs={12}>
-                    {/* {
-                      selectedRow && <UpdateReport ticket={selectedRow} open={open} dateRanges={dateRangesA} months={month} />
-                    } */}
-                    {
-                      TicketsDetail.map((row, index) => (
-                        (selectedRow && selectedRow.No === row.No) || indexes === index ?
-                          <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesA} months={month} />
-                          : ""
-                      ))
-                    }
-                  </Grid>
-                </Grid>
-                : open === 2 ?
-                  <Grid container spacing={2} sx={{ marginTop: -5, }}>
-                    <Grid item xs={12}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
-                        </Grid>
-                        <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
-                          <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
-                          <FormControlLabel control={
-                            <Checkbox
-                              value={checkOverdueTransfer}
-                              onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
-                              defaultChecked />
-                          }
-                            label={
-                              <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
-                                ค้างโอน
-                              </Typography>
-                            } />
-                        </Grid>
-                      </Grid>
-                      <TableContainer
-                        component={Paper}
-                        sx={TransportDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
-                      >
-                        <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
-                          <TableHead sx={{ height: "5vh" }}>
-                            <TableRow>
-                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                                ลำดับ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                วันที่รับ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                จนถึง
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
-                                ชื่อตั๋ว
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดเงิน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                หักภาษี 1%
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดชำระ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดโอน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ค้างโอน
-                              </TablecellHeader>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {
-                              checkOverdueTransfer ?
-                                TransportDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0))
-                                  .map((row, index) => {
-                                    // <<<<<< เพิ่มตรงนี้
-                                const transfer = transferMoneyDetail.filter((transferRow) =>
-                                  transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
-                                );
-
-                                const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                  return sum + (Number(transferRow.IncomingMoney) || 0);
-                                }, 0);
-                                // <<<<<<
-
-                                return (
-                                    <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                      sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
-                                    >
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {index + 1}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center" }}>
-                                        <Paper component="form" sx={{ width: "100%" }}>
-                                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker
-                                              openTo="day"
-                                              views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                              format="DD/MM/YYYY"
-                                              onChange={(newDate) =>
-                                                handleDateTChange(row.No, "dateStart", newDate)
-                                              }
-                                              slotProps={{
-                                                textField: {
-                                                  size: "small",
-                                                  fullWidth: true,
-                                                  sx: {
-                                                    "& .MuiOutlinedInput-root": {
-                                                      height: "30px",
-                                                      paddingRight: "8px",
-                                                    },
-                                                    "& .MuiInputBase-input": {
-                                                      fontSize: "14px",
-                                                      marginLeft: -1,
-                                                    },
-                                                    "& .MuiInputAdornment-root": {
-                                                      marginLeft: -2,
-                                                      paddingLeft: "0px"
-                                                    }
-                                                  },
-                                                },
-                                              }}
-                                            />
-                                          </LocalizationProvider>
-                                        </Paper>
-                                      </TableCell>
-
-                                      {/* วันที่สิ้นสุด */}
-                                      <TableCell sx={{ textAlign: "center" }}>
-                                        <Paper component="form" sx={{ width: "100%" }}>
-                                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker
-                                              openTo="day"
-                                              views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                              format="DD/MM/YYYY"
-                                              onChange={(newDate) =>
-                                                handleDateTChange(row.No, "dateEnd", newDate)
-                                              }
-                                              slotProps={{
-                                                textField: {
-                                                  size: "small",
-                                                  fullWidth: true,
-                                                  sx: {
-                                                    "& .MuiOutlinedInput-root": {
-                                                      height: "30px",
-                                                      paddingRight: "8px",
-                                                    },
-                                                    "& .MuiInputBase-input": {
-                                                      fontSize: "14px",
-                                                      marginLeft: -1,
-                                                    },
-                                                    "& .MuiInputAdornment-root": {
-                                                      marginLeft: -2,
-                                                      paddingLeft: "0px"
-                                                    }
-                                                  },
-                                                },
-                                              }}
-                                            />
-                                          </LocalizationProvider>
-                                        </Paper>
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {row.TicketName.split(":")[1]}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                })
-                                : TransportDetail.map((row, index) => {
-                                  // <<<<<< เพิ่มตรงนี้
-                                const transfer = transferMoneyDetail.filter((transferRow) =>
-                                  transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
-                                );
-
-                                const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                  return sum + (Number(transferRow.IncomingMoney) || 0);
-                                }, 0);
-                                // <<<<<<
-
-                                return (
-                                  <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
-                                  >
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {index + 1}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}>
-                                      <Paper component="form" sx={{ width: "100%" }}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                          <DatePicker
-                                            openTo="day"
-                                            views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                            format="DD/MM/YYYY"
-                                            onChange={(newDate) =>
-                                              handleDateTChange(row.No, "dateStart", newDate)
-                                            }
-                                            slotProps={{
-                                              textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                sx: {
-                                                  "& .MuiOutlinedInput-root": {
-                                                    height: "30px",
-                                                    paddingRight: "8px",
-                                                  },
-                                                  "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    marginLeft: -1,
-                                                  },
-                                                  "& .MuiInputAdornment-root": {
-                                                    marginLeft: -2,
-                                                    paddingLeft: "0px"
-                                                  }
-                                                },
-                                              },
-                                            }}
-                                          />
-                                        </LocalizationProvider>
-                                      </Paper>
-                                    </TableCell>
-
-                                    {/* วันที่สิ้นสุด */}
-                                    <TableCell sx={{ textAlign: "center" }}>
-                                      <Paper component="form" sx={{ width: "100%" }}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                          <DatePicker
-                                            openTo="day"
-                                            views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                            format="DD/MM/YYYY"
-                                            onChange={(newDate) =>
-                                              handleDateTChange(row.No, "dateEnd", newDate)
-                                            }
-                                            slotProps={{
-                                              textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                sx: {
-                                                  "& .MuiOutlinedInput-root": {
-                                                    height: "30px",
-                                                    paddingRight: "8px",
-                                                  },
-                                                  "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    marginLeft: -1,
-                                                  },
-                                                  "& .MuiInputAdornment-root": {
-                                                    marginLeft: -2,
-                                                    paddingLeft: "0px"
-                                                  }
-                                                },
-                                              },
-                                            }}
-                                          />
-                                        </LocalizationProvider>
-                                      </Paper>
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {row.TicketName.split(":")[1]}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })
-                            }
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Grid item xs={12}>
-                        {/* {
-                        selectedRow && <UpdateReport ticket={selectedRow} open={open} dateRanges={dateRangesG} months={month} />
-                      } */}
-                        {
-                          TransportDetail.map((row, index) => (
-                            (selectedRow && selectedRow.No === row.No) || indexes === index ?
-                              <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} months={month} />
-                              : ""
-                          ))
-                        }
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  :
-                  <Grid container spacing={2} sx={{ marginTop: -5, }}>
-                    <Grid item xs={12}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
-                        </Grid>
-                        <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
-                          <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
-                          <FormControlLabel control={
-                            <Checkbox
-                              value={checkOverdueTransfer}
-                              onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
-                              defaultChecked />
-                          }
-                            label={
-                              <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
-                                ค้างโอน
-                              </Typography>
-                            } />
-                        </Grid>
-                      </Grid>
-                      <TableContainer
-                        component={Paper}
-                        sx={GasStationDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
-                      >
-                        <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}>
-                          <TableHead sx={{ height: "5vh" }}>
-                            <TableRow>
-                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                                ลำดับ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                วันที่รับ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                จนถึง
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
-                                ชื่อตั๋ว
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดเงิน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                หักภาษี 1%
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดชำระ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ยอดโอน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                ค้างโอน
-                              </TablecellHeader>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {
-                              checkOverdueTransfer ?
-                                GasStationDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0))
-                                  .map((row, index) => {
-                                    // <<<<<< เพิ่มตรงนี้
-                                const transfer = transferMoneyDetail.filter((transferRow) =>
-                                  transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
-                                );
-
-                                const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                  return sum + (Number(transferRow.IncomingMoney) || 0);
-                                }, 0);
-                                // <<<<<<
-
-                                return (
-                                    <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                      sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
-                                    >
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {index + 1}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center" }}>
-                                        <Paper component="form" sx={{ width: "100%" }}>
-                                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker
-                                              openTo="day"
-                                              views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                              format="DD/MM/YYYY"
-                                              onChange={(newDate) =>
-                                                handleDateGChange(row.No, "dateStart", newDate)
-                                              }
-                                              slotProps={{
-                                                textField: {
-                                                  size: "small",
-                                                  fullWidth: true,
-                                                  sx: {
-                                                    "& .MuiOutlinedInput-root": {
-                                                      height: "30px",
-                                                      paddingRight: "8px",
-                                                    },
-                                                    "& .MuiInputBase-input": {
-                                                      fontSize: "14px",
-                                                      marginLeft: -1,
-                                                    },
-                                                    "& .MuiInputAdornment-root": {
-                                                      marginLeft: -2,
-                                                      paddingLeft: "0px"
-                                                    }
-                                                  },
-                                                },
-                                              }}
-                                            />
-                                          </LocalizationProvider>
-                                        </Paper>
-                                      </TableCell>
-
-                                      {/* วันที่สิ้นสุด */}
-                                      <TableCell sx={{ textAlign: "center" }}>
-                                        <Paper component="form" sx={{ width: "100%" }}>
-                                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker
-                                              openTo="day"
-                                              views={["year", "month", "day"]}
-                                              value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                              format="DD/MM/YYYY"
-                                              onChange={(newDate) =>
-                                                handleDateGChange(row.No, "dateEnd", newDate)
-                                              }
-                                              slotProps={{
-                                                textField: {
-                                                  size: "small",
-                                                  fullWidth: true,
-                                                  sx: {
-                                                    "& .MuiOutlinedInput-root": {
-                                                      height: "30px",
-                                                      paddingRight: "8px",
-                                                    },
-                                                    "& .MuiInputBase-input": {
-                                                      fontSize: "16px",
-                                                      marginLeft: -1,
-                                                    },
-                                                    "& .MuiInputAdornment-root": {
-                                                      marginLeft: -2,
-                                                      paddingLeft: "0px"
-                                                    }
-                                                  },
-                                                },
-                                              }}
-                                            />
-                                          </LocalizationProvider>
-                                        </Paper>
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {row.TicketName.split(":")[1]}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
-                                      </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                        {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                })
-                                : GasStationDetail.map((row, index) => {
-                                  // <<<<<< เพิ่มตรงนี้
-                                const transfer = transferMoneyDetail.filter((transferRow) =>
-                                  transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
-                                );
-
-                                const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                  return sum + (Number(transferRow.IncomingMoney) || 0);
-                                }, 0);
-                                // <<<<<<
-
-                                return (
-                                  <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                    sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
-                                  >
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {index + 1}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}>
-                                      <Paper component="form" sx={{ width: "100%" }}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                          <DatePicker
-                                            openTo="day"
-                                            views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                            format="DD/MM/YYYY"
-                                            onChange={(newDate) =>
-                                              handleDateGChange(row.No, "dateStart", newDate)
-                                            }
-                                            slotProps={{
-                                              textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                sx: {
-                                                  "& .MuiOutlinedInput-root": {
-                                                    height: "30px",
-                                                    paddingRight: "8px",
-                                                  },
-                                                  "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    marginLeft: -1,
-                                                  },
-                                                  "& .MuiInputAdornment-root": {
-                                                    marginLeft: -2,
-                                                    paddingLeft: "0px"
-                                                  }
-                                                },
-                                              },
-                                            }}
-                                          />
-                                        </LocalizationProvider>
-                                      </Paper>
-                                    </TableCell>
-
-                                    {/* วันที่สิ้นสุด */}
-                                    <TableCell sx={{ textAlign: "center" }}>
-                                      <Paper component="form" sx={{ width: "100%" }}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                          <DatePicker
-                                            openTo="day"
-                                            views={["year", "month", "day"]}
-                                            value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
-                                            format="DD/MM/YYYY"
-                                            onChange={(newDate) =>
-                                              handleDateGChange(row.No, "dateEnd", newDate)
-                                            }
-                                            slotProps={{
-                                              textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                sx: {
-                                                  "& .MuiOutlinedInput-root": {
-                                                    height: "30px",
-                                                    paddingRight: "8px",
-                                                  },
-                                                  "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    marginLeft: -1,
-                                                  },
-                                                  "& .MuiInputAdornment-root": {
-                                                    marginLeft: -2,
-                                                    paddingLeft: "0px"
-                                                  }
-                                                },
-                                              },
-                                            }}
-                                          />
-                                        </LocalizationProvider>
-                                      </Paper>
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {row.TicketName.split(":")[1]}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
-                                      {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })
                             }
                           </TableBody>
                         </Table>
@@ -1739,21 +1154,666 @@ const Report = () => {
                     </Grid>
                     <Grid item xs={12}>
                       {/* {
-                        selectedRow && <UpdateReport ticket={selectedRow} open={open} dateRanges={dateRangesG} months={month} />
-                      } */}
+                      selectedRow && <UpdateReport ticket={selectedRow} open={open} dateRanges={dateRangesA} months={month} />
+                    } */}
                       {
-                        GasStationDetail.map((row, index) => (
+                        TicketsDetail.map((row, index) => (
                           (selectedRow && selectedRow.No === row.No) || indexes === index ?
-                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} months={month} />
+                            <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesA} months={month} />
                             : ""
                         ))
                       }
                     </Grid>
                   </Grid>
-            }
-          </Paper>
+                  : open === 2 ?
+                    <Grid container spacing={2} sx={{ marginTop: -5, }}>
+                      <Grid item xs={12}>
+                        {
+                          windowWidth <= 900 ?
+                            <Grid container spacing={2} textAlign="right">
+                              <Grid item xs={12}>
+                                <FormControlLabel control={
+                                  <Checkbox
+                                    value={checkOverdueTransfer}
+                                    onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                                    defaultChecked />
+                                }
+                                  label={
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                      ค้างโอน
+                                    </Typography>
+                                  } />
+                              </Grid>
+                            </Grid>
+                            :
+                            <Grid container spacing={2}>
+                              <Grid item xs={6}>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+                              </Grid>
+                              <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
+                                <FormControlLabel control={
+                                  <Checkbox
+                                    value={checkOverdueTransfer}
+                                    onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                                    defaultChecked />
+                                }
+                                  label={
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                      ค้างโอน
+                                    </Typography>
+                                  } />
+                              </Grid>
+                            </Grid>
+                        }
+                        <TableContainer
+                          component={Paper}
+                          sx={TransportDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                        >
+                          <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
+                            <TableHead sx={{ height: "5vh" }}>
+                              <TableRow>
+                                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                  ลำดับ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  วันที่รับ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  จนถึง
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                  ชื่อตั๋ว
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ยอดเงิน
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  หักภาษี 1%
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ยอดชำระ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ยอดโอน
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ค้างโอน
+                                </TablecellHeader>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {
+                                checkOverdueTransfer ?
+                                  TransportDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0))
+                                    .map((row, index) => {
+                                      // <<<<<< เพิ่มตรงนี้
+                                      const transfer = transferMoneyDetail.filter((transferRow) =>
+                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                      );
+
+                                      const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                        return sum + (Number(transferRow.IncomingMoney) || 0);
+                                      }, 0);
+                                      // <<<<<<
+
+                                      return (
+                                        <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
+                                          sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                        >
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {index + 1}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center" }}>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                  openTo="day"
+                                                  views={["year", "month", "day"]}
+                                                  value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                  format="DD/MM/YYYY"
+                                                  onChange={(newDate) =>
+                                                    handleDateTChange(row.No, "dateStart", newDate)
+                                                  }
+                                                  slotProps={{
+                                                    textField: {
+                                                      size: "small",
+                                                      fullWidth: true,
+                                                      sx: {
+                                                        "& .MuiOutlinedInput-root": {
+                                                          height: "30px",
+                                                          paddingRight: "8px",
+                                                        },
+                                                        "& .MuiInputBase-input": {
+                                                          fontSize: "14px",
+                                                          marginLeft: -1,
+                                                        },
+                                                        "& .MuiInputAdornment-root": {
+                                                          marginLeft: -2,
+                                                          paddingLeft: "0px"
+                                                        }
+                                                      },
+                                                    },
+                                                  }}
+                                                />
+                                              </LocalizationProvider>
+                                            </Paper>
+                                          </TableCell>
+
+                                          {/* วันที่สิ้นสุด */}
+                                          <TableCell sx={{ textAlign: "center" }}>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                  openTo="day"
+                                                  views={["year", "month", "day"]}
+                                                  value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                  format="DD/MM/YYYY"
+                                                  onChange={(newDate) =>
+                                                    handleDateTChange(row.No, "dateEnd", newDate)
+                                                  }
+                                                  slotProps={{
+                                                    textField: {
+                                                      size: "small",
+                                                      fullWidth: true,
+                                                      sx: {
+                                                        "& .MuiOutlinedInput-root": {
+                                                          height: "30px",
+                                                          paddingRight: "8px",
+                                                        },
+                                                        "& .MuiInputBase-input": {
+                                                          fontSize: "14px",
+                                                          marginLeft: -1,
+                                                        },
+                                                        "& .MuiInputAdornment-root": {
+                                                          marginLeft: -2,
+                                                          paddingLeft: "0px"
+                                                        }
+                                                      },
+                                                    },
+                                                  }}
+                                                />
+                                              </LocalizationProvider>
+                                            </Paper>
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {row.TicketName.split(":")[1]}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
+                                          </TableCell>
+                                        </TableRow>
+                                      );
+                                    })
+                                  : TransportDetail.map((row, index) => {
+                                    // <<<<<< เพิ่มตรงนี้
+                                    const transfer = transferMoneyDetail.filter((transferRow) =>
+                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                    );
+
+                                    const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                      return sum + (Number(transferRow.IncomingMoney) || 0);
+                                    }, 0);
+                                    // <<<<<<
+
+                                    return (
+                                      <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
+                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                      >
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {index + 1}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                          <Paper component="form" sx={{ width: "100%" }}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                              <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(dateRangesT[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                format="DD/MM/YYYY"
+                                                onChange={(newDate) =>
+                                                  handleDateTChange(row.No, "dateStart", newDate)
+                                                }
+                                                slotProps={{
+                                                  textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    sx: {
+                                                      "& .MuiOutlinedInput-root": {
+                                                        height: "30px",
+                                                        paddingRight: "8px",
+                                                      },
+                                                      "& .MuiInputBase-input": {
+                                                        fontSize: "14px",
+                                                        marginLeft: -1,
+                                                      },
+                                                      "& .MuiInputAdornment-root": {
+                                                        marginLeft: -2,
+                                                        paddingLeft: "0px"
+                                                      }
+                                                    },
+                                                  },
+                                                }}
+                                              />
+                                            </LocalizationProvider>
+                                          </Paper>
+                                        </TableCell>
+
+                                        {/* วันที่สิ้นสุด */}
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                          <Paper component="form" sx={{ width: "100%" }}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                              <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(dateRangesT[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                format="DD/MM/YYYY"
+                                                onChange={(newDate) =>
+                                                  handleDateTChange(row.No, "dateEnd", newDate)
+                                                }
+                                                slotProps={{
+                                                  textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    sx: {
+                                                      "& .MuiOutlinedInput-root": {
+                                                        height: "30px",
+                                                        paddingRight: "8px",
+                                                      },
+                                                      "& .MuiInputBase-input": {
+                                                        fontSize: "14px",
+                                                        marginLeft: -1,
+                                                      },
+                                                      "& .MuiInputAdornment-root": {
+                                                        marginLeft: -2,
+                                                        paddingLeft: "0px"
+                                                      }
+                                                    },
+                                                  },
+                                                }}
+                                              />
+                                            </LocalizationProvider>
+                                          </Paper>
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {row.TicketName.split(":")[1]}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })
+                              }
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Grid item xs={12}>
+                          {/* {
+                        selectedRow && <UpdateReport ticket={selectedRow} open={open} dateRanges={dateRangesG} months={month} />
+                      } */}
+                          {
+                            TransportDetail.map((row, index) => (
+                              (selectedRow && selectedRow.No === row.No) || indexes === index ?
+                                <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} months={month} />
+                                : ""
+                            ))
+                          }
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    :
+                    <Grid container spacing={2} sx={{ marginTop: -5, }}>
+                      <Grid item xs={12}>
+                        {
+                          windowWidth <= 900 ?
+                            <Grid container spacing={2} textAlign="right">
+                              <Grid item xs={12}>
+                                <FormControlLabel control={
+                                  <Checkbox
+                                    value={checkOverdueTransfer}
+                                    onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                                    defaultChecked />
+                                }
+                                  label={
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                      ค้างโอน
+                                    </Typography>
+                                  } />
+                              </Grid>
+                            </Grid>
+                            :
+                            <Grid container spacing={2}>
+                              <Grid item xs={6}>
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginTop: 2, marginBottom: -1 }} gutterBottom>*กรุณาคลิกชื่อลูกค้าในตารางเพื่อดูรายละเอียด*</Typography>
+                              </Grid>
+                              <Grid item xs={6} display="flex" justifyContent="right" alignItems="center">
+                                <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
+                                <FormControlLabel control={
+                                  <Checkbox
+                                    value={checkOverdueTransfer}
+                                    onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
+                                    defaultChecked />
+                                }
+                                  label={
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                      ค้างโอน
+                                    </Typography>
+                                  } />
+                              </Grid>
+                            </Grid>
+                        }
+                        <TableContainer
+                          component={Paper}
+                          sx={GasStationDetail.length <= 8 ? { marginBottom: 2 } : { marginBottom: 2, height: "250px" }}
+                        >
+                          <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
+                            <TableHead sx={{ height: "5vh" }}>
+                              <TableRow>
+                                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                  ลำดับ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  วันที่รับ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  จนถึง
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                  ชื่อตั๋ว
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ยอดเงิน
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  หักภาษี 1%
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ยอดชำระ
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ยอดโอน
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                  ค้างโอน
+                                </TablecellHeader>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {
+                                checkOverdueTransfer ?
+                                  GasStationDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0))
+                                    .map((row, index) => {
+                                      // <<<<<< เพิ่มตรงนี้
+                                      const transfer = transferMoneyDetail.filter((transferRow) =>
+                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                      );
+
+                                      const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                        return sum + (Number(transferRow.IncomingMoney) || 0);
+                                      }, 0);
+                                      // <<<<<<
+
+                                      return (
+                                        <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
+                                          sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                        >
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {index + 1}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center" }}>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                  openTo="day"
+                                                  views={["year", "month", "day"]}
+                                                  value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                  format="DD/MM/YYYY"
+                                                  onChange={(newDate) =>
+                                                    handleDateGChange(row.No, "dateStart", newDate)
+                                                  }
+                                                  slotProps={{
+                                                    textField: {
+                                                      size: "small",
+                                                      fullWidth: true,
+                                                      sx: {
+                                                        "& .MuiOutlinedInput-root": {
+                                                          height: "30px",
+                                                          paddingRight: "8px",
+                                                        },
+                                                        "& .MuiInputBase-input": {
+                                                          fontSize: "14px",
+                                                          marginLeft: -1,
+                                                        },
+                                                        "& .MuiInputAdornment-root": {
+                                                          marginLeft: -2,
+                                                          paddingLeft: "0px"
+                                                        }
+                                                      },
+                                                    },
+                                                  }}
+                                                />
+                                              </LocalizationProvider>
+                                            </Paper>
+                                          </TableCell>
+
+                                          {/* วันที่สิ้นสุด */}
+                                          <TableCell sx={{ textAlign: "center" }}>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                  openTo="day"
+                                                  views={["year", "month", "day"]}
+                                                  value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                  format="DD/MM/YYYY"
+                                                  onChange={(newDate) =>
+                                                    handleDateGChange(row.No, "dateEnd", newDate)
+                                                  }
+                                                  slotProps={{
+                                                    textField: {
+                                                      size: "small",
+                                                      fullWidth: true,
+                                                      sx: {
+                                                        "& .MuiOutlinedInput-root": {
+                                                          height: "30px",
+                                                          paddingRight: "8px",
+                                                        },
+                                                        "& .MuiInputBase-input": {
+                                                          fontSize: "16px",
+                                                          marginLeft: -1,
+                                                        },
+                                                        "& .MuiInputAdornment-root": {
+                                                          marginLeft: -2,
+                                                          paddingLeft: "0px"
+                                                        }
+                                                      },
+                                                    },
+                                                  }}
+                                                />
+                                              </LocalizationProvider>
+                                            </Paper>
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {row.TicketName.split(":")[1]}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                          </TableCell>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
+                                          </TableCell>
+                                        </TableRow>
+                                      );
+                                    })
+                                  : GasStationDetail.map((row, index) => {
+                                    // <<<<<< เพิ่มตรงนี้
+                                    const transfer = transferMoneyDetail.filter((transferRow) =>
+                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                    );
+
+                                    const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                      return sum + (Number(transferRow.IncomingMoney) || 0);
+                                    }, 0);
+                                    // <<<<<<
+
+                                    return (
+                                      <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
+                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                      >
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {index + 1}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                          <Paper component="form" sx={{ width: "100%" }}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                              <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(dateRangesG[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                format="DD/MM/YYYY"
+                                                onChange={(newDate) =>
+                                                  handleDateGChange(row.No, "dateStart", newDate)
+                                                }
+                                                slotProps={{
+                                                  textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    sx: {
+                                                      "& .MuiOutlinedInput-root": {
+                                                        height: "30px",
+                                                        paddingRight: "8px",
+                                                      },
+                                                      "& .MuiInputBase-input": {
+                                                        fontSize: "14px",
+                                                        marginLeft: -1,
+                                                      },
+                                                      "& .MuiInputAdornment-root": {
+                                                        marginLeft: -2,
+                                                        paddingLeft: "0px"
+                                                      }
+                                                    },
+                                                  },
+                                                }}
+                                              />
+                                            </LocalizationProvider>
+                                          </Paper>
+                                        </TableCell>
+
+                                        {/* วันที่สิ้นสุด */}
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                          <Paper component="form" sx={{ width: "100%" }}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                              <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(dateRangesG[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY")}
+                                                format="DD/MM/YYYY"
+                                                onChange={(newDate) =>
+                                                  handleDateGChange(row.No, "dateEnd", newDate)
+                                                }
+                                                slotProps={{
+                                                  textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    sx: {
+                                                      "& .MuiOutlinedInput-root": {
+                                                        height: "30px",
+                                                        paddingRight: "8px",
+                                                      },
+                                                      "& .MuiInputBase-input": {
+                                                        fontSize: "14px",
+                                                        marginLeft: -1,
+                                                      },
+                                                      "& .MuiInputAdornment-root": {
+                                                        marginLeft: -2,
+                                                        paddingLeft: "0px"
+                                                      }
+                                                    },
+                                                  },
+                                                }}
+                                              />
+                                            </LocalizationProvider>
+                                          </Paper>
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {row.TicketName.split(":")[1]}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })
+                              }
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </Grid>
+                      <Grid item xs={12}>
+                        {/* {
+                        selectedRow && <UpdateReport ticket={selectedRow} open={open} dateRanges={dateRangesG} months={month} />
+                      } */}
+                        {
+                          GasStationDetail.map((row, index) => (
+                            (selectedRow && selectedRow.No === row.No) || indexes === index ?
+                              <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} months={month} />
+                              : ""
+                          ))
+                        }
+                      </Grid>
+                    </Grid>
+              }
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Container>
   );
 };

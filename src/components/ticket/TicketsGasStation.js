@@ -79,7 +79,7 @@ const TicketsGasStation = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{rate2}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate3}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{status}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
+                        <TableCell sx={{ textAlign: "center",position: "sticky", right: 0, backgroundColor: "white" }}>
                             <Button
                                 variant="contained"
                                 color="warning"
@@ -225,7 +225,7 @@ const TicketsGasStation = (props) => {
                             </Paper>
                         </TableCell>
                         <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{row.Status}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>
+                        <TableCell sx={{ textAlign: "center",position: "sticky", right: 0, backgroundColor: "white" }}>
                             {
                                 !open ?
                                     <Button

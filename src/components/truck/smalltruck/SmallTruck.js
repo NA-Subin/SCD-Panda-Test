@@ -159,7 +159,7 @@ const SmallTruck = (props) => {
               component={Paper}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small" sx={{ width: "1080pxpx" }}>
+              <Table stickyHeader size="small" sx={{ width: "1080px" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -183,7 +183,7 @@ const SmallTruck = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       พนักงานขับรถ
                     </TablecellHeader>
-                    <TablecellHeader />
+                    <TablecellHeader sx={{ position: "sticky", right: 0 }}/>
                   </TableRow>
                 </TableHead>
                 <TableBody>

@@ -204,7 +204,7 @@ const Employee = () => {
         พนักงาน
       </Typography>
       <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} marginTop={1}>
+      <Grid container spacing={2} marginTop={1} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230) }}>
         <Grid item xs={6}>
           <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>พนักงานบริษัท</Button>
         </Grid>
@@ -222,12 +222,12 @@ const Employee = () => {
           }
         </Grid>
       </Grid>
-      <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5 }}>
+      <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5,width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230)  }}>
         <Grid container spacing={2}>
-          <Grid item xs={3}>
+          <Grid item md={open === 2 ? 3 : 5 } xs={12} >
             <Typography variant="h6" fontWeight="bold" gutterBottom>รายชื่อพนักงาน{open === 1 ? "ภายในบริษัท" : "ขับรถ"}</Typography>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item md={open === 2 ? 6 : 4} xs={12}>
             {
               open === 2 &&
               <FormGroup row sx={{ marginBottom: -2 }}>
@@ -238,7 +238,7 @@ const Employee = () => {
               </FormGroup>
             }
           </Grid>
-          <Grid item xs={3}>
+          <Grid item md={3} xs={12}>
             <InsertEmployee type={open} driver={driverDetail} officer={dataofficers} truck={registrationHead} smallTruck={registrationSmallTruck} />
           </Grid>
         </Grid>
@@ -255,7 +255,7 @@ const Employee = () => {
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                       ลำดับ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                       ชื่อ-สกุล
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
@@ -346,7 +346,7 @@ const Employee = () => {
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                       ลำดับ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                       ชื่อ-สกุล
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>

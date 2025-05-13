@@ -87,6 +87,21 @@ const UpdateTrip = (props) => {
     const [ticketLength, setTicketLength] = React.useState(0);
     const [selectedDateReceive, setSelectedDateReceive] = useState(dateReceive);
     const [selectedDateDelivery, setSelectedDateDelivery] = useState(dateDelivery);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const { depots, reghead } = useData();
     const depotOptions = Object.values(depots || {});
@@ -379,6 +394,72 @@ const UpdateTrip = (props) => {
             });
         }
     }, [ticket, order]); // ใช้ useEffect ดักจับการเปลี่ยนแปลงของ ticket
+
+    const handleCancleUpdate = () => {
+        setEditableTickets([]);
+        setTicketTrip([]);
+        setEditableOrders([]);
+        setOrderTrip([]);
+
+        if (ticket && ticket.length > 0) {
+            setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
+
+            setTicketTrip((prev) => {
+                const newTickets = {};
+                ticket.forEach((item, index) => {
+                    const newIndex = index + 1; // ใช้ 1-based index
+                    // const branches = [
+                    //     "( สาขาที่  00001)/",
+                    //     "( สาขาที่  00002)/",
+                    //     "( สาขาที่  00003)/",
+                    //     "( สำนักงานใหญ่)/"
+                    // ];
+
+                    // let ticketName = `${item.TicketName}`;
+                    // for (const branch of branches) {
+                    //     if (ticketName.includes(branch)) {
+                    //         ticketName = ticketName.split(branch)[1];
+                    //         break;
+                    //     }
+                    // }
+
+                    newTickets[`Ticket${newIndex}`] = item.TicketName;
+                });
+
+                return { ...prev, ...newTickets };
+            });
+        }
+
+        if (order && order.length > 0) {
+            setEditableOrders(order.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
+
+            setOrderTrip((prev) => {
+                const newOrders = {};
+                order.forEach((item, index) => {
+                    const newIndex = index + 1; // ใช้ 1-based index
+                    // const branches = [
+                    //     "( สาขาที่  00001)/",
+                    //     "( สาขาที่  00002)/",
+                    //     "( สาขาที่  00003)/",
+                    //     "( สำนักงานใหญ่)/"
+                    // ];
+
+                    // let ticketName = `${item.TicketName}`;
+                    // for (const branch of branches) {
+                    //     if (ticketName.includes(branch)) {
+                    //         ticketName = ticketName.split(branch)[1];
+                    //         break;
+                    //     }
+                    // }
+
+                    newOrders[`Order${newIndex}`] = item.TicketName;
+                });
+
+                return { ...prev, ...newOrders };
+            });
+        }
+        setEditMode(false)
+    }
 
     const handleEditChange = (index, field, value) => {
         setEditableTickets((prev) => {
@@ -1327,11 +1408,11 @@ const UpdateTrip = (props) => {
                 <DialogContent>
                     <Box sx={{ p: 2 }} ref={dialogRef}>
                         <Grid container spacing={1} marginTop={0.5}>
-                            <Grid item sm={editMode ? 8.5 : 12} xs={editMode ? 12 : 12} display="flex" alignItems="center" justifyContent='center'>
+                            <Grid item md={editMode ? 8.5 : 12} xs={editMode ? 12 : 12} display="flex" alignItems="center" justifyContent='center'>
                                 {
                                     editMode ?
                                         <Grid container spacing={2}>
-                                            <Grid item sm={4.5} xs={12} textAlign="right">
+                                            <Grid item md={4.5} xs={12} textAlign="right">
                                                 <Box display="flex" justifyContent="center" alignItems="center">
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
@@ -1375,7 +1456,7 @@ const UpdateTrip = (props) => {
 
                                                 </Box>
                                             </Grid>
-                                            <Grid item sm={7.5} xs={12}>
+                                            <Grid item md={7.5} xs={12}>
                                                 <Box display="flex" justifyContent="center" alignItems="center">
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                                     <Paper
@@ -1431,31 +1512,57 @@ const UpdateTrip = (props) => {
                                             </Grid>
                                         </Grid>
                                         :
-                                        <>
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
-                                                {
-                                                    trip.Driver !== undefined &&
-                                                        trip.Driver.split(":")[1] !== undefined ?
-                                                        trip.Driver.split(":")[1]
-                                                        :
-                                                        trip.Driver
-                                                }/
-                                                {
-                                                    trip.Registration !== undefined &&
-                                                        trip.Registration.split(":")[1] !== undefined ?
-                                                        trip.Registration.split(":")[1]
-                                                        :
-                                                        trip.Registration
-                                                }
-                                            </Typography>
-                                        </>
+                                        <Grid container>
+                                            <Grid item md={2} xs={4} textAlign="right">
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
+                                            </Grid>
+                                            <Grid item md={4.5} xs={8} textAlign="center">
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateReceive}</Typography>
+                                            </Grid>
+                                            <Grid item md={7.5} xs={12} textAlign="center">
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
+                                                    {
+                                                        trip.Driver !== undefined &&
+                                                            trip.Driver.split(":")[1] !== undefined ?
+                                                            trip.Driver.split(":")[1]
+                                                            :
+                                                            trip.Driver
+                                                    }/
+                                                    {
+                                                        trip.Registration !== undefined &&
+                                                            trip.Registration.split(":")[1] !== undefined ?
+                                                            trip.Registration.split(":")[1]
+                                                            :
+                                                            trip.Registration
+                                                    }
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    // <>
+                                    //     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
+                                    //     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
+                                    //     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
+                                    //         {
+                                    //             trip.Driver !== undefined &&
+                                    //                 trip.Driver.split(":")[1] !== undefined ?
+                                    //                 trip.Driver.split(":")[1]
+                                    //                 :
+                                    //                 trip.Driver
+                                    //         }/
+                                    //         {
+                                    //             trip.Registration !== undefined &&
+                                    //                 trip.Registration.split(":")[1] !== undefined ?
+                                    //                 trip.Registration.split(":")[1]
+                                    //                 :
+                                    //                 trip.Registration
+                                    //         }
+                                    //     </Typography>
+                                    // </>
                                 }
                             </Grid>
                             {
                                 editMode &&
-                                <Grid item sm={3.5} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                <Grid item md={3.5} xs={12} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
                                     <Paper
                                         component="form"
@@ -1566,88 +1673,88 @@ const UpdateTrip = (props) => {
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
                                                             {editMode && row.TicketName === "1:ตั๋วเปล่า" ? (
                                                                 <Autocomplete
-                                                                id="autocomplete-tickets"
-                                                                options={getTickets()}
-                                                                getOptionLabel={(option) => `${option.Name}`}
-                                                                isOptionEqualToValue={(option, value) => option.Name === value.Name}
-                                                                value={getTickets().find(item => `${item.id}:${item.Name}` === row.TicketName) || null}
-                                                                onChange={(event, newValue) => {
-                                                                    if (newValue) {
-                                                                        setEditableTickets((prev) => {
-                                                                            const updatedTickets = [...prev];
-                                                                            updatedTickets[rowIdx] = {
-                                                                                Address: newValue.Address || "-",
-                                                                                Bill: newValue.Bill || "-",
-                                                                                CodeID: newValue.CodeID || "-",
-                                                                                CompanyName: newValue.CompanyName || "-",
-                                                                                CreditTime: newValue.CreditTime || "-",
-                                                                                Date: trip.DateStart,
-                                                                                Driver: trip.Driver,
-                                                                                Lat: newValue.Lat || 0,
-                                                                                Lng: newValue.Lng || 0,
-                                                                                Product: newValue.Product || "-",
-                                                                                Rate1: newValue.Rate1,
-                                                                                Rate2: newValue.Rate2,
-                                                                                Rate3: newValue.Rate3,
-                                                                                Registration: trip.Registration,
-                                                                                id: row.id,
-                                                                                No: row.No,
-                                                                                Trip: row.Trip,
-                                                                                TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                                CustomerType: newValue.CustomerType || "-",
-                                                                                Product: {
-                                                                                    P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                                }
-                                                                            };
-                                                                            return updatedTickets;
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                renderInput={(params) => (
-                                                                    <TextField
-                                                                        {...params}
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        sx={{
-                                                                            "& .MuiOutlinedInput-root": { height: "22px" },
-                                                                            "& .MuiInputBase-input": { fontSize: "16px", textAlign: "center" },
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                                renderOption={(props, option) => (
-                                                                    <li {...props}>
-                                                                        <Typography fontSize="16px">{`${option.Name}`}</Typography>
-                                                                    </li>
-                                                                )}
-                                                            />
+                                                                    id="autocomplete-tickets"
+                                                                    options={getTickets()}
+                                                                    getOptionLabel={(option) => `${option.Name}`}
+                                                                    isOptionEqualToValue={(option, value) => option.Name === value.Name}
+                                                                    value={getTickets().find(item => `${item.id}:${item.Name}` === row.TicketName) || null}
+                                                                    onChange={(event, newValue) => {
+                                                                        if (newValue) {
+                                                                            setEditableTickets((prev) => {
+                                                                                const updatedTickets = [...prev];
+                                                                                updatedTickets[rowIdx] = {
+                                                                                    Address: newValue.Address || "-",
+                                                                                    Bill: newValue.Bill || "-",
+                                                                                    CodeID: newValue.CodeID || "-",
+                                                                                    CompanyName: newValue.CompanyName || "-",
+                                                                                    CreditTime: newValue.CreditTime || "-",
+                                                                                    Date: trip.DateStart,
+                                                                                    Driver: trip.Driver,
+                                                                                    Lat: newValue.Lat || 0,
+                                                                                    Lng: newValue.Lng || 0,
+                                                                                    Product: newValue.Product || "-",
+                                                                                    Rate1: newValue.Rate1,
+                                                                                    Rate2: newValue.Rate2,
+                                                                                    Rate3: newValue.Rate3,
+                                                                                    Registration: trip.Registration,
+                                                                                    id: row.id,
+                                                                                    No: row.No,
+                                                                                    Trip: row.Trip,
+                                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                                    CustomerType: newValue.CustomerType || "-",
+                                                                                    Product: {
+                                                                                        P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                                    }
+                                                                                };
+                                                                                return updatedTickets;
+                                                                            });
+                                                                        }
+                                                                    }}
+                                                                    renderInput={(params) => (
+                                                                        <TextField
+                                                                            {...params}
+                                                                            variant="outlined"
+                                                                            size="small"
+                                                                            sx={{
+                                                                                "& .MuiOutlinedInput-root": { height: "22px" },
+                                                                                "& .MuiInputBase-input": { fontSize: "16px", textAlign: "center" },
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    renderOption={(props, option) => (
+                                                                        <li {...props}>
+                                                                            <Typography fontSize="16px">{`${option.Name}`}</Typography>
+                                                                        </li>
+                                                                    )}
+                                                                />
                                                             )
                                                                 : (
-                                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                    {
-                                                                        // (() => {
-                                                                        //     const branches = [
-                                                                        //         "( สาขาที่  00001)/",
-                                                                        //         "( สาขาที่  00002)/",
-                                                                        //         "( สาขาที่  00003)/",
-                                                                        //         "(สำนักงานใหญ่)/"
-                                                                        //     ];
+                                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                        {
+                                                                            // (() => {
+                                                                            //     const branches = [
+                                                                            //         "( สาขาที่  00001)/",
+                                                                            //         "( สาขาที่  00002)/",
+                                                                            //         "( สาขาที่  00003)/",
+                                                                            //         "(สำนักงานใหญ่)/"
+                                                                            //     ];
 
-                                                                        //     for (const branch of branches) {
-                                                                        //         if (row.TicketName.includes(branch)) {
-                                                                        //             return row.TicketName.split(branch)[1];
-                                                                        //         }
-                                                                        //     }
+                                                                            //     for (const branch of branches) {
+                                                                            //         if (row.TicketName.includes(branch)) {
+                                                                            //             return row.TicketName.split(branch)[1];
+                                                                            //         }
+                                                                            //     }
 
-                                                                        //     return row.TicketName;
-                                                                        // })()
-                                                                        row.TicketName.split(":")[1] !== undefined ?
-                                                                            row.TicketName.split(":")[1]
-                                                                            :
-                                                                            row.TicketName
+                                                                            //     return row.TicketName;
+                                                                            // })()
+                                                                            row.TicketName.split(":")[1] !== undefined ?
+                                                                                row.TicketName.split(":")[1]
+                                                                                :
+                                                                                row.TicketName
 
-                                                                    }
-                                                                </Typography>
-                                                            )}
+                                                                        }
+                                                                    </Typography>
+                                                                )}
                                                         </TableCell>
 
 
@@ -1843,7 +1950,7 @@ const UpdateTrip = (props) => {
                             <Grid container spacing={1} marginBottom={-0.5}>
                                 {
                                     editMode &&
-                                    <Grid item sm={6} xs={12} marginBottom={-0.5}>
+                                    <Grid item md={6} xs={12} marginBottom={-0.5}>
                                         <Paper
                                             component="form"
                                             sx={{ height: "30px", width: "100%" }}
@@ -1929,7 +2036,7 @@ const UpdateTrip = (props) => {
                                         </Paper>
                                     </Grid>
                                 }
-                                <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 0.5 }} gutterBottom>น้ำมันหนัก</Typography>
                                     <Paper
                                         component="form">
@@ -1955,7 +2062,7 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 0.5 }} gutterBottom>น้ำมันเบา</Typography>
                                     <Paper
                                         component="form">
@@ -1981,7 +2088,7 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={editMode ? 2 : 3} xs={6} display="flex" justifyContent="center" alignItems="center">
+                                <Grid item md={editMode ? 2 : 3} xs={6} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 0.5 }} gutterBottom>น้ำหนักรถ</Typography>
                                     <Paper
                                         component="form">
@@ -2009,7 +2116,7 @@ const UpdateTrip = (props) => {
                                 </Grid>
                                 {
                                     !editMode &&
-                                    <Grid item sm={3} xs={6} display="flex" justifyContent="center" alignItems="center">
+                                    <Grid item md={3} xs={6} display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 0.5 }} gutterBottom>รวม</Typography>
                                         <Paper
                                             component="form" sx={{ width: "100%" }}>
@@ -2037,14 +2144,49 @@ const UpdateTrip = (props) => {
                                         </Paper>
                                     </Grid>
                                 }
+                                {
+                                    windowWidth <= 900 &&
+                                    <Grid item md={6} xs={6}>
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
+                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
+                                            <Paper
+                                                component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            height: '30px', // ปรับความสูงของ TextField
+                                                            display: 'flex', // ใช้ flexbox
+                                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                        },
+                                                        '& .MuiInputBase-input': {
+                                                            fontSize: '16px', // ขนาด font เวลาพิมพ์
+                                                            fontWeight: 'bold',
+                                                            padding: '1px 4px', // ปรับ padding ภายใน input
+                                                            textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                            paddingLeft: 2
+                                                        },
+                                                        borderRadius: 10
+                                                    }}
+                                                    value={new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    }).format(editMode ? (totalVolumesTicket.totalWeight) : totalWeight)}
+                                                // InputProps={{
+                                                //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
+                                                // }}
+                                                />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
+                                }
                             </Grid>
                         </Paper>
                         <Grid container spacing={1}>
-                            <Grid item sm={editMode ? 9.5 : 11} xs={editMode ? 11 : 8} display="flex" alignItems="center" justifyContent='center'>
+                            <Grid item md={editMode ? 9.5 : 11} xs={editMode ? 11 : 12} display="flex" alignItems="center" justifyContent='center'>
                                 {
                                     editMode ?
                                         <Grid container spacing={2}>
-                                            <Grid item sm={4} xs={12} textAlign="right">
+                                            <Grid item md={4} xs={12} textAlign="right">
                                                 <Box display="flex" justifyContent="center" alignItems="center">
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่ส่ง</Typography>
@@ -2087,7 +2229,7 @@ const UpdateTrip = (props) => {
                                                     </Paper>
                                                 </Box>
                                             </Grid>
-                                            <Grid item sm={8} xs={12} >
+                                            <Grid item md={8} xs={12} >
                                                 <Box display="flex" justifyContent="center" alignItems="center">
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                                     <Paper
@@ -2115,31 +2257,57 @@ const UpdateTrip = (props) => {
                                         </Grid>
 
                                         :
-                                        <>
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
-                                                {
-                                                    trip.Driver !== undefined &&
-                                                        trip.Driver.split(":")[1] !== undefined ?
-                                                        trip.Driver.split(":")[1]
-                                                        :
-                                                        trip.Driver
-                                                }/
-                                                {
-                                                    trip.Registration !== undefined &&
-                                                        trip.Registration.split(":")[1] !== undefined ?
-                                                        trip.Registration.split(":")[1]
-                                                        :
-                                                        trip.Registration
-                                                }
-                                            </Typography>
-                                        </>
+                                        <Grid container>
+                                            <Grid item md={2} xs={4} textAlign="right">
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
+                                            </Grid>
+                                            <Grid item md={4.5} xs={8} textAlign="center">
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
+                                            </Grid>
+                                            <Grid item md={7.5} xs={12} textAlign="center">
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
+                                                    {
+                                                        trip.Driver !== undefined &&
+                                                            trip.Driver.split(":")[1] !== undefined ?
+                                                            trip.Driver.split(":")[1]
+                                                            :
+                                                            trip.Driver
+                                                    }/
+                                                    {
+                                                        trip.Registration !== undefined &&
+                                                            trip.Registration.split(":")[1] !== undefined ?
+                                                            trip.Registration.split(":")[1]
+                                                            :
+                                                            trip.Registration
+                                                    }
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    // <>
+                                    //     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
+                                    //     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
+                                    //     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
+                                    //         {
+                                    //             trip.Driver !== undefined &&
+                                    //                 trip.Driver.split(":")[1] !== undefined ?
+                                    //                 trip.Driver.split(":")[1]
+                                    //                 :
+                                    //                 trip.Driver
+                                    //         }/
+                                    //         {
+                                    //             trip.Registration !== undefined &&
+                                    //                 trip.Registration.split(":")[1] !== undefined ?
+                                    //                 trip.Registration.split(":")[1]
+                                    //                 :
+                                    //                 trip.Registration
+                                    //         }
+                                    //     </Typography>
+                                    // </>
                                 }
                             </Grid>
                             {
-                                editMode &&
-                                <Grid item sm={2.5} xs={12}>
+                                editMode && windowWidth >= 900 &&
+                                <Grid item md={2.5} xs={12}>
                                     <Box sx={{ backgroundColor: editMode ? (totalVolumesTicket.totalWeight || totalWeight) > 50300 ? "red" : "lightgray" : totalWeight > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
                                         <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
                                         <Paper
@@ -2468,7 +2636,7 @@ const UpdateTrip = (props) => {
                                 {
                                     editMode ?
                                         <>
-                                            <Grid item sm={6} xs={12} marginBottom={-0.5}>
+                                            <Grid item md={6} xs={12} marginBottom={-0.5}>
                                                 <Paper
                                                     component="form"
                                                     sx={{ height: "30px", width: "100%" }}
@@ -2556,7 +2724,7 @@ const UpdateTrip = (props) => {
                                             </Grid>
                                         </>
                                         :
-                                        <Grid item sm={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
                                             <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
                                             <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                                 component="form">
@@ -2580,7 +2748,7 @@ const UpdateTrip = (props) => {
                                             </Paper>
                                         </Grid>
                                 }
-                                <Grid item sm={editMode ? 2 : 3} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                         component="form">
@@ -2603,7 +2771,7 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item sm={editMode ? 4 : 5} xs={12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={editMode ? 4 : 5} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                         component="form">
@@ -2642,28 +2810,28 @@ const UpdateTrip = (props) => {
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
                                     {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
-                                        <Button variant="contained" color="success" size="small" sx={{ marginRight: 1 }} onClick={handleChangeStatus} endIcon={<WhereToVoteIcon/>}>
+                                        <Button variant="contained" color="success" size="small" sx={{ marginRight: 1 }} onClick={handleChangeStatus} endIcon={<WhereToVoteIcon />}>
                                             จบเที่ยววิ่ง
                                         </Button>
                                     }
                                     {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
-                                        <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={handleChangeCancelTrip} endIcon={<LocationOffIcon/>} >
+                                        <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={handleChangeCancelTrip} endIcon={<LocationOffIcon />} >
                                             ยกเลิกเที่ยววิ่ง
                                         </Button>
                                     }
                                     {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
-                                        <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon/>} >แก้ไข</Button>
+                                        <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
-                                    <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon/>} >บันทึกรูปภาพ</Button>
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>
                                 </Box>
                             </>
                             :
                             <>
                                 <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "center", marginTop: -1, marginBottom: -1 }} gutterBottom>*เมื่อแก้ไขเสร็จแล้วให้กดบันทึกให้เรียบร้อย*</Typography>
                                 <Box textAlign="center" marginTop={1} display="flex" justifyContent="center" alignItems="center">
-                                    <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={() => setEditMode(false)}>ยกเลิก</Button>
+                                    <Button variant="contained" color="error" size="small" sx={{ marginRight: 1 }} onClick={handleCancleUpdate}>ยกเลิก</Button>
                                     <Button variant="contained" color="success" size="small" onClick={handleSave}>บันทึก</Button>
                                 </Box>
                             </>

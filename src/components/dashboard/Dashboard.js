@@ -339,7 +339,7 @@ const Dashboard = () => {
     };
   });
 
-  const valueFormatter = (v) => `${v.toLocaleString()} รายการ`;
+  const valueFormatter = (v) => `${v?.toLocaleString?.() ?? '-'} รายการ`;
 
   console.log("monthStats : ", monthStats);
   console.log("monthOrders : ", monthOrders);
@@ -680,7 +680,8 @@ const Dashboard = () => {
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: 1
+                gap: 1,
+                height: "50vh"
               }}
             >
               <BarChart

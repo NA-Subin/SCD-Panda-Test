@@ -327,11 +327,9 @@ const TruckRepair = (props) => {
 
   return (
     <React.Fragment>
-      <TableCell sx={{ textAlign: "center",width: 20 }}>
         <IconButtonWarning color="warning" onClick={handleClickOpen} size="small">
         <ConstructionIcon fontSize="small" />
       </IconButtonWarning>
-      </TableCell>
       <Dialog
         open={open}
         TransitionComponent={Transition}
