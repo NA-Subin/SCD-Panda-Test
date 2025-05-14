@@ -1210,6 +1210,7 @@ const InsertTrips = () => {
                 open={open}
                 keepMounted
                 onClose={handleCancle}
+                fullScreen={ windowWidth <= 900 ? true : false }
                 sx={{
                     "& .MuiDialog-paper": {
                         width: "1200px", // กำหนดความสูงของ Dialog

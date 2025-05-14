@@ -52,6 +52,22 @@ const InsertDepot = (props) => {
         setOpen(false);
     };
 
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    
+      // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+      useEffect(() => {
+        const handleResize = () => {
+          setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+    
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+    
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+          window.removeEventListener('resize', handleResize);
+        };
+      }, []);
+
     const [name, setName] = React.useState("");
     const [no, setNo] = React.useState("");
     const [village, setVillage] = React.useState("");
@@ -104,6 +120,7 @@ const InsertDepot = (props) => {
             <Dialog
                 open={open}
                 keepMounted
+                fullScreen={windowWidth <= 600 ? true : false}
                 onClose={handleClose}
                 maxWidth="md"
                 sx={{ zIndex: 1000 }}

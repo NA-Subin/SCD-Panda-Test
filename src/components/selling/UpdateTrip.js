@@ -87,7 +87,7 @@ const UpdateTrip = (props) => {
     const [ticketLength, setTicketLength] = React.useState(0);
     const [selectedDateReceive, setSelectedDateReceive] = useState(dateReceive);
     const [selectedDateDelivery, setSelectedDateDelivery] = useState(dateDelivery);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [windowWidths, setWindowWidth] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -1371,6 +1371,7 @@ const UpdateTrip = (props) => {
             <Dialog
                 open={open}
                 keepMounted
+                fullScreen={ windowWidths <= 900 ? true : false }
                 onClose={() => {
                     if (!editMode) {
                         handleCancle();
@@ -1453,7 +1454,6 @@ const UpdateTrip = (props) => {
                                                             />
                                                         </LocalizationProvider>
                                                     </Paper>
-
                                                 </Box>
                                             </Grid>
                                             <Grid item md={7.5} xs={12}>
@@ -1513,13 +1513,13 @@ const UpdateTrip = (props) => {
                                         </Grid>
                                         :
                                         <Grid container>
-                                            <Grid item md={2} xs={4} textAlign="right">
+                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right"} }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                             </Grid>
-                                            <Grid item md={4.5} xs={8} textAlign="center">
+                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left"} }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateReceive}</Typography>
                                             </Grid>
-                                            <Grid item md={7.5} xs={12} textAlign="center">
+                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center"} }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
                                                     {
                                                         trip.Driver !== undefined &&
@@ -2145,7 +2145,7 @@ const UpdateTrip = (props) => {
                                     </Grid>
                                 }
                                 {
-                                    windowWidth <= 900 &&
+                                    windowWidths <= 900 &&
                                     <Grid item md={6} xs={6}>
                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
                                             <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
@@ -2258,13 +2258,13 @@ const UpdateTrip = (props) => {
 
                                         :
                                         <Grid container>
-                                            <Grid item md={2} xs={4} textAlign="right">
+                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right"} }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                                             </Grid>
-                                            <Grid item md={4.5} xs={8} textAlign="center">
+                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "right", xs: "left"} }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
                                             </Grid>
-                                            <Grid item md={7.5} xs={12} textAlign="center">
+                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center"} }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
                                                     {
                                                         trip.Driver !== undefined &&
@@ -2306,7 +2306,7 @@ const UpdateTrip = (props) => {
                                 }
                             </Grid>
                             {
-                                editMode && windowWidth >= 900 &&
+                                editMode && windowWidths >= 900 &&
                                 <Grid item md={2.5} xs={12}>
                                     <Box sx={{ backgroundColor: editMode ? (totalVolumesTicket.totalWeight || totalWeight) > 50300 ? "red" : "lightgray" : totalWeight > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
                                         <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>

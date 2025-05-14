@@ -52,7 +52,7 @@ const InsertDeducetionIncome = () => {
     const [open, setOpen] = React.useState(false);
     const [type, setType] = React.useState("");
     const [check, setCheck] = React.useState(true);
-    const { reportType, drivers, typeFinancial,reportFinancial } = useData();
+    const { reportType, drivers, typeFinancial, reportFinancial } = useData();
     const reportTypeDetail = Object.values(reportType);
     const driverDetail = Object.values(drivers);
     const typeFinancialDetail = Object.values(typeFinancial);
@@ -63,11 +63,26 @@ const InsertDeducetionIncome = () => {
     const [deduction, setDeduction] = useState("");
     const [note, setNote] = useState("");
     const [money, setMoney] = useState("");
-    
-        const handleReceiveData = (data) => {
-            console.log('Data from child:', data);
-            setResult(data);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
         };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    const handleReceiveData = (data) => {
+        console.log('Data from child:', data);
+        setResult(data);
+    };
 
     console.log("Type : ", type);
 
@@ -125,19 +140,20 @@ const InsertDeducetionIncome = () => {
             <Dialog
                 open={open}
                 keepMounted
+                fullScreen={windowWidth <= 900 ? true : false}
                 onClose={handleClose}
                 maxWidth="md"
                 sx={
                     !result ?
-                    {zIndex: 1200}
-                    :
-                    {
-                    '& .MuiDialog-container': {
-                        justifyContent: 'flex-start', // 👈 ชิดซ้าย
-            alignItems: 'center',
-                    },
-                    zIndex: 1200,
-                }}
+                        { zIndex: 1200 }
+                        :
+                        {
+                            '& .MuiDialog-container': {
+                                justifyContent: 'flex-start', // 👈 ชิดซ้าย
+                                alignItems: 'center',
+                            },
+                            zIndex: 1200,
+                        }}
             >
                 <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark, height: "50px" }}>
                     <Grid container spacing={2}>
@@ -151,15 +167,17 @@ const InsertDeducetionIncome = () => {
                         </Grid>
                     </Grid>
                 </DialogTitle>
-                <DialogContent sx={{ height: "40vh", display: "flex", alignItems: "center",justifyContent: "center" }}>
+                <DialogContent sx={{ height: "40vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Grid container spacing={2} marginTop={1} marginBottom={1}>
-                        <Grid item xs={9}/>
-                        <Grid item xs={3}>
-                        <Tooltip title="เพิ่มประเภท" placement="top">
-                                        <InsertTypeDeduction onSend={handleReceiveData} />
-                                    </Tooltip>
+                        {
+                            windowWidth >= 900 && <Grid item md={9} sx={12}/>
+                        }
+                        <Grid item md={3} xs={12}>
+                            <Tooltip title="เพิ่มประเภท" placement="top">
+                                <InsertTypeDeduction onSend={handleReceiveData} />
+                            </Tooltip>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>พนักงานขับรถ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -199,109 +217,109 @@ const InsertDeducetionIncome = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <FormGroup row>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เลือกประเภท</Typography>
                                 <FormControlLabel control={<Checkbox checked={check} />} label="รายได้" onClick={() => setCheck(true)} />
                                 <FormControlLabel control={<Checkbox checked={!check} />} label="รายหัก" onClick={() => setCheck(false)} />
                             </FormGroup>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             {
                                 check ?
                                     <Box display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 6.5 }} gutterBottom>รายได้</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                        <Autocomplete
-                                        id="autocomplete-tickets"
-                                        options={typeFinancialDetail.filter((row) => row.Type === "รายได้")}
-                                        getOptionLabel={(option) => option?.Name || ""}
-                                        value={type} // registrationTruck เป็น object แล้ว
-                                        onChange={(event, newValue) => {
-                                            if (newValue) {
-                                                setType(newValue); // เก็บทั้ง object
-                                            } else {
-                                                setType(null); // หรือ default object ถ้ามี
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label={!type ? "เลือกรายได้พนักงาน" : ""}
-                                                variant="outlined"
-                                                size="small"
-                                            //   sx={{
-                                            //     "& .MuiOutlinedInput-root": { height: "30px" },
-                                            //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
-                                            //   }}
+                                            <Autocomplete
+                                                id="autocomplete-tickets"
+                                                options={typeFinancialDetail.filter((row) => row.Type === "รายได้")}
+                                                getOptionLabel={(option) => option?.Name || ""}
+                                                value={type} // registrationTruck เป็น object แล้ว
+                                                onChange={(event, newValue) => {
+                                                    if (newValue) {
+                                                        setType(newValue); // เก็บทั้ง object
+                                                    } else {
+                                                        setType(null); // หรือ default object ถ้ามี
+                                                    }
+                                                }}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label={!type ? "เลือกรายได้พนักงาน" : ""}
+                                                        variant="outlined"
+                                                        size="small"
+                                                    //   sx={{
+                                                    //     "& .MuiOutlinedInput-root": { height: "30px" },
+                                                    //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
+                                                    //   }}
+                                                    />
+                                                )}
+                                                renderOption={(props, option) => (
+                                                    <li {...props}>
+                                                        <Typography fontSize="16px">
+                                                            {option.Name}
+                                                        </Typography>
+                                                    </li>
+                                                )}
                                             />
-                                        )}
-                                        renderOption={(props, option) => (
-                                            <li {...props}>
-                                                <Typography fontSize="16px">
-                                                    {option.Name}
-                                                </Typography>
-                                            </li>
-                                        )}
-                                    />
                                         </Paper>
                                     </Box>
                                     :
                                     <Box display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 6 }} gutterBottom>รายหัก</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                        <Autocomplete
-                                        id="autocomplete-tickets"
-                                        options={typeFinancialDetail.filter((row) => row.Type === "รายหัก")}
-                                        getOptionLabel={(option) => option?.Name || ""}
-                                        value={type} // registrationTruck เป็น object แล้ว
-                                        onChange={(event, newValue) => {
-                                            if (newValue) {
-                                                setType(newValue); // เก็บทั้ง object
-                                            } else {
-                                                setType(null); // หรือ default object ถ้ามี
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label={!type ? "เลือกรายได้พนักงาน" : ""}
-                                                variant="outlined"
-                                                size="small"
-                                            //   sx={{
-                                            //     "& .MuiOutlinedInput-root": { height: "30px" },
-                                            //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
-                                            //   }}
+                                            <Autocomplete
+                                                id="autocomplete-tickets"
+                                                options={typeFinancialDetail.filter((row) => row.Type === "รายหัก")}
+                                                getOptionLabel={(option) => option?.Name || ""}
+                                                value={type} // registrationTruck เป็น object แล้ว
+                                                onChange={(event, newValue) => {
+                                                    if (newValue) {
+                                                        setType(newValue); // เก็บทั้ง object
+                                                    } else {
+                                                        setType(null); // หรือ default object ถ้ามี
+                                                    }
+                                                }}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label={!type ? "เลือกรายได้พนักงาน" : ""}
+                                                        variant="outlined"
+                                                        size="small"
+                                                    //   sx={{
+                                                    //     "& .MuiOutlinedInput-root": { height: "30px" },
+                                                    //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
+                                                    //   }}
+                                                    />
+                                                )}
+                                                renderOption={(props, option) => (
+                                                    <li {...props}>
+                                                        <Typography fontSize="16px">
+                                                            {option.Name}
+                                                        </Typography>
+                                                    </li>
+                                                )}
                                             />
-                                        )}
-                                        renderOption={(props, option) => (
-                                            <li {...props}>
-                                                <Typography fontSize="16px">
-                                                    {option.Name}
-                                                </Typography>
-                                            </li>
-                                        )}
-                                    />
                                         </Paper>
                                     </Box>
                             }
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>จำนวน</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 6} }} gutterBottom>จำนวน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth type="number"
-                                    value={money} onChange={(e) => setMoney(e.target.value)} 
+                                        value={money} onChange={(e) => setMoney(e.target.value)}
                                     />
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>หมายเหตุ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth
-                                    value={note} onChange={(e) => setNote(e.target.value)} 
+                                        value={note} onChange={(e) => setNote(e.target.value)}
                                     />
                                 </Paper>
                             </Box>

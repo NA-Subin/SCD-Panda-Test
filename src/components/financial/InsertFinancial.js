@@ -67,6 +67,21 @@ const InsertFinancial = () => {
     const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [result, setResult] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    
+        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+        useEffect(() => {
+            const handleResize = () => {
+                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            };
+    
+            window.addEventListener('resize', handleResize); // เพิ่ม event listener
+    
+            // ลบ event listener เมื่อ component ถูกทำลาย
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }, []);
 
     const handleReceiveData = (data) => {
         console.log('Data from child:', data);
@@ -175,6 +190,7 @@ const InsertFinancial = () => {
             <Dialog
                 open={open}
                 keepMounted
+                fullScreen={windowWidth <= 900 ? true : false}
                 onClose={handleClose}
                 maxWidth="md"
                 sx={
@@ -206,16 +222,15 @@ const InsertFinancial = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={1} marginBottom={1}>
-                        <Grid item xs={0.5} />
-                        <Grid item xs={4.5}>
+                        <Grid item md={5} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เลขที่บิล</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>เลขที่บิล</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth value={invoiceID} onChange={(e) => setInvoiceID(e.target.value)} />
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={3.5}>
+                        <Grid item md={3.5} xs={6}>
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker
@@ -248,7 +263,7 @@ const InsertFinancial = () => {
                                 </LocalizationProvider>
                             </Paper>
                         </Grid>
-                        <Grid item xs={3.5}>
+                        <Grid item md={3.5} xs={6}>
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker
@@ -281,7 +296,7 @@ const InsertFinancial = () => {
                                 </LocalizationProvider>
                             </Paper>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1.5 }} gutterBottom>ป้ายทะเบียน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -335,7 +350,7 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ใช้จ่ายเกี่ยวกับ</Typography>
                                 {/* <Paper component="form" sx={{ width: "100%" }}>
@@ -381,7 +396,7 @@ const InsertFinancial = () => {
                                 </Tooltip>
                             </Box>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>หมายเหตุ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -389,7 +404,7 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>ชื่อบริษัท</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -397,7 +412,7 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>ชื่อบัญชี</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -405,10 +420,9 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={0.5} />
-                        <Grid item xs={4}>
+                        <Grid item md={4.5} xs={7}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3 }} gutterBottom>ยอด</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7 }} gutterBottom>ยอด</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" type="number" fullWidth
                                         value={price}
@@ -427,7 +441,7 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={2.5}>
+                        <Grid item md={2.5} xs={5}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>Vat</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -448,9 +462,9 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item xs={5}>
+                        <Grid item md={5} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอดรวม</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 4} }} gutterBottom>ยอดรวม</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" type="number" fullWidth
                                         value={total}

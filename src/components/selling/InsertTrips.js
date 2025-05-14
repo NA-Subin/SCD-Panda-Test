@@ -70,21 +70,21 @@ const InsertTrips = () => {
     const dialogRef = useRef(null);
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
     const [editMode, setEditMode] = useState(true);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
-        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-        useEffect(() => {
-            const handleResize = () => {
-                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-            };
-    
-            window.addEventListener('resize', handleResize); // เพิ่ม event listener
-    
-            // ลบ event listener เมื่อ component ถูกทำลาย
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
+    const [windowWidths, setWindowWidth] = useState(window.innerWidth);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // โหลด html2canvas จาก CDN
     useEffect(() => {
@@ -1356,6 +1356,7 @@ const InsertTrips = () => {
             <Dialog
                 open={open}
                 keepMounted
+                fullScreen={windowWidths <= 900 ? true : false}
                 onClose={handleCancle}
                 sx={{
                     "& .MuiDialog-paper": {
@@ -2001,7 +2002,7 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 {
-                                    windowWidth <= 900 &&
+                                    windowWidths <= 900 &&
                                     <Grid item xs>
                                         <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
                                             <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
@@ -2153,37 +2154,37 @@ const InsertTrips = () => {
                                 </Box>
                             </Grid>
                             {
-                                 windowWidth >= 900 &&
-<Grid item md={2.5} xs={12}>
-                                <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
-                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
-                                    <Paper
-                                        component="form" sx={{ width: "100%", marginTop: 0.5 }}>
-                                        <TextField size="small" fullWidth
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: '30px', // ปรับความสูงของ TextField
-                                                    display: 'flex', // ใช้ flexbox
-                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                    fontWeight: 'bold',
-                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                },
-                                                borderRadius: 10
-                                            }}
-                                            value={new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format((parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) || 0)}
-                                        // InputProps={{
-                                        //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
-                                        // }}
-                                        />
-                                    </Paper>
-                                </Box>
-                            </Grid>
+                                windowWidths >= 900 &&
+                                <Grid item md={2.5} xs={12}>
+                                    <Box sx={{ backgroundColor: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) > 50300 ? "red" : "lightgray", display: "flex", justifyContent: "center", alignItems: "center", p: 0.5, marginTop: -1, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
+                                        <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5, marginTop: 1 }} gutterBottom>รวม</Typography>
+                                        <Paper
+                                            component="form" sx={{ width: "100%", marginTop: 0.5 }}>
+                                            <TextField size="small" fullWidth
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        height: '30px', // ปรับความสูงของ TextField
+                                                        display: 'flex', // ใช้ flexbox
+                                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        fontSize: '16px', // ขนาด font เวลาพิมพ์
+                                                        fontWeight: 'bold',
+                                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                    },
+                                                    borderRadius: 10
+                                                }}
+                                                value={new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format((parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)) || 0)}
+                                            // InputProps={{
+                                            //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
+                                            // }}
+                                            />
+                                        </Paper>
+                                    </Box>
+                                </Grid>
                             }
                         </Grid>
                         <Paper sx={{ backgroundColor: theme.palette.panda.contrastText, p: 1 }}>

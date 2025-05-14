@@ -42,7 +42,7 @@ const InsertCompany = () => {
     const [depots, setDepots] = useState("");
 
     const { company } = useData();
-      const companyDetail = Object.values(company || {});
+    const companyDetail = Object.values(company || {});
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -52,7 +52,7 @@ const InsertCompany = () => {
         setOpen(false);
     };
 
-    const [companyType,setCompanyType] = React.useState("")
+    const [companyType, setCompanyType] = React.useState("")
     const [name, setName] = React.useState("");
     //const [company, setCompany] = React.useState([]);
     const [no, setNo] = React.useState("");
@@ -60,8 +60,8 @@ const InsertCompany = () => {
     const [subDistrict, setSubDistrict] = React.useState("");
     const [district, setDistrict] = React.useState("");
     const [province, setProvince] = React.useState("");
-    const [lat,setLat] = React.useState("");
-    const [lng,setLng] = React.useState("");
+    const [lat, setLat] = React.useState("");
+    const [lng, setLng] = React.useState("");
     const [zipCode, setZipCode] = React.useState("");
 
     // const getCompany = async () => {
@@ -74,8 +74,23 @@ const InsertCompany = () => {
     // useEffect(() => {
     //     getCompany();
     // }, []);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    console.log("Company : ",companyDetail);
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    console.log("Company : ", companyDetail);
 
     const handlePost = () => {
         database
@@ -84,13 +99,13 @@ const InsertCompany = () => {
             .update({
                 id: (companyDetail.length) + 1,
                 Name: name,
-                Address: 
-                    (no === "-" ? "-" : no)+
-                    (village === "-" ? "" : ","+village)+
-                    (subDistrict === "-" ? "" : ","+subDistrict)+
-                    (district === "-" ? "" : ","+district)+
-                    (province === "-" ? "" : ","+province)+
-                    (zipCode === "-" ? "" : ","+zipCode)
+                Address:
+                    (no === "-" ? "-" : no) +
+                    (village === "-" ? "" : "," + village) +
+                    (subDistrict === "-" ? "" : "," + subDistrict) +
+                    (district === "-" ? "" : "," + district) +
+                    (province === "-" ? "" : "," + province) +
+                    (zipCode === "-" ? "" : "," + zipCode)
                 ,
                 lat: lat,
                 lng: lng,
@@ -115,6 +130,7 @@ const InsertCompany = () => {
             <Dialog
                 open={open}
                 keepMounted
+                fullScreen={ windowWidth <= 600 ? true :false }
                 onClose={handleClose}
                 maxWidth="md"
             >
@@ -132,73 +148,73 @@ const InsertCompany = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
-                        <Grid item sm={1}  xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" marginTop={1} textAlign="right" gutterBottom>
                                 ชื่อบริษัท
                             </Typography>
                         </Grid>
-                        <Grid item sm={11} xs={9}>
+                        <Grid item  md={9} xs={10}>
                             <Paper
                                 component="form">
                                 <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                             </Paper>
                         </Grid>
-                        <Grid item sm={12} xs={12}>
+                        <Grid item  md={12} xs={12}>
                             <Divider>
                                 <Chip label="ที่อยู่" size="small" />
                             </Divider>
                         </Grid>
-                        <Grid item sm={1.5} xs={3}>
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>บ้านเลขที่</Typography>
+                        <Grid item  md={3} xs={2}>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่</Typography>
                         </Grid>
-                        <Grid item sm={2.5} xs={9}>
+                        <Grid item  md={9} xs={10}>
                             <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} />
                         </Grid>
-                        <Grid item sm={1} xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>หมู่ที่</Typography>
                         </Grid>
-                        <Grid item sm={3} xs={9}>
+                        <Grid item md={9} xs={10}>
                             <TextField size="small" fullWidth value={village} onChange={(e) => setVillage(e.target.value)} />
                         </Grid>
-                        <Grid item sm={1} xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ตำบล</Typography>
                         </Grid>
-                        <Grid item sm={3} xs={9}>
+                        <Grid item md={9} xs={10}>
                             <TextField size="small" fullWidth value={subDistrict} onChange={(e) => setSubDistrict(e.target.value)} />
                         </Grid>
-                        <Grid item sm={1} xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>อำเภอ</Typography>
                         </Grid>
-                        <Grid item sm={3} xs={9}>
+                        <Grid item md={9} xs={10}>
                             <TextField size="small" fullWidth value={district} onChange={(e) => setDistrict(e.target.value)} />
                         </Grid>
-                        <Grid item sm={1} xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>จังหวัด</Typography>
                         </Grid>
-                        <Grid item sm={3} xs={9}>
+                        <Grid item md={9} xs={10}>
                             <TextField size="small" fullWidth value={province} onChange={(e) => setProvince(e.target.value)} />
                         </Grid>
-                        <Grid item sm={1.5} xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>รหัสไปรณีย์</Typography>
                         </Grid>
-                        <Grid item sm={2.5} xs={9}>
+                        <Grid item md={9} xs={10}>
                             <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                         </Grid>
-                        <Grid item sm={12} xs={12}>
+                        <Grid item  md={12} xs={12}>
                             <Divider>
                                 <Chip label="พิกัด" size="small" />
                             </Divider>
                         </Grid>
-                        <Grid item sm={1} xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>lat</Typography>
                         </Grid>
-                        <Grid item sm={5} xs={9}>
+                        <Grid item md={9} xs={10}>
                             <TextField size="small" fullWidth value={lat} onChange={(e) => setLat(e.target.value)} />
                         </Grid>
-                        <Grid item sm={1} xs={3}>
+                        <Grid item md={3} xs={2}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>long</Typography>
                         </Grid>
-                        <Grid item sm={5} xs={9}>
+                        <Grid item md={9} xs={10}>
                             <TextField size="small" fullWidth value={lng} onChange={(e) => setLng(e.target.value)} />
                         </Grid>
                     </Grid>
