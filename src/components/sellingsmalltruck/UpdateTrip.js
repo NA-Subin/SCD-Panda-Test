@@ -2000,11 +2000,11 @@ const UpdateTrip = (props) => {
                                                             const updatedTickets = [...prev];
 
                                                             // ตรวจสอบว่ามีตั๋วนี้อยู่แล้วหรือไม่
-                                                            const existingIndex = updatedTickets.findIndex(
-                                                                (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
-                                                            );
+                                                            // const existingIndex = updatedTickets.findIndex(
+                                                            //     (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
+                                                            // );
 
-                                                            if (existingIndex === -1) {
+                                                            // if (existingIndex === -1) {
 
                                                                 // let depotTrip = "-"; // ค่าเริ่มต้น
 
@@ -2041,7 +2041,7 @@ const UpdateTrip = (props) => {
                                                                         P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                     }
                                                                 });
-                                                            }
+                                                            // }
 
                                                             return updatedTickets;
                                                         });
@@ -2703,11 +2703,11 @@ const UpdateTrip = (props) => {
                                                                 const updatedOrders = [...prev];
 
                                                                 // ตรวจสอบว่ามีตั๋วนี้อยู่แล้วหรือไม่
-                                                                const existingIndex = updatedOrders.findIndex(
-                                                                    (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
-                                                                );
+                                                                // const existingIndex = updatedOrders.findIndex(
+                                                                //     (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
+                                                                // );
 
-                                                                if (existingIndex === -1) {
+                                                                // if (existingIndex === -1) {
 
                                                                     // let depotTrip = "-"; // ค่าเริ่มต้น
 
@@ -2744,7 +2744,7 @@ const UpdateTrip = (props) => {
                                                                             P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                         }
                                                                     });
-                                                                }
+                                                                // }
 
                                                                 return updatedOrders;
                                                             });
@@ -2872,7 +2872,7 @@ const UpdateTrip = (props) => {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
                                         <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
-                                    <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>
+                                    {/* <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button> */}
                                 </Box>
                             </>
                             :

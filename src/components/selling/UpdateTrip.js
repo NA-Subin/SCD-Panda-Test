@@ -462,82 +462,62 @@ const UpdateTrip = (props) => {
     }
 
     const handleEditChange = (index, field, value) => {
-        setEditableTickets((prev) => {
-            const updatedTickets = [...prev];
+    setEditableTickets((prev) => {
+        const updatedTickets = [...prev];
 
-            // ถ้ายังไม่มี index นี้ ให้เพิ่มเข้าไปก่อน
-            if (!updatedTickets[index]) {
-                updatedTickets[index] = { id: index + 1, No: 0, Product: {} };
-            }
+        if (!updatedTickets[index]) {
+            updatedTickets[index] = { id: index + 1, No: 0, Product: {} };
+        }
 
-            const fields = field.split(".");
-            let obj = updatedTickets[index];
+        const fields = field.split(".");
+        let obj = updatedTickets[index];
 
-            for (let i = 0; i < fields.length - 1; i++) {
-                const key = fields[i];
-                if (!obj[key]) obj[key] = {}; // ถ้าไม่มี ให้สร้าง object ใหม่
-                obj = obj[key];
-            }
+        for (let i = 0; i < fields.length - 1; i++) {
+            const key = fields[i];
+            if (!obj[key]) obj[key] = {};
+            obj = obj[key];
+        }
 
-            // แปลงค่า value ให้เป็นตัวเลข (ถ้าเป็นค่าว่างหรือไม่ใช่ตัวเลขให้ใช้ 0 แทน)
+        const lastField = fields[fields.length - 1];
+
+        // ✅ เช็กเฉพาะ OrderID ว่าเป็น string
+        if (field === "OrderID") {
+            obj[lastField] = value;
+        } else {
             const numericValue = parseFloat(value) || 0;
-            obj[fields[fields.length - 1]] = numericValue;
+            obj[lastField] = numericValue;
 
-            console.log("Updated Value:", numericValue);
-
-            // ถ้าเป็นการเพิ่ม Product ใหม่ และ Value > 0 ให้เพิ่มโครงสร้าง Product
+            // เงื่อนไขสำหรับ Product
             if (fields[0] === "Product" && numericValue > 0) {
                 const productType = fields[1];
                 if (!updatedTickets[index].Product) {
                     updatedTickets[index].Product = {};
                 }
-                updatedTickets[index].Product[productType] = { Volume: numericValue.toString() };
+                updatedTickets[index].Product[productType] = { Volume: value.toString() };
             }
 
-            // **ลบ Product ที่มี Volume เป็น 0 ออก**
             if (fields[0] === "Product" && numericValue === 0) {
                 const productType = fields[1];
-                console.log(`Removing Product: ${productType}`);
-
-                // ลบ key ของ Product
                 delete updatedTickets[index].Product[productType];
-
-                // ถ้า Product ไม่มี key เหลืออยู่ ให้ลบทั้ง object
                 if (Object.keys(updatedTickets[index].Product).length === 0) {
                     delete updatedTickets[index].Product;
                 }
             }
+        }
 
-            setTicketTrip((prev) => {
-                const newTickets = {};
-                const allTickets = [...updatedTickets]; // ใช้ข้อมูลใหม่ทั้งหมด
-
-                allTickets.forEach((item, i) => {
-                    const newIndex = i + 1; // ใช้ 1-based index
-                    // const branches = [
-                    //     "( สาขาที่  00001)/",
-                    //     "( สาขาที่  00002)/",
-                    //     "( สาขาที่  00003)/",
-                    //     "( สำนักงานใหญ่)/"
-                    // ];
-
-                    // let ticketName = `${item.TicketName}`;
-                    // for (const branch of branches) {
-                    //     if (ticketName.includes(branch)) {
-                    //         ticketName = ticketName.split(branch)[1];
-                    //         break;
-                    //     }
-                    // }
-
-                    newTickets[`Ticket${newIndex}`] = item.TicketName;
-                });
-
-                return { ...prev, ...newTickets };
+        setTicketTrip((prev) => {
+            const newTickets = {};
+            const allTickets = [...updatedTickets];
+            allTickets.forEach((item, i) => {
+                const newIndex = i + 1;
+                newTickets[`Ticket${newIndex}`] = item.TicketName;
             });
-
-            return updatedTickets;
+            return { ...prev, ...newTickets };
         });
-    };
+
+        return updatedTickets;
+    });
+};
 
     const handleOrderChange = (index, field, value) => {
         setEditableOrders((prev) => {
@@ -1702,9 +1682,10 @@ const UpdateTrip = (props) => {
                                                                                     Trip: row.Trip,
                                                                                     TicketName: `${newValue.id}:${newValue.Name}`,
                                                                                     CustomerType: newValue.CustomerType || "-",
-                                                                                    Product: {
-                                                                                        P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                                    }
+                                                                                    Product: row.Product
+                                                                                    // Product: {
+                                                                                    //     P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                                    // }
                                                                                 };
                                                                                 return updatedTickets;
                                                                             });
@@ -1764,6 +1745,8 @@ const UpdateTrip = (props) => {
                                                                 <TextField
                                                                     value={row.OrderID}
                                                                     fullWidth
+
+                                                                    type="text"
                                                                     InputLabelProps={{
                                                                         sx: {
                                                                             fontSize: '12px',
@@ -1968,11 +1951,11 @@ const UpdateTrip = (props) => {
                                                             const updatedTickets = [...prev];
 
                                                             // ตรวจสอบว่ามีตั๋วนี้อยู่แล้วหรือไม่
-                                                            const existingIndex = updatedTickets.findIndex(
-                                                                (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
-                                                            );
+                                                            // const existingIndex = updatedTickets.findIndex(
+                                                            //     (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
+                                                            // );
 
-                                                            if (existingIndex === -1) {
+                                                            // if (existingIndex === -1) {
 
                                                                 // let depotTrip = "-"; // ค่าเริ่มต้น
 
@@ -2000,6 +1983,7 @@ const UpdateTrip = (props) => {
                                                                     Rate2: newValue.Rate2,
                                                                     Rate3: newValue.Rate3,
                                                                     Registration: trip.Registration,
+                                                                    OrderID: newValue.OrderID || "",
                                                                     id: updatedTickets.length, // ลำดับ id ใหม่
                                                                     No: ticketLength, // คำนวณจำนวน order
                                                                     Trip: (Number(tripID) - 1),
@@ -2009,7 +1993,7 @@ const UpdateTrip = (props) => {
                                                                         P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                     }
                                                                 });
-                                                            }
+                                                            // }
 
                                                             return updatedTickets;
                                                         });
@@ -2655,11 +2639,11 @@ const UpdateTrip = (props) => {
                                                                     const updatedOrders = [...prev];
 
                                                                     // ตรวจสอบว่ามีตั๋วนี้อยู่แล้วหรือไม่
-                                                                    const existingIndex = updatedOrders.findIndex(
-                                                                        (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
-                                                                    );
+                                                                    // const existingIndex = updatedOrders.findIndex(
+                                                                    //     (item) => item.TicketName === `${newValue.id}:${newValue.Name}`
+                                                                    // );
 
-                                                                    if (existingIndex === -1) {
+                                                                    // if (existingIndex === -1) {
 
                                                                         // let depotTrip = "-"; // ค่าเริ่มต้น
 
@@ -2696,7 +2680,7 @@ const UpdateTrip = (props) => {
                                                                                 P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                             }
                                                                         });
-                                                                    }
+                                                                    // }
 
                                                                     return updatedOrders;
                                                                 });

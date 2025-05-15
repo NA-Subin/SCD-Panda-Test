@@ -77,24 +77,29 @@ const TripsSmallTruck = () => {
 
     //const tripDetail = trips.filter((item) => item.TruckType === "รถเล็ก" && item.StatusTrip !== "ยกเลิก" );
     const tripDetail = trips.filter((item) => {
-        const itemDateR = dayjs(item.DateReceive, "DD/MM/YYYY");
-        const itemDateD = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        // const itemDateR = dayjs(item.DateReceive, "DD/MM/YYYY");
+        // const itemDateD = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const itemDate = dayjs(item.DateStart, "DD/MM/YYYY");
         return (
             check === 2 ?
                 item.TruckType === "รถเล็ก" &&
                 item.StatusTrip === "กำลังจัดเที่ยววิ่ง" &&
-                (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
                 : check === 3 ?
                     item.TruckType === "รถเล็ก" &&
                     item.StatusTrip === "ยกเลิก" &&
-                    (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                    //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                    itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
                     : check === 4 ?
                         item.TruckType === "รถเล็ก" &&
                         item.StatusTrip === "จบทริป" &&
-                        (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                        //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
                         :
                         item.TruckType === "รถเล็ก" &&
-                        (itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                        //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+                        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
         );
     }).sort((a, b) => {
         const dateA = dayjs(a.DateReceive, "DD/MM/YYYY");
@@ -171,19 +176,19 @@ const TripsSmallTruck = () => {
                     </Box>
                 </Grid>
                 <Grid item md={5} xs={12}>
-                          <Box
-                            sx={{
-                              width: "100%", // กำหนดความกว้างของ Paper
-                              height: "40px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginTop: { md: -10, xs: 2 },
-                              marginBottom: 3
-                            }}
-                          >
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                              <DatePicker
+                    <Box
+                        sx={{
+                            width: "100%", // กำหนดความกว้างของ Paper
+                            height: "40px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginTop: { md: -10, xs: 2 },
+                            marginBottom: 3
+                        }}
+                    >
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
                                 value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
@@ -191,54 +196,54 @@ const TripsSmallTruck = () => {
                                 onChange={handleDateChangeDateStart}
                                 sx={{ marginRight: 2, }}
                                 slotProps={{
-                                  textField: {
-                                    size: "small",
-                                    fullWidth: true,
-                                    InputProps: {
-                                      startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                          วันที่เริ่มต้น :
-                                        </InputAdornment>
-                                      ),
-                                      sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                      },
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    วันที่เริ่มต้น :
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                height: "40px",  // ความสูงของ Input
+                                                padding: "10px", // Padding ภายใน Input
+                                                fontWeight: "bold",
+                                            },
+                                        },
                                     },
-                                  },
                                 }}
-                              />
-                              <DatePicker
+                            />
+                            <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
                                 value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
                                 format="DD/MM/YYYY"
                                 onChange={handleDateChangeDateEnd}
                                 slotProps={{
-                                  textField: {
-                                    size: "small",
-                                    fullWidth: true,
-                                    InputProps: {
-                                      startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                          วันที่สิ้นสุด :
-                                        </InputAdornment>
-                                      ),
-                                      sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                      },
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    วันที่สิ้นสุด :
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                height: "40px",  // ความสูงของ Input
+                                                padding: "10px", // Padding ภายใน Input
+                                                fontWeight: "bold",
+                                            },
+                                        },
                                     },
-                                  },
                                 }}
-                              />
-                            </LocalizationProvider>
-                          </Box>
-                        </Grid>
+                            />
+                        </LocalizationProvider>
+                    </Box>
+                </Grid>
             </Grid>
             <Divider sx={{ marginBottom: 2 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
