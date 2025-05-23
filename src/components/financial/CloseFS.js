@@ -42,6 +42,8 @@ import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, 
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import InsertType from "./InsertType";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const CloseFS = () => {
 
@@ -66,7 +68,9 @@ const CloseFS = () => {
         };
     }, []);
 
-    const { company, drivers, typeFinancial, order, reghead, trip } = useData();
+    // const { company, drivers, typeFinancial, order, reghead, trip } = useData();
+    const { company, drivers, reghead } = useBasicData();
+    const { order, trip, typeFinancial } = useTripData();
     const companies = Object.values(company || {});
     const driver = Object.values(drivers || {});
     const typeF = Object.values(typeFinancial || {});

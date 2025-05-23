@@ -36,6 +36,7 @@ import theme from "../../theme/theme";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const Invoice = () => {
   const [update, setUpdate] = React.useState(true);
@@ -92,7 +93,8 @@ const Invoice = () => {
   console.log("selectedRow : ", selectedRow);
   console.log("indexes : ", indexes);
 
-  const { order, transferMoney } = useData();
+  // const { order, transferMoney } = useData();
+  const { order, transferMoney } = useTripData();
   const orders = Object.values(order || {});
   const transferMoneyDetail = Object.values(transferMoney || {});
 

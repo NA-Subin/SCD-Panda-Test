@@ -45,6 +45,8 @@ import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InsertDeducetionIncome from "./InsertDeductionIncome";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const DeductionOfIncome = () => {
 
@@ -85,7 +87,9 @@ const DeductionOfIncome = () => {
         }
     };
 
-    const { reportFinancial, drivers } = useData();
+    // const { reportFinancial, drivers } = useData();
+    const { drivers } = useBasicData();
+    const { reportFinancial } = useTripData();
     const reports = Object.values(reportFinancial || {});
     const driver = Object.values(drivers || {});
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
@@ -133,7 +137,7 @@ const DeductionOfIncome = () => {
 
     let table = [];
 
-    drivers.forEach((driver) => {
+    driver.forEach((driver) => {
         table.push({
             name: driver.Name,
             item: "เงินเดือน",

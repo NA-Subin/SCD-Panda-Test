@@ -72,23 +72,23 @@ const UpdateDriver = (props) => {
     const [license, setLicense] = React.useState(driver.DrivingLicense);
     const [expiration, setExpiration] = React.useState(driver.DrivingLicenseExpiration);
     const [picture, setPicture] = React.useState(driver.DrivingLicensePicture);
-    const [phone, setPhone] =  React.useState(driver.Phone);
-    const [user,setUser] = React.useState(driver.User);
+    const [phone, setPhone] = React.useState(driver.Phone);
+    const [user, setUser] = React.useState(driver.User);
     const [registrationHead, setRegistrationHead] = React.useState([]);
     const [registrationSmallTruck, setRegistrationSmallTruck] = React.useState([]);
 
     const handleDateChange = (newDate) => {
         setExpiration(newDate);
-      };
+    };
 
-    console.log("show date : "+dayjs(expiration).format("DD/MM/YYYY"));
+    console.log("show date : " + dayjs(expiration).format("DD/MM/YYYY"));
 
     const getRegitration = async () => {
         database.ref("/truck/registration/").on("value", (snapshot) => {
             const datas = snapshot.val();
             const dataRegistration = [];
             for (let id in datas) {
-                if(datas[id].Driver === "ไม่มี"){
+                if (datas[id].Driver === "0:ไม่มี") {
                     dataRegistration.push({ id, ...datas[id] })
                 }
             }
@@ -99,7 +99,7 @@ const UpdateDriver = (props) => {
             const datas = snapshot.val();
             const dataRegistration = [];
             for (let id in datas) {
-                if(datas[id].Driver === "ไม่มี"){
+                if (datas[id].Driver === "0:ไม่มี") {
                     dataRegistration.push({ id, ...datas[id] })
                 }
             }
@@ -111,11 +111,11 @@ const UpdateDriver = (props) => {
         getRegitration();
     }, []);
 
-    const handleUpdate = () => {
-        database
-            .ref("/employee/drivers/")
-            .child(driver.id - 1)
-            .update({
+    console.log("registartion : ", driver.Registration.split(":")[0] - 1)
+
+    const handleUpdate = async () => {
+        try {
+            await database.ref("/employee/drivers/").child(driver.id - 1).update({
                 Name: name,
                 IDCard: idCard,
                 Registration: registration,
@@ -131,49 +131,38 @@ const UpdateDriver = (props) => {
                 DrivingLicense: license,
                 DrivingLicenseExpiration: expiration === "ไม่มี" ? "ไม่มี" : dayjs(expiration).format("DD/MM/YYYY"),
                 DrivingLicensePicture: picture
-            })
-            .then(() => {
-                if(truckType === "รถใหญ่"){
-                    database
-                    .ref("/truck/registration/")
-                    .child(driver.Registration.split(":")[0] - 1)
-                    .update({
-                        Driver: registration.split(":")[1] === "ไม่มี" ? "ไม่มี" : name,
-                    })
-                    .then(() => {
-                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                        console.log("Data pushed successfully");
-                        setUpdate(true)
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
-                }else if(truckType === "รถเล็ก"){
-                    database
-                    .ref("/truck/registrationTail/")
-                    .child(driver.Registration.split(":")[0] - 1)
-                    .update({
-                        Driver: registration.split(":")[1] === "ไม่มี" ? "ไม่มี" : name,
-                    })
-                    .then(() => {
-                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                        console.log("Data pushed successfully");
-                        setUpdate(true)
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
-
-                }
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
             });
-    }
+
+            const regId = registration?.split?.(":")[0] || "0";
+            const drvId = driver?.Registration?.split?.(":")[0] || "0";
+
+            const driverIdPart = drvId === "0"
+                ? regId
+                : (regId === "0" ? drvId : drvId);
+            const driverId = Number(driverIdPart);
+            //const truckIndex = driverId - 1;
+
+            if (!isNaN(driverId) && driverId >= 0) {
+                const truckPath = truckType === "รถใหญ่"
+                    ? "/truck/registration/"
+                    : "/truck/small/";
+
+                await database.ref(truckPath).child(driverId - 1).update({
+                    Driver: registration.split(":")[1] !== "ไม่มี" ? `${driver.id}:${driver.Name}` : registration,
+                });
+            } else {
+                ShowError("Truck ID ไม่ถูกต้อง");
+                return;
+            }
+
+            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+            setUpdate(true);
+        } catch (error) {
+            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+            console.error("Error:", error);
+        }
+    };
+
 
 
     return (
@@ -241,12 +230,12 @@ const UpdateDriver = (props) => {
                                                 {
                                                     truckType === "รถใหญ่" ?
                                                         registrationHead.map((row) => (
-                                                            <MenuItem value={row.id+":"+row.RegHead}>{row.RegHead}</MenuItem>
+                                                            <MenuItem value={`${row.id}:${row.RegHead}`}>{row.RegHead}</MenuItem>
                                                         ))
                                                         :
                                                         truckType === "รถเล็ก" ?
                                                             registrationSmallTruck.map((row) => (
-                                                                <MenuItem value={row.id+":"+row.Registration}>{row.Registration}</MenuItem>
+                                                                <MenuItem value={`${row.id}:${row.RegHead}`}>{row.RegHead}</MenuItem>
                                                             ))
                                                             : ""
                                                 }
@@ -292,7 +281,7 @@ const UpdateDriver = (props) => {
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>User</Typography>
                             </Grid>
                             <Grid item xs={5}>
-                                <TextField fullWidth variant="standard" type="number" value={user} disabled/>
+                                <TextField fullWidth variant="standard" type="number" value={user} disabled />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" whiteSpace="nowrap" gutterBottom>เบอร์โทร</Typography>
@@ -358,19 +347,19 @@ const UpdateDriver = (props) => {
                             <Grid item xs={4}>
                                 {
                                     update ?
-                                    <TextField fullWidth variant="standard" value={expiration} disabled />
-                                    :
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker
-                                        openTo="day"
-                                        views={["year", "month", "day"]}
-                                        value={dayjs(expiration === "ไม่มี" ? new Date : expiration ).locale("th")}
-                                        format="DD/MM/YYYY"
-                                        slotProps={{ textField: { size: "small",variant:"standard" } }}
-                                        sx={{ backgroundColor: theme.palette.primary.contrastText }}
-                                        onChange={handleDateChange}
-                                    />
-                                </LocalizationProvider>
+                                        <TextField fullWidth variant="standard" value={expiration} disabled />
+                                        :
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(expiration === "ไม่มี" ? new Date : expiration).locale("th")}
+                                                format="DD/MM/YYYY"
+                                                slotProps={{ textField: { size: "small", variant: "standard" } }}
+                                                sx={{ backgroundColor: theme.palette.primary.contrastText }}
+                                                onChange={handleDateChange}
+                                            />
+                                        </LocalizationProvider>
                                 }
                             </Grid>
                             <Grid item xs={12}>
@@ -388,8 +377,8 @@ const UpdateDriver = (props) => {
                                             <Button variant="contained" color="info" >เพิ่มรูปภาพ</Button>
                                         :
                                         <>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
-                                        <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
+                                            <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
                                         </>
                                 }
                             </Grid>
@@ -406,17 +395,17 @@ const UpdateDriver = (props) => {
                 </DialogContent>
                 <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
                     {
-                        update ? 
-                        <>
-                        <Button onClick={() => setOpen(false)} variant="contained" color="error">ยกเลิก</Button>
-                        <Button onClick={() => setUpdate(false)} variant="contained" color="warning">แก้ไข</Button>
-                        </>
-                        : 
-                        <>
-                        <Button onClick={() => setUpdate(true)} variant="contained" color="error">ยกเลิก</Button>
-                        <Button onClick={handleUpdate} variant="contained" color="success">บันทึก</Button>
-                        </>
-                        
+                        update ?
+                            <>
+                                <Button onClick={() => setOpen(false)} variant="contained" color="error">ยกเลิก</Button>
+                                <Button onClick={() => setUpdate(false)} variant="contained" color="warning">แก้ไข</Button>
+                            </>
+                            :
+                            <>
+                                <Button onClick={() => setUpdate(true)} variant="contained" color="error">ยกเลิก</Button>
+                                <Button onClick={handleUpdate} variant="contained" color="success">บันทึก</Button>
+                            </>
+
                     }
                 </DialogActions>
             </Dialog>

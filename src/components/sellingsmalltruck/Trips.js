@@ -41,6 +41,7 @@ import { database } from "../../server/firebase";
 import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const TripsSmallTruck = () => {
     const [menu, setMenu] = React.useState(0);
@@ -72,7 +73,8 @@ const TripsSmallTruck = () => {
         setOpen(false);
     };
 
-    const { trip } = useData();
+    // const { trip } = useData();
+    const { trip } = useBasicData();
     const trips = Object.values(trip || {});
 
     //const tripDetail = trips.filter((item) => item.TruckType === "รถเล็ก" && item.StatusTrip !== "ยกเลิก" );

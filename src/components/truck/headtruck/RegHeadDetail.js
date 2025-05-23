@@ -46,13 +46,14 @@ import UpdateRegHead from "./UpdateRegHead";
 import TruckRepair from "./TruckRepair";
 import { fetchRealtimeData } from "../../../server/data";
 import { useData } from "../../../server/path";
+import { useBasicData } from "../../../server/provider/BasicDataProvider";
 
 const RegHeadDetail = (props) => {
   const { truck } = props;
 
   const [openTab, setOpenTab] = React.useState(true);
   const [setting, setSetting] = React.useState("0:0");
-  const [tail, setTail] = React.useState("ไม่มี:::");
+  const [tail, setTail] = React.useState("ไม่มี:0:0:0");
 
   const toggleDrawer = (newOpen) => () => {
     setOpenTab(newOpen);
@@ -75,9 +76,10 @@ const RegHeadDetail = (props) => {
   //   });
   // };
 
-  const { regtail } = useData();
-        const dataregtail = Object.values(regtail); 
-  const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
+  // const { regtail } = useData();
+  const { regtail } = useBasicData();
+  const dataregtail = Object.values(regtail || {});
+  const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่ได้เชื่อมต่อทะเบียนหัว");
 
   // useEffect(() => {
   //   getRegitrationTail();
@@ -116,75 +118,74 @@ const RegHeadDetail = (props) => {
 
   return (
     <React.Fragment>
-                      <TableRow key={truck.id}>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.id}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.RegHead}</TableCell>
-                        {
-                          setting.split(":")[1] === truck.RegTail ?
-                            <TableCell sx={{ textAlign: "center" }}>
-                              <Grid container spacing={2}>
-                                <Grid item xs={8}>
-                                  <Paper
-                                    component="form">
-                                    <Select
-                                      id="demo-simple-select"
-                                      value={tail}
-                                      size="small"
-                                      MenuProps={{
-                                        PaperProps: {
-                                          sx: {
-                                            '& .MuiMenuItem-root': {
-                                              fontSize: "14px", // ขนาดตัวอักษรในรายการเมนู
-                                            },
-                                          },
-                                        },
-                                      }}
-                                      sx={{ textAlign: "left", height: 25, fontSize: "14px" }}
-                                      onChange={(e) => setTail(e.target.value)}
-                                      fullWidth
-                                    >
-                                      <MenuItem value={"ไม่มี:::"}>
-                                        เลือกทะเบียน
-                                      </MenuItem>
-                                      {
-                                        registrationTail.map((row) => (
-                                          <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
-                                        ))
-                                      }
-                                    </Select>
-                                  </Paper>
-                                </Grid>
-                                <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                                  <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting("")}>
-                                    <CancelIcon color="error" fontSize="12px" />
-                                  </IconButton>
-                                  <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={handlePost}>
-                                    <CheckCircleIcon color="success" fontSize="12px" />
-                                  </IconButton>
-                                </Grid>
-                              </Grid>
-                            </TableCell>
-                            :
-                            <TableCell sx={{ textAlign: "center" }}>
-                              {truck.RegTail}
-                              {truck.RegTail === "ไม่มี" ?
-                                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting(truck.id + ":" + truck.RegTail)}><SettingsIcon color="warning" fontSize="12px" /></IconButton>
-                                : ""}
-                            </TableCell>
-                        }
-                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(truck.Weight)}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.VehicleRegistration}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.RepairTruck.split(":")[1]}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.Status}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.Company.split(":")[1]}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{truck.Driver === "ไม่มี" ? truck.Driver : truck.Driver.split(":")[1]}</TableCell>
-                        <TableCell sx={{ width: 40, position: "sticky", right: 0, backgroundColor: "white" }} colSpan={2}>
-                          <Box display="flex" justifyContent="center" alignItems="center">
-                            <UpdateRegHead key={truck.id} truck={truck}/>
-                        <TruckRepair key={truck.RepairTruck.split(":")[1]} row={truck} />
-                          </Box>
-                        </TableCell>
-                      </TableRow>
+      <TableRow key={truck.id}>
+        <TableCell sx={{ textAlign: "center" }}>{truck.id}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.RegHead}</TableCell>
+        {
+          setting.split(":")[1] === truck.RegTail ?
+            <TableCell sx={{ textAlign: "center" }}>
+              <Grid container spacing={2}>
+                <Grid item xs={8}>
+                  <Paper
+                    component="form">
+                    <Select
+                      id="demo-simple-select"
+                      value={tail}
+                      size="small"
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            '& .MuiMenuItem-root': {
+                              fontSize: "14px", // ขนาดตัวอักษรในรายการเมนู
+                            },
+                          },
+                        },
+                      }}
+                      sx={{ textAlign: "left", height: 25, fontSize: "14px" }}
+                      onChange={(e) => setTail(e.target.value)}
+                      fullWidth
+                    >
+                      <MenuItem value={"ไม่มี:0:0:0"}>
+                        เลือกทะเบียน
+                      </MenuItem>
+                      {
+                        registrationTail.map((row) => (
+                          <MenuItem value={`${row.id}:${row.RegTail}:${row.Cap}:${row.Weight}`}>{row.RegTail}</MenuItem>
+                        ))
+                      }
+                    </Select>
+                  </Paper>
+                </Grid>
+                <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
+                  <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting("")}>
+                    <CancelIcon color="error" fontSize="12px" />
+                  </IconButton>
+                  <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={handlePost}>
+                    <CheckCircleIcon color="success" fontSize="12px" />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </TableCell>
+            :
+            <TableCell sx={{ textAlign: "center" }}>
+              {truck.RegTail === "0:ไม่มี" ?
+                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting(truck.RegTail)}><SettingsIcon color="warning" fontSize="12px" /></IconButton>
+                : truck.RegTail.split(":")[1]}
+            </TableCell>
+        }
+        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(truck.Weight)}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.VehicleRegistration}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.RepairTruck.split(":")[1]}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Status}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Company.split(":")[1]}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Driver === "ไม่มี" ? truck.Driver : truck.Driver.split(":")[1]}</TableCell>
+        <TableCell sx={{ width: 40, position: "sticky", right: 0, backgroundColor: "white" }} colSpan={2}>
+          <Box display="flex" justifyContent="center" alignItems="center">
+            <UpdateRegHead key={truck.id} truck={truck} />
+            <TruckRepair key={truck.RepairTruck.split(":")[1]} row={truck} />
+          </Box>
+        </TableCell>
+      </TableRow>
     </React.Fragment>
   );
 };

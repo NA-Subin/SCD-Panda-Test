@@ -39,6 +39,7 @@ import { useData } from "../../server/path";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { getAuth, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 
 const Setting = () => {
@@ -63,9 +64,13 @@ const Setting = () => {
   }, []);
 
   const userId = Cookies.get("sessionToken");
-  const { company, officers } = useData();
+  // const { company, officers } = useData();
+  
+  const { company, officers } = useBasicData();
   const companyDetail = Object.values(company || {});
   const officersDetail = Object.values(officers || {});
+  console.log("company : ",company);
+  console.log("Officers : ",officers);
 
   const userDetail = officersDetail.find((row) => (row.id === Number(userId.split("$")[1])));
 

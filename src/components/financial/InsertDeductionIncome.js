@@ -47,12 +47,17 @@ import { useData } from "../../server/path";
 import dayjs from "dayjs";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InsertTypeDeduction from "./InsertTypeDeduction";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const InsertDeducetionIncome = () => {
     const [open, setOpen] = React.useState(false);
     const [type, setType] = React.useState("");
     const [check, setCheck] = React.useState(true);
-    const { reportType, drivers, typeFinancial, reportFinancial } = useData();
+    // const { reportType, drivers, typeFinancial, reportFinancial } = useData();
+    const { drivers } = useBasicData();
+    const { reportType, typeFinancial, reportFinancial } = useTripData();
+    
     const reportTypeDetail = Object.values(reportType);
     const driverDetail = Object.values(drivers);
     const typeFinancialDetail = Object.values(typeFinancial);

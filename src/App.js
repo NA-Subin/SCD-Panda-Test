@@ -26,7 +26,9 @@ import TicketSmallTruck from "./components/ticket/TicketsSmallTruck";
 import Depots from "./components/depots/depot/Depots";
 import TripsBigTruck from "./components/selling/Trips";
 import TripsSmallTruck from "./components/sellingsmalltruck/Trips";
-import { DataProvider } from "./server/path";
+//import { DataProvider } from "./server/path";
+//import { DataProvider } from "./server/provider";
+//import { DataProvider } from "./server/ConnectDB";
 import Invoice from "./components/invoice/Invoice";
 import PrintInvoice from "./components/invoice/PrintInvoice";
 import Swal from "sweetalert2";
@@ -39,6 +41,10 @@ import CloseFS from "./components/financial/CloseFS";
 import DriverDetail from "./components/driver/DriverDetail";
 import Financial from "./components/financial/Financial";
 import DeductionOfIncome from "./components/financial/DeductionOfIncome";
+import { BasicDataProvider } from "./server/provider/BasicDataProvider";
+import { TripDataProvider } from "./server/provider/TripProvider";
+import { GasStationDataProvider } from "./server/provider/GasStationProvider";
+//import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
 
@@ -82,100 +88,108 @@ function App() {
   }, []);
 
   return (
-      <BrowserRouter>
-      <ThemeProvider theme={theme}>
-      <DataProvider>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        {/* <Route path="/:email/*" element={ */}
-        <Route path="/print-invoice" element={<PrintInvoice />} />
-        <Route path="/print-trips" element={<PrintTrips />} />
-        <Route path="/print-report" element={<PrintReport />} />
-        <Route path="/gasstation-attendant" element={<GasStationA />} />
-        <Route path="/driver-Detail" element={<DriverDetail />} />
-        <Route path="/driver" element={<Driver />} />
-        <Route path="/trade-payable" element={<TradePayable />} />
-        <Route path="/choose" element={<Choose />} />
-        <Route path="/gasStation-admin" element={<GasStationAdmin />} />
-        <Route
-          path="/*"
-          element={
-            <Box sx={{ display: "flex" }}>
-              <Navbar />
+    <BrowserRouter>
+      <BasicDataProvider>
+        <ThemeProvider theme={theme}>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            {/* <Route path="/:email/*" element={ */}
+            <Route path="/gasstation-attendant" element={<GasStationDataProvider><GasStationA /></GasStationDataProvider>} />
+            <Route path="/gasStation-admin" element={<GasStationDataProvider><GasStationAdmin /></GasStationDataProvider>} />
+              <Route path="/print-invoice" element={<TripDataProvider><PrintInvoice /></TripDataProvider>} />
+            <Route path="/print-trips" element={<TripDataProvider><PrintTrips /></TripDataProvider>} />
+            <Route path="/print-report" element={<TripDataProvider><PrintReport /></TripDataProvider>} />
+              <Route path="/driver-Detail" element={<TripDataProvider><DriverDetail /></TripDataProvider>} />
+              <Route path="/driver" element={<TripDataProvider><Driver /></TripDataProvider>} />
+              <Route path="/trade-payable" element={<TripDataProvider><TradePayable /></TripDataProvider>} />
+            <Route path="/choose" element={<Choose />} />
+            <Route
+              path="/*"
+              element={
+                <Box sx={{ display: "flex" }}>
+                  <Navbar />
+                  <Box
+                    sx={{
+                      flexGrow: 1,
+                      backgroundSize: "auto",
+                    }}
+                  >
+                    <TripDataProvider>
+                      <GasStationDataProvider>
+                        <Routes>
+                          <Route path="/dashboard" element={<Dashboard />} />
+                        </Routes>
+                      </GasStationDataProvider>
+                    </TripDataProvider>
 
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  backgroundSize: "auto",
-                }}
-              >
-                <Routes>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                </Routes>
-                <Routes>
-                  <Route path="/setting" element={<Setting />} />
-                </Routes>
-                <Routes>
-                  <Route path="/edit-firebase" element={<Editfirebase />} />
-                </Routes>
-                <Routes>
-                  <Route path="/trips-bigtruck" element={<TripsBigTruck />} />
-                </Routes>
-                <Routes>
-                  <Route path="/trips-smalltruck" element={<TripsSmallTruck />} />
-                </Routes>
-                <Routes>
-                  <Route path="/employee" element={<Employee />} />
-                </Routes>
-                <Routes>
-                  <Route path="/ticket" element={<Tickets />} />
-                </Routes>
-                <Routes>
-                  <Route path="/creditor" element={<Creditor />} />
-                </Routes>
-                <Routes>
-                  <Route path="/invoice" element={<Invoice />} />
-                </Routes>
-                <Routes>
-                  <Route path="/report" element={<Report />} />
-                </Routes>
-                <Routes>
-                  <Route path="/gasstations" element={<GasStations />} />
-                </Routes>
-                <Routes>
-                  <Route path="/customer" element={<Customer />} />
-                </Routes>
-                <Routes>
-                  <Route path="/trucks" element={<Trucks />} />
-                </Routes>
-                <Routes>
-                  <Route path="/depots" element={<Depots />} />
-                </Routes>
-                <Routes>
-                  <Route path="/transports" element={<TicketsTransport />} />
-                </Routes>
-                <Routes>
-                  <Route path="/customer-bigtrucks" element={<TicketsBigTruck />} />
-                </Routes>
-                <Routes>
-                  <Route path="/customer-smalltrucks" element={<TicketSmallTruck />} />
-                </Routes>
-                <Routes>
-                  <Route path="/invoice-financial" element={<Financial />} />
-                </Routes>
-                <Routes>
-                  <Route path="/close-financial" element={<CloseFS />} />
-                </Routes>
-                <Routes>
-                  <Route path="/financial-deduction" element={<DeductionOfIncome />} />
-                </Routes>
-              </Box>
-            </Box>
-          }
-        />
-      </Routes>
-      </DataProvider>
-      </ThemeProvider>
+                    {/* <Routes>
+                      <Route path="/customer" element={<Customer />} />
+                    </Routes> */}
+                    <Routes>
+                      <Route path="/creditor" element={<Creditor />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/trucks" element={<Trucks />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/depots" element={<Depots />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/transports" element={<TicketsTransport />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/customer-bigtrucks" element={<TicketsBigTruck />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/customer-smalltrucks" element={<TicketSmallTruck />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/setting" element={<Setting />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/edit-firebase" element={<Editfirebase />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/employee" element={<Employee />} />
+                    </Routes>
+                    <TripDataProvider>
+                      <Routes>
+                        <Route path="/ticket" element={<Tickets />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/trips-bigtruck" element={<TripsBigTruck />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/trips-smalltruck" element={<TripsSmallTruck />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/invoice" element={<Invoice />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/report" element={<Report />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/invoice-financial" element={<Financial />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/close-financial" element={<CloseFS />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/financial-deduction" element={<DeductionOfIncome />} />
+                      </Routes>
+                    </TripDataProvider>
+                    <GasStationDataProvider>
+                      <Routes>
+                        <Route path="/gasstations" element={<GasStations />} />
+                      </Routes>
+                    </GasStationDataProvider>
+                  </Box>
+                </Box>
+              }
+            />
+          </Routes>
+        </ThemeProvider>
+      </BasicDataProvider>
     </BrowserRouter>
   );
 }

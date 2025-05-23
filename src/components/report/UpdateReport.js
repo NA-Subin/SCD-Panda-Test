@@ -54,6 +54,8 @@ import notoSansThaiRegular from "@fontsource/noto-sans-thai";
 import html2canvas from "html2canvas";
 import BankDetail from "./BankDetail";
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
+import { useTripData } from "../../server/provider/TripProvider";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
@@ -80,18 +82,31 @@ const UpdateReport = (props) => {
         };
     }, []);
 
+    // const {
+    //     tickets,
+    //     customertransports,
+    //     customergasstations,
+    //     customertickets,
+    //     trip,
+    //     reghead,
+    //     company,
+    //     banks,
+    //     transferMoney,
+    //     invoiceReport
+    // } = useData();
+
     const {
         tickets,
         customertransports,
         customergasstations,
         customertickets,
         trip,
-        reghead,
-        company,
         banks,
         transferMoney,
         invoiceReport
-    } = useData();
+    } = useTripData();
+
+    const { reghead, company } = useBasicData();
 
     console.log("Show Data ", ticket);
 

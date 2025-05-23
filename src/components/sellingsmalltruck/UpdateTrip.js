@@ -52,6 +52,7 @@ import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 import "../../theme/scrollbar.css"
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 // const depotOptions = ["ลำปาง", "พิจิตร", "สระบุรี", "บางปะอิน", "IR"];
 
@@ -103,7 +104,8 @@ const UpdateTrip = (props) => {
             };
         }, []);
 
-    const { depots, small } = useData();
+    // const { depots, small } = useData();
+    const { depots, small } = useBasicData();
     const depotOptions = Object.values(depots || {});
     const registrationTruck = Object.values(small || {});
 

@@ -35,14 +35,18 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const InsertCompany = () => {
     const [menu, setMenu] = React.useState(0);
     const [open, setOpen] = React.useState(false);
     const [depots, setDepots] = useState("");
 
-    const { company } = useData();
+    // const { company } = useData();
+    const { company } = useBasicData();
     const companyDetail = Object.values(company || {});
+
+    console.log("Company : ", companyDetail);
 
     const handleClickOpen = () => {
         setOpen(true);

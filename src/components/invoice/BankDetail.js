@@ -45,6 +45,7 @@ import AddCardIcon from '@mui/icons-material/AddCard';
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
 import { useData } from "../../server/path";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const BankDetail = () => {
     const [open, setOpen] = React.useState(false);
@@ -54,7 +55,8 @@ const BankDetail = () => {
     const [bankShortName, setBankShortName] = React.useState("");
     const [status, setStatus] = React.useState("");
 
-    const { banks } = useData();
+    // const { banks } = useData();
+    const { banks } = useTripData();
     const bankDetail = Object.values(banks || {});
 
     const handleClickOpen = () => {

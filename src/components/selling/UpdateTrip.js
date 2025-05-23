@@ -52,6 +52,7 @@ import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 import "../../theme/scrollbar.css"
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 // const depotOptions = ["ลำปาง", "พิจิตร", "สระบุรี", "บางปะอิน", "IR"];
 
@@ -103,7 +104,8 @@ const UpdateTrip = (props) => {
         };
     }, []);
 
-    const { depots, reghead } = useData();
+    // const { depots, reghead } = useData();
+    const { depots, reghead } = useBasicData();
     const depotOptions = Object.values(depots || {});
     const registrationTruck = Object.values(reghead || {});
 
@@ -126,7 +128,7 @@ const UpdateTrip = (props) => {
             CostTrip: costTrip,
             DateReceive: trip.DateReceive,
             DateDelivery: trip.DateDelivery,
-            Driver: trip.Driver + " / " + trip.Registration,
+            Driver: trip.Driver.split(":")[1] + " / " + trip.Registration.split(":")[1],
             Depot: depotTrip,
             WeightHigh: totalVolumesTicket.oilHeavy,
             WeightLow: totalVolumesTicket.oilLight,
@@ -642,18 +644,19 @@ const UpdateTrip = (props) => {
             calculateOil(totalsTicket["G91"], 0.740) +
             calculateOil(totalsTicket["G95"], 0.740) +
             calculateOil(totalsTicket["B95"], 0.740) +
-            calculateOil(totalsTicket["E20"], 0.740) +
-            calculateOil(totalsTicket["PWD"], 0.740);
+            calculateOil(totalsTicket["E20"], 0.740)
+            
 
         const oilHeavy =
-            calculateOil(totalsTicket["B7"], 0.837);
+            calculateOil(totalsTicket["B7"], 0.837) +
+            calculateOil(totalsTicket["PWD"], 0.837);;
 
         const totalWeight = parseFloat(weightTrucks) +
             calculateOil(totalsTicket["G91"], 0.740) +
             calculateOil(totalsTicket["G95"], 0.740) +
             calculateOil(totalsTicket["B95"], 0.740) +
             calculateOil(totalsTicket["E20"], 0.740) +
-            calculateOil(totalsTicket["PWD"], 0.740) +
+            calculateOil(totalsTicket["PWD"], 0.837) +
             calculateOil(totalsTicket["B7"], 0.837);
 
         // ตั้งค่าผลลัพธ์
@@ -848,10 +851,15 @@ const UpdateTrip = (props) => {
     const getTickets = () => {
         const tickets = [
             { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },  // เพิ่มตั๋วเปล่าเข้าไป
-            ...ticketsA.map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
-            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
-            ...ticketsT
+            ...[...ticketsA].map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" }))
+            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
+            
+            ...[...ticketsPS].map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" }))
+            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
+
+            ...[...ticketsT]
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
         ];
 
@@ -860,11 +868,17 @@ const UpdateTrip = (props) => {
 
     const getCustomers = () => {
         const customers = [
-            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
-            ...ticketsT
+            ...[...ticketsPS].map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" }))
+            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
+
+            ...[...ticketsT]
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
-            ...ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" }))
+
+            ...[...ticketsB].filter((item) => item.Status === "ลูกค้าประจำ")
+            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+            .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" }))
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);
@@ -1497,7 +1511,7 @@ const UpdateTrip = (props) => {
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                             </Grid>
                                             <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left"} }}>
-                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateReceive}</Typography>
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
                                             </Grid>
                                             <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center"} }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :

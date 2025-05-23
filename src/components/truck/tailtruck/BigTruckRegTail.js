@@ -44,13 +44,15 @@ import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import UpdateRegTail from "./UpdateRegTail";
 import { useData } from "../../../server/path";
+import { useBasicData } from "../../../server/provider/BasicDataProvider";
 
 const BigTruckRegTail = (props) => {
   const { status } = props;
   const [openTab, setOpenTab] = React.useState(true);
   const [open, setOpen] = useState(false);
 
-  const { regtail } = useData();
+  // const { regtail } = useData();
+  const { regtail } = useBasicData();
   const truck = Object.values(regtail || {});
 
   const isMobile = useMediaQuery("(max-width:1100px)");

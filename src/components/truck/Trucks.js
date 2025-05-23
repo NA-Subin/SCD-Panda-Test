@@ -46,6 +46,7 @@ import { SmallTruckIconBlack, SmallTruckIconWhite, TailTruckIconBlack, TailTruck
 import RepairTruck from "./RepairTruck";
 import { fetchRealtimeData } from "../../server/data";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const Trucks = () => {
   const [open, setOpen] = useState(1);
@@ -57,10 +58,11 @@ const Trucks = () => {
     setOpenTab(newOpen);
   };
 
-        const { reghead,regtail,small } = useData();
-        const datareghead = Object.values(reghead); 
-        const dataregtail = Object.values(regtail); 
-        const datasmall = Object.values(small); 
+        // const { reghead,regtail,small } = useData();
+        const { reghead,regtail,small } = useBasicData();
+        const datareghead = Object.values(reghead || {}); 
+        const dataregtail = Object.values(regtail || {}); 
+        const datasmall = Object.values(small || {}); 
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
       

@@ -54,6 +54,8 @@ import { auth, database } from "../../server/firebase";
 import { TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellSelling, TableCellPWD } from "../../theme/style";
 import { useData } from "../../server/path";
 import withReactContent from "sweetalert2-react-content";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const DriverDetail = () => {
     const branches = [
@@ -91,7 +93,9 @@ const DriverDetail = () => {
     const [showTrip, setShowTrip] = useState(true);
     const [check, setCheck] = useState({});
 
-    const { reghead, trip, order, depots, drivers } = useData();
+    // const { reghead, trip, order, depots, drivers } = useData();
+    const { reghead, drivers, depots } = useBasicData();
+    const { trip, order} = useTripData();
     const regheads = Object.values(reghead || {});
     const trips = Object.values(trip || {});
     const orders = Object.values(order || {});

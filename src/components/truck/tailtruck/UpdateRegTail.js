@@ -43,6 +43,7 @@ import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { useData } from "../../../server/path";
+import { useBasicData } from "../../../server/provider/BasicDataProvider";
 
 const UpdateRegTail = (props) => {
     const { truck } = props;
@@ -66,8 +67,9 @@ const UpdateRegTail = (props) => {
         setOpenTab(newOpen);
     };
 
-    const { company } = useData();
-                const dataCompany = Object.values(company); 
+    // const { company } = useData();
+    const { company } = useBasicData();
+    const dataCompany = Object.values(company || {});
 
     const [companies, setCompanies] = React.useState(truck.Company);
     const [regTail, setRegTail] = React.useState(truck.RegTail);
@@ -100,7 +102,7 @@ const UpdateRegTail = (props) => {
             });
     }
 
-    console.log("Company : ",companies);
+    console.log("Company : ", companies);
 
     return (
         <React.Fragment>
@@ -221,28 +223,28 @@ const UpdateRegTail = (props) => {
                                             <Button variant="contained" color="info" >เพิ่มรูปภาพ</Button>
                                         :
                                         <>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
-                                        <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
+                                            <Button variant="contained" color="warning" >แก้ไขรูปภาพ</Button>
                                         </>
                                 }
                             </Grid>
                         </Grid>
                     </Paper>
-                    </DialogContent>
+                </DialogContent>
                 <DialogActions sx={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                                    {
-                                        update ?
-                                            <Box marginBottom={2} textAlign="center">
-                                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)}  sx={{ marginRight: 2 }}>แก้ไข</Button>
-                                                <Button variant="contained" color="info">พิมพ์</Button>
-                                            </Box>
-                                            :
-                                            <Box marginBottom={2} textAlign="center">
-                                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} sx={{ marginRight: 2 }}>ยกเลิก</Button>
-                                                <Button variant="contained" color="success" onClick={handleUpdate} >บันทึก</Button>
-                                            </Box>
-                                    }
-                                </DialogActions>
+                    {
+                        update ?
+                            <Box marginBottom={2} textAlign="center">
+                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)} sx={{ marginRight: 2 }}>แก้ไข</Button>
+                                <Button variant="contained" color="info">พิมพ์</Button>
+                            </Box>
+                            :
+                            <Box marginBottom={2} textAlign="center">
+                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} sx={{ marginRight: 2 }}>ยกเลิก</Button>
+                                <Button variant="contained" color="success" onClick={handleUpdate} >บันทึก</Button>
+                            </Box>
+                    }
+                </DialogActions>
             </Dialog>
         </React.Fragment>
     );

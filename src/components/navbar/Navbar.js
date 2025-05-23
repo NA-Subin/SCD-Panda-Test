@@ -33,6 +33,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  CircularProgress,
   Collapse,
   CssBaseline,
   Divider,
@@ -76,6 +77,7 @@ import ContactPageIcon from '@mui/icons-material/ContactPage';
 import BadgeIcon from '@mui/icons-material/Badge';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import Cookies from 'js-cookie';
+import { BasicDataProvider, useBasicData } from "../../server/provider/BasicDataProvider";
 const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
@@ -150,7 +152,16 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function Navbar() {
+  const [pendingPath, setPendingPath] = useState(null);
   const navigate = useNavigate();
+  const {loading} = useBasicData();
+
+  useEffect(() => {
+  if (!loading && pendingPath) {
+    navigate(pendingPath);
+    setPendingPath(null);
+  }
+}, [loading, pendingPath, navigate]);
   // const { state } = useLocation();
   // console.log(state.Position);
   // const { user } = useParams();
@@ -227,33 +238,33 @@ export default function Navbar() {
   const isMobileMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const isMobileSM = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
-// ปรับค่า open ตามขนาดหน้าจอเมื่อโหลดครั้งแรก
-React.useEffect(() => {
-  setOpen(!isMobileMD); // true ถ้า desktop, false ถ้า mobile
+  // ปรับค่า open ตามขนาดหน้าจอเมื่อโหลดครั้งแรก
+  React.useEffect(() => {
+    setOpen(!isMobileMD); // true ถ้า desktop, false ถ้า mobile
 
-  if (isMobileMD) {
+    if (isMobileMD) {
+      setOpenData(false);
+      setOperation(false);
+      setReport(false);
+      setFinacieal(false);
+    }
+  }, [isMobileMD]);
+
+  const shouldDrawerOpen = React.useMemo(() => {
+    return open;
+  }, [open]);
+
+  // debug
+  console.log("Open : ", open);
+  console.log("shouldDrawerOpen : ", shouldDrawerOpen);
+
+  const handleDrawerOpen = () => {
+    setOpen((prev) => !prev);
     setOpenData(false);
     setOperation(false);
     setReport(false);
     setFinacieal(false);
-  }
-}, [isMobileMD]);
-
-const shouldDrawerOpen = React.useMemo(() => {
-  return open;
-}, [open]);
-
-// debug
-console.log("Open : ", open);
-console.log("shouldDrawerOpen : ", shouldDrawerOpen);
-
-  const handleDrawerOpen = () => {
-  setOpen((prev) => !prev);
-  setOpenData(false);
-  setOperation(false);
-  setReport(false);
-  setFinacieal(false);
-};
+  };
 
   const handleDrawerClose = () => {
     setOpen(false);
@@ -366,6 +377,14 @@ console.log("shouldDrawerOpen : ", shouldDrawerOpen);
       },
     },
   }));
+
+  if (pendingPath) {
+      return (
+        <Box display="flex" justifyContent="center" alignItems="center" height={"100vh"} width={"100vw"}>
+          <CircularProgress size={100} />
+        </Box>
+      );
+    }
 
   return (
     <>
@@ -1050,24 +1069,26 @@ console.log("shouldDrawerOpen : ", shouldDrawerOpen);
                       }}
                     >
                       <ListItemButton
-                        component={Link}
-                        to={
-                          index === 0 ? "/dashboard"
-                            : index === 1 ? "/employee"
-                              : index === 2 ? "/trucks"
-                                : index === 3 ? "/depots"
-                                  : index === 4 ? "/ticket"
-                                    : index === 5 ? "/transports"
-                                      : index === 6 ? "/customer-bigtrucks"
-                                        : index === 7 ? "/customer-smalltrucks"
-                                          : "/creditor"
-                        }
-                        sx={{
-                          height: 35, // กำหนดความสูงให้ ListItem
+                        onClick={() => {
+                          setShow1(index);
+                          setSetting(false);
+                          setShow2(null);
+                          setShow3(null);
+                          setShow4(null);
+
+                          const path =
+                            index === 0 ? "/dashboard"
+                              : index === 1 ? "/employee"
+                                : index === 2 ? "/trucks"
+                                  : index === 3 ? "/depots"
+                                    : index === 4 ? "/ticket"
+                                      : index === 5 ? "/transports"
+                                        : index === 6 ? "/customer-bigtrucks"
+                                          : index === 7 ? "/customer-smalltrucks"
+                                            : "/creditor";
+
+                          setPendingPath(path); // ขอไปหน้านั้น
                         }}
-                        onClick={() => (setShow1(index), setSetting(false))}
-                        onMouseUp={() => (setShow1(index), setSetting(false))}
-                        onMouseDown={() => (setShow2(null), setShow3(null), setShow4(null))}
                       >
                         {
                           shouldDrawerOpen ?

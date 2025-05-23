@@ -45,6 +45,7 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const InsertEmployee = (props) => {
     const { type, driver, officer, truck, smallTruck } = props;
@@ -54,9 +55,10 @@ const InsertEmployee = (props) => {
         setMenu(type);  // อัปเดต state เมื่อ props.type เปลี่ยน
     }, [type]);
 
-    const { gasstation, positions } = useData();
-    const gasStation = Object.values(gasstation);
-    const positionDetail = Object.values(positions);
+    // const { gasstation, positions } = useData();
+    const { gasstation, positions } = useBasicData();
+    const gasStation = Object.values(gasstation || {});
+    const positionDetail = Object.values(positions || {});
 
     const [open, setOpen] = React.useState(false);
     const [prefix, setPrefix] = React.useState(0);
@@ -117,7 +119,7 @@ const InsertEmployee = (props) => {
     }
 
     const handlePost = () => {
-        if (menu === 1) {
+        if (menu === 2) {
             createUserWithEmailAndPassword(auth, (user + "@gmail.com"), password).then(
                 (userCredential) => {
                     database
@@ -317,7 +319,7 @@ const InsertEmployee = (props) => {
                             </Box>
                         </Grid>
                         {
-                            menu === 1 ?
+                            menu === 2 ?
                                 <>
                                     <Grid item md={6} xs={12}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
@@ -356,14 +358,14 @@ const InsertEmployee = (props) => {
                                         <MenuItem value={0}>
                                             กรุณาเลือกประเภทพนักงาน
                                         </MenuItem>
-                                        <MenuItem value={1}>พนักงานทั่วไป</MenuItem>
-                                        <MenuItem value={2}>พนักงานขับรถ</MenuItem>
+                                        <MenuItem value={2}>พนักงานทั่วไป</MenuItem>
+                                        <MenuItem value={1}>พนักงานขับรถ</MenuItem>
                                     </Select>
                                 </Paper>
                             </Box>
                         </Grid>
                         {
-                            menu === 1 ?
+                            menu === 2 ?
                                 <>
                                     <Grid item md={12} xs={12}>
                                         <Divider>
@@ -494,7 +496,7 @@ const InsertEmployee = (props) => {
                                         </Box>
                                     </Grid>
                                 </>
-                                : menu === 2 ?
+                                : menu === 1 ?
                                     <>
                                         <Grid item md={2} xs={3}>
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทรถ</Typography>

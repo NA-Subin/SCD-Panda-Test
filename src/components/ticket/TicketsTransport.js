@@ -23,22 +23,32 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import { database } from "../../server/firebase";
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import theme from "../../theme/theme";
 import { TablecellHeader } from "../../theme/style";
 import InsertTicketsTransport from "./InsertTicketsTransport";
 import InsertTicketsGasStations from "./InsertTicketsGasStations";
 import TicketsGasStation from "./TicketsGasStation";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const TicketsTransport = () => {
-    const [transport, setTransport] = useState([]);
-    const [gasStation, setGasStation] = React.useState([]);
+    //const [transport, setTransport] = useState([]);
+    //const [gasStation, setGasStation] = React.useState([]);
     const [setting, setSetting] = useState(false);
     const [ticketChecked, setTicketChecked] = useState(false);
     const [recipientChecked, setRecipientChecked] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState(null); // จับ ID ของแถวที่ต้องการแก้ไข
     const [typeCustomer, setTypeCuster] = React.useState(0);
     const [open, setOpen] = useState(1);
+
+    const { customertransports, customergasstations } = useBasicData();
+    const transports = Object.values(customertransports || {});
+    const gasStations = Object.values(customergasstations || {});
+
+    const transport = transports.filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ");
+    const gasStation = gasStations.filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ");
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -57,40 +67,41 @@ const TicketsTransport = () => {
     }, []);
 
     // ดึงข้อมูลจาก Firebase
-    const getTransport = async () => {
-        database.ref("/customers/transports/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setTransport([]);
-            } else {
-                const dataList = [];
-                for (let id in datas) {
-                    dataList.push({ id, ...datas[id] })
-                }
-                setTransport(dataList);
-            }
-        });
-    };
+    // const getTransport = async () => {
+    //     database.ref("/customers/transports/").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setTransport([]);
+    //         } else {
+    //             const dataList = [];
+    //             for (let id in datas) {
+    //                 dataList.push({ id, ...datas[id] })
+    //             }
+    //             setTransport(dataList);
+    //         }
+    //     });
+    // };
 
-    const getGasStation = async () => {
-        database.ref("/customers/gasstations/").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setGasStation([]);
-            } else {
-                const dataList = [];
-                for (let id in datas) {
-                    dataList.push({ id, ...datas[id] })
-                }
-                setGasStation(dataList);
-            }
-        });
-    };
+    // const getGasStation = async () => {
+    //     database.ref("/customers/gasstations/").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setGasStation([]);
+    //         } else {
+    //             const dataList = [];
+    //             for (let id in datas) {
+    //                 datas[id].SystemStatus !== "ไม่อยู่ในระบบ" &&
+    //                     dataList.push({ id, ...datas[id] })
+    //             }
+    //             setGasStation(dataList);
+    //         }
+    //     });
+    // };
 
-    useEffect(() => {
-        getTransport();
-        getGasStation();
-    }, []);
+    // useEffect(() => {
+    //     getTransport();
+    //     getGasStation();
+    // }, []);
 
     // State สำหรับเก็บค่าแก้ไข Rate
     const [rate1Edit, setRate1Edit] = useState("");
@@ -98,9 +109,11 @@ const TicketsTransport = () => {
     const [rate3Edit, setRate3Edit] = useState("");
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
     const [name, setName] = useState("");
+    const [rowIndex, setRowIndex] = useState(null);
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (rowId, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname) => {
+    const handleSetting = (index, rowId, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname) => {
+        setRowIndex(index + 1);
         setSetting(true);
         setSelectedRowId(rowId);
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
@@ -124,17 +137,39 @@ const TicketsTransport = () => {
         ].filter((s) => s).join("/");
 
         // Update ทั้ง Status และค่า Rate ไปยัง Firebase
-        await database.ref(`/customers/transports/${selectedRowId - 1}`).update({
-            Status: newStatus,
-            Rate1: rate1Edit,
-            Rate2: rate2Edit,
-            Rate3: rate3Edit,
-            CreditTime: creditTimeEdit,
-            Name: name
-        });
-        // Reset state หลังบันทึก
-        setSetting(false);
-        setSelectedRowId(null);
+        // await database.ref(`/customers/transports/${selectedRowId - 1}`).update({
+        //     Status: newStatus,
+        //     Rate1: rate1Edit,
+        //     Rate2: rate2Edit,
+        //     Rate3: rate3Edit,
+        //     CreditTime: creditTimeEdit,
+        //     Name: name
+        // });
+        // // Reset state หลังบันทึก
+        // setSetting(false);
+        // setSelectedRowId(null);
+        database
+            .ref("/customers/transports/")
+            .child(selectedRowId - 1)
+            .update({
+                Status: newStatus,
+                Rate1: rate1Edit,
+                Rate2: rate2Edit,
+                Rate3: rate3Edit,
+                CreditTime: creditTimeEdit,
+                Name: name
+            }) // อัพเดท values ทั้งหมด
+            .then(() => {
+                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                console.log("Data updated successfully");
+                setSetting(false);
+                setSelectedRowId(null);
+                setRowIndex(null);
+            })
+            .catch((error) => {
+                ShowError("แก้ไขข้อมูลไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
     };
 
     const handleCancel = () => {
@@ -165,6 +200,34 @@ const TicketsTransport = () => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
+    const handleDelete = () => {
+        ShowConfirm(
+            `ต้องการยกเลิกตั๋วรับจ้างขนส่งที่ ${rowIndex} ใช่หรือไม่`,
+            () => {
+                database
+                    .ref("/customers/transports/")
+                    .child(selectedRowId - 1)
+                    .update({
+                        SystemStatus: "ไม่อยู่ในระบบ"
+                    }) // อัพเดท values ทั้งหมด
+                    .then(() => {
+                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                        console.log("Data updated successfully");
+                        setSetting(false);
+                        setSelectedRowId(null);
+                        setRowIndex(null);
+                    })
+                    .catch((error) => {
+                        ShowError("แก้ไขข้อมูลไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
+            },
+            () => {
+                console.log(`ยกเลิกลบตั๋วรับจ้างขนส่งที่ ${rowIndex}`);
+            }
+        );
+    }
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -237,7 +300,12 @@ const TicketsTransport = () => {
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
                                             สถานะ
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ width: 80, position: "sticky", right: 0 }} />
+                                        <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 50 : 160, textAlign: "center" }}>
+
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ position: 'sticky', right: 0, width: !setting ? 20 : 60, textAlign: "center" }}>
+
+                                        </TablecellHeader>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -460,7 +528,7 @@ const TicketsTransport = () => {
                                                             }
                                                         </Box>
                                                     </TableCell>
-                                                    <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
+                                                    {/* <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
                                                         <Box sx={{ marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
@@ -482,7 +550,72 @@ const TicketsTransport = () => {
                                                                     </>
                                                             }
                                                         </Box>
+                                                    </TableCell> */}
+                                                    <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 50 : 100, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="warning"
+                                                                    startIcon={<EditNoteIcon />}
+                                                                    size="small"
+                                                                    sx={{ height: "25px" }}
+                                                                    onClick={() => handleSetting(index, row.id, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name)}
+                                                                >
+                                                                    แก้ไข
+                                                                </Button>
+                                                                :
+                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="error"
+                                                                        endIcon={<CancelIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px", marginRight: 1 }}
+                                                                        onClick={handleCancel}
+                                                                    >
+                                                                        ยกเลิก
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="success"
+                                                                        endIcon={<SaveIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleSave}
+                                                                    >
+                                                                        บันทึก
+                                                                    </Button>
+
+                                                                    {/* <IconButton color="error" onClick={handleCancel}>
+                                                                                                                        <CancelIcon />
+                                                                                                                    </IconButton>
+                                                                                                                    <IconButton color="success" onClick={handleSave} >
+                                                                                                                        <SaveIcon />
+                                                                                                                    </IconButton> */}
+                                                                </Box>
+                                                        }
                                                     </TableCell>
+                                                    {
+                                                        !setting || row.id !== selectedRowId ?
+                                                            ""
+                                                            :
+                                                            <TableCell sx={{ width: 50, height: "30px", position: "sticky", right: 0, backgroundColor: "white", textAlign: "center" }}>
+                                                                <Box>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="error"
+                                                                        endIcon={<DeleteIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleDelete}
+
+                                                                    >
+                                                                        ลบ
+                                                                    </Button>
+                                                                </Box>
+                                                            </TableCell>
+                                                    }
                                                 </TableRow>
                                             ))
                                     }

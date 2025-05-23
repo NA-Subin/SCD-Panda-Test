@@ -61,7 +61,7 @@ const InsertTrips = () => {
     const [showTickers, setShowTickers] = React.useState(true);
     const [showTrips, setShowTrips] = React.useState(true);
     const [selectedDateReceive, setSelectedDateReceive] = useState(dayjs(new Date()));
-    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs(new Date()));
+    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs(new Date()).add(1, 'day'));
     const [depots, setDepots] = React.useState("");
     const [status, setStatus] = React.useState("");
     const [ticket, setTicket] = React.useState(0);
@@ -269,7 +269,7 @@ const InsertTrips = () => {
             const datas = snapshot.val();
             const dataRegHead = [];
             for (let id in datas) {
-                if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง") {
+                if (datas[id].Driver !== "0:ไม่มี" && datas[id].RegTail !== "0:ไม่มี" && datas[id].Status === "ว่าง") {
                     dataRegHead.push({ id, ...datas[id], type: "รถใหญ่" });
                 }
             }
@@ -279,7 +279,7 @@ const InsertTrips = () => {
                 const datas = snapshot.val();
                 const dataSmall = [];
                 for (let id in datas) {
-                    if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง") {
+                    if (datas[id].Driver !== "0:ไม่มี" && datas[id].RegTail !== "0:ไม่มี" && datas[id].Status === "ว่าง") {
                         dataSmall.push({ id, ...datas[id], type: "รถเล็ก" });
                     }
                 }
@@ -769,11 +769,11 @@ const InsertTrips = () => {
             let B7 = (totalB7 * 0.837) * 1000;
             let B95 = (totalB95 * 0.740) * 1000;
             let E20 = (totalE20 * 0.740) * 1000;
-            let PWD = (totalPWD * 0.740) * 1000;
+            let PWD = (totalPWD * 0.837) * 1000;
 
             setWeightA({ G91: G91.toFixed(2), G95: G95.toFixed(2), B7: B7.toFixed(2), B95: B95.toFixed(2), E20: E20.toFixed(2), PWD: PWD.toFixed(2) });
-            setWeightL(parseFloat(G91) + parseFloat(G95) + parseFloat(B95) + parseFloat(E20) + parseFloat(PWD));
-            setWeightH(B7);
+            setWeightL(parseFloat(G91) + parseFloat(G95) + parseFloat(B95) + parseFloat(E20));
+            setWeightH(parseFloat(B7)+parseFloat(PWD));
 
             // อัปเดตค่า State ของแต่ละ productName
             setVolumeG95(totalG95);
@@ -971,6 +971,7 @@ const InsertTrips = () => {
         }
     };
 
+    console.log("Registration s : ",registration);
     const handleSaveAsImage = () => {
         const Trips = {
             Tickets: Object.values(ordersTickets),
@@ -1248,13 +1249,22 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const tickets = [
-            { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },  // เพิ่มตั๋วเปล่าเข้าไป
-            ...ticketsA.map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
-            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
-            ...ticketsT
-                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
-        ];
+  { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },
+
+  ...[...ticketsA]
+    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+    .map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
+
+  ...[...ticketsPS]
+    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+    .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+
+  ...[...ticketsT]
+    .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+    .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+];
+
 
         return tickets.filter((item) => item.id || item.TicketsCode);
     };
@@ -1269,13 +1279,22 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const customers = [
-            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
-            ...ticketsT
+            ...[...ticketsPS]
+            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+            .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+
+            ...[...ticketsT]
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+
             ...(selectedTruck.type === "รถใหญ่"
-                ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
-                : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
+                ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
+                : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
             ),
         ];
 
@@ -1430,7 +1449,7 @@ const InsertTrips = () => {
                                             options={regHead}
                                             getOptionLabel={(option) =>
                                                 option.type === "รถใหญ่" ?
-                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail : ""} (${option.type ? option.type : ""})`
+                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail.split(":")[1] : ""} (${option.type ? option.type : ""})`
                                                     :
                                                     `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
                                             }
@@ -1461,7 +1480,7 @@ const InsertTrips = () => {
                                                 <li {...props}>
                                                     {
                                                         option.type === "รถใหญ่" ?
-                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail} (${option.type})`}</Typography>
+                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail.split(":")[1]} (${option.type})`}</Typography>
                                                             :
                                                             <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (${option.type})`}</Typography>
                                                     }

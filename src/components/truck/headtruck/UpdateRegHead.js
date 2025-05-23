@@ -43,6 +43,7 @@ import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { useData } from "../../../server/path";
+import { useBasicData } from "../../../server/provider/BasicDataProvider";
 
 const UpdateRegHead = (props) => {
     const { truck } = props;
@@ -57,21 +58,23 @@ const UpdateRegHead = (props) => {
         setOpen(false);
     };
 
-    const { regtail, company, drivers } = useData();
-    const dataregtail = Object.values(regtail);
-    const dataCompany = Object.values(company);
-    const dataDrivers = Object.values(drivers);
-    const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
-    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "ไม่มี" && row.TruckType === "รถใหญ่");
+    // const { regtail, company, drivers } = useData();
+    const { regtail, company, drivers } = useBasicData();
+    const dataregtail = Object.values(regtail || {});
+    const dataCompany = Object.values(company || {});
+    const dataDrivers = Object.values(drivers || {});
+    const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่ได้เชื่อมต่อทะเบียนหัว");
+    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && row.TruckType === "รถใหญ่");
 
     const [companies, setCompanies] = React.useState(truck.Company);
-    const [driver, setDriver] = React.useState("0:" + truck.Driver);
+    const [driver, setDriver] = React.useState(truck.Driver);
     const [regHead, setRegHead] = React.useState(truck.RegHead);
-    const [regTail, setRegTail] = React.useState("0:" + truck.RegTail + "::");
+    const [regTail, setRegTail] = React.useState(truck.RegTail + ":0:0");
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
     const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration);
     const [vehExpirationDate, setVehExpirationDate] = React.useState(truck.VehExpirationDate);
+    console.log("regTail :", regTail);
 
     const handleUpdate = () => {
         database
@@ -79,21 +82,29 @@ const UpdateRegHead = (props) => {
             .child(truck.id - 1)
             .update({
                 RegHead: regHead,
-                RegTail: regTail.split(":")[1],
+                RegTail: `${regTail.split(":")[0]}:${regTail.split(":")[1]}`,
                 Weight: weight,
                 TotalWeight: (parseFloat(weight) + parseFloat(regTail.split(":")[3])),
                 Insurance: insurance,
-                VehicleRegistration: vehicleRegistration,
-                VehExpirationDate: vehExpirationDate,
+                VehicleRegistration: vehicleRegistration || "-",
+                VehExpirationDate: vehExpirationDate || "-",
                 Company: companies,
                 Driver: driver
             })
             .then(() => {
+                const regK = regTail?.split?.(":")[0] || "0";
+                const regT = truck?.RegTail?.split?.(":")[0] || "0";
+
+                const regIdPart = regT === "0"
+                    ? regK
+                    : (regK === "0" ? regT : regT);
+                const RegistrationId = Number(regIdPart);
+
                 database
                     .ref("/truck/registrationTail/")
-                    .child(regTail.split(":")[0] - 1)
+                    .child(RegistrationId - 1)
                     .update({
-                        Status: "เชื่อมทะเบียนหัวแล้ว",
+                        Status: regK !== "0" ? "เชื่อมทะเบียนหัวแล้ว" : "ยังไม่ได้เชื่อมต่อทะเบียนหัว",
                     })
                     .then(() => {
                         console.log("Data pushed successfully");
@@ -102,11 +113,19 @@ const UpdateRegHead = (props) => {
                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                         console.error("Error pushing data:", error);
                     });
+
+                const regId = driver?.split?.(":")[0] || "0";
+                const drvId = truck?.Driver?.split?.(":")[0] || "0";
+
+                const driverIdPart = drvId === "0"
+                    ? regId
+                    : (regId === "0" ? drvId : drvId);
+                const driverId = Number(driverIdPart);
                 database
                     .ref("/employee/drivers/")
-                    .child(driver.split(":")[0] - 1)
+                    .child(driverId - 1)
                     .update({
-                        Registration: regHead,
+                        Registration: driver !== "0:ไม่มี" ? `${truck.id}:${regHead}` : driver,
                     })
                     .then(() => {
                         ShowSuccess("แก้ไขข้อมูลสำเร็จ");
@@ -128,9 +147,9 @@ const UpdateRegHead = (props) => {
 
     return (
         <React.Fragment>
-                <IconButton size="small" sx={{ marginTop: -0.5,marginRight: 1 }} onClick={() => setOpen(regHead)}><InfoIcon color="info" fontSize="12px" /></IconButton>
+            <IconButton size="small" sx={{ marginTop: -0.5, marginRight: 1 }} onClick={() => setOpen(truck.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
             <Dialog
-                open={open === regHead ? true : false}
+                open={open === truck.id ? true : false}
                 keepMounted
                 onClose={handleClose}
                 sx={{
@@ -177,8 +196,12 @@ const UpdateRegHead = (props) => {
                                             >
                                                 <MenuItem value={driver}>{driver.split(":")[1]}</MenuItem>
                                                 {
+                                                    driver !== "0:ไม่มี" &&
+                                                    <MenuItem value={"0:ไม่มี"}>ไม่มี</MenuItem>
+                                                }
+                                                {
                                                     employees.map((row) => (
-                                                        <MenuItem value={row.id + ":" + row.Name}>{row.Name}</MenuItem>
+                                                        <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
@@ -221,8 +244,12 @@ const UpdateRegHead = (props) => {
                                                     {regTail.split(":")[1]}
                                                 </MenuItem>
                                                 {
+                                                    regTail !== "0:ไม่มี:0:0" &&
+                                                    <MenuItem value={"0:ไม่มี:0:0"}>ไม่มี</MenuItem>
+                                                }
+                                                {
                                                     registrationTail.map((row) => (
-                                                        <MenuItem value={row.id + ":" + row.RegTail + ":" + row.Cap + ":" + row.Weight}>{row.RegTail}</MenuItem>
+                                                        <MenuItem value={`${row.id}:${row.RegTail}:${row.Cap}:${row.Weight}`}>{row.RegTail}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
@@ -310,6 +337,8 @@ const UpdateRegHead = (props) => {
                             </Grid>
                         </Grid>
                     </Paper>
+                </DialogContent>
+                <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark, display: "flex", justifyContent: "center", alignItems: "center" }}>
                     {
                         update ?
                             <Box marginBottom={2} textAlign="center">
@@ -318,14 +347,12 @@ const UpdateRegHead = (props) => {
                             </Box>
                             :
                             <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="success" sx={{ marginRight: 2 }} onClick={handleUpdate} >บันทึก</Button>
-                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} >ยกเลิก</Button>
+                                <Button variant="contained" color="error" sx={{ marginRight: 2 }} onClick={() => setUpdate(true)} >ยกเลิก</Button>
+                                <Button variant="contained" color="success" onClick={handleUpdate} >บันทึก</Button>
                             </Box>
                     }
-                </DialogContent>
-                <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                    <Button onClick={handleClose} variant="contained" color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
+                    {/* <Button onClick={handleClose} variant="contained" color="success">บันทึก</Button>
+                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button> */}
                 </DialogActions>
             </Dialog>
         </React.Fragment>

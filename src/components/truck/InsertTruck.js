@@ -39,6 +39,7 @@ import UploadButton from "./UploadButton";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const InsertTruck = (props) => {
     const { openMenu } = props;
@@ -127,12 +128,13 @@ const InsertTruck = (props) => {
         });
     };
 
-    const { company, drivers, reghead, regtail, small } = useData();
-    const dataCompany = Object.values(company);
-    const dataDrivers = Object.values(drivers);
-    const regheads = Object.values(reghead);
-    const regtails = Object.values(regtail);
-    const smalls = Object.values(small);
+    // const { company, drivers, reghead, regtail, small } = useData();
+    const { company, drivers, reghead, regtail, small } = useBasicData();
+    const dataCompany = Object.values(company || {});
+    const dataDrivers = Object.values(drivers || {});
+    const regheads = Object.values(reghead || {});
+    const regtails = Object.values(regtail || {});
+    const smalls = Object.values(small || {});
 
     const driverDetail = dataDrivers.filter((row) => row.Status === "ว่าง");
     const regtailsDetail = regtails.filter((row) => row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");

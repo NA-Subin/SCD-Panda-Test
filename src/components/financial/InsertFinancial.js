@@ -46,9 +46,13 @@ import { useData } from "../../server/path";
 import dayjs from "dayjs";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InsertSpendingAbout from "./InsertSpendingAbout";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const InsertFinancial = () => {
-    const { reghead, regtail, small, report, reportType } = useData();
+    // const { reghead, regtail, small, report, reportType } = useData();
+    const { reghead, regtail, small } = useBasicData();
+    const { report, reportType } = useTripData();
     const registrationH = Object.values(reghead);
     const registrationT = Object.values(regtail);
     const registrationS = Object.values(small);

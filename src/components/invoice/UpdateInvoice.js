@@ -54,6 +54,8 @@ import html2canvas from "html2canvas";
 import BankDetail from "./BankDetail";
 import "dayjs/locale/th"; // โหลดภาษาไทย
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
+import { useTripData } from "../../server/provider/TripProvider";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
@@ -80,13 +82,22 @@ const UpdateInvoice = (props) => {
         };
     }, []);
 
+    // const {
+    //     order,
+    //     company,
+    //     banks,
+    //     transferMoney,
+    //     invoiceReport
+    // } = useData();
+
     const {
         order,
-        company,
         banks,
         transferMoney,
         invoiceReport
-    } = useData();
+    } = useTripData();
+
+    const { company } = useBasicData();
 
     const orders = Object.values(order || {});
     const companies = Object.values(company || {});

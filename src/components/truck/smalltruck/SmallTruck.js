@@ -44,13 +44,15 @@ import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import UpdateSmallTruck from "./UpdateSmallTruck";
 import { useData } from "../../../server/path";
+import { useBasicData } from "../../../server/provider/BasicDataProvider";
 
 const SmallTruck = (props) => {
   const { repair } = props;
   const [openTab, setOpenTab] = React.useState(true);
   const [openMenu, setOpenMenu] = React.useState(false);
 
-  const { small } = useData();
+  // const { small } = useData();
+  const { small } = useBasicData();
     const truck = Object.values(small || {});
 
   const isMobile = useMediaQuery("(max-width:1100px)");

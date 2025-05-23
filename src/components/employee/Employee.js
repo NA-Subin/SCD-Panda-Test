@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -48,66 +49,22 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import UpdateDriver from "./UpdateDriver";
 import UpdateEmployee from "./UpdateEmployee";
 import { fetchRealtimeData } from "../../server/data";
-import { useData } from "../../server/path";
+//import { useData } from "../../server/path";
+//import { useData } from "../../server/ConnectDB";
+//import DriverTable from "../dashboard/ProviderTest";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const Employee = () => {
-  const [update, setUpdate] = React.useState(true);
-  const [open, setOpen] = useState(1);
-  const [openMenu, setOpenMenu] = useState(1);
-  const [openOfficeDetail, setOpenOfficeDetail] = useState(false);
-  const [check, setCheck] = useState(1);
-
-  const handleClose = () => {
-    setOpenOfficeDetail(false);
-  };
-
-  const { officers, drivers, reghead, small } = useData();
-  const dataofficers = Object.values(officers);
-  const datadrivers = Object.values(drivers);
-  const datareghead = Object.values(reghead);
-  const datasmall = Object.values(small);
-
-  const registrationHead = datareghead.filter(row => row.Driver && row.Driver === "ไม่มี");
-  const registrationSmallTruck = datasmall.filter(row => row.Driver && row.Driver === "ไม่มี");
-  const driverDetail = datadrivers.filter((row) =>
-    check === 2 ? row.TruckType === "รถใหญ่"
-      : check === 3 ? row.TruckType === "รถเล็ก"
-        : true // แสดงทั้งหมดถ้าไม่ใช่ check === 2 หรือ check === 3
-  );
-
-
-  const [openTab, setOpenTab] = React.useState(true);
-
-  const isMobile = useMediaQuery("(max-width:1000px)");
-
-  const shouldDrawerOpen = React.useMemo(() => {
-    if (isMobile) {
-      return !openTab; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
-    } else {
-      return openTab; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
-    }
-  }, [openTab, isMobile]);
-
-  const handleDrawerOpen = () => {
-    if (isMobile) {
-      // จอเท่ากับโทรศัพท์
-      setOpenTab((prevOpen) => !prevOpen);
-    } else {
-      // จอไม่เท่ากับโทรศัพท์
-      setOpenTab((prevOpen) => !prevOpen);
-    }
-  };
-
-  const toggleDrawer = (newOpen) => () => {
-    setOpenTab(newOpen);
-  };
-
+  //const [update, setUpdate] = React.useState(true);
+  const [open, setOpen] = React.useState(1);
+  //const [openMenu, setOpenMenu] = useState(1);
+  //const [openOfficeDetail, setOpenOfficeDetail] = useState(false);
+  const [check, setCheck] = React.useState(1);
   const [setting, setSetting] = React.useState("");
   const [truck, setTruck] = React.useState("0:ไม่มี:ไม่มี");
 
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
 
-  // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
@@ -120,6 +77,79 @@ const Employee = () => {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  // const handleClose = () => {
+  //   setOpenOfficeDetail(false);
+  // };
+
+  const { officers, drivers, reghead, small, loading } = useBasicData();
+
+  // const { data, fetchDataMany, loading } = useData();
+
+  // useEffect(() => {
+  //   fetchDataMany(["officers", "drivers", "reghead", "small"]);
+  // }, [fetchDataMany]);
+
+  // const dataofficers = Object.values(data.officers || {});
+  // const datadrivers = Object.values(data.drivers || {});
+  // const datareghead = Object.values(data.reghead || {});
+  // const datasmall = Object.values(data.small || {});
+
+  // const { officers, drivers, reghead, small } = useData();
+  // คำนวณค่าที่ใช้หลายครั้งด้วย useMemo
+  const dataofficers = useMemo(() => Object.values(officers || {}), [officers]);
+  const datadrivers = useMemo(() => Object.values(drivers || {}), [drivers]);
+  const datareghead = useMemo(() => Object.values(reghead || {}), [reghead]);
+  const datasmall = useMemo(() => Object.values(small || {}), [small]);
+
+  // ตัวกรองรถที่ไม่มีคนขับ
+  const registrationHead = useMemo(() =>
+    datareghead.filter(row => row.Driver === "0:ไม่มี"),
+    [datareghead]
+  );
+
+  const registrationSmallTruck = useMemo(() =>
+    datasmall.filter(row => row.Driver === "0:ไม่มี"),
+    [datasmall]
+  );
+
+  // กรองคนขับตาม TruckType เฉพาะถ้าจำเป็น
+  const driverDetail = useMemo(() => {
+    if (check === 2) return datadrivers.filter(row => row.TruckType === "รถใหญ่");
+    if (check === 3) return datadrivers.filter(row => row.TruckType === "รถเล็ก");
+    return datadrivers;
+  }, [datadrivers, check]);
+
+  // const [openTab, setOpenTab] = React.useState(true);
+
+  // const isMobile = useMediaQuery("(max-width:1000px)");
+
+  // const shouldDrawerOpen = React.useMemo(() => {
+  //   if (isMobile) {
+  //     return !openTab; // ถ้าเป็นจอโทรศัพท์ ให้เปิด drawer เมื่อ open === false
+  //   } else {
+  //     return openTab; // ถ้าไม่ใช่จอโทรศัพท์ ให้เปิด drawer เมื่อ open === true
+  //   }
+  // }, [openTab, isMobile]);
+
+  // const handleDrawerOpen = () => {
+  //   if (isMobile) {
+  //     // จอเท่ากับโทรศัพท์
+  //     setOpenTab((prevOpen) => !prevOpen);
+  //   } else {
+  //     // จอไม่เท่ากับโทรศัพท์
+  //     setOpenTab((prevOpen) => !prevOpen);
+  //   }
+  // };
+
+  // const toggleDrawer = (newOpen) => () => {
+  //   setOpenTab(newOpen);
+  // };
+
+  // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
 
   const handlePost = () => {
     database
@@ -171,9 +201,6 @@ const Employee = () => {
       });
   }
 
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -183,15 +210,110 @@ const Employee = () => {
     setPage(0);
   };
 
-  const handleChangeOpen1 = (event) => {
-    setOpen(1);
-    setPage(0);
+  // const handleChangeOpen1 = (event) => {
+  //   setOpen(1);
+  //   setPage(0);
+  // };
+
+  // const handleChangeOpen2 = (event) => {
+  //   setOpen(2);
+  //   setPage(0);
+  // };
+  const paginatedDrivers = useMemo(() => {
+    return driverDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [driverDetail, page, rowsPerPage]);
+
+  const renderSelectOptions = (truckType) => {
+    if (truckType === "รถใหญ่") {
+      return registrationHead.map(head => (
+        <MenuItem key={head.id} value={`${head.id}:${head.RegHead}:รถใหญ่`}>{head.RegHead}</MenuItem>
+      ));
+    }
+    if (truckType === "รถเล็ก") {
+      return registrationSmallTruck.map(small => (
+        <MenuItem key={small.id} value={`${small.id}:${small.RegHead}:รถเล็ก`}>{small.RegHead}</MenuItem>
+      ));
+    }
+    return (
+      <>
+        {registrationHead.map(head => (
+          <MenuItem key={head.id} value={`${head.id}:${head.RegHead}`}>{head.RegHead}</MenuItem>
+        ))}
+        {registrationSmallTruck.map(small => (
+          <MenuItem key={small.id} value={`${small.id}:${small.Registration}`}>{small.Registration}</MenuItem>
+        ))}
+      </>
+    );
   };
 
-  const handleChangeOpen2 = (event) => {
-    setOpen(2);
-    setPage(0);
+  const renderSettingCell = (row) => {
+    const rowName = row.Name;
+    const regText = row.Registration?.split(":")[1] || "";
+
+    if (!setting || setting === "") {
+      return (
+        <TableCell sx={{ textAlign: "center" }}>
+          {regText}
+          {regText === "ไม่มี" && (
+            <IconButton size="small" sx={{ mt: -0.5 }} onClick={() => setSetting(`${row.id}:${rowName}`)}>
+              <SettingsIcon color="warning" fontSize="12px" />
+            </IconButton>
+          )}
+        </TableCell>
+      );
+    }
+
+    if (setting.split(":")[1] === rowName) {
+      return (
+        <TableCell sx={{ textAlign: "center" }}>
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <Paper component="form">
+                <Select
+                  id="demo-simple-select"
+                  value={truck}
+                  size="small"
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        '& .MuiMenuItem-root': {
+                          fontSize: "14px",
+                        },
+                      },
+                    },
+                  }}
+                  sx={{ textAlign: "left", height: 25, fontSize: "14px" }}
+                  onChange={(e) => setTruck(e.target.value)}
+                  fullWidth
+                >
+                  <MenuItem value="0:ไม่มี:ไม่มี">เลือกทะเบียน</MenuItem>
+                  {renderSelectOptions(row.TruckType)}
+                </Select>
+              </Paper>
+            </Grid>
+            <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
+              <IconButton size="small" sx={{ mt: -0.5 }} onClick={() => setSetting("")}>
+                <CancelIcon color="error" fontSize="12px" />
+              </IconButton>
+              <IconButton size="small" sx={{ mt: -0.5 }} onClick={() => setSetting(handlePost)}>
+                <CheckCircleIcon color="success" fontSize="12px" />
+              </IconButton>
+            </Grid>
+          </Grid>
+        </TableCell>
+      );
+    }
+
+    return <TableCell></TableCell>;
   };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height={"100vh"} width={"100vw"}>
+        <CircularProgress size={100} />
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -204,12 +326,12 @@ const Employee = () => {
         พนักงาน
       </Typography>
       <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} marginTop={1} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230) }}>
+      <Grid container spacing={2} marginTop={1} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
         <Grid item xs={6}>
-          <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>พนักงานบริษัท</Button>
+          <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>พนักงานขับรถ</Button>
         </Grid>
         <Grid item xs={6}>
-          <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>พนักงานขับรถ</Button>
+          <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>พนักงานบริษัท</Button>
         </Grid>
         <Grid item xs={6} sx={{ marginTop: -3 }}>
           {
@@ -222,14 +344,14 @@ const Employee = () => {
           }
         </Grid>
       </Grid>
-      <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5,width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230)  }}>
+      <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
         <Grid container spacing={2}>
-          <Grid item md={open === 2 ? 3 : 5 } xs={12} >
-            <Typography variant="h6" fontWeight="bold" gutterBottom>รายชื่อพนักงาน{open === 1 ? "ภายในบริษัท" : "ขับรถ"}</Typography>
+          <Grid item md={open === 1 ? 3 : 5} xs={12} >
+            <Typography variant="h6" fontWeight="bold" gutterBottom>รายชื่อพนักงาน{open === 2 ? "ภายในบริษัท" : "ขับรถ"}</Typography>
           </Grid>
-          <Grid item md={open === 2 ? 6 : 4} xs={12}>
+          <Grid item md={open === 1 ? 6 : 4} xs={12}>
             {
-              open === 2 &&
+              open === 1 &&
               <FormGroup row sx={{ marginBottom: -2 }}>
                 <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกประเภทที่ต้องการ : </Typography>
                 <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
@@ -244,7 +366,7 @@ const Employee = () => {
         </Grid>
         <Divider sx={{ marginBottom: 1, marginTop: 2 }} />
         {
-          open === 1 ?
+          open === 2 ?
             <TableContainer
               component={Paper}
               sx={{ marginTop: 2 }}
@@ -275,9 +397,12 @@ const Employee = () => {
                 </TableHead>
                 <TableBody>
                   {
+                    // loading ? (
+                    //   <p> กำลังโหลด...</p>
+                    // ) :
                     dataofficers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                       <TableRow>
-                        <TableCell sx={{ textAlign: "center" }}>{index+1}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Position}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
@@ -336,6 +461,7 @@ const Employee = () => {
               }
             </TableContainer>
             :
+            // <DriverTable />
             <TableContainer
               component={Paper}
               sx={{ marginTop: 2 }}
@@ -369,85 +495,19 @@ const Employee = () => {
                 </TableHead>
                 <TableBody>
                   {
-                    driverDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
-                      <TableRow >
-                        <TableCell sx={{ textAlign: "center" }}>{index+1}</TableCell>
+                    // loading ? (
+                    //   <p> กำลังโหลด...</p>
+                    // ) :
+                    paginatedDrivers.map((row, index) => (
+                      <TableRow key={row.id}>
+                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>
-                        {
-                          setting === "" || setting === undefined ?
-                            <TableCell sx={{ textAlign: "center" }}>
-                              {row.Registration.split(":")[1]}
-                              {row.Registration.split(":")[1] === "ไม่มี" ?
-                                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting(row.id + ":" + row.Name)}><SettingsIcon color="warning" fontSize="12px" /></IconButton>
-                                : ""}
-                            </TableCell>
-                            : setting.split(":")[1] === row.Name ?
-                              <TableCell sx={{ textAlign: "center" }}>
-                                <Grid container spacing={2}>
-                                  <Grid item xs={8}>
-                                    <Paper
-                                      component="form">
-                                      <Select
-                                        id="demo-simple-select"
-                                        value={truck}
-                                        size="small"
-                                        MenuProps={{
-                                          PaperProps: {
-                                            sx: {
-                                              '& .MuiMenuItem-root': {
-                                                fontSize: "14px", // ขนาดตัวอักษรในรายการเมนู
-                                              },
-                                            },
-                                          },
-                                        }}
-                                        sx={{ textAlign: "left", height: 25, fontSize: "14px" }}
-                                        onChange={(e) => setTruck(e.target.value)}
-                                        fullWidth
-                                      >
-                                        <MenuItem value={"0:ไม่มี:ไม่มี"}>
-                                          เลือกทะเบียน
-                                        </MenuItem>
-                                        {
-                                          row.TruckType === "รถใหญ่" ?
-                                            registrationHead.map((head) => (
-                                              <MenuItem value={head.id + ":" + head.RegHead + ":รถใหญ่"}>{head.RegHead}</MenuItem>
-                                            ))
-                                            : row.TruckType === "รถเล็ก" ?
-                                              registrationSmallTruck.map((small) => (
-                                                <MenuItem value={small.id + ":" + small.RegHead + ":รถเล็ก"}>{small.RegHead}</MenuItem>
-                                              ))
-                                              :
-                                              <>
-                                                {registrationHead.map((head) => (
-                                                  <MenuItem value={head.id + ":" + head.RegHead}>{head.RegHead}</MenuItem>
-                                                ))
-                                                }{
-                                                  registrationSmallTruck.map((small) => (
-                                                    <MenuItem value={small.id + ":" + small.Registration}>{small.Registration}</MenuItem>
-                                                  ))}
-                                              </>
-                                        }
-                                      </Select>
-                                    </Paper>
-                                  </Grid>
-                                  <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                                    <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting("")}>
-                                      <CancelIcon color="error" fontSize="12px" />
-                                    </IconButton>
-                                    <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting(handlePost)}>
-                                      <CheckCircleIcon color="success" fontSize="12px" />
-                                    </IconButton>
-                                  </Grid>
-                                </Grid>
-                              </TableCell>
-                              :
-                              <TableCell></TableCell>
-                        }
+                        {renderSettingCell(row)}
                         <TableCell sx={{ textAlign: "center" }}>{row.TruckType}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.BankName}</TableCell>
-                        <UpdateDriver key={row.id} driver={row} />
+                        <UpdateDriver driver={row} />
                       </TableRow>
                     ))
                   }
@@ -501,7 +561,7 @@ const Employee = () => {
             </TableContainer>
         }
       </Paper>
-    </Container>
+    </Container >
   );
 };
 

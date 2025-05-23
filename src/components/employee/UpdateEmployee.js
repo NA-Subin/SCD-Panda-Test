@@ -45,13 +45,15 @@ import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const UpdateEmployee = (props) => {
     const { row } = props;
     const [update, setUpdate] = React.useState(true);
     const [openOfficeDetail, setOpenOfficeDetail] = useState(false);
-    const { positions } = useData();
-    const positionDetail = Object.values(positions);
+    // const { positions } = useData();
+    const { positions } = useBasicData();
+    const positionDetail = Object.values(positions || {});
 
     const [name, setName] = React.useState(row.Name);
     const [user, setUser] = React.useState(row.User);

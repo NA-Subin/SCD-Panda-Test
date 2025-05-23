@@ -36,12 +36,14 @@ import UpdateDepot from "./UpdateDepot";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import InserDepot from "./InsertDepot";
 import { useData } from "../../../server/path";
+import { useBasicData } from "../../../server/provider/BasicDataProvider";
 
 const Depots = () => {
   const [menu, setMenu] = React.useState(0);
   const [open, setOpen] = React.useState(false);
 
-  const { depots } = useData();
+  // const { depots } = useData();
+  const { depots } = useBasicData();
   const depot = Object.values(depots || {});
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

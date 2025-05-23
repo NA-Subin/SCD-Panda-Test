@@ -29,6 +29,7 @@ import { database } from "../../server/firebase";
 import InsertCreditor from "./InsertCreditor";
 import UpdateCreditor from "./UpdateCreditor";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const Creditor = () => {
   const [update, setUpdate] = React.useState(true);
@@ -64,7 +65,8 @@ const Creditor = () => {
     };
   }, []);
 
-  const { creditors } = useData();
+  //const { creditors } = useData();
+  const { creditors } = useBasicData();
   const creditor = Object.values(creditors || {});
 
   const [page, setPage] = useState(0);

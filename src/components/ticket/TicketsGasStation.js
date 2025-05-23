@@ -29,10 +29,11 @@ import SaveIcon from '@mui/icons-material/Save';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import DeleteIcon from '@mui/icons-material/Delete';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const TicketsGasStation = (props) => {
     const { row, index } = props;
@@ -67,6 +68,32 @@ const TicketsGasStation = (props) => {
             });
     };
 
+    const handleDelete = () => {
+        ShowConfirm(
+            `ต้องการยกเลิกตั๋วปั้มที่ ${index + 1} ใช่หรือไม่`,
+            () => {
+                database
+                    .ref("/customers/gasstations/")
+                    .child(row.id - 1)
+                    .update({
+                        SystemStatus: "ไม่อยู่ในระบบ"
+                    }) // อัพเดท values ทั้งหมด
+                    .then(() => {
+                        ShowSuccess(`ลบข้อตั๋วปั้มลำดับที่ ${index + 1} สำเร็จ`);
+                        console.log("Data updated successfully");
+                        setOpen(false);
+                    })
+                    .catch((error) => {
+                        ShowError("แก้ไขข้อมูลไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
+            },
+            () => {
+                console.log(`ยกเลิกลบตั๋วปั้มที่ ${index + 1}`);
+            }
+        )
+    }
+
     return (
         <React.Fragment>
             {
@@ -79,7 +106,7 @@ const TicketsGasStation = (props) => {
                         <TableCell sx={{ textAlign: "center" }}>{rate2}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate3}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{status}</TableCell>
-                        <TableCell sx={{ textAlign: "center",position: "sticky", right: 0, backgroundColor: "white" }}>
+                        <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                             <Button
                                 variant="contained"
                                 color="warning"
@@ -224,8 +251,22 @@ const TicketsGasStation = (props) => {
                                 />
                             </Paper>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{row.Status}</TableCell>
-                        <TableCell sx={{ textAlign: "center",position: "sticky", right: 0, backgroundColor: "white" }}>
+                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                            <Box sx={{ marginLeft: 2.5, marginRight: 2.5 }}>
+                                <Button
+                                    variant="contained"
+                                    color="error"
+                                    endIcon={<DeleteIcon />}
+                                    size="small"
+                                    sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }}
+                                    onClick={handleDelete}
+                                    fullWidth
+                                >
+                                    ลบ
+                                </Button>
+                            </Box>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                             {
                                 !open ?
                                     <Button
@@ -233,7 +274,7 @@ const TicketsGasStation = (props) => {
                                         color="warning"
                                         startIcon={<EditNoteIcon />}
                                         size="small"
-                                        sx={{ height: "25px", marginTop: 1.5, marginBottom: 1 }}
+                                        sx={{ height: "25px" }}
                                         onClick={() => setOpen(true)}
                                         fullWidth
                                     >

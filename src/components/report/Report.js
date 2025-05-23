@@ -38,6 +38,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { useTripData } from "../../server/provider/TripProvider";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -95,7 +96,8 @@ const Report = () => {
   console.log("selectedRow : ", selectedRow);
   console.log("index : ", indexes);
 
-  const { tickets, customertransports, customergasstations, customertickets, trip, transferMoney } = useData();
+  // const { tickets, customertransports, customergasstations, customertickets, trip, transferMoney } = useData();
+  const { tickets, customertransports, customergasstations, customertickets, trip, transferMoney } = useTripData();
   const ticket = Object.values(tickets || {});
   const transports = Object.values(customertransports || {});
   const gasstations = Object.values(customergasstations || {});

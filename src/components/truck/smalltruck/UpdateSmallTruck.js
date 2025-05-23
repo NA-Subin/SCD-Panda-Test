@@ -43,6 +43,7 @@ import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { useData } from "../../../server/path";
+import { useBasicData } from "../../../server/provider/BasicDataProvider";
 
 const UpdateSmallTruck = (props) => {
     const { truck } = props;
@@ -59,9 +60,10 @@ const UpdateSmallTruck = (props) => {
 
     const [openTab, setOpenTab] = React.useState(true);
 
-    const { company, drivers } = useData();
-    const dataCompany = Object.values(company);
-    const dataDrivers = Object.values(drivers);
+    // const { company, drivers } = useData();
+    const { company, drivers } = useBasicData();
+    const dataCompany = Object.values(company || {});
+    const dataDrivers = Object.values(drivers || {});
     const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && row.TruckType === "รถเล็ก");
 
     const toggleDrawer = (newOpen) => () => {
@@ -73,44 +75,55 @@ const UpdateSmallTruck = (props) => {
     const [registration, setRegistration] = React.useState(truck.RegHead);
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
-    const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration);
-    const [vehExpirationDate, setVehExpirationDate] = React.useState(truck.VehExpirationDate);
+    const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration || "-");
+    const [vehExpirationDate, setVehExpirationDate] = React.useState(truck.VehExpirationDate || "-");
 
-    const handleUpdate = () => {
-        database
-            .ref("/truck/small/")
-            .child(truck.id - 1)
-            .update({
-                RegHead: registration,
-                Weight: weight,
-                Insurance: insurance,
-                VehicleRegistration: vehicleRegistration,
-                VehExpirationDate: vehExpirationDate,
-                Company: companies,
-                Driver: driver
-            })
-            .then(() => {
-                database
+    console.log("show truck", Number(truck.Driver.split(":")[0]) - 1);
+    console.log("show Driver : ", driver);
+
+    const handleUpdate = async () => {
+        try {
+            await database
+                .ref("/truck/small/")
+                .child(truck.id - 1)
+                .update({
+                    RegHead: registration,
+                    Weight: weight,
+                    Insurance: insurance,
+                    VehicleRegistration: vehicleRegistration,
+                    VehExpirationDate: vehExpirationDate,
+                    Company: companies,
+                    Driver: driver
+                });
+
+            const regId = driver?.split?.(":")[0] || "0";
+            const drvId = truck?.Driver?.split?.(":")[0] || "0";
+
+            const driverIdPart = drvId === "0"
+                ? regId
+                : (regId === "0" ? drvId : drvId);
+            const driverId = Number(driverIdPart);
+
+            // const driverIdPart = driver?.split(":")[0];
+            // const driverId = Number(driverIdPart);
+
+            if (!isNaN(driverId) && driverId > 0) {
+                await database
                     .ref("/employee/drivers/")
-                    .child(driver.split(":")[0] - 1)
+                    .child(driverId - 1)
                     .update({
-                        Registration: registration,
-                    })
-                    .then(() => {
-                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                        console.log("Data pushed successfully");
-                        setUpdate(true)
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
+                        Registration: driver !== "0:ไม่มี" ? `${truck.id}:${registration}` : driver,
                     });
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
-    }
+            }
+
+            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+            console.log("Data pushed successfully");
+            setUpdate(true);
+        } catch (error) {
+            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+            console.error("Error pushing data:", error);
+        }
+    };
 
     return (
         <React.Fragment>
@@ -154,7 +167,7 @@ const UpdateSmallTruck = (props) => {
                             <Grid item xs={4}>
                                 {
                                     update ?
-                                        <TextField fullWidth variant="standard" value={driver === "ไม่มี" ? driver : driver.split(":")[1]} disabled />
+                                        <TextField fullWidth variant="standard" value={driver.split(":")[1]} disabled />
                                         :
                                         <FormControl variant="standard" fullWidth>
                                             <Select
@@ -163,15 +176,15 @@ const UpdateSmallTruck = (props) => {
                                                 value={driver}
                                                 onChange={(e) => setDriver(e.target.value)}
                                             >
-                                                <MenuItem value={driver}>{driver === "ไม่มี" ? driver : driver.split(":")[1]}</MenuItem>
+                                                <MenuItem value={driver}>{driver.split(":")[1]}</MenuItem>
                                                 {
-                                                    driver !== "ไม่มี" &
-                                                    <MenuItem value={"ไม่มี"}>ไม่มี</MenuItem>
+                                                    driver !== "0:ไม่มี" &&
+                                                    <MenuItem value={"0:ไม่มี"}>ไม่มี</MenuItem>
                                                 }
                                                 {
                                                     employees.map((row) => (
                                                         row.id !== driver.split(":")[0] &&
-                                                        <MenuItem value={row.id + ":" + row.Name}>{row.Name}</MenuItem>
+                                                        <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
@@ -270,7 +283,7 @@ const UpdateSmallTruck = (props) => {
                     {
                         update ?
                             <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)}  sx={{ marginRight: 2 }}>แก้ไข</Button>
+                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)} sx={{ marginRight: 2 }}>แก้ไข</Button>
                                 <Button variant="contained" color="info">พิมพ์</Button>
                             </Box>
                             :

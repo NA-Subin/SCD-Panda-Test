@@ -271,7 +271,7 @@ const InsertTrips = () => {
             const datas = snapshot.val();
             const dataRegHead = [];
             for (let id in datas) {
-                if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง") {
+                if (datas[id].Driver !== "0:ไม่มี" && datas[id].RegTail !== "0:ไม่มี" && datas[id].Status === "ว่าง") {
                     dataRegHead.push({ id, ...datas[id], type: "รถใหญ่" });
                 }
             }
@@ -281,7 +281,7 @@ const InsertTrips = () => {
                 const datas = snapshot.val();
                 const dataSmall = [];
                 for (let id in datas) {
-                    if (datas[id].Driver !== "ไม่มี" && datas[id].RegTail !== "ไม่มี" && datas[id].Status === "ว่าง") {
+                    if (datas[id].Driver !== "0:ไม่มี" && datas[id].RegTail !== "0:ไม่มี" && datas[id].Status === "ว่าง") {
                         dataSmall.push({ id, ...datas[id], type: "รถเล็ก" });
                     }
                 }

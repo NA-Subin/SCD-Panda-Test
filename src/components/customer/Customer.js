@@ -35,6 +35,7 @@ import { Inventory } from "@mui/icons-material";
 import { database } from "../../server/firebase";
 import UpdateCustomer from "./UpdateCustomer";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -57,7 +58,8 @@ const Customer = () => {
     getData();
   }, []);
 
-  const { customer } = useData();
+  // const { customer } = useData();
+  const { customer } = useBasicData();
       const customerList = Object.values(customer); 
       console.log("customer : ", customerList);
 

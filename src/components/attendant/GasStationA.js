@@ -41,11 +41,14 @@ import 'dayjs/locale/th';
 import GasStationDetail from "./GasStationDetail";
 import { useData } from "../../server/path";
 import withReactContent from "sweetalert2-react-content";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useGasStationData } from "../../server/provider/GasStationProvider";
 
 const GasStationA = () => {
     const userId = Cookies.get("sessionToken");
     const navigate = useNavigate();
-    const { officers, gasstation } = useData();
+    const { officers } = useBasicData();
+    const { gasstation } = useGasStationData();
     const employee = Object.values(officers || {});
     const gasstations = Object.values(gasstation || {});
     const employeeDetail = employee.find((emp) => (emp.id === Number(userId.split("$")[1])));

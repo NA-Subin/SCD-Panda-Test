@@ -30,35 +30,44 @@ import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 import InsertCustomerSmallTruck from "./InsertCustomerSmallTruck";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const TicketsSmallTruck = () => {
     const [update, setUpdate] = React.useState("");
     const [newName, setNewName] = React.useState("");
-    const [ticket, setTicket] = React.useState([]);
+    //const [ticket, setTicket] = React.useState([]);
     const [open, setOpen] = useState(1);
     const [setting, setSetting] = React.useState(false);
     const [ticketChecked, setTicketChecked] = useState(false);
     const [recipientChecked, setRecipientChecked] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState(null); // จับ ID ของแถวที่ต้องการแก้ไข
-    const [ticketM, setTicketM] = React.useState([]);
-    const [ticketR, setTicketR] = React.useState([]);
+    //const [ticketM, setTicketM] = React.useState([]);
+    //const [ticketR, setTicketR] = React.useState([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
-        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-        useEffect(() => {
-            const handleResize = () => {
-                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-            };
-    
-            window.addEventListener('resize', handleResize); // เพิ่ม event listener
-    
-            // ลบ event listener เมื่อ component ถูกทำลาย
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
-    
+
+    const { customersmalltruck } = useBasicData();
+    const ticket = Object.values(customersmalltruck || {});
+
+    const ticketM = ticket.filter((item) => item.Type === "เชียงใหม่" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
+    const ticketR = ticket.filter((item) => item.Type === "บ้านโฮ่ง" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
 
     console.log("ticketM", ticketM);
     console.log("ticketR", ticketR);
@@ -67,45 +76,45 @@ const TicketsSmallTruck = () => {
         setOpen(true);
     };
 
-    const getTicket = async () => {
-        database.ref("/customers/smalltruck").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            if (datas === null || datas === undefined) {
-                setTicketM([]);
-                setTicketR([]);
-            } else {
-                const dataList = [];
-                for (let id in datas) {
-                    dataList.push({ id, ...datas[id] });
-                }
+    // const getTicket = async () => {
+    //     database.ref("/customers/smalltruck").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         if (datas === null || datas === undefined) {
+    //             setTicketM([]);
+    //             setTicketR([]);
+    //         } else {
+    //             const dataList = [];
+    //             for (let id in datas) {
+    //                 dataList.push({ id, ...datas[id] });
+    //             }
 
-                // กรองข้อมูลตาม type
-                const ticketM = dataList.filter((item) => item.Type === "เชียงใหม่");
-                const ticketR = dataList.filter((item) => item.Type === "บ้านโฮ่ง");
+    //             // กรองข้อมูลตาม type
+    //             const ticketM = dataList.filter((item) => item.Type === "เชียงใหม่");
+    //             const ticketR = dataList.filter((item) => item.Type === "บ้านโฮ่ง");
 
-                // เรียงลำดับข้อมูล (สามารถปรับเปลี่ยนเงื่อนไขการเรียงได้ตามต้องการ)
-                // ตัวอย่าง: เรียงตาม id (หรือ key อื่นๆ ที่เหมาะสม)
-                ticketM.sort((a, b) => a.id - b.id);
-                ticketR.sort((a, b) => a.id - b.id);
+    //             // เรียงลำดับข้อมูล (สามารถปรับเปลี่ยนเงื่อนไขการเรียงได้ตามต้องการ)
+    //             // ตัวอย่าง: เรียงตาม id (หรือ key อื่นๆ ที่เหมาะสม)
+    //             ticketM.sort((a, b) => a.id - b.id);
+    //             ticketR.sort((a, b) => a.id - b.id);
 
-                // เพิ่มลำดับโดยใช้ property "No"
-                ticketM.forEach((item, index) => {
-                    item.No = index + 1;
-                });
-                ticketR.forEach((item, index) => {
-                    item.No = index + 1;
-                });
+    //             // เพิ่มลำดับโดยใช้ property "No"
+    //             ticketM.forEach((item, index) => {
+    //                 item.No = index + 1;
+    //             });
+    //             ticketR.forEach((item, index) => {
+    //                 item.No = index + 1;
+    //             });
 
-                // บันทึกข้อมูลเข้า state
-                setTicketM(ticketM);
-                setTicketR(ticketR);
-            }
-        });
-    };
+    //             // บันทึกข้อมูลเข้า state
+    //             setTicketM(ticketM);
+    //             setTicketR(ticketR);
+    //         }
+    //     });
+    // };
 
-    useEffect(() => {
-        getTicket();
-    }, []);
+    // useEffect(() => {
+    //     getTicket();
+    // }, []);
 
     // State สำหรับเก็บค่าแก้ไข Rate
     // const [rate1Edit, setRate1Edit] = useState("");
@@ -113,11 +122,13 @@ const TicketsSmallTruck = () => {
     // const [rate3Edit, setRate3Edit] = useState("");
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
     const [name, setName] = useState("");
+    const [rowId, setRowId] = useState(null);
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (rowId, status, rowCreditTime, newname
+    const handleSetting = (index,rowId, status, rowCreditTime, newname
         // , rowRate1, rowRate2, rowRate3
     ) => {
+        setRowId(index+1);
         setSetting(true);
         setSelectedRowId(rowId);
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
@@ -144,16 +155,38 @@ const TicketsSmallTruck = () => {
                 !ticketChecked && recipientChecked ? "ลูกค้าไม่ประจำ" : "ยกเลิก")
 
         // บันทึกสถานะใหม่ไปยัง Firebase
-        await database.ref(`/customers/smalltruck/${selectedRowId - 1}`).update({
-            Status: newStatus,
-            CreditTime: creditTimeEdit,
-            Name: name
-            // Rate1: rate1Edit,
-            // Rate2: rate2Edit,
-            // Rate3: rate3Edit,
-        });
-        setSetting(false);
-        setSelectedRowId(null);
+        // await database.ref(`/customers/smalltruck/${selectedRowId - 1}`).update({
+        //     Status: newStatus,
+        //     CreditTime: creditTimeEdit,
+        //     Name: name
+        //     // Rate1: rate1Edit,
+        //     // Rate2: rate2Edit,
+        //     // Rate3: rate3Edit,
+        // });
+        // setSetting(false);
+        // setSelectedRowId(null);
+        database
+            .ref("/customers/smalltruck/")
+            .child(selectedRowId - 1)
+            .update({
+                Status: newStatus,
+                CreditTime: creditTimeEdit,
+                Name: name
+                // Rate1: rate1Edit,
+                // Rate2: rate2Edit,
+                // Rate3: rate3Edit,
+            }) // อัพเดท values ทั้งหมด
+            .then(() => {
+                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                console.log("Data updated successfully");
+                setSetting(false);
+                setSelectedRowId(null);
+                setRowId(null);
+            })
+            .catch((error) => {
+                ShowError("แก้ไขข้อมูลไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
     };
 
     const handleCancel = () => {
@@ -195,6 +228,34 @@ const TicketsSmallTruck = () => {
         setRecipientChecked(true);
     }
 
+    const handleDelete = () => {
+        ShowConfirm(
+            `ต้องการยกเลิกตั๋วรถเล็กที่ ${rowId} ใช่หรือไม่`,
+            () => {
+                database
+                    .ref("/customers/smalltruck/")
+                    .child(selectedRowId - 1)
+                    .update({
+                        SystemStatus: "ไม่อยู่ในระบบ",
+                    }) // อัพเดท values ทั้งหมด
+                    .then(() => {
+                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                        console.log("Data updated successfully");
+                        setSetting(false);
+                        setSelectedRowId(null);
+                        setRowId(null);
+                    })
+                    .catch((error) => {
+                        ShowError("แก้ไขข้อมูลไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
+            },
+            () => {
+                console.log(`ยกเลิกลบตั๋วรถเล็กที่ ${rowId}`);
+            }
+        )
+    }
+
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
             <Typography
@@ -224,7 +285,7 @@ const TicketsSmallTruck = () => {
                     }
                 </Grid>
             </Grid>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5,width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260)  }}>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <Grid container spacing={2}>
                     <Grid item md={9} xs={12} >
                         <Typography variant="h6" fontWeight="bold" gutterBottom>รายการลูกค้าของ{open === 1 ? "เชียงใหม่" : "บ้านโฮ่ง"}</Typography>
@@ -244,7 +305,7 @@ const TicketsSmallTruck = () => {
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                     ลำดับ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16,width: 200 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                     ชื่อตั๋ว
                                 </TablecellHeader>
                                 {/* <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
@@ -262,7 +323,12 @@ const TicketsSmallTruck = () => {
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
                                     สถานะ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ width: 30,position: "sticky", right: 0 }} />
+                                <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 50 : 160, textAlign: "center" }}>
+
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ position: 'sticky', right: 0, width: !setting ? 20 : 60, textAlign: "center" }}>
+
+                                </TablecellHeader>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -464,7 +530,7 @@ const TicketsSmallTruck = () => {
                                                                         }
                                                                     />
                                                                     <FormControlLabel
-                                                                        sx={{ whiteSpace: "nowrap", marginTop: -2 }}
+                                                                        sx={{ whiteSpace: "nowrap" }}
                                                                         control={
                                                                             <Checkbox
                                                                                 checked={!ticketChecked && recipientChecked ? true : false}
@@ -481,7 +547,7 @@ const TicketsSmallTruck = () => {
                                                                 </>
                                                         }
                                                     </TableCell>
-                                                    <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
+                                                    {/* <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
                                                         <Box sx={{ marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
@@ -493,7 +559,72 @@ const TicketsSmallTruck = () => {
                                                                     </>
                                                             }
                                                         </Box>
+                                                    </TableCell> */}
+                                                    <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 50 : 100, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="warning"
+                                                                    startIcon={<EditNoteIcon />}
+                                                                    size="small"
+                                                                    sx={{ height: "25px" }}
+                                                                    onClick={() => handleSetting(index,row.id, row.Status, row.CreditTime, row.Name)}
+                                                                >
+                                                                    แก้ไข
+                                                                </Button>
+                                                                :
+                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="error"
+                                                                        endIcon={<CancelIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px", marginRight: 1 }}
+                                                                        onClick={handleCancel}
+                                                                    >
+                                                                        ยกเลิก
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="success"
+                                                                        endIcon={<SaveIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleSave}
+                                                                    >
+                                                                        บันทึก
+                                                                    </Button>
+
+                                                                    {/* <IconButton color="error" onClick={handleCancel}>
+                                                                                                                        <CancelIcon />
+                                                                                                                    </IconButton>
+                                                                                                                    <IconButton color="success" onClick={handleSave} >
+                                                                                                                        <SaveIcon />
+                                                                                                                    </IconButton> */}
+                                                                </Box>
+                                                        }
                                                     </TableCell>
+                                                    {
+                                                        !setting || row.id !== selectedRowId ?
+                                                            ""
+                                                            :
+                                                            <TableCell sx={{ width: 50, height: "30px", position: "sticky", right: 0, backgroundColor: "white", textAlign: "center" }}>
+                                                                <Box>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="error"
+                                                                        endIcon={<DeleteIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleDelete}
+
+                                                                    >
+                                                                        ลบ
+                                                                    </Button>
+                                                                </Box>
+                                                            </TableCell>
+                                                    }
                                                 </TableRow>
                                             ))
                                     )
@@ -504,11 +635,11 @@ const TicketsSmallTruck = () => {
                                                 <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
                                             </TableRow>
                                             :
-                                            ticketR.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                                            ticketR.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
                                                 <TableRow key={row.id} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                            {row.No}
+                                                            {index + 1}
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell> */}
@@ -694,7 +825,7 @@ const TicketsSmallTruck = () => {
                                                                         }
                                                                     />
                                                                     <FormControlLabel
-                                                                        sx={{ whiteSpace: "nowrap", marginTop: -2 }}
+                                                                        sx={{ whiteSpace: "nowrap" }}
                                                                         control={
                                                                             <Checkbox
                                                                                 checked={!ticketChecked && recipientChecked ? true : false}
@@ -711,7 +842,7 @@ const TicketsSmallTruck = () => {
                                                                 </>
                                                         }
                                                     </TableCell>
-                                                    <TableCell width={70} sx={{ backgroundColor: "white",position: "sticky", right: 0 }}>
+                                                    {/* <TableCell width={70} sx={{ backgroundColor: "white",position: "sticky", right: 0 }}>
                                                         <Box sx={{ marginTop: -0.5 }}>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
@@ -723,7 +854,72 @@ const TicketsSmallTruck = () => {
                                                                     </>
                                                             }
                                                         </Box>
+                                                    </TableCell> */}
+                                                    <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 50 : 100, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="warning"
+                                                                    startIcon={<EditNoteIcon />}
+                                                                    size="small"
+                                                                    sx={{ height: "25px" }}
+                                                                    onClick={() => handleSetting(index,row.id, row.Status, row.CreditTime, row.Name)}
+                                                                >
+                                                                    แก้ไข
+                                                                </Button>
+                                                                :
+                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="error"
+                                                                        endIcon={<CancelIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px", marginRight: 1 }}
+                                                                        onClick={handleCancel}
+                                                                    >
+                                                                        ยกเลิก
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="success"
+                                                                        endIcon={<SaveIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleSave}
+                                                                    >
+                                                                        บันทึก
+                                                                    </Button>
+
+                                                                    {/* <IconButton color="error" onClick={handleCancel}>
+                                                                    <CancelIcon />
+                                                                </IconButton>
+                                                                <IconButton color="success" onClick={handleSave} >
+                                                                    <SaveIcon />
+                                                                </IconButton> */}
+                                                                </Box>
+                                                        }
                                                     </TableCell>
+                                                    {
+                                                        !setting || row.id !== selectedRowId ?
+                                                            ""
+                                                            :
+                                                            <TableCell sx={{ width: 50, height: "30px", position: "sticky", right: 0, backgroundColor: "white", textAlign: "center" }}>
+                                                                <Box>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="error"
+                                                                        endIcon={<DeleteIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleDelete}
+
+                                                                    >
+                                                                        ลบ
+                                                                    </Button>
+                                                                </Box>
+                                                            </TableCell>
+                                                    }
                                                 </TableRow>
                                             ))
                                     )

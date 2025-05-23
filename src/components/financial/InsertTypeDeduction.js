@@ -48,6 +48,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useData } from "../../server/path";
 import dayjs from "dayjs";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const InsertTypeDeduction = ({ onSend }) => {
     const [open, setOpen] = React.useState(false);
@@ -55,7 +56,8 @@ const InsertTypeDeduction = ({ onSend }) => {
     const [name, setName] = React.useState("");
     const [openMain, setOpenMain] = useState(false);
     const [openSub, setOpenSub] = useState(false);
-    const { typeFinancial } = useData();
+    // const { typeFinancial } = useData();
+    const { typeFinancial } = useTripData();
     const typeFinancialDetail = Object.values(typeFinancial);
 
     console.log("Type : ", type);

@@ -51,6 +51,8 @@ import 'dayjs/locale/th';
 import { database } from "../../server/firebase";
 import { TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellSelling, TableCellPWD } from "../../theme/style";
 import { useData } from "../../server/path";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const Driver = () => {
     const [truck, setTruck] = React.useState("0:0:0");
@@ -150,7 +152,10 @@ const Driver = () => {
     //     getTrip();
     // }, []);
 
-    const { reghead, trip, order, depots } = useData();
+    // const { reghead, trip, order, depots } = useData();
+     const { reghead, depots } = useBasicData();
+     const { trip, order } = useTripData();
+
     const drivers = Object.values(reghead || {});
   const trips = Object.values(trip || {});
   const orders = Object.values(order || {});
@@ -416,7 +421,7 @@ const Driver = () => {
                                 <MenuItem value={"0:0:0"}>กรุณาเลือกรถบรรทุก</MenuItem>
                                 {
                                     driver.map((row) => (
-                                        <MenuItem value={`${row.Driver}:${row.RegHead}:${row.RegTail}`}>{`${row.Driver.split(":")[1]} / ${row.RegHead}:${row.RegTail}`}</MenuItem>
+                                        <MenuItem value={`${row.Driver}:${row.RegHead}:${row.RegTail}`}>{`${row.Driver.split(":")[1]} / ${row.RegHead}:${row.RegTail.split(":")[1]}`}</MenuItem>
                                     ))
                                 }
                             </Select>

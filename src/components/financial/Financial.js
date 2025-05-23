@@ -45,6 +45,7 @@ import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import InsertFinancial from "./InsertFinancial";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const Financial = () => {
 
@@ -85,7 +86,8 @@ const Financial = () => {
         }
     };
 
-    const { report } = useData();
+    // const { report } = useData();
+    const { report } = useTripData();
     const reports = Object.values(report || {});
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
 

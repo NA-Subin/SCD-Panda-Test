@@ -41,6 +41,7 @@ import { database } from "../../server/firebase";
 import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
 import { useData } from "../../server/path";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const TripsBigTruck = () => {
     const [menu, setMenu] = React.useState(0);
@@ -72,7 +73,8 @@ const TripsBigTruck = () => {
         setOpen(false);
     };
 
-    const { trip } = useData();
+    // const { trip } = useData();
+    const { trip } = useTripData();
     const trips = Object.values(trip || {});
 
     //const tripDetail = trips.filter((item) => item.TruckType === "รถใหญ่" && item.StatusTrip !== "ยกเลิก" );

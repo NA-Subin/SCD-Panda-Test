@@ -34,6 +34,10 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import 'dayjs/locale/th'; // เพิ่มการใช้งาน locale ภาษาไทย
+import { useTripData } from "../../server/provider/TripProvider";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useGasStationData } from "../../server/provider/GasStationProvider";
+//import DriverTable from "./ProviderTest";
 
 dayjs.locale('th'); // ตั้งค่าให้ dayjs ใช้ภาษาไทย
 
@@ -57,13 +61,34 @@ const Dashboard = () => {
   const token = Cookies.get("token");
   const [slideOut, setSlideOut] = useState(true);
 
-  const { officers,
-    drivers,
-    creditors,
+  // const { officers,
+  //   drivers,
+  //   creditors,
+  //   order,
+  //   trip,
+  //   tickets,
+  //   gasstation,
+  //   reghead,
+  //   regtail,
+  //   small,
+  //   depots,
+  //   customertransports,
+  //   customergasstations,
+  //   customerbigtruck,
+  //   customersmalltruck,
+  //   customertickets
+  // } = useData();
+
+  const {
     order,
     trip,
-    tickets,
-    gasstation,
+    tickets
+  } = useTripData();
+
+  const {
+    officers,
+    drivers,
+    creditors,
     reghead,
     regtail,
     small,
@@ -73,7 +98,10 @@ const Dashboard = () => {
     customerbigtruck,
     customersmalltruck,
     customertickets
-  } = useData();
+  } = useBasicData();
+
+  const { gasstation } = useGasStationData();
+
   const orders = Object.values(order || {});
   const trips = Object.values(trip || {});
   const creditor = Object.values(creditors || {});
@@ -749,7 +777,7 @@ const Dashboard = () => {
                 height: "50vh"
               }}
             >
-              
+
               <PieChart
                 series={[
                   {
@@ -789,7 +817,7 @@ const Dashboard = () => {
                 </Box>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Box sx={{ display: "flex", alignItems: "center",marginRight: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", marginRight: 2 }}>
                   <Box sx={{ backgroundColor: theme.palette.success.dark, height: 15, width: 15, border: "2px solid white", mr: 0.5 }} />
                   <Typography fontSize="12px" fontWeight="bold">ตั๋วรถเล็ก เชียงใหม่</Typography>
                 </Box>
@@ -818,6 +846,7 @@ const Dashboard = () => {
           </Paper>
         </Grid>
       </Grid>
+      {/* <DriverTable /> */}
     </Container>
   );
 };
