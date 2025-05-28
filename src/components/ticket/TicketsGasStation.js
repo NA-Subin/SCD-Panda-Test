@@ -39,6 +39,8 @@ const TicketsGasStation = (props) => {
     const { row, index } = props;
     const [update, setUpdate] = React.useState(true);
     const [name, setName] = React.useState(row.Name);
+    const [shortName, setShortName] = React.useState(row.ShortName || "");
+    const [lastName, setLastName] = React.useState(row.LastName || "");
     const [rate1, setRate1] = React.useState(row.Rate1);
     const [rate2, setRate2] = React.useState(row.Rate2);
     const [rate3, setRate3] = React.useState(row.Rate3);
@@ -55,7 +57,9 @@ const TicketsGasStation = (props) => {
                 Rate2: rate2,
                 Rate3: rate3,
                 CreditTime: creditTime,
-                Name: name
+                Name: shortName + lastName,
+                ShortName: shortName,
+                LastName: lastName
             }) // อัพเดท values ทั้งหมด
             .then(() => {
                 ShowSuccess("แก้ไขข้อมูลสำเร็จ");
@@ -125,31 +129,62 @@ const TicketsGasStation = (props) => {
                         <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{index + 1}</TableCell>
                         {/* <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{name}</TableCell> */}
                         <TableCell sx={{ textAlign: "center" }}>
-                            <Paper sx={{ width: "100%" }}>
-                                <TextField
-                                    fullWidth
-                                    InputLabelProps={{
-                                        sx: {
-                                            fontSize: '14px',
-                                        },
-                                    }}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            height: '30px', // ปรับความสูงของ TextField
-                                        },
-                                        '& .MuiInputBase-input': {
-                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
-                                            fontWeight: 'bold',
-                                            padding: '2px 6px', // ปรับ padding ภายใน input
-                                            textAlign: "center"
-                                        },
-                                    }}
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    size="small"
-                                    variant="outlined"
-                                />
-                            </Paper>
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <Paper sx={{ width: "100%" }}>
+                                        <TextField
+                                            fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px',
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                    fontWeight: 'bold',
+                                                    padding: '2px 6px', // ปรับ padding ภายใน input
+                                                    textAlign: "center"
+                                                },
+                                            }}
+                                            value={shortName}
+                                            onChange={(e) => setShortName(e.target.value)}
+                                            size="small"
+                                            variant="outlined"
+                                        />
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Paper sx={{ width: "100%" }}>
+                                        <TextField
+                                            fullWidth
+                                            InputLabelProps={{
+                                                sx: {
+                                                    fontSize: '14px',
+                                                },
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                    fontWeight: 'bold',
+                                                    padding: '2px 6px', // ปรับ padding ภายใน input
+                                                    textAlign: "center"
+                                                },
+                                            }}
+                                            value={lastName}
+                                            onChange={(e) => setLastName(e.target.value)}
+                                            size="small"
+                                            variant="outlined"
+                                        />
+                                    </Paper>
+                                </Grid>
+                            </Grid>
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
                             <Paper component="form" sx={{ width: "100%" }}>

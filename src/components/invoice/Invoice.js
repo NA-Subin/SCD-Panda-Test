@@ -11,6 +11,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
+  FormGroup,
   Grid,
   IconButton,
   InputAdornment,
@@ -37,6 +38,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useTripData } from "../../server/provider/TripProvider";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const Invoice = () => {
   const [update, setUpdate] = React.useState(true);
@@ -45,6 +47,7 @@ const Invoice = () => {
   const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
   const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
   const [checkOverdueTransfer, setCheckOverdueTransfer] = useState(true);
+  const [check, setCheck] = useState(1); // 1 = ทั้งหมด, 2 = กำลังจัดเที่ยววิ่ง, 3 = ยกเลิก, 4 = จบทริป
 
   const handleDateChangeDateStart = (newValue) => {
     if (newValue) {
@@ -94,8 +97,10 @@ const Invoice = () => {
   console.log("indexes : ", indexes);
 
   // const { order, transferMoney } = useData();
+  const { customerbigtruck } = useBasicData();
   const { order, transferMoney } = useTripData();
   const orders = Object.values(order || {});
+  const customerB = Object.values(customerbigtruck || {});
   const transferMoneyDetail = Object.values(transferMoney || {});
 
   console.log("Transfer Money : ", transferMoneyDetail);
@@ -103,7 +108,18 @@ const Invoice = () => {
   const orderDetail = orders
     .filter((item) => {
       const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+      const customerId = Number(item.TicketName.split(":")[0]);
+      console.log("checks : ", check);
+      let isInCompany =
+        check === 1 ?
+          customerB.find((customer) => customer.id === Number(item.TicketName.split(":")[0]))
+          : check === 2 ?
+            customerB.find((customer) => customer.id === Number(item.TicketName.split(":")[0]) && customer.StatusCompany === "อยู่บริษัทในเครือ")
+            : customerB.find((customer) => customer.id === Number(item.TicketName.split(":")[0]) && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
+
       return (
+        isInCompany && // <--- ป้องกัน error
+        isInCompany.id === customerId &&
         item.CustomerType === "ตั๋วรถใหญ่" &&
         item.Trip !== "ยกเลิก" &&
         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
@@ -278,6 +294,14 @@ const Invoice = () => {
           }
         </Grid> */}
           <Grid item xs={12}>
+            <FormGroup row sx={{ marginBottom: -1.5 }}>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+              <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+              <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
+              <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
+            </FormGroup>
+          </Grid>
+          <Grid item xs={12}>
             {/* <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -3 }}> */}
             {
               //open === 1 ?
@@ -372,7 +396,7 @@ const Invoice = () => {
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                     {dayjs(row.Date, "DD/MM/YYYY")
-                                      .add(row.CreditTime === "-" ? 0 : row.CreditTime, "day")
+                                      .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : row.CreditTime, "day")
                                       .format("DD/MM/YYYY")}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>

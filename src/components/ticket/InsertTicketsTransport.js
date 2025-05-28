@@ -129,8 +129,7 @@ const InsertTicketsTransport = () => {
                 lat: lat,
                 lng: lng,
                 Phone: phone,
-                creditTime: creditTime,
-                Type: zone
+                creditTime: creditTime
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -195,7 +194,7 @@ const InsertTicketsTransport = () => {
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รอบการวางบิล</Typography>
                                     <TextField size="small" fullWidth value={bill} onChange={(e) => setBill(e.target.value)} />
                                 </Grid>
-                                <Grid item md={6} xs={12} display="flex" justifyContent="left" alignItems="center">
+                                <Grid item md={12} xs={12} display="flex" justifyContent="left" alignItems="center">
                                     <Typography variant="subtitle1" fontWeight="bold" marginRight={1} sx={{ marginLeft: { md: 0, xs: 4 } }}>สถานะตั๋ว :</Typography>
                                     <FormControlLabel
                                         control={
@@ -217,20 +216,6 @@ const InsertTicketsTransport = () => {
                                         }
                                         label="ผู้รับ"
                                     />
-                                </Grid>
-                                <Grid item md={6} xs={12} display="flex" justifyContent="left" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginLeft: { md: 0, xs: 8 } }} marginRight={1}>โซน :</Typography>
-                                    <FormControl fullWidth>
-                                        <Select
-                                            size="small"
-                                            value={zone}
-                                            onChange={(e) => setZone(e.target.value)}
-                                        >
-                                            <MenuItem value={"-"}>กรุณาเลือกโซน</MenuItem>
-                                            <MenuItem value={"เชียงใหม่"}>เชียงใหม่</MenuItem>
-                                            <MenuItem value={"เชียงราย"}>เชียงราย</MenuItem>
-                                        </Select>
-                                    </FormControl>
                                 </Grid>
                             </Grid>
                         </Grid>

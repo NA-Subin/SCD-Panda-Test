@@ -69,7 +69,13 @@ const UpdateRegHead = (props) => {
     const [companies, setCompanies] = React.useState(truck.Company);
     const [driver, setDriver] = React.useState(truck.Driver);
     const [regHead, setRegHead] = React.useState(truck.RegHead);
-    const [regTail, setRegTail] = React.useState(truck.RegTail + ":0:0");
+    const [regTail, setRegTail] = React.useState(() => {
+        const match = dataregtail.find(item => item.id === Number(truck.RegTail.split(":")[0]));
+        return match
+            ? `${match.id}:${match.RegTail}:${match.Cap}:${match.Weight}`
+            : "";
+    });
+
     const [weight, setWeight] = React.useState(truck.Weight);
     const [insurance, setInsurance] = React.useState(truck.Insurance);
     const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration);

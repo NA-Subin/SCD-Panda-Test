@@ -464,62 +464,62 @@ const UpdateTrip = (props) => {
     }
 
     const handleEditChange = (index, field, value) => {
-    setEditableTickets((prev) => {
-        const updatedTickets = [...prev];
+        setEditableTickets((prev) => {
+            const updatedTickets = [...prev];
 
-        if (!updatedTickets[index]) {
-            updatedTickets[index] = { id: index + 1, No: 0, Product: {} };
-        }
-
-        const fields = field.split(".");
-        let obj = updatedTickets[index];
-
-        for (let i = 0; i < fields.length - 1; i++) {
-            const key = fields[i];
-            if (!obj[key]) obj[key] = {};
-            obj = obj[key];
-        }
-
-        const lastField = fields[fields.length - 1];
-
-        // ✅ เช็กเฉพาะ OrderID ว่าเป็น string
-        if (field === "OrderID") {
-            obj[lastField] = value;
-        } else {
-            const numericValue = parseFloat(value) || 0;
-            obj[lastField] = numericValue;
-
-            // เงื่อนไขสำหรับ Product
-            if (fields[0] === "Product" && numericValue > 0) {
-                const productType = fields[1];
-                if (!updatedTickets[index].Product) {
-                    updatedTickets[index].Product = {};
-                }
-                updatedTickets[index].Product[productType] = { Volume: value.toString() };
+            if (!updatedTickets[index]) {
+                updatedTickets[index] = { id: index + 1, No: 0, Product: {} };
             }
 
-            if (fields[0] === "Product" && numericValue === 0) {
-                const productType = fields[1];
-                delete updatedTickets[index].Product[productType];
-                if (Object.keys(updatedTickets[index].Product).length === 0) {
-                    delete updatedTickets[index].Product;
+            const fields = field.split(".");
+            let obj = updatedTickets[index];
+
+            for (let i = 0; i < fields.length - 1; i++) {
+                const key = fields[i];
+                if (!obj[key]) obj[key] = {};
+                obj = obj[key];
+            }
+
+            const lastField = fields[fields.length - 1];
+
+            // ✅ เช็กเฉพาะ OrderID ว่าเป็น string
+            if (field === "OrderID") {
+                obj[lastField] = value;
+            } else {
+                const numericValue = parseFloat(value) || 0;
+                obj[lastField] = numericValue;
+
+                // เงื่อนไขสำหรับ Product
+                if (fields[0] === "Product" && numericValue > 0) {
+                    const productType = fields[1];
+                    if (!updatedTickets[index].Product) {
+                        updatedTickets[index].Product = {};
+                    }
+                    updatedTickets[index].Product[productType] = { Volume: value.toString() };
+                }
+
+                if (fields[0] === "Product" && numericValue === 0) {
+                    const productType = fields[1];
+                    delete updatedTickets[index].Product[productType];
+                    if (Object.keys(updatedTickets[index].Product).length === 0) {
+                        delete updatedTickets[index].Product;
+                    }
                 }
             }
-        }
 
-        setTicketTrip((prev) => {
-            const newTickets = {};
-            const allTickets = [...updatedTickets];
-            allTickets.forEach((item, i) => {
-                const newIndex = i + 1;
-                newTickets[`Ticket${newIndex}`] = item.TicketName;
+            setTicketTrip((prev) => {
+                const newTickets = {};
+                const allTickets = [...updatedTickets];
+                allTickets.forEach((item, i) => {
+                    const newIndex = i + 1;
+                    newTickets[`Ticket${newIndex}`] = item.TicketName;
+                });
+                return { ...prev, ...newTickets };
             });
-            return { ...prev, ...newTickets };
-        });
 
-        return updatedTickets;
-    });
-};
+            return updatedTickets;
+        });
+    };
 
     const handleOrderChange = (index, field, value) => {
         setEditableOrders((prev) => {
@@ -623,19 +623,29 @@ const UpdateTrip = (props) => {
             return acc;
         }, {});
 
-        // ✅ คำนวณ CostTrip
-        const orderCount = editableOrders.length;
+        // คำนวณ CostTrip ตาม shortName ซ้ำหรือไม่
+        const seenShortNames = new Set();
         let newCostTrip = 0;
 
-        if (orderCount > 0) {
-            if (depot.split(":")[1] === "ลำปาง") {
-                newCostTrip = 750 + (orderCount - 1) * 200;
-            } else if (depot.split(":")[1] === "พิจิตร") {
-                newCostTrip = 2000 + (orderCount - 1) * 200;
-            } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
-                newCostTrip = 3200 + (orderCount - 1) * 200;
+        editableOrders.forEach((order, index) => {
+            const shortName = order.ShortName || "-";
+            let shouldAddExtra = false;
+
+            if (shortName === "-" || shortName.trim() === "") {
+                shouldAddExtra = true;
+            } else if (!seenShortNames.has(shortName)) {
+                shouldAddExtra = true;
+                seenShortNames.add(shortName);
             }
-        }
+
+            if (depot.split(":")[1] === "ลำปาง") {
+                newCostTrip += index === 0 ? 750 : (shouldAddExtra ? 200 : 0);
+            } else if (depot.split(":")[1] === "พิจิตร") {
+                newCostTrip += index === 0 ? 2000 : (shouldAddExtra ? 200 : 0);
+            } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
+                newCostTrip += index === 0 ? (2000 + 1200) : (shouldAddExtra ? 200 : 0);
+            }
+        });
 
         // คำนวณน้ำมันเบาและน้ำมันหนัก
         const calculateOil = (volume, factor) => (volume * factor) * 1000; // สูตรคำนวณน้ำมัน
@@ -645,7 +655,7 @@ const UpdateTrip = (props) => {
             calculateOil(totalsTicket["G95"], 0.740) +
             calculateOil(totalsTicket["B95"], 0.740) +
             calculateOil(totalsTicket["E20"], 0.740)
-            
+
 
         const oilHeavy =
             calculateOil(totalsTicket["B7"], 0.837) +
@@ -852,10 +862,11 @@ const UpdateTrip = (props) => {
         const tickets = [
             { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...[...ticketsA].map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" }))
-            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
-            
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
+
             ...[...ticketsPS].map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" }))
-            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
+                .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
 
             ...[...ticketsT]
                 .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
@@ -869,7 +880,8 @@ const UpdateTrip = (props) => {
     const getCustomers = () => {
         const customers = [
             ...[...ticketsPS].map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" }))
-            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
+                .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
 
             ...[...ticketsT]
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
@@ -877,8 +889,8 @@ const UpdateTrip = (props) => {
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
 
             ...[...ticketsB].filter((item) => item.Status === "ลูกค้าประจำ")
-            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-            .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" }))
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" }))
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);
@@ -1365,7 +1377,7 @@ const UpdateTrip = (props) => {
             <Dialog
                 open={open}
                 keepMounted
-                fullScreen={ windowWidths <= 900 ? true : false }
+                fullScreen={windowWidths <= 900 ? true : false}
                 onClose={() => {
                     if (!editMode) {
                         handleCancle();
@@ -1507,13 +1519,13 @@ const UpdateTrip = (props) => {
                                         </Grid>
                                         :
                                         <Grid container>
-                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right"} }}>
+                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                             </Grid>
-                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left"} }}>
+                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
                                             </Grid>
-                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center"} }}>
+                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
                                                     {
                                                         trip.Driver !== undefined &&
@@ -1971,42 +1983,42 @@ const UpdateTrip = (props) => {
 
                                                             // if (existingIndex === -1) {
 
-                                                                // let depotTrip = "-"; // ค่าเริ่มต้น
+                                                            // let depotTrip = "-"; // ค่าเริ่มต้น
 
-                                                                // if (depot.split(":")[1] === "ลำปาง") {
-                                                                //     depotTrip = newValue.Rate1;
-                                                                // } else if (depot.split(":")[1] === "พิจิตร") {
-                                                                //     depotTrip = newValue.Rate2;
-                                                                // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
-                                                                //     depotTrip = newValue.Rate3;
-                                                                // }
+                                                            // if (depot.split(":")[1] === "ลำปาง") {
+                                                            //     depotTrip = newValue.Rate1;
+                                                            // } else if (depot.split(":")[1] === "พิจิตร") {
+                                                            //     depotTrip = newValue.Rate2;
+                                                            // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
+                                                            //     depotTrip = newValue.Rate3;
+                                                            // }
 
-                                                                // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
-                                                                updatedTickets.push({
-                                                                    Address: newValue.Address || "-",
-                                                                    Bill: newValue.Bill || "-",
-                                                                    CodeID: newValue.CodeID || "-",
-                                                                    CompanyName: newValue.CompanyName || "-",
-                                                                    CreditTime: newValue.CreditTime || "-",
-                                                                    Date: trip.DateStart,
-                                                                    Driver: trip.Driver,
-                                                                    Lat: newValue.Lat || 0,
-                                                                    Lng: newValue.Lng || 0,
-                                                                    Product: newValue.Product || "-",
-                                                                    Rate1: newValue.Rate1,
-                                                                    Rate2: newValue.Rate2,
-                                                                    Rate3: newValue.Rate3,
-                                                                    Registration: trip.Registration,
-                                                                    OrderID: newValue.OrderID || "",
-                                                                    id: updatedTickets.length, // ลำดับ id ใหม่
-                                                                    No: ticketLength, // คำนวณจำนวน order
-                                                                    Trip: (Number(tripID) - 1),
-                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                    CustomerType: newValue.CustomerType || "-",
-                                                                    Product: {
-                                                                        P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                    }
-                                                                });
+                                                            // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
+                                                            updatedTickets.push({
+                                                                Address: newValue.Address || "-",
+                                                                Bill: newValue.Bill || "-",
+                                                                CodeID: newValue.CodeID || "-",
+                                                                CompanyName: newValue.CompanyName || "-",
+                                                                CreditTime: newValue.CreditTime || "-",
+                                                                Date: trip.DateStart,
+                                                                Driver: trip.Driver,
+                                                                Lat: newValue.Lat || 0,
+                                                                Lng: newValue.Lng || 0,
+                                                                Product: newValue.Product || "-",
+                                                                Rate1: newValue.Rate1,
+                                                                Rate2: newValue.Rate2,
+                                                                Rate3: newValue.Rate3,
+                                                                Registration: trip.Registration,
+                                                                OrderID: newValue.OrderID || "",
+                                                                id: updatedTickets.length, // ลำดับ id ใหม่
+                                                                No: ticketLength, // คำนวณจำนวน order
+                                                                Trip: (Number(tripID) - 1),
+                                                                TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                CustomerType: newValue.CustomerType || "-",
+                                                                Product: {
+                                                                    P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                }
+                                                            });
                                                             // }
 
                                                             return updatedTickets;
@@ -2256,13 +2268,13 @@ const UpdateTrip = (props) => {
 
                                         :
                                         <Grid container>
-                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right"} }}>
+                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                                             </Grid>
-                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "right", xs: "left"} }}>
+                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "right", xs: "left" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
                                             </Grid>
-                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center"} }}>
+                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
                                                     {
                                                         trip.Driver !== undefined &&
@@ -2659,41 +2671,43 @@ const UpdateTrip = (props) => {
 
                                                                     // if (existingIndex === -1) {
 
-                                                                        // let depotTrip = "-"; // ค่าเริ่มต้น
+                                                                    // let depotTrip = "-"; // ค่าเริ่มต้น
 
-                                                                        // if (depot.split(":")[1] === "ลำปาง") {
-                                                                        //     depotTrip = newValue.Rate1;
-                                                                        // } else if (depot.split(":")[1] === "พิจิตร") {
-                                                                        //     depotTrip = newValue.Rate2;
-                                                                        // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
-                                                                        //     depotTrip = newValue.Rate3;
-                                                                        // }
+                                                                    // if (depot.split(":")[1] === "ลำปาง") {
+                                                                    //     depotTrip = newValue.Rate1;
+                                                                    // } else if (depot.split(":")[1] === "พิจิตร") {
+                                                                    //     depotTrip = newValue.Rate2;
+                                                                    // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
+                                                                    //     depotTrip = newValue.Rate3;
+                                                                    // }
 
-                                                                        // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
-                                                                        updatedOrders.push({
-                                                                            Address: newValue.Address || "-",
-                                                                            Bill: newValue.Bill || "-",
-                                                                            CodeID: newValue.CodeID || "-",
-                                                                            CompanyName: newValue.CompanyName || "-",
-                                                                            CreditTime: newValue.CreditTime || "-",
-                                                                            Date: trip.DateStart,
-                                                                            Driver: trip.Driver,
-                                                                            Lat: newValue.Lat || 0,
-                                                                            Lng: newValue.Lng || 0,
-                                                                            Product: newValue.Product || "-",
-                                                                            Rate1: newValue.Rate1,
-                                                                            Rate2: newValue.Rate2,
-                                                                            Rate3: newValue.Rate3,
-                                                                            Registration: trip.Registration,
-                                                                            id: updatedOrders.length, // ลำดับ id ใหม่
-                                                                            No: orderLength, // คำนวณจำนวน order
-                                                                            Trip: (Number(tripID) - 1),
-                                                                            TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                            CustomerType: newValue.CustomerType || "-",
-                                                                            Product: {
-                                                                                P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                            }
-                                                                        });
+                                                                    // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
+                                                                    updatedOrders.push({
+                                                                        Address: newValue.Address || "-",
+                                                                        Bill: newValue.Bill || "-",
+                                                                        CodeID: newValue.CodeID || "-",
+                                                                        CompanyName: newValue.CompanyName || "-",
+                                                                        CreditTime: newValue.CreditTime || "-",
+                                                                        Date: trip.DateStart,
+                                                                        Driver: trip.Driver,
+                                                                        Lat: newValue.Lat || 0,
+                                                                        Lng: newValue.Lng || 0,
+                                                                        Product: newValue.Product || "-",
+                                                                        Rate1: newValue.Rate1,
+                                                                        Rate2: newValue.Rate2,
+                                                                        Rate3: newValue.Rate3,
+                                                                        Registration: trip.Registration,
+                                                                        id: updatedOrders.length, // ลำดับ id ใหม่
+                                                                        No: orderLength, // คำนวณจำนวน order
+                                                                        Trip: (Number(tripID) - 1),
+                                                                        TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                        CustomerType: newValue.CustomerType || "-",
+                                                                        ShortName: newValue.ShortName || "-",
+                                                                        LastName: newValue.LastName || "-",
+                                                                        Product: {
+                                                                            P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                        }
+                                                                    });
                                                                     // }
 
                                                                     return updatedOrders;

@@ -29,7 +29,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { IconButtonError, IconButtonInfo, IconButtonSuccess, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
+import { IconButtonError, IconButtonInfo, IconButtonSuccess, IconButtonWarning, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import CancelIcon from '@mui/icons-material/Cancel';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -37,6 +37,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
 import { database } from "../../server/firebase";
@@ -445,6 +446,57 @@ const UpdateInvoice = (props) => {
                 });
         });
     };
+
+    const [tranferID, setTranferID] = useState(null);
+    const [tranferDateStart, setTranferDateStart] = useState("");
+    const [tranferBankName, setTranferBankName] = useState("");
+    const [tranferIncomingMoney, setTranferIncomingMoney] = useState("");
+    const [tranferNote, setTranferNote] = useState("");
+    const [updateTranfer, setUpdateTranfer] = useState(false);
+
+    console.log("handleClickTranfer : ", tranferID, tranferDateStart, tranferBankName, tranferIncomingMoney, tranferNote);
+
+    const handleClickTranfer = (id, DateStart, BankName, IncomingMoney, Note) => {
+        setUpdateTranfer(true);
+        setTranferID(id);
+        setTranferDateStart(DateStart);
+        setTranferBankName(BankName);
+        setTranferIncomingMoney(IncomingMoney);
+        setTranferNote(Note);
+    }
+
+    const handleSaveTranfer = () => {
+        if (tranferID === null) {
+            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+            return;
+        }
+
+        const updatedData = {
+            DateStart: tranferDateStart,
+            BankName: tranferBankName,
+            IncomingMoney: tranferIncomingMoney,
+            Note: tranferNote,
+        };
+
+        database
+            .ref("transfermoney/")
+            .child(tranferID)
+            .update(updatedData)
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                setUpdateTranfer(false);
+                setTranferID(null);
+                setTranferDateStart("");
+                setTranferBankName("");
+                setTranferIncomingMoney("");
+                setTranferNote("");
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+    }
 
     const handlePost = () => {
         setPrice(prevPrice => {
@@ -941,6 +993,7 @@ const UpdateInvoice = (props) => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main,position: 'sticky', right: 0,  }} />
                                         {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                         <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                             <IconButton color="success"
@@ -961,10 +1014,123 @@ const UpdateInvoice = (props) => {
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.DateStart}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>{row.BankName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{new Intl.NumberFormat("en-US").format(row.IncomingMoney)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    {
+                                                        !updateTranfer || row.id !== tranferID ? row.DateStart
+                                                            :
+                                                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
+                                                                <DatePicker
+                                                                    openTo="day"
+                                                                    views={["year", "month", "day"]}
+                                                                    value={dayjs(tranferDateStart, "DD/MM/YYYY")}
+                                                                    onChange={(newValue) => setTranferDateStart(dayjs(newValue).format("DD/MM/YYYY"))}
+                                                                    format="DD MMMM YYYY"
+                                                                    slotProps={{
+                                                                        textField: {
+                                                                            size: "small",
+                                                                            fullWidth: true,
+                                                                            sx: {
+                                                                                "& .MuiOutlinedInput-root": { height: "30px", paddingRight: "8px" },
+                                                                                "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1, marginRight: -1 },
+                                                                            },
+                                                                            InputProps: {
+                                                                                startAdornment: (
+                                                                                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                                        วันที่ :
+                                                                                    </InputAdornment>
+                                                                                ),
+                                                                            }
+                                                                        },
+                                                                    }}
+                                                                />
+                                                            </LocalizationProvider>
+                                                    }
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>
+                                                    {
+                                                        !updateTranfer || row.id !== tranferID ? row.BankName.split(":")[1]
+                                                            :
+                                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                                <FormControl
+                                                                    fullWidth
+                                                                    size="small"
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': { height: '30px' },
+                                                                        '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                                                    }}
+                                                                >
+                                                                    <Select
+                                                                        value={tranferBankName}
+                                                                        onChange={(e) => setTranferBankName(e.target.value)}
+                                                                    >
+                                                                        <MenuItem value={tranferBankName} sx={{ fontSize: "14px", }}>{tranferBankName.split(":")[1]}</MenuItem>
+                                                                        {
+                                                                            bankDetail.map((row) => (
+                                                                                row.id !== Number(tranferBankName.split(":")[0]) &&
+                                                                                <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                                            ))
+                                                                        }
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Paper>
+                                                    }
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    {
+                                                        !updateTranfer || row.id !== tranferID ? new Intl.NumberFormat("en-US").format(row.IncomingMoney)
+                                                            :
+                                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                                <TextField
+                                                                    type="number"
+                                                                    value={tranferIncomingMoney}
+                                                                    onChange={(e) => setTranferIncomingMoney(e.target.value)}
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': { height: '30px' },
+                                                                        '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                                                    }}
+                                                                />
+                                                            </Paper>
+                                                    }
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    {
+                                                        !updateTranfer || row.id !== tranferID ? row.Note
+                                                            :
+                                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                                <TextField
+                                                                    type="number"
+                                                                    value={tranferNote}
+                                                                    onChange={(e) => setTranferNote(e.target.value)}
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    sx={{
+                                                                        '& .MuiOutlinedInput-root': { height: '30px' },
+                                                                        '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                                                    }}
+                                                                />
+                                                            </Paper>
+                                                    }
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50,position: 'sticky', right: 0, backgroundColor: "white" }}>
+                                                    {
+                                                        !updateTranfer ?
+                                                            <IconButton color="warning" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.IncomingMoney, row.Note)} size="small" sx={{ borderRadius: 2 }}>
+                                                                <EditIcon />
+                                                            </IconButton>
+                                                            :
+                                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                <IconButton color="error" onClick={() => setUpdateTranfer(false)} size="small" sx={{ borderRadius: 2 }}>
+                                                                    <CancelIcon />
+                                                                </IconButton>
+                                                                <IconButton color="success" onClick={handleSaveTranfer} size="small" sx={{ borderRadius: 2 }}>
+                                                                    <SaveIcon />
+                                                                </IconButton>
+                                                            </Box>
+                                                    }
+
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     }
@@ -978,7 +1144,7 @@ const UpdateInvoice = (props) => {
                                                 รวม
                                             </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 300, backgroundColor: "#616161", color: "white" }} colSpan={2}>
+                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 350, backgroundColor: "#616161", color: "white" }} colSpan={2}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                 {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                             </Typography>
@@ -1141,7 +1307,7 @@ const UpdateInvoice = (props) => {
                             </Grid>
                             <Grid container spacing={2}>
                                 {
-                                    windowWidths >= 900 && <Grid item md={0.5} xs={12}/>
+                                    windowWidths >= 900 && <Grid item md={0.5} xs={12} />
                                 }
                                 <Grid item md={5.5} xs={6}>
                                     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -1161,7 +1327,7 @@ const UpdateInvoice = (props) => {
                                                 >
                                                     {
                                                         bankDetail.map((row) => (
-                                                            <MenuItem value={`${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
                                                         ))
                                                     }
                                                 </Select>

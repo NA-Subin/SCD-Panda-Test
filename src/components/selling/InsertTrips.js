@@ -138,6 +138,7 @@ const InsertTrips = () => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
             setSelectedDateReceive(formattedDate);
+            setSelectedDateDelivery(formattedDate.add(1, 'day')); // ตั้งค่าวันที่ส่งเป็นวันถัดไป
         }
     };
 
@@ -416,6 +417,10 @@ const InsertTrips = () => {
 
     console.log("Order : ", orders);
 
+    const [usedShortNames, setUsedShortNames] = useState(new Set());
+
+    console.log("Used ShortNames: ", [...usedShortNames]);
+
     const [ordersTickets, setOrdersTickets] = React.useState({});
     const [selling, setSelling] = React.useState({});
     const [volumeT, setVolumeT] = React.useState({});
@@ -506,25 +511,49 @@ const InsertTrips = () => {
         if (customerValue === "0:0") return;
 
         // ค้นหา ticket ที่ตรงกับ customerValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
-        const ticketData = getCustomers().find(
+        const orderData = getCustomers().find(
             (item) => `${item.id}:${item.Name}` === customerValue
         );
 
-
+        console.log("customerValue : ", customerValue.split(":")[1].split(".")[0]);
 
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
         // let newRate = 0;
-        if (ticketData && depots) {
-            // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
-            if (depots.split(":")[1] === "ลำปาง") {
-                // newRate = ticketData.Rate1;
-                setCostTrip((prev) => (prev === 0 ? 750 : prev + 200));
-            } else if (depots.split(":")[1] === "พิจิตร") {
-                // newRate = ticketData.Rate2;
-                setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
-            } else if (depots.split(":")[1] === "สระบุรี" || depots.split(":")[1] === "บางปะอิน" || depots.split(":")[1] === "IR") {
-                // newRate = ticketData.Rate3;
-                setCostTrip((prev) => (prev === 0 ? (2000 + 1200) : prev + 200));
+        // if (orderData && depots) {
+        //     // ตรวจสอบค่า depot ที่เลือก (สมมุติว่า depots เป็น "1", "2", "3")
+        //     if (depots.split(":")[1] === "ลำปาง") {
+        //         // newRate = orderData.Rate1;
+        //         setCostTrip((prev) => (prev === 0 ? 750 : prev + 200));
+        //     } else if (depots.split(":")[1] === "พิจิตร") {
+        //         // newRate = orderData.Rate2;
+        //         setCostTrip((prev) => (prev === 0 ? 2000 : prev + 200));
+        //     } else if (depots.split(":")[1] === "สระบุรี" || depots.split(":")[1] === "บางปะอิน" || depots.split(":")[1] === "IR") {
+        //         // newRate = orderData.Rate3;
+        //         setCostTrip((prev) => (prev === 0 ? (2000 + 1200) : prev + 200));
+        //     }
+        // }
+
+        if (orderData && depots) {
+            const depotName = depots.split(":")[1];
+
+            const shortName = orderData.ShortName || "-";
+            let shouldAddExtra = false;
+
+            if (shortName === "-" || shortName.trim() === "") {
+                // ถ้าไม่มีค่า หรือเป็น "-"
+                shouldAddExtra = true;
+            } else if (!usedShortNames.has(shortName)) {
+                // ถ้ามีค่าและยังไม่เคยเจอ
+                shouldAddExtra = true;
+                setUsedShortNames((prev) => new Set([...prev, shortName])); // ✅ สำคัญ
+            }
+
+            if (depotName === "ลำปาง") {
+                setCostTrip((prev) => (prev === 0 ? 750 : prev + (shouldAddExtra ? 200 : 0)));
+            } else if (depotName === "พิจิตร") {
+                setCostTrip((prev) => (prev === 0 ? 2000 : prev + (shouldAddExtra ? 200 : 0)));
+            } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) {
+                setCostTrip((prev) => (prev === 0 ? (2000 + 1200) : prev + (shouldAddExtra ? 200 : 0)));
             }
         }
 
@@ -534,22 +563,24 @@ const InsertTrips = () => {
                 ...prev,
                 [newIndex]: {
                     TicketName: customerValue,
-                    CompanyName: ticketData.CompanyName || "-",
-                    Address: ticketData.Address || "-",
-                    Lat: ticketData.lat || "-",
-                    Lng: ticketData.lng || "-",
-                    CodeID: ticketData.CodeID || "-",
-                    CreditTime: ticketData.CreditTime || "-",
-                    Bill: ticketData.Bill || "-",
-                    Rate1: ticketData.Rate1,
-                    Rate2: ticketData.Rate2,
-                    Rate3: ticketData.Rate3,
+                    CompanyName: orderData.CompanyName || "-",
+                    Address: orderData.Address || "-",
+                    Lat: orderData.lat || "-",
+                    Lng: orderData.lng || "-",
+                    CodeID: orderData.CodeID || "-",
+                    CreditTime: orderData.CreditTime || "-",
+                    Bill: orderData.Bill || "-",
+                    Rate1: orderData.Rate1,
+                    Rate2: orderData.Rate2,
+                    Rate3: orderData.Rate3,
                     Trip: trip.length,
                     Date: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
                     Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
                     Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                     id: newIndex,
-                    CustomerType: ticketData.CustomerType,
+                    CustomerType: orderData.CustomerType,
+                    ShortName: orderData.ShortName || "-",
+                    LastName: orderData.LastName || "-",
                     Product: {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
                     }
@@ -671,6 +702,7 @@ const InsertTrips = () => {
         // สมมุติว่า ordersTickets มี 3 รายการ
         // เราคำนวณตามเงื่อนไข depot แต่ละครั้ง
         setSelling((prevOrders) => {
+            const seenShortNames = new Set();
             const updatedOrders = Object.keys(prevOrders).reduce((acc, key) => {
                 const order = prevOrders[key];
                 const ticketData = getCustomers().find(
@@ -697,13 +729,25 @@ const InsertTrips = () => {
 
             // หลังจากอัพเดต orders แล้ว คำนวณ costTrip รวม
             let cost = 0;
-            Object.keys(updatedOrders).forEach((key) => {
+            Object.keys(updatedOrders).forEach((key, index) => {
+                const order = updatedOrders[key];
+                const shortName = order.ShortName || "-";
+
+                let shouldAddExtra = false;
+
+                if (shortName === "-" || shortName.trim() === "") {
+                    shouldAddExtra = true;
+                } else if (!seenShortNames.has(shortName)) {
+                    shouldAddExtra = true;
+                    seenShortNames.add(shortName);
+                }
+
                 if (selectedDepot === "ลำปาง") {
-                    cost += cost === 0 ? 750 : 200;
+                    cost += index === 0 ? 750 : (shouldAddExtra ? 200 : 0);
                 } else if (selectedDepot === "พิจิตร") {
-                    cost += cost === 0 ? 2000 : 200;
-                } else if (selectedDepot === "สระบุรี" || selectedDepot === "บางปะอิน" || selectedDepot === "IR") {
-                    cost += cost === 0 ? 2000 + 1200 : 200;
+                    cost += index === 0 ? 2000 : (shouldAddExtra ? 200 : 0);
+                } else if (["สระบุรี", "บางปะอิน", "IR"].includes(selectedDepot)) {
+                    cost += index === 0 ? (2000 + 1200) : (shouldAddExtra ? 200 : 0);
                 }
             });
             setCostTrip(cost);
@@ -773,7 +817,7 @@ const InsertTrips = () => {
 
             setWeightA({ G91: G91.toFixed(2), G95: G95.toFixed(2), B7: B7.toFixed(2), B95: B95.toFixed(2), E20: E20.toFixed(2), PWD: PWD.toFixed(2) });
             setWeightL(parseFloat(G91) + parseFloat(G95) + parseFloat(B95) + parseFloat(E20));
-            setWeightH(parseFloat(B7)+parseFloat(PWD));
+            setWeightH(parseFloat(B7) + parseFloat(PWD));
 
             // อัปเดตค่า State ของแต่ละ productName
             setVolumeG95(totalG95);
@@ -898,9 +942,9 @@ const InsertTrips = () => {
 
     const handleDeleteCustomer = (indexToDelete) => {
         setSelling((prev) => {
+            // 1. ลบ order ตาม indexToDelete และ re-index ใหม่
             const newOrder = {};
             let newIndex = 0;
-
             Object.keys(prev).forEach((key) => {
                 if (parseInt(key) !== indexToDelete) {
                     newOrder[newIndex] = { ...prev[key], id: newIndex };
@@ -908,15 +952,57 @@ const InsertTrips = () => {
                 }
             });
 
-            // คำนวณค่า Volume ใหม่จาก newOrder (ข้อมูลหลังจากลบ)
-            let totalG95 = 0;
-            let totalG91 = 0;
-            let totalB7 = 0;
-            let totalB95 = 0;
-            let totalE20 = 0;
-            let totalPWD = 0;
+            // 2. อัปเดต Rate และ shortName พร้อมคำนวณ costTrip ใหม่
+            const seenShortNames = new Set();
+            const updatedOrders = {};
+            let cost = 0;
 
-            Object.values(newOrder).forEach((ticket) => {
+            Object.keys(newOrder).forEach((key, index) => {
+                const order = newOrder[key];
+                const ticketData = getCustomers().find(
+                    (item) => `${item.id}:${item.Name}` === order.TicketName
+                );
+
+                const updatedOrder = {
+                    ...order,
+                    Rate1: ticketData?.Rate1,
+                    Rate2: ticketData?.Rate2,
+                    Rate3: ticketData?.Rate3,
+                };
+
+                updatedOrders[key] = updatedOrder;
+
+                const shortName = updatedOrder.ShortName || "-";
+
+                let shouldAddExtra = false;
+                if (shortName === "-" || shortName.trim() === "") {
+                    shouldAddExtra = true;
+                } else if (!seenShortNames.has(shortName)) {
+                    shouldAddExtra = true;
+                    seenShortNames.add(shortName);
+                }
+
+                if (depots) {
+                    const depotName = depots.split(":")[1]; // สมมุติรูปแบบ depots = "xx:ลำปาง" เป็นต้น
+                    if (depotName === "ลำปาง") {
+                        cost += index === 0 ? 750 : (shouldAddExtra ? 200 : 0);
+                    } else if (depotName === "พิจิตร") {
+                        cost += index === 0 ? 2000 : (shouldAddExtra ? 200 : 0);
+                    } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) {
+                        cost += index === 0 ? (2000 + 1200) : (shouldAddExtra ? 200 : 0);
+                    }
+                }
+            });
+
+            // 3. คำนวณ Volume จาก updatedOrders
+            let totalG95 = 0,
+                totalG91 = 0,
+                totalB7 = 0,
+                totalB95 = 0,
+                totalE20 = 0,
+                totalPWD = 0;
+
+            Object.values(updatedOrders).forEach((ticket) => {
                 if (ticket.Product) {
                     totalG95 += ticket.Product?.G95?.Volume || 0;
                     totalG91 += ticket.Product?.G91?.Volume || 0;
@@ -927,51 +1013,38 @@ const InsertTrips = () => {
                 }
             });
 
-            // อัปเดตค่า volumeT ใหม่
             setVolumeS({
                 G91: totalG91,
                 G95: totalG95,
                 B7: totalB7,
                 B95: totalB95,
                 E20: totalE20,
-                PWD: totalPWD
+                PWD: totalPWD,
             });
 
-            return newOrder;
+            // 4. อัพเดตค่า costTrip ใหม่
+            setCostTrip(cost);
+
+            // 5. คืนค่า updatedOrders เพื่ออัพเดต state
+            return updatedOrders;
         });
 
+        // อัพเดต orderTrip เหมือนเดิม
         setOrderTrip((prev) => {
-            // แปลง object เป็น array ของ entries
             const entries = Object.entries(prev);
-
-            // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น Order1)
-            const filtered = entries.filter(([key]) => key !== `Order${parseInt(indexToDelete, 10) + 1}`);
-
-            // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก Order1
+            const filtered = entries.filter(
+                ([key]) => key !== `Order${parseInt(indexToDelete, 10) + 1}`
+            );
             const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
                 acc[`Order${index + 1}`] = value;
                 return acc;
             }, {});
-
             return newOrderTrip;
         });
-
-
-        // ลด costTrip -200 เมื่อมีการยกเลิก (กดปุ่ม "ยกเลิก")
-        if (depots) {
-            // ตรวจสอบค่า depot ที่เลือก
-            const depotName = depots.split(":")[1]; // สมมุติรูปแบบ depots = "xx:ลำปาง" เป็นต้น
-            if (depotName === "ลำปาง") {
-                setCostTrip((prev) => (prev === 750 ? 0 : prev - 200));
-            } else if (depotName === "พิจิตร") {
-                setCostTrip((prev) => (prev === 2000 ? 0 : prev - 200));
-            } else if (depotName === "สระบุรี" || depotName === "บางปะอิน" || depotName === "IR") {
-                setCostTrip((prev) => (prev === 3200 ? 0 : prev - 200));
-            }
-        }
     };
 
-    console.log("Registration s : ",registration);
+
+    console.log("Registration s : ", registration);
     const handleSaveAsImage = () => {
         const Trips = {
             Tickets: Object.values(ordersTickets),
@@ -1249,21 +1322,22 @@ const InsertTrips = () => {
         if (!selectedTruck) return [];
 
         const tickets = [
-  { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },
+            { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },
 
-  ...[...ticketsA]
-    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-    .map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
+            ...[...ticketsA]
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
 
-  ...[...ticketsPS]
-    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-    .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+            ...[...ticketsPS]
+                .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
 
-  ...[...ticketsT]
-    .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-    .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
-];
+            ...[...ticketsT]
+                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+        ];
 
 
         return tickets.filter((item) => item.id || item.TicketsCode);
@@ -1280,8 +1354,9 @@ const InsertTrips = () => {
 
         const customers = [
             ...[...ticketsPS]
-            .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-            .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+                .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
 
             ...[...ticketsT]
                 .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
@@ -1290,11 +1365,11 @@ const InsertTrips = () => {
 
             ...(selectedTruck.type === "รถใหญ่"
                 ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ")
-                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-                .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
+                    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                    .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
                 : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ")
-                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-                .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
+                    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                    .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
             ),
         ];
 

@@ -37,10 +37,11 @@ import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
 import { IconButtonError, IconButtonSuccess, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
-import CancelIcon from '@mui/icons-material/Cancel';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
 import AddCardIcon from '@mui/icons-material/AddCard';
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
@@ -304,10 +305,10 @@ const BankDetail = () => {
                                                         </TableCell>
                                                         <TableCell sx={{ textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                             <IconButton onClick={() => setUpdateId(null)} color="error">
-                                                                <AddBoxIcon />
+                                                                <CancelIcon />
                                                             </IconButton>
                                                             <IconButton onClick={handleSaveClick} color="success">
-                                                                <AddBoxIcon />
+                                                                <SaveIcon />
                                                             </IconButton>
                                                         </TableCell>
                                                     </>

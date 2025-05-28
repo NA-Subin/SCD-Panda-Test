@@ -50,6 +50,8 @@ const TicketsTransport = () => {
     const transport = transports.filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ");
     const gasStation = gasStations.filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ");
 
+    console.log("gasStation : ",gasStation);
+
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -104,6 +106,7 @@ const TicketsTransport = () => {
     // }, []);
 
     // State สำหรับเก็บค่าแก้ไข Rate
+    const [ticketCheckedC, setTicketCheckedC] = useState(true);
     const [rate1Edit, setRate1Edit] = useState("");
     const [rate2Edit, setRate2Edit] = useState("");
     const [rate3Edit, setRate3Edit] = useState("");
@@ -112,10 +115,16 @@ const TicketsTransport = () => {
     const [rowIndex, setRowIndex] = useState(null);
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (index, rowId, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname) => {
+    const handleSetting = (index, rowId, statusCompany, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname) => {
         setRowIndex(index + 1);
         setSetting(true);
         setSelectedRowId(rowId);
+
+        if (statusCompany === "อยู่บริษัทในเครือ") {
+            setTicketCheckedC(true);
+        } else {
+            setTicketCheckedC(false);
+        }
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
         const hasTicket = status.includes("ตั๋ว");
         const hasRecipient = status.includes("ผู้รับ");
@@ -300,7 +309,7 @@ const TicketsTransport = () => {
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
                                             สถานะ
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 50 : 160, textAlign: "center" }}>
+                                        <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 50 : 100, textAlign: "center" }}>
 
                                         </TablecellHeader>
                                         <TablecellHeader sx={{ position: 'sticky', right: 0, width: !setting ? 20 : 60, textAlign: "center" }}>
@@ -319,7 +328,7 @@ const TicketsTransport = () => {
                                                 <TableRow key={index} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                            {index + 1}
+                                                            {index + page * rowsPerPage + 1}
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
@@ -560,39 +569,41 @@ const TicketsTransport = () => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name)}
+                                                                    onClick={() => handleSetting(index, row.id,row.StatusCompany, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
                                                                 :
-                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                <Box sx={{ paddingLeft: 1, paddingRight: 1 }}>
                                                                     <Button
                                                                         variant="contained"
-                                                                        color="error"
-                                                                        endIcon={<CancelIcon />}
-                                                                        size="small"
-                                                                        sx={{ height: "25px", marginRight: 1 }}
-                                                                        onClick={handleCancel}
-                                                                    >
-                                                                        ยกเลิก
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="contained"
+                                                                        fullWidth
                                                                         color="success"
                                                                         endIcon={<SaveIcon />}
                                                                         size="small"
-                                                                        sx={{ height: "25px" }}
+                                                                        sx={{ height: "25px", marginBottom: 0.5 }}
                                                                         onClick={handleSave}
                                                                     >
                                                                         บันทึก
                                                                     </Button>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        fullWidth
+                                                                        color="error"
+                                                                        endIcon={<CancelIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleCancel}
+                                                                    >
+                                                                        ยกเลิก
+                                                                    </Button>
 
                                                                     {/* <IconButton color="error" onClick={handleCancel}>
-                                                                                                                        <CancelIcon />
-                                                                                                                    </IconButton>
-                                                                                                                    <IconButton color="success" onClick={handleSave} >
-                                                                                                                        <SaveIcon />
-                                                                                                                    </IconButton> */}
+                                                                    <CancelIcon />
+                                                                </IconButton>
+                                                                <IconButton color="success" onClick={handleSave} >
+                                                                    <SaveIcon />
+                                                                </IconButton> */}
                                                                 </Box>
                                                         }
                                                     </TableCell>
@@ -656,8 +667,8 @@ const TicketsTransport = () => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        gasStation.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                                            <TicketsGasStation key={row.id} row={row} index={index} />
+                                        gasStation.sort((a, b) => a.ShortName.localeCompare(b.ShortName)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            <TicketsGasStation key={row.id} row={row} index={index + page * rowsPerPage} />
                                         ))
                                     }
                                 </TableBody>

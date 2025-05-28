@@ -242,7 +242,7 @@ const Tickets = () => {
                                         <TableRow key={row.id}>
                                             <TableCell sx={{ textAlign: "center", height: "30px" }}>
                                                 <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                    {index+1}
+                                                    {index + page * rowsPerPage + 1}
                                                 </Typography>
                                             </TableCell>
                                             {/* <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Name}</Typography> */}

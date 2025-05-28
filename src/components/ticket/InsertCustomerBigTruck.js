@@ -80,8 +80,7 @@ const InsertCustomerBigTruck = (props) => {
     const [creditTime, setCreditTime] = React.useState("");
     const [checked1, setChecked1] = React.useState(show);
     const [checked2, setChecked2] = React.useState(show);
-    const [ticketChecked1, setTicketChecked1] = React.useState(true);
-    const [ticketChecked2, setTicketChecked2] = React.useState(true);
+    const [ticketChecked, setTicketChecked] = React.useState(true);
 
     const getTicket = async () => {
         database.ref("/customers/bigtruck").on("value", (snapshot) => {
@@ -108,7 +107,7 @@ const InsertCustomerBigTruck = (props) => {
                 id: ticket + 1,
                 Name: ticketsName,
                 TicketsName: ticketsName,
-                Status: ticketChecked1 === false && ticketChecked2 === true ? "ตั๋ว" : ticketChecked1 === true && ticketChecked2 === false ? "ผู้รับ" : ticketChecked1 === false && ticketChecked2 === false ? "ตั๋ว/ผู้รับ" : "-",
+                Status: ticketChecked === true ? "ลูกค้าประจำ" : "ลูกค้าไม่ประจำ",
                 Rate1: rate1,
                 Rate2: rate2,
                 Rate3: rate3,
@@ -220,22 +219,22 @@ const InsertCustomerBigTruck = (props) => {
                                     <FormControlLabel
                                         control={
                                             <Checkbox
-                                                checked={ticketChecked1 === false ? true : false}
-                                                onChange={() => setTicketChecked1(!ticketChecked1)}
+                                                checked={ticketChecked === true ? true : false}
+                                                onChange={() => setTicketChecked(true)}
                                                 size="small"
                                             />
                                         }
-                                        label="ตั๋ว"
+                                        label="ลูกค้าประจำ"
                                     />
                                     <FormControlLabel
                                         control={
                                             <Checkbox
-                                                checked={ticketChecked2 === false ? true : false}
-                                                onChange={() => setTicketChecked2(!ticketChecked2)}
+                                                checked={ticketChecked === false ? true : false}
+                                                onChange={() => setTicketChecked(false)}
                                                 size="small"
                                             />
                                         }
-                                        label="ผู้รับ"
+                                        label="ลูกค้าไม่ประจำ"
                                     />
                                 </Grid>
                             </Grid>

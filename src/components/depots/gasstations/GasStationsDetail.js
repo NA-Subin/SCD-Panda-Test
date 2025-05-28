@@ -38,6 +38,7 @@ import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { database } from "../../../server/firebase";
 import UpdateGasStations from "./UpdateGasStations";
+import { useGasStationData } from "../../../server/provider/GasStationProvider";
 
 const GasStationsDetail = (props) => {
     const { gasStation } = props;
@@ -139,191 +140,259 @@ const GasStationsDetail = (props) => {
     const [lat, setLat] = React.useState("");
     const [lng, setLng] = React.useState("");
 
-    const [gasStationOil, setGasStationsOil] = useState([]);
-    const [stock, setStock] = React.useState([]);
-    const [stocks, setStocks] = React.useState([]);
-    const getStockOil = async () => {
-        const gasStation = [];
-        database.ref("/depot/gasStations").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                dataList.push({ id, ...datas[id] });
-                gasStation.push({ id, ...datas[id] });
-            }
-            setGasStationsOil(dataList);
-        });
+    // const [gasStationOil, setGasStationsOil] = useState([]);
+    // const [stock, setStock] = React.useState([]);
+    // const [stocks, setStocks] = React.useState([]);
 
-        database.ref("/depot/stock").on("value", (snapshot) => {
-            const datas = snapshot.val();
-            const dataList = [];
-            for (let id in datas) {
-                dataList.push({ id, ...datas[id] });
-            }
-            setStocks(dataList);
+    const { gasstationDetail, stockDetail } = useGasStationData();
+    const gasStationOil = Object.values(gasstationDetail || {});
+    const stocks = Object.values(stockDetail || {});
 
-            const matchedStocks = dataList.filter((stock) =>
-                gasStation.some((station) => station.Stock === stock.Name)
-            );
-            setStock(matchedStocks);
+    const stock = stocks.filter((stock) =>
+        gasStationOil.some((station) => station.Stock === stock.Name)
+    );
+    const [isDataUpdated, setIsDataUpdated] = useState(false);
+
+    // ฟังก์ชันรวมค่าของ DownHole
+    const calculateDownHole = (list, targetStock, day) => {
+        const result = {};
+        list.forEach(row => {
+            if (targetStock === "ทั้งหมด" || row.Stock === targetStock) {
+                const currentReport = row.Report?.[day];
+                if (currentReport) {
+                    Object.values(currentReport).forEach(reportItem => {
+                        const name = reportItem?.ProductName || "";
+                        const downHole = parseFloat(reportItem?.DownHole || 0);
+                        result[name] = (result[name] || 0) + downHole;
+                    });
+                }
+            }
         });
+        return result;
     };
 
     useEffect(() => {
-        getStockOil();
-    }, []);
+        const day = dayjs(selectedDate).format("DD-MM-YYYY");
 
-    const matchCount = stocks.reduce((count, stock) => {
-        return count + gasStationOil.filter((row) => stock.Name === row.Stock && row.Stock === open).length;
-    }, 0);
+        const valuesDownHole = calculateDownHole(values, checkStock, day);
+        const gasStationDownHole = calculateDownHole(gasStationOil, checkStock, day);
 
-    console.log("ปั้มทั้งหมด" + matchCount);
+        const sum = obj => Object.values(obj).reduce((total, val) => total + val, 0);
 
-    console.log(" Gas Station Oil : ", gasStationOil);
-    console.log(" Gas Station Oil edit : ", values);
+        const totalValues = sum(valuesDownHole);
+        const totalGas = sum(gasStationDownHole);
 
-    const [isDataUpdated, setIsDataUpdated] = useState(false);
-    const [downHoles, setDownHoles] = useState(0);
+        console.log("1.show Down Hole :", valuesDownHole);
+        console.log("2.show Down Hole :", gasStationDownHole);
+        console.log("1.Total Down Hole :", totalValues);
+        console.log("2.Total Down Hole :", totalGas);
 
-    React.useEffect(() => {
-        if (checkStock === "ทั้งหมด") {
-            let total = 0;
-            let downHoleValues = {}; // ตัวแปรเก็บค่ารวมของ DownHole
-            let downHoleGas = {}; // ตัวแปรเก็บค่ารวมของ DownHole
-            stocks.map((stock, index) => {
-                let day = dayjs(selectedDate).format("DD-MM-YYYY");
-            console.log("Show Values : ", values);
+        setIsDataUpdated(totalValues !== totalGas && totalGas !== 0);
+    }, [values, gasStationOil, selectedDate, checkStock]);
 
-            values.forEach((row) => {
-                if (stock.Name === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
-                    const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
-                    const yesterdayData = row?.Report?.[yesterdayDate];
+    const getDownHoleByStock = (stockName) => {
+        let downHole = {};
+        let day = dayjs(selectedDate).format("DD-MM-YYYY");
 
-                    let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
-                    if (currentReport) {
-                        Object.values(currentReport).forEach(reportItem => {
-                            // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
-
-                            let productName = reportItem?.ProductName || "";
-                            console.log("DownHole : ", parseFloat(reportItem?.DownHole));
-
-                            if (!downHoleValues[productName]) {
-                                downHoleValues[productName] = 0;
-                            }
-                            downHoleValues[productName] += parseFloat(reportItem?.DownHole);
-                        });
-                    }
+        values.forEach((row) => {
+            if (stockName === "ทั้งหมด" || row.Stock === stockName) {
+                const currentReport = row.Report?.[day];
+                if (currentReport) {
+                    Object.values(currentReport).forEach(reportItem => {
+                        const productName = reportItem?.ProductName || "";
+                        const downHoleValue = parseFloat(reportItem?.DownHole) || 0;
+                        downHole[productName] = (downHole[productName] || 0) + downHoleValue;
+                    });
                 }
-            });
-
-            gasStationOil.forEach((row) => {
-                if (stock.Name === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
-                    const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
-                    const yesterdayData = row?.Report?.[yesterdayDate];
-
-                    let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
-                    if (currentReport) {
-                        Object.values(currentReport).forEach(reportItem => {
-                            // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
-
-                            let productName = reportItem?.ProductName || "";
-                            console.log("DownHole : ", parseFloat(reportItem?.DownHole));
-
-                            if (!downHoleGas[productName]) {
-                                downHoleGas[productName] = 0;
-                            }
-                            downHoleGas[productName] += (parseFloat(reportItem?.DownHole) || 0);
-                        });
-                    }
-                }
-            });
-
-        })
-
-            const totalDownHoleValues = Object.values(downHoleValues).reduce((total, value) => total + value, 0);
-            const totalDownHoleGas = Object.values(downHoleGas).reduce((total, value) => total + value, 0);
-
-            console.log("1.show Down Hole : ",downHoleValues);
-            console.log("2.show Down Hole : ",downHoleGas);
-            console.log("1.Total Down Hole : ", totalDownHoleValues);
-            console.log("2.Total Down Hole : ", totalDownHoleGas);
-
-            //ถ้ามีการเปลี่ยนแปลง อัปเดตสถานะ
-            if (totalDownHoleValues !== totalDownHoleGas && totalDownHoleGas !== 0 ) {
-                setIsDataUpdated(true);
-            }else{
-                setIsDataUpdated(false);
             }
+        });
 
-        } else {
-            let total = 0;
-            let downHoleValues = {}; // ตัวแปรเก็บค่ารวมของ DownHole
-            let downHoleGas = {}; // ตัวแปรเก็บค่ารวมของ DownHole
-            let matchCount = 0; // ตัวแปรนับจำนวน match
-            let isUpdated = false; // ตัวแปรเก็บสถานะการเปลี่ยนแปลง
-            let day = dayjs(selectedDate).format("DD-MM-YYYY");
-            console.log("Show Values : ", values);
+        return downHole;
+    };
 
-            values.forEach((row) => {
-                if (checkStock === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
-                    const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
-                    const yesterdayData = row?.Report?.[yesterdayDate];
 
-                    let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
-                    if (currentReport) {
-                        Object.values(currentReport).forEach(reportItem => {
-                            // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+    // const getStockOil = async () => {
+    //     const gasStation = [];
+    //     database.ref("/depot/gasStations").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         const dataList = [];
+    //         for (let id in datas) {
+    //             dataList.push({ id, ...datas[id] });
+    //             gasStation.push({ id, ...datas[id] });
+    //         }
+    //         setGasStationsOil(dataList);
+    //     });
 
-                            let productName = reportItem?.ProductName || "";
-                            console.log("DownHole : ", parseFloat(reportItem?.DownHole));
+    //     database.ref("/depot/stock").on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         const dataList = [];
+    //         for (let id in datas) {
+    //             dataList.push({ id, ...datas[id] });
+    //         }
+    //         setStocks(dataList);
 
-                            if (!downHoleValues[productName]) {
-                                downHoleValues[productName] = 0;
-                            }
-                            downHoleValues[productName] += parseFloat(reportItem?.DownHole);
-                        });
-                    }
-                }
-            });
+    //         const matchedStocks = dataList.filter((stock) =>
+    //             gasStation.some((station) => station.Stock === stock.Name)
+    //         );
+    //         setStock(matchedStocks);
+    //     });
+    // };
 
-            gasStationOil.forEach((row) => {
-                if (checkStock === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
-                    const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
-                    const yesterdayData = row?.Report?.[yesterdayDate];
+    // useEffect(() => {
+    //     getStockOil();
+    // }, []);
 
-                    let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
-                    if (currentReport) {
-                        Object.values(currentReport).forEach(reportItem => {
-                            // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+    // const matchCount = stocks.reduce((count, stock) => {
+    //     return count + gasStationOil.filter((row) => stock.Name === row.Stock && row.Stock === open).length;
+    // }, 0);
 
-                            let productName = reportItem?.ProductName || "";
-                            console.log("DownHole : ", parseFloat(reportItem?.DownHole));
+    // console.log("ปั้มทั้งหมด" + matchCount);
 
-                            if (!downHoleGas[productName]) {
-                                downHoleGas[productName] = 0;
-                            }
-                            downHoleGas[productName] += (parseFloat(reportItem?.DownHole) || 0);
-                        });
-                    }
-                }
-            });
+    // console.log(" Gas Station Oil : ", gasStationOil);
+    // console.log(" Gas Station Oil edit : ", values);
 
-            const totalDownHoleValues = Object.values(downHoleValues).reduce((total, value) => total + value, 0);
-            const totalDownHoleGas = Object.values(downHoleGas).reduce((total, value) => total + value, 0);
+    // const [isDataUpdated, setIsDataUpdated] = useState(false);
+    // const [downHoles, setDownHoles] = useState(0);
 
-            console.log("1.show Down Hole : ",downHoleValues);
-            console.log("2.show Down Hole : ",downHoleGas);
-            console.log("1.Total Down Hole : ", totalDownHoleValues);
-            console.log("2.Total Down Hole : ", totalDownHoleGas);
+    // React.useEffect(() => {
+    //     if (checkStock === "ทั้งหมด") {
+    //         let total = 0;
+    //         let downHoleValues = {}; // ตัวแปรเก็บค่ารวมของ DownHole
+    //         let downHoleGas = {}; // ตัวแปรเก็บค่ารวมของ DownHole
+    //         stocks.map((stock, index) => {
+    //             let day = dayjs(selectedDate).format("DD-MM-YYYY");
+    //             console.log("Show Values : ", values);
 
-            //ถ้ามีการเปลี่ยนแปลง อัปเดตสถานะ
-            if (totalDownHoleValues !== totalDownHoleGas && totalDownHoleGas !== 0 ) {
-                setIsDataUpdated(true);
-            }else{
-                setIsDataUpdated(false);
-            }
-        }
-    }, [values, gasStationOil, selectedDate, checkStock, stocks]);
+    //             values.forEach((row) => {
+    //                 if (stock.Name === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
+    //                     const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+    //                     const yesterdayData = row?.Report?.[yesterdayDate];
+
+    //                     let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
+    //                     if (currentReport) {
+    //                         Object.values(currentReport).forEach(reportItem => {
+    //                             // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+
+    //                             let productName = reportItem?.ProductName || "";
+    //                             console.log("DownHole : ", parseFloat(reportItem?.DownHole));
+
+    //                             if (!downHoleValues[productName]) {
+    //                                 downHoleValues[productName] = 0;
+    //                             }
+    //                             downHoleValues[productName] += parseFloat(reportItem?.DownHole);
+    //                         });
+    //                     }
+    //                 }
+    //             });
+
+    //             gasStationOil.forEach((row) => {
+    //                 if (stock.Name === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
+    //                     const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+    //                     const yesterdayData = row?.Report?.[yesterdayDate];
+
+    //                     let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
+    //                     if (currentReport) {
+    //                         Object.values(currentReport).forEach(reportItem => {
+    //                             // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+
+    //                             let productName = reportItem?.ProductName || "";
+    //                             console.log("DownHole : ", parseFloat(reportItem?.DownHole));
+
+    //                             if (!downHoleGas[productName]) {
+    //                                 downHoleGas[productName] = 0;
+    //                             }
+    //                             downHoleGas[productName] += (parseFloat(reportItem?.DownHole) || 0);
+    //                         });
+    //                     }
+    //                 }
+    //             });
+
+    //         })
+
+    //         const totalDownHoleValues = Object.values(downHoleValues).reduce((total, value) => total + value, 0);
+    //         const totalDownHoleGas = Object.values(downHoleGas).reduce((total, value) => total + value, 0);
+
+    //         console.log("1.show Down Hole : ", downHoleValues);
+    //         console.log("2.show Down Hole : ", downHoleGas);
+    //         console.log("1.Total Down Hole : ", totalDownHoleValues);
+    //         console.log("2.Total Down Hole : ", totalDownHoleGas);
+
+    //         //ถ้ามีการเปลี่ยนแปลง อัปเดตสถานะ
+    //         if (totalDownHoleValues !== totalDownHoleGas && totalDownHoleGas !== 0) {
+    //             setIsDataUpdated(true);
+    //         } else {
+    //             setIsDataUpdated(false);
+    //         }
+
+    //     } else {
+    //         let total = 0;
+    //         let downHoleValues = {}; // ตัวแปรเก็บค่ารวมของ DownHole
+    //         let downHoleGas = {}; // ตัวแปรเก็บค่ารวมของ DownHole
+    //         let matchCount = 0; // ตัวแปรนับจำนวน match
+    //         let isUpdated = false; // ตัวแปรเก็บสถานะการเปลี่ยนแปลง
+    //         let day = dayjs(selectedDate).format("DD-MM-YYYY");
+    //         console.log("Show Values : ", values);
+
+    //         values.forEach((row) => {
+    //             if (checkStock === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
+    //                 const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+    //                 const yesterdayData = row?.Report?.[yesterdayDate];
+
+    //                 let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
+    //                 if (currentReport) {
+    //                     Object.values(currentReport).forEach(reportItem => {
+    //                         // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+
+    //                         let productName = reportItem?.ProductName || "";
+    //                         console.log("DownHole : ", parseFloat(reportItem?.DownHole));
+
+    //                         if (!downHoleValues[productName]) {
+    //                             downHoleValues[productName] = 0;
+    //                         }
+    //                         downHoleValues[productName] += parseFloat(reportItem?.DownHole);
+    //                     });
+    //                 }
+    //             }
+    //         });
+
+    //         gasStationOil.forEach((row) => {
+    //             if (checkStock === row.Stock) {  // ตรวจสอบว่าชื่อ Stock ตรงกัน
+    //                 const yesterdayDate = dayjs(selectedDate).subtract(1, "day").format("DD-MM-YYYY");
+    //                 const yesterdayData = row?.Report?.[yesterdayDate];
+
+    //                 let currentReport = row.Report?.[day]; // ดึงข้อมูลตามวันที่ที่เลือก
+    //                 if (currentReport) {
+    //                     Object.values(currentReport).forEach(reportItem => {
+    //                         // const yesterdayEntry = Object.values(yesterdayData || {}).find(entry => entry?.ProductName === reportItem?.ProductName) || { OilBalance: 0 };
+
+    //                         let productName = reportItem?.ProductName || "";
+    //                         console.log("DownHole : ", parseFloat(reportItem?.DownHole));
+
+    //                         if (!downHoleGas[productName]) {
+    //                             downHoleGas[productName] = 0;
+    //                         }
+    //                         downHoleGas[productName] += (parseFloat(reportItem?.DownHole) || 0);
+    //                     });
+    //                 }
+    //             }
+    //         });
+
+    //         const totalDownHoleValues = Object.values(downHoleValues).reduce((total, value) => total + value, 0);
+    //         const totalDownHoleGas = Object.values(downHoleGas).reduce((total, value) => total + value, 0);
+
+    //         console.log("1.show Down Hole : ", downHoleValues);
+    //         console.log("2.show Down Hole : ", downHoleGas);
+    //         console.log("1.Total Down Hole : ", totalDownHoleValues);
+    //         console.log("2.Total Down Hole : ", totalDownHoleGas);
+
+    //         //ถ้ามีการเปลี่ยนแปลง อัปเดตสถานะ
+    //         if (totalDownHoleValues !== totalDownHoleGas && totalDownHoleGas !== 0) {
+    //             setIsDataUpdated(true);
+    //         } else {
+    //             setIsDataUpdated(false);
+    //         }
+    //     }
+    // }, [values, gasStationOil, selectedDate, checkStock, stocks]);
 
     // ใช้ useEffect เพื่อตรวจสอบค่า values และอัปเดต isDataUpdated
     // React.useEffect(() => {
@@ -366,116 +435,6 @@ const GasStationsDetail = (props) => {
 
     //     console.log("🔄 ค่า isDataUpdated:", isUpdated);
     // }, [values, gasStationOil, selectedDate]);
-
-
-
-
-    // gasStation: {
-    //     0: {
-    //         id: 1,
-    //         Name: "แม่โจ้-เฟิร์สโปร",
-    //         StockName: "แม่โจ้",
-    //         Report: {
-    //             12-03-2025: {
-    //                 0: {
-    //                     ProductName: "G95",
-    //                         DownHole: 2000
-    //                 },
-    //                 1: {
-    //                     ProductName: "G91",
-    //                         DownHole: 3000
-    //                 },
-    //                 2: {
-    //                     ProductName: "B7",
-    //                         DownHole: 5000
-    //                 }
-    //             },
-    //             13-03-2025: {
-    //                 0: {
-    //                     ProductName: "G95",
-    //                         DownHole: 3000
-    //                 },
-    //                 1: {
-    //                     ProductName: "G91",
-    //                         DownHole: 5000
-    //                 },
-    //                 2: {
-    //                     ProductName: "B7",
-    //                         DownHole: 6000
-    //                 }
-    //             },
-    //         }
-    //     },
-    //     2: {
-    //         id: 2,
-    //         Name: "สันกลาง-เฟิร์สโปร",
-    //         StockName: "สันกลาง",
-    //         Report: {
-    //             12-03-2025: {
-    //                 0: {
-    //                     ProductName: "G95",
-    //                         DownHole: 3000
-    //                 },
-    //                 1: {
-    //                     ProductName: "B7",
-    //                         DownHole: 3000
-    //                 }
-    //             },
-    //             13-03-2025: {
-    //                 0: {
-    //                     ProductName: "G95",
-    //                         DownHole: 2000
-    //                 },
-    //                 1: {
-    //                     ProductName: "B7",
-    //                         DownHole: 4000
-    //                 }
-    //             },
-    //         }
-    //     },
-    //     3: {
-    //         id: 3,
-    //         Name: "แม่โจ้-นามอส",
-    //         StockName: "แม่โจ้",
-    //         Report: {
-    //             12-03-2025: {
-    //                 0: {
-    //                     ProductName: "G95",
-    //                         DownHole: 3000
-    //                 },
-    //                 1: {
-    //                     ProductName: "G91",
-    //                         DownHole: 3000
-    //                 },
-    //                 2: {
-    //                     ProductName: "B7",
-    //                         DownHole: 2000
-    //                 }
-    //             },
-    //             13-03-2025: {
-    //                 0: {
-    //                     ProductName: "G95",
-    //                         DownHole: 2000
-    //                 },
-    //                 1: {
-    //                     ProductName: "G91",
-    //                         DownHole: 2000
-    //                 },
-    //                 2: {
-    //                     ProductName: "B7",
-    //                         DownHole: 4000
-    //                 }
-    //             },
-    //         }
-    //     }
-    // }
-
-    // ถ้าเกิดเป็น StockName: "แม่โจ้" และวันที่ 12-03-2025  ข้อมูลที่บันทึกเข้าไปใน downHole จะได้ดังนี้
-    // downHole :{
-    //     G95: 3000+2000
-    //     G91: 3000+3000
-    //     B7: 2000+5000
-    // }
 
     return (
         <React.Fragment>
@@ -554,14 +513,59 @@ const GasStationsDetail = (props) => {
                                 />
                             ))}
                             {isDataUpdated && (
-                            <Typography color="error" sx={{ mt: 1 }}>
-                                ⚠️ กรุณาบันทึกข้อมูลก่อนเปลี่ยนสาขา
-                            </Typography>
-                        )}
+                                <Typography color="error" sx={{ mt: 1 }}>
+                                    ⚠️ กรุณาบันทึกข้อมูลก่อนเปลี่ยนสาขา
+                                </Typography>
+                            )}
                         </FormGroup>
                     </Grid>
                     <Grid item xs={12}>
-                        {
+                        {(checkStock === "ทั้งหมด" ? stocks : [stocks.find(s => s.Name === checkStock)]).map((stock, index) => {
+                            if (!stock) return null;
+
+                            const downHole = getDownHoleByStock(stock.Name);
+                            let matchCount = 0;
+
+                            return (
+                                <Paper
+                                    sx={{
+                                        p: 2,
+                                        mb: 2,
+                                        border: '2px solid lightgray',
+                                        borderRadius: 3,
+                                        boxShadow: 1,
+                                        width:
+                                            windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) :
+                                                windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275),
+                                        overflowY: 'auto',
+                                    }}
+                                    key={stock.id || index}
+                                >
+                                    {gasStationOil.map((row) => {
+                                        if (row.Stock === stock.Name) {
+                                            matchCount++;
+                                            return (
+                                                <UpdateGasStations
+                                                    key={row.id}
+                                                    gasStation={row}
+                                                    gasStationOil={gasStationOil}
+                                                    selectedDate={selectedDate}
+                                                    count={matchCount}
+                                                    checkStock={checkStock}
+                                                    Squeeze={matchCount === 1 ? 800 : 0}
+                                                    currentReport={row.Report}
+                                                    valueDownHole={downHole}
+                                                    onSendBack={handleSendBack}
+                                                />
+                                            );
+                                        }
+                                        return null;
+                                    })}
+                                </Paper>
+                            );
+                        })}
+
+                        {/* {
                             checkStock === "ทั้งหมด" ?
                                 stocks.map((stock, index) => {
                                     let downHole = {}; // ตัวแปรเก็บค่ารวมของ DownHole
@@ -722,7 +726,7 @@ const GasStationsDetail = (props) => {
                                     }
                                     )()}
                                 </Paper>
-                        }
+                        } */}
                     </Grid>
                 </Grid>
             </Box>

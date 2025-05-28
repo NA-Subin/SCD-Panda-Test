@@ -62,6 +62,7 @@ const InsertTicketsGasStations = (props) => {
         }, []);
 
     const [name, setName] = React.useState("");
+    const [shortName, setShortName] = React.useState("");
     const [no, setNo] = React.useState("");
     const [village, setVillage] = React.useState("");
     const [subDistrict, setSubDistrict] = React.useState("");
@@ -119,7 +120,9 @@ const InsertTicketsGasStations = (props) => {
             .child(ticket)
             .update({
                 id: ticket + 1,
-                Name: name,
+                Name: shortName+name,
+                ShortName: shortName,
+                LastName: name,
                 TicketsName: ticketsName,
                 Status: "ตั๋ว/ผู้รับ",
                 Rate1: rate1,
@@ -196,7 +199,14 @@ const InsertTicketsGasStations = (props) => {
                             <Grid container spacing={2}>
                                 <Grid item md={12} xs={12} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1,marginLeft: {md: 0, xs: 8} }} gutterBottom>ชื่อตั๋ว</Typography>
-                                    <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+                                    <Grid container spacing={2}>
+                                        <Grid item md={4} xs={12}>
+                                            <TextField size="small" label="กรุณาเพิ่มรหัส" fullWidth value={shortName} onChange={(e) => setShortName(e.target.value)} />
+                                        </Grid>
+                                        <Grid item md={8} xs={12}>
+                                            <TextField size="small" label="กรุณาเพิ่มชื่อ" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
                                 <Grid item md={12} xs={12} display="flex" justifyContent="center" alignItems="center">
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1,marginLeft: {md: 0, xs: 6} }} gutterBottom>เลือกปั้ม</Typography>

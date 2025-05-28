@@ -224,10 +224,10 @@ export default function Navbar() {
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
   const [activeButton, setActiveButton] = useState(null); // เก็บสถานะของปุ่มที่ถูกคลิก
-  const [openData, setOpenData] = useState(false);
-  const [operation, setOperation] = useState(true);
-  const [report, setReport] = useState(true);
-  const [financial, setFinacieal] = useState(true);
+  const [openData, setOpenData] = useState(true);
+  const [operation, setOperation] = useState(false);
+  const [report, setReport] = useState(false);
+  const [financial, setFinacieal] = useState(false);
 
   console.log("OpenData : ", openData);
 

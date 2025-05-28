@@ -120,17 +120,23 @@ const TicketsSmallTruck = () => {
     // const [rate1Edit, setRate1Edit] = useState("");
     // const [rate2Edit, setRate2Edit] = useState("");
     // const [rate3Edit, setRate3Edit] = useState("");
+    const [ticketCheckedC, setTicketCheckedC] = useState(true); // สถานะของ checkbox สำหรับ "อยู่บริษัทในเครือ"
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
     const [name, setName] = useState("");
     const [rowId, setRowId] = useState(null);
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (index,rowId, status, rowCreditTime, newname
+    const handleSetting = (index, rowId, statusCompany, status, rowCreditTime, newname
         // , rowRate1, rowRate2, rowRate3
     ) => {
-        setRowId(index+1);
+        setRowId(index + 1);
         setSetting(true);
         setSelectedRowId(rowId);
+        if (statusCompany === "อยู่บริษัทในเครือ") {
+            setTicketCheckedC(true);
+        } else {
+            setTicketCheckedC(false);
+        }
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
         if (status === "ลูกค้าประจำ") {
             setTicketChecked(true);
@@ -170,6 +176,7 @@ const TicketsSmallTruck = () => {
             .child(selectedRowId - 1)
             .update({
                 Status: newStatus,
+                StatusCompany: ticketCheckedC ? "อยู่บริษัทในเครือ" : "ไม่อยู่บริษัทในเครือ",
                 CreditTime: creditTimeEdit,
                 Name: name
                 // Rate1: rate1Edit,
@@ -321,12 +328,15 @@ const TicketsSmallTruck = () => {
                                     ระยะเวลาเครดิต
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
+                                    สถานะบริษัท
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
                                     สถานะ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 50 : 160, textAlign: "center" }}>
+                                <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 30 : 70, textAlign: "center" }}>
 
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ position: 'sticky', right: 0, width: !setting ? 20 : 60, textAlign: "center" }}>
+                                <TablecellHeader sx={{ position: 'sticky', right: 0, width: !setting ? 10 : 60, textAlign: "center" }}>
 
                                 </TablecellHeader>
                             </TableRow>
@@ -344,7 +354,7 @@ const TicketsSmallTruck = () => {
                                                 <TableRow key={index} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                            {index + 1}
+                                                            {index + page * rowsPerPage + 1}
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
@@ -509,6 +519,45 @@ const TicketsSmallTruck = () => {
                                                         }
                                                     </TableCell> */}
                                                     <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box>
+                                                            {
+                                                                !setting || row.id !== selectedRowId ?
+                                                                    <Typography variant="subtitle2" gutterBottom>{row.StatusCompany || "-"}</Typography>
+                                                                    :
+                                                                    <>
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={ticketCheckedC === true ? true : false}
+                                                                                    onChange={(e) => setTicketCheckedC(true)}
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    อยู่บริษัทในเครือ
+                                                                                </Typography>
+                                                                            }
+                                                                        />
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={ticketCheckedC === false ? true : false}
+                                                                                    onChange={(e) => setTicketCheckedC(false)}
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    ไม่อยู่บริษัทในเครือ
+                                                                                </Typography>
+                                                                            }
+                                                                        />
+                                                                    </>
+                                                            }
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
                                                                 <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
@@ -560,7 +609,7 @@ const TicketsSmallTruck = () => {
                                                             }
                                                         </Box>
                                                     </TableCell> */}
-                                                    <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 50 : 100, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
+                                                    <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 30 : 70, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
                                                                 <Button
@@ -569,39 +618,41 @@ const TicketsSmallTruck = () => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index,row.id, row.Status, row.CreditTime, row.Name)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
                                                                 :
-                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                <Box sx={{ paddingLeft: 1, paddingRight: 1 }}>
                                                                     <Button
                                                                         variant="contained"
-                                                                        color="error"
-                                                                        endIcon={<CancelIcon />}
-                                                                        size="small"
-                                                                        sx={{ height: "25px", marginRight: 1 }}
-                                                                        onClick={handleCancel}
-                                                                    >
-                                                                        ยกเลิก
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="contained"
+                                                                        fullWidth
                                                                         color="success"
                                                                         endIcon={<SaveIcon />}
                                                                         size="small"
-                                                                        sx={{ height: "25px" }}
+                                                                        sx={{ height: "25px", marginBottom: 0.5 }}
                                                                         onClick={handleSave}
                                                                     >
                                                                         บันทึก
                                                                     </Button>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        fullWidth
+                                                                        color="error"
+                                                                        endIcon={<CancelIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleCancel}
+                                                                    >
+                                                                        ยกเลิก
+                                                                    </Button>
 
                                                                     {/* <IconButton color="error" onClick={handleCancel}>
-                                                                                                                        <CancelIcon />
-                                                                                                                    </IconButton>
-                                                                                                                    <IconButton color="success" onClick={handleSave} >
-                                                                                                                        <SaveIcon />
-                                                                                                                    </IconButton> */}
+                                                                    <CancelIcon />
+                                                                </IconButton>
+                                                                <IconButton color="success" onClick={handleSave} >
+                                                                    <SaveIcon />
+                                                                </IconButton> */}
                                                                 </Box>
                                                         }
                                                     </TableCell>
@@ -635,11 +686,11 @@ const TicketsSmallTruck = () => {
                                                 <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
                                             </TableRow>
                                             :
-                                            ticketR.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => (
+                                            ticketR.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow key={row.id} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                            {index + 1}
+                                                            {index + page * rowsPerPage + 1}
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell> */}
@@ -804,6 +855,45 @@ const TicketsSmallTruck = () => {
                                                         }
                                                     </TableCell> */}
                                                     <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box>
+                                                            {
+                                                                !setting || row.id !== selectedRowId ?
+                                                                    <Typography variant="subtitle2" gutterBottom>{row.StatusCompany || "-"}</Typography>
+                                                                    :
+                                                                    <>
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={ticketCheckedC === true ? true : false}
+                                                                                    onChange={(e) => setTicketCheckedC(true)}
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    อยู่บริษัทในเครือ
+                                                                                </Typography>
+                                                                            }
+                                                                        />
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={ticketCheckedC === false ? true : false}
+                                                                                    onChange={(e) => setTicketCheckedC(false)}
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                            label={
+                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                                    ไม่อยู่บริษัทในเครือ
+                                                                                </Typography>
+                                                                            }
+                                                                        />
+                                                                    </>
+                                                            }
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
                                                                 <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
@@ -855,7 +945,7 @@ const TicketsSmallTruck = () => {
                                                             }
                                                         </Box>
                                                     </TableCell> */}
-                                                    <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 50 : 100, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
+                                                    <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 30 : 70, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
                                                                 <Button
@@ -864,31 +954,33 @@ const TicketsSmallTruck = () => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index,row.id, row.Status, row.CreditTime, row.Name)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
                                                                 :
-                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                <Box sx={{ paddingLeft: 1, paddingRight: 1 }}>
                                                                     <Button
                                                                         variant="contained"
-                                                                        color="error"
-                                                                        endIcon={<CancelIcon />}
-                                                                        size="small"
-                                                                        sx={{ height: "25px", marginRight: 1 }}
-                                                                        onClick={handleCancel}
-                                                                    >
-                                                                        ยกเลิก
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="contained"
+                                                                        fullWidth
                                                                         color="success"
                                                                         endIcon={<SaveIcon />}
                                                                         size="small"
-                                                                        sx={{ height: "25px" }}
+                                                                        sx={{ height: "25px", marginBottom: 0.5 }}
                                                                         onClick={handleSave}
                                                                     >
                                                                         บันทึก
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        fullWidth
+                                                                        color="error"
+                                                                        endIcon={<CancelIcon />}
+                                                                        size="small"
+                                                                        sx={{ height: "25px" }}
+                                                                        onClick={handleCancel}
+                                                                    >
+                                                                        ยกเลิก
                                                                     </Button>
 
                                                                     {/* <IconButton color="error" onClick={handleCancel}>

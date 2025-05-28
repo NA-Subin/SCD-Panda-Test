@@ -9,13 +9,15 @@ export const useGasStationData = () => useContext(GasStationDataContext);
 
 export const GasStationDataProvider = ({ children }) => {
     const [gasStationData, setGasStationData] = useState({
-        gasstation: {}
+        gasstationDetail: {},
+        stockDetail: {}
     });
 
     const [loading, setLoading] = useState(true);
 
     const refs = useMemo(() => ({
-        gasstation: ref(database, "/depot/gasStations/")
+        gasstationDetail: ref(database, "/depot/gasStations/"),
+        stockDetail: ref(database, "/depot/stock/")
     }), []);
 
     useEffect(() => {
