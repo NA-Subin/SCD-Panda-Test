@@ -490,6 +490,9 @@ const Employee = () => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                       ธนาคาร
                     </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                      UserID
+                    </TablecellHeader>
                     <TablecellHeader sx={{ width: 50 }} />
                   </TableRow>
                 </TableHead>
@@ -507,6 +510,7 @@ const Employee = () => {
                         <TableCell sx={{ textAlign: "center" }}>{row.TruckType}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.BankName}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
                         <UpdateDriver driver={row} />
                       </TableRow>
                     ))

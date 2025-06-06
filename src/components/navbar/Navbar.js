@@ -154,14 +154,14 @@ const Drawer = styled(MuiDrawer, {
 export default function Navbar() {
   const [pendingPath, setPendingPath] = useState(null);
   const navigate = useNavigate();
-  const {loading} = useBasicData();
+  const { loading } = useBasicData();
 
   useEffect(() => {
-  if (!loading && pendingPath) {
-    navigate(pendingPath);
-    setPendingPath(null);
-  }
-}, [loading, pendingPath, navigate]);
+    if (!loading && pendingPath) {
+      navigate(pendingPath);
+      setPendingPath(null);
+    }
+  }, [loading, pendingPath, navigate]);
   // const { state } = useLocation();
   // console.log(state.Position);
   // const { user } = useParams();
@@ -379,12 +379,12 @@ export default function Navbar() {
   }));
 
   if (pendingPath) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" height={"100vh"} width={"100vw"}>
-          <CircularProgress size={100} />
-        </Box>
-      );
-    }
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height={"100vh"} width={"100vw"}>
+        <CircularProgress size={100} />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -1058,7 +1058,7 @@ export default function Navbar() {
                   }
                 </Collapse>
                 <Collapse in={!openData} unmountOnExit={false}>
-                  {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
+                  {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "รถรับจ้างขนส่ง", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
                     <ListItem
                       key={text}
                       disablePadding
@@ -1080,12 +1080,13 @@ export default function Navbar() {
                             index === 0 ? "/dashboard"
                               : index === 1 ? "/employee"
                                 : index === 2 ? "/trucks"
-                                  : index === 3 ? "/depots"
-                                    : index === 4 ? "/ticket"
-                                      : index === 5 ? "/transports"
-                                        : index === 6 ? "/customer-bigtrucks"
-                                          : index === 7 ? "/customer-smalltrucks"
-                                            : "/creditor";
+                                  : index === 3 ? "/trucks-transport"
+                                    : index === 4 ? "/depots"
+                                      : index === 5 ? "/ticket"
+                                        : index === 6 ? "/transports"
+                                          : index === 7 ? "/customer-bigtrucks"
+                                            : index === 8 ? "/customer-smalltrucks"
+                                              : "/creditor";
 
                           setPendingPath(path); // ขอไปหน้านั้น
                         }}
@@ -1106,14 +1107,16 @@ export default function Navbar() {
                               ) : index === 2 ? (
                                 <LocalShippingIcon />
                               ) : index === 3 ? (
-                                <StoreMallDirectoryIcon />
+                                <LocalShippingIcon />
                               ) : index === 4 ? (
-                                <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
+                                <StoreMallDirectoryIcon />
                               ) : index === 5 ? (
                                 <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
                               ) : index === 6 ? (
-                                <GroupsIcon />
+                                <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
                               ) : index === 7 ? (
+                                <GroupsIcon />
+                              ) : index === 8 ? (
                                 <GroupsIcon />
                               ) : (
                                 <CurrencyExchangeIcon />
@@ -1666,7 +1669,7 @@ export default function Navbar() {
                 }
               >
                 <Collapse in={!report} unmountOnExit={false}>
-                  {["รายได้รายหัก", "บิลค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
+                  {["สรุปยอดส่งน้ำมัน", "สรุปค่าเที่ยว", "การชำระค่าน้ำมัน", "รายได้รายหัก", "บิลค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
                     <ListItem
                       key={text}
                       disablePadding
@@ -1679,7 +1682,7 @@ export default function Navbar() {
                       <ListItemButton
                         component={Link}
                         to={
-                          index === 0 ? "/financial-deduction" : index === 1 ? "/invoice-financial" : "/close-financial"
+                          index === 0 ? "/summary-oil-balance" : index === 1 ? "/report-driver-trip" : index === 2 ? "/report-fuel-payment" : index === 3 ? "/financial-deduction" : index === 4 ? "/invoice-financial" : "/close-financial"
                         }
                         sx={{
                           height: 35, // กำหนดความสูงให้ ListItem

@@ -89,6 +89,8 @@ const UpdateTrip = (props) => {
     const [selectedDateReceive, setSelectedDateReceive] = useState(dateReceive);
     const [selectedDateDelivery, setSelectedDateDelivery] = useState(dateDelivery);
     const [windowWidths, setWindowWidth] = useState(window.innerWidth);
+    const [editIdx1, setEditIdx1] = useState(null); // row index กำลังแก้ไข
+    const [editIdx2, setEditIdx2] = useState(null);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -402,6 +404,8 @@ const UpdateTrip = (props) => {
         setTicketTrip([]);
         setEditableOrders([]);
         setOrderTrip([]);
+        setEditIdx1(null);
+        setEditIdx2(null);
 
         if (ticket && ticket.length > 0) {
             setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
@@ -1676,8 +1680,8 @@ const UpdateTrip = (props) => {
                                                         </TableCell>
 
                                                         {/* Ticket Name */}
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
-                                                            {editMode && row.TicketName === "1:ตั๋วเปล่า" ? (
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }} onClick={() => setEditIdx1(rowIdx)}>
+                                                            {editMode && editIdx1 === rowIdx ? (
                                                                 <Autocomplete
                                                                     id="autocomplete-tickets"
                                                                     options={getTickets()}
@@ -1714,6 +1718,22 @@ const UpdateTrip = (props) => {
                                                                                     // }
                                                                                 };
                                                                                 return updatedTickets;
+                                                                            });
+
+                                                                            setTicketTrip((prev) => {
+                                                                                const updated = { ...prev };
+
+                                                                                Object.entries(updated).forEach(([key, value]) => {
+                                                                                    const match = key.match(/^Ticket(\d+)$/);
+                                                                                    if (match) {
+                                                                                        const orderId = parseInt(match[1], 10);
+                                                                                        if (orderId === (row.id+1)) {
+                                                                                            updated[key] = `${newValue.id}:${newValue.Name}`;
+                                                                                        }
+                                                                                    }
+                                                                                });
+
+                                                                                return updated;
                                                                             });
                                                                         }
                                                                     }}
@@ -2433,46 +2453,95 @@ const UpdateTrip = (props) => {
                                                             </Typography>
                                                         </TableCell>
 
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
-                                                            {/* {editMode ? (
-                                                            <TextField
-                                                                value={editableOrders[rowIdx]?.TicketName || ""}
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': { height: '22px' },
-                                                                    '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
-                                                                }}
-                                                                onChange={(e) => handleOrderChange(rowIdx, "TicketName", e.target.value)}
-                                                            />
-                                                        ) : (
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
-                                                            </Typography>
-                                                        )} */}
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {
-                                                                    // (() => {
-                                                                    //     const branches = [
-                                                                    //         "( สาขาที่  00001)/",
-                                                                    //         "( สาขาที่  00002)/",
-                                                                    //         "( สาขาที่  00003)/",
-                                                                    //         "(สำนักงานใหญ่)/"
-                                                                    //     ];
+                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }} onClick={() => setEditIdx2(rowIdx)}>
+                                                            {editMode && editIdx2 === rowIdx ? (
+                                                                <Autocomplete
+                                                                    id="autocomplete-tickets"
+                                                                    options={getCustomers()}
+                                                                    getOptionLabel={(option) => `${option.Name}`}
+                                                                    isOptionEqualToValue={(option, value) => option.Name === value.Name}
+                                                                    value={getCustomers().find(item => `${item.id}:${item.Name}` === row.TicketName) || null}
+                                                                    onChange={(event, newValue) => {
+                                                                        if (newValue) {
+                                                                            setEditableOrders((prev) => {
+                                                                                const updatedTickets = [...prev];
+                                                                                updatedTickets[rowIdx] = {
+                                                                                    Address: newValue.Address || "-",
+                                                                                    Bill: newValue.Bill || "-",
+                                                                                    CodeID: newValue.CodeID || "-",
+                                                                                    CompanyName: newValue.CompanyName || "-",
+                                                                                    CreditTime: newValue.CreditTime || "-",
+                                                                                    Date: trip.DateStart,
+                                                                                    Driver: trip.Driver,
+                                                                                    Lat: newValue.Lat || 0,
+                                                                                    Lng: newValue.Lng || 0,
+                                                                                    Product: newValue.Product || "-",
+                                                                                    Rate1: newValue.Rate1,
+                                                                                    Rate2: newValue.Rate2,
+                                                                                    Rate3: newValue.Rate3,
+                                                                                    Registration: trip.Registration,
+                                                                                    id: row.id,
+                                                                                    No: row.No,
+                                                                                    Trip: row.Trip,
+                                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                                    CustomerType: newValue.CustomerType || "-",
+                                                                                    Product: row.Product
+                                                                                    // Product: {
+                                                                                    //     P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                                    // }
+                                                                                };
+                                                                                return updatedTickets;
+                                                                            });
 
-                                                                    //     for (const branch of branches) {
-                                                                    //         if (row.TicketName.includes(branch)) {
-                                                                    //             return row.TicketName.split(branch)[1];
-                                                                    //         }
-                                                                    //     }
+                                                                            setOrderTrip((prev) => {
+                                                                                const updated = { ...prev };
 
-                                                                    //     return row.TicketName;
-                                                                    // })()
-                                                                    row.TicketName.split(":")[1] !== undefined ?
-                                                                        row.TicketName.split(":")[1]
-                                                                        :
-                                                                        row.TicketName
-                                                                }
-                                                            </Typography>
+                                                                                Object.entries(updated).forEach(([key, value]) => {
+                                                                                    const match = key.match(/^Order(\d+)$/);
+                                                                                    console.log("match : ",match);
+                                                                                    if (match) {
+                                                                                        const orderId = parseInt(match[1], 10);
+                                                                                        console.log("orderId : ",orderId);
+                                                                                        if (orderId === (row.id+1)) {
+                                                                                            updated[key] = `${newValue.id}:${newValue.Name}`;
+                                                                                            console.log("updated[key] : ",updated[key]);
+                                                                                        }
+                                                                                    }
+                                                                                });
+
+                                                                                return updated;
+                                                                            });
+                                                                        }
+                                                                    }}
+                                                                    renderInput={(params) => (
+                                                                        <TextField
+                                                                            {...params}
+                                                                            variant="outlined"
+                                                                            size="small"
+                                                                            sx={{
+                                                                                "& .MuiOutlinedInput-root": { height: "22px" },
+                                                                                "& .MuiInputBase-input": { fontSize: "16px", textAlign: "center" },
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    renderOption={(props, option) => (
+                                                                        <li {...props}>
+                                                                            <Typography fontSize="16px">{`${option.Name}`}</Typography>
+                                                                        </li>
+                                                                    )}
+                                                                />
+                                                            )
+                                                                : (
+                                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                        {
+                                                                            row.TicketName.split(":")[1] !== undefined ?
+                                                                                row.TicketName.split(":")[1]
+                                                                                :
+                                                                                row.TicketName
+
+                                                                        }
+                                                                    </Typography>
+                                                                )}
                                                         </TableCell>
 
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 100 }}>

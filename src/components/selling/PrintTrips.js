@@ -134,22 +134,23 @@ const PrintTrips = () => {
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.id + 1}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
                       {
-                        (() => {
-                          const branches = [
-                            "( สาขาที่  00001)/",
-                            "( สาขาที่  00002)/",
-                            "( สาขาที่  00003)/",
-                            "(สำนักงานใหญ่)/"
-                          ];
+                        // (() => {
+                        //   const branches = [
+                        //     "( สาขาที่  00001)/",
+                        //     "( สาขาที่  00002)/",
+                        //     "( สาขาที่  00003)/",
+                        //     "(สำนักงานใหญ่)/"
+                        //   ];
 
-                          for (const branch of branches) {
-                            if (row.TicketName.includes(branch)) {
-                              return row.TicketName.split(branch)[1];
-                            }
-                          }
+                        //   for (const branch of branches) {
+                        //     if (row.TicketName.includes(branch)) {
+                        //       return row.TicketName.split(branch)[1];
+                        //     }
+                        //   }
 
-                          return row.TicketName;
-                        })()
+                        //   return row.TicketName;
+                        // })()
+                        row.TicketName.split(":")[1]
                       }
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.OrderID}</TableCell>
@@ -233,22 +234,23 @@ const PrintTrips = () => {
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.id + 1}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
                       {
-                        (() => {
-                          const branches = [
-                            "( สาขาที่  00001)/",
-                            "( สาขาที่  00002)/",
-                            "( สาขาที่  00003)/",
-                            "(สำนักงานใหญ่)/"
-                          ];
+                        // (() => {
+                        //   const branches = [
+                        //     "( สาขาที่  00001)/",
+                        //     "( สาขาที่  00002)/",
+                        //     "( สาขาที่  00003)/",
+                        //     "(สำนักงานใหญ่)/"
+                        //   ];
 
-                          for (const branch of branches) {
-                            if (row.TicketName.includes(branch)) {
-                              return row.TicketName.split(branch)[1];
-                            }
-                          }
+                        //   for (const branch of branches) {
+                        //     if (row.TicketName.includes(branch)) {
+                        //       return row.TicketName.split(branch)[1];
+                        //     }
+                        //   }
 
-                          return row.TicketName;
-                        })()
+                        //   return row.TicketName;
+                        // })()
+                        row.TicketName.split(":")[1]
                       }
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>

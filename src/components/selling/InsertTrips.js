@@ -44,6 +44,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 import "../../theme/scrollbar.css"
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const InsertTrips = () => {
     const [menu, setMenu] = React.useState(0);
@@ -245,6 +246,10 @@ const InsertTrips = () => {
         console.log("After Update:", { volumeG91, volumeG95, volumeB7, volumeB95, volumeE20, volumePWD });
     };
 
+    const { reghead, small, transport } = useBasicData();
+    const truckH = Object.values(reghead || {});
+    const truckS = Object.values(small || {});
+    const truckT = Object.values(transport || {});
 
     const [orders, setOrders] = useState([]);
     const [data, setData] = useState([]);
@@ -1312,6 +1317,24 @@ const InsertTrips = () => {
         }
     }, [registration, allTruck]);
 
+    const getDriver = () => {
+        const driverss = [
+            ...[...truckH]
+                .filter((item) => item.Driver !== "0:ไม่มี" && item.RegTail !== "0:ไม่มี" && item.Status === "ว่าง")
+                .sort((a, b) => a.Driver.localeCompare(b.Driver, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, Type: "รถบริษัท" })),
+
+            ...[...truckT]
+                .filter((item) => item.TruckType === "รถใหญ่")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, Type: "รถรับจ้างขนส่ง" })),
+        ];
+
+        return driverss.filter((item) => item.id);
+    };
+
+    console.log("Driver : ", getDriver());
+
     const getTickets = () => {
         if (!registration || registration === "0:0:0:0:0") return [];
 
@@ -1521,19 +1544,31 @@ const InsertTrips = () => {
                                         component="form" sx={{ height: "30px", width: "100%" }}>
                                         <Autocomplete
                                             id="autocomplete-registration-1"
-                                            options={regHead}
+                                            options={getDriver()}
                                             getOptionLabel={(option) =>
-                                                option.type === "รถใหญ่" ?
-                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail.split(":")[1] : ""} (${option.type ? option.type : ""})`
+                                                option.Type === "รถบริษัท" ?
+                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail.split(":")[1] : ""}`
                                                     :
-                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
+                                                    `${option.Name ? option.Name : ""} ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}` }`
                                             }
-                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
-                                            value={registration ? regHead.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration) : null}
+                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.Type === value.Type}
+                                            value={registration ? getDriver().find(item =>
+                                                item.Type === "รถบริษัท" ?
+                                                    (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                                                    : item.Type === "รถรับจ้างขนส่ง" ?
+                                                        (`${item.id}:${item.Registration}:${item.Name}:${item.Type}` === registration)
+                                                        : null
+                                            )
+                                                :
+                                                null
+                                            }
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
-                                                    const values = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.type}`;
-                                                    handleRegistration(values); // อัพเดตค่าเมื่อเลือก
+                                                    let values = "";
+                                                    newValue.Type === "รถบริษัท" ?
+                                                        handleRegistration(`${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.Type}`)
+                                                        :
+                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.Name}:${newValue.Type}`); // อัพเดตค่าเมื่อเลือก
                                                 } else {
                                                     setRegistration("0:0:0:0:0");
                                                 }
@@ -1554,10 +1589,10 @@ const InsertTrips = () => {
                                             renderOption={(props, option) => (
                                                 <li {...props}>
                                                     {
-                                                        option.type === "รถใหญ่" ?
-                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail.split(":")[1]} (${option.type})`}</Typography>
+                                                        option.Type === "รถบริษัท" ?
+                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail.split(":")[1]}`}</Typography>
                                                             :
-                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (${option.type})`}</Typography>
+                                                            <Typography fontSize="16px">{`${option.Name}  ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}` }`}</Typography>
                                                     }
                                                 </li>
                                             )}
@@ -2198,13 +2233,16 @@ const InsertTrips = () => {
                                                 borderRadius: 10
                                             }}
                                             value={(() => {
-                                                const selectedItem = regHead.find(item =>
-                                                    `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+                                                const selectedItem = getDriver().find(item =>
+                                                    item.Type === "รถบริษัท" ?
+                                                    (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                                                    :
+                                                    (`${item.id}:${item.Registration}:${item.Name}:${item.Type}` === registration)
                                                 );
-                                                return selectedItem && selectedItem.type === "รถใหญ่"
-                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (${selectedItem.type ? selectedItem.type : ""})`
-                                                    : selectedItem && selectedItem.type === "รถเล็ก"
-                                                        ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""} (${selectedItem.type ? selectedItem.type : ""})`
+                                                return selectedItem && selectedItem.Type === "รถบริษัท"
+                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""}`
+                                                    : selectedItem && selectedItem.Type === "รถรับจ้างขนส่ง"
+                                                        ? `${selectedItem.Name ? selectedItem.Name : ""} ${selectedItem.Registration === "ไม่มี" ? "" : `:${selectedItem.Registration}`}`
                                                         : "";
                                             })()}
                                         />
@@ -2609,29 +2647,32 @@ const InsertTrips = () => {
                                         </Grid>
                                     </Paper>
                                 </Grid>
-                                <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
-                                    <Paper sx={{ width: "100%", marginTop: -1 }}
-                                        component="form">
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            value={new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format(costTrip)}
-                                            sx={{
-                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                "& .MuiInputBase-input": {
-                                                    fontSize: "16px",
-                                                    padding: "2px 6px",
-                                                },
-                                                borderRadius: 10
-                                            }}
-                                        />
-                                    </Paper>
-                                </Grid>
-                                <Grid item md={4} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                {
+                                    registration.split(":")[3] !== "รถรับจ้างขนส่ง" &&
+                                        <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
+                                            <Paper sx={{ width: "100%", marginTop: -1 }}
+                                                component="form">
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    value={new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    }).format(costTrip)}
+                                                    sx={{
+                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                        "& .MuiInputBase-input": {
+                                                            fontSize: "16px",
+                                                            padding: "2px 6px",
+                                                        },
+                                                        borderRadius: 10
+                                                    }}
+                                                />
+                                            </Paper>
+                                        </Grid>
+                                }
+                                <Grid item md={registration.split(":")[3] !== "รถรับจ้างขนส่ง" ? 4 : 6} xs={registration.split(":")[3] !== "รถรับจ้างขนส่ง" ? 6 : 12} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -1 }}
                                         component="form">

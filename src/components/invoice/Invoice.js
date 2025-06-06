@@ -47,7 +47,7 @@ const Invoice = () => {
   const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
   const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
   const [checkOverdueTransfer, setCheckOverdueTransfer] = useState(true);
-  const [check, setCheck] = useState(1); // 1 = ทั้งหมด, 2 = กำลังจัดเที่ยววิ่ง, 3 = ยกเลิก, 4 = จบทริป
+  const [check, setCheck] = useState(3); // 1 = ทั้งหมด, 2 = กำลังจัดเที่ยววิ่ง, 3 = ยกเลิก, 4 = จบทริป
 
   const handleDateChangeDateStart = (newValue) => {
     if (newValue) {

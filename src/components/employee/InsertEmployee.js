@@ -153,7 +153,7 @@ const InsertEmployee = (props) => {
                 }
             )
         } else {
-            createUserWithEmailAndPassword(auth, (user + "@gmail.com"), password).then(
+            createUserWithEmailAndPassword(auth, (`t${driver.length.toString().padStart(4, '0')}` + "@gmail.com"), password).then(
                 (userCredential) => {
                     database
                         .ref("employee/drivers/")
@@ -161,7 +161,7 @@ const InsertEmployee = (props) => {
                         .update({
                             id: driver.length + 1,
                             Name: prefix + name + " " + lastname,
-                            User: user,
+                            User: `t${driver.length.toString().padStart(4, '0')}`,
                             Password: password,
                             Phone: phone,
                             Registration: regTruck,
@@ -344,7 +344,7 @@ const InsertEmployee = (props) => {
                         }
                         <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 3.5} }} gutterBottom>ประเภทพนักงาน</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 4, xs: 3.5} }} gutterBottom>ประเภทพนักงาน</Typography>
                                 <Paper
                                     component="form" sx={{ width: "100%" }}>
                                     <Select
@@ -558,7 +558,7 @@ const InsertEmployee = (props) => {
                                         <Grid item md={4} xs={9}>
                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
+                                                    <TextField size="small" fullWidth value={`t${driver.length.toString().padStart(4, '0')}`} disabled/>
                                                 </Paper>
                                             </Box>
                                         </Grid>

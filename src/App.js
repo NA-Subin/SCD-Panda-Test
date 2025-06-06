@@ -44,6 +44,10 @@ import DeductionOfIncome from "./components/financial/DeductionOfIncome";
 import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 import { TripDataProvider } from "./server/provider/TripProvider";
 import { GasStationDataProvider } from "./server/provider/GasStationProvider";
+import SummaryOilBalance from "./components/oilbalance/SummaryOil";
+import ReportTrip from "./components/trip/ReportTrip";
+import TruckTransport from "./components/truck/transport/TruckTransport";
+import FuelPaymentReport from "./components/invoice/Report";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -132,6 +136,9 @@ function App() {
                       <Route path="/trucks" element={<Trucks />} />
                     </Routes>
                     <Routes>
+                      <Route path="/trucks-transport" element={<TruckTransport />} />
+                    </Routes>
+                    <Routes>
                       <Route path="/depots" element={<Depots />} />
                     </Routes>
                     <Routes>
@@ -176,6 +183,15 @@ function App() {
                       </Routes>
                       <Routes>
                         <Route path="/financial-deduction" element={<DeductionOfIncome />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/summary-oil-balance" element={<SummaryOilBalance />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/report-driver-trip" element={<ReportTrip />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/report-fuel-payment" element={<FuelPaymentReport />} />
                       </Routes>
                     </TripDataProvider>
                     <GasStationDataProvider>
