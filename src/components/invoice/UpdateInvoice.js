@@ -48,7 +48,6 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import dayjs from "dayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import "dayjs/locale/th";
 import jsPDF from "jspdf";
 import notoSansThaiRegular from "@fontsource/noto-sans-thai";
 import html2canvas from "html2canvas";
