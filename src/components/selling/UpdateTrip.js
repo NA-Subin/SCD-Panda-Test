@@ -70,6 +70,7 @@ const UpdateTrip = (props) => {
     } = props;
 
     console.log("Date : ", dateStart);
+    console.log("registrations : ", registrations);
     const [open, setOpen] = React.useState(false);
     const dialogRef = useRef(null);
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
@@ -107,11 +108,13 @@ const UpdateTrip = (props) => {
     }, []);
 
     // const { depots, reghead } = useData();
-    const { depots, reghead } = useBasicData();
+    const { depots, reghead, small, transport } = useBasicData();
     const depotOptions = Object.values(depots || {});
-    const registrationTruck = Object.values(reghead || {});
+    const truckH = Object.values(reghead || {});
+    const truckS = Object.values(small || {});
+    const truckT = Object.values(transport || {});
 
-    console.log("registrationTruck : ", registrationTruck);
+    console.log("truckH : ", truckH);
 
     // โหลด html2canvas จาก CDN
     useEffect(() => {
@@ -321,6 +324,7 @@ const UpdateTrip = (props) => {
     const [costTrip, setCostTrip] = useState(trip.CostTrip);
     const [status, setStatus] = useState(trip.Status || "-");
     const [weightTrucks, setWeightTrucks] = useState(weightTruck || 0);
+    const [driverOptions, setDriverOptions] = useState([]);
 
     const [depot, setDepot] = useState(depotTrip);
     const [registration, setRegistration] = useState(registrations);
@@ -406,6 +410,7 @@ const UpdateTrip = (props) => {
         setOrderTrip([]);
         setEditIdx1(null);
         setEditIdx2(null);
+        setRegistration(registrations);
 
         if (ticket && ticket.length > 0) {
             setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
@@ -604,11 +609,6 @@ const UpdateTrip = (props) => {
 
             return updatedOrders;
         });
-    };
-
-
-    const handleUpdate = () => {
-        setEditMode(!editMode); // สลับโหมดแก้ไข <-> อ่านอย่างเดียว
     };
 
     const [totalVolumesTicket, setTotalVolumesTicket] = useState({});
@@ -862,6 +862,22 @@ const UpdateTrip = (props) => {
     console.log("Updated Oil Light:", totalVolumesTicket.oilLight);
     console.log("Updated Total Weight:", totalVolumesTicket.totalWeight);
 
+    const getDriver = () => {
+        const driverss = [
+            ...[...truckH]
+                .filter((item) => item.Driver !== "0:ไม่มี" && item.RegTail !== "0:ไม่มี" && item.Status === "ว่าง")
+                .sort((a, b) => a.Driver.localeCompare(b.Driver, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, Type: "รถบริษัท" })),
+
+            ...[...truckT]
+                .filter((item) => item.TruckType === "รถใหญ่")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, Type: "รถรับจ้างขนส่ง" })),
+        ];
+
+        return driverss.filter((item) => item.id);
+    };
+
     const getTickets = () => {
         const tickets = [
             { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },  // เพิ่มตั๋วเปล่าเข้าไป
@@ -998,6 +1014,12 @@ const UpdateTrip = (props) => {
                 console.log(`ยกเลิกลบตั๋วที่ ${id}`);
             }
         );
+    };
+
+    const handleUpdate = () => {
+        setDriverOptions(getDriver());
+        setRegistration(registrations);
+        setEditMode(!editMode); // สลับโหมดแก้ไข <-> อ่านอย่างเดียว
     };
 
     const updateStateAfterTicketDelete = (indexToDelete, id) => {
@@ -1170,7 +1192,7 @@ const UpdateTrip = (props) => {
             `ต้องการจบเที่ยววิ่งใช่หรือไม่`,
             () => {
                 database
-                    .ref("truck/registration/")
+                    .ref(registration.split(":")[4] === "รถบริษัท" ? "truck/registration/" : "truck/transport/")
                     .child(Number(registration.split(":")[2]) - 1)
                     .update({
                         Status: "ว่าง"
@@ -1242,7 +1264,7 @@ const UpdateTrip = (props) => {
             `ต้องการยกเลิกเที่ยววิ่งใช่หรือไม่`,
             () => {
                 database
-                    .ref("truck/registration/")
+                    .ref(registration.split(":")[4] === "รถบริษัท" ? "truck/registration/" : "truck/transport/")
                     .child(Number(registration.split(":")[2]) - 1)
                     .update({
                         Status: "ว่าง"
@@ -1473,7 +1495,62 @@ const UpdateTrip = (props) => {
                                                         component="form" sx={{ height: "30px", width: "100%" }}>
                                                         <Autocomplete
                                                             id="autocomplete-registration-1"
-                                                            options={registrationTruck}
+                                                            options={getDriver()}
+                                                            getOptionLabel={(option) =>
+                                                                option.Type === "รถบริษัท" ?
+                                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail.split(":")[1] : ""}`
+                                                                    :
+                                                                    `${option.Name ? option.Name : ""} ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`
+                                                            }
+                                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.Type === value.Type}
+                                                            value={registration ? getDriver().find(item =>
+                                                                item.Type === "รถบริษัท" ?
+                                                                    (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                                                                    : item.Type === "รถรับจ้างขนส่ง" ?
+                                                                        (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
+                                                                        : null
+                                                            )
+                                                                :
+                                                                null
+                                                            }
+                                                            onChange={(event, newValue) => {
+                                                                if (newValue) {
+                                                                    let values = "";
+                                                                    newValue.Type === "รถบริษัท" ?
+                                                                        handleRegistration(`${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.Type}`)
+                                                                        :
+                                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.id}:${newValue.Name}:${newValue.Type}`); // อัพเดตค่าเมื่อเลือก
+                                                                } else {
+                                                                    setRegistration("0:0:0:0:0");
+                                                                }
+                                                            }}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label={!registration || registration === "0:0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    sx={{
+                                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            fullWidth
+                                                            renderOption={(props, option) => (
+                                                                <li {...props}>
+                                                                    {
+                                                                        option.Type === "รถบริษัท" ?
+                                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail.split(":")[1]}`}</Typography>
+                                                                            :
+                                                                            <Typography fontSize="16px">{`${option.Name}  ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`}</Typography>
+                                                                    }
+                                                                </li>
+                                                            )}
+                                                        />
+                                                        {/* <Autocomplete
+                                                            id="autocomplete-registration-1"
+                                                            options={truckH}
                                                             getOptionLabel={(option) => {
                                                                 if (option.Driver === "ไม่มี" && option.Status === "ว่าง") return "";
 
@@ -1483,7 +1560,7 @@ const UpdateTrip = (props) => {
 
                                                                 return `${driverName} : ${regHead}/${regTail} (รถใหญ่)`;
                                                             }}
-                                                            value={registrationTruck.find(
+                                                            value={truckH.find(
                                                                 (d) => `${d.Driver}:${d.id}:${d.RegHead}` === registration
                                                             ) || null}
                                                             onChange={(event, newValue) => {
@@ -1516,7 +1593,7 @@ const UpdateTrip = (props) => {
                                                                     }
                                                                 </li>
                                                             )}
-                                                        />
+                                                        /> */}
                                                     </Paper>
                                                 </Box>
                                             </Grid>
@@ -1727,7 +1804,7 @@ const UpdateTrip = (props) => {
                                                                                     const match = key.match(/^Ticket(\d+)$/);
                                                                                     if (match) {
                                                                                         const orderId = parseInt(match[1], 10);
-                                                                                        if (orderId === (row.id+1)) {
+                                                                                        if (orderId === (row.id + 1)) {
                                                                                             updated[key] = `${newValue.id}:${newValue.Name}`;
                                                                                         }
                                                                                     }
@@ -2273,12 +2350,25 @@ const UpdateTrip = (props) => {
                                                                 },
                                                                 borderRadius: 10
                                                             }}
+                                                            // value={(() => {
+                                                            //     const selectedItem = truckH.find(item =>
+                                                            //         `${item.Driver}:${item.id}:${item.RegHead}` === registration
+                                                            //     );
+                                                            //     return selectedItem && selectedItem.Driver !== "ไม่มี" &&
+                                                            //         `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถใหญ่)`;
+                                                            // })()}
                                                             value={(() => {
-                                                                const selectedItem = registrationTruck.find(item =>
-                                                                    `${item.Driver}:${item.id}:${item.RegHead}` === registration
+                                                                const selectedItem = getDriver().find(item =>
+                                                                    item.Type === "รถบริษัท" ?
+                                                                        (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                                                                        :
+                                                                        (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
                                                                 );
-                                                                return selectedItem && selectedItem.Driver !== "ไม่มี" &&
-                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถใหญ่)`;
+                                                                return selectedItem && selectedItem.Type === "รถบริษัท"
+                                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""}`
+                                                                    : selectedItem && selectedItem.Type === "รถรับจ้างขนส่ง"
+                                                                        ? `${selectedItem.Name ? selectedItem.Name : ""} ${selectedItem.Registration === "ไม่มี" ? "" : `:${selectedItem.Registration}`}`
+                                                                        : "";
                                                             })()}
                                                         />
                                                     </Paper>
@@ -2498,13 +2588,13 @@ const UpdateTrip = (props) => {
 
                                                                                 Object.entries(updated).forEach(([key, value]) => {
                                                                                     const match = key.match(/^Order(\d+)$/);
-                                                                                    console.log("match : ",match);
+                                                                                    console.log("match : ", match);
                                                                                     if (match) {
                                                                                         const orderId = parseInt(match[1], 10);
-                                                                                        console.log("orderId : ",orderId);
-                                                                                        if (orderId === (row.id+1)) {
+                                                                                        console.log("orderId : ", orderId);
+                                                                                        if (orderId === (row.id + 1)) {
                                                                                             updated[key] = `${newValue.id}:${newValue.Name}`;
-                                                                                            console.log("updated[key] : ",updated[key]);
+                                                                                            console.log("updated[key] : ", updated[key]);
                                                                                         }
                                                                                     }
                                                                                 });
@@ -2805,7 +2895,7 @@ const UpdateTrip = (props) => {
                                             </Grid>
                                         </>
                                         :
-                                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                        <Grid item md={registration.split(":")[4] === "รถบริษัท" ? 4 : 6} xs={12} display="flex" justifyContent="center" alignItems="center">
                                             <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>คลังรับน้ำมัน</Typography>
                                             <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                                 component="form">
@@ -2829,30 +2919,33 @@ const UpdateTrip = (props) => {
                                             </Paper>
                                         </Grid>
                                 }
-                                <Grid item md={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
-                                    <Paper sx={{ width: "100%", marginTop: -0.5 }}
-                                        component="form">
-                                        <TextField size="small" fullWidth
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: '30px', // ปรับความสูงของ TextField
-                                                    display: 'flex', // ใช้ flexbox
-                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                    fontWeight: 'bold',
-                                                    padding: '1px 4px', // ปรับ padding ภายใน input
-                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                },
-                                                borderRadius: 10
-                                            }}
-                                            value={editMode ? costTrip : trip.CostTrip}
-                                        />
-                                    </Paper>
-                                </Grid>
-                                <Grid item md={editMode ? 4 : 5} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                {
+                                    registration.split(":")[4] === "รถบริษัท" &&
+                                    <Grid item md={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                        <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
+                                        <Paper sx={{ width: "100%", marginTop: -0.5 }}
+                                            component="form">
+                                            <TextField size="small" fullWidth
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        height: '30px', // ปรับความสูงของ TextField
+                                                        display: 'flex', // ใช้ flexbox
+                                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        fontSize: '16px', // ขนาด font เวลาพิมพ์
+                                                        fontWeight: 'bold',
+                                                        padding: '1px 4px', // ปรับ padding ภายใน input
+                                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                    },
+                                                    borderRadius: 10
+                                                }}
+                                                value={editMode ? costTrip : trip.CostTrip}
+                                            />
+                                        </Paper>
+                                    </Grid>
+                                }
+                                <Grid item md={registration.split(":")[4] === "รถบริษัท" ? (editMode ? 4 : 5) : 6 } xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                         component="form">

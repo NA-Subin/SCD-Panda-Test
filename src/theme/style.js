@@ -35,6 +35,14 @@ const TablecellTickets = styled(TableCell)(({ theme }) => ({
   fontWeight: "bold",
 }));
 
+const TablecellSetting = styled(TableCell)(({ theme }) => ({
+  backgroundColor: theme.palette.warning.dark,
+  color: theme.palette.primary.contrastText,
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
 const TablecellFinancial = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#689f38",
   color: theme.palette.primary.contrastText,
@@ -211,5 +219,6 @@ export {
   TablecellTickets,
   TablecellCustomers,
   TablecellFinancial,
-  TablecellFinancialHead
+  TablecellFinancialHead,
+  TablecellSetting
 };

@@ -221,6 +221,7 @@ export default function Navbar() {
   const [show2, setShow2] = React.useState(false);
   const [show3, setShow3] = React.useState(false);
   const [show4, setShow4] = React.useState(false);
+  const [show5, setShow5] = React.useState(false);
   const [logo, setLogo] = React.useState(false);
   const [notify, setNotify] = React.useState(false);
   const [activeButton, setActiveButton] = useState(null); // เก็บสถานะของปุ่มที่ถูกคลิก
@@ -228,6 +229,7 @@ export default function Navbar() {
   const [operation, setOperation] = useState(false);
   const [report, setReport] = useState(false);
   const [financial, setFinacieal] = useState(false);
+  const [trucksmall, setTrucksmall] = useState(true);
 
   console.log("OpenData : ", openData);
 
@@ -795,7 +797,25 @@ export default function Navbar() {
                             aria-expanded={!menu ? "true" : undefined}
                             onClick={handleClick}
                           >
-                            <ListIcon />
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
+                              <StyledBadge
+                                overlap="circular"
+                                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                variant="dot"
+                              >
+                                <Avatar
+              /*alt={token.split("#")[0]}*/ src="/static/images/avatar/2.jpg"
+                                  sx={{ width: 30, height: 30 }}
+                                />
+                              </StyledBadge>
+                            </Box>
+                            {/* <ListIcon /> */}
                           </IconButtonOnNavbar>
                         </Tooltip>
                         <Divider
@@ -933,32 +953,12 @@ export default function Navbar() {
                 }
               </>
             } */}
-            <Box
-              sx={{
-                height: shouldDrawerOpen ? 80 : 60,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: 1
-              }}
-            >
-              <StyledBadge
-                overlap="circular"
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                variant="dot"
-              >
-                <Avatar
-              /*alt={token.split("#")[0]}*/ src="/static/images/avatar/2.jpg"
-                  sx={{ width: shouldDrawerOpen ? 80 : 40, height: shouldDrawerOpen ? 80 : 40 }}
-                />
-              </StyledBadge>
-            </Box>
-            {
+            {/* {
               shouldDrawerOpen &&
               <Box sx={{ textAlign: "center" }}>
                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>User : {Cookies.get('user')}</Typography>
               </Box>
-            }
+            } */}
             <Box sx={{ overflowY: 'auto', flex: 1, marginLeft: shouldDrawerOpen ? 0 : -3, marginRight: shouldDrawerOpen ? 0 : -3 }}>
               <List
                 sx={
@@ -1075,7 +1075,7 @@ export default function Navbar() {
                           setShow2(null);
                           setShow3(null);
                           setShow4(null);
-
+                          setShow5(null);
                           const path =
                             index === 0 ? "/dashboard"
                               : index === 1 ? "/employee"
@@ -1289,7 +1289,7 @@ export default function Navbar() {
                   }
                 </Collapse>
                 <Collapse in={!operation} unmountOnExit={false}>
-                  {["สต็อกหน้าลาน", "เที่ยววิ่งรถใหญ่", "เที่ยววิ่งรถเล็ก"].map((text, index) => (
+                  {["สต็อกหน้าลาน", "เที่ยววิ่งรถใหญ่"].map((text, index) => (
                     <ListItem
                       key={text}
                       disablePadding
@@ -1302,14 +1302,14 @@ export default function Navbar() {
                       <ListItemButton
                         component={Link}
                         to={
-                          index === 0 ? "/gasstations" : index === 1 ? "/trips-bigtruck" : "/trips-smalltruck"
+                          index === 0 ? "/gasstations" : "/trips-bigtruck"
                         }
                         sx={{
                           height: 35, // กำหนดความสูงให้ ListItem
                         }}
                         onClick={() => (setShow2(index), setSetting(false))}
                         onMouseUp={() => (setShow2(index), setSetting(false))}
-                        onMouseDown={() => (setShow1(null), setShow3(null), setShow4(null))}
+                        onMouseDown={() => (setShow1(null), setShow3(null), setShow4(null), setShow5(null))}
                       >
                         {
                           shouldDrawerOpen ?
@@ -1499,7 +1499,7 @@ export default function Navbar() {
                         }}
                         onClick={() => (setShow3(index), setSetting(false))}
                         onMouseUp={() => (setShow3(index), setSetting(false))}
-                        onMouseDown={() => (setShow1(null), setShow2(null), setShow4(null))}
+                        onMouseDown={() => (setShow1(null), setShow2(null), setShow4(null), setShow5(null))}
                       >
                         {
                           shouldDrawerOpen ?
@@ -1689,7 +1689,7 @@ export default function Navbar() {
                         }}
                         onClick={() => (setShow4(index), setSetting(false))}
                         onMouseUp={() => (setShow4(index), setSetting(false))}
-                        onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null))}
+                        onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null), setShow5(null))}
                       >
                         {
                           shouldDrawerOpen ?
@@ -1749,6 +1749,198 @@ export default function Navbar() {
                           primary={shouldDrawerOpen ? text : ""}
                           sx={{
                             color: show4 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                          }}
+                          primaryTypographyProps={{
+                            fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </Collapse>
+              </List>
+              <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+              <Collapse in={!trucksmall} unmountOnExit={false}>
+                {
+                  open &&
+                  <ListItem
+                    key={"รถเล็ก"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setTrucksmall(true)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <LocalShippingIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="รถเล็ก"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowDownIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
+              <Collapse in={trucksmall} unmountOnExit={false}>
+                {
+                  open &&
+                  <ListItem
+                    key={"รถเล็ก"}
+                    disablePadding
+                    sx={{
+                      height: 40, // กำหนดความสูงให้ ListItem
+                      paddingY: 1,
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => setTrucksmall(false)}
+                      sx={{
+                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                        px: 2,      // padding แนวนอน
+                      }}
+                    >
+                      {/* ไอคอนซ้าย */}
+                      <ListItemIcon sx={{ minWidth: 30 }}>
+                        <LocalShippingIcon />
+                      </ListItemIcon>
+
+                      {/* ข้อความ */}
+                      <ListItemText
+                        primary="รถเล็ก"
+                        primaryTypographyProps={{
+                          fontSize: "16px",
+                        }}
+                        sx={{
+                          marginLeft: 1,
+                        }}
+                      />
+
+                      {/* ไอคอนขวา */}
+                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                        <KeyboardArrowUpIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+
+                  </ListItem>
+                }
+              </Collapse>
+              <List
+                sx={
+                  !open ? {
+                    backgroundColor: theme.palette.panda.dark,
+                    color: theme.palette.primary.contrastText,
+                  }
+                    : {
+                      marginTop: -1
+                    }
+                }
+              >
+                <Collapse in={!trucksmall} unmountOnExit={false}>
+                  {["จัดเที่ยววิ่ง", "การชำระค่าน้ำมัน", "รายงาน"].map((text, index) => (
+                    <ListItem
+                      key={text}
+                      disablePadding
+                      sx={{
+                        backgroundColor: show5 === index && theme.palette.panda.dark,
+                        height: 35, // กำหนดความสูงให้ ListItem
+                        paddingY: 1,
+                      }}
+                    >
+                      <ListItemButton
+                        component={Link}
+                        to={
+                          index === 0 ? "/trips-smalltruck" : "/close-financial"
+                        }
+                        sx={{
+                          height: 35, // กำหนดความสูงให้ ListItem
+                        }}
+                        onClick={() => (setShow5(index), setSetting(false))}
+                        onMouseUp={() => (setShow5(index), setSetting(false))}
+                        onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null), setShow4(null))}
+                      >
+                        {
+                          shouldDrawerOpen ?
+                            <ListItemIcon
+                              sx={{
+                                color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                mr: !open || show5 === index ? -3 : -2,
+                                ml: !open || show5 === index ? 3 : 2,
+                              }}
+                            >
+                              {index === 0 ? (
+                                <ModeOfTravelIcon />
+                              ) : index === 1 ? (
+                                <PaidIcon />
+                              ) : (
+                                <SummarizeIcon />
+                              )}
+                            </ListItemIcon>
+                            :
+                            <Tooltip
+                              title={text}
+                              placement="right"
+                              PopperProps={{
+                                modifiers: [
+                                  {
+                                    name: 'offset',
+                                    options: {
+                                      offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
+                                    },
+                                  },
+                                ],
+                              }}
+                              componentsProps={{
+                                tooltip: {
+                                  sx: {
+                                    fontSize: '15px', // ปรับขนาดตัวอักษร
+                                    textAlign: 'left', // จัดข้อความชิดซ้าย
+                                    backgroundColor: theme.palette.panda.dark,
+                                  },
+                                },
+                              }}
+                            >
+                              <ListItemIcon
+                                sx={{
+                                  color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                  mr: !open || show5 === index ? -3 : -2,
+                                  ml: !open || show5 === index ? 3 : 2,
+                                }}
+                              >
+                                {index === 0 ? (
+                                  <SummarizeIcon />
+                                ) : (
+                                  <SummarizeIcon />
+                                )}
+                              </ListItemIcon>
+                            </Tooltip>
+                        }
+                        <ListItemText
+                          primary={shouldDrawerOpen ? text : ""}
+                          sx={{
+                            color: show5 === index && theme.palette.primary.contrastText, fontSize: "15px"
                           }}
                           primaryTypographyProps={{
                             fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่

@@ -2,12 +2,14 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
+  Checkbox,
   Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
+  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
@@ -28,9 +30,13 @@ import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CancelIcon from '@mui/icons-material/Cancel';
+import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DoneIcon from '@mui/icons-material/Done';
+import CloseIcon from '@mui/icons-material/Close';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import InfoIcon from '@mui/icons-material/Info';
-import { IconButtonError, TablecellHeader } from "../../theme/style";
+import { IconButtonError, IconButtonInfo, TablecellHeader, TablecellSetting, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import InsertCompany from "./InsertCompany";
 import theme from "../../theme/theme";
@@ -48,6 +54,20 @@ const Setting = () => {
   const [openEditePassword, setOpenEditePassword] = React.useState(false);
   const [openDetailCompany, setOpenDetailCompany] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [insertPositions, setInsertPositions] = useState(true);
+  const [checkID, setCheckID] = useState(0);
+  const [checkIndex, setCheckIndex] = useState(0);
+  const [positionName, setPositionName] = useState("");
+  const [checkBasicData, setCheckBasicData] = useState("");
+  const [checkOrperationData, setCheckOprerationData] = useState("");
+  const [checkFinancialData, setCheckFinancialData] = useState("");
+  const [checkReportData, setCheckReportData] = useState("");
+  const [checkBigTruckData, setCheckBigTruckData] = useState("");
+  const [checkSmallTruckData, setCheckSmallTruckData] = useState("");
+  const [checkGasStationData, setCheckGasStationData] = useState("");
+  const [checkDriverData, setCheckDriverData] = useState("");
+  const [updatePosition, setUpdatePosition] = React.useState(true);
+  const [name, setName] = useState("");
 
   // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
   useEffect(() => {
@@ -65,12 +85,13 @@ const Setting = () => {
 
   const userId = Cookies.get("sessionToken");
   // const { company, officers } = useData();
-  
-  const { company, officers } = useBasicData();
+
+  const { company, officers, positions } = useBasicData();
   const companyDetail = Object.values(company || {});
   const officersDetail = Object.values(officers || {});
-  console.log("company : ",company);
-  console.log("Officers : ",officers);
+  const positionsDetail = Object.values(positions || {});
+  console.log("company : ", company);
+  console.log("Officers : ", officers);
 
   const userDetail = officersDetail.find((row) => (row.id === Number(userId.split("$")[1])));
 
@@ -142,6 +163,34 @@ const Setting = () => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const handleSave = () => {
+    database
+      .ref("positions/")
+      .child(positionsDetail.length)
+      .update({
+        id: (positionsDetail.length) + 1,
+        Name: positionName,
+        BasicData: 0,
+        OprerationData: 0,
+        FinancialData: 0,
+        ReportData: 0,
+        BigTruckData: 0,
+        SmallTruckData: 0,
+        GasStationData: 0,
+        DriverData: 0
+      })
+      .then(() => {
+        ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+        console.log("Data pushed successfully");
+        setInsertPositions(false);
+        setPositionName("");
+      })
+      .catch((error) => {
+        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+        console.error("Error pushing data:", error);
+      });
+  }
   // const [company, setCompany] = useState([]);
 
   // const getCompany = async () => {
@@ -159,6 +208,51 @@ const Setting = () => {
   //   getCompany();
   // }, []);
 
+  const handleUpdate = (newIndex, newID, newName, newBasicData, newOperationData, newFinancialData, newReportData, newBigTruckData, newSmallTruckData, newGasStationData, newDriverData) => {
+    setCheckID(newID - 1);
+    setCheckIndex(newIndex);
+    setName(newName);
+    setCheckBasicData(newBasicData === 0 ? false : true);
+    setCheckOprerationData(newOperationData === 0 ? false : true);
+    setCheckFinancialData(newFinancialData === 0 ? false : true);
+    setCheckReportData(newReportData === 0 ? false : true);
+    setCheckBigTruckData(newBigTruckData === 0 ? false : true);
+    setCheckSmallTruckData(newSmallTruckData === 0 ? false : true);
+    setCheckGasStationData(newGasStationData === 0 ? false : true);
+    setCheckDriverData(newDriverData === 0 ? false : true);
+    setUpdatePosition(false);
+  }
+
+  console.log("BasucData : ", checkBasicData);
+
+  const handleSavePosition = () => {
+    database
+      .ref("positions/")
+      .child(checkID)
+      .update({
+        Name: name,
+        BasicData: checkBasicData === false ? 0 : 1,
+        OprerationData: checkOrperationData === false ? 0 : 1,
+        FinancialData: checkFinancialData === false ? 0 : 1,
+        ReportData: checkReportData === false ? 0 : 1,
+        BigTruckData: checkBigTruckData === false ? 0 : 1,
+        SmallTruckData: checkSmallTruckData === false ? 0 : 1,
+        GasStationData: checkGasStationData === false ? 0 : 1,
+        DriverData: checkDriverData === false ? 0 : 1
+      })
+      .then(() => {
+        ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+        console.log("Data pushed successfully");
+        setUpdatePosition(true);
+      })
+      .catch((error) => {
+        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+        console.error("Error pushing data:", error);
+      });
+  }
+
+  console.log("Positon Detail : ", positionsDetail);
+
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
       <Typography
@@ -171,305 +265,618 @@ const Setting = () => {
       </Typography>
       <Divider />
       <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 130) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 280) }}>
-      <Grid container spacing={2} marginTop={2}>
-        <Grid item xs={12} sm={1.5} md={3} />
-        <Grid item xs={6} sm={4.5} md={3}>
-          <Button variant="contained" color={open === 1 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(1)}>
-            <AssignmentIndIcon fontSize="large" />
-          </Button>
-        </Grid>
-        <Grid item xs={6} sm={4.5} md={3}>
-          <Button variant="contained" color={open === 2 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(2)}>
-            <BusinessIcon fontSize="large" />
-          </Button>
-        </Grid>
-        {/* <Grid item xs={4} sm={3} md={2}>
-          <Button variant="contained" color={open === 3 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(3)}>
-            <PasswordIcon fontSize="large" />
-          </Button>
-        </Grid> */}
-        <Grid item xs={12} sm={1.5} md={3} />
-        <Grid item xs={12} marginTop={3}>
-          {
-            open === 1 ?
-              <Paper sx={{ height: "70vh", borderRadius: 5, padding: 2 }}>
-                <Typography variant="h6" fontWeight="bold" textAlign="center">ข้อมูลส่วนตัว</Typography>
-                <Divider sx={{ marginTop: 1 }} />
-                <Grid container spacing={2} marginTop={2} padding={5}>
-                  <Grid item xs={6}>
-                    <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
-                      <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>ชื่อ-สกุล : </Typography>
-                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Name}</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
-                      <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>ตำแหน่ง : </Typography>
-                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Position}</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
-                      <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>User : </Typography>
-                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.User}</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
-                      <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>เบอร์โทร : </Typography>
-                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Phone}</Typography>
-                    </Box>
-                  </Grid>
-                  {
-                    !openEditePassword &&
-                    <Grid item xs={12}>
-                      <Button variant="contained" color="warning" size="small" onClick={() => setOpenEditePassword(true)}>แก้ไขรหัสผ่าน</Button>
+        <Grid container spacing={2} marginTop={2}>
+          <Grid item xs={12} sm={1.5} md={3} />
+          <Grid item xs={4} sm={3} md={2}>
+            <Button variant="contained" color={open === 1 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(1)}>
+              <AssignmentIndIcon fontSize="large" />
+            </Button>
+          </Grid>
+          <Grid item xs={4} sm={3} md={2}>
+            <Button variant="contained" color={open === 3 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(3)}>
+              <PrivacyTipIcon fontSize="large" />
+            </Button>
+          </Grid>
+          <Grid item xs={4} sm={3} md={2}>
+            <Button variant="contained" color={open === 2 ? "warning" : "inherit"} fullWidth sx={{ height: "20vh", borderRadius: 5 }} onClick={() => setOpen(2)}>
+              <BusinessIcon fontSize="large" />
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={1.5} md={3} />
+          <Grid item xs={12} marginTop={3}>
+            {
+              open === 1 ?
+                <Paper sx={{ height: "70vh", borderRadius: 5, padding: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" textAlign="center">ข้อมูลส่วนตัว</Typography>
+                  <Divider sx={{ marginTop: 1 }} />
+                  <Grid container spacing={2} marginTop={2} padding={5}>
+                    <Grid item xs={6}>
+                      <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
+                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>ชื่อ-สกุล : </Typography>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Name}</Typography>
+                      </Box>
                     </Grid>
-                  }
-                  {
-                    openEditePassword &&
-                    <Grid item xs={12}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={3}>
-                          <Typography variant="subtitle1" fontWeight="bold" marginTop={1} gutterBottom>รหัสผ่านเดิม</Typography>
-                        </Grid>
-                        <Grid item xs={9}>
-                          <Paper component="form" >
-                            <TextField
-                              size="small"
-                              type={showPassword ? 'text' : 'password'}
-                              fullWidth
-                              value={currentPassword}
-                              onChange={(e) => setCurrentPassword(e.target.value)}
-                              InputProps={{
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <IconButton
-                                      onClick={handleTogglePassword}
-                                      edge="end"
-                                      aria-label="toggle password visibility"
-                                    >
-                                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Paper>
-                        </Grid>
-                        <Grid item xs={3}>
-                          <Typography variant="subtitle1" fontWeight="bold" marginTop={1} gutterBottom>รหัสผ่านใหม่</Typography>
-                        </Grid>
-                        <Grid item xs={9}>
-                          <Paper component="form" >
-                            <TextField
-                              size="small"
-                              type={showPassword ? 'text' : 'password'}
-                              fullWidth
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              InputProps={{
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <IconButton
-                                      onClick={handleTogglePassword}
-                                      edge="end"
-                                      aria-label="toggle password visibility"
-                                    >
-                                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Paper>
-                        </Grid>
-                        <Grid item xs={3}>
-                          <Typography variant="subtitle1" fontWeight="bold" marginTop={1} gutterBottom>รหัสผ่านใหม่อีกครั้ง</Typography>
-                        </Grid>
-                        <Grid item xs={9}>
-                          <Paper component="form" >
-                            <TextField
-                              size="small"
-                              type={showPassword ? 'text' : 'password'}
-                              fullWidth
-                              value={newPasswordAgain}
-                              onChange={(e) => setNewPasswordAgian(e.target.value)}
-                              InputProps={{
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <IconButton
-                                      onClick={handleTogglePassword}
-                                      edge="end"
-                                      aria-label="toggle password visibility"
-                                    >
-                                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Paper>
-                        </Grid>
-                        <Grid item xs={12} textAlign="center" marginTop={2}>
-                          <Button variant="contained" color="error" size="small" sx={{ marginRight: 2 }} onClick={() => setOpenEditePassword(false)}>ยกเลิก</Button>
-                          <Button variant="contained" color="success" size="small" onClick={handleChangePassword}>บันทึก</Button>
+                    <Grid item xs={6}>
+                      <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
+                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>ตำแหน่ง : </Typography>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Position}</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
+                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>User : </Typography>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.User}</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
+                        <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>เบอร์โทร : </Typography>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Phone}</Typography>
+                      </Box>
+                    </Grid>
+                    {
+                      !openEditePassword &&
+                      <Grid item xs={12}>
+                        <Button variant="contained" color="warning" size="small" onClick={() => setOpenEditePassword(true)}>แก้ไขรหัสผ่าน</Button>
+                      </Grid>
+                    }
+                    {
+                      openEditePassword &&
+                      <Grid item xs={12}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={3}>
+                            <Typography variant="subtitle1" fontWeight="bold" marginTop={1} gutterBottom>รหัสผ่านเดิม</Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Paper component="form" >
+                              <TextField
+                                size="small"
+                                type={showPassword ? 'text' : 'password'}
+                                fullWidth
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                InputProps={{
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      <IconButton
+                                        onClick={handleTogglePassword}
+                                        edge="end"
+                                        aria-label="toggle password visibility"
+                                      >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                      </IconButton>
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                            </Paper>
+                          </Grid>
+                          <Grid item xs={3}>
+                            <Typography variant="subtitle1" fontWeight="bold" marginTop={1} gutterBottom>รหัสผ่านใหม่</Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Paper component="form" >
+                              <TextField
+                                size="small"
+                                type={showPassword ? 'text' : 'password'}
+                                fullWidth
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                InputProps={{
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      <IconButton
+                                        onClick={handleTogglePassword}
+                                        edge="end"
+                                        aria-label="toggle password visibility"
+                                      >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                      </IconButton>
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                            </Paper>
+                          </Grid>
+                          <Grid item xs={3}>
+                            <Typography variant="subtitle1" fontWeight="bold" marginTop={1} gutterBottom>รหัสผ่านใหม่อีกครั้ง</Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Paper component="form" >
+                              <TextField
+                                size="small"
+                                type={showPassword ? 'text' : 'password'}
+                                fullWidth
+                                value={newPasswordAgain}
+                                onChange={(e) => setNewPasswordAgian(e.target.value)}
+                                InputProps={{
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      <IconButton
+                                        onClick={handleTogglePassword}
+                                        edge="end"
+                                        aria-label="toggle password visibility"
+                                      >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                      </IconButton>
+                                    </InputAdornment>
+                                  ),
+                                }}
+                              />
+                            </Paper>
+                          </Grid>
+                          <Grid item xs={12} textAlign="center" marginTop={2}>
+                            <Button variant="contained" color="error" size="small" sx={{ marginRight: 2 }} onClick={() => setOpenEditePassword(false)}>ยกเลิก</Button>
+                            <Button variant="contained" color="success" size="small" onClick={handleChangePassword}>บันทึก</Button>
+                          </Grid>
                         </Grid>
                       </Grid>
-                    </Grid>
-                  }
+                    }
 
-                </Grid>
-              </Paper>
-              : open === 2 ?
-                <Paper sx={{ height: "70vh", borderRadius: 5, padding: 2 }}>
-                  <Typography variant="h6" fontWeight="bold" textAlign="center">บริษัท</Typography>
-                  <Divider sx={{ marginTop: 1 }} />
-                  <InsertCompany />
-                  <TableContainer
-                    component={Paper}
-                    style={{ maxHeight: "90vh" }}
-                    sx={{ marginTop: 2 }}
-                  >
-                    <Table stickyHeader size="small" sx={{ width: "1280px" }}>
-                      <TableHead sx={{ height: "7vh" }}>
-                        <TableRow>
-                          <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                            ลำดับ
-                          </TablecellHeader>
-                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                            ชื่อบริษัท
-                          </TablecellHeader>
-                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
-                            ที่อยู่
-                          </TablecellHeader>
-                          <TablecellHeader />
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {
-                          companyDetail.map((row, index) => (
-                            <TableRow>
-                              <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                              <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                              <TableCell sx={{ textAlign: "center" }}>{row.Address}</TableCell>
-                              <TableCell sx={{ textAlign: "center" }}>
-                                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpenDetailCompany(row.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
-                              </TableCell>
-                              <Dialog
-                                open={openDetailCompany === row.id ? true : false}
-                                keepMounted
-                                onClose={() => setOpenDetailCompany(false)}
-                                sx={{
-                                  "& .MuiDialog-paper": {
-                                    width: "800px", // กำหนดความกว้างแบบ Fixed
-                                    maxWidth: "none", // ปิดการปรับอัตโนมัติ
-                                  },
-                                }}
-                              >
-                                <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
-                                  <Grid container spacing={2}>
-                                    <Grid item xs={10}>
-                                      <Typography variant="h6" fontWeight="bold" color="white" >รายละเอียดบริษัท{row.Name}</Typography>
-                                    </Grid>
-                                    <Grid item xs={2} textAlign="right">
-                                      <IconButtonError onClick={() => setOpenDetailCompany(false)}>
-                                        <CancelIcon />
-                                      </IconButtonError>
-                                    </Grid>
-                                  </Grid>
-                                </DialogTitle>
-                                <DialogContent>
-                                  <Paper
-                                    sx={{ p: 2, border: "1px solid" + theme.palette.grey[600], marginTop: 2, marginBottom: 2 }}
-                                  >
-                                    <Grid container spacing={1}>
-                                      <Grid item xs={1}>
-                                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ชื่อ-สกุล</Typography>
-                                      </Grid>
-                                      <Grid item xs={11}>
-                                        <TextField fullWidth variant="standard" value={row.Name} disabled={update ? true : false} />
-                                      </Grid>
-                                      <Grid item xs={1.5}>
-                                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>บ้านเลขที่</Typography>
-                                      </Grid>
-                                      <Grid item xs={2.5}>
-                                        <TextField fullWidth variant="standard" value={row.Address.split(",")[0] === undefined ? "-" : row.Address.split(",")[0]} disabled={update ? true : false} />
-                                      </Grid>
-                                      <Grid item xs={1}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>หมู่ที่</Typography>
-                                      </Grid>
-                                      <Grid item xs={3}>
-                                        <TextField fullWidth variant="standard" value={row.Address.split(",")[1] === undefined ? "-" : row.Address.split(",")[1]} disabled={update ? true : false} />
-                                      </Grid>
-                                      <Grid item xs={1}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ตำบล</Typography>
-                                      </Grid>
-                                      <Grid item xs={3}>
-                                        <TextField fullWidth variant="standard" value={row.Address.split(",")[2] === undefined ? "-" : row.Address.split(",")[2]} disabled={update ? true : false} />
-                                      </Grid>
-
-                                      <Grid item xs={1}>
-                                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>อำเภอ</Typography>
-                                      </Grid>
-                                      <Grid item xs={3}>
-                                        <TextField fullWidth variant="standard" value={row.Address.split(",")[3] === undefined ? "-" : row.Address.split(",")[3]} disabled={update ? true : false} />
-                                      </Grid>
-                                      <Grid item xs={1}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>จังหวัด</Typography>
-                                      </Grid>
-                                      <Grid item xs={3}>
-                                        <TextField fullWidth variant="standard" value={row.Address.split(",")[4] === undefined ? "-" : row.Address.split(",")[4]} disabled={update ? true : false} />
-                                      </Grid>
-                                      <Grid item xs={2}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รหัสไปรษณีย์</Typography>
-                                      </Grid>
-                                      <Grid item xs={2}>
-                                        <TextField fullWidth variant="standard" value={row.Address.split(",")[5] === undefined ? "-" : row.Address.split(",")[5]} disabled={update ? true : false} />
-                                      </Grid>
-                                      <Grid item xs={2.5}>
-                                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Latitude(ละติจูด)</Typography>
-                                      </Grid>
-                                      <Grid item xs={3.5}>
-                                        <TextField fullWidth variant="standard" value={row.Lat} disabled={update ? true : false} />
-                                      </Grid>
-                                      <Grid item xs={2.5}>
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>Longitude(ลองจิจูด)</Typography>
-                                      </Grid>
-                                      <Grid item xs={3.5}>
-                                        <TextField fullWidth variant="standard" value={row.Lng} disabled={update ? true : false} />
-                                      </Grid>
-                                    </Grid>
-                                  </Paper>
-                                  {
-                                    update ?
-                                      <Box marginBottom={2} textAlign="center">
-                                        <Button variant="contained" color="info" sx={{ marginRight: 2 }}>พิมพ์</Button>
-                                        <Button variant="contained" color="warning" onClick={() => setUpdate(false)} >แก้ไข</Button>
-                                      </Box>
-                                      :
-                                      <Box marginBottom={2} textAlign="center">
-                                        <Button variant="contained" color="success" sx={{ marginRight: 2 }} onClick={() => setUpdate(true)} >บันทึก</Button>
-                                        <Button variant="contained" color="error" onClick={() => setUpdate(true)} >ยกเลิก</Button>
-                                      </Box>
-                                  }
-                                </DialogContent>
-                                <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                                  <Button onClick={() => setOpenDetailCompany(false)} variant="contained" color="success">บันทึก</Button>
-                                  <Button onClick={() => setOpenDetailCompany(false)} variant="contained" color="error">ยกเลิก</Button>
-                                </DialogActions>
-                              </Dialog>
-                            </TableRow>
-                          ))
-                        }
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                  </Grid>
                 </Paper>
-                : ""
-          }
+                : open === 2 ?
+                  <Paper sx={{ height: "70vh", borderRadius: 5, padding: 2 }}>
+                    <Typography variant="h6" fontWeight="bold" textAlign="center">บริษัท</Typography>
+                    <Divider sx={{ marginTop: 1 }} />
+                    <InsertCompany />
+                    <TableContainer
+                      component={Paper}
+                      style={{ maxHeight: "90vh" }}
+                      sx={{ marginTop: 2 }}
+                    >
+                      <Table stickyHeader size="small" sx={{ width: "1280px" }}>
+                        <TableHead sx={{ height: "7vh" }}>
+                          <TableRow>
+                            <TablecellSetting width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                              ลำดับ
+                            </TablecellSetting>
+                            <TablecellSetting sx={{ textAlign: "center", fontSize: 16 }}>
+                              ชื่อบริษัท
+                            </TablecellSetting>
+                            <TablecellSetting sx={{ textAlign: "center", fontSize: 16 }}>
+                              ที่อยู่
+                            </TablecellSetting>
+                            <TablecellSetting />
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {
+                            companyDetail.map((row, index) => (
+                              <TableRow>
+                                <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
+                                <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
+                                <TableCell sx={{ textAlign: "center" }}>{row.Address}</TableCell>
+                                <TableCell sx={{ textAlign: "center" }}>
+                                  <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpenDetailCompany(row.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
+                                </TableCell>
+                                <Dialog
+                                  open={openDetailCompany === row.id ? true : false}
+                                  keepMounted
+                                  onClose={() => setOpenDetailCompany(false)}
+                                  sx={{
+                                    "& .MuiDialog-paper": {
+                                      width: "800px", // กำหนดความกว้างแบบ Fixed
+                                      maxWidth: "none", // ปิดการปรับอัตโนมัติ
+                                    },
+                                  }}
+                                >
+                                  <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
+                                    <Grid container spacing={2}>
+                                      <Grid item xs={10}>
+                                        <Typography variant="h6" fontWeight="bold" color="white" >รายละเอียดบริษัท{row.Name}</Typography>
+                                      </Grid>
+                                      <Grid item xs={2} textAlign="right">
+                                        <IconButtonError onClick={() => setOpenDetailCompany(false)}>
+                                          <CancelIcon />
+                                        </IconButtonError>
+                                      </Grid>
+                                    </Grid>
+                                  </DialogTitle>
+                                  <DialogContent>
+                                    <Paper
+                                      sx={{ p: 2, border: "1px solid" + theme.palette.grey[600], marginTop: 2, marginBottom: 2 }}
+                                    >
+                                      <Grid container spacing={1}>
+                                        <Grid item xs={1}>
+                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ชื่อ-สกุล</Typography>
+                                        </Grid>
+                                        <Grid item xs={11}>
+                                          <TextField fullWidth variant="standard" value={row.Name} disabled={update ? true : false} />
+                                        </Grid>
+                                        <Grid item xs={1.5}>
+                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>บ้านเลขที่</Typography>
+                                        </Grid>
+                                        <Grid item xs={2.5}>
+                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[0] === undefined ? "-" : row.Address.split(",")[0]} disabled={update ? true : false} />
+                                        </Grid>
+                                        <Grid item xs={1}>
+                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>หมู่ที่</Typography>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[1] === undefined ? "-" : row.Address.split(",")[1]} disabled={update ? true : false} />
+                                        </Grid>
+                                        <Grid item xs={1}>
+                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ตำบล</Typography>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[2] === undefined ? "-" : row.Address.split(",")[2]} disabled={update ? true : false} />
+                                        </Grid>
+
+                                        <Grid item xs={1}>
+                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>อำเภอ</Typography>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[3] === undefined ? "-" : row.Address.split(",")[3]} disabled={update ? true : false} />
+                                        </Grid>
+                                        <Grid item xs={1}>
+                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>จังหวัด</Typography>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[4] === undefined ? "-" : row.Address.split(",")[4]} disabled={update ? true : false} />
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รหัสไปรษณีย์</Typography>
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[5] === undefined ? "-" : row.Address.split(",")[5]} disabled={update ? true : false} />
+                                        </Grid>
+                                        <Grid item xs={2.5}>
+                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Latitude(ละติจูด)</Typography>
+                                        </Grid>
+                                        <Grid item xs={3.5}>
+                                          <TextField fullWidth variant="standard" value={row.Lat} disabled={update ? true : false} />
+                                        </Grid>
+                                        <Grid item xs={2.5}>
+                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>Longitude(ลองจิจูด)</Typography>
+                                        </Grid>
+                                        <Grid item xs={3.5}>
+                                          <TextField fullWidth variant="standard" value={row.Lng} disabled={update ? true : false} />
+                                        </Grid>
+                                      </Grid>
+                                    </Paper>
+                                    {
+                                      update ?
+                                        <Box marginBottom={2} textAlign="center">
+                                          <Button variant="contained" color="info" sx={{ marginRight: 2 }}>พิมพ์</Button>
+                                          <Button variant="contained" color="warning" onClick={() => setUpdate(false)} >แก้ไข</Button>
+                                        </Box>
+                                        :
+                                        <Box marginBottom={2} textAlign="center">
+                                          <Button variant="contained" color="success" sx={{ marginRight: 2 }} onClick={() => setUpdate(true)} >บันทึก</Button>
+                                          <Button variant="contained" color="error" onClick={() => setUpdate(true)} >ยกเลิก</Button>
+                                        </Box>
+                                    }
+                                  </DialogContent>
+                                  <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
+                                    <Button onClick={() => setOpenDetailCompany(false)} variant="contained" color="success">บันทึก</Button>
+                                    <Button onClick={() => setOpenDetailCompany(false)} variant="contained" color="error">ยกเลิก</Button>
+                                  </DialogActions>
+                                </Dialog>
+                              </TableRow>
+                            ))
+                          }
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Paper>
+                  :
+                  <Paper sx={{ height: "70vh", borderRadius: 5, padding: 2 }}>
+                    <Typography variant="h6" fontWeight="bold" textAlign="center">จัดการสิทธิ์เข้าใช้งานระบบ</Typography>
+                    <Divider sx={{ marginTop: 1 }} />
+                    {
+                      !insertPositions &&
+                      <Grid container spacing={2} sx={{ marginBottom: -3, marginTop: 1 }}>
+                        <Grid item xs={10}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            value={positionName}
+                            onChange={(e) => setPositionName(e.target.value)}
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Typography sx={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                    กรุณากรอกชื่อตำแหน่ง :
+                                  </Typography>
+                                </InputAdornment>
+                              )
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={1}>
+                          <Button variant="contained" color="success" size="small" fullWidth sx={{ marginTop: 0.5 }} onClick={handleSave} >บันทึก</Button>
+                        </Grid>
+                        <Grid item xs={1}>
+                          <Button variant="contained" color="error" size="small" fullWidth sx={{ marginTop: 0.5 }} onClick={() => setInsertPositions(true)}>ยกเลิก</Button>
+                        </Grid>
+                      </Grid>
+                    }
+                    <Grid container spacing={2} marginTop={2} padding={2}>
+                      <Grid item xs={12}>
+                        <TableContainer
+                          component={Paper}
+                          style={{ maxHeight: "90vh" }}
+                        >
+                          <Table stickyHeader size="small" sx={{ width: "1245px" }}>
+                            <TableHead sx={{ height: "7vh" }}>
+                              <TableRow>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16 }} rowSpan={2} width={50}>
+                                  ลำดับ
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 280 }} rowSpan={2}>
+                                  ตำแหน่ง
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 900 }} colSpan={8}>
+                                  สิทธิ์
+                                </TablecellSetting>
+                                <TablecellSetting rowSpan={2} width={50} sx={{ textAlign: "center",position: 'sticky', zIndex: 3, right: 0, }}>
+                                  <IconButtonInfo onClick={() => setInsertPositions(false)}>
+                                    <AddBoxIcon />
+                                  </IconButtonInfo>
+                                </TablecellSetting>
+                              </TableRow>
+                              <TableRow>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  ข้อมูลทั่วไป
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  ปฎิบัติงาน
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  ชำระเงิน
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  รายงาน
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  รถใหญ่
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  รถเล็ก
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  หน้าลาน
+                                </TablecellSetting>
+                                <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                  พขร.
+                                </TablecellSetting>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {
+                                positionsDetail.map((row, index) => (
+                                  <TableRow>
+                                    <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      {
+                                        !updatePosition && checkIndex === index  ?
+                                          <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" fullWidth
+                                              InputLabelProps={{
+                                                sx: {
+                                                  fontSize: '14px',
+                                                },
+                                              }}
+                                              sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                  height: '30px', // ปรับความสูงของ TextField
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                  fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                  fontWeight: 'bold',
+                                                  padding: '2px 6px', // ปรับ padding ภายใน input
+                                                  textAlign: "center"
+                                                },
+                                              }}
+                                              value={name}
+                                              onChange={(e) => setName(e.target.value)}
+                                            />
+                                          </Paper>
+                                          :
+                                          row.Name
+                                      }
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {
+                                          !updatePosition && checkIndex === index ?
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  checked={checkBasicData}
+                                                  onChange={() => setCheckBasicData(!checkBasicData)}
+                                                  size="small"
+                                                />
+                                              }
+                                            />
+                                            :
+                                            (row.BasicData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {
+                                          !updatePosition && checkIndex === index ?
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  checked={checkOrperationData}
+                                                  onChange={() => setCheckOprerationData(!checkOrperationData)}
+                                                  size="small"
+                                                />
+                                              }
+                                            />
+                                            :
+                                            (row.OprerationData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {
+                                          !updatePosition && checkIndex === index ?
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  checked={checkFinancialData}
+                                                  onChange={() => setCheckFinancialData(!checkFinancialData)}
+                                                  size="small"
+                                                />
+                                              }
+                                            />
+                                            :
+                                            (row.FinancialData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {
+                                          !updatePosition && checkIndex === index ?
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  checked={checkReportData}
+                                                  onChange={() => setCheckReportData(!checkReportData)}
+                                                  size="small"
+                                                />
+                                              }
+                                            />
+                                            :
+                                            (row.ReportData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {
+                                          !updatePosition && checkIndex === index ?
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  checked={checkBigTruckData}
+                                                  onChange={() => setCheckBigTruckData(!checkBigTruckData)}
+                                                  size="small"
+                                                />
+                                              }
+                                            />
+                                            :
+                                            (row.BigTruckData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {
+                                          !updatePosition && checkIndex === index ?
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  checked={checkSmallTruckData}
+                                                  onChange={() => setCheckSmallTruckData(!checkSmallTruckData)}
+                                                  size="small"
+                                                />
+                                              }
+                                            />
+                                            :
+                                            (row.SmallTruckData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {
+                                          !updatePosition && checkIndex === index ?
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  checked={checkGasStationData}
+                                                  onChange={() => setCheckGasStationData(!checkGasStationData)}
+                                                  size="small"
+                                                />
+                                              }
+                                            />
+                                            :
+                                            (row.GasStationData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center" }}>
+                                      <Box display="flex" justifyContent="center" alignItems="center">
+                                        {!updatePosition && checkIndex === index ?
+                                          <FormControlLabel
+                                            control={
+                                              <Checkbox
+                                                checked={checkDriverData}
+                                                onChange={() => setCheckDriverData(!checkDriverData)}
+                                                size="small"
+                                              />
+                                            }
+                                          />
+                                          :
+                                          (row.DriverData === 0 ? <CloseIcon color="error" /> : <DoneIcon color="success" />)
+
+                                        }
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: "center",position: 'sticky', right: 0,backgroundColor: "white" }}>
+                                      {
+                                        !updatePosition && checkIndex === index ?
+                                          <Box>
+                                            <Button
+                                              variant="contained"
+                                              color="success"
+                                              size="small"
+                                              fullWidth
+                                              sx={{ height: 20, marginBottom: 0.5 }}
+                                              onClick={handleSavePosition}
+                                            >
+                                              บันทึก
+                                            </Button>
+                                            <Button
+                                              variant="contained"
+                                              color="error"
+                                              size="small"
+                                              fullWidth
+                                              sx={{ height: 20 }}
+                                              onClick={() => setUpdatePosition(true)}
+                                            >
+                                              ยกเลิก
+                                            </Button>
+                                          </Box>
+                                          :
+                                          <Button
+                                            variant="contained"
+                                            color="warning"
+                                            size="small"
+                                            fullWidth
+                                            onClick={() => handleUpdate(index, row.id, row.Name, row.BasicData, row.OprerationData, row.FinancialData, row.ReportData, row.BigTruckData, row.SmallTruckData, row.GasStationData, row.DriverData)}
+                                          >
+                                            แก้ไข
+                                          </Button>
+                                      }
+                                    </TableCell>
+                                  </TableRow>
+                                ))
+                              }
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </Grid>
+                    </Grid>
+
+                  </Paper>
+            }
+          </Grid>
         </Grid>
-      </Grid>
       </Box>
     </Container>
   );

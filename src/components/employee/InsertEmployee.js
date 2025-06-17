@@ -39,7 +39,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { IconButtonError, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
 import UploadButton from "./UploadButton";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { auth, database } from "../../server/firebase";
@@ -68,20 +68,28 @@ const InsertEmployee = (props) => {
     const [idCard, setIDCard] = React.useState('');
     const [trucks, setTrucks] = React.useState(0);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
-      // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-      useEffect(() => {
+    const [checkBasicData, setCheckBasicData] = useState(false);
+    const [checkOrperationData, setCheckOprerationData] = useState(false);
+    const [checkFinancialData, setCheckFinancialData] = useState(false);
+    const [checkReportData, setCheckReportData] = useState(false);
+    const [checkBigTruckData, setCheckBigTruckData] = useState(false);
+    const [checkSmallTruckData, setCheckSmallTruckData] = useState(false);
+    const [checkGasStationData, setCheckGasStationData] = useState(false);
+    const [checkDriverData, setCheckDriverData] = useState(false);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
         const handleResize = () => {
-          setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
         };
-    
+
         window.addEventListener('resize', handleResize); // เพิ่ม event listener
-    
+
         // ลบ event listener เมื่อ component ถูกทำลาย
         return () => {
-          window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', handleResize);
         };
-      }, []);
+    }, []);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -113,9 +121,31 @@ const InsertEmployee = (props) => {
     const [check, setCheck] = React.useState(1);
 
     const handleAddPosition = () => {
-        database.ref("positions/").child(positionDetail.length).set(newPosition)
-        setOpenPosition(false);
-        setNewPosition("");
+        database
+            .ref("positions/")
+            .child(positionDetail.length)
+            .update({
+                id: (positionDetail.length) + 1,
+                Name: newPosition,
+                BasicData: checkBasicData === false ? 0 : 1,
+                OprerationData: checkOrperationData === false ? 0 : 1,
+                FinancialData: checkFinancialData === false ? 0 : 1,
+                ReportData: checkReportData === false ? 0 : 1,
+                BigTruckData: checkBigTruckData === false ? 0 : 1,
+                SmallTruckData: checkSmallTruckData === false ? 0 : 1,
+                GasStationData: checkGasStationData === false ? 0 : 1,
+                DriverData: checkDriverData === false ? 0 : 1
+            })
+            .then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+                setOpenPosition(false);
+                setNewPosition("");
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
     }
 
     const handlePost = () => {
@@ -304,7 +334,7 @@ const InsertEmployee = (props) => {
                         </Grid>
                         <Grid item md={4.5} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 13.5} }} gutterBottom>ชื่อ</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 13.5 } }} gutterBottom>ชื่อ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                                 </Paper>
@@ -312,7 +342,7 @@ const InsertEmployee = (props) => {
                         </Grid>
                         <Grid item md={4.5} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 12.5} } } gutterBottom>สกุล</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 12.5 } }} gutterBottom>สกุล</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
                                 </Paper>
@@ -323,7 +353,7 @@ const InsertEmployee = (props) => {
                                 <>
                                     <Grid item md={6} xs={12}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 12} }} gutterBottom>User</Typography>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 12 } }} gutterBottom>User</Typography>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                                 <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
                                             </Paper>
@@ -344,7 +374,7 @@ const InsertEmployee = (props) => {
                         }
                         <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 4, xs: 3.5} }} gutterBottom>ประเภทพนักงาน</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 4, xs: 3.5 } }} gutterBottom>ประเภทพนักงาน</Typography>
                                 <Paper
                                     component="form" sx={{ width: "100%" }}>
                                     <Select
@@ -389,8 +419,8 @@ const InsertEmployee = (props) => {
                                                         กรุณาเลือกตำแหน่ง
                                                     </MenuItem>
                                                     {
-                                                        positionDetail.map((p) => (
-                                                            <MenuItem value={p}>{p}</MenuItem>
+                                                        positionDetail.map((row) => (
+                                                            <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                                         ))
                                                     }
                                                 </Select>
@@ -423,6 +453,162 @@ const InsertEmployee = (props) => {
                                             </Box>
                                         }
                                     </Grid>
+                                    {
+                                        openPosition &&
+                                        <Grid item md={12} xs={12}>
+                                            <TableContainer
+                                                component={Paper}
+                                                style={{ maxHeight: "90vh" }}
+                                            >
+                                                <Table stickyHeader size="small" sx={{ width: "83s0px" }}>
+                                                    <TableHead sx={{ height: "3vh" }}>
+                                                        <TableRow>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                ข้อมูลทั่วไป
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                ปฎิบัติงาน
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                ชำระเงิน
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                รายงาน
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                รถใหญ่
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                รถเล็ก
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                หน้าลาน
+                                                            </TablecellSelling>
+                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                                พขร.
+                                                            </TablecellSelling>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        <TableRow>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkBasicData}
+                                                                                onChange={() => setCheckBasicData(!checkBasicData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkOrperationData}
+                                                                                onChange={() => setCheckOprerationData(!checkOrperationData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkFinancialData}
+                                                                                onChange={() => setCheckFinancialData(!checkFinancialData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkReportData}
+                                                                                onChange={() => setCheckReportData(!checkReportData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkBigTruckData}
+                                                                                onChange={() => setCheckBigTruckData(!checkBigTruckData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkSmallTruckData}
+                                                                                onChange={() => setCheckSmallTruckData(!checkSmallTruckData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkGasStationData}
+                                                                                onChange={() => setCheckGasStationData(!checkGasStationData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <Box display="flex" justifyContent="center" alignItems="center">
+                                                                    <FormControlLabel
+                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={checkDriverData}
+                                                                                onChange={() => setCheckDriverData(!checkDriverData)}
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Box>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        </Grid>
+                                    }
                                     <Grid item md={6} xs={12}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
                                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ให้สิทธิ์</Typography>
@@ -558,7 +744,7 @@ const InsertEmployee = (props) => {
                                         <Grid item md={4} xs={9}>
                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField size="small" fullWidth value={`t${driver.length.toString().padStart(4, '0')}`} disabled/>
+                                                    <TextField size="small" fullWidth value={`t${driver.length.toString().padStart(4, '0')}`} disabled />
                                                 </Paper>
                                             </Box>
                                         </Grid>
@@ -572,7 +758,7 @@ const InsertEmployee = (props) => {
                                                 </Paper>
                                             </Box>
                                         </Grid>
-                                        <Grid item md={12}  xs={12}>
+                                        <Grid item md={12} xs={12}>
                                             <Divider>
                                                 <Chip label="ข้อมูลการเงินของพนักงานขับรถ" size="small" />
                                             </Divider>
@@ -650,7 +836,7 @@ const InsertEmployee = (props) => {
                                             </Paper>
                                         </Grid>
                                         <Grid item md={6} xs={12} />
-                                        <Grid item md={12}  xs={12}>
+                                        <Grid item md={12} xs={12}>
                                             <Divider>
                                                 <Chip label="ใบอนุญาตการขับขี่รถ" size="small" />
                                             </Divider>
@@ -671,7 +857,7 @@ const InsertEmployee = (props) => {
                                                 <TextField size="small" fullWidth value={expiration} onChange={(e) => setExpiration(e.target.value)} />
                                             </Paper>
                                         </Grid>
-                                        <Grid item md={12}  xs={12}>
+                                        <Grid item md={12} xs={12}>
                                             <UploadButton />
                                         </Grid>
                                     </>

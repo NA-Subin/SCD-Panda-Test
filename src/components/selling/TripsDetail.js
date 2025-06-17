@@ -223,7 +223,7 @@ const TripsDetail = (props) => {
                         totalWeight={trips.TotalWeight}
                         weightTruck={trips.WeightTruck}
                         depotTrip={trips.Depot}
-                        registrations={`${trips.Driver}:${trips.Registration}`}
+                        registrations={trips.TruckType === "รถใหญ่" ? `${trips.Registration}:${trips.Driver}:รถบริษัท` : `${trips.Registration}:${trips.Driver}:รถรับจ้างขนส่ง`}
                     />
                 </TableCell>
                 {/* <TableCell sx={{

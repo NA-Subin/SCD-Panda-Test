@@ -1181,16 +1181,17 @@ const InsertTrips = () => {
                 TotalWeight: (parseFloat(weightH) + parseFloat(weightL) + parseFloat(weight)),
                 Status: status,
                 StatusTrip: "กำลังจัดเที่ยววิ่ง",
-                TruckType: "รถใหญ่",
+                TruckType: registration.split(":")[4] === "รถบริษัท" ? "รถใหญ่" : "รถรับจ้างขนส่ง",
                 ...orderTrip,
                 ...ticketTrip
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
-                database
+                if(registration.split(":")[4] === "รถบริษัท"){
+                    database
                     .ref("truck/registration/")
-                    .child((registration.split(":")[0]) - 1)
+                    .child(Number(registration.split(":")[0]) - 1)
                     .update({
                         Status: "TR:" + trip.length
                     })
@@ -1203,6 +1204,23 @@ const InsertTrips = () => {
                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                         console.error("Error pushing data:", error);
                     });
+                }else{
+                    database
+                    .ref("truck/transport/")
+                    .child(Number(registration.split(":")[0]) - 1)
+                    .update({
+                        Status: "TR:" + trip.length
+                    })
+                    .then(() => {
+                        setOpen(false);
+                        console.log("Data pushed successfully");
+
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+                }
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -1338,9 +1356,14 @@ const InsertTrips = () => {
     const getTickets = () => {
         if (!registration || registration === "0:0:0:0:0") return [];
 
-        const selectedTruck = allTruck.find(
-            (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+        const selectedTruck = getDriver().find(
+            (item) =>
+                item.Type === "รถบริษัท" ?
+                    (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                    : (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
         );
+
+        console.log("selectTicket : ", selectedTruck);
 
         if (!selectedTruck) return [];
 
@@ -1369,8 +1392,14 @@ const InsertTrips = () => {
     const getCustomers = () => {
         if (!registration || registration === "0:0:0:0:0") return [];
 
-        const selectedTruck = allTruck.find(
-            (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+        // const selectedTruck = allTruck.find(
+        //     (item) => `${item.id}:${item.RegHead}:${item.Driver}:` === registration.split("รถบริษัท")[0]
+        // );
+        const selectedTruck = getDriver().find(
+            (item) =>
+                item.Type === "รถบริษัท" ?
+                    (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                    : (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
         );
 
         if (!selectedTruck) return [];
@@ -1386,19 +1415,16 @@ const InsertTrips = () => {
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
 
-            ...(selectedTruck.type === "รถใหญ่"
-                ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ")
-                    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-                    .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
-                : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ")
-                    .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-                    .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
-            ),
+            ...[...ticketsB].filter((item) => item.Status === "ลูกค้าประจำ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);
     };
 
+    console.log("ticket : ", getTickets());
+    console.log("registraation : ", registration);
     // const getTickets = () => {
     //     if (codeCustomer === "") {
     //         // รวมข้อมูลทั้งหมด พร้อมเพิ่ม `type` ให้กับแต่ละรายการ
@@ -1549,14 +1575,14 @@ const InsertTrips = () => {
                                                 option.Type === "รถบริษัท" ?
                                                     `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail.split(":")[1] : ""}`
                                                     :
-                                                    `${option.Name ? option.Name : ""} ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}` }`
+                                                    `${option.Name ? option.Name : ""} ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`
                                             }
                                             isOptionEqualToValue={(option, value) => option.id === value.id && option.Type === value.Type}
                                             value={registration ? getDriver().find(item =>
                                                 item.Type === "รถบริษัท" ?
                                                     (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
                                                     : item.Type === "รถรับจ้างขนส่ง" ?
-                                                        (`${item.id}:${item.Registration}:${item.Name}:${item.Type}` === registration)
+                                                        (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
                                                         : null
                                             )
                                                 :
@@ -1568,7 +1594,7 @@ const InsertTrips = () => {
                                                     newValue.Type === "รถบริษัท" ?
                                                         handleRegistration(`${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.Type}`)
                                                         :
-                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.Name}:${newValue.Type}`); // อัพเดตค่าเมื่อเลือก
+                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.id}:${newValue.Name}:${newValue.Type}`); // อัพเดตค่าเมื่อเลือก
                                                 } else {
                                                     setRegistration("0:0:0:0:0");
                                                 }
@@ -1592,7 +1618,7 @@ const InsertTrips = () => {
                                                         option.Type === "รถบริษัท" ?
                                                             <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail.split(":")[1]}`}</Typography>
                                                             :
-                                                            <Typography fontSize="16px">{`${option.Name}  ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}` }`}</Typography>
+                                                            <Typography fontSize="16px">{`${option.Name}  ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`}</Typography>
                                                     }
                                                 </li>
                                             )}
@@ -2235,9 +2261,9 @@ const InsertTrips = () => {
                                             value={(() => {
                                                 const selectedItem = getDriver().find(item =>
                                                     item.Type === "รถบริษัท" ?
-                                                    (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
-                                                    :
-                                                    (`${item.id}:${item.Registration}:${item.Name}:${item.Type}` === registration)
+                                                        (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                                                        :
+                                                        (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
                                                 );
                                                 return selectedItem && selectedItem.Type === "รถบริษัท"
                                                     ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""}`
@@ -2648,31 +2674,31 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 {
-                                    registration.split(":")[3] !== "รถรับจ้างขนส่ง" &&
-                                        <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
-                                            <Paper sx={{ width: "100%", marginTop: -1 }}
-                                                component="form">
-                                                <TextField
-                                                    size="small"
-                                                    fullWidth
-                                                    value={new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2,
-                                                    }).format(costTrip)}
-                                                    sx={{
-                                                        "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": {
-                                                            fontSize: "16px",
-                                                            padding: "2px 6px",
-                                                        },
-                                                        borderRadius: 10
-                                                    }}
-                                                />
-                                            </Paper>
-                                        </Grid>
+                                    registration.split(":")[4] !== "รถรับจ้างขนส่ง" &&
+                                    <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                        <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
+                                        <Paper sx={{ width: "100%", marginTop: -1 }}
+                                            component="form">
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(costTrip)}
+                                                sx={{
+                                                    "& .MuiOutlinedInput-root": { height: "30px" },
+                                                    "& .MuiInputBase-input": {
+                                                        fontSize: "16px",
+                                                        padding: "2px 6px",
+                                                    },
+                                                    borderRadius: 10
+                                                }}
+                                            />
+                                        </Paper>
+                                    </Grid>
                                 }
-                                <Grid item md={registration.split(":")[3] !== "รถรับจ้างขนส่ง" ? 4 : 6} xs={registration.split(":")[3] !== "รถรับจ้างขนส่ง" ? 6 : 12} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={registration.split(":")[4] !== "รถรับจ้างขนส่ง" ? 4 : 6} xs={registration.split(":")[4] !== "รถรับจ้างขนส่ง" ? 6 : 12} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -1 }}
                                         component="form">

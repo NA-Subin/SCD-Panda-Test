@@ -85,22 +85,22 @@ const TripsBigTruck = () => {
         const itemDate = dayjs(item.DateStart,"DD/MM/YYYY");
         return (
             check === 2 ?
-                item.TruckType === "รถใหญ่" &&
+                (item.TruckType === "รถใหญ่" || item.TruckType === "รถรับจ้างขนส่ง") &&
                 item.StatusTrip === "กำลังจัดเที่ยววิ่ง" &&
                 //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
                 itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
                 : check === 3 ?
-                    item.TruckType === "รถใหญ่" &&
+                    (item.TruckType === "รถใหญ่" || item.TruckType === "รถรับจ้างขนส่ง") &&
                     item.StatusTrip === "ยกเลิก" &&
                     //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
                     itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
                     : check === 4 ?
-                        item.TruckType === "รถใหญ่" &&
+                        (item.TruckType === "รถใหญ่" || item.TruckType === "รถรับจ้างขนส่ง") &&
                         item.StatusTrip === "จบทริป" &&
                         //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
                         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
                         :
-                        item.TruckType === "รถใหญ่" &&
+                        (item.TruckType === "รถใหญ่" || item.TruckType === "รถรับจ้างขนส่ง") &&
                         //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
                         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
         );
