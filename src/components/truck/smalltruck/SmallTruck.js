@@ -168,6 +168,9 @@ const SmallTruck = (props) => {
                       ลำดับ
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                      ชื่อย่อ
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       ทะเบียน
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
@@ -193,6 +196,7 @@ const SmallTruck = (props) => {
                     truck.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                       <TableRow >
                         <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.ShortName}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.RegHead}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.VehicleRegistration}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.RepairTruck.split(":")[1]}</TableCell>

@@ -1324,17 +1324,6 @@ const InsertTrips = () => {
         setTotalWeight(total);
     };
 
-    React.useEffect(() => {
-        const currentRow = allTruck.find((item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration);
-        if (currentRow) {
-            if (currentRow.type === "รถใหญ่") {
-                setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
-            } else {
-                setWeight(currentRow.Weight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
-            }
-        }
-    }, [registration, allTruck]);
-
     const getDriver = () => {
         const driverss = [
             ...[...truckH]
@@ -1422,6 +1411,22 @@ const InsertTrips = () => {
 
         return customers.filter((item) => item.id || item.TicketsCode);
     };
+
+    React.useEffect(() => {
+        const currentRow = getDriver().find(
+            (item) =>
+                item.Type === "รถบริษัท" ?
+                    (`${item.id}:${item.RegHead}:${item.Driver}:${item.Type}` === registration)
+                    : (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
+        );
+        if (currentRow) {
+            if (currentRow.type === "รถใหญ่") {
+                setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
+            } else {
+                setWeight(currentRow.Weight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
+            }
+        }
+    }, [registration, getDriver()]);
 
     console.log("ticket : ", getTickets());
     console.log("registraation : ", registration);

@@ -44,6 +44,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import OrderDetail from "./OrderDetail";
 import SellingDetail from "./SellingDetail";
 import "../../theme/scrollbar.css"
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const InsertTrips = () => {
     const [menu, setMenu] = React.useState(0);
@@ -54,8 +55,9 @@ const InsertTrips = () => {
     const [tickets, setTickets] = React.useState("0:0");
     const [customers, setCustomers] = React.useState("0:0");
     const [customer, setCustomer] = React.useState("0:0");
+    const [driverss, setDriverss] = React.useState("0:0");
     const [selectedValue, setSelectedValue] = useState('');
-    const [registration, setRegistration] = React.useState("0:0:0:0");
+    const [registration, setRegistration] = React.useState("0:0");
     const [weight, setWeight] = React.useState(0);
     const [totalWeight, setTotalWeight] = React.useState(0);
     const [showTickers, setShowTickers] = React.useState(true);
@@ -71,6 +73,14 @@ const InsertTrips = () => {
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
     const [editMode, setEditMode] = useState(true);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    const { reghead, small, transport, drivers } = useBasicData();
+    const truckH = Object.values(reghead || {});
+    const truckS = Object.values(small || {});
+    const truckT = Object.values(transport || {});
+    const driver = Object.values(drivers || {});
+
+    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี");
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -281,7 +291,7 @@ const InsertTrips = () => {
                 const datas = snapshot.val();
                 const dataSmall = [];
                 for (let id in datas) {
-                    if (datas[id].Driver !== "0:ไม่มี" && datas[id].RegTail !== "0:ไม่มี" && datas[id].Status === "ว่าง") {
+                    if (datas[id].Status === "ว่าง" && datas[id].Driver === "0:ไม่มี") {
                         dataSmall.push({ id, ...datas[id], type: "รถเล็ก" });
                     }
                 }
@@ -476,8 +486,7 @@ const InsertTrips = () => {
                 [newIndex]: {
                     TicketName: ticketValue,
                     id: newIndex,
-                    Rate: ticketData.Rate || 0,
-                    Travel: ticketData.Travel || 0,
+                    //Travel: ticketData.Travel || 0,
                     OrderID: "",
                     Trip: trip.length,
                     Product: {
@@ -533,8 +542,8 @@ const InsertTrips = () => {
                     Rate: ticketData.Rate || 0,
                     Trip: trip.length,
                     Date: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
-                    Registration: registration.split(":")[1],
-                    Driver: registration.split(":")[2],
+                    Registration: registration,
+                    Driver: driverss,
                     Travel: ticketData.Travel || 0,
                     id: newIndex,
                     Product: {
@@ -910,7 +919,7 @@ const InsertTrips = () => {
             CostTrip: costTrip,
             DateReceive: dayjs(selectedDateReceive).format("DD/MM/YYYY"),
             DateDelivery: dayjs(selectedDateDelivery).format("DD/MM/YYYY"),
-            Driver: registration.split(":")[2] + " / " + registration.split(":")[1],
+            Driver: driverss.split(":")[1] + " / " + driverss.split(":")[0],
             Depot: depots,
             WeightHigh: weightH,
             WeightLow: weightL,
@@ -1010,9 +1019,9 @@ const InsertTrips = () => {
                 id: trip.length + 1,
                 DateReceive: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
                 DateDelivery: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
-                Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
+                Registration: registration,
                 DateStart: dayjs(new Date).format("DD/MM/YYYY"),
-                Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
+                Driver: driverss,
                 Depot: depots,
                 CostTrip: costTrip,
                 WeightOil: (volumeS.G91 + volumeS.G95 + volumeS.B7 + volumeS.B95 + volumeS.E20 + volumeS.PWD),
@@ -1029,9 +1038,26 @@ const InsertTrips = () => {
                 console.log("Data pushed successfully");
                 database
                     .ref("truck/small/")
-                    .child((registration.split(":")[0]) - 1)
+                    .child(Number(registration.split(":")[0]) - 1)
                     .update({
+                        Driver: driverss,
                         Status: "TR:" + trip.length
+                    })
+                    .then(() => {
+                        setOpen(false);
+                        console.log("Data pushed successfully");
+
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+
+                database
+                    .ref("employee/drivers/")
+                    .child(Number(driverss.split(":")[0]) - 1)
+                    .update({
+                    Registration: registration
                     })
                     .then(() => {
                         setOpen(false);
@@ -1056,7 +1082,7 @@ const InsertTrips = () => {
         setWeightH(0);
         setWeightL(0);
         setCostTrip(0);
-        setRegistration("0:0:0:0");
+        setRegistration("0:0");
     };
 
     const handleCancle = () => {
@@ -1073,7 +1099,7 @@ const InsertTrips = () => {
                         console.log("Data pushed successfully");
                         database
                             .ref("truck/small/")
-                            .child((registration.split(":")[0]) - 1)
+                            .child(Number(registration.split(":")[0]) - 1)
                             .update({
                                 Status: "ว่าง"
                             })
@@ -1095,7 +1121,7 @@ const InsertTrips = () => {
             } else {
                 database
                     .ref("truck/small/")
-                    .child((registration.split(":")[0]) - 1)
+                    .child(Number(registration.split(":")[0]) - 1)
                     .update({
                         Status: "ว่าง"
                     })
@@ -1124,7 +1150,7 @@ const InsertTrips = () => {
 
     React.useEffect(() => {
         const currentRow = smallTruck.find(item =>
-            `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration)
+            `${item.id}:${item.RegHead}` === registration)
         console.log("Current : ", currentRow);
 
         if (currentRow) {
@@ -1201,8 +1227,6 @@ const InsertTrips = () => {
 
     console.log("Check : ", isNegative);
 
-    console.log("Show Registration : ", smallTruck.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration && `${item.Driver}:${item.Registration}:(${item.type})`))
-
     return (
         <React.Fragment>
             <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} endIcon={<AddLocationAltIcon />} >จัดเที่ยววิ่ง</Button>
@@ -1210,7 +1234,7 @@ const InsertTrips = () => {
                 open={open}
                 keepMounted
                 onClose={handleCancle}
-                fullScreen={ windowWidth <= 900 ? true : false }
+                fullScreen={windowWidth <= 900 ? true : false}
                 sx={{
                     "& .MuiDialog-paper": {
                         width: "1200px", // กำหนดความสูงของ Dialog
@@ -1278,42 +1302,21 @@ const InsertTrips = () => {
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
                                         component="form" sx={{ height: "30px", width: "100%" }}>
-                                        <Autocomplete
-                                            id="autocomplete-registration-1"
-                                            options={smallTruck}
-                                            getOptionLabel={(option) =>
-                                                `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""} (${option.type ? option.type : ""})`
-                                            }
-                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
-                                            value={registration ? smallTruck.find(item => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration) : null}
-                                            onChange={(event, newValue) => {
-                                                if (newValue) {
-                                                    const value = `${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.type}`;
-                                                    setRegistration(value);
-                                                } else {
-                                                    setRegistration("0:0:0:0");
-                                                }
+                                        <TextField size="small" fullWidth disabled
+                                            sx={{
+                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    padding: "1px 4px",
+                                                },
+                                                borderRadius: 10
                                             }}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label={!registration || registration === "0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
-                                                    variant="outlined"
-                                                    size="small"
-                                                    sx={{
-                                                        "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "1px 2px" },
-                                                    }}
-                                                />
-                                            )}
-                                            fullWidth
-                                            renderOption={(props, option) => (
-                                                <li {...props}>
-                                                    {
-                                                        <Typography fontSize="14px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (${option.type})`}</Typography>
-                                                    }
-                                                </li>
-                                            )}
+                                            value={(() => {
+                                                const selectedItem = smallTruck.find(item =>
+                                                    `${item.id}:${item.RegHead}` === registration
+                                                );
+                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : "" } : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
+                                            })()}
                                         />
                                     </Paper>
                                 </Box>
@@ -1791,21 +1794,42 @@ const InsertTrips = () => {
                                     <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
                                         component="form" sx={{ height: "30px", width: "100%" }}>
-                                        <TextField size="small" fullWidth
-                                            sx={{
-                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    padding: "1px 4px",
-                                                },
-                                                borderRadius: 10
+                                        <Autocomplete
+                                            id="autocomplete-registration-1"
+                                            options={smallTruck}
+                                            getOptionLabel={(option) =>
+                                                `${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`
+                                            }
+                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
+                                            value={registration ? smallTruck.find(item => `${item.id}:${item.RegHead}` === registration) : null}
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    const value = `${newValue.id}:${newValue.RegHead}`;
+                                                    setRegistration(value);
+                                                } else {
+                                                    setRegistration("0:0");
+                                                }
                                             }}
-                                            value={(() => {
-                                                const selectedItem = smallTruck.find(item =>
-                                                    `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
-                                                );
-                                                return selectedItem && `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.Registration ? selectedItem.Registration : ""} (${selectedItem.type ? selectedItem.type : ""})`;
-                                            })()}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label={!registration || registration === "0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "1px 2px" },
+                                                    }}
+                                                />
+                                            )}
+                                            fullWidth
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    {
+                                                        <Typography fontSize="14px">{`${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`}</Typography>
+                                                    }
+                                                </li>
+                                            )}
                                         />
                                     </Paper>
                                 </Box>
@@ -1915,14 +1939,28 @@ const InsertTrips = () => {
 
                                 {/* Footer: คงที่ด้านล่าง */}
                                 <Box
-                                    sx={{
-                                        position: "absolute",
-                                        height: "25px",
-                                        bottom: "25px", // จนถึงด้านบนของ footer
-                                        backgroundColor: theme.palette.info.main,
-                                        zIndex: 2,
-                                        marginBottom: 0.5
-                                    }}
+                                    sx={
+                                        totalVolume !== 0 ?
+                                            {
+                                                position: "absolute",
+                                                height: "25px",
+                                                bottom: "25px", // จนถึงด้านบนของ footer
+                                                backgroundColor: theme.palette.info.main,
+                                                zIndex: 2,
+                                                marginBottom: 0.5
+                                            }
+                                            :
+                                            {
+                                                position: "absolute",
+                                                height: "25px",
+                                                bottom: 0,
+                                                backgroundColor: theme.palette.info.main,
+                                                zIndex: 2,
+                                                borderTop: "2px solid white",
+                                                marginBottom: 0.5
+                                            }
+
+                                    }
                                 >
                                     <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                         <TableFooter>
@@ -1986,82 +2024,85 @@ const InsertTrips = () => {
                                 </Box>
 
                                 {/* Footer: คงที่ด้านล่าง */}
-                                <Box
-                                    sx={{
-                                        position: "absolute",
-                                        height: "25px",
-                                        bottom: 0,
-                                        backgroundColor: theme.palette.info.main,
-                                        zIndex: 2,
-                                        borderTop: "2px solid white",
-                                        marginBottom: 0.5
-                                    }}
-                                >
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                        <TableFooter>
-                                            <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
-                                                <TablecellCustomers width={400} sx={{ textAlign: "center", height: "35px" }}>
-                                                    คงเหลือ
-                                                </TablecellCustomers>
-                                                {
-                                                    fuelTypes.map((type) => {
-                                                        const value = Number(volumeT[type]) - Number(volumeS[type]);
-                                                        return (
-                                                            <TablecellCustomers
-                                                                key={type}
-                                                                width={70}
-                                                                sx={{
-                                                                    textAlign: "center",
-                                                                    color: "black",
-                                                                    height: "35px",
-                                                                    fontWeight: "bold",
-                                                                    backgroundColor: getBackgroundColor(value),
-                                                                    borderLeft: "2px solid white",
-                                                                }}
-                                                            >
-                                                                {formatNumber(value || 0)}
-                                                            </TablecellCustomers>
-                                                        );
-                                                    })
-                                                }
-                                                <TablecellCustomers width={Object.keys(selling).length > 6 ? 150 : 140} colSpan={2} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                {
+                                    totalVolume !== 0 &&
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            height: "25px",
+                                            bottom: 0,
+                                            backgroundColor: theme.palette.info.main,
+                                            zIndex: 2,
+                                            borderTop: "2px solid white",
+                                            marginBottom: 0.5
+                                        }}
+                                    >
+                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                            <TableFooter>
+                                                <TableRow sx={{ position: "sticky", top: 0, zIndex: 3, backgroundColor: theme.palette.panda.main }}>
+                                                    <TablecellCustomers width={400} sx={{ textAlign: "center", height: "35px" }}>
+                                                        คงเหลือ
+                                                    </TablecellCustomers>
                                                     {
-                                                        editMode ?
-                                                            <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
-                                                                <TextField size="small" fullWidth
-
-                                                                    InputLabelProps={{
-                                                                        sx: {
-                                                                            fontSize: '12px',
-                                                                        },
-                                                                    }}
+                                                        fuelTypes.map((type) => {
+                                                            const value = Number(volumeT[type]) - Number(volumeS[type]);
+                                                            return (
+                                                                <TablecellCustomers
+                                                                    key={type}
+                                                                    width={70}
                                                                     sx={{
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            height: '22px', // ปรับความสูงของ TextField
-                                                                            display: 'flex', // ใช้ flexbox
-                                                                            alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                                                        },
-                                                                        '& .MuiInputBase-input': {
-                                                                            fontSize: '14px', // ขนาด font เวลาพิมพ์
-                                                                            fontWeight: 'bold',
-                                                                            padding: '2px 6px', // ปรับ padding ภายใน input
-                                                                            textAlign: 'center',
-                                                                        },
+                                                                        textAlign: "center",
+                                                                        color: "black",
+                                                                        height: "35px",
+                                                                        fontWeight: "bold",
+                                                                        backgroundColor: getBackgroundColor(value),
+                                                                        borderLeft: "2px solid white",
                                                                     }}
-                                                                    value={formatNumber(totalVolume)}
-                                                                // value={volumeG95}
-                                                                />
-                                                            </Paper>
-                                                            :
-                                                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>
-                                                                {formatNumber(totalVolume)}
-                                                            </Typography>
+                                                                >
+                                                                    {formatNumber(value || 0)}
+                                                                </TablecellCustomers>
+                                                            );
+                                                        })
                                                     }
-                                                </TablecellCustomers>
-                                            </TableRow>
-                                        </TableFooter>
-                                    </Table>
-                                </Box>
+                                                    <TablecellCustomers width={Object.keys(selling).length > 6 ? 150 : 140} colSpan={2} sx={{ textAlign: "center", backgroundColor: "lightgray", borderLeft: "2px solid white" }}>
+                                                        {
+                                                            editMode ?
+                                                                <Paper component="form" sx={{ width: "100%", marginTop: -0.5 }}>
+                                                                    <TextField size="small" fullWidth
+
+                                                                        InputLabelProps={{
+                                                                            sx: {
+                                                                                fontSize: '12px',
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '22px', // ปรับความสูงของ TextField
+                                                                                display: 'flex', // ใช้ flexbox
+                                                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                                                                fontWeight: 'bold',
+                                                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                                                textAlign: 'center',
+                                                                            },
+                                                                        }}
+                                                                        value={formatNumber(totalVolume)}
+                                                                    // value={volumeG95}
+                                                                    />
+                                                                </Paper>
+                                                                :
+                                                                <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>
+                                                                    {formatNumber(totalVolume)}
+                                                                </Typography>
+                                                        }
+                                                    </TablecellCustomers>
+                                                </TableRow>
+                                            </TableFooter>
+                                        </Table>
+                                    </Box>
+                                }
                             </Paper>
                             <Grid container spacing={1}>
                                 <Grid item md={6} xs={12}>
@@ -2132,23 +2173,44 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 <Grid item md={4} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
+                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>พขร.</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            value={status}
-                                            sx={{
-                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    padding: "2px 6px",
-                                                },
-                                                borderRadius: 10,
-                                            }}
-                                            onChange={(e) => setStatus(e.target.value)}
-                                        />
+                                        <Autocomplete
+                                                    id="autocomplete-tickets"
+                                                    options={driverDetail} // ดึงข้อมูลจากฟังก์ชัน getTickets()
+                                                    getOptionLabel={(option) =>
+                                                        `${option.Name}`
+                                                    } // กำหนดรูปแบบของ Label ที่แสดง
+                                                    isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
+                                                    value={driverss ? driverDetail.find(item => item.Name === driverss) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                                    onChange={(event, newValue) => {
+                                                        if (newValue) {
+                                                            const value = `${newValue.id}:${newValue.Name}`;
+                                                            setDriverss(value); // อัพเดตค่าเมื่อเลือก
+                                                        } else {
+                                                            setDriverss("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
+                                                        }
+                                                    }}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label={driverss === "0:0" ? "เลือกพนักงานขับรถ" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                                            variant="outlined"
+                                                            size="small"
+                                                            sx={{
+                                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                "& .MuiInputBase-input": { fontSize: "14px", padding: "4px 8px" },
+                                                            }}
+                                                        />
+                                                    )}
+                                                    renderOption={(props, option) => (
+                                                        <li {...props}>
+                                                            <Typography fontSize="14px">{`${option.Name}`}</Typography>
+                                                        </li>
+                                                    )}
+                                                    //disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
+                                                />
                                     </Paper>
                                 </Grid>
                             </Grid>

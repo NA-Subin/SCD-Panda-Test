@@ -103,7 +103,7 @@ const DriverDetail = () => {
     const driverDetails = Object.values(drivers || {});
 
     const driverDeetail = driverDetails.find((row) => (row.id === Number(userId.split("$")[1])))
-    const registrationDetail = regheads.find((reg) => (reg.id === Number(driverDeetail.Registration.split(":")[0])))
+    const registrationDetail = regheads.find((reg) => (reg.id === Number(driverDeetail?.Registration.split(":")[0])))
 
     console.log("Driver Detail ", driverDeetail);
     console.log("Registration Detail ", registrationDetail);
@@ -144,7 +144,7 @@ const DriverDetail = () => {
     console.log("ชื่อ:", firstName);       // สมส่วน
     console.log("นามสกุล:", lastName);     // สามสี
 
-    const [truck, setTruck] = React.useState(`${registrationDetail.Driver}:${registrationDetail.RegHead}:${registrationDetail.RegTail}`);
+    const [truck, setTruck] = React.useState(`${registrationDetail?.Driver}:${registrationDetail?.RegHead}:${registrationDetail?.RegTail}`);
 
     useEffect(() => {
         console.log("driver and truck : ", truck);
@@ -498,7 +498,7 @@ const DriverDetail = () => {
                                         size="small"
                                         fullWidth
                                         variant="standard"
-                                        value={driverDeetail.Position}
+                                        value={driverDeetail?.Position.split(":")[1]}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '25px', // ปรับความสูงของ TextField
@@ -529,7 +529,7 @@ const DriverDetail = () => {
                                 size="small"
                                 fullWidth
                                 variant="standard"
-                                value={registrationDetail.RegHead}
+                                value={registrationDetail?.RegHead}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         height: '25px', // ปรับความสูงของ TextField
@@ -560,7 +560,7 @@ const DriverDetail = () => {
                                 size="small"
                                 fullWidth
                                 variant="standard"
-                                value={registrationDetail.RegTail}
+                                value={registrationDetail?.RegTail.split(":")[1]}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         height: '25px', // ปรับความสูงของ TextField

@@ -404,7 +404,7 @@ const Employee = () => {
                       <TableRow>
                         <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Position}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{row.Position.split(":")[1]}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Rights}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>

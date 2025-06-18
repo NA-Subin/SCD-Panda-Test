@@ -42,6 +42,7 @@ import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
 import { useData } from "../../server/path";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { useTripData } from "../../server/provider/TripProvider";
 
 const TripsSmallTruck = () => {
     const [menu, setMenu] = React.useState(0);
@@ -74,7 +75,7 @@ const TripsSmallTruck = () => {
     };
 
     // const { trip } = useData();
-    const { trip } = useBasicData();
+    const { trip } = useTripData();
     const trips = Object.values(trip || {});
 
     //const tripDetail = trips.filter((item) => item.TruckType === "รถเล็ก" && item.StatusTrip !== "ยกเลิก" );

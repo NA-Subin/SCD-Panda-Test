@@ -411,6 +411,7 @@ const UpdateTrip = (props) => {
         setEditIdx1(null);
         setEditIdx2(null);
         setRegistration(registrations);
+        setWeightTrucks(weightTruck);
 
         if (ticket && ticket.length > 0) {
             setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
@@ -865,18 +866,20 @@ const UpdateTrip = (props) => {
     const getDriver = () => {
         const driverss = [
             ...[...truckH]
-                .filter((item) => item.Driver !== "0:ไม่มี" && item.RegTail !== "0:ไม่มี" && item.Status === "ว่าง")
+                .filter((item) => item.Driver !== "0:ไม่มี" && item.RegTail !== "0:ไม่มี" && (item.Status === "ว่าง" || item.id === Number(registrations.split(":")[0])))
                 .sort((a, b) => a.Driver.localeCompare(b.Driver, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, Type: "รถบริษัท" })),
 
             ...[...truckT]
-                .filter((item) => item.TruckType === "รถใหญ่")
+                .filter((item) => item.TruckType === "รถใหญ่" && (item.Status === "ว่าง" || item.id === Number(registrations.split(":")[0]) ))
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, Type: "รถรับจ้างขนส่ง" })),
         ];
 
         return driverss.filter((item) => item.id);
     };
+
+    console.log("Driver : ", getDriver());
 
     const getTickets = () => {
         const tickets = [
@@ -1331,6 +1334,8 @@ const UpdateTrip = (props) => {
         )
     }
 
+    console.log("Registration : ", registration);
+    console.log("Weight Truck : ", weightTrucks);
     const handleRegistration = (event, weight) => {
         const registrationValue = event;
         setRegistration(registrationValue);
@@ -1366,6 +1371,13 @@ const UpdateTrip = (props) => {
             setEditableOrders(updatedOrdersArray);
         }
     }
+
+    const matched = getDriver().find(item => {
+        const str = `${item.id}:${item.RegHead}:${item.Driver}:${item.Type}`;
+        console.log("COMPARE:", str, "==?", registration);
+        return str === registration;
+    });
+    console.log("MATCHED VALUE:", matched);
 
     console.log("Updated Tickets : ", editableTickets);
     console.log("Updated Orders : ", editableOrders);
@@ -1517,9 +1529,9 @@ const UpdateTrip = (props) => {
                                                                 if (newValue) {
                                                                     let values = "";
                                                                     newValue.Type === "รถบริษัท" ?
-                                                                        handleRegistration(`${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.Type}`)
+                                                                        handleRegistration(`${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.Type}`, newValue.Weight)
                                                                         :
-                                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.id}:${newValue.Name}:${newValue.Type}`); // อัพเดตค่าเมื่อเลือก
+                                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.id}:${newValue.Name}:${newValue.Type}`, newValue.Weight); // อัพเดตค่าเมื่อเลือก
                                                                 } else {
                                                                     setRegistration("0:0:0:0:0");
                                                                 }
@@ -2945,7 +2957,7 @@ const UpdateTrip = (props) => {
                                         </Paper>
                                     </Grid>
                                 }
-                                <Grid item md={registration.split(":")[4] === "รถบริษัท" ? (editMode ? 4 : 5) : 6 } xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={registration.split(":")[4] === "รถบริษัท" ? (editMode ? 4 : 5) : 6} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                         component="form">

@@ -77,6 +77,7 @@ const UpdateSmallTruck = (props) => {
     const [insurance, setInsurance] = React.useState(truck.Insurance);
     const [vehicleRegistration, setVehicleRegistration] = React.useState(truck.VehicleRegistration || "-");
     const [vehExpirationDate, setVehExpirationDate] = React.useState(truck.VehExpirationDate || "-");
+    const [shortName, setShortName] = React.useState(truck.ShortName);
 
     console.log("show truck", Number(truck.Driver.split(":")[0]) - 1);
     console.log("show Driver : ", driver);
@@ -88,6 +89,7 @@ const UpdateSmallTruck = (props) => {
                 .child(truck.id - 1)
                 .update({
                     RegHead: registration,
+                    ShortName: shortName,
                     Weight: weight,
                     Insurance: insurance,
                     VehicleRegistration: vehicleRegistration,
@@ -164,7 +166,7 @@ const UpdateSmallTruck = (props) => {
                             <Grid item xs={2}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ชื่อพนักงานขับรถ</Typography>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={10}>
                                 {
                                     update ?
                                         <TextField fullWidth variant="standard" value={driver.split(":")[1]} disabled />
@@ -190,6 +192,12 @@ const UpdateSmallTruck = (props) => {
                                             </Select>
                                         </FormControl>
                                 }
+                            </Grid>
+                            <Grid item xs={1}>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ชื่อย่อ</Typography>
+                            </Grid>
+                            <Grid item xs={5}>
+                                <TextField fullWidth variant="standard" value={shortName} onChange={(e) => setShortName(e.target.value)} disabled={update ? true : false} />
                             </Grid>
                             <Grid item xs={1.5}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ทะเบียน</Typography>

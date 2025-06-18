@@ -89,20 +89,20 @@ const UpdateTrip = (props) => {
     const [selectedDateReceive, setSelectedDateReceive] = useState(dateReceive);
     const [selectedDateDelivery, setSelectedDateDelivery] = useState(dateDelivery);
     const [windowWidths, setWindowWidth] = useState(window.innerWidth);
-    
-        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-        useEffect(() => {
-            const handleResize = () => {
-                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-            };
-    
-            window.addEventListener('resize', handleResize); // เพิ่ม event listener
-    
-            // ลบ event listener เมื่อ component ถูกทำลาย
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // const { depots, small } = useData();
     const { depots, small } = useBasicData();
@@ -1203,7 +1203,24 @@ const UpdateTrip = (props) => {
                     .ref("truck/small/")
                     .child(Number(registration.split(":")[2]) - 1)
                     .update({
+                        Driver: "0:ไม่มี",
                         Status: "ว่าง"
+                    })
+                    .then(() => {
+                        setOpen(false);
+                        console.log("Data pushed successfully");
+
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    })
+
+                database
+                    .ref("employee/drivers/")
+                    .child(Number(registrations.split(":")[0]) - 1)
+                    .update({
+                        Registration: "0:ไม่มี",
                     })
                     .then(() => {
                         setOpen(false);
@@ -1272,10 +1289,27 @@ const UpdateTrip = (props) => {
             `ต้องการยกเลิกเที่ยววิ่งใช่หรือไม่`,
             () => {
                 database
-                    .ref("truck/registration/")
+                    .ref("truck/small/")
                     .child(Number(registration.split(":")[2]) - 1)
                     .update({
+                        Driver: "0:ไม่มี",
                         Status: "ว่าง"
+                    })
+                    .then(() => {
+                        setOpen(false);
+                        console.log("Data pushed successfully");
+
+                    })
+                    .catch((error) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    })
+
+                database
+                    .ref("employee/drivers/")
+                    .child(Number(registrations.split(":")[0]) - 1)
+                    .update({
+                        Registration: "0:ไม่มี",
                     })
                     .then(() => {
                         setOpen(false);
@@ -1410,7 +1444,7 @@ const UpdateTrip = (props) => {
             <Dialog
                 open={open}
                 keepMounted
-                fullScreen={ windowWidths <= 900 ? true : false }
+                fullScreen={windowWidths <= 900 ? true : false}
                 onClose={() => {
                     if (!editMode) {
                         handleCancle();
@@ -1552,13 +1586,13 @@ const UpdateTrip = (props) => {
                                         </Grid>
                                         :
                                         <Grid container>
-                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right"} }}>
+                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                             </Grid>
-                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left"} }}>
+                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
                                             </Grid>
-                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center"} }}>
+                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
                                                     {
                                                         trip.Driver !== undefined &&
@@ -2008,41 +2042,41 @@ const UpdateTrip = (props) => {
 
                                                             // if (existingIndex === -1) {
 
-                                                                // let depotTrip = "-"; // ค่าเริ่มต้น
+                                                            // let depotTrip = "-"; // ค่าเริ่มต้น
 
-                                                                // if (depot.split(":")[1] === "ลำปาง") {
-                                                                //     depotTrip = newValue.Rate1;
-                                                                // } else if (depot.split(":")[1] === "พิจิตร") {
-                                                                //     depotTrip = newValue.Rate2;
-                                                                // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
-                                                                //     depotTrip = newValue.Rate3;
-                                                                // }
+                                                            // if (depot.split(":")[1] === "ลำปาง") {
+                                                            //     depotTrip = newValue.Rate1;
+                                                            // } else if (depot.split(":")[1] === "พิจิตร") {
+                                                            //     depotTrip = newValue.Rate2;
+                                                            // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
+                                                            //     depotTrip = newValue.Rate3;
+                                                            // }
 
-                                                                // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
-                                                                updatedTickets.push({
-                                                                    Address: newValue.Address || "-",
-                                                                    Bill: newValue.Bill || "-",
-                                                                    CodeID: newValue.CodeID || "-",
-                                                                    CompanyName: newValue.CompanyName || "-",
-                                                                    CreditTime: newValue.CreditTime || "-",
-                                                                    Date: trip.DateStart,
-                                                                    Driver: trip.Driver,
-                                                                    Lat: newValue.Lat || 0,
-                                                                    Lng: newValue.Lng || 0,
-                                                                    Product: newValue.Product || "-",
-                                                                    Rate1: newValue.Rate1,
-                                                                    Rate2: newValue.Rate2,
-                                                                    Rate3: newValue.Rate3,
-                                                                    Registration: trip.Registration,
-                                                                    id: updatedTickets.length, // ลำดับ id ใหม่
-                                                                    No: ticketLength, // คำนวณจำนวน order
-                                                                    Trip: (Number(tripID) - 1),
-                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                    CustomerType: newValue.CustomerType || "-",
-                                                                    Product: {
-                                                                        P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                    }
-                                                                });
+                                                            // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
+                                                            updatedTickets.push({
+                                                                Address: newValue.Address || "-",
+                                                                Bill: newValue.Bill || "-",
+                                                                CodeID: newValue.CodeID || "-",
+                                                                CompanyName: newValue.CompanyName || "-",
+                                                                CreditTime: newValue.CreditTime || "-",
+                                                                Date: trip.DateStart,
+                                                                Driver: trip.Driver,
+                                                                Lat: newValue.Lat || 0,
+                                                                Lng: newValue.Lng || 0,
+                                                                Product: newValue.Product || "-",
+                                                                Rate1: newValue.Rate1,
+                                                                Rate2: newValue.Rate2,
+                                                                Rate3: newValue.Rate3,
+                                                                Registration: trip.Registration,
+                                                                id: updatedTickets.length, // ลำดับ id ใหม่
+                                                                No: ticketLength, // คำนวณจำนวน order
+                                                                Trip: (Number(tripID) - 1),
+                                                                TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                CustomerType: newValue.CustomerType || "-",
+                                                                Product: {
+                                                                    P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                }
+                                                            });
                                                             // }
 
                                                             return updatedTickets;
@@ -2257,13 +2291,13 @@ const UpdateTrip = (props) => {
 
                                         :
                                         <Grid container>
-                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right"} }}>
+                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                                             </Grid>
-                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left"} }}>
+                                            <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
                                             </Grid>
-                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center"} }}>
+                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
                                                     {
                                                         trip.Driver !== undefined &&
@@ -2603,17 +2637,32 @@ const UpdateTrip = (props) => {
 
                                     {/* Footer: คงที่ด้านล่าง */}
                                     <Box
-                                        sx={{
-                                            position: "absolute",
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            height: "25px", // กำหนดความสูง footer
-                                            bottom: "25px", // จนถึงด้านบนของ footer
-                                            backgroundColor: theme.palette.info.main,
-                                            zIndex: 2,
-                                            marginBottom: 0.5
-                                        }}
+                                        sx={
+                                            ["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0) !== 0 ?
+                                                {
+                                                    position: "absolute",
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    height: "25px", // กำหนดความสูง footer
+                                                    bottom: "25px", // จนถึงด้านบนของ footer
+                                                    backgroundColor: theme.palette.info.main,
+                                                    zIndex: 2,
+                                                    marginBottom: 0.5
+                                                }
+                                                :
+                                                {
+                                                    position: "absolute",
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    height: "25px", // กำหนดความสูง footer
+                                                    backgroundColor: theme.palette.info.main,
+                                                    zIndex: 2,
+                                                    borderTop: "2px solid white",
+                                                    marginBottom: 0.5
+                                                }
+                                        }
                                     >
                                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
                                             <TableFooter>
@@ -2642,44 +2691,47 @@ const UpdateTrip = (props) => {
                                     </Box>
 
                                     {/* Footer: คงที่ด้านล่าง */}
-                                    <Box
-                                        sx={{
-                                            position: "absolute",
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            height: "25px", // กำหนดความสูง footer
-                                            backgroundColor: theme.palette.info.main,
-                                            zIndex: 2,
-                                            borderTop: "2px solid white",
-                                            marginBottom: 0.5
-                                        }}
-                                    >
-                                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
-                                            <TableFooter>
-                                                <TableRow>
-                                                    <TablecellCustomers width={400} sx={{ textAlign: "center", height: "25px", fontSize: "16px" }}>
-                                                        คงเหลือ
-                                                    </TablecellCustomers>
-
-                                                    {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
-                                                        <TablecellCustomers key={product} width={70} sx={{
-                                                            textAlign: "center", height: "25px", color: "black", fontSize: "16px",
-                                                            fontWeight: "bold", backgroundColor: (totalVolumesTicket[product] - totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product] - totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
-                                                        }}>
-                                                            {totalVolumesTicket[product] - totalVolumesOrder[product]}
+                                    {
+                                        ["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0) !== 0 &&
+                                        <Box
+                                            sx={{
+                                                position: "absolute",
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                height: "25px", // กำหนดความสูง footer
+                                                backgroundColor: theme.palette.info.main,
+                                                zIndex: 2,
+                                                borderTop: "2px solid white",
+                                                marginBottom: 0.5
+                                            }}
+                                        >
+                                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" } }}>
+                                                <TableFooter>
+                                                    <TableRow>
+                                                        <TablecellCustomers width={400} sx={{ textAlign: "center", height: "25px", fontSize: "16px" }}>
+                                                            คงเหลือ
                                                         </TablecellCustomers>
-                                                    ))}
-                                                    <TablecellCustomers width={130} colSpan={2} sx={{
-                                                        textAlign: "center", height: "25px", color: "black", fontSize: "16px",
-                                                        fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
-                                                    }}>
-                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + ((totalVolumesTicket[product] - totalVolumesOrder[product]) || 0), 0)}
-                                                    </TablecellCustomers>
-                                                </TableRow>
-                                            </TableFooter>
-                                        </Table>
-                                    </Box>
+
+                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].map((product) => (
+                                                            <TablecellCustomers key={product} width={70} sx={{
+                                                                textAlign: "center", height: "25px", color: "black", fontSize: "16px",
+                                                                fontWeight: "bold", backgroundColor: (totalVolumesTicket[product] - totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product] - totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
+                                                            }}>
+                                                                {totalVolumesTicket[product] - totalVolumesOrder[product]}
+                                                            </TablecellCustomers>
+                                                        ))}
+                                                        <TablecellCustomers width={130} colSpan={2} sx={{
+                                                            textAlign: "center", height: "25px", color: "black", fontSize: "16px",
+                                                            fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
+                                                        }}>
+                                                            {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + ((totalVolumesTicket[product] - totalVolumesOrder[product]) || 0), 0)}
+                                                        </TablecellCustomers>
+                                                    </TableRow>
+                                                </TableFooter>
+                                            </Table>
+                                        </Box>
+                                    }
                                 </TableContainer>
                             </Paper>
                             <Grid container spacing={1}>
@@ -2711,41 +2763,41 @@ const UpdateTrip = (props) => {
 
                                                                 // if (existingIndex === -1) {
 
-                                                                    // let depotTrip = "-"; // ค่าเริ่มต้น
+                                                                // let depotTrip = "-"; // ค่าเริ่มต้น
 
-                                                                    // if (depot.split(":")[1] === "ลำปาง") {
-                                                                    //     depotTrip = newValue.Rate1;
-                                                                    // } else if (depot.split(":")[1] === "พิจิตร") {
-                                                                    //     depotTrip = newValue.Rate2;
-                                                                    // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
-                                                                    //     depotTrip = newValue.Rate3;
-                                                                    // }
+                                                                // if (depot.split(":")[1] === "ลำปาง") {
+                                                                //     depotTrip = newValue.Rate1;
+                                                                // } else if (depot.split(":")[1] === "พิจิตร") {
+                                                                //     depotTrip = newValue.Rate2;
+                                                                // } else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1])) {
+                                                                //     depotTrip = newValue.Rate3;
+                                                                // }
 
-                                                                    // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
-                                                                    updatedOrders.push({
-                                                                        Address: newValue.Address || "-",
-                                                                        Bill: newValue.Bill || "-",
-                                                                        CodeID: newValue.CodeID || "-",
-                                                                        CompanyName: newValue.CompanyName || "-",
-                                                                        CreditTime: newValue.CreditTime || "-",
-                                                                        Date: trip.DateStart,
-                                                                        Driver: trip.Driver,
-                                                                        Lat: newValue.Lat || 0,
-                                                                        Lng: newValue.Lng || 0,
-                                                                        Product: newValue.Product || "-",
-                                                                        Rate1: newValue.Rate1,
-                                                                        Rate2: newValue.Rate2,
-                                                                        Rate3: newValue.Rate3,
-                                                                        Registration: trip.Registration,
-                                                                        id: updatedOrders.length, // ลำดับ id ใหม่
-                                                                        No: orderLength, // คำนวณจำนวน order
-                                                                        Trip: (Number(tripID) - 1),
-                                                                        TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                        CustomerType: newValue.CustomerType || "-",
-                                                                        Product: {
-                                                                            P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                        }
-                                                                    });
+                                                                // ถ้ายังไม่มี ให้เพิ่มตั๋วใหม่เข้าไป
+                                                                updatedOrders.push({
+                                                                    Address: newValue.Address || "-",
+                                                                    Bill: newValue.Bill || "-",
+                                                                    CodeID: newValue.CodeID || "-",
+                                                                    CompanyName: newValue.CompanyName || "-",
+                                                                    CreditTime: newValue.CreditTime || "-",
+                                                                    Date: trip.DateStart,
+                                                                    Driver: trip.Driver,
+                                                                    Lat: newValue.Lat || 0,
+                                                                    Lng: newValue.Lng || 0,
+                                                                    Product: newValue.Product || "-",
+                                                                    Rate1: newValue.Rate1,
+                                                                    Rate2: newValue.Rate2,
+                                                                    Rate3: newValue.Rate3,
+                                                                    Registration: trip.Registration,
+                                                                    id: updatedOrders.length, // ลำดับ id ใหม่
+                                                                    No: orderLength, // คำนวณจำนวน order
+                                                                    Trip: (Number(tripID) - 1),
+                                                                    TicketName: `${newValue.id}:${newValue.Name}`,
+                                                                    CustomerType: newValue.CustomerType || "-",
+                                                                    Product: {
+                                                                        P: { Volume: 0, Cost: 0, Selling: 0 },
+                                                                    }
+                                                                });
                                                                 // }
 
                                                                 return updatedOrders;

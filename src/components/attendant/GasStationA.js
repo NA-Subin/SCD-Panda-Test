@@ -48,13 +48,12 @@ const GasStationA = () => {
     const userId = Cookies.get("sessionToken");
     const navigate = useNavigate();
     const { officers } = useBasicData();
-    const { gasstation } = useGasStationData();
+    const { gasstationDetail } = useGasStationData();
     const employee = Object.values(officers || {});
-    const gasstations = Object.values(gasstation || {});
+    const gasstations = Object.values(gasstationDetail || {});
     const employeeDetail = employee.find((emp) => (emp.id === Number(userId.split("$")[1])));
     const gasStationsDetail = gasstations.find((gas) => gas.id === Number(employeeDetail?.GasStation.split(":")[0]));
 
-    console.log("GasStation ID : ", gasStationsDetail);
     console.log("GasStation : : :", Number(employeeDetail?.GasStation.split(":")[0]));
     console.log("GasStation : :", employeeDetail?.GasStation);
 
@@ -82,8 +81,8 @@ const GasStationA = () => {
     const [report, setReport] = React.useState([]);
     const [setting, setSetting] = React.useState(true);
     const [gasStationReport, setGasStationReport] = React.useState([]);
-    //const [gasstationDetail,setGasStationDetail] = React.useState("");
-    const gasstationDetail = employeeDetail?.GasStation;
+    //const [gasstationDetails,setGasStationDetail] = React.useState("");
+    const gasstationDetails = employeeDetail?.GasStation;
 
     const PREFIXES = ["นาย", "นาง", "นางสาว", "เด็กชาย", "เด็กหญิง", "ด.ช.", "ด.ญ."];
 
@@ -115,7 +114,7 @@ console.log("นามสกุล:", lastName);     // สามสี
     console.log("GasStation : ", gasStationsDetail);
     console.log("GasStation Oil : ", gasStationOil);
     console.log("GasStation ID : ", gasStationID);
-    console.log("GasStation Detail : ", gasstationDetail);
+    console.log("GasStation Detail : ", gasstationDetails);
 
     const handleDateChange = (newValue) => {
         if (newValue) {
@@ -125,7 +124,7 @@ console.log("นามสกุล:", lastName);     // สามสี
                 const datasG = snapshot.val();
                 const dataListG = [];
                 for (let idG in datasG) {
-                    if (datasG[idG].Name === gasstationDetail.split(":")[1]) {
+                    if (datasG[idG].Name === gasstationDetails.split(":")[1]) {
                         dataListG.push({ idG, ...datasG[idG] });
                         database.ref("/depot/stock").on("value", (snapshot) => {
                             const datasS = snapshot.val();
@@ -216,7 +215,7 @@ console.log("นามสกุล:", lastName);     // สามสี
             const datasG = snapshot.val();
             const dataListG = [];
             for (let idG in datasG) {
-                if (datasG[idG].Name === gasstationDetail.split(":")[1]) {
+                if (datasG[idG].Name === gasstationDetails.split(":")[1]) {
                     dataListG.push({ idG, ...datasG[idG] });
                     database.ref("/depot/stock").on("value", (snapshot) => {
                         const datasS = snapshot.val();
@@ -257,7 +256,7 @@ console.log("นามสกุล:", lastName);     // สามสี
             setStatusSave(false);
         });
 
-    }, [gasstationDetail]); // อัปเดตเมื่อ orderNew เปลี่ยน
+    }, [gasstationDetails]); // อัปเดตเมื่อ orderNew เปลี่ยน
 
     // const handleGasStationChange = (e) => {
     //     setGasStation(e.target.value);
@@ -324,7 +323,7 @@ console.log("นามสกุล:", lastName);     // สามสี
     //     return () => clearInterval(interval); // ล้าง interval เมื่อคอมโพเนนต์ถูกทำลาย
     // }, []);
 
-    console.log("GasStation :", gasstationDetail);
+    console.log("GasStation :", gasstationDetails);
     console.log("GasStationOil ::", gasStationOil);
 
     return (
@@ -524,7 +523,7 @@ console.log("นามสกุล:", lastName);     // สามสี
                                     size="small"
                                     fullWidth
                                     variant="standard"
-                                    value={employeeDetail.Position}
+                                    value={employeeDetail?.Position.split(":")[1]}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '25px', // ปรับความสูงของ TextField
@@ -597,7 +596,7 @@ console.log("นามสกุล:", lastName);     // สามสี
                                     size="small"
                                     fullWidth
                                     variant="standard"
-                                    value={gasStationsDetail.Name}
+                                    value={gasStationsDetail?.Name}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             height: '25px', // ปรับความสูงของ TextField

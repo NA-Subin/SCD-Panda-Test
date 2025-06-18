@@ -60,6 +60,8 @@ const InsertEmployee = (props) => {
     const gasStation = Object.values(gasstation || {});
     const positionDetail = Object.values(positions || {});
 
+    console.log("Positions : ",positionDetail);
+
     const [open, setOpen] = React.useState(false);
     const [prefix, setPrefix] = React.useState(0);
     const [name, setName] = React.useState('');
@@ -110,10 +112,10 @@ const InsertEmployee = (props) => {
     const [loan, setLoan] = React.useState("");
     const [drivingLicense, setDrivingLicense] = React.useState("");
     const [expiration, setExpiration] = React.useState("");
-    const [gasStations, setGasStations] = useState("");
+    const [gasStations, setGasStations] = useState("0:0");
     const [telephoneBill, setTelephoneBill] = useState("");
 
-    const [position, setPosition] = React.useState("");
+    const [position, setPosition] = React.useState("0:0");
     const [newPosition, setNewPosition] = React.useState("");
     const [phone, setPhone] = React.useState("");
     const [password, setPassword] = React.useState("1234567")
@@ -149,7 +151,7 @@ const InsertEmployee = (props) => {
     }
 
     const handlePost = () => {
-        if (menu === 2) {
+        if (position.split(":")[0] !== "5") {
             createUserWithEmailAndPassword(auth, (user + "@gmail.com"), password).then(
                 (userCredential) => {
                     database
@@ -349,30 +351,31 @@ const InsertEmployee = (props) => {
                             </Box>
                         </Grid>
                         {
-                            menu === 2 ?
+                            position.split(":")[0] !== "5" ?
                                 <>
-                                    <Grid item md={6} xs={12}>
-                                        <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 12 } }} gutterBottom>User</Typography>
-                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
-                                            </Paper>
-                                        </Box>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
+                                        </Paper>
                                     </Grid>
                                 </>
                                 :
                                 <>
-                                    <Grid item md={6} xs={12}>
-                                        <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เลขประจำตัวผู้เสียภาษี</Typography>
-                                            <Paper component="form" sx={{ width: "100%" }}>
-                                                <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} />
-                                            </Paper>
-                                        </Box>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={-0.5} gutterBottom>เลขประจำตัว</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={-1.5} gutterBottom>ผู้เสียภาษี</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} />
+                                        </Paper>
                                     </Grid>
                                 </>
                         }
-                        <Grid item md={6} xs={12}>
+                        {/* <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 4, xs: 3.5 } }} gutterBottom>ประเภทพนักงาน</Typography>
                                 <Paper
@@ -393,472 +396,442 @@ const InsertEmployee = (props) => {
                                     </Select>
                                 </Paper>
                             </Box>
+                        </Grid> */}
+                        <Grid item md={2} xs={3}>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
+                        </Grid>
+                        <Grid item md={4} xs={9}>
+                            <Paper component="form" sx={{ width: "100%" }}>
+                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                            </Paper>
+                        </Grid>
+                        <Grid item md={2} xs={3}>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ตำแหน่ง</Typography>
+                        </Grid>
+                        <Grid item md={4} xs={9}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Paper
+                                    component="form" sx={{ width: "100%" }} >
+                                    <Select
+                                        id="demo-simple-select"
+                                        value={position}
+                                        size="small"
+                                        sx={{ textAlign: "left" }}
+                                        onChange={(e) => setPosition(e.target.value)}
+                                        fullWidth
+                                    >
+                                        <MenuItem value={"0:0"}>
+                                            กรุณาเลือกตำแหน่ง
+                                        </MenuItem>
+                                        {
+                                            positionDetail.map((row) => (
+                                                <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
+                                            ))
+                                        }
+                                    </Select>
+                                </Paper>
+                                <Tooltip title="เพิ่มตำแหน่ง" placement="right" onClick={() => setOpenPosition(true)}>
+                                    <IconButton color="primary">
+                                        <AddBoxIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                        </Grid>
+                        <Grid item md={6} xs={12}>
+                            {
+                                openPosition &&
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เพิ่มตำแหน่ง</Typography>
+                                    <Paper component="form" sx={{ width: "100%" }}>
+                                        <TextField size="small" fullWidth value={newPosition} onChange={(e) => setNewPosition(e.target.value)} />
+                                    </Paper>
+                                    <Tooltip title="ยกเลิก" placement="right" onClick={() => setOpenPosition(false)}>
+                                        <IconButton color="error">
+                                            <CancelIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="บันทึก" placement="right" onClick={handleAddPosition}>
+                                        <IconButton color="success">
+                                            <CheckCircleIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+                            }
                         </Grid>
                         {
-                            menu === 2 ?
+                            openPosition &&
+                            <>
+                                <Grid item md={12} xs={12}>
+                                    <Divider>
+                                        <Chip label="เพิ่มสิทธ์ให้ตำแหน่งงานใหม่" size="small" />
+                                    </Divider>
+                                </Grid>
+                                <Grid item md={12} xs={12}>
+                                    <TableContainer
+                                        component={Paper}
+                                        style={{ maxHeight: "90vh" }}
+                                    >
+                                        <Table stickyHeader size="small" sx={{ width: "83s0px" }}>
+                                            <TableHead sx={{ height: "3vh" }}>
+                                                <TableRow>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        ข้อมูลทั่วไป
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        ปฎิบัติงาน
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        ชำระเงิน
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        รายงาน
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        รถใหญ่
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        รถเล็ก
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        หน้าลาน
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
+                                                        พขร.
+                                                    </TablecellSelling>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkBasicData}
+                                                                        onChange={() => setCheckBasicData(!checkBasicData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkOrperationData}
+                                                                        onChange={() => setCheckOprerationData(!checkOrperationData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkFinancialData}
+                                                                        onChange={() => setCheckFinancialData(!checkFinancialData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkReportData}
+                                                                        onChange={() => setCheckReportData(!checkReportData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkBigTruckData}
+                                                                        onChange={() => setCheckBigTruckData(!checkBigTruckData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkSmallTruckData}
+                                                                        onChange={() => setCheckSmallTruckData(!checkSmallTruckData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkGasStationData}
+                                                                        onChange={() => setCheckGasStationData(!checkGasStationData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                                            <FormControlLabel
+                                                                sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={checkDriverData}
+                                                                        onChange={() => setCheckDriverData(!checkDriverData)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Grid>
+                            </>
+                        }
+                        {
+                            position.split(":")[0] === "5" ?
                                 <>
                                     <Grid item md={12} xs={12}>
                                         <Divider>
-                                            <Chip label="พนักงานทั่วไป" size="small" />
+                                            <Chip label="ข้อมูลทั่วไป" size="small" />
                                         </Divider>
                                     </Grid>
-                                    <Grid item md={6} xs={12}>
-                                        <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ตำแหน่ง</Typography>
-                                            <Paper
-                                                component="form" sx={{ width: "100%" }} >
-                                                <Select
-                                                    id="demo-simple-select"
-                                                    value={position}
-                                                    size="small"
-                                                    sx={{ textAlign: "left" }}
-                                                    onChange={(e) => setPosition(e.target.value)}
-                                                    fullWidth
-                                                >
-                                                    <MenuItem value={0}>
-                                                        กรุณาเลือกตำแหน่ง
-                                                    </MenuItem>
-                                                    {
-                                                        positionDetail.map((row) => (
-                                                            <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
-                                                        ))
-                                                    }
-                                                </Select>
-                                            </Paper>
-                                            <Tooltip title="เพิ่มตำแหน่ง" placement="right" onClick={() => setOpenPosition(true)}>
-                                                <IconButton color="primary">
-                                                    <AddBoxIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Box>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทรถ</Typography>
                                     </Grid>
-                                    <Grid item md={6} xs={12}>
-                                        {
-                                            openPosition &&
-                                            <Box display="flex" justifyContent="center" alignItems="center">
-                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เพิ่มตำแหน่ง</Typography>
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField size="small" fullWidth value={newPosition} onChange={(e) => setNewPosition(e.target.value)} />
-                                                </Paper>
-                                                <Tooltip title="ยกเลิก" placement="right" onClick={() => setOpenPosition(false)}>
-                                                    <IconButton color="error">
-                                                        <CancelIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="บันทึก" placement="right" onClick={handleAddPosition}>
-                                                    <IconButton color="success">
-                                                        <CheckCircleIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </Box>
-                                        }
-                                    </Grid>
-                                    {
-                                        openPosition &&
-                                        <Grid item md={12} xs={12}>
-                                            <TableContainer
-                                                component={Paper}
-                                                style={{ maxHeight: "90vh" }}
+                                    <Grid item md={4} xs={9}>
+                                        <Paper
+                                            component="form">
+                                            <Select
+                                                id="demo-simple-select"
+                                                value={trucks}
+                                                size="small"
+                                                sx={{ textAlign: "left" }}
+                                                onChange={(e) => setTrucks(e.target.value)}
+                                                fullWidth
                                             >
-                                                <Table stickyHeader size="small" sx={{ width: "83s0px" }}>
-                                                    <TableHead sx={{ height: "3vh" }}>
-                                                        <TableRow>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                ข้อมูลทั่วไป
-                                                            </TablecellSelling>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                ปฎิบัติงาน
-                                                            </TablecellSelling>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                ชำระเงิน
-                                                            </TablecellSelling>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                รายงาน
-                                                            </TablecellSelling>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                รถใหญ่
-                                                            </TablecellSelling>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                รถเล็ก
-                                                            </TablecellSelling>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                หน้าลาน
-                                                            </TablecellSelling>
-                                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 14, width: 50 }}>
-                                                                พขร.
-                                                            </TablecellSelling>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        <TableRow>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkBasicData}
-                                                                                onChange={() => setCheckBasicData(!checkBasicData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkOrperationData}
-                                                                                onChange={() => setCheckOprerationData(!checkOrperationData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkFinancialData}
-                                                                                onChange={() => setCheckFinancialData(!checkFinancialData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkReportData}
-                                                                                onChange={() => setCheckReportData(!checkReportData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkBigTruckData}
-                                                                                onChange={() => setCheckBigTruckData(!checkBigTruckData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkSmallTruckData}
-                                                                                onChange={() => setCheckSmallTruckData(!checkSmallTruckData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkGasStationData}
-                                                                                onChange={() => setCheckGasStationData(!checkGasStationData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                                    <FormControlLabel
-                                                                        sx={{ marginTop: -1, marginBottom: -1, marginLeft: 2 }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={checkDriverData}
-                                                                                onChange={() => setCheckDriverData(!checkDriverData)}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Box>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </TableBody>
-                                                </Table>
-                                            </TableContainer>
-                                        </Grid>
-                                    }
-                                    <Grid item md={6} xs={12}>
+                                                <MenuItem value={0}>
+                                                    กรุณาเลือกประเภทรถ
+                                                </MenuItem>
+                                                <MenuItem value={"รถใหญ่"}>รถใหญ่</MenuItem>
+                                                <MenuItem value={"รถเล็ก"}>รถเล็ก</MenuItem>
+                                            </Select>
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ทะเบียนรถ</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper
+                                            component="form">
+                                            <Select
+                                                id="demo-simple-select"
+                                                value={regTruck}
+                                                size="small"
+                                                sx={{ textAlign: "left" }}
+                                                onChange={(e) => setRegTruck(e.target.value)}
+                                                fullWidth
+                                            >
+                                                <MenuItem value={0}>
+                                                    กรุณาเลือกทะเบียนรถ
+                                                </MenuItem>
+                                                <MenuItem value={"0:ไม่มี"}>ไม่มี</MenuItem>
+                                                {
+                                                    trucks === "รถใหญ่" ?
+                                                        truck.map((row) => (
+                                                            <MenuItem value={row.id + ":" + row.RegHead}>{row.RegHead}</MenuItem>
+                                                        ))
+                                                        : trucks === "รถเล็ก" ?
+                                                            smallTruck.map((row) => (
+                                                                <MenuItem value={row.id + ":" + row.Registration}>{row.Registration}</MenuItem>
+                                                            ))
+                                                            : ""
+                                                }
+                                            </Select>
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ให้สิทธิ์</Typography>
-                                            <FormGroup row>
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            checked={check === 1 ? true : false}
-                                                            onChange={() => setCheck(1)}
-                                                            size="small"
-                                                        />
-                                                    }
-                                                    label="แอดมิน" />
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            checked={check === 2 ? true : false}
-                                                            onChange={() => setCheck(2)}
-                                                            size="small"
-                                                        />
-                                                    }
-                                                    label="หน้าลาน" />
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            checked={check === 3 ? true : false}
-                                                            onChange={() => setCheck(3)}
-                                                            size="small"
-                                                        />
-                                                    }
-                                                    label="เจ้าหนี้น้ำมัน" />
-                                            </FormGroup>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={`t${driver.length.toString().padStart(4, '0')}`} disabled />
+                                            </Paper>
                                         </Box>
                                     </Grid>
-                                    {
-                                        check === 2 &&
-                                        <>
-                                            <Grid item md={6} xs={12}>
-                                                <Box display="flex" justifyContent="center" alignItems="center">
-                                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ปั้ม</Typography>
-                                                    <Paper
-                                                        component="form" sx={{ width: "100%" }}>
-                                                        <Select
-                                                            id="demo-simple-select"
-                                                            value={gasStations}
-                                                            size="small"
-                                                            sx={{ textAlign: "left" }}
-                                                            onChange={(e) => setGasStations(e.target.value)}
-                                                            fullWidth
-                                                        >
-                                                            <MenuItem value={""}>
-                                                                กรุณาเลือกปั้ม
-                                                            </MenuItem>
-                                                            {
-                                                                gasStation.map((row) => (
-                                                                    <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
-                                                                ))
-                                                            }
-                                                        </Select>
-                                                    </Paper>
-                                                </Box>
-                                            </Grid>
-                                        </>
-                                    }
-                                    <Grid item md={6} xs={12}>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เบอร์โทร</Typography>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                                 <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
                                             </Paper>
                                         </Box>
                                     </Grid>
+                                    <Grid item md={12} xs={12}>
+                                        <Divider>
+                                            <Chip label="ข้อมูลการเงินของพนักงานขับรถ" size="small" />
+                                        </Divider>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่บัญชี</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={bankID} onChange={(e) => setBankID(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ธนาคาร</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={bank} onChange={(e) => setBank(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินเดือน</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={salary} onChange={(e) => setSalary(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประกันสังคม</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={security} onChange={(e) => setSecurity(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าเที่ยว</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={tripCost} onChange={(e) => setTripCost(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าจุดส่ง</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={pointCost} onChange={(e) => setPointCost(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าโทรศัพท์</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={telephoneBill} onChange={(e) => setTelephoneBill(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินประกัน</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={deposit} onChange={(e) => setDeposit(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินกู้ยืม</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={loan} onChange={(e) => setLoan(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={6} xs={12} />
+                                    <Grid item md={12} xs={12}>
+                                        <Divider>
+                                            <Chip label="ใบอนุญาตการขับขี่รถ" size="small" />
+                                        </Divider>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขจดทะเบียน</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={drivingLicense} onChange={(e) => setDrivingLicense(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={2} xs={3}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
+                                    </Grid>
+                                    <Grid item md={4} xs={9}>
+                                        <Paper component="form">
+                                            <TextField size="small" fullWidth value={expiration} onChange={(e) => setExpiration(e.target.value)} />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item md={12} xs={12}>
+                                        <UploadButton />
+                                    </Grid>
                                 </>
-                                : menu === 1 ?
+                                : position.split(":")[0] === "6" ?
                                     <>
                                         <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทรถ</Typography>
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ปั้ม</Typography>
                                         </Grid>
                                         <Grid item md={4} xs={9}>
                                             <Paper
-                                                component="form">
+                                                component="form" sx={{ width: "100%" }}>
                                                 <Select
                                                     id="demo-simple-select"
-                                                    value={trucks}
+                                                    value={gasStations}
                                                     size="small"
                                                     sx={{ textAlign: "left" }}
-                                                    onChange={(e) => setTrucks(e.target.value)}
+                                                    onChange={(e) => setGasStations(e.target.value)}
                                                     fullWidth
                                                 >
-                                                    <MenuItem value={0}>
-                                                        กรุณาเลือกประเภทรถ
+                                                    <MenuItem value={"0:0"}>
+                                                        กรุณาเลือกปั้ม
                                                     </MenuItem>
-                                                    <MenuItem value={"รถใหญ่"}>รถใหญ่</MenuItem>
-                                                    <MenuItem value={"รถเล็ก"}>รถเล็ก</MenuItem>
-                                                </Select>
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ทะเบียนรถ</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper
-                                                component="form">
-                                                <Select
-                                                    id="demo-simple-select"
-                                                    value={regTruck}
-                                                    size="small"
-                                                    sx={{ textAlign: "left" }}
-                                                    onChange={(e) => setRegTruck(e.target.value)}
-                                                    fullWidth
-                                                >
-                                                    <MenuItem value={0}>
-                                                        กรุณาเลือกทะเบียนรถ
-                                                    </MenuItem>
-                                                    <MenuItem value={"0:ไม่มี"}>ไม่มี</MenuItem>
                                                     {
-                                                        trucks === "รถใหญ่" ?
-                                                            truck.map((row) => (
-                                                                <MenuItem value={row.id + ":" + row.RegHead}>{row.RegHead}</MenuItem>
-                                                            ))
-                                                            : trucks === "รถเล็ก" ?
-                                                                smallTruck.map((row) => (
-                                                                    <MenuItem value={row.id + ":" + row.Registration}>{row.Registration}</MenuItem>
-                                                                ))
-                                                                : ""
+                                                        gasStation.map((row) => (
+                                                            <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
+                                                        ))
                                                     }
                                                 </Select>
                                             </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Box display="flex" justifyContent="center" alignItems="center">
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField size="small" fullWidth value={`t${driver.length.toString().padStart(4, '0')}`} disabled />
-                                                </Paper>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เบอร์โทร</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Box display="flex" justifyContent="center" alignItems="center">
-                                                <Paper component="form" sx={{ width: "100%" }}>
-                                                    <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
-                                                </Paper>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item md={12} xs={12}>
-                                            <Divider>
-                                                <Chip label="ข้อมูลการเงินของพนักงานขับรถ" size="small" />
-                                            </Divider>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่บัญชี</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={bankID} onChange={(e) => setBankID(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ธนาคาร</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={bank} onChange={(e) => setBank(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินเดือน</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={salary} onChange={(e) => setSalary(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประกันสังคม</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={security} onChange={(e) => setSecurity(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าเที่ยว</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={tripCost} onChange={(e) => setTripCost(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าจุดส่ง</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={pointCost} onChange={(e) => setPointCost(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ค่าโทรศัพท์</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={telephoneBill} onChange={(e) => setTelephoneBill(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินประกัน</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={deposit} onChange={(e) => setDeposit(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เงินกู้ยืม</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={loan} onChange={(e) => setLoan(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={6} xs={12} />
-                                        <Grid item md={12} xs={12}>
-                                            <Divider>
-                                                <Chip label="ใบอนุญาตการขับขี่รถ" size="small" />
-                                            </Divider>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขจดทะเบียน</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={drivingLicense} onChange={(e) => setDrivingLicense(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={2} xs={3}>
-                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
-                                        </Grid>
-                                        <Grid item md={4} xs={9}>
-                                            <Paper component="form">
-                                                <TextField size="small" fullWidth value={expiration} onChange={(e) => setExpiration(e.target.value)} />
-                                            </Paper>
-                                        </Grid>
-                                        <Grid item md={12} xs={12}>
-                                            <UploadButton />
                                         </Grid>
                                     </>
                                     : ""

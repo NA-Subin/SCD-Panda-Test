@@ -93,6 +93,7 @@ const InsertTruck = (props) => {
     const [dateEnd, setDateEnd] = React.useState("");
     const [registration, setRegistration] = React.useState("");
     const [regTail, setRegTail] = React.useState("");
+    const [shortName, setShortName] = React.useState("");
 
     const [fields, setFields] = useState([]); // เก็บค่าของแต่ละช่องกรอก
 
@@ -242,6 +243,7 @@ const InsertTruck = (props) => {
                 .update({
                     id: smalls.length + 1,
                     Company: companies,
+                    ShortName: shortName,
                     RegHead: registration,
                     RepairTruck: "00/00/0000:ยังไม่ตรวจสอบสภาพรถ",
                     Weight: weight,
@@ -444,7 +446,7 @@ const InsertTruck = (props) => {
                                     {
                                         licenseRegHead === "มี" ?
                                             <>
-                                                <Grid item  md={12} xs={12}>
+                                                <Grid item md={12} xs={12}>
                                                     <Divider>
                                                         <Chip label="ใบจดทะเบียนหัวรถใหญ่" size="small" />
                                                     </Divider>
@@ -452,7 +454,7 @@ const InsertTruck = (props) => {
                                                 <Grid item md={2} xs={3}>
                                                     <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>เลขที่</Typography>
                                                 </Grid>
-                                                <Grid item  md={4} xs={9}>
+                                                <Grid item md={4} xs={9}>
                                                     <Paper component="form" >
                                                         <TextField size="small" fullWidth value={vehicleRegistration} onChange={(e) => setVehicleRegistration(e.target.value)} />
                                                     </Paper>
@@ -473,7 +475,7 @@ const InsertTruck = (props) => {
                                                         <TextField size="small" fullWidth value={dateEndInsurance} onChange={(e) => setDateEndInsurance(e.target.value)} />
                                                     </Paper>
                                                 </Grid>
-                                                <Grid item  md={12} xs={12}>
+                                                <Grid item md={12} xs={12}>
                                                     <UploadButton />
                                                 </Grid>
                                             </>
@@ -543,7 +545,7 @@ const InsertTruck = (props) => {
                                         {
                                             licenseRegTail === "มี" ?
                                                 <>
-                                                    <Grid item  md={12} xs={12}>
+                                                    <Grid item md={12} xs={12}>
                                                         <Divider>
                                                             <Chip label="ใบจดทะเบียนหางรถใหญ่" size="small" />
                                                         </Divider>
@@ -564,7 +566,7 @@ const InsertTruck = (props) => {
                                                             <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
                                                         </Paper>
                                                     </Grid>
-                                                    <Grid item  md={12} xs={12}>
+                                                    <Grid item md={12} xs={12}>
                                                         <UploadButton />
                                                     </Grid>
                                                 </>
@@ -574,6 +576,14 @@ const InsertTruck = (props) => {
                                     :
                                     menu === 3 ?
                                         <>
+                                            <Grid item md={2} xs={3}>
+                                                <Typography variant="subtitle1" fontWeight="bold" marginTop={1} textAlign="right" gutterBottom>ชื่อย่อรถเล็ก</Typography>
+                                            </Grid>
+                                            <Grid item md={4} xs={9}>
+                                                <Paper component="form">
+                                                    <TextField size="small" fullWidth value={shortName} onChange={(e) => setShortName(e.target.value)} />
+                                                </Paper>
+                                            </Grid>
                                             <Grid item md={2} xs={3}>
                                                 <Typography variant="subtitle1" fontWeight="bold" marginTop={1} textAlign="right" gutterBottom>ทะเบียน</Typography>
                                             </Grid>
@@ -608,7 +618,7 @@ const InsertTruck = (props) => {
                                             {
                                                 licenseSmallTruck === "มี" ?
                                                     <>
-                                                        <Grid item  md={12} xs={12}>
+                                                        <Grid item md={12} xs={12}>
                                                             <Divider>
                                                                 <Chip label="ใบจดทะเบียนรถเล็ก" size="small" />
                                                             </Divider>
@@ -629,7 +639,7 @@ const InsertTruck = (props) => {
                                                                 <TextField size="small" fullWidth value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
                                                             </Paper>
                                                         </Grid>
-                                                        <Grid item  md={12} xs={12}>
+                                                        <Grid item md={12} xs={12}>
                                                             <UploadButton />
                                                         </Grid>
                                                     </>
