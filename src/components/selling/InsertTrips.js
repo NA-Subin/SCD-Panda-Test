@@ -1420,7 +1420,7 @@ const InsertTrips = () => {
                     : (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
         );
         if (currentRow) {
-            if (currentRow.type === "รถใหญ่") {
+            if (currentRow.Type === "รถบริษัท") {
                 setWeight(currentRow.TotalWeight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
             } else {
                 setWeight(currentRow.Weight || 0); // ใช้ค่า Weight จาก row หรือ 0 ถ้าไม่มี
@@ -1428,6 +1428,7 @@ const InsertTrips = () => {
         }
     }, [registration, getDriver()]);
 
+    console.log("driver : ", getDriver());
     console.log("ticket : ", getTickets());
     console.log("registraation : ", registration);
     // const getTickets = () => {
@@ -2154,7 +2155,7 @@ const InsertTrips = () => {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
                                             }).format(parseFloat(weight))}
-                                            onChange={handleTotalWeight}
+                                            //onChange={handleTotalWeight}
                                         // InputProps={{
                                         //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
                                         // }}

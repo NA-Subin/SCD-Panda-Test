@@ -83,19 +83,16 @@ const TripsDetail = (props) => {
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateDelivery}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Depot.split(":")[0]}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Driver.split(":")[1] !== undefined ?
-                        trips.Driver.split(":")[1]
-                        :
-                        trips.Driver
-                    }/
-                    {
-                        trips.Registration.split(":")[1] !== undefined ?
-                        trips.Registration.split(":")[1]
-                        :
-                        trips.Registration
-                    }
-                    {/* {trips.Driver}/{trips.Registration} */}
+                    {(() => {
+                        const driverName = trips.Driver?.split(":")[1] || trips.Driver || "";
+                        const regName = trips.Registration?.split(":")[1] || trips.Registration || "";
+
+                        if (trips.TruckType !== "รถรับจ้างขนส่ง") {
+                            return `${driverName}/${regName}`;
+                        } else {
+                            return `${driverName}${regName !== "ไม่มี" ? `/${regName}` : ""}`;
+                        }
+                    })()}
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     {

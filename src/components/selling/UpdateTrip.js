@@ -800,8 +800,8 @@ const UpdateTrip = (props) => {
                 DateReceive: selectedDateReceive,
                 DateDelivery: selectedDateDelivery,
                 DateStart: trip.DateStart,
-                Driver: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
-                Registration: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
+                Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
+                Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                 Depot: depot,
                 CostTrip: costTrip,
                 WeightHigh: totalVolumesTicket.oilHeavy,
@@ -810,7 +810,7 @@ const UpdateTrip = (props) => {
                 TotalWeight: totalVolumesTicket.totalWeight,
                 Status: status,
                 StatusTrip: "กำลังจัดเที่ยววิ่ง",
-                TruckType: "รถใหญ่",
+                TruckType: registration.split(":")[4] === "รถบริษัท" ? "รถใหญ่" : "รถรับจ้างขนส่ง",
                 ...orderTrip,
                 ...ticketTrip
             })    // อัปเดตข้อมูลของแต่ละ order
@@ -821,9 +821,10 @@ const UpdateTrip = (props) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+
         database
-            .ref("truck/registration/")
-            .child(Number(registrations.split(":")[2]) - 1)
+            .ref(registrations.split(":")[4] === "รถบริษัท" ? "truck/registration/" : "truck/transport")
+            .child(Number(registrations.split(":")[0]) - 1)
             .update({
                 Status: "ว่าง"
             })
@@ -838,8 +839,8 @@ const UpdateTrip = (props) => {
             });
 
         database
-            .ref("truck/registration/")
-            .child(Number(registration.split(":")[2]) - 1)
+            .ref(registration.split(":")[4] === "รถบริษัท" ? "truck/registration/" : "truck/transport")
+            .child(Number(registration.split(":")[0]) - 1)
             .update({
                 Status: "TR:" + (tripID - 1)
             })
@@ -871,7 +872,7 @@ const UpdateTrip = (props) => {
                 .map((item) => ({ ...item, Type: "รถบริษัท" })),
 
             ...[...truckT]
-                .filter((item) => item.TruckType === "รถใหญ่" && (item.Status === "ว่าง" || item.id === Number(registrations.split(":")[0]) ))
+                .filter((item) => item.TruckType === "รถใหญ่" && (item.Status === "ว่าง" || item.id === Number(registrations.split(":")[0])))
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, Type: "รถรับจ้างขนส่ง" })),
         ];

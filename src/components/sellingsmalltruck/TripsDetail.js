@@ -198,7 +198,7 @@ const TripsDetail = (props) => {
                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                }).format(parseFloat(trips.WeightHigh) + parseFloat(trips.WeightLow))}</TableCell>
+                }).format(parseFloat(trips.WeightOil))}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -221,7 +221,8 @@ const TripsDetail = (props) => {
                         totalWeight={trips.TotalWeight}
                         weightTruck={trips.WeightTruck}
                         depotTrip={trips.Depot}
-                        registrations={`${trips.Driver}:${trips.Registration}`}
+                        registrations={trips.Registration}
+                        driversdetail={trips.Driver}
                     />
                 </TableCell>
                 {/* <TableCell sx={{

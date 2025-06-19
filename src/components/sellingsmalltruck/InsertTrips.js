@@ -488,6 +488,7 @@ const InsertTrips = () => {
                     id: newIndex,
                     //Travel: ticketData.Travel || 0,
                     OrderID: "",
+                    CustomerType: "ตั๋วรถเล็ก",
                     Trip: trip.length,
                     Product: {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
@@ -543,6 +544,7 @@ const InsertTrips = () => {
                     Trip: trip.length,
                     Date: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
                     Registration: registration,
+                    CustomerType: "ตั๋วรถเล็ก",
                     Driver: driverss,
                     Travel: ticketData.Travel || 0,
                     id: newIndex,

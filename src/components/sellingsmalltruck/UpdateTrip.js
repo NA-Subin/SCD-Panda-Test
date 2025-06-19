@@ -66,7 +66,8 @@ const UpdateTrip = (props) => {
         dateReceive,
         dateDelivery,
         depotTrip,
-        registrations
+        registrations,
+        driversdetail
     } = props;
 
     console.log("Date : ", dateStart);
@@ -105,10 +106,18 @@ const UpdateTrip = (props) => {
     }, []);
 
     // const { depots, small } = useData();
-    const { depots, small } = useBasicData();
-    const depotOptions = Object.values(depots || {});
-    const registrationTruck = Object.values(small || {});
+    const [driverss, setDriverss] = React.useState(driversdetail);
+    const { depots, small, drivers } = useBasicData();
 
+    const driver = Object.values(drivers || {});
+    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี" || row.Registration === registrations);
+
+    console.log("Driver Detail ", driverDetail);
+    console.log("Driver Detail ss ", driversdetail);
+
+    const depotOptions = Object.values(depots || {});
+    const smalls = Object.values(small || {});
+    const registrationTruck = smalls.filter((row) => (row.Driver === "0:ไม่มี" && row.Status === "ว่าง") || row.Driver === driverss);
     console.log("registrationTruck : ", registrationTruck);
 
     // โหลด html2canvas จาก CDN
@@ -622,9 +631,10 @@ const UpdateTrip = (props) => {
         });
     };
 
+    console.log("Edit Mode : ", editMode);
 
     const handleUpdate = () => {
-        setEditMode(!editMode); // สลับโหมดแก้ไข <-> อ่านอย่างเดียว
+        setEditMode(true); // สลับโหมดแก้ไข <-> อ่านอย่างเดียว
     };
 
     const [totalVolumesTicket, setTotalVolumesTicket] = useState({});
@@ -738,6 +748,19 @@ const UpdateTrip = (props) => {
     }, [editableTickets, editableOrders, depot, weightTrucks]);
     // คำนวณใหม่ทุกครั้งที่ editableOrders เปลี่ยน
 
+    const updateFirebase = (refPath, childKey, data) => {
+        return database
+            .ref(refPath)
+            .child(childKey)
+            .update(data)
+            .then(() => console.log("Data pushed successfully"))
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    };
+
+
     const handleSave = () => {
         const noCountTicket = {}; // เก็บจำนวนครั้งที่ No ปรากฏ
         const noIdTrackerTicket = {}; // เก็บค่า id ที่ใช้ไปแล้วสำหรับ No แต่ละค่า
@@ -843,8 +866,8 @@ const UpdateTrip = (props) => {
                 DateReceive: selectedDateReceive,
                 DateDelivery: selectedDateDelivery,
                 DateStart: trip.DateStart,
-                Driver: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
-                Registration: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
+                Driver: driverss,
+                Registration: registration,
                 Depot: depot,
                 CostTrip: costTrip,
                 WeightOil: totalVolumesOrder.totalOil,
@@ -863,37 +886,35 @@ const UpdateTrip = (props) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
-        database
-            .ref("truck/small/")
-            .child(Number(registrations.split(":")[2]) - 1)
-            .update({
-                Status: "ว่าง"
-            })
-            .then(() => {
-                setOpen(false);
-                console.log("Data pushed successfully");
 
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
+        // เงื่อนไขเมื่อทะเบียนเปลี่ยน
+        if (registrations !== registration) {
+            updateFirebase("truck/small/", Number(registrations.split(":")[0]) - 1, {
+                Driver: "0:ไม่มี",
+                Status: "ว่าง",
             });
-
-        database
-            .ref("truck/small/")
-            .child(Number(registration.split(":")[2]) - 1)
-            .update({
-                Status: "TR:" + (tripID - 1)
-            })
-            .then(() => {
-                setOpen(false);
-                console.log("Data pushed successfully");
-
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
+            updateFirebase("truck/small/", Number(registration.split(":")[0]) - 1, {
+                Driver: driverss,
+                Status: "TR:" + (tripID - 1),
             });
+            updateFirebase("employee/drivers/", Number(driverss.split(":")[0]) - 1, {
+                Registration: registration,
+            });
+        }
+
+        // เงื่อนไขเมื่อพนักงานขับรถเปลี่ยน
+        if (driversdetail !== driverss) {
+            updateFirebase("employee/drivers/", Number(driversdetail.split(":")[0]) - 1, {
+                Registration: "0:ไม่มี",
+            });
+            updateFirebase("employee/drivers/", Number(driverss.split(":")[0]) - 1, {
+                Registration: registration,
+            });
+            updateFirebase("truck/small/", Number(registration.split(":")[0]) - 1, {
+                Driver: driverss,
+                Status: "TR:" + (tripID - 1),
+            });
+        }
 
         setEditMode(false);
     };
@@ -1380,13 +1401,12 @@ const UpdateTrip = (props) => {
         console.log("show registration : ", registrationValue);
 
         if (Object.keys(editableTickets).length > 0) {
-            const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
-            const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+            // const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            // const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
 
             const updatedTicketsArray = Object.values(editableTickets).map((item) => ({
                 ...item,
-                Registration: registration,
-                Driver: driver,
+                Registration: registrationValue,
             }));
 
             // ถ้าคุณต้องการ set เป็น array:
@@ -1395,13 +1415,45 @@ const UpdateTrip = (props) => {
 
         // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
         if (Object.keys(editableOrders).length > 0) {
-            const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
-            const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+            // const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            // const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
 
             const updatedOrdersArray = Object.values(editableOrders).map((item) => ({
                 ...item,
-                Registration: registration,
-                Driver: driver,
+                Registration: registrationValue
+            }));
+
+            // ถ้าคุณต้องการ set เป็น array:
+            setEditableOrders(updatedOrdersArray);
+        }
+    }
+
+    const handleDriver = (event) => {
+        const driversValue = event;
+        setDriverss(driversValue);
+        console.log("show drivers : ", driversValue);
+
+        if (Object.keys(editableTickets).length > 0) {
+            // const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            // const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+
+            const updatedTicketsArray = Object.values(editableTickets).map((item) => ({
+                ...item,
+                Driver: driversValue,
+            }));
+
+            // ถ้าคุณต้องการ set เป็น array:
+            setEditableTickets(updatedTicketsArray);
+        }
+
+        // ตรวจสอบว่า selling ไม่ใช่ object ว่าง
+        if (Object.keys(editableOrders).length > 0) {
+            // const driver = `${registrationValue.split(":")[0]}:${registrationValue.split(":")[1]}`;
+            // const registration = `${registrationValue.split(":")[2]}:${registrationValue.split(":")[3]}`;
+
+            const updatedOrdersArray = Object.values(editableOrders).map((item) => ({
+                ...item,
+                Driver: driversValue,
             }));
 
             // ถ้าคุณต้องการ set เป็น array:
@@ -1535,50 +1587,38 @@ const UpdateTrip = (props) => {
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                                     <Paper
                                                         component="form" sx={{ height: "30px", width: "100%" }}>
-                                                        <Autocomplete
-                                                            id="autocomplete-registration-1"
-                                                            options={registrationTruck}
-                                                            getOptionLabel={(option) => {
-                                                                if (option.Driver === "ไม่มี" && option.Status === "ว่าง") return "";
-
-                                                                const driverName = option.Driver?.split(":")[1] ?? option.Driver ?? "";
-                                                                const regHead = option.RegHead ?? "";
-
-                                                                return `${driverName} : ${regHead} (รถเล็ก)`;
+                                                        {/* <TextField size="small" fullWidth disabled
+                                                            sx={{
+                                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                "& .MuiInputBase-input": {
+                                                                    fontSize: "16px",
+                                                                    padding: "1px 4px",
+                                                                },
+                                                                borderRadius: 10
                                                             }}
-                                                            value={registrationTruck.find(
-                                                                (d) => `${d.Driver}:${d.id}:${d.RegHead}` === registration
-                                                            ) || null}
-                                                            onChange={(event, newValue) => {
-                                                                if (newValue) {
-                                                                    const value = `${newValue.Driver}:${newValue.id}:${newValue.RegHead}`;
-                                                                    console.log("Truck : ", value);
-                                                                    handleRegistration(value, newValue.TotalWeight)
-                                                                } else {
-                                                                    setRegistration("0:0:0:0");
-                                                                }
+                                                            value={(() => {
+                                                                const selectedItem = registrationTruck.find(item =>
+                                                                    `${item.Driver}:${item.id}:${item.RegHead}` === registration
+                                                                );
+                                                                return selectedItem && selectedItem.Driver !== "ไม่มี" &&
+                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถเล็ก)`;
+                                                            })()}
+                                                        /> */}
+                                                        <TextField size="small" fullWidth disabled
+                                                            sx={{
+                                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                "& .MuiInputBase-input": {
+                                                                    fontSize: "14px",
+                                                                    padding: "1px 4px",
+                                                                },
+                                                                borderRadius: 10
                                                             }}
-                                                            renderInput={(params) => (
-                                                                <TextField
-                                                                    {...params}
-                                                                    label={!registration || registration === "0:0:0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
-                                                                    variant="outlined"
-                                                                    size="small"
-                                                                    sx={{
-                                                                        "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
-                                                                    }}
-                                                                />
-                                                            )}
-                                                            fullWidth
-                                                            renderOption={(props, option) => (
-                                                                <li {...props}>
-                                                                    {
-                                                                        option.Driver !== "ไม่มี" && option.Status === "ว่าง" &&
-                                                                        <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead} (รถเล็ก)`}</Typography>
-                                                                    }
-                                                                </li>
-                                                            )}
+                                                            value={(() => {
+                                                                const selectedItem = registrationTruck.find(item =>
+                                                                    `${item.id}:${item.RegHead}` === registration
+                                                                );
+                                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
+                                                            })()}
                                                         />
                                                     </Paper>
                                                 </Box>
@@ -1762,9 +1802,7 @@ const UpdateTrip = (props) => {
                                                                                     Lat: newValue.Lat || 0,
                                                                                     Lng: newValue.Lng || 0,
                                                                                     Product: newValue.Product || "-",
-                                                                                    Rate1: newValue.Rate1,
-                                                                                    Rate2: newValue.Rate2,
-                                                                                    Rate3: newValue.Rate3,
+                                                                                    Rate: newValue.Rate || 0,
                                                                                     Registration: trip.Registration,
                                                                                     id: row.id,
                                                                                     No: row.No,
@@ -2267,22 +2305,44 @@ const UpdateTrip = (props) => {
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                                     <Paper
                                                         component="form" sx={{ height: "30px", width: "100%" }}>
-                                                        <TextField size="small" fullWidth
-                                                            sx={{
-                                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                "& .MuiInputBase-input": {
-                                                                    fontSize: "16px",
-                                                                    padding: "1px 4px",
-                                                                },
-                                                                borderRadius: 10
+                                                        <Autocomplete
+                                                            id="autocomplete-registration-1"
+                                                            options={registrationTruck}
+                                                            getOptionLabel={(option) =>
+                                                                `${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`
+                                                            }
+                                                            value={registration ? (registrationTruck.find(
+                                                                (d) => `${d.id}:${d.RegHead}` === registration
+                                                            )) : null}
+                                                            onChange={(event, newValue) => {
+                                                                if (newValue) {
+                                                                    const value = `${newValue.id}:${newValue.RegHead}`;
+                                                                    console.log("Truck : ", value);
+                                                                    handleRegistration(value, newValue.Weight)
+                                                                } else {
+                                                                    setRegistration("0:0");
+                                                                }
                                                             }}
-                                                            value={(() => {
-                                                                const selectedItem = registrationTruck.find(item =>
-                                                                    `${item.Driver}:${item.id}:${item.RegHead}` === registration
-                                                                );
-                                                                return selectedItem && selectedItem.Driver !== "ไม่มี" &&
-                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถเล็ก)`;
-                                                            })()}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label={!registration || registration === "0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    sx={{
+                                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            fullWidth
+                                                            renderOption={(props, option) => (
+                                                                <li {...props}>
+                                                                    {
+                                                                        <Typography fontSize="16px">{`${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`}</Typography>
+                                                                    }
+                                                                </li>
+                                                            )}
                                                         />
                                                     </Paper>
                                                 </Box>
@@ -2785,9 +2845,7 @@ const UpdateTrip = (props) => {
                                                                     Lat: newValue.Lat || 0,
                                                                     Lng: newValue.Lng || 0,
                                                                     Product: newValue.Product || "-",
-                                                                    Rate1: newValue.Rate1,
-                                                                    Rate2: newValue.Rate2,
-                                                                    Rate3: newValue.Rate3,
+                                                                    Rate: newValue.Rate || 0,
                                                                     Registration: trip.Registration,
                                                                     id: updatedOrders.length, // ลำดับ id ใหม่
                                                                     No: orderLength, // คำนวณจำนวน order
@@ -2850,7 +2908,7 @@ const UpdateTrip = (props) => {
                                     //     </Paper>
                                     // </Grid>
                                 }
-                                <Grid item md={editMode ? 2 : 3} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                <Grid item md={editMode ? 2 : 12} xs={6} display="flex" alignItems="center" justifyContent="center">
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                         component="form">
@@ -2873,8 +2931,51 @@ const UpdateTrip = (props) => {
                                         />
                                     </Paper>
                                 </Grid>
-                                <Grid item md={editMode ? 4 : 5} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
+                                {
+                                    editMode &&
+                                    <Grid item md={4} xs={6} display="flex" alignItems="center" justifyContent="center">
+                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>พขร.</Typography>
+                                        <Paper sx={{ width: "100%" }}
+                                            component="form">
+                                            <Autocomplete
+                                                id="autocomplete-tickets"
+                                                options={driverDetail} // ดึงข้อมูลจากฟังก์ชัน getTickets()
+                                                getOptionLabel={(option) =>
+                                                    `${option.Name}`
+                                                } // กำหนดรูปแบบของ Label ที่แสดง
+                                                //isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
+                                                value={driverDetail.find(item => `${item.id}:${item.Name}` === driverss) || null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                                onChange={(event, newValue) => {
+                                                    if (newValue) {
+                                                        const value = `${newValue.id}:${newValue.Name}`;
+                                                        console.log("Driver Detail : ", value);
+                                                        console.log("Driver ss Detail : ", driverss);
+                                                        handleDriver(value); // อัพเดตค่าเมื่อเลือก
+                                                    } else {
+                                                        setDriverss("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
+                                                    }
+                                                }}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label={driverss === "0:0" ? "เลือกพนักงานขับรถ" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{
+                                                            "& .MuiOutlinedInput-root": { height: "30px" },
+                                                            "& .MuiInputBase-input": { fontSize: "14px", padding: "4px 8px" },
+                                                        }}
+                                                    />
+                                                )}
+                                                renderOption={(props, option) => (
+                                                    <li {...props}>
+                                                        <Typography fontSize="14px">{`${option.Name}`}</Typography>
+                                                    </li>
+                                                )}
+                                            //disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
+                                            />
+                                        </Paper>
+                                        {/* <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>สถานะ</Typography>
                                     <Paper sx={{ width: "100%", marginTop: -0.5 }}
                                         component="form">
                                         <TextField size="small" fullWidth
@@ -2895,8 +2996,9 @@ const UpdateTrip = (props) => {
                                             value={status}
                                             onChange={(e) => setStatus(e.target.value)}
                                         />
-                                    </Paper>
-                                </Grid>
+                                    </Paper> */}
+                                    </Grid>
+                                }
                             </Grid>
                         </Paper>
                     </Box>
