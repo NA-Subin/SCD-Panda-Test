@@ -162,7 +162,7 @@ const Driver = () => {
   const depot = Object.values(depots || {});
 
     // กรองตามเงื่อนไขที่ต้องการหลังจาก data มาแล้ว
-    const driver = drivers.filter(d => d.Driver !== "ไม่มี");
+    const driver = drivers.filter(d => d.Driver !== "0:ไม่มี");
 
     const today = dayjs(new Date()).format("DD/MM/YYYY");
     const tripDetail = trips.filter(t =>
@@ -421,7 +421,7 @@ const Driver = () => {
                                 <MenuItem value={"0:0:0"}>กรุณาเลือกรถบรรทุก</MenuItem>
                                 {
                                     driver.map((row) => (
-                                        <MenuItem value={`${row.Driver}:${row.RegHead}:${row.RegTail}`}>{`${row.Driver.split(":")[1]} / ${row.RegHead}:${row.RegTail.split(":")[1]}`}</MenuItem>
+                                        <MenuItem value={`${row.Driver}:${row.RegHead}:${row.RegTail}`}>{`${row.Driver ? row.Driver.split(":")[1] : ""} / ${row.RegHead}:${row.RegTail ? row.RegTail.split(":")[1] : ""}`}</MenuItem>
                                     ))
                                 }
                             </Select>

@@ -463,7 +463,7 @@ const InsertTrips = () => {
 
         // ค้นหา ticket ที่ตรงกับ ticketValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
         const ticketData = getTickets().find(
-            (item) => item.TicketsName === ticketValue
+            (item) => item.Name === ticketValue
         );
 
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
@@ -506,7 +506,7 @@ const InsertTrips = () => {
 
         // ค้นหา ticket ที่ตรงกับ customerValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
         const ticketData = getCustomers().find(
-            (item) => item.TicketsName === customerValue
+            (item) => `${item.id}:${item.Name}` === customerValue
         );
 
 
@@ -2117,13 +2117,13 @@ const InsertTrips = () => {
                                                     id="autocomplete-tickets"
                                                     options={getCustomers()} // ดึงข้อมูลจากฟังก์ชัน getTickets()
                                                     getOptionLabel={(option) =>
-                                                        `${option.TicketsName}`
+                                                        `${option.Name}`
                                                     } // กำหนดรูปแบบของ Label ที่แสดง
                                                     isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
-                                                    value={customers ? getCustomers().find(item => item.TicketsName === customers) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                                    value={customers ? getCustomers().find(item => `${item.id}:${item.TickeNametsName}` === customers) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
                                                     onChange={(event, newValue) => {
                                                         if (newValue) {
-                                                            const value = `${newValue.TicketsName}`;
+                                                            const value = `${newValue.id}:${newValue.Name}`;
                                                             handlePostSelling({ target: { value } }); // อัพเดตค่าเมื่อเลือก
                                                         } else {
                                                             setCustomers("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
@@ -2143,7 +2143,7 @@ const InsertTrips = () => {
                                                     )}
                                                     renderOption={(props, option) => (
                                                         <li {...props}>
-                                                            <Typography fontSize="14px">{`${option.TicketsName}`}</Typography>
+                                                            <Typography fontSize="14px">{`${option.Name}`}</Typography>
                                                         </li>
                                                     )}
                                                     disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false

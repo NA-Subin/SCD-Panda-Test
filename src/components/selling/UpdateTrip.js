@@ -369,7 +369,10 @@ const UpdateTrip = (props) => {
                     newTickets[`Ticket${newIndex}`] = item.TicketName;
                 });
 
-                return { ...prev, ...newTickets };
+                return {
+                    ...prev,
+                    ...newTickets
+                };
             });
         }
 
@@ -398,7 +401,10 @@ const UpdateTrip = (props) => {
                     newOrders[`Order${newIndex}`] = item.TicketName;
                 });
 
-                return { ...prev, ...newOrders };
+                return {
+                    ...prev,
+                    ...newOrders
+                };
             });
         }
     }, [ticket, order]); // ใช้ useEffect ดักจับการเปลี่ยนแปลงของ ticket
@@ -412,6 +418,8 @@ const UpdateTrip = (props) => {
         setEditIdx2(null);
         setRegistration(registrations);
         setWeightTrucks(weightTruck);
+        setSelectedDateReceive(dateReceive);
+        setSelectedDateDelivery(dateDelivery);
 
         if (ticket && ticket.length > 0) {
             setEditableTickets(ticket.map(item => ({ ...item }))); // คัดลอกข้อมูลมาใช้
@@ -438,7 +446,10 @@ const UpdateTrip = (props) => {
                     newTickets[`Ticket${newIndex}`] = item.TicketName;
                 });
 
-                return { ...prev, ...newTickets };
+                return {
+                    ...prev,
+                    ...newTickets
+                };
             });
         }
 
@@ -467,7 +478,10 @@ const UpdateTrip = (props) => {
                     newOrders[`Order${newIndex}`] = item.TicketName;
                 });
 
-                return { ...prev, ...newOrders };
+                return {
+                    ...prev,
+                    ...newOrders
+                };
             });
         }
         setEditMode(false)
@@ -800,6 +814,7 @@ const UpdateTrip = (props) => {
                 DateReceive: selectedDateReceive,
                 DateDelivery: selectedDateDelivery,
                 DateStart: trip.DateStart,
+                DateEnd: trip.DateEnd || "-",
                 Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
                 Driver: `${registration.split(":")[2]}:${registration.split(":")[3]}`,
                 Depot: depot,
@@ -1471,9 +1486,24 @@ const UpdateTrip = (props) => {
                                                                 format="DD/MM/YYYY"
                                                                 onChange={(newValue) => {
                                                                     if (newValue) {
-                                                                        setSelectedDateReceive(newValue.format("DD/MM/YYYY"));
+                                                                        const formatted = newValue.format("DD/MM/YYYY");
+                                                                        setSelectedDateReceive(formatted);
+
+                                                                        // อัปเดต date ทั้งหมดใน editableTickets
+                                                                        setEditableTickets((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: formatted,
+                                                                            }))
+                                                                        );
                                                                     } else {
-                                                                        setSelectedDateReceive(""); // หรือ null แล้วแต่คุณต้องการ
+                                                                        setSelectedDateReceive("");
+                                                                        setEditableTickets((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: dateReceive,
+                                                                            }))
+                                                                        );
                                                                     }
                                                                 }}
                                                                 slotProps={{
@@ -1530,9 +1560,9 @@ const UpdateTrip = (props) => {
                                                                 if (newValue) {
                                                                     let values = "";
                                                                     newValue.Type === "รถบริษัท" ?
-                                                                        handleRegistration(`${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.Type}`, newValue.Weight)
+                                                                        handleRegistration(`${newValue.id}:${newValue.RegHead}:${newValue.Driver}:${newValue.Type}`, newValue.TotalWeight)
                                                                         :
-                                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.id}:${newValue.Name}:${newValue.Type}`, newValue.Weight); // อัพเดตค่าเมื่อเลือก
+                                                                        handleRegistration(`${newValue.id}:${newValue.Registration}:${newValue.id}:${newValue.Name}:${newValue.Type}`, newValue.TotalWeight); // อัพเดตค่าเมื่อเลือก
                                                                 } else {
                                                                     setRegistration("0:0:0:0:0");
                                                                 }
@@ -2110,7 +2140,7 @@ const UpdateTrip = (props) => {
                                                                 CodeID: newValue.CodeID || "-",
                                                                 CompanyName: newValue.CompanyName || "-",
                                                                 CreditTime: newValue.CreditTime || "-",
-                                                                Date: trip.DateStart,
+                                                                Date: selectedDateReceive,
                                                                 Driver: trip.Driver,
                                                                 Lat: newValue.Lat || 0,
                                                                 Lng: newValue.Lng || 0,
@@ -2317,11 +2347,33 @@ const UpdateTrip = (props) => {
                                                                 views={["year", "month", "day"]}
                                                                 value={dayjs(selectedDateDelivery, "DD/MM/YYYY")}
                                                                 format="DD/MM/YYYY"
+                                                                // onChange={(newValue) => {
+                                                                //     if (newValue) {
+                                                                //         setSelectedDateDelivery(newValue.format("DD/MM/YYYY"));
+                                                                //     } else {
+                                                                //         setSelectedDateDelivery(""); // หรือ null แล้วแต่คุณต้องการ
+                                                                //     }
+                                                                // }}
                                                                 onChange={(newValue) => {
                                                                     if (newValue) {
-                                                                        setSelectedDateDelivery(newValue.format("DD/MM/YYYY"));
+                                                                        const formatted = newValue.format("DD/MM/YYYY");
+                                                                        setSelectedDateDelivery(formatted);
+
+                                                                        // อัปเดต date ทั้งหมดใน editableTickets
+                                                                        setEditableOrders((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: formatted,
+                                                                            }))
+                                                                        );
                                                                     } else {
-                                                                        setSelectedDateDelivery(""); // หรือ null แล้วแต่คุณต้องการ
+                                                                        setSelectedDateDelivery("");
+                                                                        setEditableOrders((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: dateDelivery,
+                                                                            }))
+                                                                        );
                                                                     }
                                                                 }}
                                                                 slotProps={{
@@ -3008,7 +3060,7 @@ const UpdateTrip = (props) => {
                                         </Button>
                                     }
                                     {
-                                        trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        //trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
                                         <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
                                     <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>

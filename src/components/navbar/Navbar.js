@@ -155,6 +155,62 @@ export default function Navbar() {
   const [pendingPath, setPendingPath] = useState(null);
   const navigate = useNavigate();
   const { loading } = useBasicData();
+  const { positions, officers, drivers, creditors } = useBasicData();
+  const creditorsDetail = Object.values(creditors || {});
+  const driversDetail = Object.values(drivers || {});
+  const officersDetail = Object.values(officers || {});
+  const positionsDetail = Object.values(positions || {});
+  const [showBasicData, setShowBasicData] = useState(false);
+  const [showBigTruck, setShowBigTruck] = useState(false);
+  const [showSmallTruck, setShowSmallTruck] = useState(false);
+  const [showOperation, setShowOperation] = useState(false);
+  const [showFinancial, setShowFinancial] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+
+  useEffect(() => {
+    const user = Cookies.get("user");
+    if (!user) return;
+
+    const allUsers = [...officersDetail, ...driversDetail, ...creditorsDetail];
+    const matchedUser = allUsers.find((emp) => emp.User === user);
+
+    if (!matchedUser || !matchedUser.Position) return;
+
+    const positionId = Number(matchedUser.Position.split(":")[0]);
+    const position = positionsDetail.find((pos) => pos.id === positionId);
+    if (!position) return;
+
+    // เงื่อนไขสิทธิ์ตามที่ระบุ
+
+    if (position.OprerationData === 1) {
+      setShowOperation(true);
+    }
+
+    if (position.FinancialData === 1) {
+      setShowFinancial(true);
+    }
+
+    if (position.ReportData === 1) {
+      setShowReport(true);
+    }
+
+
+    if (position.BigTruckData === 1) {
+      setShowBigTruck(true);
+    }
+
+    if (position.SmallTruckData === 1) {
+      setShowSmallTruck(true);
+    }
+
+    const otherKeys = [
+      "BasicData"
+    ];
+    const hasOtherPermission = otherKeys.some((key) => position[key] === 1);
+    if (hasOtherPermission) {
+      setShowBasicData(true);
+    }
+  }, [officersDetail, driversDetail, creditorsDetail, positionsDetail]);
 
   useEffect(() => {
     if (!loading && pendingPath) {
@@ -960,998 +1016,1024 @@ export default function Navbar() {
               </Box>
             } */}
             <Box sx={{ overflowY: 'auto', flex: 1, marginLeft: shouldDrawerOpen ? 0 : -3, marginRight: shouldDrawerOpen ? 0 : -3 }}>
-              <List
-                sx={
-                  !open ? {
-                    backgroundColor: theme.palette.panda.dark,
-                    color: theme.palette.primary.contrastText,
-                  }
-                    : {
-                      marginTop: -1
+              {(
+                showBasicData &&
+                <>
+                  <List
+                    sx={
+                      !open ? {
+                        backgroundColor: theme.palette.panda.dark,
+                        color: theme.palette.primary.contrastText,
+                      }
+                        : {
+                          marginTop: -1
+                        }
                     }
-                }
-              >
-                <Collapse in={!openData} unmountOnExit={false}>
-                  {
-                    open &&
-                    <ListItem
-                      key={"ข้อมูล"}
-                      disablePadding
-                      sx={{
-                        height: 40, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        onClick={() => setOpenData(true)}
-                        sx={{
-                          height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                          px: 2,      // padding แนวนอน
-                        }}
-                      >
-                        {/* ไอคอนซ้าย */}
-                        <ListItemIcon sx={{ minWidth: 30 }}>
-                          <BadgeIcon />
-                        </ListItemIcon>
-
-                        {/* ข้อความ */}
-                        <ListItemText
-                          primary="ข้อมูลทั่วไป"
-                          primaryTypographyProps={{
-                            fontSize: "16px",
-                          }}
+                  >
+                    <Collapse in={!openData} unmountOnExit={false}>
+                      {
+                        open &&
+                        <ListItem
+                          key={"ข้อมูล"}
+                          disablePadding
                           sx={{
-                            marginLeft: 1,
+                            height: 40, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
                           }}
-                        />
-
-                        {/* ไอคอนขวา */}
-                        <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                          <KeyboardArrowDownIcon />
-                        </ListItemIcon>
-                      </ListItemButton>
-
-                    </ListItem>
-                  }
-                </Collapse>
-                <Collapse in={openData} unmountOnExit={false}>
-                  {
-                    open &&
-                    <ListItem
-                      key={"ข้อมูล"}
-                      disablePadding
-                      sx={{
-                        height: 40, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        onClick={() => setOpenData(false)}
-                        sx={{
-                          height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                          px: 2,      // padding แนวนอน
-                        }}
-                      >
-                        {/* ไอคอนซ้าย */}
-                        <ListItemIcon sx={{ minWidth: 30 }}>
-                          <BadgeIcon />
-                        </ListItemIcon>
-
-                        {/* ข้อความ */}
-                        <ListItemText
-                          primary="ข้อมูลทั่วไป"
-                          primaryTypographyProps={{
-                            fontSize: "16px",
-                          }}
-                          sx={{
-                            marginLeft: 1,
-                          }}
-                        />
-
-                        {/* ไอคอนขวา */}
-                        <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                          <KeyboardArrowUpIcon />
-                        </ListItemIcon>
-                      </ListItemButton>
-
-                    </ListItem>
-                  }
-                </Collapse>
-                <Collapse in={!openData} unmountOnExit={false}>
-                  {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "รถรับจ้างขนส่ง", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
-                    <ListItem
-                      key={text}
-                      disablePadding
-                      sx={{
-                        backgroundColor: show1 === index && theme.palette.panda.dark,
-                        height: 35, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        onClick={() => {
-                          setShow1(index);
-                          setSetting(false);
-                          setShow2(null);
-                          setShow3(null);
-                          setShow4(null);
-                          setShow5(null);
-                          const path =
-                            index === 0 ? "/dashboard"
-                              : index === 1 ? "/employee"
-                                : index === 2 ? "/trucks"
-                                  : index === 3 ? "/trucks-transport"
-                                    : index === 4 ? "/depots"
-                                      : index === 5 ? "/ticket"
-                                        : index === 6 ? "/transports"
-                                          : index === 7 ? "/customer-bigtrucks"
-                                            : index === 8 ? "/customer-smalltrucks"
-                                              : "/creditor";
-
-                          setPendingPath(path); // ขอไปหน้านั้น
-                        }}
-                      >
-                        {
-                          shouldDrawerOpen ?
-                            <ListItemIcon
-                              sx={{
-                                color: !open || show1 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                mr: !open || show1 === index ? -3 : -2,
-                                ml: !open || show1 === index ? 3 : 2,
-                              }}
-                            >
-                              {index === 0 ? (
-                                <HomeIcon />
-                              ) : index === 1 ? (
-                                <AccountCircleIcon />
-                              ) : index === 2 ? (
-                                <LocalShippingIcon />
-                              ) : index === 3 ? (
-                                <LocalShippingIcon />
-                              ) : index === 4 ? (
-                                <StoreMallDirectoryIcon />
-                              ) : index === 5 ? (
-                                <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
-                              ) : index === 6 ? (
-                                <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
-                              ) : index === 7 ? (
-                                <GroupsIcon />
-                              ) : index === 8 ? (
-                                <GroupsIcon />
-                              ) : (
-                                <CurrencyExchangeIcon />
-                              )}
+                        >
+                          <ListItemButton
+                            onClick={() => setOpenData(true)}
+                            sx={{
+                              height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                              px: 2,      // padding แนวนอน
+                            }}
+                          >
+                            {/* ไอคอนซ้าย */}
+                            <ListItemIcon sx={{ minWidth: 30 }}>
+                              <BadgeIcon />
                             </ListItemIcon>
-                            :
-                            <Tooltip
-                              title={text}
-                              placement="right"
-                              PopperProps={{
-                                modifiers: [
-                                  {
-                                    name: 'offset',
-                                    options: {
-                                      offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
-                                    },
-                                  },
-                                ],
-                              }}
-                              componentsProps={{
-                                tooltip: {
-                                  sx: {
-                                    fontSize: '15px', // ปรับขนาดตัวอักษร
-                                    textAlign: 'left', // จัดข้อความชิดซ้าย
-                                    backgroundColor: theme.palette.panda.dark,
-                                  },
-                                },
-                              }}
-                            >
-                              <ListItemIcon
-                                sx={{
-                                  color: !open || show1 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                  mr: !open || show1 === index ? -3 : -2,
-                                  ml: !open || show1 === index ? 3 : 2,
-                                }}
-                              >
-                                {index === 0 ? (
-                                  <HomeIcon />
-                                ) : index === 1 ? (
-                                  <AccountCircleIcon />
-                                ) : index === 2 ? (
-                                  <LocalShippingIcon />
-                                ) : index === 3 ? (
-                                  <StoreMallDirectoryIcon />
-                                ) : index === 4 ? (
-                                  <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
-                                ) : index === 5 ? (
-                                  <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
-                                ) : index === 6 ? (
-                                  <GroupsIcon />
-                                ) : index === 7 ? (
-                                  <GroupsIcon />
-                                ) : (
-                                  <CurrencyExchangeIcon />
-                                )}
-                              </ListItemIcon>
-                            </Tooltip>
-                        }
-                        <ListItemText
-                          primary={shouldDrawerOpen ? text : ""}
-                          sx={{
-                            color: show1 === index && theme.palette.primary.contrastText, fontSize: "15px"
-                          }}
-                          primaryTypographyProps={{
-                            fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
 
+                            {/* ข้อความ */}
+                            <ListItemText
+                              primary="ข้อมูลทั่วไป"
+                              primaryTypographyProps={{
+                                fontSize: "16px",
+                              }}
+                              sx={{
+                                marginLeft: 1,
+                              }}
+                            />
+
+                            {/* ไอคอนขวา */}
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                              <KeyboardArrowDownIcon />
+                            </ListItemIcon>
+                          </ListItemButton>
+
+                        </ListItem>
+                      }
+                    </Collapse>
+                    <Collapse in={openData} unmountOnExit={false}>
+                      {
+                        open &&
+                        <ListItem
+                          key={"ข้อมูล"}
+                          disablePadding
+                          sx={{
+                            height: 40, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
                           }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </Collapse>
-              </List>
-              <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
-              <List
-                sx={
-                  !open ? {
-                    backgroundColor: theme.palette.panda.dark,
-                    color: theme.palette.primary.contrastText,
-                  }
-                    : {
-                      marginTop: -1
+                        >
+                          <ListItemButton
+                            onClick={() => setOpenData(false)}
+                            sx={{
+                              height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                              px: 2,      // padding แนวนอน
+                            }}
+                          >
+                            {/* ไอคอนซ้าย */}
+                            <ListItemIcon sx={{ minWidth: 30 }}>
+                              <BadgeIcon />
+                            </ListItemIcon>
+
+                            {/* ข้อความ */}
+                            <ListItemText
+                              primary="ข้อมูลทั่วไป"
+                              primaryTypographyProps={{
+                                fontSize: "16px",
+                              }}
+                              sx={{
+                                marginLeft: 1,
+                              }}
+                            />
+
+                            {/* ไอคอนขวา */}
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                              <KeyboardArrowUpIcon />
+                            </ListItemIcon>
+                          </ListItemButton>
+
+                        </ListItem>
+                      }
+                    </Collapse>
+                    <Collapse in={!openData} unmountOnExit={false}>
+                      {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "รถรับจ้างขนส่ง", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
+                        <ListItem
+                          key={text}
+                          disablePadding
+                          sx={{
+                            backgroundColor: show1 === index && theme.palette.panda.dark,
+                            height: 35, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
+                          }}
+                        >
+                          <ListItemButton
+                            onClick={() => {
+                              setShow1(index);
+                              setSetting(false);
+                              setShow2(null);
+                              setShow3(null);
+                              setShow4(null);
+                              setShow5(null);
+                              const path =
+                                index === 0 ? "/dashboard"
+                                  : index === 1 ? "/employee"
+                                    : index === 2 ? "/trucks"
+                                      : index === 3 ? "/trucks-transport"
+                                        : index === 4 ? "/depots"
+                                          : index === 5 ? "/ticket"
+                                            : index === 6 ? "/transports"
+                                              : index === 7 ? "/customer-bigtrucks"
+                                                : index === 8 ? "/customer-smalltrucks"
+                                                  : "/creditor";
+
+                              setPendingPath(path); // ขอไปหน้านั้น
+                            }}
+                          >
+                            {
+                              shouldDrawerOpen ?
+                                <ListItemIcon
+                                  sx={{
+                                    color: !open || show1 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    mr: !open || show1 === index ? -3 : -2,
+                                    ml: !open || show1 === index ? 3 : 2,
+                                  }}
+                                >
+                                  {index === 0 ? (
+                                    <HomeIcon />
+                                  ) : index === 1 ? (
+                                    <AccountCircleIcon />
+                                  ) : index === 2 ? (
+                                    <LocalShippingIcon />
+                                  ) : index === 3 ? (
+                                    <LocalShippingIcon />
+                                  ) : index === 4 ? (
+                                    <StoreMallDirectoryIcon />
+                                  ) : index === 5 ? (
+                                    <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
+                                  ) : index === 6 ? (
+                                    <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
+                                  ) : index === 7 ? (
+                                    <GroupsIcon />
+                                  ) : index === 8 ? (
+                                    <GroupsIcon />
+                                  ) : (
+                                    <CurrencyExchangeIcon />
+                                  )}
+                                </ListItemIcon>
+                                :
+                                <Tooltip
+                                  title={text}
+                                  placement="right"
+                                  PopperProps={{
+                                    modifiers: [
+                                      {
+                                        name: 'offset',
+                                        options: {
+                                          offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
+                                        },
+                                      },
+                                    ],
+                                  }}
+                                  componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        fontSize: '15px', // ปรับขนาดตัวอักษร
+                                        textAlign: 'left', // จัดข้อความชิดซ้าย
+                                        backgroundColor: theme.palette.panda.dark,
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <ListItemIcon
+                                    sx={{
+                                      color: !open || show1 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      mr: !open || show1 === index ? -3 : -2,
+                                      ml: !open || show1 === index ? 3 : 2,
+                                    }}
+                                  >
+                                    {index === 0 ? (
+                                      <HomeIcon />
+                                    ) : index === 1 ? (
+                                      <AccountCircleIcon />
+                                    ) : index === 2 ? (
+                                      <LocalShippingIcon />
+                                    ) : index === 3 ? (
+                                      <StoreMallDirectoryIcon />
+                                    ) : index === 4 ? (
+                                      <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
+                                    ) : index === 5 ? (
+                                      <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />
+                                    ) : index === 6 ? (
+                                      <GroupsIcon />
+                                    ) : index === 7 ? (
+                                      <GroupsIcon />
+                                    ) : (
+                                      <CurrencyExchangeIcon />
+                                    )}
+                                  </ListItemIcon>
+                                </Tooltip>
+                            }
+                            <ListItemText
+                              primary={shouldDrawerOpen ? text : ""}
+                              sx={{
+                                color: show1 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                              }}
+                              primaryTypographyProps={{
+                                fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
+
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </Collapse>
+                  </List>
+                </>
+              )}
+              {(
+                showOperation &&
+                <>
+                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <List
+                    sx={
+                      !open ? {
+                        backgroundColor: theme.palette.panda.dark,
+                        color: theme.palette.primary.contrastText,
+                      }
+                        : {
+                          marginTop: -1
+                        }
                     }
-                }
-              >
-                <Collapse in={!operation} unmountOnExit={false}>
-                  {
-                    open &&
-                    <ListItem
-                      key={"ข้อมูล"}
-                      disablePadding
-                      sx={{
-                        height: 40, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        onClick={() => setOperation(true)}
-                        sx={{
-                          height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                          px: 2,      // padding แนวนอน
-                        }}
-                      >
-                        {/* ไอคอนซ้าย */}
-                        <ListItemIcon sx={{ minWidth: 30 }}>
-                          <ContactPageIcon />
-                        </ListItemIcon>
-
-                        {/* ข้อความ */}
-                        <ListItemText
-                          primary="ปฎิบัติงาน"
-                          primaryTypographyProps={{
-                            fontSize: "16px",
-                          }}
+                  >
+                    <Collapse in={!operation} unmountOnExit={false}>
+                      {
+                        open &&
+                        <ListItem
+                          key={"ข้อมูล"}
+                          disablePadding
                           sx={{
-                            marginLeft: 1,
+                            height: 40, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
                           }}
-                        />
-
-                        {/* ไอคอนขวา */}
-                        <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                          <KeyboardArrowDownIcon />
-                        </ListItemIcon>
-                      </ListItemButton>
-
-                    </ListItem>
-                  }
-                </Collapse>
-                <Collapse in={operation} unmountOnExit={false}>
-                  {
-                    open &&
-                    <ListItem
-                      key={"ปฎิบัติงาน"}
-                      disablePadding
-                      sx={{
-                        height: 40, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        onClick={() => setOperation(false)}
-                        sx={{
-                          height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                          px: 2,      // padding แนวนอน
-                        }}
-                      >
-                        {/* ไอคอนซ้าย */}
-                        <ListItemIcon sx={{ minWidth: 30 }}>
-                          <ContactPageIcon />
-                        </ListItemIcon>
-
-                        {/* ข้อความ */}
-                        <ListItemText
-                          primary="ปฎิบัติงาน"
-                          primaryTypographyProps={{
-                            fontSize: "16px",
-                          }}
-                          sx={{
-                            marginLeft: 1,
-                          }}
-                        />
-
-                        {/* ไอคอนขวา */}
-                        <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                          <KeyboardArrowUpIcon />
-                        </ListItemIcon>
-                      </ListItemButton>
-
-                    </ListItem>
-                  }
-                </Collapse>
-                <Collapse in={!operation} unmountOnExit={false}>
-                  {["สต็อกหน้าลาน", "เที่ยววิ่งรถใหญ่"].map((text, index) => (
-                    <ListItem
-                      key={text}
-                      disablePadding
-                      sx={{
-                        backgroundColor: show2 === index && theme.palette.panda.dark,
-                        height: 35, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        component={Link}
-                        to={
-                          index === 0 ? "/gasstations" : "/trips-bigtruck"
-                        }
-                        sx={{
-                          height: 35, // กำหนดความสูงให้ ListItem
-                        }}
-                        onClick={() => (setShow2(index), setSetting(false))}
-                        onMouseUp={() => (setShow2(index), setSetting(false))}
-                        onMouseDown={() => (setShow1(null), setShow3(null), setShow4(null), setShow5(null))}
-                      >
-                        {
-                          shouldDrawerOpen ?
-                            <ListItemIcon
-                              sx={{
-                                color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                mr: !open || show2 === index ? -3 : -2,
-                                ml: !open || show2 === index ? 3 : 2,
-                              }}
-                            >
-                              {index === 0 ? (
-                                <LocalGasStationIcon />
-                              ) : (
-                                <ModeOfTravelIcon />
-                              )}
+                        >
+                          <ListItemButton
+                            onClick={() => setOperation(true)}
+                            sx={{
+                              height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                              px: 2,      // padding แนวนอน
+                            }}
+                          >
+                            {/* ไอคอนซ้าย */}
+                            <ListItemIcon sx={{ minWidth: 30 }}>
+                              <ContactPageIcon />
                             </ListItemIcon>
-                            :
-                            <Tooltip
-                              title={text}
-                              placement="right"
-                              PopperProps={{
-                                modifiers: [
-                                  {
-                                    name: 'offset',
-                                    options: {
-                                      offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
-                                    },
-                                  },
-                                ],
+
+                            {/* ข้อความ */}
+                            <ListItemText
+                              primary="ปฎิบัติงาน"
+                              primaryTypographyProps={{
+                                fontSize: "16px",
                               }}
-                              componentsProps={{
-                                tooltip: {
-                                  sx: {
-                                    fontSize: '15px', // ปรับขนาดตัวอักษร
-                                    textAlign: 'left', // จัดข้อความชิดซ้าย
-                                    backgroundColor: theme.palette.panda.dark,
-                                  },
-                                },
+                              sx={{
+                                marginLeft: 1,
                               }}
-                            >
-                              <ListItemIcon
-                                sx={{
-                                  color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                  mr: !open || show2 === index ? -3 : -2,
-                                  ml: !open || show2 === index ? 3 : 2,
-                                }}
-                              >
-                                {index === 0 ? (
-                                  <LocalGasStationIcon />
-                                ) : (
-                                  <ModeOfTravelIcon />
-                                )}
-                              </ListItemIcon>
-                            </Tooltip>
-                        }
-                        <ListItemText
-                          primary={shouldDrawerOpen ? text : ""}
+                            />
+
+                            {/* ไอคอนขวา */}
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                              <KeyboardArrowDownIcon />
+                            </ListItemIcon>
+                          </ListItemButton>
+
+                        </ListItem>
+                      }
+                    </Collapse>
+                    <Collapse in={operation} unmountOnExit={false}>
+                      {
+                        open &&
+                        <ListItem
+                          key={"ปฎิบัติงาน"}
+                          disablePadding
                           sx={{
-                            color: show2 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                            height: 40, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
                           }}
-                          primaryTypographyProps={{
-                            fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
+                        >
+                          <ListItemButton
+                            onClick={() => setOperation(false)}
+                            sx={{
+                              height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                              px: 2,      // padding แนวนอน
+                            }}
+                          >
+                            {/* ไอคอนซ้าย */}
+                            <ListItemIcon sx={{ minWidth: 30 }}>
+                              <ContactPageIcon />
+                            </ListItemIcon>
 
+                            {/* ข้อความ */}
+                            <ListItemText
+                              primary="ปฎิบัติงาน"
+                              primaryTypographyProps={{
+                                fontSize: "16px",
+                              }}
+                              sx={{
+                                marginLeft: 1,
+                              }}
+                            />
+
+                            {/* ไอคอนขวา */}
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                              <KeyboardArrowUpIcon />
+                            </ListItemIcon>
+                          </ListItemButton>
+
+                        </ListItem>
+                      }
+                    </Collapse>
+                    <Collapse in={!operation} unmountOnExit={false}>
+                      {["สต็อกหน้าลาน", "เที่ยววิ่งรถใหญ่"].map((text, index) => (
+                        <ListItem
+                          key={text}
+                          disablePadding
+                          sx={{
+                            backgroundColor: show2 === index && theme.palette.panda.dark,
+                            height: 35, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
                           }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </Collapse>
-              </List>
-              <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
-              <Collapse in={!financial} unmountOnExit={false}>
-                {
-                  open &&
-                  <ListItem
-                    key={"การชำระเงิน"}
-                    disablePadding
-                    sx={{
-                      height: 40, // กำหนดความสูงให้ ListItem
-                      paddingY: 1,
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => setFinacieal(true)}
-                      sx={{
-                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                        px: 2,      // padding แนวนอน
-                      }}
-                    >
-                      {/* ไอคอนซ้าย */}
-                      <ListItemIcon sx={{ minWidth: 30 }}>
-                        <PaidIcon />
-                      </ListItemIcon>
+                        >
+                          <ListItemButton
+                            component={Link}
+                            to={
+                              index === 0 ? "/gasstations" : "/trips-bigtruck"
+                            }
+                            sx={{
+                              height: 35, // กำหนดความสูงให้ ListItem
+                            }}
+                            onClick={() => (setShow2(index), setSetting(false))}
+                            onMouseUp={() => (setShow2(index), setSetting(false))}
+                            onMouseDown={() => (setShow1(null), setShow3(null), setShow4(null), setShow5(null))}
+                          >
+                            {
+                              shouldDrawerOpen ?
+                                <ListItemIcon
+                                  sx={{
+                                    color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    mr: !open || show2 === index ? -3 : -2,
+                                    ml: !open || show2 === index ? 3 : 2,
+                                  }}
+                                >
+                                  {index === 0 ? (
+                                    <LocalGasStationIcon />
+                                  ) : (
+                                    <ModeOfTravelIcon />
+                                  )}
+                                </ListItemIcon>
+                                :
+                                <Tooltip
+                                  title={text}
+                                  placement="right"
+                                  PopperProps={{
+                                    modifiers: [
+                                      {
+                                        name: 'offset',
+                                        options: {
+                                          offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
+                                        },
+                                      },
+                                    ],
+                                  }}
+                                  componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        fontSize: '15px', // ปรับขนาดตัวอักษร
+                                        textAlign: 'left', // จัดข้อความชิดซ้าย
+                                        backgroundColor: theme.palette.panda.dark,
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <ListItemIcon
+                                    sx={{
+                                      color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      mr: !open || show2 === index ? -3 : -2,
+                                      ml: !open || show2 === index ? 3 : 2,
+                                    }}
+                                  >
+                                    {index === 0 ? (
+                                      <LocalGasStationIcon />
+                                    ) : (
+                                      <ModeOfTravelIcon />
+                                    )}
+                                  </ListItemIcon>
+                                </Tooltip>
+                            }
+                            <ListItemText
+                              primary={shouldDrawerOpen ? text : ""}
+                              sx={{
+                                color: show2 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                              }}
+                              primaryTypographyProps={{
+                                fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
 
-                      {/* ข้อความ */}
-                      <ListItemText
-                        primary="การชำระเงิน"
-                        primaryTypographyProps={{
-                          fontSize: "16px",
-                        }}
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </Collapse>
+                  </List>
+                </>
+              )}
+              {(
+                showFinancial &&
+                <>
+                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <Collapse in={!financial} unmountOnExit={false}>
+                    {
+                      open &&
+                      <ListItem
+                        key={"การชำระเงิน"}
+                        disablePadding
                         sx={{
-                          marginLeft: 1,
+                          height: 40, // กำหนดความสูงให้ ListItem
+                          paddingY: 1,
                         }}
-                      />
+                      >
+                        <ListItemButton
+                          onClick={() => setFinacieal(true)}
+                          sx={{
+                            height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                            px: 2,      // padding แนวนอน
+                          }}
+                        >
+                          {/* ไอคอนซ้าย */}
+                          <ListItemIcon sx={{ minWidth: 30 }}>
+                            <PaidIcon />
+                          </ListItemIcon>
 
-                      {/* ไอคอนขวา */}
-                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                        <KeyboardArrowDownIcon />
-                      </ListItemIcon>
-                    </ListItemButton>
+                          {/* ข้อความ */}
+                          <ListItemText
+                            primary="การชำระเงิน"
+                            primaryTypographyProps={{
+                              fontSize: "16px",
+                            }}
+                            sx={{
+                              marginLeft: 1,
+                            }}
+                          />
 
-                  </ListItem>
-                }
-              </Collapse>
-              <Collapse in={financial} unmountOnExit={false}>
-                {
-                  open &&
-                  <ListItem
-                    key={"การชำระเงิน"}
-                    disablePadding
-                    sx={{
-                      height: 40, // กำหนดความสูงให้ ListItem
-                      paddingY: 1,
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => setFinacieal(false)}
-                      sx={{
-                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                        px: 2,      // padding แนวนอน
-                      }}
-                    >
-                      {/* ไอคอนซ้าย */}
-                      <ListItemIcon sx={{ minWidth: 30 }}>
-                        <PaidIcon />
-                      </ListItemIcon>
+                          {/* ไอคอนขวา */}
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <KeyboardArrowDownIcon />
+                          </ListItemIcon>
+                        </ListItemButton>
 
-                      {/* ข้อความ */}
-                      <ListItemText
-                        primary="การชำระเงิน"
-                        primaryTypographyProps={{
-                          fontSize: "16px",
-                        }}
-                        sx={{
-                          marginLeft: 1,
-                        }}
-                      />
-
-                      {/* ไอคอนขวา */}
-                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                        <KeyboardArrowUpIcon />
-                      </ListItemIcon>
-                    </ListItemButton>
-
-                  </ListItem>
-                }
-              </Collapse>
-              <List
-                sx={
-                  !open ? {
-                    backgroundColor: theme.palette.panda.dark,
-                    color: theme.palette.primary.contrastText,
-                  }
-                    : {
-                      marginTop: -1
+                      </ListItem>
                     }
-                }
-              >
-                <Collapse in={!financial} unmountOnExit={false}>
-                  {["ชำระค่าน้ำมัน", "ชำระค่าขนส่ง"].map((text, index) => (
-                    <ListItem
-                      key={text}
-                      disablePadding
-                      sx={{
-                        backgroundColor: show3 === index && theme.palette.panda.dark,
-                        height: 35, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        component={Link}
-                        to={
-                          index === 0 ? "/invoice" : "/report"
-                        }
+                  </Collapse>
+                  <Collapse in={financial} unmountOnExit={false}>
+                    {
+                      open &&
+                      <ListItem
+                        key={"การชำระเงิน"}
+                        disablePadding
                         sx={{
-                          height: 35, // กำหนดความสูงให้ ListItem
+                          height: 40, // กำหนดความสูงให้ ListItem
+                          paddingY: 1,
                         }}
-                        onClick={() => (setShow3(index), setSetting(false))}
-                        onMouseUp={() => (setShow3(index), setSetting(false))}
-                        onMouseDown={() => (setShow1(null), setShow2(null), setShow4(null), setShow5(null))}
                       >
-                        {
-                          shouldDrawerOpen ?
-                            <ListItemIcon
-                              sx={{
-                                color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                mr: !open || show3 === index ? -3 : -2,
-                                ml: !open || show3 === index ? 3 : 2,
-                              }}
-                            >
-                              {index === 0 ? (
-                                <PaidIcon />
-                              ) : (
-                                <PaidIcon />
-                              )}
-                            </ListItemIcon>
-                            :
-                            <Tooltip
-                              title={text}
-                              placement="right"
-                              PopperProps={{
-                                modifiers: [
-                                  {
-                                    name: 'offset',
-                                    options: {
-                                      offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
-                                    },
-                                  },
-                                ],
-                              }}
-                              componentsProps={{
-                                tooltip: {
-                                  sx: {
-                                    fontSize: '15px', // ปรับขนาดตัวอักษร
-                                    textAlign: 'left', // จัดข้อความชิดซ้าย
-                                    backgroundColor: theme.palette.panda.dark,
-                                  },
-                                },
-                              }}
-                            >
-                              <ListItemIcon
-                                sx={{
-                                  color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                  mr: !open || show3 === index ? -3 : -2,
-                                  ml: !open || show3 === index ? 3 : 2,
-                                }}
-                              >
-                                {index === 0 ? (
-                                  <PaidIcon />
-                                ) : (
-                                  <PaidIcon />
-                                )}
-                              </ListItemIcon>
-                            </Tooltip>
-                        }
-                        <ListItemText
-                          primary={shouldDrawerOpen ? text : ""}
+                        <ListItemButton
+                          onClick={() => setFinacieal(false)}
                           sx={{
-                            color: show3 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                            height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                            px: 2,      // padding แนวนอน
                           }}
-                          primaryTypographyProps={{
-                            fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+                        >
+                          {/* ไอคอนซ้าย */}
+                          <ListItemIcon sx={{ minWidth: 30 }}>
+                            <PaidIcon />
+                          </ListItemIcon>
 
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </Collapse>
-              </List>
-              <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
-              <Collapse in={!report} unmountOnExit={false}>
-                {
-                  open &&
-                  <ListItem
-                    key={"รายงาน"}
-                    disablePadding
-                    sx={{
-                      height: 40, // กำหนดความสูงให้ ListItem
-                      paddingY: 1,
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => setReport(true)}
-                      sx={{
-                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                        px: 2,      // padding แนวนอน
-                      }}
-                    >
-                      {/* ไอคอนซ้าย */}
-                      <ListItemIcon sx={{ minWidth: 30 }}>
-                        <SummarizeIcon />
-                      </ListItemIcon>
+                          {/* ข้อความ */}
+                          <ListItemText
+                            primary="การชำระเงิน"
+                            primaryTypographyProps={{
+                              fontSize: "16px",
+                            }}
+                            sx={{
+                              marginLeft: 1,
+                            }}
+                          />
 
-                      {/* ข้อความ */}
-                      <ListItemText
-                        primary="รายงาน"
-                        primaryTypographyProps={{
-                          fontSize: "16px",
-                        }}
-                        sx={{
-                          marginLeft: 1,
-                        }}
-                      />
+                          {/* ไอคอนขวา */}
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <KeyboardArrowUpIcon />
+                          </ListItemIcon>
+                        </ListItemButton>
 
-                      {/* ไอคอนขวา */}
-                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                        <KeyboardArrowDownIcon />
-                      </ListItemIcon>
-                    </ListItemButton>
-
-                  </ListItem>
-                }
-              </Collapse>
-              <Collapse in={report} unmountOnExit={false}>
-                {
-                  open &&
-                  <ListItem
-                    key={"รายงาน"}
-                    disablePadding
-                    sx={{
-                      height: 40, // กำหนดความสูงให้ ListItem
-                      paddingY: 1,
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => setReport(false)}
-                      sx={{
-                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                        px: 2,      // padding แนวนอน
-                      }}
-                    >
-                      {/* ไอคอนซ้าย */}
-                      <ListItemIcon sx={{ minWidth: 30 }}>
-                        <SummarizeIcon />
-                      </ListItemIcon>
-
-                      {/* ข้อความ */}
-                      <ListItemText
-                        primary="รายงาน"
-                        primaryTypographyProps={{
-                          fontSize: "16px",
-                        }}
-                        sx={{
-                          marginLeft: 1,
-                        }}
-                      />
-
-                      {/* ไอคอนขวา */}
-                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                        <KeyboardArrowUpIcon />
-                      </ListItemIcon>
-                    </ListItemButton>
-
-                  </ListItem>
-                }
-              </Collapse>
-              <List
-                sx={
-                  !open ? {
-                    backgroundColor: theme.palette.panda.dark,
-                    color: theme.palette.primary.contrastText,
-                  }
-                    : {
-                      marginTop: -1
+                      </ListItem>
                     }
-                }
-              >
-                <Collapse in={!report} unmountOnExit={false}>
-                  {["สรุปยอดส่งน้ำมัน", "สรุปค่าเที่ยว", "การชำระค่าน้ำมัน", "รายได้รายหัก", "บิลค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
-                    <ListItem
-                      key={text}
-                      disablePadding
-                      sx={{
-                        backgroundColor: show4 === index && theme.palette.panda.dark,
-                        height: 35, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        component={Link}
-                        to={
-                          index === 0 ? "/summary-oil-balance" : index === 1 ? "/report-driver-trip" : index === 2 ? "/report-fuel-payment" : index === 3 ? "/financial-deduction" : index === 4 ? "/invoice-financial" : "/close-financial"
+                  </Collapse>
+                  <List
+                    sx={
+                      !open ? {
+                        backgroundColor: theme.palette.panda.dark,
+                        color: theme.palette.primary.contrastText,
+                      }
+                        : {
+                          marginTop: -1
                         }
-                        sx={{
-                          height: 35, // กำหนดความสูงให้ ListItem
-                        }}
-                        onClick={() => (setShow4(index), setSetting(false))}
-                        onMouseUp={() => (setShow4(index), setSetting(false))}
-                        onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null), setShow5(null))}
-                      >
-                        {
-                          shouldDrawerOpen ?
-                            <ListItemIcon
-                              sx={{
-                                color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                mr: !open || show4 === index ? -3 : -2,
-                                ml: !open || show4 === index ? 3 : 2,
-                              }}
-                            >
-                              {index === 0 ? (
-                                <SummarizeIcon />
-                              ) : (
-                                <SummarizeIcon />
-                              )}
-                            </ListItemIcon>
-                            :
-                            <Tooltip
-                              title={text}
-                              placement="right"
-                              PopperProps={{
-                                modifiers: [
-                                  {
-                                    name: 'offset',
-                                    options: {
-                                      offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
-                                    },
-                                  },
-                                ],
-                              }}
-                              componentsProps={{
-                                tooltip: {
-                                  sx: {
-                                    fontSize: '15px', // ปรับขนาดตัวอักษร
-                                    textAlign: 'left', // จัดข้อความชิดซ้าย
-                                    backgroundColor: theme.palette.panda.dark,
-                                  },
-                                },
-                              }}
-                            >
-                              <ListItemIcon
-                                sx={{
-                                  color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                  mr: !open || show4 === index ? -3 : -2,
-                                  ml: !open || show4 === index ? 3 : 2,
-                                }}
-                              >
-                                {index === 0 ? (
-                                  <SummarizeIcon />
-                                ) : (
-                                  <SummarizeIcon />
-                                )}
-                              </ListItemIcon>
-                            </Tooltip>
-                        }
-                        <ListItemText
-                          primary={shouldDrawerOpen ? text : ""}
-                          sx={{
-                            color: show4 === index && theme.palette.primary.contrastText, fontSize: "15px"
-                          }}
-                          primaryTypographyProps={{
-                            fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
-
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </Collapse>
-              </List>
-              <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
-              <Collapse in={!trucksmall} unmountOnExit={false}>
-                {
-                  open &&
-                  <ListItem
-                    key={"รถเล็ก"}
-                    disablePadding
-                    sx={{
-                      height: 40, // กำหนดความสูงให้ ListItem
-                      paddingY: 1,
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => setTrucksmall(true)}
-                      sx={{
-                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                        px: 2,      // padding แนวนอน
-                      }}
-                    >
-                      {/* ไอคอนซ้าย */}
-                      <ListItemIcon sx={{ minWidth: 30 }}>
-                        <LocalShippingIcon />
-                      </ListItemIcon>
-
-                      {/* ข้อความ */}
-                      <ListItemText
-                        primary="รถเล็ก"
-                        primaryTypographyProps={{
-                          fontSize: "16px",
-                        }}
-                        sx={{
-                          marginLeft: 1,
-                        }}
-                      />
-
-                      {/* ไอคอนขวา */}
-                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                        <KeyboardArrowDownIcon />
-                      </ListItemIcon>
-                    </ListItemButton>
-
-                  </ListItem>
-                }
-              </Collapse>
-              <Collapse in={trucksmall} unmountOnExit={false}>
-                {
-                  open &&
-                  <ListItem
-                    key={"รถเล็ก"}
-                    disablePadding
-                    sx={{
-                      height: 40, // กำหนดความสูงให้ ListItem
-                      paddingY: 1,
-                    }}
-                  >
-                    <ListItemButton
-                      onClick={() => setTrucksmall(false)}
-                      sx={{
-                        height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
-                        px: 2,      // padding แนวนอน
-                      }}
-                    >
-                      {/* ไอคอนซ้าย */}
-                      <ListItemIcon sx={{ minWidth: 30 }}>
-                        <LocalShippingIcon />
-                      </ListItemIcon>
-
-                      {/* ข้อความ */}
-                      <ListItemText
-                        primary="รถเล็ก"
-                        primaryTypographyProps={{
-                          fontSize: "16px",
-                        }}
-                        sx={{
-                          marginLeft: 1,
-                        }}
-                      />
-
-                      {/* ไอคอนขวา */}
-                      <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
-                        <KeyboardArrowUpIcon />
-                      </ListItemIcon>
-                    </ListItemButton>
-
-                  </ListItem>
-                }
-              </Collapse>
-              <List
-                sx={
-                  !open ? {
-                    backgroundColor: theme.palette.panda.dark,
-                    color: theme.palette.primary.contrastText,
-                  }
-                    : {
-                      marginTop: -1
                     }
-                }
-              >
-                <Collapse in={!trucksmall} unmountOnExit={false}>
-                  {["จัดเที่ยววิ่ง", "การชำระค่าน้ำมัน", "รายงาน"].map((text, index) => (
-                    <ListItem
-                      key={text}
-                      disablePadding
-                      sx={{
-                        backgroundColor: show5 === index && theme.palette.panda.dark,
-                        height: 35, // กำหนดความสูงให้ ListItem
-                        paddingY: 1,
-                      }}
-                    >
-                      <ListItemButton
-                        component={Link}
-                        to={
-                          index === 0 ? "/trips-smalltruck" : "/close-financial"
-                        }
-                        sx={{
-                          height: 35, // กำหนดความสูงให้ ListItem
-                        }}
-                        onClick={() => (setShow5(index), setSetting(false))}
-                        onMouseUp={() => (setShow5(index), setSetting(false))}
-                        onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null), setShow4(null))}
-                      >
-                        {
-                          shouldDrawerOpen ?
-                            <ListItemIcon
-                              sx={{
-                                color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                mr: !open || show5 === index ? -3 : -2,
-                                ml: !open || show5 === index ? 3 : 2,
-                              }}
-                            >
-                              {index === 0 ? (
-                                <ModeOfTravelIcon />
-                              ) : index === 1 ? (
-                                <PaidIcon />
-                              ) : (
-                                <SummarizeIcon />
-                              )}
-                            </ListItemIcon>
-                            :
-                            <Tooltip
-                              title={text}
-                              placement="right"
-                              PopperProps={{
-                                modifiers: [
-                                  {
-                                    name: 'offset',
-                                    options: {
-                                      offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
-                                    },
-                                  },
-                                ],
-                              }}
-                              componentsProps={{
-                                tooltip: {
-                                  sx: {
-                                    fontSize: '15px', // ปรับขนาดตัวอักษร
-                                    textAlign: 'left', // จัดข้อความชิดซ้าย
-                                    backgroundColor: theme.palette.panda.dark,
-                                  },
-                                },
-                              }}
-                            >
-                              <ListItemIcon
-                                sx={{
-                                  color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
-                                  mr: !open || show5 === index ? -3 : -2,
-                                  ml: !open || show5 === index ? 3 : 2,
-                                }}
-                              >
-                                {index === 0 ? (
-                                  <SummarizeIcon />
-                                ) : (
-                                  <SummarizeIcon />
-                                )}
-                              </ListItemIcon>
-                            </Tooltip>
-                        }
-                        <ListItemText
-                          primary={shouldDrawerOpen ? text : ""}
+                  >
+                    <Collapse in={!financial} unmountOnExit={false}>
+                      {["ชำระค่าน้ำมัน", "ชำระค่าขนส่ง"].map((text, index) => (
+                        <ListItem
+                          key={text}
+                          disablePadding
                           sx={{
-                            color: show5 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                            backgroundColor: show3 === index && theme.palette.panda.dark,
+                            height: 35, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
                           }}
-                          primaryTypographyProps={{
-                            fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+                        >
+                          <ListItemButton
+                            component={Link}
+                            to={
+                              index === 0 ? "/invoice" : "/report"
+                            }
+                            sx={{
+                              height: 35, // กำหนดความสูงให้ ListItem
+                            }}
+                            onClick={() => (setShow3(index), setSetting(false))}
+                            onMouseUp={() => (setShow3(index), setSetting(false))}
+                            onMouseDown={() => (setShow1(null), setShow2(null), setShow4(null), setShow5(null))}
+                          >
+                            {
+                              shouldDrawerOpen ?
+                                <ListItemIcon
+                                  sx={{
+                                    color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    mr: !open || show3 === index ? -3 : -2,
+                                    ml: !open || show3 === index ? 3 : 2,
+                                  }}
+                                >
+                                  {index === 0 ? (
+                                    <PaidIcon />
+                                  ) : (
+                                    <PaidIcon />
+                                  )}
+                                </ListItemIcon>
+                                :
+                                <Tooltip
+                                  title={text}
+                                  placement="right"
+                                  PopperProps={{
+                                    modifiers: [
+                                      {
+                                        name: 'offset',
+                                        options: {
+                                          offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
+                                        },
+                                      },
+                                    ],
+                                  }}
+                                  componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        fontSize: '15px', // ปรับขนาดตัวอักษร
+                                        textAlign: 'left', // จัดข้อความชิดซ้าย
+                                        backgroundColor: theme.palette.panda.dark,
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <ListItemIcon
+                                    sx={{
+                                      color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      mr: !open || show3 === index ? -3 : -2,
+                                      ml: !open || show3 === index ? 3 : 2,
+                                    }}
+                                  >
+                                    {index === 0 ? (
+                                      <PaidIcon />
+                                    ) : (
+                                      <PaidIcon />
+                                    )}
+                                  </ListItemIcon>
+                                </Tooltip>
+                            }
+                            <ListItemText
+                              primary={shouldDrawerOpen ? text : ""}
+                              sx={{
+                                color: show3 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                              }}
+                              primaryTypographyProps={{
+                                fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
 
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </Collapse>
+                  </List>
+                </>
+              )}
+              {(
+                showReport &&
+                <>
+                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <Collapse in={!report} unmountOnExit={false}>
+                    {
+                      open &&
+                      <ListItem
+                        key={"รายงาน"}
+                        disablePadding
+                        sx={{
+                          height: 40, // กำหนดความสูงให้ ListItem
+                          paddingY: 1,
+                        }}
+                      >
+                        <ListItemButton
+                          onClick={() => setReport(true)}
+                          sx={{
+                            height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                            px: 2,      // padding แนวนอน
                           }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </Collapse>
-              </List>
+                        >
+                          {/* ไอคอนซ้าย */}
+                          <ListItemIcon sx={{ minWidth: 30 }}>
+                            <SummarizeIcon />
+                          </ListItemIcon>
+
+                          {/* ข้อความ */}
+                          <ListItemText
+                            primary="รายงาน"
+                            primaryTypographyProps={{
+                              fontSize: "16px",
+                            }}
+                            sx={{
+                              marginLeft: 1,
+                            }}
+                          />
+
+                          {/* ไอคอนขวา */}
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <KeyboardArrowDownIcon />
+                          </ListItemIcon>
+                        </ListItemButton>
+
+                      </ListItem>
+                    }
+                  </Collapse>
+                  <Collapse in={report} unmountOnExit={false}>
+                    {
+                      open &&
+                      <ListItem
+                        key={"รายงาน"}
+                        disablePadding
+                        sx={{
+                          height: 40, // กำหนดความสูงให้ ListItem
+                          paddingY: 1,
+                        }}
+                      >
+                        <ListItemButton
+                          onClick={() => setReport(false)}
+                          sx={{
+                            height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                            px: 2,      // padding แนวนอน
+                          }}
+                        >
+                          {/* ไอคอนซ้าย */}
+                          <ListItemIcon sx={{ minWidth: 30 }}>
+                            <SummarizeIcon />
+                          </ListItemIcon>
+
+                          {/* ข้อความ */}
+                          <ListItemText
+                            primary="รายงาน"
+                            primaryTypographyProps={{
+                              fontSize: "16px",
+                            }}
+                            sx={{
+                              marginLeft: 1,
+                            }}
+                          />
+
+                          {/* ไอคอนขวา */}
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <KeyboardArrowUpIcon />
+                          </ListItemIcon>
+                        </ListItemButton>
+
+                      </ListItem>
+                    }
+                  </Collapse>
+                  <List
+                    sx={
+                      !open ? {
+                        backgroundColor: theme.palette.panda.dark,
+                        color: theme.palette.primary.contrastText,
+                      }
+                        : {
+                          marginTop: -1
+                        }
+                    }
+                  >
+                    <Collapse in={!report} unmountOnExit={false}>
+                      {["สรุปยอดส่งน้ำมัน", "สรุปค่าเที่ยว", "การชำระค่าน้ำมัน", "รายได้รายหัก", "บิลค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
+                        <ListItem
+                          key={text}
+                          disablePadding
+                          sx={{
+                            backgroundColor: show4 === index && theme.palette.panda.dark,
+                            height: 35, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
+                          }}
+                        >
+                          <ListItemButton
+                            component={Link}
+                            to={
+                              index === 0 ? "/summary-oil-balance" : index === 1 ? "/report-driver-trip" : index === 2 ? "/report-fuel-payment" : index === 3 ? "/financial-deduction" : index === 4 ? "/invoice-financial" : "/close-financial"
+                            }
+                            sx={{
+                              height: 35, // กำหนดความสูงให้ ListItem
+                            }}
+                            onClick={() => (setShow4(index), setSetting(false))}
+                            onMouseUp={() => (setShow4(index), setSetting(false))}
+                            onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null), setShow5(null))}
+                          >
+                            {
+                              shouldDrawerOpen ?
+                                <ListItemIcon
+                                  sx={{
+                                    color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    mr: !open || show4 === index ? -3 : -2,
+                                    ml: !open || show4 === index ? 3 : 2,
+                                  }}
+                                >
+                                  {index === 0 ? (
+                                    <SummarizeIcon />
+                                  ) : (
+                                    <SummarizeIcon />
+                                  )}
+                                </ListItemIcon>
+                                :
+                                <Tooltip
+                                  title={text}
+                                  placement="right"
+                                  PopperProps={{
+                                    modifiers: [
+                                      {
+                                        name: 'offset',
+                                        options: {
+                                          offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
+                                        },
+                                      },
+                                    ],
+                                  }}
+                                  componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        fontSize: '15px', // ปรับขนาดตัวอักษร
+                                        textAlign: 'left', // จัดข้อความชิดซ้าย
+                                        backgroundColor: theme.palette.panda.dark,
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <ListItemIcon
+                                    sx={{
+                                      color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      mr: !open || show4 === index ? -3 : -2,
+                                      ml: !open || show4 === index ? 3 : 2,
+                                    }}
+                                  >
+                                    {index === 0 ? (
+                                      <SummarizeIcon />
+                                    ) : (
+                                      <SummarizeIcon />
+                                    )}
+                                  </ListItemIcon>
+                                </Tooltip>
+                            }
+                            <ListItemText
+                              primary={shouldDrawerOpen ? text : ""}
+                              sx={{
+                                color: show4 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                              }}
+                              primaryTypographyProps={{
+                                fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </Collapse>
+                  </List>
+                </>
+              )}
+              {(
+                showSmallTruck &&
+                <>
+                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <Collapse in={!trucksmall} unmountOnExit={false}>
+                    {
+                      open &&
+                      <ListItem
+                        key={"รถเล็ก"}
+                        disablePadding
+                        sx={{
+                          height: 40, // กำหนดความสูงให้ ListItem
+                          paddingY: 1,
+                        }}
+                      >
+                        <ListItemButton
+                          onClick={() => setTrucksmall(true)}
+                          sx={{
+                            height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                            px: 2,      // padding แนวนอน
+                          }}
+                        >
+                          {/* ไอคอนซ้าย */}
+                          <ListItemIcon sx={{ minWidth: 30 }}>
+                            <LocalShippingIcon />
+                          </ListItemIcon>
+
+                          {/* ข้อความ */}
+                          <ListItemText
+                            primary="รถเล็ก"
+                            primaryTypographyProps={{
+                              fontSize: "16px",
+                            }}
+                            sx={{
+                              marginLeft: 1,
+                            }}
+                          />
+
+                          {/* ไอคอนขวา */}
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <KeyboardArrowDownIcon />
+                          </ListItemIcon>
+                        </ListItemButton>
+
+                      </ListItem>
+                    }
+                  </Collapse>
+                  <Collapse in={trucksmall} unmountOnExit={false}>
+                    {
+                      open &&
+                      <ListItem
+                        key={"รถเล็ก"}
+                        disablePadding
+                        sx={{
+                          height: 40, // กำหนดความสูงให้ ListItem
+                          paddingY: 1,
+                        }}
+                      >
+                        <ListItemButton
+                          onClick={() => setTrucksmall(false)}
+                          sx={{
+                            height: 40, // ปรับขึ้นนิดนึงให้ไม่แน่นเกินไป
+                            px: 2,      // padding แนวนอน
+                          }}
+                        >
+                          {/* ไอคอนซ้าย */}
+                          <ListItemIcon sx={{ minWidth: 30 }}>
+                            <LocalShippingIcon />
+                          </ListItemIcon>
+
+                          {/* ข้อความ */}
+                          <ListItemText
+                            primary="รถเล็ก"
+                            primaryTypographyProps={{
+                              fontSize: "16px",
+                            }}
+                            sx={{
+                              marginLeft: 1,
+                            }}
+                          />
+
+                          {/* ไอคอนขวา */}
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <KeyboardArrowUpIcon />
+                          </ListItemIcon>
+                        </ListItemButton>
+
+                      </ListItem>
+                    }
+                  </Collapse>
+                  <List
+                    sx={
+                      !open ? {
+                        backgroundColor: theme.palette.panda.dark,
+                        color: theme.palette.primary.contrastText,
+                      }
+                        : {
+                          marginTop: -1
+                        }
+                    }
+                  >
+                    <Collapse in={!trucksmall} unmountOnExit={false}>
+                      {["จัดเที่ยววิ่ง", "การชำระค่าน้ำมัน", "รายงาน"].map((text, index) => (
+                        <ListItem
+                          key={text}
+                          disablePadding
+                          sx={{
+                            backgroundColor: show5 === index && theme.palette.panda.dark,
+                            height: 35, // กำหนดความสูงให้ ListItem
+                            paddingY: 1,
+                          }}
+                        >
+                          <ListItemButton
+                            component={Link}
+                            to={
+                              index === 0 ? "/trips-smalltruck" : index === 0 ? "/invoice-smalltruck" : "/invoice-smalltruck"
+                            }
+                            sx={{
+                              height: 35, // กำหนดความสูงให้ ListItem
+                            }}
+                            onClick={() => (setShow5(index), setSetting(false))}
+                            onMouseUp={() => (setShow5(index), setSetting(false))}
+                            onMouseDown={() => (setShow1(null), setShow2(null), setShow3(null), setShow4(null))}
+                          >
+                            {
+                              shouldDrawerOpen ?
+                                <ListItemIcon
+                                  sx={{
+                                    color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    mr: !open || show5 === index ? -3 : -2,
+                                    ml: !open || show5 === index ? 3 : 2,
+                                  }}
+                                >
+                                  {index === 0 ? (
+                                    <ModeOfTravelIcon />
+                                  ) : index === 1 ? (
+                                    <PaidIcon />
+                                  ) : (
+                                    <SummarizeIcon />
+                                  )}
+                                </ListItemIcon>
+                                :
+                                <Tooltip
+                                  title={text}
+                                  placement="right"
+                                  PopperProps={{
+                                    modifiers: [
+                                      {
+                                        name: 'offset',
+                                        options: {
+                                          offset: [0, -25], // ขยับ tooltip เข้าไปทางซ้าย (ติด icon มากขึ้น)
+                                        },
+                                      },
+                                    ],
+                                  }}
+                                  componentsProps={{
+                                    tooltip: {
+                                      sx: {
+                                        fontSize: '15px', // ปรับขนาดตัวอักษร
+                                        textAlign: 'left', // จัดข้อความชิดซ้าย
+                                        backgroundColor: theme.palette.panda.dark,
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <ListItemIcon
+                                    sx={{
+                                      color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      mr: !open || show5 === index ? -3 : -2,
+                                      ml: !open || show5 === index ? 3 : 2,
+                                    }}
+                                  >
+                                    {index === 0 ? (
+                                      <SummarizeIcon />
+                                    ) : (
+                                      <SummarizeIcon />
+                                    )}
+                                  </ListItemIcon>
+                                </Tooltip>
+                            }
+                            <ListItemText
+                              primary={shouldDrawerOpen ? text : ""}
+                              sx={{
+                                color: show5 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                              }}
+                              primaryTypographyProps={{
+                                fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+
+                              }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))}
+                    </Collapse>
+                  </List>
+                </>
+
+              )}
             </Box>
           </Drawer>
       }

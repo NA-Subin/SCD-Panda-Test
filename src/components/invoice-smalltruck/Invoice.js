@@ -42,7 +42,7 @@ import dayjs from "dayjs";
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 
-const Invoice = () => {
+const InvoiceSmallTruck = () => {
   const [update, setUpdate] = React.useState(true);
   const [open, setOpen] = useState(1);
 
@@ -127,17 +127,11 @@ const Invoice = () => {
       const itemDate = dayjs(item.Date, "DD/MM/YYYY");
       const customerId = Number(item.TicketName.split(":")[0]);
 
-      let isInCompany =
-        check === 1
-          ? customerB.find((customer) => customer.id === customerId)
-          : check === 2
-            ? customerB.find((customer) => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ")
-            : customerB.find((customer) => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
 
       return (
-        isInCompany &&
-        isInCompany.id === customerId &&
-        item.CustomerType === "ตั๋วรถใหญ่" &&
+        // isInCompany &&
+        // isInCompany.id === customerId &&
+        item.CustomerType === "ตั๋วรถเล็ก" &&
         item.Trip !== "ยกเลิก" &&
         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
       );
@@ -237,7 +231,7 @@ const Invoice = () => {
             textAlign="center"
             gutterBottom
           >
-            ชำระค่าน้ำมัน
+            ชำระค่าน้ำมันรถเล็ก
           </Typography>
         </Grid>
         <Grid item md={5} xs={12}>
@@ -731,4 +725,4 @@ const Invoice = () => {
   );
 };
 
-export default Invoice;
+export default InvoiceSmallTruck;
