@@ -141,17 +141,17 @@ const UpdateEmployee = (props) => {
                                                 variant="standard"
                                                 onChange={(e) => setPosition(e.target.value)}
                                             >
-                                                <MenuItem value={position}>{position}</MenuItem>
+                                                <MenuItem value={position}>{position.split(":")[1]}</MenuItem>
                                                 {
-                                                    positionDetail.map((p) => (
-                                                        p !== position &&
-                                                        <MenuItem value={p}>{p}</MenuItem>
+                                                    positionDetail.map((row) => (
+                                                        `${row.id}:${row.Name}` !== position &&
+                                                        <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
                                         </FormControl>
                                         :
-                                        <TextField fullWidth variant="standard" value={position} disabled />
+                                        <TextField fullWidth variant="standard" value={position.split(":")[1]} disabled />
                                 }
                             </Grid>
                             <Grid item xs={1.5}>

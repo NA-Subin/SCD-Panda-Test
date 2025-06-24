@@ -49,6 +49,7 @@ import ReportTrip from "./components/trip/ReportTrip";
 import TruckTransport from "./components/truck/transport/TruckTransport";
 import FuelPaymentReport from "./components/invoice/Report";
 import InvoiceSmallTruck from "./components/invoice-smalltruck/Invoice";
+import ReportSmallTruck from "./components/report-smalltruck/Report";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -178,6 +179,9 @@ function App() {
                       </Routes>
                       <Routes>
                         <Route path="/report" element={<Report />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/report-smalltruck" element={<ReportSmallTruck />} />
                       </Routes>
                       <Routes>
                         <Route path="/invoice-financial" element={<Financial />} />

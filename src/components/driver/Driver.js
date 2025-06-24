@@ -153,30 +153,30 @@ const Driver = () => {
     // }, []);
 
     // const { reghead, trip, order, depots } = useData();
-     const { reghead, depots } = useBasicData();
-     const { trip, order } = useTripData();
+    const { reghead, depots } = useBasicData();
+    const { trip, order } = useTripData();
 
     const drivers = Object.values(reghead || {});
-  const trips = Object.values(trip || {});
-  const orders = Object.values(order || {});
-  const depot = Object.values(depots || {});
+    const trips = Object.values(trip || {});
+    const orders = Object.values(order || {});
+    const depot = Object.values(depots || {});
 
     // กรองตามเงื่อนไขที่ต้องการหลังจาก data มาแล้ว
     const driver = drivers.filter(d => d.Driver !== "0:ไม่มี");
 
     const today = dayjs(new Date()).format("DD/MM/YYYY");
     const tripDetail = trips.filter(t =>
-        t.StatusTrip === "กำลังจัดเที่ยววิ่ง" 
+        t.StatusTrip === "กำลังจัดเที่ยววิ่ง"
         ||
         (t.StatusTrip === "จบทริป" && t.DateEnd === today)
     );
 
     useEffect(() => {
-        console.log("driver and truck : ",truck);
+        console.log("driver and truck : ", truck);
         const check = tripDetail.find((item) => Number(item.Driver.split(":")[0]) === Number(truck.split(":")[0])) || {};
-        console.log("check : ",check);
+        console.log("check : ", check);
         const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
-        console.log("checkOrder : ",checkOrder);
+        console.log("checkOrder : ", checkOrder);
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
@@ -219,12 +219,12 @@ const Driver = () => {
 
     const handleChangeDriver = (e) => {
         const trucks = e.target.value;
-        console.log("trucks : ",trucks);
+        console.log("trucks : ", trucks);
         setTruck(e.target.value);
         const check = tripDetail.find((item) => Number(item.Driver.split(":")[0]) === Number(trucks.split(":")[0])) || {};
-        console.log("check : ",check);
+        console.log("check : ", check);
         const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
-        console.log("checkOrder : ",checkOrder);
+        console.log("checkOrder : ", checkOrder);
 
         const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
         const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
@@ -302,7 +302,7 @@ const Driver = () => {
     console.log("TripNew length : ", Object.keys(tripNew).length);
     console.log("DepotNew : ", depotNew);
     console.log("OrderNew : ", orderNew);
-    console.log("check : ",check);
+    console.log("check : ", check);
 
     return (
         <Container sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: { xs: "lg", sm: "lg", md: "lg" } }}>
@@ -549,43 +549,43 @@ const Driver = () => {
                                                 เช็คลำดับในการจัดส่งสินค้า
                                             </Button>
                                             {
-                                            !showTrip &&
-                                            (() => {
-                                                // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
-                                                const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
-                                                    orderNew
-                                                        .filter(row => {
-                                                            let modifiedTicketName = row.TicketName;
+                                                !showTrip &&
+                                                (() => {
+                                                    // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
+                                                    const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
+                                                        orderNew
+                                                            .filter(row => {
+                                                                let modifiedTicketName = row.TicketName;
 
-                                                            // ตัดค่า branch ออกจาก TicketName
-                                                            // branches.forEach(branch => {
-                                                            //     if (row.TicketName.includes(branch)) {
-                                                            //         modifiedTicketName = row.TicketName.split(branch).pop().trim();
-                                                            //     }
-                                                            // });
+                                                                // ตัดค่า branch ออกจาก TicketName
+                                                                // branches.forEach(branch => {
+                                                                //     if (row.TicketName.includes(branch)) {
+                                                                //         modifiedTicketName = row.TicketName.split(branch).pop().trim();
+                                                                //     }
+                                                                // });
 
-                                                            return modifiedTicketName === value.Name;
-                                                        })
-                                                        .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
-                                                        .filter(Boolean) // ลบค่า null ออก
-                                                );
-
-                                                // ถ้ามีพิกัดให้สร้างลิงก์
-                                                if (coordinates.length > 0) {
-                                                    const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
-                                                    const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
-
-                                                    return (
-                                                        <Typography sx={{ marginTop: 2 }}>
-                                                            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
-                                                            คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
-                                                            </a>
-                                                        </Typography>
+                                                                return modifiedTicketName === value.Name;
+                                                            })
+                                                            .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
+                                                            .filter(Boolean) // ลบค่า null ออก
                                                     );
-                                                }
 
-                                                return null;
-                                            })()}
+                                                    // ถ้ามีพิกัดให้สร้างลิงก์
+                                                    if (coordinates.length > 0) {
+                                                        const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
+                                                        const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
+
+                                                        return (
+                                                            <Typography sx={{ marginTop: 2 }}>
+                                                                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                                                                    คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
+                                                                </a>
+                                                            </Typography>
+                                                        );
+                                                    }
+
+                                                    return null;
+                                                })()}
                                         </Grid>
                                         {!showTrip &&
                                             <>
@@ -717,43 +717,43 @@ const Driver = () => {
                                                     เช็คลำดับในการจัดส่งสินค้า
                                                 </Button>
                                                 {
-                                                !showTrip &&
-                                                (() => {
-                                                // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
-                                                const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
-                                                    orderNew
-                                                        .filter(row => {
-                                                            let modifiedTicketName = row.TicketName;
+                                                    !showTrip &&
+                                                    (() => {
+                                                        // รวม lat,lng จาก orderNew ที่ตรงกับ tripNew
+                                                        const coordinates = Object.entries(tripNew).flatMap(([key, value]) =>
+                                                            orderNew
+                                                                .filter(row => {
+                                                                    let modifiedTicketName = row.TicketName;
 
-                                                            // ตัดค่า branch ออกจาก TicketName
-                                                            branches.forEach(branch => {
-                                                                if (row.TicketName.includes(branch)) {
-                                                                    modifiedTicketName = row.TicketName.split(branch).pop().trim();
-                                                                }
-                                                            });
+                                                                    // ตัดค่า branch ออกจาก TicketName
+                                                                    branches.forEach(branch => {
+                                                                        if (row.TicketName.includes(branch)) {
+                                                                            modifiedTicketName = row.TicketName.split(branch).pop().trim();
+                                                                        }
+                                                                    });
 
-                                                            return modifiedTicketName === value.Name;
-                                                        })
-                                                        .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
-                                                        .filter(Boolean) // ลบค่า null ออก
-                                                );
+                                                                    return modifiedTicketName === value.Name;
+                                                                })
+                                                                .map(row => row.Lat && row.Lng && row.Lat !== "-" && row.Lng !== "-" && row.Lat !== 0 && row.Lng !== 0 ? `${row.Lat},${row.Lng}` : null) // ตรวจสอบ lat,lng
+                                                                .filter(Boolean) // ลบค่า null ออก
+                                                        );
 
-                                                // ถ้ามีพิกัดให้สร้างลิงก์
-                                                if (coordinates.length > 0) {
-                                                    const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
-                                                    const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
+                                                        // ถ้ามีพิกัดให้สร้างลิงก์
+                                                        if (coordinates.length > 0) {
+                                                            const depotLatLng = depotNew.lat === "0" && depotNew.lng === "0" ? "" : `${depotNew.lat},${depotNew.lng}/`;
+                                                            const googleMapsUrl = `https://www.google.com/maps/dir/${depotLatLng}${coordinates.join("/")}`;
 
-                                                    return (
-                                                        <Typography  sx={{ marginTop: 2 }}>
-                                                            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
-                                                                คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
-                                                            </a>
-                                                        </Typography>
-                                                    );
-                                                }
+                                                            return (
+                                                                <Typography sx={{ marginTop: 2 }}>
+                                                                    <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                                                                        คลิ๊กตรงนี้เพื่อเช็คดูเส้นทางการเดินรถ
+                                                                    </a>
+                                                                </Typography>
+                                                            );
+                                                        }
 
-                                                return null;
-                                            })()}
+                                                        return null;
+                                                    })()}
 
                                             </Grid>
                                             {

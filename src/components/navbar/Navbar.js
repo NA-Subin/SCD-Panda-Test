@@ -78,6 +78,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import Cookies from 'js-cookie';
 import { BasicDataProvider, useBasicData } from "../../server/provider/BasicDataProvider";
+import FullPageLoading from "./Loading";
 const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
@@ -156,118 +157,13 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { loading } = useBasicData();
   const { positions, officers, drivers, creditors } = useBasicData();
-  const creditorsDetail = Object.values(creditors || {});
-  const driversDetail = Object.values(drivers || {});
-  const officersDetail = Object.values(officers || {});
-  const positionsDetail = Object.values(positions || {});
+  const [isLoading, setIsLoading] = useState(true);
   const [showBasicData, setShowBasicData] = useState(false);
   const [showBigTruck, setShowBigTruck] = useState(false);
   const [showSmallTruck, setShowSmallTruck] = useState(false);
   const [showOperation, setShowOperation] = useState(false);
   const [showFinancial, setShowFinancial] = useState(false);
   const [showReport, setShowReport] = useState(false);
-
-  useEffect(() => {
-    const user = Cookies.get("user");
-    if (!user) return;
-
-    const allUsers = [...officersDetail, ...driversDetail, ...creditorsDetail];
-    const matchedUser = allUsers.find((emp) => emp.User === user);
-
-    if (!matchedUser || !matchedUser.Position) return;
-
-    const positionId = Number(matchedUser.Position.split(":")[0]);
-    const position = positionsDetail.find((pos) => pos.id === positionId);
-    if (!position) return;
-
-    // เงื่อนไขสิทธิ์ตามที่ระบุ
-
-    if (position.OprerationData === 1) {
-      setShowOperation(true);
-    }
-
-    if (position.FinancialData === 1) {
-      setShowFinancial(true);
-    }
-
-    if (position.ReportData === 1) {
-      setShowReport(true);
-    }
-
-
-    if (position.BigTruckData === 1) {
-      setShowBigTruck(true);
-    }
-
-    if (position.SmallTruckData === 1) {
-      setShowSmallTruck(true);
-    }
-
-    const otherKeys = [
-      "BasicData"
-    ];
-    const hasOtherPermission = otherKeys.some((key) => position[key] === 1);
-    if (hasOtherPermission) {
-      setShowBasicData(true);
-    }
-  }, [officersDetail, driversDetail, creditorsDetail, positionsDetail]);
-
-  useEffect(() => {
-    if (!loading && pendingPath) {
-      navigate(pendingPath);
-      setPendingPath(null);
-    }
-  }, [loading, pendingPath, navigate]);
-  // const { state } = useLocation();
-  // console.log(state.Position);
-  // const { user } = useParams();
-  // console.log(user);
-  // const token = Cookies.get('token');
-  let position = "";
-  const [data, setData] = useState([]);
-
-  const getData = async () => {
-    database.ref("/employee").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataList = [];
-      for (let id in datas) {
-        dataList.push({ id, ...datas[id] });
-      }
-      console.log(dataList);
-      setData(dataList);
-    });
-    // await HTTP.get("/employee")
-    // .then(res => {
-    //     if(res.data.length <= 0){
-    //     setData("ไม่มีข้อมูล")
-    //     }else{
-    //     setData(res.data)
-    //     }
-    // })
-    // .catch(e => {
-    //     console.log(e);
-    // });
-  };
-
-  // data.map((row) => (
-  //   row.Email.split('@')[0] === user && (position = row.Position)
-  // ))
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in.
-        console.log("true");
-      } else {
-        console.log("false");
-        ShowError("กรุณาเข้าสู่ระบบ");
-        navigate("/");
-        // User is signed out.
-      }
-    });
-
-    getData();
-  }, []);
 
   // const dataToSend = { position: "admin" };
   const theme = useTheme();
@@ -285,13 +181,7 @@ export default function Navbar() {
   const [operation, setOperation] = useState(false);
   const [report, setReport] = useState(false);
   const [financial, setFinacieal] = useState(false);
-  const [trucksmall, setTrucksmall] = useState(true);
-
-  console.log("OpenData : ", openData);
-
-  const handleButtonClick = (index) => {
-    setActiveButton(index); // อัพเดตสถานะของปุ่มที่ถูกคลิก
-  };
+  const [trucksmall, setTrucksmall] = useState(showSmallTruck ? true : false);
 
   const isMobileMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const isMobileSM = useMediaQuery((theme) => theme.breakpoints.down('sm'));
@@ -311,6 +201,68 @@ export default function Navbar() {
   const shouldDrawerOpen = React.useMemo(() => {
     return open;
   }, [open]);
+
+  useEffect(() => {
+    if (!loading && pendingPath) {
+      navigate(pendingPath);
+      setPendingPath(null);
+    }
+  }, [loading, pendingPath, navigate]);
+
+  const creditorsDetail = Object.values(creditors || {});
+  const driversDetail = Object.values(drivers || {});
+  const officersDetail = Object.values(officers || {});
+  const positionsDetail = Object.values(positions || {});
+
+  useEffect(() => {
+    const user = Cookies.get("user");
+    if (!user) return;
+
+    const isDataReady =
+      officersDetail.length > 0 &&
+      driversDetail.length > 0 &&
+      creditorsDetail.length > 0 &&
+      positionsDetail.length > 0;
+
+    if (!isDataReady) return;
+
+    const allUsers = [...officersDetail, ...driversDetail, ...creditorsDetail];
+    const matchedUser = allUsers.find((emp) => emp.User === user);
+    if (!matchedUser || !matchedUser.Position) return;
+
+    const positionId = Number(matchedUser.Position.split(":")[0]);
+    const position = positionsDetail.find((pos) => pos.id === positionId);
+    if (!position) return;
+
+    if (position.OprerationData === 1) setShowOperation(true);
+    if (position.FinancialData === 1) setShowFinancial(true);
+    if (position.ReportData === 1) setShowReport(true);
+    if (position.BigTruckData === 1) setShowBigTruck(true);
+    if (position.SmallTruckData === 1) setShowSmallTruck(true);
+    if (position.BasicData === 1) setShowBasicData(true);
+
+    setIsLoading(false);
+  }, [officersDetail, driversDetail, creditorsDetail, positionsDetail]);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in.
+        console.log("true");
+      } else {
+        console.log("false");
+        ShowError("กรุณาเข้าสู่ระบบ");
+        navigate("/");
+        // User is signed out.
+      }
+    });
+  }, []);
+
+  console.log("OpenData : ", openData);
+
+  const handleButtonClick = (index) => {
+    setActiveButton(index); // อัพเดตสถานะของปุ่มที่ถูกคลิก
+  };
 
   // debug
   console.log("Open : ", open);
@@ -436,12 +388,8 @@ export default function Navbar() {
     },
   }));
 
-  if (pendingPath) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height={"100vh"} width={"100vw"}>
-        <CircularProgress size={100} />
-      </Box>
-    );
+  if (isLoading) {
+    return <FullPageLoading />;
   }
 
   return (
@@ -1951,7 +1899,7 @@ export default function Navbar() {
                           <ListItemButton
                             component={Link}
                             to={
-                              index === 0 ? "/trips-smalltruck" : index === 0 ? "/invoice-smalltruck" : "/invoice-smalltruck"
+                              index === 0 ? "/trips-smalltruck" : index === 1 ? "/invoice-smalltruck" : "/report-smalltruck"
                             }
                             sx={{
                               height: 35, // กำหนดความสูงให้ ListItem

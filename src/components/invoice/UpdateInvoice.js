@@ -29,7 +29,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { IconButtonError, IconButtonInfo, IconButtonSuccess, IconButtonWarning, RateOils, TablecellHeader, TablecellSelling } from "../../theme/style";
+import { IconButtonError, IconButtonInfo, IconButtonSuccess, IconButtonWarning, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD, TablecellSelling } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import CancelIcon from '@mui/icons-material/Cancel';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -61,11 +61,12 @@ dayjs.locale('th');
 dayjs.extend(buddhistEra);
 
 const UpdateInvoice = (props) => {
-    const { ticket,ticketNo,date } = props;
+    const { ticket, ticketNo, date } = props;
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
     const [test, setTest] = useState([]);
+    const FUEL_ORDER = ["G95", "B95", "B7", "G91", "E20", "PWD"];
     const [windowWidths, setWindowWidths] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -784,9 +785,12 @@ const UpdateInvoice = (props) => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ผู้ขับ/ป้ายทะเบียน
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                        ชนิดน้ำมัน
-                                    </TablecellSelling>
+                                    <TableCellG95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G95</TableCellG95>
+                                    <TableCellB95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B95</TableCellB95>
+                                    <TableCellB7 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B7(D)</TableCellB7>
+                                    <TableCellG91 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G91</TableCellG91>
+                                    <TableCellE20 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>E20</TableCellE20>
+                                    <TableCellPWD width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>PWD</TableCellPWD>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         จำนวนลิตร
                                     </TablecellSelling>
@@ -798,7 +802,7 @@ const UpdateInvoice = (props) => {
                                     </TablecellSelling>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            {/* <TableBody>
                                 {
                                     orderList
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -927,6 +931,151 @@ const UpdateInvoice = (props) => {
                                             </TableRow>
                                         ))
                                 }
+                            </TableBody> */}
+                            <TableBody>
+                                {orderList
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((row, index) => {
+                                        const fuelMap = {};
+
+                                        Object.entries(row.Product)
+                                            .filter(([productName]) => productName !== "P")
+                                            .forEach(([productName, Volume], i) => {
+                                                const uniqueRowId = `${i}:${productName}:${row.No}`;
+                                                const productNameFromReport = report[uniqueRowId]?.ProductName || productName;
+                                                fuelMap[productNameFromReport] = {
+                                                    Volume: (Volume.Volume || 0) * 1000,
+                                                    RateOil: report[uniqueRowId]?.RateOil || Volume.RateOil || 0,
+                                                    Amount: report[uniqueRowId]?.Amount || Volume.Amount || 0,
+                                                };
+                                            });
+
+                                        const displayDriver = row.Driver.split(":")[1];
+                                        const displayRegis = row.Registration.split(":")[1];
+
+                                        return (
+                                            <TableRow key={`row-${row.No}`}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
+                                                    <Typography fontSize="14px">{index + 1}</Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    <Typography fontSize="14px">{row.Date}</Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
+                                                    <Typography fontSize="14px">{displayDriver} : {displayRegis}</Typography>
+                                                </TableCell>
+
+                                                {/* วนตามหัวตารางน้ำมัน */}
+                                                {FUEL_ORDER.map((fuel) => {
+                                                    const fuelData = fuelMap[fuel];
+                                                    return (
+                                                        <TableCell key={fuel} sx={{ textAlign: "center", height: '30px', width: 60 }}>
+                                                            {fuelData ? (
+                                                                <Typography fontSize="13px">{fuelData.Volume.toLocaleString()}</Typography>
+                                                                // <Box>
+                                                                //     <Typography fontSize="13px">{fuelData.Volume.toLocaleString()}</Typography>
+                                                                //     <Typography fontSize="13px">{fuelData.RateOil}</Typography>
+                                                                //     <Typography fontSize="13px">{fuelData.Amount.toLocaleString()}</Typography>
+                                                                // </Box>
+                                                            ) : (
+                                                                "-"
+                                                            )}
+                                                        </TableCell>
+                                                    );
+                                                })}
+
+                                                {/* รวมลิตร */}
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    <Typography fontSize="14px">
+                                                        {Object.values(fuelMap).reduce((sum, item) => sum + item.Volume, 0).toLocaleString()}
+                                                    </Typography>
+                                                </TableCell>
+
+                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 100 }}>
+                                                    <Paper component="form" sx={{ marginTop: -1, marginBottom: -1 }}>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                type="number"
+                                                                size="small"
+                                                                fullWidth
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '22px',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: "14px",
+                                                                        padding: '1px 4px',
+                                                                        textAlign: 'center',
+                                                                    },
+                                                                    borderRadius: 10,
+                                                                }}
+                                                                value={
+                                                                    Object.keys(fuelMap).length > 0
+                                                                        ? Object.values(fuelMap)[0].RateOil // เอา Rate ตัวแรกมาแสดง
+                                                                        : ""
+                                                                }
+                                                                onChange={(e) => {
+                                                                    let newValue = e.target.value.replace(/^0+(?=\d)/, "");
+                                                                    if (newValue === "") newValue = "";
+
+                                                                    // วนทุก product เพื่อส่งค่าเดียวกันไป
+                                                                    Object.entries(row.Product)
+                                                                        .filter(([productName]) => productName !== "P")
+                                                                        .forEach(([productName, Volume], i) => {
+                                                                            const uniqueRowId = `${i}:${productName}:${row.No}`;
+                                                                            const volume = (Volume.Volume || 0) * 1000;
+
+                                                                            handlePriceChange(
+                                                                                newValue,
+                                                                                row.No,
+                                                                                uniqueRowId,
+                                                                                row.TicketName,
+                                                                                productName,
+                                                                                row.Date,
+                                                                                row.Driver,
+                                                                                row.Registration,
+                                                                                volume
+                                                                            );
+                                                                        });
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        Object.entries(row.Product)
+                                                                            .filter(([productName]) => productName !== "P")
+                                                                            .forEach(([productName, Volume], i) => {
+                                                                                const uniqueRowId = `${i}:${productName}:${row.No}`;
+                                                                                const volume = (Volume.Volume || 0) * 1000;
+
+                                                                                handlePriceChange(
+                                                                                    "0",
+                                                                                    row.No,
+                                                                                    uniqueRowId,
+                                                                                    row.TicketName,
+                                                                                    productName,
+                                                                                    row.Date,
+                                                                                    row.Driver,
+                                                                                    row.Registration,
+                                                                                    volume
+                                                                                );
+                                                                            });
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </Paper>
+                                                    </Paper>
+                                                </TableCell>
+
+                                                {/* รวมยอดเงิน */}
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    <Typography fontSize="14px">
+                                                        {Object.values(fuelMap).reduce((sum, item) => sum + item.Amount, 0).toLocaleString()}
+                                                    </Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                             </TableBody>
                         </Table>
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1330px" }}>
@@ -992,7 +1141,7 @@ const UpdateInvoice = (props) => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main,position: 'sticky', right: 0,  }} />
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main, position: 'sticky', right: 0, }} />
                                         {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                         <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                             <IconButton color="success"
@@ -1112,7 +1261,7 @@ const UpdateInvoice = (props) => {
                                                             </Paper>
                                                     }
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50,position: 'sticky', right: 0, backgroundColor: "white" }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50, position: 'sticky', right: 0, backgroundColor: "white" }}>
                                                     {
                                                         !updateTranfer ?
                                                             <IconButton color="warning" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.IncomingMoney, row.Note)} size="small" sx={{ borderRadius: 2 }}>

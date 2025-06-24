@@ -33,39 +33,48 @@ import { database } from "../../server/firebase";
 import GasStationsDetail from "./gasstations/GasStationsDetail";
 import StockDetail from "./stock/StockDetail";
 import InsertGasStation from "./InsertGasStation";
+import { useGasStationData } from "../../server/provider/GasStationProvider";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const GasStations = () => {
   const [openMenu, setOpenMenu] = React.useState(1);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
-  const [depot, setDepot] = useState(0);
-  const [gasStation, setGasStation] = useState(0);
-  const [stock, setStock] = React.useState([]);
+  const { depots } = useBasicData();
+  const { gasstationDetail, stockDetail } = useGasStationData();
 
-  const getDepot = async () => {
-    database.ref("/depot/oils").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setDepot(datas.length);
-    });
+  const depot = Object.values(depots || {});
+  const gasStation = Object.values(gasstationDetail || {});
+  const stock = Object.values(stockDetail || {});
 
-    database.ref("/depot/stock").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      const dataList = [];
-      for (let id in datas) {
-        dataList.push({ id, ...datas[id] });
-      }
-      setStock(dataList);
-    });
+  // const [depot, setDepot] = useState(0);
+  // const [gasStation, setGasStation] = useState(0);
+  // const [stock, setStock] = React.useState([]);
 
-    database.ref("/depot/gasStations").on("value", (snapshot) => {
-      const datas = snapshot.val();
-      setGasStation(datas.length);
-    });
-  };
+  // const getDepot = async () => {
+  //   database.ref("/depot/oils").on("value", (snapshot) => {
+  //     const datas = snapshot.val();
+  //     setDepot(datas.length);
+  //   });
 
-  useEffect(() => {
-    getDepot();
-  }, []);
+  //   database.ref("/depot/stock").on("value", (snapshot) => {
+  //     const datas = snapshot.val();
+  //     const dataList = [];
+  //     for (let id in datas) {
+  //       dataList.push({ id, ...datas[id] });
+  //     }
+  //     setStock(dataList);
+  //   });
+
+  //   database.ref("/depot/gasStations").on("value", (snapshot) => {
+  //     const datas = snapshot.val();
+  //     setGasStation(datas.length);
+  //   });
+  // };
+
+  // useEffect(() => {
+  //   getDepot();
+  // }, []);
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -78,70 +87,70 @@ const GasStations = () => {
         {openMenu === 1 ? "ปั้มน้ำมัน" : "คลังสต็อกน้ำมัน"}
       </Typography>
       <Box display="flex" justifyContent="right" alignItems="center" marginRight={3} marginTop={-8} marginBottom={3}>
-        <InsertGasStation openMenu={openMenu} depot={depot} stock={stock.length} gasStation={gasStation} />
+        <InsertGasStation openMenu={openMenu} depot={depot.length} stock={stock.length} gasStation={gasStation.length} />
       </Box>
       <Divider />
       <Grid container spacing={5} marginTop={0.5} marginBottom={2}>
         <Grid item xs={openMenu === 1 ? 9 : 3} sm={openMenu === 1 ? 10 : 2} lg={openMenu === 1 ? 11 : 1}>
           <Tooltip title="ปั้มน้ำมัน" placement="top">
             {
-              isMobile ? 
-              <Button
-              variant="contained"
-              color={openMenu === 1 ? "info" : "inherit"}
-              fullWidth
-              onClick={() => setOpenMenu(1)}
-              sx={{ height: "10vh", fontSize: openMenu === 1 ? 40 : 16, paddingLeft: openMenu === 1 ? 0 : 3.5 }}
-            >
-              <Badge
-                badgeContent={gasStation}
-                sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: 20, // ขนาดตัวเลขใน Badge
-                    minWidth: 30, // ความกว้างของ Badge
-                    height: 30, // ความสูงของ Badge
-                    top: openMenu === 1 ? 35 : -10,
-                    right: openMenu === 1 ? -30 : -10,
-                    color: openMenu === 1 ? theme.palette.info.main : "white",
-                    backgroundColor: openMenu === 1 ? "white" : theme.palette.info.main,
-                    fontWeight: "bold",
-                  },
-                  fontWeight: "bold",
-                }}
-              >
-                <LocalGasStationIcon sx={{ width: '3em', height: '3em' }} />
-              </Badge>
-            </Button>
-            :
-            <Button
-              variant="contained"
-              color={openMenu === 1 ? "info" : "inherit"}
-              fullWidth
-              onClick={() => setOpenMenu(1)}
-              sx={{ height: "10vh", fontSize: openMenu === 1 ? 40 : 16, paddingLeft: openMenu === 1 ? 0 : 3.5 }}
-              startIcon={
-                <LocalGasStationIcon sx={{ width: '3em', height: '3em' }} />
-              }
-            >
-              <Badge
-                badgeContent={gasStation}
-                sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: 20, // ขนาดตัวเลขใน Badge
-                    minWidth: 30, // ความกว้างของ Badge
-                    height: 30, // ความสูงของ Badge
-                    top: openMenu === 1 ? 35 : -40,
-                    right: openMenu === 1 ? -30 : -5,
-                    color: openMenu === 1 ? theme.palette.info.main : "white",
-                    backgroundColor: openMenu === 1 ? "white" : theme.palette.info.main,
-                    fontWeight: "bold",
-                  },
-                  fontWeight: "bold",
-                }}
-              >
-                {openMenu === 1 ? "ปั้มน้ำมัน" : ""}
-              </Badge>
-            </Button>
+              isMobile ?
+                <Button
+                  variant="contained"
+                  color={openMenu === 1 ? "info" : "inherit"}
+                  fullWidth
+                  onClick={() => setOpenMenu(1)}
+                  sx={{ height: "10vh", fontSize: openMenu === 1 ? 40 : 16, paddingLeft: openMenu === 1 ? 0 : 3.5 }}
+                >
+                  <Badge
+                    badgeContent={gasStation.length}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        fontSize: 20, // ขนาดตัวเลขใน Badge
+                        minWidth: 30, // ความกว้างของ Badge
+                        height: 30, // ความสูงของ Badge
+                        top: openMenu === 1 ? 35 : -10,
+                        right: openMenu === 1 ? -30 : -10,
+                        color: openMenu === 1 ? theme.palette.info.main : "white",
+                        backgroundColor: openMenu === 1 ? "white" : theme.palette.info.main,
+                        fontWeight: "bold",
+                      },
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <LocalGasStationIcon sx={{ width: '3em', height: '3em' }} />
+                  </Badge>
+                </Button>
+                :
+                <Button
+                  variant="contained"
+                  color={openMenu === 1 ? "info" : "inherit"}
+                  fullWidth
+                  onClick={() => setOpenMenu(1)}
+                  sx={{ height: "10vh", fontSize: openMenu === 1 ? 40 : 16, paddingLeft: openMenu === 1 ? 0 : 3.5 }}
+                  startIcon={
+                    <LocalGasStationIcon sx={{ width: '3em', height: '3em' }} />
+                  }
+                >
+                  <Badge
+                    badgeContent={gasStation.length}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        fontSize: 20, // ขนาดตัวเลขใน Badge
+                        minWidth: 30, // ความกว้างของ Badge
+                        height: 30, // ความสูงของ Badge
+                        top: openMenu === 1 ? 35 : -40,
+                        right: openMenu === 1 ? -30 : -5,
+                        color: openMenu === 1 ? theme.palette.info.main : "white",
+                        backgroundColor: openMenu === 1 ? "white" : theme.palette.info.main,
+                        fontWeight: "bold",
+                      },
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {openMenu === 1 ? "ปั้มน้ำมัน" : ""}
+                  </Badge>
+                </Button>
             }
             {
               openMenu === 1 && <Divider orientation="vertical" flexItem sx={{ border: "1px solid lightgray", marginTop: 2 }} />
@@ -151,63 +160,63 @@ const GasStations = () => {
         <Grid item xs={openMenu === 2 ? 9 : 3} sm={openMenu === 2 ? 10 : 2} lg={openMenu === 2 ? 11 : 1}>
           <Tooltip title="คลังสต็อกน้ำมัน" placement="top">
             {
-              isMobile ? 
-              <Button
-              variant="contained"
-              color={openMenu === 2 ? "info" : "inherit"}
-              fullWidth
-              onClick={() => setOpenMenu(2)}
-              sx={{ height: "10vh", fontSize: openMenu === 2 ? 40 : 16, paddingLeft: openMenu === 2 ? 0 : 3.5 }}
-            >
-              <Badge
-                badgeContent={stock.length}
-                sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: 20, // ขนาดตัวเลขใน Badge
-                    minWidth: 30, // ความกว้างของ Badge
-                    height: 30, // ความสูงของ Badge
-                    top: openMenu === 2 ? 35 : -10,
-                    right: openMenu === 2 ? -30 : -10,
-                    color: openMenu === 2 ? theme.palette.info.main : "white",
-                    backgroundColor: openMenu === 2 ? "white" : theme.palette.info.main,
-                    fontWeight: "bold",
-                  },
-                  fontWeight: "bold",
-                }}
-              >
-                <WaterDropIcon sx={{ width: '3em', height: '3em' }} />
-              </Badge>
-            </Button>
-            :
-            <Button
-              variant="contained"
-              color={openMenu === 2 ? "info" : "inherit"}
-              fullWidth
-              onClick={() => setOpenMenu(2)}
-              sx={{ height: "10vh", fontSize: openMenu === 2 ? 40 : 16, paddingLeft: openMenu === 2 ? 0 : 3.5 }}
-              startIcon={
-                <WaterDropIcon sx={{ width: '3em', height: '3em' }} />
-              }
-            >
-              <Badge
-                badgeContent={stock.length}
-                sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: 20, // ขนาดตัวเลขใน Badge
-                    minWidth: 30, // ความกว้างของ Badge
-                    height: 30, // ความสูงของ Badge
-                    top: openMenu === 2 ? 35 : -40,
-                    right: openMenu === 2 ? -30 : -5,
-                    color: openMenu === 2 ? theme.palette.info.main : "white",
-                    backgroundColor: openMenu === 2 ? "white" : theme.palette.info.main,
-                    fontWeight: "bold",
-                  },
-                  fontWeight: "bold",
-                }}
-              >
-                {openMenu === 2 ? "คลังสต็อกน้ำมัน" : ""}
-              </Badge>
-            </Button>
+              isMobile ?
+                <Button
+                  variant="contained"
+                  color={openMenu === 2 ? "info" : "inherit"}
+                  fullWidth
+                  onClick={() => setOpenMenu(2)}
+                  sx={{ height: "10vh", fontSize: openMenu === 2 ? 40 : 16, paddingLeft: openMenu === 2 ? 0 : 3.5 }}
+                >
+                  <Badge
+                    badgeContent={stock.length}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        fontSize: 20, // ขนาดตัวเลขใน Badge
+                        minWidth: 30, // ความกว้างของ Badge
+                        height: 30, // ความสูงของ Badge
+                        top: openMenu === 2 ? 35 : -10,
+                        right: openMenu === 2 ? -30 : -10,
+                        color: openMenu === 2 ? theme.palette.info.main : "white",
+                        backgroundColor: openMenu === 2 ? "white" : theme.palette.info.main,
+                        fontWeight: "bold",
+                      },
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <WaterDropIcon sx={{ width: '3em', height: '3em' }} />
+                  </Badge>
+                </Button>
+                :
+                <Button
+                  variant="contained"
+                  color={openMenu === 2 ? "info" : "inherit"}
+                  fullWidth
+                  onClick={() => setOpenMenu(2)}
+                  sx={{ height: "10vh", fontSize: openMenu === 2 ? 40 : 16, paddingLeft: openMenu === 2 ? 0 : 3.5 }}
+                  startIcon={
+                    <WaterDropIcon sx={{ width: '3em', height: '3em' }} />
+                  }
+                >
+                  <Badge
+                    badgeContent={stock.length}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        fontSize: 20, // ขนาดตัวเลขใน Badge
+                        minWidth: 30, // ความกว้างของ Badge
+                        height: 30, // ความสูงของ Badge
+                        top: openMenu === 2 ? 35 : -40,
+                        right: openMenu === 2 ? -30 : -5,
+                        color: openMenu === 2 ? theme.palette.info.main : "white",
+                        backgroundColor: openMenu === 2 ? "white" : theme.palette.info.main,
+                        fontWeight: "bold",
+                      },
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {openMenu === 2 ? "คลังสต็อกน้ำมัน" : ""}
+                  </Badge>
+                </Button>
             }
             {
               openMenu === 2 && <Divider orientation="vertical" flexItem sx={{ border: "1px solid lightgray", marginTop: 2 }} />
@@ -217,11 +226,11 @@ const GasStations = () => {
       </Grid>
       {
         openMenu === 1 ?
-          <GasStationsDetail gasStation={gasStation} />
-          : 
-            stock.map((st) => (
-              <StockDetail key={st.id} stock={st} />
-            ))
+          <GasStationsDetail gasStation={gasStation.length} />
+          :
+          stock.map((st) => (
+            <StockDetail key={st.id} stock={st} />
+          ))
       }
     </Container>
   );

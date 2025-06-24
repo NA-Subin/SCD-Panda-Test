@@ -1222,7 +1222,7 @@ const UpdateTrip = (props) => {
             () => {
                 database
                     .ref("truck/small/")
-                    .child(Number(registration.split(":")[2]) - 1)
+                    .child(Number(registration.split(":")[0]) - 1)
                     .update({
                         Driver: "0:ไม่มี",
                         Status: "ว่าง"
@@ -1239,7 +1239,7 @@ const UpdateTrip = (props) => {
 
                 database
                     .ref("employee/drivers/")
-                    .child(Number(registrations.split(":")[0]) - 1)
+                    .child(Number(driverss.split(":")[0]) - 1)
                     .update({
                         Registration: "0:ไม่มี",
                     })
@@ -1311,7 +1311,7 @@ const UpdateTrip = (props) => {
             () => {
                 database
                     .ref("truck/small/")
-                    .child(Number(registration.split(":")[2]) - 1)
+                    .child(Number(registration.split(":")[0]) - 1)
                     .update({
                         Driver: "0:ไม่มี",
                         Status: "ว่าง"
@@ -1328,7 +1328,7 @@ const UpdateTrip = (props) => {
 
                 database
                     .ref("employee/drivers/")
-                    .child(Number(registrations.split(":")[0]) - 1)
+                    .child(Number(driverss.split(":")[0]) - 1)
                     .update({
                         Registration: "0:ไม่มี",
                     })
@@ -1341,7 +1341,6 @@ const UpdateTrip = (props) => {
                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                         console.error("Error pushing data:", error);
                     })
-
                 database
                     .ref("trip/")
                     .child(Number(tripID) - 1)

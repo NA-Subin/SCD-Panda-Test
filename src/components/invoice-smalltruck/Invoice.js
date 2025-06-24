@@ -58,11 +58,11 @@ const InvoiceSmallTruck = () => {
   });
 
   const handleSort = (key) => {
-        setSortConfig((prev) => ({
-            key,
-            direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
-        }));
-    };
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
 
   const handleDateChangeDateStart = (newValue) => {
     if (newValue) {
@@ -114,10 +114,10 @@ const InvoiceSmallTruck = () => {
   console.log("indexes : ", indexes);
 
   // const { order, transferMoney } = useData();
-  const { customerbigtruck } = useBasicData();
+  const { customersmalltruck } = useBasicData();
   const { order, transferMoney } = useTripData();
   const orders = Object.values(order || {});
-  const customerB = Object.values(customerbigtruck || {});
+  const customerS = Object.values(customersmalltruck || {});
   const transferMoneyDetail = Object.values(transferMoney || {});
 
   console.log("Transfer Money : ", transferMoneyDetail);
@@ -126,11 +126,16 @@ const InvoiceSmallTruck = () => {
     .filter((item) => {
       const itemDate = dayjs(item.Date, "DD/MM/YYYY");
       const customerId = Number(item.TicketName.split(":")[0]);
-
+      let isInCompany =
+        check === 1
+          ? customerS.find((customer) => customer.id === customerId)
+          : check === 2
+            ? customerS.find((customer) => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ")
+            : customerS.find((customer) => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
 
       return (
-        // isInCompany &&
-        // isInCompany.id === customerId &&
+        isInCompany &&
+        isInCompany.id === customerId &&
         item.CustomerType === "ตั๋วรถเล็ก" &&
         item.Trip !== "ยกเลิก" &&
         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")

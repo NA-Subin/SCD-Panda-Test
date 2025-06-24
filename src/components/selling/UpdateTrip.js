@@ -1212,7 +1212,7 @@ const UpdateTrip = (props) => {
             () => {
                 database
                     .ref(registration.split(":")[4] === "รถบริษัท" ? "truck/registration/" : "truck/transport/")
-                    .child(Number(registration.split(":")[2]) - 1)
+                    .child(Number(registration.split(":")[0]) - 1)
                     .update({
                         Status: "ว่าง"
                     })
@@ -1284,7 +1284,7 @@ const UpdateTrip = (props) => {
             () => {
                 database
                     .ref(registration.split(":")[4] === "รถบริษัท" ? "truck/registration/" : "truck/transport/")
-                    .child(Number(registration.split(":")[2]) - 1)
+                    .child(Number(registration.split(":")[0]) - 1)
                     .update({
                         Status: "ว่าง"
                     })
@@ -3060,7 +3060,7 @@ const UpdateTrip = (props) => {
                                         </Button>
                                     }
                                     {
-                                        //trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
                                         <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
                                     <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>
