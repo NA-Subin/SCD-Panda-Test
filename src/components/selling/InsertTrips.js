@@ -73,6 +73,17 @@ const InsertTrips = () => {
     const [editMode, setEditMode] = useState(true);
     const [windowWidths, setWindowWidth] = useState(window.innerWidth);
 
+    const [ordersTickets, setOrdersTickets] = React.useState({});
+    const [selling, setSelling] = React.useState({});
+    const [volumeT, setVolumeT] = React.useState({});
+    const [volumeS, setVolumeS] = React.useState({});
+    const [weightA, setWeightA] = React.useState({});
+    const [orderTrip, setOrderTrip] = React.useState({});
+    const [ticketTrip, setTicketTrip] = React.useState({});
+    const [weightH, setWeightH] = React.useState(0);
+    const [weightL, setWeightL] = React.useState(0);
+    const [costTrip, setCostTrip] = React.useState(0);
+
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
         const handleResize = () => {
@@ -137,16 +148,62 @@ const InsertTrips = () => {
 
     const handleDateChangeReceive = (newValue) => {
         if (newValue) {
-            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            const formattedDate = dayjs(newValue);
             setSelectedDateReceive(formattedDate);
-            setSelectedDateDelivery(formattedDate.add(1, 'day')); // ตั้งค่าวันที่ส่งเป็นวันถัดไป
+            setSelectedDateDelivery(formattedDate.add(1, 'day'));
+
+            console.log("order Ticket : ", Object.keys(ordersTickets).length);
+            console.log("selectedDateReceive : ", formattedDate.format("DD/MM/YYYY"));
+
+            if (ordersTickets && Object.keys(ordersTickets).length > 0) {
+                setOrdersTickets((prevOrders) => {
+                    const updated = {};
+                    for (const key in prevOrders) {
+                        updated[key] = {
+                            ...prevOrders[key],
+                            Date: formattedDate.format("DD/MM/YYYY"),
+                        };
+                    }
+                    console.log("Updated Orders with new Date (object):", updated);
+                    return updated;
+                });
+            }
+
+            if (selling && Object.keys(selling).length > 0) {
+                setSelling((prevOrders) => {
+                    const updated = {};
+                    for (const key in prevOrders) {
+                        updated[key] = {
+                            ...prevOrders[key],
+                            Date: formattedDate.add(1, 'day').format("DD/MM/YYYY")
+                        };
+                    }
+                    console.log("Updated Selling with new Date (object):", updated);
+                    return updated;
+                });
+            }
         }
     };
+
 
     const handleDateChangeDelivery = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
             setSelectedDateDelivery(formattedDate);
+
+            if (selling && Object.keys(selling).length > 0) {
+                setSelling((prevOrders) => {
+                    const updated = {};
+                    for (const key in prevOrders) {
+                        updated[key] = {
+                            ...prevOrders[key],
+                            Date: formattedDate.format("DD/MM/YYYY"),
+                        };
+                    }
+                    console.log("Updated Orders with new Date (object):", updated);
+                    return updated;
+                });
+            }
         }
     };
 
@@ -425,17 +482,6 @@ const InsertTrips = () => {
     const [usedShortNames, setUsedShortNames] = useState(new Set());
 
     console.log("Used ShortNames: ", [...usedShortNames]);
-
-    const [ordersTickets, setOrdersTickets] = React.useState({});
-    const [selling, setSelling] = React.useState({});
-    const [volumeT, setVolumeT] = React.useState({});
-    const [volumeS, setVolumeS] = React.useState({});
-    const [weightA, setWeightA] = React.useState({});
-    const [orderTrip, setOrderTrip] = React.useState({});
-    const [ticketTrip, setTicketTrip] = React.useState({});
-    const [weightH, setWeightH] = React.useState(0);
-    const [weightL, setWeightL] = React.useState(0);
-    const [costTrip, setCostTrip] = React.useState(0);
 
     console.log("ข้อมูลตั๋ว : ", Object.values(ordersTickets));
     console.log("ข้อมูลลูกค้า : ", Object.values(selling));
@@ -1188,38 +1234,38 @@ const InsertTrips = () => {
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
-                if(registration.split(":")[4] === "รถบริษัท"){
+                if (registration.split(":")[4] === "รถบริษัท") {
                     database
-                    .ref("truck/registration/")
-                    .child(Number(registration.split(":")[0]) - 1)
-                    .update({
-                        Status: "TR:" + trip.length
-                    })
-                    .then(() => {
-                        setOpen(false);
-                        console.log("Data pushed successfully");
+                        .ref("truck/registration/")
+                        .child(Number(registration.split(":")[0]) - 1)
+                        .update({
+                            Status: "TR:" + trip.length
+                        })
+                        .then(() => {
+                            setOpen(false);
+                            console.log("Data pushed successfully");
 
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
-                }else{
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error("Error pushing data:", error);
+                        });
+                } else {
                     database
-                    .ref("truck/transport/")
-                    .child(Number(registration.split(":")[0]) - 1)
-                    .update({
-                        Status: "TR:" + trip.length
-                    })
-                    .then(() => {
-                        setOpen(false);
-                        console.log("Data pushed successfully");
+                        .ref("truck/transport/")
+                        .child(Number(registration.split(":")[0]) - 1)
+                        .update({
+                            Status: "TR:" + trip.length
+                        })
+                        .then(() => {
+                            setOpen(false);
+                            console.log("Data pushed successfully");
 
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error("Error pushing data:", error);
+                        });
                 }
             })
             .catch((error) => {
@@ -2155,7 +2201,7 @@ const InsertTrips = () => {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
                                             }).format(parseFloat(weight))}
-                                            //onChange={handleTotalWeight}
+                                        //onChange={handleTotalWeight}
                                         // InputProps={{
                                         //     endAdornment: <InputAdornment position="end">กก.</InputAdornment>, // เพิ่ม endAdornment ที่นี่
                                         // }}

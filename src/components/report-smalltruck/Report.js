@@ -126,12 +126,45 @@ const ReportSmallTruck = () => {
   ];
   // แยกเฉพาะส่งออก (จาก trips)
   const outboundList = orders
-    .filter((trip) => trip.CustomerType === "ตั๋วรถเล็ก" && trip.Status === "จัดส่งสำเร็จ")
+    .filter((trip) => {
+      const orderDate = dayjs(trip.Date, "DD/MM/YYYY");
+      const isInDateRange =
+        orderDate.isValid() &&
+        orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+
+      return (
+        trip.CustomerType === "ตั๋วรถเล็ก" &&
+        trip.Status === "จัดส่งสำเร็จ" &&
+        isInDateRange
+      );
+    })
     .map((trip) => ({
       id: trip.id.toString(),
       type: "ส่งออก",
       ...trip,
     }));
+
+  const travelSummary = {};
+
+  outboundList.forEach((trip) => {
+    const key = `${trip.Driver}_${trip.Registration}`;
+    const travel = Number(trip.Travel) || 0;
+
+    if (!travelSummary[key]) {
+      travelSummary[key] = {
+        Driver: trip.Driver,
+        Registration: trip.Registration,
+        totalTravel: 0,
+      };
+    }
+
+    travelSummary[key].totalTravel += travel;
+  });
+
+  // แปลงกลับเป็น array ถ้าต้องการ
+  const summarizedList = Object.values(travelSummary);
+
+  console.log("ผลรวม Travel ตาม Driver + Registration:", summarizedList);
 
   const matchedOrders = useMemo(() => {
     return orders
@@ -258,24 +291,116 @@ const ReportSmallTruck = () => {
   });
 
   matchedOrdersWithAll.forEach((row) => {
-  Object.entries(row.Product || {})
-    .filter(([key]) => key !== "P") // ❌ ตัด P ออก
-    .forEach(([key, product]) => {
-      const volume = product?.Volume || 0;
-      const liters = volume * 1000;
+    Object.entries(row.Product || {})
+      .filter(([key]) => key !== "P") // ❌ ตัด P ออก
+      .forEach(([key, product]) => {
+        const volume = Number(product?.Volume) || 0;
+        const liters = volume * 1000;
 
-      if (row.type === "รับเข้า") {
-        summary.inbound[key] += liters;
-      } else {
-        summary.outbound[key] += Number(volume); // ✨ คูณ 1000 ทั้งสองฝั่งให้เท่ากัน
-      }
+        if (row.type === "รับเข้า") {
+          summary.inbound[key] += liters;
+        } else {
+          const outboundLiters = -volume; // ✅ ติดลบ
+          summary.outbound[key] += outboundLiters;
+        }
+      });
+  });
+
+  const carryOverSummary = useMemo(() => {
+    const summary = {
+      inbound: {},
+      outbound: {},
+      balance: {},
+    };
+
+    productTypes.forEach((key) => {
+      summary.inbound[key] = 0;
+      summary.outbound[key] = 0;
+      summary.balance[key] = 0;
     });
-});
 
+    const selectedId = Number(selectOrder?.split(":")[0]);
+
+    const carryOverOrders = orders
+      .filter((order) => {
+        const orderDate = dayjs(order.Date, "DD/MM/YYYY");
+
+        // ✅ เอาเฉพาะรายการที่อยู่นอกช่วงวันที่เลือก
+        const isOutOfRange =
+          orderDate.isValid() &&
+          (orderDate.isBefore(selectedDateStart, "day") ||
+            orderDate.isAfter(selectedDateEnd, "day"));
+
+        if (!isOutOfRange) return false;
+        if (order.Status !== "จัดส่งสำเร็จ") return false;
+
+        const isTruck = order.CustomerType === "ตั๋วรถใหญ่" || order.CustomerType === "ตั๋วรถเล็ก";
+        if (!isTruck) return false;
+
+        const orderTicketId = Number(order.TicketName?.split(":")[0]);
+        if (isNaN(orderTicketId)) return false;
+
+        if (selectedId === 0) {
+          // ✅ แสดงทั้งหมดในเครือ
+          return customerB.some(
+            (cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.id === orderTicketId
+          );
+        }
+
+        // ✅ แสดงเฉพาะเจาะจง + อยู่ในเครือ
+        const isInCompany = customerB.some(
+          (cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.id === orderTicketId
+        );
+        if (!isInCompany) return false;
+
+        return selectedId === orderTicketId;
+      })
+      .map((order) => ({
+        ...order,
+        type: order.CustomerType === "ตั๋วรถใหญ่" ? "รับเข้า" : "ส่งออก",
+      }));
+
+    // ✅ รวมข้อมูลทั้งรับเข้าและส่งออก
+    carryOverOrders.forEach((row) => {
+      Object.entries(row.Product || {})
+        .filter(([key]) => key !== "P") // ❌ ตัด P ออก
+        .forEach(([key, product]) => {
+          const volume = Number(product?.Volume) || 0;
+          const liters = volume * 1000;
+
+          if (row.type === "รับเข้า") {
+            summary.inbound[key] += liters;
+          } else {
+            const outboundLiters = -volume; // ✅ ติดลบ
+            summary.outbound[key] += outboundLiters;
+          }
+        });
+    });
+
+    productTypes.forEach((key) => {
+      summary.balance[key] = summary.inbound[key] + summary.outbound[key];
+    });
+
+    return summary;
+  }, [orders, selectedDateStart, selectedDateEnd, customerB, selectOrder]);
+
+  console.log("carryOverSummary inbound:", carryOverSummary.inbound);
+  console.log("carryOverSummary outbound:", carryOverSummary.outbound);
+  console.log("carryOverSummary balance:", carryOverSummary.balance);
 
   // คำนวณคงเหลือ
   productTypes.forEach((key) => {
-    summary.balance[key] = summary.inbound[key] - summary.outbound[key];
+    summary.balance[key] = summary.inbound[key] + summary.outbound[key];
+  });
+
+  const differenceBalanceSummary = {
+    balance: {},
+  };
+
+  productTypes.forEach((key) => {
+    const current = summary?.balance?.[key] || 0;
+    const carryOver = carryOverSummary?.balance?.[key] || 0;
+    differenceBalanceSummary.balance[key] = carryOver + current;
   });
 
   const [driverData, setDriverData] = useState([])
@@ -292,6 +417,73 @@ const ReportSmallTruck = () => {
 
   console.log("data : ", data);
   console.log("Data Not Cancel : ", dataNotCancel);
+
+  const cellComponents = {
+    G95: TableCellG95,
+    B95: TableCellB95,
+    B7: TableCellB7,
+    G91: TableCellG91,
+    E20: TableCellE20,
+    PWD: TableCellPWD,
+  };
+
+  const renderSummaryRow = (label, dataKey, bgColor, dataSource = summary) => {
+    const total = productTypes.reduce((sum, key) => sum + (dataSource[dataKey][key] || 0), 0);
+
+    return (
+      <TableRow sx={{ backgroundColor: bgColor }}>
+        <TableCell
+          colSpan={3}
+          sx={{
+            fontWeight: "bold",
+            textAlign: "center",
+            backgroundColor: "#e0e0e0",
+            width: 480,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {label}
+        </TableCell>
+
+        {productTypes.map((key) => {
+          const CellComponent = cellComponents[key] || TableCell;
+          return (
+            <CellComponent
+              key={`${dataKey}-${key}`}
+              sx={{ textAlign: "center", fontWeight: "bold", width: 80 }}
+            >
+              {dataSource[dataKey][key]?.toLocaleString() || 0}
+            </CellComponent>
+          );
+        })}
+
+        <TableCell
+          sx={{
+            textAlign: "center",
+            width: 200,
+            fontWeight: "bold",
+            backgroundColor: "#e0e0e0",
+          }}
+        >
+          {total.toLocaleString()}
+        </TableCell>
+
+        {/* ✅ เงื่อนไขเฉพาะ "รับเข้า" และใช้ rowSpan */}
+        {dataKey === "inbound" &&
+          summarizedList.map((row, idx) => (
+            <TableCell
+              key={`${dataKey}-summary-${idx}`}
+              sx={{ textAlign: "center", width: 200 }}
+              rowSpan={3}
+            >
+              {row.totalTravel.toLocaleString()}
+            </TableCell>
+          ))}
+      </TableRow>
+    );
+  };
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -478,13 +670,13 @@ const ReportSmallTruck = () => {
                 <TableCellPWD sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
                   PWD
                 </TableCellPWD>
-                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white" }}>
+                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                   ไปส่งที่
                 </TablecellFinancialHead>
                 {
-                  detail.map((row) => (
+                  summarizedList.map((row) => (
                     <TablecellFinancial sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
-                      <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1, marginTop: 1 }} gutterBottom>{row.Driver.split(":")[1]}</Typography>
+                      <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1, marginTop: 1 }} gutterBottom>ค่าเที่ยว {row.Driver.split(":")[1]}</Typography>
                       <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{row.Registration.split(":")[1]}</Typography>
                     </TablecellFinancial>
                   ))
@@ -492,6 +684,7 @@ const ReportSmallTruck = () => {
               </TableRow>
             </TableHead>
             <TableBody>
+              {renderSummaryRow("ยอดยกมา", "balance", "#e0e0f8", carryOverSummary)}
               {
                 matchedOrdersWithAll.map((row, index) => (
                   row.type === "รับเข้า" ? (
@@ -510,7 +703,7 @@ const ReportSmallTruck = () => {
                         const volume = row.Product?.[productKey]?.Volume;
                         return (
                           <TableCell key={productKey} sx={{ textAlign: "center" }}>
-                            {typeof volume === "number" ? volume * 1000 : ""}
+                            {(Number(volume) * 1000 || "").toLocaleString()}
                           </TableCell>
                         );
                       })}
@@ -518,7 +711,7 @@ const ReportSmallTruck = () => {
 
                       </TableCell>
                       {
-                        detail.map((d) => (
+                        summarizedList.map((d) => (
                           <TableCell sx={{ textAlign: "center" }}>
 
                           </TableCell>
@@ -546,15 +739,16 @@ const ReportSmallTruck = () => {
                         const volume = row.Product?.[productKey]?.Volume;
                         return (
                           <TableCell key={productKey} sx={{ textAlign: "center" }}>
-                            {volume !== undefined ? `- ${volume}` : ""}
+                            {(volume ? (-Number(volume)).toLocaleString() : "")}
                           </TableCell>
                         );
                       })}
+
                       <TableCell sx={{ textAlign: "center" }}>
                         {row.TicketName.split(":")[1] || "-"}
                       </TableCell>
                       {
-                        detail.map((d) => (
+                        summarizedList.map((d) => (
                           d.Driver === row.Driver && d.Registration === row.Registration ? (
                             <TableCell sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                               <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{row.Travel}</Typography>
@@ -571,54 +765,15 @@ const ReportSmallTruck = () => {
             </TableBody>
 
           </Table>
-          <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
+
+          <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" }, width: "1280px" }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#e0f7fa" }}>
-                <TableCell colSpan={3} sx={{ fontWeight: "bold", textAlign: "center", width: 480 }}>
-                  รวมรับเข้า
-                </TableCell>
-                {productTypes.map((key) => (
-                  <TableCell key={`in-${key}`} sx={{ textAlign: "center", fontWeight: "bold", width: 80 }}>
-                    {summary.inbound[key].toLocaleString()}
-                  </TableCell>
-                ))}
-                <TableCell sx={{ width: 200 }} />
-                {
-                  detail.map((row) => (
-                    <TableCell sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
-
-                    </TableCell>
-                  ))
-                }
-              </TableRow>
-
-              {/* ✅ แถวรวม ส่งออก */}
-              <TableRow sx={{ backgroundColor: "#ffe0b2" }}>
-                <TableCell colSpan={3} sx={{ fontWeight: "bold", textAlign: "center" }}>
-                  รวมส่งออก
-                </TableCell>
-                {productTypes.map((key) => (
-                  <TableCell key={`out-${key}`} sx={{ textAlign: "center", fontWeight: "bold" }}>
-                    {summary.outbound[key].toLocaleString()}
-                  </TableCell>
-                ))}
-                <TableCell colSpan={1} />
-              </TableRow>
-
-              {/* ✅ แถวคงเหลือ */}
-              <TableRow sx={{ backgroundColor: "#f1f8e9" }}>
-                <TableCell colSpan={3} sx={{ fontWeight: "bold", textAlign: "center" }}>
-                  คงเหลือ
-                </TableCell>
-                {productTypes.map((key) => (
-                  <TableCell key={`balance-${key}`} sx={{ textAlign: "center", fontWeight: "bold" }}>
-                    {summary.balance[key].toLocaleString()}
-                  </TableCell>
-                ))}
-                <TableCell colSpan={1} />
-              </TableRow>
+              {renderSummaryRow("รวมรับเข้า", "inbound", "#e0f7fa")}
+              {renderSummaryRow("รวมส่งออก", "outbound", "#ffe0b2")}
+              {renderSummaryRow("คงเหลือ", "balance", "#f1f8e9", differenceBalanceSummary)}
             </TableHead>
           </Table>
+
         </TableContainer>
       </Box>
     </Container>

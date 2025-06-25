@@ -73,6 +73,15 @@ const InsertTrips = () => {
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
     const [editMode, setEditMode] = useState(true);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [ordersTickets, setOrdersTickets] = React.useState({});
+    const [selling, setSelling] = React.useState({});
+    const [volumeT, setVolumeT] = React.useState({});
+    const [volumeS, setVolumeS] = React.useState({});
+    const [weightA, setWeightA] = React.useState({});
+    const [orderTrip, setOrderTrip] = React.useState({});
+    const [weightH, setWeightH] = React.useState(0);
+    const [weightL, setWeightL] = React.useState(0);
+    const [costTrip, setCostTrip] = React.useState(0);
 
     const { reghead, small, transport, drivers } = useBasicData();
     const truckH = Object.values(reghead || {});
@@ -146,17 +155,63 @@ const InsertTrips = () => {
     // };
 
 
+    // const handleDateChangeReceive = (newValue) => {
+    //     if (newValue) {
+    //         const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+    //         setSelectedDateReceive(formattedDate);
+    //     }
+    // };
+
+    // const handleDateChangeDelivery = (newValue) => {
+    //     if (newValue) {
+    //         const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+    //         setSelectedDateDelivery(formattedDate);
+    //     }
+    // };
+
     const handleDateChangeReceive = (newValue) => {
         if (newValue) {
-            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            const formattedDate = dayjs(newValue);
             setSelectedDateReceive(formattedDate);
+
+            console.log("order Ticket : ", Object.keys(ordersTickets).length);
+            console.log("selectedDateReceive : ", formattedDate.format("DD/MM/YYYY"));
+
+            if (ordersTickets && Object.keys(ordersTickets).length > 0) {
+                setOrdersTickets((prevOrders) => {
+                    const updated = {};
+                    for (const key in prevOrders) {
+                        updated[key] = {
+                            ...prevOrders[key],
+                            Date: formattedDate.format("DD/MM/YYYY"),
+                        };
+                    }
+                    console.log("Updated Orders with new Date (object):", updated);
+                    return updated;
+                });
+            }
         }
     };
+
 
     const handleDateChangeDelivery = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
             setSelectedDateDelivery(formattedDate);
+
+            if (selling && Object.keys(selling).length > 0) {
+                setSelling((prevOrders) => {
+                    const updated = {};
+                    for (const key in prevOrders) {
+                        updated[key] = {
+                            ...prevOrders[key],
+                            Date: formattedDate.format("DD/MM/YYYY"),
+                        };
+                    }
+                    console.log("Updated Orders with new Date (object):", updated);
+                    return updated;
+                });
+            }
         }
     };
 
@@ -435,16 +490,6 @@ const InsertTrips = () => {
         if (isNaN(number)) return "";
         return number.toLocaleString(); // => 3000 -> "3,000"
     };
-
-    const [ordersTickets, setOrdersTickets] = React.useState({});
-    const [selling, setSelling] = React.useState({});
-    const [volumeT, setVolumeT] = React.useState({});
-    const [volumeS, setVolumeS] = React.useState({});
-    const [weightA, setWeightA] = React.useState({});
-    const [orderTrip, setOrderTrip] = React.useState({});
-    const [weightH, setWeightH] = React.useState(0);
-    const [weightL, setWeightL] = React.useState(0);
-    const [costTrip, setCostTrip] = React.useState(0);
 
     console.log("ข้อมูลตั๋ว : ", Object.values(ordersTickets));
     console.log("ข้อมูลลูกค้า : ", Object.values(selling));
@@ -727,6 +772,70 @@ const InsertTrips = () => {
             return updatedOrders;
         });
     };
+
+    const handleChangeDriverss = (newvalue) => {
+        setDriverss(newvalue); // อัพเดตค่าเมื่อเลือก
+
+        if (ordersTickets && Object.keys(ordersTickets).length > 0) {
+            setOrdersTickets((prevOrders) => {
+                const updated = {};
+                for (const key in prevOrders) {
+                    updated[key] = {
+                        ...prevOrders[key],
+                        Driver: newvalue,
+                    };
+                }
+                console.log("Updated Orders with new Date (object):", updated);
+                return updated;
+            });
+        }
+
+        if (selling && Object.keys(selling).length > 0) {
+            setSelling((prevOrders) => {
+                const updated = {};
+                for (const key in prevOrders) {
+                    updated[key] = {
+                        ...prevOrders[key],
+                        Driver: newvalue,
+                    };
+                }
+                console.log("Updated Orders with new Date (object):", updated);
+                return updated;
+            });
+        }
+    }
+
+    const handleChangeRegistration = (newvalue) => {
+        setRegistration(newvalue);
+
+        if (ordersTickets && Object.keys(ordersTickets).length > 0) {
+            setOrdersTickets((prevOrders) => {
+                const updated = {};
+                for (const key in prevOrders) {
+                    updated[key] = {
+                        ...prevOrders[key],
+                        Registration: newvalue,
+                    };
+                }
+                console.log("Updated Orders with new Date (object):", updated);
+                return updated;
+            });
+        }
+
+        if (selling && Object.keys(selling).length > 0) {
+            setSelling((prevOrders) => {
+                const updated = {};
+                for (const key in prevOrders) {
+                    updated[key] = {
+                        ...prevOrders[key],
+                        Registration: newvalue,
+                    };
+                }
+                console.log("Updated Orders with new Date (object):", updated);
+                return updated;
+            });
+        }
+    }
 
     const handleAddCustomer = (ticketIndex, productName, field, value) => {
         setSelling((prev) => {
@@ -1059,7 +1168,7 @@ const InsertTrips = () => {
                     .ref("employee/drivers/")
                     .child(Number(driverss.split(":")[0]) - 1)
                     .update({
-                    Registration: registration
+                        Registration: registration
                     })
                     .then(() => {
                         setOpen(false);
@@ -1084,7 +1193,10 @@ const InsertTrips = () => {
         setWeightH(0);
         setWeightL(0);
         setCostTrip(0);
+        setDriverss("0:0");
         setRegistration("0:0");
+        setSelectedDateReceive(dayjs(new Date()));
+        setSelectedDateDelivery(dayjs(new Date()));
     };
 
     const handleCancle = () => {
@@ -1317,7 +1429,7 @@ const InsertTrips = () => {
                                                 const selectedItem = smallTruck.find(item =>
                                                     `${item.id}:${item.RegHead}` === registration
                                                 );
-                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : "" } : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
+                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
                                             })()}
                                         />
                                     </Paper>
@@ -1807,7 +1919,7 @@ const InsertTrips = () => {
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
                                                     const value = `${newValue.id}:${newValue.RegHead}`;
-                                                    setRegistration(value);
+                                                    handleChangeRegistration(value);
                                                 } else {
                                                     setRegistration("0:0");
                                                 }
@@ -2179,40 +2291,40 @@ const InsertTrips = () => {
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
                                         <Autocomplete
-                                                    id="autocomplete-tickets"
-                                                    options={driverDetail} // ดึงข้อมูลจากฟังก์ชัน getTickets()
-                                                    getOptionLabel={(option) =>
-                                                        `${option.Name}`
-                                                    } // กำหนดรูปแบบของ Label ที่แสดง
-                                                    isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
-                                                    value={driverss ? driverDetail.find(item => item.Name === driverss) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
-                                                    onChange={(event, newValue) => {
-                                                        if (newValue) {
-                                                            const value = `${newValue.id}:${newValue.Name}`;
-                                                            setDriverss(value); // อัพเดตค่าเมื่อเลือก
-                                                        } else {
-                                                            setDriverss("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
-                                                        }
+                                            id="autocomplete-tickets"
+                                            options={driverDetail} // ดึงข้อมูลจากฟังก์ชัน getTickets()
+                                            getOptionLabel={(option) =>
+                                                `${option.Name}`
+                                            } // กำหนดรูปแบบของ Label ที่แสดง
+                                            isOptionEqualToValue={(option, value) => option.id === value.id} // ตรวจสอบค่าที่เลือก
+                                            value={driverss ? driverDetail.find(item => item.Name === driverss) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    const value = `${newValue.id}:${newValue.Name}`;
+                                                    handleChangeDriverss(value);
+                                                } else {
+                                                    setDriverss("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
+                                                }
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label={driverss === "0:0" ? "เลือกพนักงานขับรถ" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "4px 8px" },
                                                     }}
-                                                    renderInput={(params) => (
-                                                        <TextField
-                                                            {...params}
-                                                            label={driverss === "0:0" ? "เลือกพนักงานขับรถ" : ""} // เปลี่ยน label กลับหากไม่เลือก
-                                                            variant="outlined"
-                                                            size="small"
-                                                            sx={{
-                                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                "& .MuiInputBase-input": { fontSize: "14px", padding: "4px 8px" },
-                                                            }}
-                                                        />
-                                                    )}
-                                                    renderOption={(props, option) => (
-                                                        <li {...props}>
-                                                            <Typography fontSize="14px">{`${option.Name}`}</Typography>
-                                                        </li>
-                                                    )}
-                                                    //disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
                                                 />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="14px">{`${option.Name}`}</Typography>
+                                                </li>
+                                            )}
+                                        //disabled={!showTrips} // ปิดการใช้งานถ้า showTrips เป็น false
+                                        />
                                     </Paper>
                                 </Grid>
                             </Grid>

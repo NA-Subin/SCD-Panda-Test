@@ -161,22 +161,7 @@ const OrderDetail = (props) => {
                             :
                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                 {
-                                    (() => {
-                                        const branches = [
-                                            "( สาขาที่  00001)/",
-                                            "( สาขาที่  00002)/",
-                                            "( สาขาที่  00003)/",
-                                            "(สำนักงานใหญ่)/"
-                                        ];
-
-                                        for (const branch of branches) {
-                                            if (detail.TicketName.includes(branch)) {
-                                                return detail.TicketName.split(branch)[1];
-                                            }
-                                        }
-
-                                        return detail.TicketName;
-                                    })()
+                                    detail.TicketName.split(":")[1]
                                 }
                             </Typography>
                     }
