@@ -720,6 +720,27 @@ const InsertTrips = () => {
         });
     };
 
+    const handleChangeCostTrip = (e) => {
+        let raw = e.target.value;
+
+        // ลบทุกอย่างที่ไม่ใช่ตัวเลขหรือตัวจุด
+        raw = raw.replace(/[^0-9.]/g, "");
+
+        // ตรวจสอบว่าใส่จุดได้แค่ 1 จุดเท่านั้น
+        const parts = raw.split(".");
+        if (parts.length > 2) return; // ห้ามใส่จุดมากกว่า 1 จุด
+
+        // จำกัดจุดทศนิยมไว้แค่ 2 ตำแหน่ง
+        if (parts[1]?.length > 2) {
+            parts[1] = parts[1].slice(0, 2);
+            raw = parts.join(".");
+        }
+
+        setCostTrip(Number(raw));
+    };
+
+    console.log("cost trip : ",costTrip);
+
     // ฟังก์ชันอัพเดตราคาใน ordersTickets เมื่อมีการเปลี่ยน depot
     const updateRatesByDepot = (selectedDepot) => {
         setCostTrip(0);
@@ -2734,10 +2755,7 @@ const InsertTrips = () => {
                                             <TextField
                                                 size="small"
                                                 fullWidth
-                                                value={new Intl.NumberFormat("en-US", {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                }).format(costTrip)}
+                                                value={new Intl.NumberFormat("en-US").format(costTrip)}
                                                 sx={{
                                                     "& .MuiOutlinedInput-root": { height: "30px" },
                                                     "& .MuiInputBase-input": {
@@ -2746,6 +2764,7 @@ const InsertTrips = () => {
                                                     },
                                                     borderRadius: 10
                                                 }}
+                                                onChange={handleChangeCostTrip}
                                             />
                                         </Paper>
                                     </Grid>

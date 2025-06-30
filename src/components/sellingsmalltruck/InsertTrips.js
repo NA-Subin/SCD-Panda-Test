@@ -173,6 +173,7 @@ const InsertTrips = () => {
         if (newValue) {
             const formattedDate = dayjs(newValue);
             setSelectedDateReceive(formattedDate);
+            setSelectedDateDelivery(formattedDate);
 
             console.log("order Ticket : ", Object.keys(ordersTickets).length);
             console.log("selectedDateReceive : ", formattedDate.format("DD/MM/YYYY"));
@@ -1444,7 +1445,7 @@ const InsertTrips = () => {
                                 sx={{
                                     position: "relative",
                                     maxWidth: "100%",
-                                    height: "31vh", // ความสูงรวมของ container หลัก
+                                    height: "25vh", // ความสูงรวมของ container หลัก
                                     overflow: "hidden",
                                     marginBottom: 0.5,
                                     overflowX: "auto",

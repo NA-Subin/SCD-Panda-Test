@@ -80,6 +80,7 @@ const TripsDetail = (props) => {
             <TableRow>
                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.DateReceive}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{trips.DateDelivery}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     {
                         trips.Driver.split(":")[1] !== undefined ?

@@ -82,7 +82,7 @@ const TripsSmallTruck = () => {
     const tripDetail = trips.filter((item) => {
         // const itemDateR = dayjs(item.DateReceive, "DD/MM/YYYY");
         // const itemDateD = dayjs(item.DateDelivery, "DD/MM/YYYY");
-        const itemDate = dayjs(item.DateStart, "DD/MM/YYYY");
+        const itemDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         return (
             check === 2 ?
                 item.TruckType === "รถเล็ก" &&
@@ -280,8 +280,11 @@ const TripsSmallTruck = () => {
                                         <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ลำดับ
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                            วันที่
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                            วันที่รับ
+                                        </TablecellTickets>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                            วันที่ส่ง
                                         </TablecellTickets>
                                         <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
                                             ชื่อ/ทะเบียนรถ
