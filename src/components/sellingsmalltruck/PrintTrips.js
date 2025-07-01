@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 
 
-const PrintTrips = () => {
+const PrintTripsSmall = () => {
   const [trips, setTrips] = useState(null);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const PrintTrips = () => {
       </Grid> */}
       <Grid container spacing={2}>
         <Grid item xs={12} marginBottom={-2}>
-          <Typography variant="subtitle1" fontWeight="bold">จัดการตั๋ว : วันที่รับ : {formatThaiDate(trips?.DateReceive)} พนักงานขับรถ : {trips?.Driver}</Typography>
+          <Typography variant="subtitle1" fontWeight="bold">วันที่รับ : {formatThaiDate(trips?.DateReceive)} พนักงานขับรถ : {trips?.Driver}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Table size="small" sx={{ "& .MuiTableCell-root": { padding: "2px" }, border: "1px solid black" }}>
@@ -109,8 +109,6 @@ const PrintTrips = () => {
               <TableRow sx={{ backgroundColor: "#e0e0e0" }}>
                 <TableCell width={50} sx={{ textAlign: "center", height: "35px", borderLeft: "1px solid black", fontWeight: "bold" }}>ลำดับ</TableCell>
                 <TableCell width={350} sx={{ textAlign: "center", height: "35px", borderLeft: "1px solid black", fontWeight: "bold" }}>ตั๋ว</TableCell>
-                <TableCell width={150} sx={{ textAlign: "center", height: "35px", borderLeft: "1px solid black", fontWeight: "bold" }}>เลขที่ออเดอร์</TableCell>
-                <TableCell width={100} sx={{ textAlign: "center", height: "35px", borderLeft: "1px solid black", fontWeight: "bold" }}>ค่าบรรทุก</TableCell>
                 <TableCell width={60} sx={{ textAlign: "center", height: "35px", borderLeft: "1px solid black", fontWeight: "bold" }}>G95</TableCell>
                 <TableCell width={60} sx={{ textAlign: "center", height: "35px", borderLeft: "1px solid black", fontWeight: "bold" }}>B95</TableCell>
                 <TableCell width={60} sx={{ textAlign: "center", height: "35px", borderLeft: "1px solid black", fontWeight: "bold" }}>B7(D)</TableCell>
@@ -126,22 +124,7 @@ const PrintTrips = () => {
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.id + 1}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
                       {
-                        (() => {
-                          const branches = [
-                            "( สาขาที่  00001)/",
-                            "( สาขาที่  00002)/",
-                            "( สาขาที่  00003)/",
-                            "(สำนักงานใหญ่)/"
-                          ];
-
-                          for (const branch of branches) {
-                            if (row.TicketName.includes(branch)) {
-                              return row.TicketName.split(branch)[1];
-                            }
-                          }
-
-                          return row.TicketName;
-                        })()
+                        row.TicketName.split(":")[1]
                       }
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.OrderID}</TableCell>
@@ -163,7 +146,7 @@ const PrintTrips = () => {
                 ))
               }
               <TableRow>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", backgroundColor: "#e0e0e0", fontWeight: "bold" }} colSpan={4}>ปริมาตรรวม</TableCell>
+                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", backgroundColor: "#e0e0e0", fontWeight: "bold" }} colSpan={2}>ปริมาตรรวม</TableCell>
                 <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.G95}</TableCell>
                 <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.B95}</TableCell>
                 <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.B7}</TableCell>
@@ -173,7 +156,7 @@ const PrintTrips = () => {
               </TableRow>
             </TableBody>
           </Table>
-          <Table size="small" sx={{ "& .MuiTableCell-root": { padding: "2px" }, border: "1px solid black" }}>
+          {/* <Table size="small" sx={{ "& .MuiTableCell-root": { padding: "2px" }, border: "1px solid black" }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#e0e0e0" }}>
                 <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>น้ำมันหนัก : </TableCell>
@@ -198,10 +181,10 @@ const PrintTrips = () => {
                 }).format(trips?.TotalWeight)}</TableCell>
               </TableRow>
             </TableHead>
-          </Table>
+          </Table> */}
         </Grid>
         <Grid item xs={12} marginBottom={-2}>
-          <Typography variant="subtitle1" fontWeight="bold">จัดการเที่ยววิ่ง : วันที่ส่ง : {formatThaiDate(trips?.DateDelivery)} พนักงานขับรถ : {trips?.Driver}</Typography>
+          <Typography variant="subtitle1" fontWeight="bold">วันที่ส่ง : {formatThaiDate(trips?.DateDelivery)} พนักงานขับรถ : {trips?.Driver}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Table size="small" sx={{ "& .MuiTableCell-root": { padding: "2px" }, border: "1px solid black" }}>
@@ -225,26 +208,11 @@ const PrintTrips = () => {
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.id + 1}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
                       {
-                        (() => {
-                          const branches = [
-                            "( สาขาที่  00001)/",
-                            "( สาขาที่  00002)/",
-                            "( สาขาที่  00003)/",
-                            "(สำนักงานใหญ่)/"
-                          ];
-
-                          for (const branch of branches) {
-                            if (row.TicketName.includes(branch)) {
-                              return row.TicketName.split(branch)[1];
-                            }
-                          }
-
-                          return row.TicketName;
-                        })()
+                        row.TicketName.split(":")[1]
                       }
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
-                    {
+                      {
                         trips?.Depot.split(":")[0] === "ลำปาง" ? row.Rate1
                           : trips?.Depot.split(":")[0] === "พิจิตร" ? row.Rate2
                             : trips?.Depot.split(":")[0] === "สระบุรี" || trips?.Depot.split(":")[0] === "บางปะอิน" || trips?.Depot.split(":")[0] === "IR" ? row.Rate3
@@ -269,26 +237,25 @@ const PrintTrips = () => {
                 <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeOrder.E20}</TableCell>
                 <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeOrder.PWD}</TableCell>
               </TableRow>
-              <TableRow>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", backgroundColor: "#e0e0e0", fontWeight: "bold" }} colSpan={3}>คงเหลือ</TableCell>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.G95 - trips?.TotalVolumeOrder.G95}</TableCell>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.B95 - trips?.TotalVolumeOrder.B95}</TableCell>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.B7 - trips?.TotalVolumeOrder.B7}</TableCell>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.G91 - trips?.TotalVolumeOrder.G91}</TableCell>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.E20 - trips?.TotalVolumeOrder.E20}</TableCell>
-                <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.PWD - trips?.TotalVolumeOrder.PWD}</TableCell>
-              </TableRow>
+              {
+                (trips?.TotalVolumeTicket.G95 + trips?.TotalVolumeTicket.B95 + trips?.TotalVolumeTicket.B7 + trips?.TotalVolumeTicket.G91 + trips?.TotalVolumeTicket.E20 + trips?.TotalVolumeTicket.PWD) !== 0 &&
+                <TableRow>
+                  <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", backgroundColor: "#e0e0e0", fontWeight: "bold" }} colSpan={3}>คงเหลือ</TableCell>
+                  <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.G95 - trips?.TotalVolumeOrder.G95}</TableCell>
+                  <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.B95 - trips?.TotalVolumeOrder.B95}</TableCell>
+                  <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.B7 - trips?.TotalVolumeOrder.B7}</TableCell>
+                  <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.G91 - trips?.TotalVolumeOrder.G91}</TableCell>
+                  <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.E20 - trips?.TotalVolumeOrder.E20}</TableCell>
+                  <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black", fontWeight: "bold" }}>{trips?.TotalVolumeTicket.PWD - trips?.TotalVolumeOrder.PWD}</TableCell>
+                </TableRow>
+              }
             </TableBody>
           </Table>
           <Table size="small" sx={{ "& .MuiTableCell-root": { padding: "2px" }, border: "1px solid black" }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#e0e0e0" }}>
-                <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>คลังรับน้ำมัน :</TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold", width: 200 }}>{trips?.Depot.split(":")[0]}</TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>ค่าเที่ยว :</TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold", width: 100 }}>{trips?.CostTrip}</TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>สถานะ :</TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", fontWeight: "bold" }}>{trips?.Status}</TableCell>
+                <TableCell colSpan={3} sx={{ textAlign: "center", height: "20px", borderLeft: "1px solid black", fontWeight: "bold", width: 80 }}>ค่าเที่ยว :</TableCell>
+                <TableCell colSpan={6} sx={{ textAlign: "center", height: "20px", fontWeight: "bold", width: 100 }}>{trips?.CostTrip}</TableCell>
               </TableRow>
             </TableHead>
           </Table>
@@ -298,4 +265,4 @@ const PrintTrips = () => {
   );
 };
 
-export default PrintTrips;
+export default PrintTripsSmall;

@@ -211,6 +211,7 @@ const TripsDetail = (props) => {
                 </TableCell>
                 <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                     <UpdateTrip
+                        trip={trips}
                         tripID={trips.id}
                         dateStart={trips.DateStart}
                         dateReceive={trips.DateReceive}

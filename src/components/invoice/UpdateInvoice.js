@@ -447,6 +447,40 @@ const UpdateInvoice = (props) => {
         });
     };
 
+    // 1. สร้างแถว
+    const rows = orderList
+        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        .flatMap((row) =>
+            Object.entries(row.Product)
+                .filter(([productName]) => productName !== "P")
+                .map(([productName, Volume]) => ({
+                    No: row.No,
+                    TicketName: row.TicketName,
+                    RateOil: Volume.RateOil || 0,
+                    Amount: Volume.Amount || 0,
+                    Date: row.Date,
+                    Driver: row.Driver,
+                    Registration: row.Registration,
+                    ProductName: productName,
+                    Volume: Volume.Volume * 1000,
+                    uniqueRowId: `${productName}:${row.No}`,
+                }))
+        )
+        .sort((a, b) =>
+            FUEL_ORDER.indexOf(a.ProductName) - FUEL_ORDER.indexOf(b.ProductName)
+        );
+
+    // 2. สร้าง Map สำหรับเก็บจำนวนซ้ำ
+    const groupMap = {};
+    rows.forEach((row) => {
+        const key = `${row.Date}|${row.Driver}|${row.Registration}`;
+        if (!groupMap[key]) groupMap[key] = [];
+        groupMap[key].push(row);
+    });
+
+    // 3. Render แถวพร้อม rowSpan
+    let renderedRowKeys = new Set();
+
     const [tranferID, setTranferID] = useState(null);
     const [tranferDateStart, setTranferDateStart] = useState("");
     const [tranferBankName, setTranferBankName] = useState("");
@@ -773,7 +807,7 @@ const UpdateInvoice = (props) => {
                         component={Paper}
                         sx={{ borderRadius: 2, marginTop: -1 }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1330px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1230px" }}>
                             <TableHead>
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px', backgroundColor: theme.palette.primary.dark }}>
@@ -785,12 +819,13 @@ const UpdateInvoice = (props) => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ผู้ขับ/ป้ายทะเบียน
                                     </TablecellSelling>
-                                    <TableCellG95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G95</TableCellG95>
+                                    <TablecellSelling width={100} sx={{ textAlign: "center", fontSize: "16px", height: "35px", backgroundColor: theme.palette.primary.dark }}>ชนิดน้ำมัน</TablecellSelling>
+                                    {/* <TableCellG95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G95</TableCellG95>
                                     <TableCellB95 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B95</TableCellB95>
                                     <TableCellB7 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>B7(D)</TableCellB7>
                                     <TableCellG91 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>G91</TableCellG91>
                                     <TableCellE20 width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>E20</TableCellE20>
-                                    <TableCellPWD width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>PWD</TableCellPWD>
+                                    <TableCellPWD width={60} sx={{ textAlign: "center", fontSize: "16px", height: "35px" }}>PWD</TableCellPWD> */}
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         จำนวนลิตร
                                     </TablecellSelling>
@@ -802,137 +837,118 @@ const UpdateInvoice = (props) => {
                                     </TablecellSelling>
                                 </TableRow>
                             </TableHead>
-                            {/* <TableBody>
-                                {
-                                    orderList
-                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .flatMap((row, rowIndex) =>
-                                            Object.entries(row.Product)
-                                                .filter(([productName]) => productName !== "P") // กรองก่อน map
-                                                .map(([productName, Volume], index) => ({
-                                                    No: row.No,
-                                                    TicketName: row.TicketName,
-                                                    RateOil: Volume.RateOil || 0,
-                                                    Amount: Volume.Amount || 0,
-                                                    Date: row.Date,
-                                                    Driver: row.Driver,
-                                                    Registration: row.Registration,
-                                                    ProductName: productName,
-                                                    Volume: Volume.Volume * 1000,
-                                                    uniqueRowId: `${index}:${productName}:${row.No}`,
-                                                }))
-                                        )
-                                        .map((row, index) => (
-                                            <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Date || row.Date}</Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
-                                                </TableCell>
-                                                <TableCell sx={{
-                                                    textAlign: "center", height: '30px', width: 100,
-                                                    backgroundColor: row.ProductName === "G91" ? "#92D050" :
-                                                        row.ProductName === "G95" ? "#FFC000" :
-                                                            row.ProductName === "B7" ? "#FFFF99" :
-                                                                row.ProductName === "B95" ? "#B7DEE8" :
-                                                                    row.ProductName === "B10" ? "#32CD32" :
-                                                                        row.ProductName === "B20" ? "#228B22" :
-                                                                            row.ProductName === "E20" ? "#C4BD97" :
-                                                                                row.ProductName === "E85" ? "#0000FF" :
-                                                                                    row.ProductName === "PWD" ? "#F141D8" :
-                                                                                        "#FFFFFF"
-                                                }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.ProductName || row.ProductName}</Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US").format(row.Volume)}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 100 }}>
-                                                    <Paper component="form" sx={{ marginTop: -1, marginBottom: -1 }}>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField
-                                                                type="number"
-                                                                size="small"
-                                                                fullWidth
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        height: '22px',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                    },
-                                                                    '& .MuiInputBase-input': {
-                                                                        fontSize: "14px",
-                                                                        padding: '1px 4px',
-                                                                        textAlign: 'center',
-                                                                    },
-                                                                    borderRadius: 10,
-                                                                }}
-                                                                value={report[row.uniqueRowId]?.RateOil || row.RateOil || ""}
-                                                                onChange={(e) => {
-                                                                    let newValue = e.target.value.replace(/^0+(?=\d)/, "");  // ลบเลข 0 ข้างหน้า
-                                                                    if (newValue === "") newValue = "";  // ถ้าว่างให้แสดงค่าว่าง
-                                                                    handlePriceChange(
-                                                                        newValue,  // ใช้ค่าใหม่ที่ไม่มี 0 ข้างหน้า
-                                                                        row.No,
-                                                                        row.uniqueRowId,
-                                                                        row.TicketName,
-                                                                        row.ProductName,
-                                                                        row.Date,
-                                                                        row.Driver,
-                                                                        row.Registration,
-                                                                        row.Volume
-                                                                    );
-                                                                }}
-                                                                onFocus={(e) => {
-                                                                    if (e.target.value === "0") { // ถ้าเป็น "0" ให้เคลียร์
-                                                                        handlePriceChange(
-                                                                            "",
-                                                                            row.No,
-                                                                            row.uniqueRowId,
-                                                                            row.TicketName,
-                                                                            row.ProductName,
-                                                                            row.Date,
-                                                                            row.Driver,
-                                                                            row.Registration,
-                                                                            row.Volume
-                                                                        );
-                                                                    }
-                                                                }}
-                                                                onBlur={(e) => {
-                                                                    if (e.target.value === "") { // ถ้าว่างให้ตั้งค่าเป็น "0"
-                                                                        handlePriceChange(
-                                                                            "0",
-                                                                            row.No,
-                                                                            row.uniqueRowId,
-                                                                            row.TicketName,
-                                                                            row.ProductName,
-                                                                            row.Date,
-                                                                            row.Driver,
-                                                                            row.Registration,
-                                                                            row.Volume
-                                                                        );
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </Paper>
-                                                    </Paper>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US").format(report[row.uniqueRowId]?.Amount || row.Amount)}
-                                                    </Typography>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                }
-                            </TableBody> */}
                             <TableBody>
+                                {
+                                    Object.entries(groupMap).map(([groupKey, groupRows], groupIndex) =>
+                                        groupRows.map((row, index) => {
+                                            const firstInGroup = index === 0;
+                                            const rowSpan = groupRows.length;
+
+                                            return (
+                                                <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
+                                                    {firstInGroup && (
+                                                        <>
+                                                            <TableCell
+                                                                rowSpan={rowSpan}
+                                                                sx={{ textAlign: "center", height: "30px", width: 50 }}
+                                                            >
+                                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                                    {groupIndex + 1}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell
+                                                                rowSpan={rowSpan}
+                                                                sx={{ textAlign: "center", height: "30px", width: 150 }}
+                                                            >
+                                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                                    {report[row.uniqueRowId]?.Date || row.Date}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell
+                                                                rowSpan={rowSpan}
+                                                                sx={{ textAlign: "center", height: "30px" }}
+                                                            >
+                                                                <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                                    {report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}
+                                                                </Typography>
+                                                            </TableCell>
+                                                        </>
+                                                    )}
+
+                                                    {/* Product Name */}
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "center",
+                                                            height: "30px",
+                                                            width: 100,
+                                                            backgroundColor:
+                                                                row.ProductName === "G91" ? "#92D050" :
+                                                                    row.ProductName === "G95" ? "#FFC000" :
+                                                                        row.ProductName === "B7" ? "#FFFF99" :
+                                                                            row.ProductName === "B95" ? "#B7DEE8" :
+                                                                                row.ProductName === "B10" ? "#32CD32" :
+                                                                                    row.ProductName === "B20" ? "#228B22" :
+                                                                                        row.ProductName === "E20" ? "#C4BD97" :
+                                                                                            row.ProductName === "E85" ? "#0000FF" :
+                                                                                                row.ProductName === "PWD" ? "#F141D8" :
+                                                                                                    "#FFFFFF"
+                                                        }}
+                                                    >
+                                                        <Typography fontWeight="bold" fontSize="14px" gutterBottom>
+                                                            {report[row.uniqueRowId]?.ProductName || row.ProductName}
+                                                        </Typography>
+                                                    </TableCell>
+
+                                                    {/* Volume */}
+                                                    <TableCell sx={{ textAlign: "center", height: "30px", width: 150 }}>
+                                                        <Typography fontSize="14px" gutterBottom>
+                                                            {new Intl.NumberFormat("en-US").format(row.Volume)}
+                                                        </Typography>
+                                                    </TableCell>
+
+                                                    {/* RateOil */}
+                                                    <TableCell sx={{ textAlign: "center", width: 100 }}>
+                                                        <TextField
+                                                            type="number"
+                                                            size="small"
+                                                            fullWidth
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-root': { height: '22px', display: 'flex', alignItems: 'center' },
+                                                                '& .MuiInputBase-input': { fontSize: "14px", padding: '1px 4px', textAlign: 'center' },
+                                                                borderRadius: 10,
+                                                            }}
+                                                            value={report[row.uniqueRowId]?.RateOil || row.RateOil || ""}
+                                                            onChange={(e) => {
+                                                                let newValue = e.target.value.replace(/^0+(?=\d)/, "");
+                                                                if (newValue === "") newValue = "";
+                                                                handlePriceChange(newValue, row.No, row.uniqueRowId, row.TicketName, row.ProductName, row.Date, row.Driver, row.Registration, row.Volume);
+                                                            }}
+                                                            onFocus={(e) => {
+                                                                if (e.target.value === "0") {
+                                                                    handlePriceChange("", row.No, row.uniqueRowId, row.TicketName, row.ProductName, row.Date, row.Driver, row.Registration, row.Volume);
+                                                                }
+                                                            }}
+                                                            onBlur={(e) => {
+                                                                if (e.target.value === "") {
+                                                                    handlePriceChange("0", row.No, row.uniqueRowId, row.TicketName, row.ProductName, row.Date, row.Driver, row.Registration, row.Volume);
+                                                                }
+                                                            }}
+                                                        />
+                                                    </TableCell>
+
+                                                    {/* Amount */}
+                                                    <TableCell sx={{ textAlign: "center", height: "30px", width: 150 }}>
+                                                        <Typography fontSize="14px" gutterBottom>
+                                                            {new Intl.NumberFormat("en-US").format(report[row.uniqueRowId]?.Amount || row.Amount)}
+                                                        </Typography>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })
+                                    )
+                                }
+                            </TableBody>
+                            {/* <TableBody>
                                 {orderList
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((row, index) => {
@@ -965,7 +981,6 @@ const UpdateInvoice = (props) => {
                                                     <Typography fontSize="14px">{displayDriver} : {displayRegis}</Typography>
                                                 </TableCell>
 
-                                                {/* วนตามหัวตารางน้ำมัน */}
                                                 {FUEL_ORDER.map((fuel) => {
                                                     const fuelData = fuelMap[fuel];
                                                     return (
@@ -984,7 +999,6 @@ const UpdateInvoice = (props) => {
                                                     );
                                                 })}
 
-                                                {/* รวมลิตร */}
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography fontSize="14px">
                                                         {Object.values(fuelMap).reduce((sum, item) => sum + item.Volume, 0).toLocaleString()}
@@ -1067,7 +1081,6 @@ const UpdateInvoice = (props) => {
                                                     </Paper>
                                                 </TableCell>
 
-                                                {/* รวมยอดเงิน */}
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography fontSize="14px">
                                                         {Object.values(fuelMap).reduce((sum, item) => sum + item.Amount, 0).toLocaleString()}
@@ -1076,9 +1089,9 @@ const UpdateInvoice = (props) => {
                                             </TableRow>
                                         );
                                     })}
-                            </TableBody>
+                            </TableBody> */}
                         </Table>
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1330px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1230px" }}>
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={4}>
@@ -1475,7 +1488,7 @@ const UpdateInvoice = (props) => {
                                                 >
                                                     {
                                                         bankDetail.map((row) => (
-                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName}....${row.BankShortName}..${row.BankID}`}</MenuItem>
                                                         ))
                                                     }
                                                 </Select>

@@ -996,11 +996,11 @@ const InsertTrips = () => {
             const entries = Object.entries(prev);
 
             // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น order1)
-            const filtered = entries.filter(([key]) => key !== `order${parseInt(indexToDelete, 10) + 1}`);
+            const filtered = entries.filter(([key]) => key !== `Order${parseInt(indexToDelete, 10) + 1}`);
 
             // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก order1
             const newOrderTrip = filtered.reduce((acc, [_, value], index) => {
-                acc[`order${index + 1}`] = value;
+                acc[`Order${index + 1}`] = value;
                 return acc;
             }, {});
 
@@ -1308,7 +1308,14 @@ const InsertTrips = () => {
             // ...ticketsT
             //     .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
             //     .map((item) => ({ ...item })),
-            ...ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item }))
+            ...ticketsS
+                .filter((item) => item.Status === "ลูกค้าประจำ")
+                .sort((a, b) => {
+                    const nameA = (a.Name || "").trim();
+                    const nameB = (b.Name || "").trim();
+                    return nameA.localeCompare(nameB, "th"); // รองรับภาษาไทย
+                })
+                .map((item) => ({ ...item }))
             // ...(selectedTruck.type === "รถใหญ่"
             //     ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
             //     : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
@@ -1378,8 +1385,8 @@ const InsertTrips = () => {
                             </Grid>
                             <Grid item md={3} xs={10} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่รับ</Typography>
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>วันที่รับ</Typography>
+                                    <Paper component="form" sx={{ width: "100%", marginTop: -1 }}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
                                                 openTo="day"
@@ -1414,9 +1421,9 @@ const InsertTrips = () => {
                             </Grid>
                             <Grid item md={8} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
-                                        component="form" sx={{ height: "30px", width: "100%" }}>
+                                        component="form" sx={{ height: "30px", width: "100%", marginTop: -1 }}>
                                         <TextField size="small" fullWidth disabled
                                             sx={{
                                                 "& .MuiOutlinedInput-root": { height: "30px" },
@@ -1870,8 +1877,8 @@ const InsertTrips = () => {
                             </Grid>
                             <Grid item md={3} xs={10} textAlign="right">
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>วันที่ส่ง</Typography>
-                                    <Paper component="form" sx={{ width: "100%" }}>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>วันที่ส่ง</Typography>
+                                    <Paper component="form" sx={{ width: "100%", marginTop: -1 }}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
                                                 openTo="day"
@@ -1906,9 +1913,9 @@ const InsertTrips = () => {
                             </Grid>
                             <Grid item md={8} xs={12}>
                                 <Box display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
-                                        component="form" sx={{ height: "30px", width: "100%" }}>
+                                        component="form" sx={{ height: "30px", width: "100%", marginTop: -1 }}>
                                         <Autocomplete
                                             id="autocomplete-registration-1"
                                             options={smallTruck}
@@ -2266,7 +2273,6 @@ const InsertTrips = () => {
                                     </Paper>
                                 </Grid>
                                 <Grid item md={2} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
                                         <TextField
@@ -2284,11 +2290,19 @@ const InsertTrips = () => {
                                                 },
                                                 borderRadius: 10
                                             }}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                                            ค่าเที่ยว :
+                                                        </Typography>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
                                         />
                                     </Paper>
                                 </Grid>
                                 <Grid item md={4} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>พขร.</Typography>
                                     <Paper sx={{ width: "100%" }}
                                         component="form">
                                         <Autocomplete

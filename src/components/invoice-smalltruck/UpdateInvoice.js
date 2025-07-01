@@ -1326,7 +1326,7 @@ const UpdateInvoice = (props) => {
                                                 >
                                                     {
                                                         bankDetail.map((row) => (
-                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
+                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName}....${row.BankShortName}..${row.BankID}`}</MenuItem>
                                                         ))
                                                     }
                                                 </Select>

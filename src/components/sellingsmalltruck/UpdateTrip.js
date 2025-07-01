@@ -57,7 +57,9 @@ import { useBasicData } from "../../server/provider/BasicDataProvider";
 // const depotOptions = ["ลำปาง", "พิจิตร", "สระบุรี", "บางปะอิน", "IR"];
 
 const UpdateTrip = (props) => {
-    const { tripID,
+    const {
+        trip,
+        tripID,
         weightHigh,
         weightLow,
         totalWeight,
@@ -78,7 +80,7 @@ const UpdateTrip = (props) => {
     const [order, setOrder] = React.useState([]);
     const [customer, setCustomer] = React.useState([]);
     const [ticket, setTicket] = React.useState([]);
-    const [trip, setTrip] = React.useState([]);
+    //const [trip, setTrip] = React.useState([]);
     const [tickets, setTickets] = React.useState([]);
     const [orderLength, setOrderLength] = React.useState(0);
     const [ticketsT, setTicketsT] = React.useState([]);
@@ -90,6 +92,8 @@ const UpdateTrip = (props) => {
     const [selectedDateReceive, setSelectedDateReceive] = useState(dateReceive);
     const [selectedDateDelivery, setSelectedDateDelivery] = useState(dateDelivery);
     const [windowWidths, setWindowWidth] = useState(window.innerWidth);
+
+    console.log("Trip s : ", trip);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -129,6 +133,23 @@ const UpdateTrip = (props) => {
     }, []);
 
     const handleSaveAsImage = () => {
+        const driverName = trip.Driver?.includes(":")
+            ? trip.Driver.split(":")[1]
+            : trip.Driver || "";
+
+        const registrationId = trip.Registration?.includes(":")
+            ? Number(trip.Registration.split(":")[0])
+            : null;
+
+        const plate = trip.Registration?.includes(":")
+            ? trip.Registration.split(":")[1]
+            : trip.Registration || "";
+
+        const shortName = registrationTruck.find(
+            (row) => row.id === registrationId
+        )?.ShortName || "";
+
+
         const Trips = {
             Tickets: editableTickets,
             Orders: editableOrders,
@@ -137,7 +158,7 @@ const UpdateTrip = (props) => {
             CostTrip: costTrip,
             DateReceive: trip.DateReceive,
             DateDelivery: trip.DateDelivery,
-            Driver: trip.Driver + " / " + trip.Registration,
+            Driver: `${shortName} : ${plate} / ${driverName}`,
             Depot: depotTrip,
             WeightHigh: totalVolumesTicket.oilHeavy,
             WeightLow: totalVolumesTicket.oilLight,
@@ -157,7 +178,7 @@ const UpdateTrip = (props) => {
         const top = (screenHeight - windowHeight) / 2;
 
         const printWindow = window.open(
-            "/print-trips",
+            "/print-tripssmall",
             "_blank",
             `width=${windowWidth},height=${windowHeight},left=${left},top=${top}`
         );
@@ -296,24 +317,24 @@ const UpdateTrip = (props) => {
         });
     };
 
-    const getTrip = async () => {
-        database.ref("/trip/" + (Number(tripID) - 1)).on("value", (snapshot) => {
-            const datas = snapshot.val();
-            // const dataTrip = [];
-            // for (let id in datas) {
-            //     if (datas[id].id === tripID) {
-            //         setSelectedDateReceive(datas[id].DateReceive)
-            //         setSelectedDateDelivery(datas[id].DateDelivery)
-            //     }
-            // }
-            setTrip(datas);
-        });
-    };
+    // const getTrip = async () => {
+    //     database.ref("/trip/" + (Number(tripID) - 1)).on("value", (snapshot) => {
+    //         const datas = snapshot.val();
+    //         // const dataTrip = [];
+    //         // for (let id in datas) {
+    //         //     if (datas[id].id === tripID) {
+    //         //         setSelectedDateReceive(datas[id].DateReceive)
+    //         //         setSelectedDateDelivery(datas[id].DateDelivery)
+    //         //     }
+    //         // }
+    //         setTrip(datas);
+    //     });
+    // };
 
     useEffect(() => {
         getTicket();
         getOrder();
-        getTrip();
+        // getTrip();
     }, []);
 
     const handleCancle = () => {
@@ -940,12 +961,31 @@ const UpdateTrip = (props) => {
     };
 
     const getCustomers = () => {
+        if (!registration || registration === "0:0:0:0") return [];
+
+        // const selectedTruck = allTruck.find(
+        //     (item) => `${item.id}:${item.RegHead}:${item.Driver}:${item.type}` === registration
+        // );
+
+        // if (!selectedTruck) return [];
+
         const customers = [
-            // ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+            // ...ticketsPS.map((item) => ({ ...item })),
             // ...ticketsT
             //     .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
-            //     .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
-            ...ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" }))
+            //     .map((item) => ({ ...item })),
+            ...ticketsS
+                .filter((item) => item.Status === "ลูกค้าประจำ")
+                .sort((a, b) => {
+                    const nameA = (a.Name || "").trim();
+                    const nameB = (b.Name || "").trim();
+                    return nameA.localeCompare(nameB, "th"); // รองรับภาษาไทย
+                })
+                .map((item) => ({ ...item }))
+            // ...(selectedTruck.type === "รถใหญ่"
+            //     ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
+            //     : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
+            //),
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);
@@ -1464,6 +1504,8 @@ const UpdateTrip = (props) => {
     console.log("Updated Orders : ", editableOrders);
     console.log("Depot : ", depot);
 
+    console.log("Trip Detail : ", trip);
+
     return (
         <React.Fragment>
             <Box display="flex" justifyContent="center" alignItems="center">
@@ -1629,25 +1671,54 @@ const UpdateTrip = (props) => {
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                             </Grid>
                                             <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left" } }}>
-                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ :
+                                                    <Box
+                                                        component="span"
+                                                        sx={{
+                                                            borderBottom: "1px dashed",
+                                                            display: "inline-block",
+                                                            lineHeight: 1.8, // ปรับให้เส้นตรงแนว baseline
+                                                            px: 0.5,         // padding ด้านข้างเล็กน้อย
+                                                        }}
+                                                    >
+                                                        {trip.DateReceive}
+                                                    </Box>
+                                                </Typography>
                                             </Grid>
                                             <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
-                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
-                                                    {
-                                                        trip.Driver !== undefined &&
-                                                            trip.Driver.split(":")[1] !== undefined ?
-                                                            trip.Driver.split(":")[1]
-                                                            :
-                                                            trip.Driver
-                                                    }/
-                                                    {
-                                                        trip.Registration !== undefined &&
-                                                            trip.Registration.split(":")[1] !== undefined ?
-                                                            trip.Registration.split(":")[1]
-                                                            :
-                                                            trip.Registration
-                                                    }
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>
+                                                    ผู้ขับ/ป้ายทะเบียน :{" "}
+                                                    <Box
+                                                        component="span"
+                                                        sx={{
+                                                            borderBottom: "1px dashed",
+                                                            display: "inline-block",
+                                                            lineHeight: 1.8, // ปรับให้เส้นตรงแนว baseline
+                                                            px: 0.5,         // padding ด้านข้างเล็กน้อย
+                                                        }}
+                                                    >
+                                                        {(() => {
+                                                            const driverName = trip.Driver?.includes(":")
+                                                                ? trip.Driver.split(":")[1]
+                                                                : trip.Driver || "";
+
+                                                            const registrationId = trip.Registration?.includes(":")
+                                                                ? Number(trip.Registration.split(":")[0])
+                                                                : null;
+
+                                                            const plate = trip.Registration?.includes(":")
+                                                                ? trip.Registration.split(":")[1]
+                                                                : trip.Registration || "";
+
+                                                            const shortName = registrationTruck.find(
+                                                                (row) => row.id === registrationId
+                                                            )?.ShortName || "";
+
+                                                            return `${shortName} : ${plate} / ${driverName}`;
+                                                        })()}
+                                                    </Box>
                                                 </Typography>
+
                                             </Grid>
                                             {/* <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                             <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่รับ : {trip.DateReceive}</Typography>
@@ -1723,7 +1794,7 @@ const UpdateTrip = (props) => {
                                 sx={{
                                     position: "relative",
                                     maxWidth: "100%",
-                                    height: "31vh", // ความสูงรวมของ container หลัก
+                                    height: "25vh", // ความสูงรวมของ container หลัก
                                     overflow: "hidden",
                                     marginBottom: 0.5,
                                     overflowX: "auto",
@@ -2354,25 +2425,54 @@ const UpdateTrip = (props) => {
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                                             </Grid>
                                             <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left" } }}>
-                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง : {trip.DateDelivery}</Typography>
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 5, marginTop: 1 }} gutterBottom>วันที่ส่ง :
+                                                    <Box
+                                                        component="span"
+                                                        sx={{
+                                                            borderBottom: "1px dashed",
+                                                            display: "inline-block",
+                                                            lineHeight: 1.8, // ปรับให้เส้นตรงแนว baseline
+                                                            px: 0.5,         // padding ด้านข้างเล็กน้อย
+                                                        }}
+                                                    >
+                                                        {trip.DateDelivery}
+                                                    </Box>
+                                                </Typography>
                                             </Grid>
                                             <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
-                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน :
-                                                    {
-                                                        trip.Driver !== undefined &&
-                                                            trip.Driver.split(":")[1] !== undefined ?
-                                                            trip.Driver.split(":")[1]
-                                                            :
-                                                            trip.Driver
-                                                    }/
-                                                    {
-                                                        trip.Registration !== undefined &&
-                                                            trip.Registration.split(":")[1] !== undefined ?
-                                                            trip.Registration.split(":")[1]
-                                                            :
-                                                            trip.Registration
-                                                    }
+                                                <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>
+                                                    ผู้ขับ/ป้ายทะเบียน :{" "}
+                                                    <Box
+                                                        component="span"
+                                                        sx={{
+                                                            borderBottom: "1px dashed",
+                                                            display: "inline-block",
+                                                            lineHeight: 1.8, // ปรับให้เส้นตรงแนว baseline
+                                                            px: 0.5,         // padding ด้านข้างเล็กน้อย
+                                                        }}
+                                                    >
+                                                        {(() => {
+                                                            const driverName = trip.Driver?.includes(":")
+                                                                ? trip.Driver.split(":")[1]
+                                                                : trip.Driver || "";
+
+                                                            const registrationId = trip.Registration?.includes(":")
+                                                                ? Number(trip.Registration.split(":")[0])
+                                                                : null;
+
+                                                            const plate = trip.Registration?.includes(":")
+                                                                ? trip.Registration.split(":")[1]
+                                                                : trip.Registration || "";
+
+                                                            const shortName = registrationTruck.find(
+                                                                (row) => row.id === registrationId
+                                                            )?.ShortName || "";
+
+                                                            return `${shortName} : ${plate} / ${driverName}`;
+                                                        })()}
+                                                    </Box>
                                                 </Typography>
+
                                             </Grid>
                                         </Grid>
                                     // <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
@@ -2908,8 +3008,7 @@ const UpdateTrip = (props) => {
                                     // </Grid>
                                 }
                                 <Grid item md={editMode ? 2 : 12} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>ค่าเที่ยว</Typography>
-                                    <Paper sx={{ width: "100%", marginTop: -0.5 }}
+                                    <Paper sx={{ width: "100%" }}
                                         component="form">
                                         <TextField size="small" fullWidth
                                             sx={{
@@ -2926,14 +3025,23 @@ const UpdateTrip = (props) => {
                                                 },
                                                 borderRadius: 10
                                             }}
-                                            value={editMode ? costTrip : trip.CostTrip}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                                            ค่าเที่ยว :
+                                                        </Typography>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                            value={costTrip}
+                                            disabled={editMode ? false : true}
                                         />
                                     </Paper>
                                 </Grid>
                                 {
                                     editMode &&
                                     <Grid item md={4} xs={6} display="flex" alignItems="center" justifyContent="center">
-                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 0.5 }} gutterBottom>พขร.</Typography>
                                         <Paper sx={{ width: "100%" }}
                                             component="form">
                                             <Autocomplete
@@ -2963,6 +3071,19 @@ const UpdateTrip = (props) => {
                                                         sx={{
                                                             "& .MuiOutlinedInput-root": { height: "30px" },
                                                             "& .MuiInputBase-input": { fontSize: "14px", padding: "4px 8px" },
+                                                        }}
+                                                        InputProps={{
+                                                            ...params.InputProps, // สำคัญ! ต้องรวมของเดิมไว้ก่อน
+                                                            startAdornment: (
+                                                                <>
+                                                                    <InputAdornment position="start">
+                                                                        <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                                                            พขร :
+                                                                        </Typography>
+                                                                    </InputAdornment>
+                                                                    {params.InputProps.startAdornment}
+                                                                </>
+                                                            ),
                                                         }}
                                                     />
                                                 )}
@@ -3027,7 +3148,7 @@ const UpdateTrip = (props) => {
                                         trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
                                         <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
-                                    {/* <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button> */}
+                                    <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>
                                 </Box>
                             </>
                             :

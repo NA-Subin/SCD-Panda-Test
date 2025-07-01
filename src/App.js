@@ -50,6 +50,7 @@ import TruckTransport from "./components/truck/transport/TruckTransport";
 import FuelPaymentReport from "./components/invoice/Report";
 import InvoiceSmallTruck from "./components/invoice-smalltruck/Invoice";
 import ReportSmallTruck from "./components/report-smalltruck/Report";
+import PrintTripsSmall from "./components/sellingsmalltruck/PrintTrips";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -102,12 +103,13 @@ function App() {
             {/* <Route path="/:email/*" element={ */}
             <Route path="/gasstation-attendant" element={<GasStationDataProvider><GasStationA /></GasStationDataProvider>} />
             <Route path="/gasStation-admin" element={<GasStationDataProvider><GasStationAdmin /></GasStationDataProvider>} />
-              <Route path="/print-invoice" element={<TripDataProvider><PrintInvoice /></TripDataProvider>} />
+            <Route path="/print-invoice" element={<TripDataProvider><PrintInvoice /></TripDataProvider>} />
             <Route path="/print-trips" element={<TripDataProvider><PrintTrips /></TripDataProvider>} />
+            <Route path="/print-tripssmall" element={<TripDataProvider><PrintTripsSmall /></TripDataProvider>} />
             <Route path="/print-report" element={<TripDataProvider><PrintReport /></TripDataProvider>} />
-              <Route path="/driver-Detail" element={<TripDataProvider><DriverDetail /></TripDataProvider>} />
-              <Route path="/driver" element={<TripDataProvider><Driver /></TripDataProvider>} />
-              <Route path="/trade-payable" element={<TripDataProvider><TradePayable /></TripDataProvider>} />
+            <Route path="/driver-Detail" element={<TripDataProvider><DriverDetail /></TripDataProvider>} />
+            <Route path="/driver" element={<TripDataProvider><Driver /></TripDataProvider>} />
+            <Route path="/trade-payable" element={<TripDataProvider><TradePayable /></TripDataProvider>} />
             <Route path="/choose" element={<Choose />} />
             <Route
               path="/*"
