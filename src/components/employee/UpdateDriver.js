@@ -148,7 +148,7 @@ const UpdateDriver = (props) => {
                     : "/truck/small/";
 
                 await database.ref(truckPath).child(driverId - 1).update({
-                    Driver: registration.split(":")[1] !== "ไม่มี" ? `${driver.id}:${driver.Name}` : registration,
+                    Driver: registration.split(":")[1] !== "ไม่มี" ? `${driver.id}:${name}` : registration,
                 });
             } else {
                 ShowError("Truck ID ไม่ถูกต้อง");

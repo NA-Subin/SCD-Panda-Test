@@ -375,7 +375,7 @@ const UpdateInvoice = (props) => {
                         Driver: row.Driver.split(":")[1],
                         Registration: row.Registration.split(":")[1],
                         ProductName: productName,
-                        Volume: Volume.Volume * 1000,
+                        Volume: Volume.Volume,
                         uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
                     }))
             ),
@@ -814,7 +814,7 @@ const UpdateInvoice = (props) => {
                                                     Driver: row.Driver,
                                                     Registration: row.Registration,
                                                     ProductName: productName,
-                                                    Volume: Volume.Volume * 1000,
+                                                    Volume: Volume.Volume,
                                                     uniqueRowId: `${index}:${productName}:${row.No}`,
                                                 }))
                                         )

@@ -127,7 +127,7 @@ const PrintTripsSmall = () => {
                         row.TicketName.split(":")[1]
                       }
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.OrderID}</TableCell>
+                    {/* <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.OrderID}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>
                       {
                         trips?.Depot.split(":")[0] === "ลำปาง" ? row.Rate1
@@ -135,7 +135,7 @@ const PrintTripsSmall = () => {
                             : trips?.Depot.split(":")[0] === "สระบุรี" || trips?.Depot.split(":")[0] === "บางปะอิน" || trips?.Depot.split(":")[0] === "IR" ? row.Rate3
                               : row.Rate
                       }
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.G95 ? row.Product.G95.Volume : "-"}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.B95 ? row.Product.B95.Volume : "-"}</TableCell>
                     <TableCell sx={{ textAlign: "center", borderLeft: "1px solid black" }}>{row.Product.B7 ? row.Product.B7.Volume : "-"}</TableCell>

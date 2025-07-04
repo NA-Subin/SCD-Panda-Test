@@ -301,7 +301,7 @@ const UpdateReport = (props) => {
             // console.log("Company (trim):", `"${company.Company.trim()}"`);
             // console.log("Company (length):", company.Company.length);
 
-            const companyAddress = companies.find(com => com.id === Number(company.Company.split(":")[0]));
+            const companyAddress = companies.find(com => com.id === Number(company?.Company.split(":")[0]));
 
             // console.log("Address (raw):", `"${companyAddress.Name}"`);
             // console.log("Address (trim):", `"${companyAddress.Name.trim()}"`);
@@ -324,10 +324,10 @@ const UpdateReport = (props) => {
                     Registration: matchedTrip ? matchedTrip.Registration : row.Registration,
                     ProductName: productName,
                     Volume: Volume.Volume * 1000,
-                    Company: `${companyAddress.id}:${companyAddress.Name}`,
-                    CompanyAddress: companyAddress.Address,
-                    CardID: companyAddress.CardID,
-                    Phone: companyAddress.Phone,
+                    Company: `${companyAddress?.id}:${companyAddress?.Name}`,
+                    CompanyAddress: companyAddress?.Address,
+                    CardID: companyAddress?.CardID,
+                    Phone: companyAddress?.Phone,
                     uniqueRowId: `${index}:${productName}:${row.No}`,
                 }));
         });
@@ -409,8 +409,8 @@ const UpdateReport = (props) => {
 
     console.log("processedTickets : ", processedTickets);
 
-    const invoices1 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company1Tickets[0].Company);
-    const invoices2 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company2Tickets[0].Company);
+    const invoices1 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company1Tickets.Company);
+    const invoices2 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company2Tickets.Company);
 
     console.log("invoices1 : ", invoices1);
     console.log("invoices2 : ", invoices2);
@@ -1512,7 +1512,7 @@ const UpdateReport = (props) => {
                             overflowY: "auto",
                         }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px", width: "1250px" } }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
                             <TableBody>
                                 {company2Tickets.map((row, index) => {
                                     const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;
@@ -1606,7 +1606,7 @@ const UpdateReport = (props) => {
                             zIndex: 2,
                         }}
                     >
-                        <Grid container spacing={2} sx={{ backgroundColor: "#616161", color: "white", paddingLeft: 2, paddingRight: 2, width: "1270px" }}>
+                        <Grid container spacing={2} sx={{ backgroundColor: "#616161", color: "white", paddingLeft: 2, paddingRight: 2, width: "1250px" }}>
                             <Grid item xs={2} sx={{ borderRight: "1px solid white" }}>
                                 <Grid container spacing={2} sx={{ paddingLeft: 1, paddingRight: 1 }}>
                                     <Grid item xs={5}>

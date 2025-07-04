@@ -68,6 +68,7 @@ const InsertTrips = () => {
     const [status, setStatus] = React.useState("");
     const [ticket, setTicket] = React.useState(0);
     const [ticketsTrip, setTicketsTrip] = React.useState(0);
+    const [ticketTrip, setTicketTrip] = React.useState(0);
     const [ticketsOrder, setTicketsOrder] = React.useState([]);
     const dialogRef = useRef(null);
     const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
@@ -89,7 +90,7 @@ const InsertTrips = () => {
     const truckT = Object.values(transport || {});
     const driver = Object.values(drivers || {});
 
-    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี");
+    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี" && row.TruckType === "รถเล็ก" );
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -509,7 +510,7 @@ const InsertTrips = () => {
 
         // ค้นหา ticket ที่ตรงกับ ticketValue ใน getTickets() เพื่อที่จะนำค่า rate จาก row นั้นมาใช้
         const ticketData = getTickets().find(
-            (item) => item.Name === ticketValue
+            (item) => `${item.id}:${item.Name}` === ticketValue
         );
 
         // กำหนดค่า default rate หากไม่พบข้อมูลหรือ depots ยังไม่ได้เลือก
@@ -540,6 +541,16 @@ const InsertTrips = () => {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
                     } // เพิ่ม Product ไว้เป็น Object ว่าง
                 }
+            };
+        });
+
+        setTicketTrip((prev) => {
+            const newIndex = Object.keys(prev).length + 1; // เพิ่มเป็น 1-based index
+            return {
+                ...prev,
+                [`Tickets${newIndex}`]: ticketValue.includes("/")
+                    ? ticketValue.split("/")[1]
+                    : ticketValue
             };
         });
     };
@@ -945,6 +956,22 @@ const InsertTrips = () => {
 
             return newOrder;
         });
+
+        setTicketTrip((prev) => {
+            // แปลง object เป็น array ของ entries
+            const entries = Object.entries(prev);
+
+            // กรองรายการที่ key ไม่ตรงกับ key ที่ต้องการลบ (เช่น order1)
+            const filtered = entries.filter(([key]) => key !== `Tickets${parseInt(indexToDelete, 10) + 1}`);
+
+            // เรียงลำดับใหม่โดย re-index key ให้ต่อเนื่อง เริ่มจาก order1
+            const newTicketsTrip = filtered.reduce((acc, [_, value], index) => {
+                acc[`Tickets${index + 1}`] = value;
+                return acc;
+            }, {});
+
+            return newTicketsTrip;
+        });
     };
 
     const handleDeleteCustomer = (indexToDelete) => {
@@ -1143,7 +1170,7 @@ const InsertTrips = () => {
                 StatusTrip: "กำลังจัดเที่ยววิ่ง",
                 TruckType: "รถเล็ก",
                 ...orderTrip,
-                ...ticketsTrip
+                ...ticketTrip
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -1191,6 +1218,7 @@ const InsertTrips = () => {
         setVolumeS({});
         setWeightA({});
         setOrderTrip({});
+        setTicketTrip({});
         setWeightH(0);
         setWeightL(0);
         setCostTrip(0);
@@ -1324,6 +1352,10 @@ const InsertTrips = () => {
 
         return customers.filter((item) => item.id || item.TicketsCode);
     };
+
+    const sortedSmallTruck = [...smallTruck].sort((a, b) =>
+        (a.ShortName || "").localeCompare(b.ShortName || "")
+    );
 
     let G95 = (Number(volumeT.G95) - Number(volumeS.G95));
     let B95 = (Number(volumeT.B95) - Number(volumeS.B95));
@@ -1804,10 +1836,10 @@ const InsertTrips = () => {
                                                 `${option.Name}`
                                             } // กำหนดรูปแบบของ Label ที่แสดง
                                             isOptionEqualToValue={(option, value) => option.Name === value.Name} // ตรวจสอบค่าที่เลือก
-                                            value={tickets ? getTickets().find(item => item.Name === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
+                                            value={tickets ? getTickets().find(item => `${item.id}:${item.TickeNametsName}` === tickets) : null} // ถ้ามีการเลือกจะไปค้นหาค่าที่ตรง
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
-                                                    const value = `${newValue.Name}`;
+                                                    const value = `${newValue.id}:${newValue.Name}`;
                                                     handlePost({ target: { value } }); // อัพเดตค่าเมื่อเลือก
                                                 } else {
                                                     setTickets("0:0"); // รีเซ็ตค่าเป็น default หากไม่มีการเลือก
@@ -1918,12 +1950,12 @@ const InsertTrips = () => {
                                         component="form" sx={{ height: "30px", width: "100%", marginTop: -1 }}>
                                         <Autocomplete
                                             id="autocomplete-registration-1"
-                                            options={smallTruck}
+                                            options={sortedSmallTruck}
                                             getOptionLabel={(option) =>
                                                 `${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`
                                             }
                                             isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
-                                            value={registration ? smallTruck.find(item => `${item.id}:${item.RegHead}` === registration) : null}
+                                            value={registration ? sortedSmallTruck.find(item => `${item.id}:${item.RegHead}` === registration) : null}
                                             onChange={(event, newValue) => {
                                                 if (newValue) {
                                                     const value = `${newValue.id}:${newValue.RegHead}`;
