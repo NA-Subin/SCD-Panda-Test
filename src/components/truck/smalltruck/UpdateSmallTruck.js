@@ -64,7 +64,7 @@ const UpdateSmallTruck = (props) => {
     const { company, drivers } = useBasicData();
     const dataCompany = Object.values(company || {});
     const dataDrivers = Object.values(drivers || {});
-    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && row.TruckType === "รถเล็ก");
+    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && (row.TruckType === "รถเล็ก" || row.TruckType === "รถใหญ่/รถเล็ก"));
 
     const toggleDrawer = (newOpen) => () => {
         setOpenTab(newOpen);

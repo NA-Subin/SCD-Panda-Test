@@ -118,8 +118,8 @@ const Employee = () => {
 
   // กรองคนขับตาม TruckType เฉพาะถ้าจำเป็น
   const driverDetail = useMemo(() => {
-    if (check === 2) return datadrivers.filter(row => row.TruckType === "รถใหญ่");
-    if (check === 3) return datadrivers.filter(row => row.TruckType === "รถเล็ก");
+    if (check === 2) return datadrivers.filter(row => row.TruckType === "รถใหญ่" || row.TruckType === "รถใหญ่/รถเล็ก");
+    if (check === 3) return datadrivers.filter(row => row.TruckType === "รถเล็ก" || row.TruckType === "รถใหญ่/รถเล็ก");
     return datadrivers;
   }, [datadrivers, check]);
 
@@ -150,6 +150,9 @@ const Employee = () => {
   // };
 
   // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+
+  console.log("setting : ", setting);
+  console.log("trucks : ",truck);
 
   const handlePost = () => {
     database
@@ -224,24 +227,24 @@ const Employee = () => {
   }, [driverDetail, page, rowsPerPage]);
 
   const renderSelectOptions = (truckType) => {
-    if (truckType === "รถใหญ่") {
-      return registrationHead.map(head => (
-        <MenuItem key={head.id} value={`${head.id}:${head.RegHead}:รถใหญ่`}>{head.RegHead}</MenuItem>
-      ));
-    }
-    if (truckType === "รถเล็ก") {
-      return registrationSmallTruck.map(small => (
-        <MenuItem key={small.id} value={`${small.id}:${small.RegHead}:รถเล็ก`}>{small.RegHead}</MenuItem>
-      ));
-    }
+    // if (truckType === "รถใหญ่") {
+    //   return registrationHead.map(head => (
+    //     <MenuItem key={head.id} value={`${head.id}:${head.RegHead}:รถใหญ่`}>{head.RegHead}</MenuItem>
+    //   ));
+    // }
+    // if (truckType === "รถเล็ก") {
+    //   return registrationSmallTruck.map(small => (
+    //     <MenuItem key={small.id} value={`${small.id}:${small.RegHead}:รถเล็ก`}>{small.RegHead}</MenuItem>
+    //   ));
+    // }
     return (
       <>
         {registrationHead.map(head => (
           <MenuItem key={head.id} value={`${head.id}:${head.RegHead}`}>{head.RegHead}</MenuItem>
         ))}
-        {registrationSmallTruck.map(small => (
+        {/* {registrationSmallTruck.map(small => (
           <MenuItem key={small.id} value={`${small.id}:${small.Registration}`}>{small.Registration}</MenuItem>
-        ))}
+        ))} */}
       </>
     );
   };
@@ -287,7 +290,10 @@ const Employee = () => {
                   fullWidth
                 >
                   <MenuItem value="0:ไม่มี:ไม่มี">เลือกทะเบียน</MenuItem>
-                  {renderSelectOptions(row.TruckType)}
+                  {registrationHead.map(head => (
+                    <MenuItem key={head.id} value={`${head.id}:${head.RegHead}`}>{head.RegHead}</MenuItem>
+                  ))}
+                  {/* {renderSelectOptions(row.TruckType)} */}
                 </Select>
               </Paper>
             </Grid>
@@ -506,7 +512,8 @@ const Employee = () => {
                         <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>
-                        {renderSettingCell(row)}
+                        <TableCell sx={{ textAlign: "center" }}>{row.Registration?.split(":")[1]}</TableCell>
+                        {/* {renderSettingCell(row)} */}
                         <TableCell sx={{ textAlign: "center" }}>{row.TruckType}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.BankName}</TableCell>

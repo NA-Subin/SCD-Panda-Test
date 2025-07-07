@@ -90,7 +90,7 @@ const InsertTrips = () => {
     const truckT = Object.values(transport || {});
     const driver = Object.values(drivers || {});
 
-    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี" && row.TruckType === "รถเล็ก" );
+    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี" && (row.TruckType === "รถเล็ก" || row.TruckType === "รถใหญ่/รถเล็ก") );
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {

@@ -167,9 +167,9 @@ const Dashboard = () => {
     });
 
     ticket.forEach((t) => {
-      const [day, monthStr] = t.Date.split('/');
-      const monthIndex = parseInt(monthStr, 10) - 1;
-      const monthName = months[monthIndex];
+      // const [day, monthStr] = t.Date.split('/');
+      // const monthIndex = parseInt(monthStr, 10) - 1;
+      // const monthName = months[monthIndex];
       const orderDate = dayjs(t.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
 
       // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
@@ -184,9 +184,9 @@ const Dashboard = () => {
 
     orders.forEach((o) => {
       if (o.Trip === "ยกเลิก") {
-        const [day, monthStr] = o.Date.split('/');
-        const monthIndex = parseInt(monthStr, 10) - 1;
-        const monthName = months[monthIndex];
+        // const [day, monthStr] = o.Date.split('/');
+        // const monthIndex = parseInt(monthStr, 10) - 1;
+        // const monthName = months[monthIndex];
         const ordersDate = dayjs(o.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
 
         // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
@@ -203,9 +203,9 @@ const Dashboard = () => {
     // Tickets
     ticket.forEach((t) => {
       if (t.Trip === "ยกเลิก") {
-        const [day, monthStr] = t.Date.split('/');
-        const monthIndex = parseInt(monthStr, 10) - 1;
-        const monthName = months[monthIndex];
+        // const [day, monthStr] = t.Date.split('/');
+        // const monthIndex = parseInt(monthStr, 10) - 1;
+        // const monthName = months[monthIndex];
         const ticketDate = dayjs(t.Date, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
 
         // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
@@ -221,9 +221,9 @@ const Dashboard = () => {
 
     // Trips
     trips.forEach((r) => {
-      const [day, monthStr] = r.DateStart.split('/');
-      const monthIndex = parseInt(monthStr, 10) - 1;
-      const monthName = months[monthIndex];
+      // const [day, monthStr] = r.DateStart.split('/');
+      // const monthIndex = parseInt(monthStr, 10) - 1;
+      // const monthName = months[monthIndex];
       const tripDate = dayjs(r.DateStart, 'DD/MM/YYYY');  // แปลงวันที่เป็น dayjs object
 
       // เช็คว่าเป็นวันที่ตรงกับเดือนที่เลือก
@@ -290,17 +290,17 @@ const Dashboard = () => {
   const monthTicketCancel = {};
 
   // Orders
-  orders.forEach((o) => {
-    const [day, monthStr] = o.Date.split('/');
-    const monthIndex = parseInt(monthStr, 10) - 1;
-    const monthName = months[monthIndex];
+  // orders.forEach((o) => {
+  //   const [day, monthStr] = o.Date.split('/');
+  //   const monthIndex = parseInt(monthStr, 10) - 1;
+  //   const monthName = months[monthIndex];
 
-    if (!monthOrders[monthName]) {
-      monthOrders[monthName] = { month: monthName, orders: 0 };
-    }
+  //   if (!monthOrders[monthName]) {
+  //     monthOrders[monthName] = { month: monthName, orders: 0 };
+  //   }
 
-    monthOrders[monthName].orders += 1;
-  });
+  //   monthOrders[monthName].orders += 1;
+  // });
 
   orders.forEach((o) => {
     if (o.Trip === "ยกเลิก") {
@@ -317,17 +317,17 @@ const Dashboard = () => {
   });
 
   // Tickets
-  ticket.forEach((t) => {
-    const [day, monthStr] = t.Date.split('/');
-    const monthIndex = parseInt(monthStr, 10) - 1;
-    const monthName = months[monthIndex];
+  // ticket.forEach((t) => {
+  //   const [day, monthStr] = t.Date.split('/');
+  //   const monthIndex = parseInt(monthStr, 10) - 1;
+  //   const monthName = months[monthIndex];
 
-    if (!monthTickets[monthName]) {
-      monthTickets[monthName] = { month: monthName, ticket: 0 };
-    }
+  //   if (!monthTickets[monthName]) {
+  //     monthTickets[monthName] = { month: monthName, ticket: 0 };
+  //   }
 
-    monthTickets[monthName].ticket += 1;
-  });
+  //   monthTickets[monthName].ticket += 1;
+  // });
 
   ticket.forEach((t) => {
     if (t.Trip === "ยกเลิก") {

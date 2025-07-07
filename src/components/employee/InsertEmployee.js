@@ -60,7 +60,7 @@ const InsertEmployee = (props) => {
     const gasStation = Object.values(gasstation || {});
     const positionDetail = Object.values(positions || {});
 
-    console.log("Positions : ",positionDetail);
+    console.log("Positions : ", positionDetail);
 
     const [open, setOpen] = React.useState(false);
     const [prefix, setPrefix] = React.useState(0);
@@ -78,6 +78,10 @@ const InsertEmployee = (props) => {
     const [checkSmallTruckData, setCheckSmallTruckData] = useState(false);
     const [checkGasStationData, setCheckGasStationData] = useState(false);
     const [checkDriverData, setCheckDriverData] = useState(false);
+    const [bigTrucks, setBigTrucks] = useState(true);
+    const [smallTrucks, setSmallTrucks] = useState(true);
+
+    console.log(!bigTrucks && !smallTrucks ? "รถใหญ่/รถเล็ก" : !bigTrucks && smallTrucks ? "รถใหญ่" : bigTrucks && !smallTrucks ? "รถเล็ก" : "กรุณาเลือกประเภทรถ")
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -101,7 +105,7 @@ const InsertEmployee = (props) => {
         setOpen(false);
     };
 
-    const [regTruck, setRegTruck] = React.useState("0:ไม่มี");
+    const [regTruck, setRegTruck] = React.useState("0:ไม่มี:ไม่มี");
     const [bank, setBank] = React.useState("");
     const [bankID, setBankID] = React.useState("");
     const [salary, setSalary] = React.useState("");
@@ -159,7 +163,7 @@ const InsertEmployee = (props) => {
                         .child(officer.length)
                         .update({
                             id: officer.length + 1,
-                            Name: prefix + name + " " + lastname,
+                            Name: name + " " + lastname,
                             User: user,
                             Password: password,
                             Position: position,
@@ -170,7 +174,7 @@ const InsertEmployee = (props) => {
                         .then(() => {
                             ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                             console.log("Data pushed successfully");
-                            setPrefix("");
+                            //setPrefix("");
                             setName("");
                             setLastname("");
                             setUser("");
@@ -192,21 +196,21 @@ const InsertEmployee = (props) => {
                         .child(driver.length)
                         .update({
                             id: driver.length + 1,
-                            Name: prefix + name + " " + lastname,
+                            Name: name + " " + lastname,
                             User: `t${driver.length.toString().padStart(4, '0')}`,
                             Password: password,
                             Phone: phone,
-                            Registration: regTruck,
+                            Registration: `${regTruck.split(":")[0]}:${regTruck.split(":")[1]}`,
                             BankID: bankID,
                             BankName: bank,
                             IDCard: idCard,
-                            Position: "พนักงานขับรถ",
+                            Position: position,
                             Salary: salary,
                             TripCost: tripCost,
                             PointCost: pointCost,
                             Security: security,
                             TelephoneBill: telephoneBill,
-                            TruckType: trucks,
+                            TruckType: !bigTrucks && !smallTrucks ? "รถใหญ่/รถเล็ก" : !bigTrucks && smallTrucks ? "รถใหญ่" : bigTrucks && !smallTrucks ? "รถเล็ก" : "",
                             Deposit: deposit,
                             Loan: loan,
                             DrivingLicense: drivingLicense,
@@ -214,12 +218,12 @@ const InsertEmployee = (props) => {
                             DrivingLicensePicture: "ไม่มี"
                         })
                         .then(() => {
-                            if (trucks === "รถใหญ่" && regTruck !== "0:ไม่มี") {
+                            if (regTruck.split(":")[2] === "รถใหญ่" && regTruck !== "0:ไม่มี") {
                                 database
                                     .ref("/truck/registration/")
                                     .child(regTruck.split(":")[0] - 1)
                                     .update({
-                                        Driver: prefix + name + " " + lastname,
+                                        Driver: name + " " + lastname,
                                     })
                                     .then(() => {
                                         ShowSuccess("แก้ไขข้อมูลสำเร็จ");
@@ -229,12 +233,12 @@ const InsertEmployee = (props) => {
                                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                                         console.error("Error pushing data:", error);
                                     });
-                            } else if (trucks === "รถเล็ก" && regTruck !== "0:ไม่มี") {
+                            } else if (regTruck.split(":")[2] === "รถเล็ก" && regTruck !== "0:ไม่มี") {
                                 database
-                                    .ref("/truck/registrationTail/")
+                                    .ref("/truck/small/")
                                     .child(regTruck.split(":")[0] - 1)
                                     .update({
-                                        Driver: prefix + name + " " + lastname,
+                                        Driver: name + " " + lastname,
                                     })
                                     .then(() => {
                                         ShowSuccess("แก้ไขข้อมูลสำเร็จ");
@@ -249,7 +253,7 @@ const InsertEmployee = (props) => {
                             }
                             ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                             console.log("Data pushed successfully");
-                            setPrefix("");
+                            //setPrefix("");
                             setName("");
                             setLastname("");
                             setRegTruck("");
@@ -276,6 +280,8 @@ const InsertEmployee = (props) => {
                 })
         }
     };
+
+    console.log("registration Truck ",regTruck);
 
     return (
         <React.Fragment>
@@ -314,7 +320,7 @@ const InsertEmployee = (props) => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={2} marginBottom={2}>
-                        <Grid item md={3} xs={12}>
+                        {/* <Grid item md={3} xs={12}>
                             <Paper
                                 component="form" sx={{ width: "100%" }}>
                                 <Select
@@ -333,25 +339,29 @@ const InsertEmployee = (props) => {
                                     <MenuItem value={"นางสาว"}>นางสาว</MenuItem>
                                 </Select>
                             </Paper>
+                        </Grid> */}
+                        <Grid item md={2} xs={3}>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อ</Typography>
                         </Grid>
-                        <Grid item md={4.5} xs={12}>
+                        <Grid item md={4} xs={9}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 13.5 } }} gutterBottom>ชื่อ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item md={4.5} xs={12}>
+                        <Grid item md={2} xs={3}>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>สกุล</Typography>
+                        </Grid>
+                        <Grid item md={4} xs={9}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 12.5 } }} gutterBottom>สกุล</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
                                 </Paper>
                             </Box>
                         </Grid>
                         {
-                            position.split(":")[0] !== "5" ?
+                            position.split(":")[1] !== "พนักงานขับรถ" ?
                                 <>
                                     <Grid item md={2} xs={3}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>User</Typography>
@@ -622,7 +632,7 @@ const InsertEmployee = (props) => {
                             </>
                         }
                         {
-                            position.split(":")[0] === "5" ?
+                            position.split(":")[1] === "พนักงานขับรถ" ?
                                 <>
                                     <Grid item md={12} xs={12}>
                                         <Divider>
@@ -633,7 +643,11 @@ const InsertEmployee = (props) => {
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ประเภทรถ</Typography>
                                     </Grid>
                                     <Grid item md={4} xs={9}>
-                                        <Paper
+                                        <FormGroup row>
+                                            <FormControlLabel control={<Checkbox onChange={() => setBigTrucks(!bigTrucks)} />} label="รถใหญ่" />
+                                            <FormControlLabel control={<Checkbox onChange={() => setSmallTrucks(!smallTrucks)} />} label="รถเล็ก" />
+                                        </FormGroup>
+                                        {/* <Paper
                                             component="form">
                                             <Select
                                                 id="demo-simple-select"
@@ -649,7 +663,7 @@ const InsertEmployee = (props) => {
                                                 <MenuItem value={"รถใหญ่"}>รถใหญ่</MenuItem>
                                                 <MenuItem value={"รถเล็ก"}>รถเล็ก</MenuItem>
                                             </Select>
-                                        </Paper>
+                                        </Paper> */}
                                     </Grid>
                                     <Grid item md={2} xs={3}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ทะเบียนรถ</Typography>
@@ -668,18 +682,36 @@ const InsertEmployee = (props) => {
                                                 <MenuItem value={0}>
                                                     กรุณาเลือกทะเบียนรถ
                                                 </MenuItem>
-                                                <MenuItem value={"0:ไม่มี"}>ไม่มี</MenuItem>
-                                                {
-                                                    trucks === "รถใหญ่" ?
-                                                        truck.map((row) => (
-                                                            <MenuItem value={row.id + ":" + row.RegHead}>{row.RegHead}</MenuItem>
-                                                        ))
-                                                        : trucks === "รถเล็ก" ?
-                                                            smallTruck.map((row) => (
-                                                                <MenuItem value={row.id + ":" + row.Registration}>{row.Registration}</MenuItem>
-                                                            ))
-                                                            : ""
-                                                }
+                                                <MenuItem value={"0:ไม่มี:ไม่มี"}>ไม่มี</MenuItem>
+                                                {(bigTrucks === false && smallTrucks === false) ? (
+                                                    [
+                                                        ...truck.map((row) => (
+                                                            <MenuItem key={`big-${row.id}`} value={row.id + ":" + row.RegHead + ":รถใหญ่"}>
+                                                                {row.RegHead}
+                                                            </MenuItem>
+                                                        )),
+                                                        ...smallTruck.map((row) => (
+                                                            <MenuItem key={`small-${row.id}`} value={row.id + ":" + row.RegHead + ":รถเล็ก"}>
+                                                                {row.RegHead}
+                                                            </MenuItem>
+                                                        )),
+                                                    ]
+                                                ) : bigTrucks === false ? (
+                                                    truck.map((row) => (
+                                                        <MenuItem key={`big-${row.id}`} value={row.id + ":" + row.RegHead + ":รถใหญ่"}>
+                                                            {row.RegHead}
+                                                        </MenuItem>
+                                                    ))
+                                                ) : smallTrucks === false ? (
+                                                    smallTruck.map((row) => (
+                                                        <MenuItem key={`small-${row.id}`} value={row.id + ":" + row.RegHead + ":รถเล็ก"}>
+                                                            {row.RegHead}
+                                                        </MenuItem>
+                                                    ))
+                                                ) : (
+                                                    <MenuItem disabled>ไม่มีรถให้เลือก</MenuItem>
+                                                )}
+
                                             </Select>
                                         </Paper>
                                     </Grid>

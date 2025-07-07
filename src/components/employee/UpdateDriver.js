@@ -3,6 +3,7 @@ import {
     Badge,
     Box,
     Button,
+    Checkbox,
     Chip,
     Container,
     Dialog,
@@ -11,6 +12,8 @@ import {
     DialogTitle,
     Divider,
     FormControl,
+    FormControlLabel,
+    FormGroup,
     Grid,
     IconButton,
     MenuItem,
@@ -58,7 +61,7 @@ const UpdateDriver = (props) => {
 
     const [name, setName] = React.useState(driver.Name);
     const [idCard, setIDCard] = React.useState(driver.IDCard);
-    const [registration, setRegistration] = React.useState(driver.Registration);
+    const [registration, setRegistration] = React.useState(driver.TruckType !== "รถเล็ก" ? `${driver.Registration}:รถใหญ่` : `${driver.Registration}:รถเล็ก`);
     const [bank, setBank] = React.useState(driver.BankName);
     const [bankID, setBankID] = React.useState(driver.BankID);
     const [salary, setSalary] = React.useState(driver.Salary);
@@ -76,6 +79,11 @@ const UpdateDriver = (props) => {
     const [user, setUser] = React.useState(driver.User);
     const [registrationHead, setRegistrationHead] = React.useState([]);
     const [registrationSmallTruck, setRegistrationSmallTruck] = React.useState([]);
+    const [bigTrucks, setBigTrucks] = useState(driver.TruckType !== "รถเล็ก" ? false : true);
+    const [smallTrucks, setSmallTrucks] = useState(driver.TruckType !== "รถใหญ่" ? false : true);
+
+    console.log("bigtruck : ", bigTrucks);
+    console.log("smalltruck : ", smallTrucks);
 
     const handleDateChange = (newDate) => {
         setExpiration(newDate);
@@ -118,7 +126,7 @@ const UpdateDriver = (props) => {
             await database.ref("/employee/drivers/").child(driver.id - 1).update({
                 Name: name,
                 IDCard: idCard,
-                Registration: registration,
+                Registration: `${registration.split(":")[0]}:${registration.split(":")[1]}`,
                 BankName: bank,
                 BankID: bankID,
                 Salary: salary,
@@ -127,7 +135,7 @@ const UpdateDriver = (props) => {
                 Security: security,
                 Deposit: deposit,
                 Loan: loan,
-                TruckType: truckType,
+                TruckType: !bigTrucks && !smallTrucks ? "รถใหญ่/รถเล็ก" : !bigTrucks && smallTrucks ? "รถใหญ่" : bigTrucks && !smallTrucks ? "รถเล็ก" : "",
                 DrivingLicense: license,
                 DrivingLicenseExpiration: expiration === "ไม่มี" ? "ไม่มี" : dayjs(expiration).format("DD/MM/YYYY"),
                 DrivingLicensePicture: picture
@@ -143,12 +151,12 @@ const UpdateDriver = (props) => {
             //const truckIndex = driverId - 1;
 
             if (!isNaN(driverId) && driverId >= 0) {
-                const truckPath = truckType === "รถใหญ่"
+                const truckPath = registration.split(":")[2] === "รถใหญ่"
                     ? "/truck/registration/"
                     : "/truck/small/";
 
                 await database.ref(truckPath).child(driverId - 1).update({
-                    Driver: registration.split(":")[1] !== "ไม่มี" ? `${driver.id}:${name}` : registration,
+                    Driver: registration.split(":")[1] !== "ไม่มี" ? `${driver.id}:${name}` : `${registration.split(":")[0]}:${registration.split(":")[1]}`,
                 });
             } else {
                 ShowError("Truck ID ไม่ถูกต้อง");
@@ -163,7 +171,7 @@ const UpdateDriver = (props) => {
         }
     };
 
-
+    console.log("registration ss : ",registration);
 
     return (
         <React.Fragment>
@@ -213,7 +221,7 @@ const UpdateDriver = (props) => {
                             <Grid item xs={1.5}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ทะเบียนรถ</Typography>
                             </Grid>
-                            <Grid item xs={1.5}>
+                            <Grid item xs={4.5}>
                                 {
                                     update ?
                                         <TextField fullWidth variant="standard" value={registration.split(":")[1]} disabled />
@@ -225,56 +233,82 @@ const UpdateDriver = (props) => {
                                                 value={registration}
                                                 onChange={(e) => setRegistration(e.target.value)}
                                             >
-                                                <MenuItem value={registration}>{registration.split(":")[1]}</MenuItem>
-                                                <MenuItem value={"0:ไม่มี"}>ไม่มี</MenuItem>
-                                                {
-                                                    truckType === "รถใหญ่" ?
-                                                        registrationHead.map((row) => (
-                                                            <MenuItem value={`${row.id}:${row.RegHead}`}>{row.RegHead}</MenuItem>
-                                                        ))
-                                                        :
-                                                        truckType === "รถเล็ก" ?
-                                                            registrationSmallTruck.map((row) => (
-                                                                <MenuItem value={`${row.id}:${row.RegHead}`}>{row.RegHead}</MenuItem>
-                                                            ))
-                                                            : ""
+                                                {/* ค่าเริ่มต้น */}
+                                                {registration && (
+                                                    <MenuItem value={registration}>
+                                                        {registration.split(":")[1] || "ไม่ระบุ"}
+                                                    </MenuItem>
+                                                )}
+                                                <MenuItem value={`0:ไม่มี:${driver.TruckType !== "รถเล็ก" ? `รถใหญ่` : `รถเล็ก`}`}>ไม่มี</MenuItem>
+
+                                                {(bigTrucks === false && smallTrucks === false) ? (
+                                                    [
+                                                        ...registrationHead.map((row) => (
+                                                            <MenuItem key={`big-${row.id}`} value={row.id + ":" + row.RegHead + ":รถใหญ่"}>
+                                                                {row.RegHead}
+                                                            </MenuItem>
+                                                        )),
+                                                        ...registrationSmallTruck.map((row) => (
+                                                            <MenuItem key={`small-${row.id}`} value={row.id + ":" + row.RegHead + ":รถเล็ก"}>
+                                                                {row.RegHead}
+                                                            </MenuItem>
+                                                        )),
+                                                    ]
+                                                ) : bigTrucks === false ? (
+                                                    registrationHead.map((row) => (
+                                                        <MenuItem key={`big-${row.id}`} value={row.id + ":" + row.RegHead + ":รถใหญ่"}>
+                                                            {row.RegHead}
+                                                        </MenuItem>
+                                                    ))
+                                                ) : smallTrucks === false ? (
+                                                    registrationSmallTruck.map((row) => (
+                                                        <MenuItem key={`small-${row.id}`} value={row.id + ":" + row.RegHead + ":รถเล็ก"}>
+                                                            {row.RegHead}
+                                                        </MenuItem>
+                                                    ))
+                                                ) : ""
                                                 }
                                             </Select>
+
                                         </FormControl>
                                 }
                             </Grid>
                             <Grid item xs={1.5}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ประเภทรถ</Typography>
                             </Grid>
-                            <Grid item xs={1.5}>
+                            <Grid item xs={4.5}>
                                 {
                                     update ?
-                                        <TextField fullWidth variant="standard" value={truckType} disabled />
+                                        <TextField fullWidth variant="standard" value={driver.TruckType} disabled />
                                         :
-                                        <FormControl variant="standard" fullWidth>
-                                            <Select
-                                                labelId="demo-simple-select-standard-label"
-                                                id="demo-simple-select-standard"
-                                                value={truckType}
-                                                onChange={(e) => setTruckType(e.target.value)}
-                                            >
-                                                <MenuItem value={truckType}>{truckType}</MenuItem>
-                                                <MenuItem value={"รถใหญ่"}>รถใหญ่</MenuItem>
-                                                <MenuItem value={"รถเล็ก"}>รถเล็ก</MenuItem>
-                                            </Select>
-                                        </FormControl>
+                                        <FormGroup row>
+                                            <FormControlLabel control={<Checkbox defaultChecked={!bigTrucks} onChange={() => setBigTrucks(!bigTrucks)} />} label="รถใหญ่" />
+                                            <FormControlLabel control={<Checkbox defaultChecked={!smallTrucks} onChange={() => setSmallTrucks(!smallTrucks)} />} label="รถเล็ก" />
+                                        </FormGroup>
+                                    // <FormControl variant="standard" fullWidth>
+                                    //     <Select
+                                    //         labelId="demo-simple-select-standard-label"
+                                    //         id="demo-simple-select-standard"
+                                    //         value={truckType}
+                                    //         onChange={(e) => setTruckType(e.target.value)}
+                                    //     >
+                                    //         <MenuItem value={truckType}>{truckType}</MenuItem>
+                                    //         <MenuItem value={"รถใหญ่"}>รถใหญ่</MenuItem>
+                                    //         <MenuItem value={"รถเล็ก"}>รถเล็ก</MenuItem>
+                                    //     </Select>
+                                    // </FormControl>
                                 }
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ค่าเที่ยว</Typography>
                             </Grid>
-                            <Grid item xs={2}>
+                            <Grid item xs={5}>
                                 <TextField fullWidth variant="standard" type="number" value={tripCost} disabled={update ? true : false} onChange={(e) => setTripCost(e.target.value)} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ค่าจุด</Typography>
                             </Grid>
-                            <Grid item xs={2}>
+                            <Grid item xs={5}>
                                 <TextField fullWidth variant="standard" type="number" value={pointCost} disabled={update ? true : false} onChange={(e) => setPointCost(e.target.value)} />
                             </Grid>
                             <Grid item xs={1}>

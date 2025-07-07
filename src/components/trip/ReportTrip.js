@@ -193,6 +193,8 @@ const ReportTrip = () => {
         return ticketA.localeCompare(ticketB, "th"); // ใช้ "th" สำหรับเรียงตามพจนานุกรมไทย
     });
 
+    console.log("Driver : ",sortedDrivers);
+
     useEffect(() => {
         if (sortedDrivers.length > 0 && !selectDriver) {
             setSelectDriver(sortedDrivers[0]);

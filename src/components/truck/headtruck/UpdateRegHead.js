@@ -63,8 +63,8 @@ const UpdateRegHead = (props) => {
     const dataregtail = Object.values(regtail || {});
     const dataCompany = Object.values(company || {});
     const dataDrivers = Object.values(drivers || {});
-    const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่ได้เชื่อมต่อทะเบียนหัว");
-    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && row.TruckType === "รถใหญ่");
+    const registrationTail = dataregtail.filter(row => row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
+    const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && (row.TruckType === "รถใหญ่" || row.TruckType === "รถใหญ่/รถเล็ก"));
 
     const [companies, setCompanies] = React.useState(truck.Company);
     const [driver, setDriver] = React.useState(truck.Driver);
