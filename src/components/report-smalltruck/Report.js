@@ -41,6 +41,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -54,6 +55,9 @@ const ReportSmallTruck = () => {
   const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
   const [checkOverdueTransfer, setCheckOverdueTransfer] = useState(true);
   const [selectOrder, setSelectOrder] = useState("0:แสดงทั้งหมด");
+  const match = selectOrder.match(/\d{1,3}-\d{3,4}/);
+  const plate = match ? match[0] : "";
+  console.log(plate); // "70-2232"
 
   const handleChangeOrder = (event) => {
     setSelectOrder(event.target.value);
@@ -111,6 +115,12 @@ const ReportSmallTruck = () => {
 
   console.log("Trips Detail: ", tripsDetail);
 
+  const orderDetail = order.filter((row) => row.TicketName === "32:S. 10 ล้อใหม่ 70-1639 ชร.PS2");
+  const customerBDetail = customerB.filter((row) => row.StatusCompany === "อยู่บริษัทในเครือ");
+
+  console.log("Small : ", orderDetail);
+  console.log("CUstomer : ", customerBDetail);
+
   // const matchedOrders = orders
   //   .filter((order) => order.CustomerType === "ตั๋วรถใหญ่" && order.Status === "จัดส่งสำเร็จ" &&
   //     customerB.some((cust) =>
@@ -122,7 +132,7 @@ const ReportSmallTruck = () => {
 
   const customerDetails = [
     { id: "0", Name: "แสดงทั้งหมด", TicketName: "แสดงทั้งหมด", StatusCompany: "อยู่บริษัทในเครือ" }, // allOption
-    ...customerB.filter((cust) => cust.StatusCompany === "อยู่บริษัทในเครือ")
+    ...customerB.filter((cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.Name.split(".")[0] === "S")
   ];
   // แยกเฉพาะส่งออก (จาก trips)
   const outboundList = orders
@@ -135,7 +145,8 @@ const ReportSmallTruck = () => {
       return (
         trip.CustomerType === "ตั๋วรถเล็ก" &&
         trip.Status === "จัดส่งสำเร็จ" &&
-        isInDateRange
+        isInDateRange &&
+        trip.Registration.split(":")[1] === plate
       );
     })
     .map((trip) => ({
@@ -239,7 +250,11 @@ const ReportSmallTruck = () => {
   };
 
   const filtered = orders
-    .filter((row) => row.Trip !== "ยกเลิก" && row.CustomerType === "ตั๋วรถเล็ก")
+    .filter(
+      (row) =>
+        row.Trip !== "ยกเลิก" &&
+        row.CustomerType === "ตั๋วรถเล็ก"
+    )
     .reduce((acc, curr) => {
       const exists = acc.some(
         (item) =>
@@ -337,6 +352,14 @@ const ReportSmallTruck = () => {
         const isTruck = order.CustomerType === "ตั๋วรถใหญ่" || order.CustomerType === "ตั๋วรถเล็ก";
         if (!isTruck) return false;
 
+        // ✅ ถ้าเป็น "ตั๋วรถเล็ก" ต้องเช็คทะเบียนให้ตรงกับ plate
+        if (
+          order.CustomerType === "ตั๋วรถเล็ก" &&
+          order.Registration.split(":")[1] !== plate
+        ) {
+          return false;
+        }
+
         const orderTicketId = Number(order.TicketName?.split(":")[0]);
         if (isNaN(orderTicketId)) return false;
 
@@ -376,6 +399,8 @@ const ReportSmallTruck = () => {
           }
         });
     });
+
+    console.log("carryOverOrders : ", carryOverOrders);
 
     productTypes.forEach((key) => {
       summary.balance[key] = summary.inbound[key] + summary.outbound[key];
@@ -429,6 +454,90 @@ const ReportSmallTruck = () => {
 
   const renderSummaryRow = (label, dataKey, bgColor, dataSource = summary) => {
     const total = productTypes.reduce((sum, key) => sum + (dataSource[dataKey][key] || 0), 0);
+
+    // const exportToExcel = () => {
+    //   const exportData = [];
+
+    //   // ✅ สร้าง Header
+    //   const headers = {
+    //     ลำดับ: "ลำดับ",
+    //     วันที่: "วันที่",
+    //     "รับเข้าโดย": "รับเข้าโดย",
+    //     G95: "G95",
+    //     B95: "B95",
+    //     B7: "B7",
+    //     G91: "G91",
+    //     E20: "E20",
+    //     PWD: "PWD",
+    //     "ไปส่งที่": "ไปส่งที่",
+    //   };
+
+    //   // ✅ เพิ่มหัวข้อ "ค่าเที่ยว" ตาม summarizedList
+    //   summarizedList.forEach((s) => {
+    //     const name = `${s.Driver.split(":")[1]}/${s.Registration.split(":")[1]}`;
+    //     headers[`ค่าเที่ยว ${name}`] = `ค่าเที่ยว ${name}`;
+    //   });
+
+    //   exportData.push(headers);
+
+    //   // ✅ สร้างข้อมูลในตาราง
+    //   matchedOrdersWithAll.forEach((row, index) => {
+    //     const dataRow = {
+    //       ลำดับ: index + 1,
+    //       วันที่: row.Date,
+    //       "รับเข้าโดย":
+    //         row.type === "รับเข้า"
+    //           ? `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`
+    //           : "",
+    //     };
+
+    //     // ✅ ปริมาณน้ำมัน
+    //     productTypes.forEach((key) => {
+    //       const volume = row.Product?.[key]?.Volume;
+    //       if (row.type === "รับเข้า") {
+    //         dataRow[key] = volume ? Number(volume) * 1000 : "";
+    //       } else {
+    //         dataRow[key] = volume ? -Number(volume) : "";
+    //       }
+    //     });
+
+    //     // ✅ ชื่อสถานที่ส่ง (ตั๋วรถเล็ก)
+    //     if (row.type === "ส่งออก") {
+    //       dataRow["ไปส่งที่"] = row.TicketName.split(":")[1] || "-";
+    //     }
+
+    //     // ✅ เติมค่าเที่ยวตาม summarizedList
+    //     summarizedList.forEach((d) => {
+    //       const name = `${d.Driver}/${d.Registration}`;
+    //       const match = d.Driver === row.Driver && d.Registration === row.Registration;
+    //       dataRow[`ค่าเที่ยว ${d.Driver.split(":")[1]}/${d.Registration.split(":")[1]}`] = match ? row.Travel : "-";
+    //     });
+
+    //     exportData.push(dataRow);
+    //   });
+
+    //   // ✅ เติมแถวสรุป 3 แถว
+    //   const pushSummaryRow = (title, data, colorName) => {
+    //     const row = { ลำดับ: title };
+    //     productTypes.forEach((key) => {
+    //       row[key] = data[key] ? Number(data[key]) * 1000 : "";
+    //     });
+    //     exportData.push(row);
+    //   };
+
+    //   pushSummaryRow("รวมรับเข้า", inboundSummary, "inbound");
+    //   pushSummaryRow("รวมส่งออก", outboundSummary, "outbound");
+    //   pushSummaryRow("คงเหลือ", differenceBalanceSummary, "balance");
+
+    //   // ✅ สร้างและบันทึก Excel
+    //   const worksheet = XLSX.utils.json_to_sheet(exportData);
+    //   const workbook = XLSX.utils.book_new();
+    //   XLSX.utils.book_append_sheet(workbook, worksheet, "รายงาน");
+
+    //   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    //   saveAs(blob, `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+    // };
 
     return (
       <TableRow sx={{ backgroundColor: bgColor }}>
@@ -517,24 +626,27 @@ const ReportSmallTruck = () => {
               <DatePicker
                 openTo="day"
                 views={["year", "month", "day"]}
-                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                format="DD/MM/YYYY"
+                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                 onChange={handleDateChangeDateStart}
-                sx={{ marginRight: 2, }}
                 slotProps={{
                   textField: {
                     size: "small",
                     fullWidth: true,
+                    inputProps: {
+                      value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                      readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                    },
                     InputProps: {
                       startAdornment: (
                         <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                          วันที่เริ่มต้น :
+                          <b>วันที่ :</b>
                         </InputAdornment>
                       ),
                       sx: {
-                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                        height: "40px",  // ความสูงของ Input
-                        padding: "10px", // Padding ภายใน Input
+                        fontSize: "16px",
+                        height: "40px",
+                        padding: "10px",
                         fontWeight: "bold",
                       },
                     },
@@ -544,23 +656,27 @@ const ReportSmallTruck = () => {
               <DatePicker
                 openTo="day"
                 views={["year", "month", "day"]}
-                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                format="DD/MM/YYYY"
+                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                 onChange={handleDateChangeDateEnd}
                 slotProps={{
                   textField: {
                     size: "small",
                     fullWidth: true,
+                    inputProps: {
+                      value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                      readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                    },
                     InputProps: {
                       startAdornment: (
                         <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                          วันที่สิ้นสุด :
+                          <b>ถึงวันที่ :</b>
                         </InputAdornment>
                       ),
                       sx: {
-                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                        height: "40px",  // ความสูงของ Input
-                        padding: "10px", // Padding ภายใน Input
+                        fontSize: "16px",
+                        height: "40px",
+                        padding: "10px",
                         fontWeight: "bold",
                       },
                     },
@@ -604,7 +720,7 @@ const ReportSmallTruck = () => {
                     ...params.InputProps,
                     startAdornment: (
                       <InputAdornment position="start" sx={{ marginRight: 1 }}>
-                        กรุณาเลือกตั๋ว :
+                        รถขนส่ง :
                       </InputAdornment>
                     ),
                     sx: {
@@ -693,7 +809,7 @@ const ReportSmallTruck = () => {
                         {index + 1}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {row.Date}
+                        {formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
                         {`${row.Driver.split(":")[1]} / ${row.Registration.split(":")[1]}`}
@@ -729,7 +845,7 @@ const ReportSmallTruck = () => {
                         {index + 1}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {row.Date}
+                        {formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
 

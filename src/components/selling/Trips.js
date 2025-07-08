@@ -42,6 +42,7 @@ import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
 import { useData } from "../../server/path";
 import { useTripData } from "../../server/provider/TripProvider";
+import { formatThaiFull } from "../../theme/DateTH";
 
 const TripsBigTruck = () => {
     const [menu, setMenu] = React.useState(0);
@@ -82,7 +83,7 @@ const TripsBigTruck = () => {
         // const itemDateR = dayjs(item.DateReceive, "DD/MM/YYYY");
         // const itemDateD = dayjs(item.DateDelivery, "DD/MM/YYYY");
 
-        const itemDate = dayjs(item.DateStart,"DD/MM/YYYY");
+        const itemDate = dayjs(item.DateReceive, "DD/MM/YYYY");
         return (
             check === 2 ?
                 (item.TruckType === "รถใหญ่" || item.TruckType === "รถรับจ้างขนส่ง") &&
@@ -195,164 +196,171 @@ const TripsBigTruck = () => {
                         เที่ยววิ่งรถใหญ่
                     </Typography>
                 </Grid>
-                <Grid item md={2} xs={12} sx={{ textAlign: {xs: "center"}, marginBottom: {xs: 2, md: 0}, marginTop: {xs: -2, md: 0} }}>
+                <Grid item md={2} xs={12} sx={{ textAlign: { xs: "center" }, marginBottom: { xs: 2, md: 0 }, marginTop: { xs: -2, md: 0 } }}>
                     <InsertTrips />
                 </Grid>
                 <Grid item md={5} xs={12}>
-                          <Box
-                            sx={{
-                              width: "100%", // กำหนดความกว้างของ Paper
-                              height: "40px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginTop: { md: -10, xs: 2 },
-                              marginBottom: 3
-                            }}
-                          >
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                              <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
-                                onChange={handleDateChangeDateStart}
-                                sx={{ marginRight: 2, }}
-                                slotProps={{
-                                  textField: {
-                                    size: "small",
-                                    fullWidth: true,
-                                    InputProps: {
-                                      startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                          วันที่เริ่มต้น :
-                                        </InputAdornment>
-                                      ),
-                                      sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                      },
-                                    },
-                                  },
-                                }}
-                              />
-                              <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
-                                onChange={handleDateChangeDateEnd}
-                                slotProps={{
-                                  textField: {
-                                    size: "small",
-                                    fullWidth: true,
-                                    InputProps: {
-                                      startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                          วันที่สิ้นสุด :
-                                        </InputAdornment>
-                                      ),
-                                      sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                      },
-                                    },
-                                  },
-                                }}
-                              />
-                            </LocalizationProvider>
-                          </Box>
-                        </Grid>
-            </Grid>
-            <Divider sx={{ marginBottom: 2 }} />
-            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260)  }}>
-            <Grid container spacing={1} width="100%">
-                <Grid item xs={12}>
-                    <FormGroup row sx={{ marginBottom: -2 }}>
-                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-                        <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-                        <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
-                        <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ยกเลิก" />
-                        <FormControlLabel control={<Checkbox checked={check === 4 ? true : false} />} onChange={() => setCheck(4)} label="จบทริป" />
-                    </FormGroup>
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -2, fontSize: "12px", color: "red", textAlign: "right", marginRight: 7 }} gutterBottom>*ดูรายละเอียด/แก้ไขการจัดเที่ยววิ่ง/กดจบทริปตรงนี้*</Typography>
-                    <TableContainer
-                        component={Paper}
+                    <Box
                         sx={{
-                            maxWidth: "1350px",
-                            overflowX: "auto", // แสดง scrollbar แนวนอน
-                            marginTop: 2,
+                            width: "100%", // กำหนดความกว้างของ Paper
+                            height: "40px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginTop: { md: -10, xs: 2 },
+                            marginBottom: 3
                         }}
                     >
-                        <Table
-                            stickyHeader
-                            size="small"
-                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" },width: "1350px" }}
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                onChange={handleDateChangeDateStart}
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>วันที่ :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        },
+                                    },
+                                }}
+                            />
+                            <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                onChange={handleDateChangeDateEnd}
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>ถึงวันที่ :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        },
+                                    },
+                                }}
+                            />
+                        </LocalizationProvider>
+                    </Box>
+                </Grid>
+            </Grid>
+            <Divider sx={{ marginBottom: 2 }} />
+            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+                <Grid container spacing={1} width="100%">
+                    <Grid item xs={12}>
+                        <FormGroup row sx={{ marginBottom: -2 }}>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+                            <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                            <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
+                            <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ยกเลิก" />
+                            <FormControlLabel control={<Checkbox checked={check === 4 ? true : false} />} onChange={() => setCheck(4)} label="จบทริป" />
+                        </FormGroup>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -2, fontSize: "12px", color: "red", textAlign: "right", marginRight: 7 }} gutterBottom>*ดูรายละเอียด/แก้ไขการจัดเที่ยววิ่ง/กดจบทริปตรงนี้*</Typography>
+                        <TableContainer
+                            component={Paper}
+                            sx={{
+                                maxWidth: "1350px",
+                                overflowX: "auto", // แสดง scrollbar แนวนอน
+                                marginTop: 2,
+                            }}
                         >
-                            <TableHead>
-                                <TableRow sx={{ height: "7vh" }}>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
-                                        ลำดับ
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                        วันที่รับ
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                        วันที่ส่ง
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
-                                        คลังรับน้ำมัน
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
-                                        ชื่อ/ทะเบียนรถ
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 1
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 2
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 3
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 4
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 5
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 6
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 7
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                        ลำดับที่ 8
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                        ค่าเที่ยว
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                        ปริมาณน้ำมัน
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                        น้ำหนักรถ
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                        น้ำหนักรวม
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                        สถานะ
-                                    </TablecellCustomers>
-                                    <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", right: 0 }} />
-                                    {/* <TablecellHeader sx={{
+                            <Table
+                                stickyHeader
+                                size="small"
+                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1350px" }}
+                            >
+                                <TableHead>
+                                    <TableRow sx={{ height: "7vh" }}>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                            ลำดับ
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                            วันที่รับ
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                            วันที่ส่ง
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                            คลังรับน้ำมัน
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
+                                            ชื่อ/ทะเบียนรถ
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 1
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 2
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 3
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 4
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 5
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 6
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 7
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                            ลำดับที่ 8
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            ค่าเที่ยว
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            ปริมาณน้ำมัน
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            น้ำหนักรถ
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                            น้ำหนักรวม
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                            สถานะ
+                                        </TablecellCustomers>
+                                        <TablecellCustomers sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", right: 0 }} />
+                                        {/* <TablecellHeader sx={{
                                                     textAlign: "center", fontSize: 16, width: 100, position: "sticky",
                                                     right: windowWidth <= 900 ? 0 : "200px", // ติดซ้ายสุด
                                                     zIndex: windowWidth <= 900 ? 2 : 4,
@@ -375,64 +383,64 @@ const TripsBigTruck = () => {
                                                             zIndex: 2,
                                                         }
                                                 } /> */}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                    tripDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                                        <TripsDetail key={row.id} trips={row} windowWidth={windowWidth} index={index} />
-                                    ))
-                                }
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    {
-                        tripDetail.length < 10 ? null :
-                            <TablePagination
-                                rowsPerPageOptions={[10, 25, 30]}
-                                component="div"
-                                count={tripDetail.length}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                                labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
-                                labelDisplayedRows={({ from, to, count }) =>
-                                    `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
-                                }
-                                sx={{
-                                    overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
-                                    borderBottomLeftRadius: 5,
-                                    borderBottomRightRadius: 5,
-                                    '& .MuiTablePagination-toolbar': {
-                                        backgroundColor: "lightgray",
-                                        height: "20px", // กำหนดความสูงของ toolbar
-                                        alignItems: "center",
-                                        paddingY: 0, // ลด padding บนและล่างให้เป็น 0
-                                        overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
-                                        fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
-                                    },
-                                    '& .MuiTablePagination-select': {
-                                        paddingY: 0,
-                                        fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
-                                    },
-                                    '& .MuiTablePagination-actions': {
-                                        '& button': {
-                                            paddingY: 0,
-                                            fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
-                                        },
-                                    },
-                                    '& .MuiTablePagination-displayedRows': {
-                                        fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
-                                    },
-                                    '& .MuiTablePagination-selectLabel': {
-                                        fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        tripDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            <TripsDetail key={row.id} trips={row} windowWidth={windowWidth} index={index} />
+                                        ))
                                     }
-                                }}
-                            />
-                    }
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        {
+                            tripDetail.length < 10 ? null :
+                                <TablePagination
+                                    rowsPerPageOptions={[10, 25, 30]}
+                                    component="div"
+                                    count={tripDetail.length}
+                                    rowsPerPage={rowsPerPage}
+                                    page={page}
+                                    onPageChange={handleChangePage}
+                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                    labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+                                    labelDisplayedRows={({ from, to, count }) =>
+                                        `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+                                    }
+                                    sx={{
+                                        overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+                                        borderBottomLeftRadius: 5,
+                                        borderBottomRightRadius: 5,
+                                        '& .MuiTablePagination-toolbar': {
+                                            backgroundColor: "lightgray",
+                                            height: "20px", // กำหนดความสูงของ toolbar
+                                            alignItems: "center",
+                                            paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+                                            overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+                                            fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+                                        },
+                                        '& .MuiTablePagination-select': {
+                                            paddingY: 0,
+                                            fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                                        },
+                                        '& .MuiTablePagination-actions': {
+                                            '& button': {
+                                                paddingY: 0,
+                                                fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+                                            },
+                                        },
+                                        '& .MuiTablePagination-displayedRows': {
+                                            fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+                                        },
+                                        '& .MuiTablePagination-selectLabel': {
+                                            fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                                        }
+                                    }}
+                                />
+                        }
+                    </Grid>
                 </Grid>
-            </Grid>
             </Box>
         </Container>
 

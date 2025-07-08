@@ -56,12 +56,13 @@ import "dayjs/locale/th"; // โหลดภาษาไทย
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
 
 const UpdateInvoice = (props) => {
-    const { ticket,ticketNo,date } = props;
+    const { ticket, ticketNo, date } = props;
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
@@ -824,7 +825,7 @@ const UpdateInvoice = (props) => {
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Date || row.Date}</Typography>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(report[row.uniqueRowId]?.Date || row.Date,"DD/MM/YYYY"))}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px' }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
@@ -992,7 +993,7 @@ const UpdateInvoice = (props) => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main,position: 'sticky', right: 0,  }} />
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main, position: 'sticky', right: 0, }} />
                                         {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                         <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                             <IconButton color="success"
@@ -1015,7 +1016,7 @@ const UpdateInvoice = (props) => {
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     {
-                                                        !updateTranfer || row.id !== tranferID ? row.DateStart
+                                                        !updateTranfer || row.id !== tranferID ? formatThaiSlash(dayjs(row.DateStart,"DD/MM/YYYY"))
                                                             :
                                                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
                                                                 <DatePicker
@@ -1028,6 +1029,10 @@ const UpdateInvoice = (props) => {
                                                                         textField: {
                                                                             size: "small",
                                                                             fullWidth: true,
+                                                                            inputProps: {
+                                                                                value: formatThaiFull(dayjs(price.DateStart, "DD/MM/YYYY")), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                                                readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                                            },
                                                                             sx: {
                                                                                 "& .MuiOutlinedInput-root": { height: "30px", paddingRight: "8px" },
                                                                                 "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1, marginRight: -1 },
@@ -1064,10 +1069,32 @@ const UpdateInvoice = (props) => {
                                                                     >
                                                                         <MenuItem value={tranferBankName} sx={{ fontSize: "14px", }}>{tranferBankName.split(":")[1]}</MenuItem>
                                                                         {
-                                                                            bankDetail.map((row) => (
-                                                                                row.id !== Number(tranferBankName.split(":")[0]) &&
-                                                                                <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName} - ${row.BankShortName}`}</MenuItem>
-                                                                            ))
+                                                                            bankDetail
+                                                                                .slice() // 🔁 Clone ก่อนกัน side effect
+                                                                                .sort((a, b) => {
+                                                                                    const aParts = a.BankShortName.split(".....");
+                                                                                    const bParts = b.BankShortName.split(".....");
+
+                                                                                    const aHasSplit = aParts.length > 1;
+                                                                                    const bHasSplit = bParts.length > 1;
+
+                                                                                    // ✅ ให้ตัวที่ไม่มี "....." อยู่ล่างสุด
+                                                                                    if (!aHasSplit && bHasSplit) return 1;
+                                                                                    if (aHasSplit && !bHasSplit) return -1;
+                                                                                    if (!aHasSplit && !bHasSplit) return 0;
+
+                                                                                    // ✅ ถ้ามีทั้งคู่ เปรียบเทียบส่วนที่ [1]
+                                                                                    return aParts[1].localeCompare(bParts[1]);
+                                                                                })
+                                                                                .map((row) => (
+                                                                                    <MenuItem
+                                                                                        key={row.id}
+                                                                                        value={`${row.id}:${row.BankName} - ${row.BankShortName}`}
+                                                                                        sx={{ fontSize: "14px" }}
+                                                                                    >
+                                                                                        {`${row.BankName}....${row.BankShortName}..${row.BankID}`}
+                                                                                    </MenuItem>
+                                                                                ))
                                                                         }
                                                                     </Select>
                                                                 </FormControl>
@@ -1112,9 +1139,9 @@ const UpdateInvoice = (props) => {
                                                             </Paper>
                                                     }
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50,position: 'sticky', right: 0, backgroundColor: "white" }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50, position: 'sticky', right: 0, backgroundColor: "white" }}>
                                                     {
-                                                        !updateTranfer ?
+                                                        !updateTranfer || row.id !== tranferID ?
                                                             <IconButton color="warning" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.IncomingMoney, row.Note)} size="small" sx={{ borderRadius: 2 }}>
                                                                 <EditIcon />
                                                             </IconButton>
@@ -1284,6 +1311,10 @@ const UpdateInvoice = (props) => {
                                                         textField: {
                                                             size: "small",
                                                             fullWidth: true,
+                                                            inputProps: {
+                                                                value: formatThaiFull(dayjs(price.DateStart, "DD/MM/YYYY")), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                                readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                            },
                                                             sx: {
                                                                 "& .MuiOutlinedInput-root": { height: "30px", paddingRight: "8px" },
                                                                 "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1, marginRight: -1 },
@@ -1325,9 +1356,32 @@ const UpdateInvoice = (props) => {
                                                     onChange={(e) => handleChange("BankName", e.target.value)}
                                                 >
                                                     {
-                                                        bankDetail.map((row) => (
-                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName}....${row.BankShortName}..${row.BankID}`}</MenuItem>
-                                                        ))
+                                                        bankDetail
+                                                            .slice() // 🔁 Clone ก่อนกัน side effect
+                                                            .sort((a, b) => {
+                                                                const aParts = a.BankShortName.split(".....");
+                                                                const bParts = b.BankShortName.split(".....");
+
+                                                                const aHasSplit = aParts.length > 1;
+                                                                const bHasSplit = bParts.length > 1;
+
+                                                                // ✅ ให้ตัวที่ไม่มี "....." อยู่ล่างสุด
+                                                                if (!aHasSplit && bHasSplit) return 1;
+                                                                if (aHasSplit && !bHasSplit) return -1;
+                                                                if (!aHasSplit && !bHasSplit) return 0;
+
+                                                                // ✅ ถ้ามีทั้งคู่ เปรียบเทียบส่วนที่ [1]
+                                                                return aParts[1].localeCompare(bParts[1]);
+                                                            })
+                                                            .map((row) => (
+                                                                <MenuItem
+                                                                    key={row.id}
+                                                                    value={`${row.id}:${row.BankName} - ${row.BankShortName}`}
+                                                                    sx={{ fontSize: "14px" }}
+                                                                >
+                                                                    {`${row.BankName}....${row.BankShortName}..${row.BankID}`}
+                                                                </MenuItem>
+                                                            ))
                                                     }
                                                 </Select>
                                             </FormControl>

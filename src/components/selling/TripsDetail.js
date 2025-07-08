@@ -36,6 +36,7 @@ import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InfoIcon from '@mui/icons-material/Info';
 import UpdateTrip from "./UpdateTrip";
+import { formatThaiSlash } from "../../theme/DateTH";
 
 const TripsDetail = (props) => {
     const { trips, windowWidth, index } = props;
@@ -79,8 +80,8 @@ const TripsDetail = (props) => {
         <React.Fragment>
             <TableRow>
                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.DateReceive}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{trips.DateDelivery}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateReceive,"DD/MM/YYYY"))}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateDelivery,"DD/MM/YYYY"))}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Depot.split(":")[0]}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     {(() => {

@@ -60,6 +60,7 @@ import "jspdf-autotable";
 import dayjs from "dayjs";
 import "dayjs/locale/th"; // โหลดภาษาไทย
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
+import { formatThaiSlash } from "../../theme/DateTH";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
@@ -241,7 +242,7 @@ const ReportDetail = (props) => {
                                                                         {groupIndex + 1}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
-                                                                        {date}
+                                                                        {formatThaiSlash(dayjs(date,"DD/MM/YYYY"))}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
                                                                         {`${driver.split(":")[1]}/${registration}`}

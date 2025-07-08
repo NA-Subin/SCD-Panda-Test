@@ -1714,7 +1714,7 @@ const UpdateTrip = (props) => {
                                                                 (row) => row.id === registrationId
                                                             )?.ShortName || "";
 
-                                                            return `${shortName} : ${plate} / ${driverName}`;
+                                                            return `${shortName.includes("...") ? shortName.split("...")[1] : shortName} : ${plate} / ${driverName}`;
                                                         })()}
                                                     </Box>
                                                 </Typography>
@@ -2468,7 +2468,7 @@ const UpdateTrip = (props) => {
                                                                 (row) => row.id === registrationId
                                                             )?.ShortName || "";
 
-                                                            return `${shortName} : ${plate} / ${driverName}`;
+                                                            return `${shortName.includes("...") ? shortName.split("...")[1] : shortName} : ${plate} / ${driverName}`;
                                                         })()}
                                                     </Box>
                                                 </Typography>

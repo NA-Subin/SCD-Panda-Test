@@ -2377,9 +2377,9 @@ const InsertTrips = () => {
                             </Grid>
                         </Paper>
                     </Box>
-                    {
+                    {/* {
                         !isNegative && ( // เพิ่มเงื่อนไขเช็คว่าห้ามมีค่าติดลบ
-                            <>
+                            <> */}
                                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
                                     <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
                                     <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
@@ -2387,9 +2387,9 @@ const InsertTrips = () => {
                                 <Box textAlign="center" marginTop={1}>
                                     <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
                                 </Box>
-                            </>
+                            {/* </>
                         )
-                    }
+                    } */}
                 </DialogContent>
             </Dialog>
         </React.Fragment>

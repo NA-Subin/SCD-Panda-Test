@@ -56,6 +56,7 @@ import BankDetail from "./BankDetail";
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { formatThaiSlash } from "../../theme/DateTH";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
@@ -1020,7 +1021,7 @@ const UpdateReport = (props) => {
                                                     rowSpan={rowSpan}
                                                     sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle" }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {row.Date}
+                                                        {formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}
                                                     </Typography>
                                                 </TableCell>
                                             )}
@@ -1535,7 +1536,7 @@ const UpdateReport = (props) => {
                                                     rowSpan={rowSpan}
                                                     sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle" }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {row.Date}
+                                                        {formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}
                                                     </Typography>
                                                 </TableCell>
                                             )}
@@ -1886,7 +1887,7 @@ const UpdateReport = (props) => {
                                                 <TableRow>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 120 }}>{`${row.Code} - ${row.Number}`}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>{row.DateStart}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>{formatThaiSlash(dayjs(row.DateStart,"DD/MM/YYYY"))}</TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.BankName}</TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.Transport.split(":")[1]}</TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 130 }}>{new Intl.NumberFormat("en-US").format(row.IncomingMoney)}</TableCell>
@@ -2074,9 +2075,32 @@ const UpdateReport = (props) => {
                                                     onChange={(e) => handleChange("BankName", e.target.value)}
                                                 >
                                                     {
-                                                        bankDetail.map((row) => (
-                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName}....${row.BankShortName}..${row.BankID}`}</MenuItem>
-                                                        ))
+                                                        bankDetail
+                                                            .slice() // 🔁 Clone ก่อนกัน side effect
+                                                            .sort((a, b) => {
+                                                                const aParts = a.BankShortName.split(".....");
+                                                                const bParts = b.BankShortName.split(".....");
+
+                                                                const aHasSplit = aParts.length > 1;
+                                                                const bHasSplit = bParts.length > 1;
+
+                                                                // ✅ ให้ตัวที่ไม่มี "....." อยู่ล่างสุด
+                                                                if (!aHasSplit && bHasSplit) return 1;
+                                                                if (aHasSplit && !bHasSplit) return -1;
+                                                                if (!aHasSplit && !bHasSplit) return 0;
+
+                                                                // ✅ ถ้ามีทั้งคู่ เปรียบเทียบส่วนที่ [1]
+                                                                return aParts[1].localeCompare(bParts[1]);
+                                                            })
+                                                            .map((row) => (
+                                                                <MenuItem
+                                                                    key={row.id}
+                                                                    value={`${row.id}:${row.BankName} - ${row.BankShortName}`}
+                                                                    sx={{ fontSize: "14px" }}
+                                                                >
+                                                                    {`${row.BankName}....${row.BankShortName}..${row.BankID}`}
+                                                                </MenuItem>
+                                                            ))
                                                     }
                                                 </Select>
                                             </FormControl>

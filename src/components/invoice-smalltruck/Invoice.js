@@ -41,6 +41,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 
 const InvoiceSmallTruck = () => {
   const [update, setUpdate] = React.useState(true);
@@ -255,24 +256,27 @@ const InvoiceSmallTruck = () => {
               <DatePicker
                 openTo="day"
                 views={["year", "month", "day"]}
-                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                format="DD/MM/YYYY"
+                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                 onChange={handleDateChangeDateStart}
-                sx={{ marginRight: 2, }}
                 slotProps={{
                   textField: {
                     size: "small",
                     fullWidth: true,
+                    inputProps: {
+                      value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                      readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                    },
                     InputProps: {
                       startAdornment: (
                         <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                          วันที่เริ่มต้น :
+                          <b>วันที่ :</b>
                         </InputAdornment>
                       ),
                       sx: {
-                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                        height: "40px",  // ความสูงของ Input
-                        padding: "10px", // Padding ภายใน Input
+                        fontSize: "16px",
+                        height: "40px",
+                        padding: "10px",
                         fontWeight: "bold",
                       },
                     },
@@ -282,23 +286,27 @@ const InvoiceSmallTruck = () => {
               <DatePicker
                 openTo="day"
                 views={["year", "month", "day"]}
-                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                format="DD/MM/YYYY"
+                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                 onChange={handleDateChangeDateEnd}
                 slotProps={{
                   textField: {
                     size: "small",
                     fullWidth: true,
+                    inputProps: {
+                      value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                      readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                    },
                     InputProps: {
                       startAdornment: (
                         <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                          วันที่สิ้นสุด :
+                          <b>ถึงวันที่ :</b>
                         </InputAdornment>
                       ),
                       sx: {
-                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                        height: "40px",  // ความสูงของ Input
-                        padding: "10px", // Padding ภายใน Input
+                        fontSize: "16px",
+                        height: "40px",
+                        padding: "10px",
                         fontWeight: "bold",
                       },
                     },
@@ -470,12 +478,13 @@ const InvoiceSmallTruck = () => {
                                     {index + 1}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {row.Date}
+                                    {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
-                                    {dayjs(row.Date, "DD/MM/YYYY")
-                                      .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : row.CreditTime, "day")
-                                      .format("DD/MM/YYYY")}
+                                    {formatThaiSlash(
+                                      dayjs(row.Date, "DD/MM/YYYY")
+                                        .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : Number(row.CreditTime), "day")
+                                    )}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
                                     {row.TicketName.split(":")[1]}

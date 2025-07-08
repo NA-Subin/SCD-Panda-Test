@@ -52,6 +52,7 @@ import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
+import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 
 const SummaryOilBalance = () => {
 
@@ -245,7 +246,7 @@ const SummaryOilBalance = () => {
     const exportToExcel = () => {
         const exportData = sortedOrderDetail.map((row, index) => ({
             ลำดับ: index + 1,
-            วันที่ส่ง: row.Date,
+            วันที่ส่ง: formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY")),
             "ผู้ขับ/ป้ายทะเบียน": `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`,
             ตั๋ว: row.TicketName.split(":")[1],
             ชนิดน้ำมัน: row.ProductName,
@@ -300,24 +301,27 @@ const SummaryOilBalance = () => {
                             <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
-                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
+                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                                 onChange={handleDateChangeDateStart}
-                                sx={{ marginRight: 2, }}
                                 slotProps={{
                                     textField: {
                                         size: "small",
                                         fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
                                         InputProps: {
                                             startAdornment: (
                                                 <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    วันที่เริ่มต้น :
+                                                    <b>วันที่ :</b>
                                                 </InputAdornment>
                                             ),
                                             sx: {
-                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                height: "40px",  // ความสูงของ Input
-                                                padding: "10px", // Padding ภายใน Input
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
                                                 fontWeight: "bold",
                                             },
                                         },
@@ -327,23 +331,27 @@ const SummaryOilBalance = () => {
                             <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
-                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
+                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                                 onChange={handleDateChangeDateEnd}
                                 slotProps={{
                                     textField: {
                                         size: "small",
                                         fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
                                         InputProps: {
                                             startAdornment: (
                                                 <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    วันที่สิ้นสุด :
+                                                    <b>ถึงวันที่ :</b>
                                                 </InputAdornment>
                                             ),
                                             sx: {
-                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                height: "40px",  // ความสูงของ Input
-                                                padding: "10px", // Padding ภายใน Input
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
                                                 fontWeight: "bold",
                                             },
                                         },
@@ -581,7 +589,7 @@ const SummaryOilBalance = () => {
                                         sortedOrderDetail.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Date}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1]}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>

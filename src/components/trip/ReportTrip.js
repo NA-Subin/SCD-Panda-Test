@@ -52,6 +52,7 @@ import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
+import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 
 const ReportTrip = () => {
 
@@ -146,13 +147,13 @@ const ReportTrip = () => {
                 .filter(([productName]) => productName !== "P")
                 .reduce((sum, [, productData]) => sum + ((Number(productData.Volume) * 1000) || 0), 0);
 
-                console.log("totalVolume : ",totalVolume);
+            console.log("totalVolume : ", totalVolume);
             acc[order.Trip] = (acc[order.Trip] || 0) + totalVolume;
-            console.log("acc[order.Trip] : ",acc[order.Trip]);
+            console.log("acc[order.Trip] : ", acc[order.Trip]);
             return acc;
         }, {});
 
-        console.log("volumeByTrip : ",volumeByTripId[0]);
+        console.log("volumeByTrip : ", volumeByTripId[0]);
 
         // 3. กรอง trips แล้วรวม totalVolumeProduct เข้าไป
         return trips
@@ -173,7 +174,7 @@ const ReportTrip = () => {
             })
             .map((trip) => ({
                 ...trip,
-                totalVolumeProduct: volumeByTripId[trip.id-1] || 0,
+                totalVolumeProduct: volumeByTripId[trip.id - 1] || 0,
             }));
     }, [trips, selectedDateStart, selectedDateEnd, orders, selectDriver]);
 
@@ -193,7 +194,7 @@ const ReportTrip = () => {
         return ticketA.localeCompare(ticketB, "th"); // ใช้ "th" สำหรับเรียงตามพจนานุกรมไทย
     });
 
-    console.log("Driver : ",sortedDrivers);
+    console.log("Driver : ", sortedDrivers);
 
     useEffect(() => {
         if (sortedDrivers.length > 0 && !selectDriver) {
@@ -221,7 +222,7 @@ const ReportTrip = () => {
     const exportToExcel = () => {
         const exportData = TripDetail.map((row, index) => ({
             ลำดับ: index + 1,
-            "วันที่รับ": row.DateDelivery,
+            "วันที่รับ": formatThaiSlash(dayjs(row.DateDelivery,"DD/MM/YYYY")),
             ไป: Object.entries(row)
                 .filter(([key]) => key.startsWith("Order"))
                 .sort(
@@ -281,24 +282,27 @@ const ReportTrip = () => {
                             <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
-                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
+                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                                 onChange={handleDateChangeDateStart}
-                                sx={{ marginRight: 2, }}
                                 slotProps={{
                                     textField: {
                                         size: "small",
                                         fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
                                         InputProps: {
                                             startAdornment: (
                                                 <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    วันที่เริ่มต้น :
+                                                    <b>วันที่ :</b>
                                                 </InputAdornment>
                                             ),
                                             sx: {
-                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                height: "40px",  // ความสูงของ Input
-                                                padding: "10px", // Padding ภายใน Input
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
                                                 fontWeight: "bold",
                                             },
                                         },
@@ -308,23 +312,27 @@ const ReportTrip = () => {
                             <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
-                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
+                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                                 onChange={handleDateChangeDateEnd}
                                 slotProps={{
                                     textField: {
                                         size: "small",
                                         fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
                                         InputProps: {
                                             startAdornment: (
                                                 <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    วันที่สิ้นสุด :
+                                                    <b>ถึงวันที่ :</b>
                                                 </InputAdornment>
                                             ),
                                             sx: {
-                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                height: "40px",  // ความสูงของ Input
-                                                padding: "10px", // Padding ภายใน Input
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
                                                 fontWeight: "bold",
                                             },
                                         },
@@ -507,7 +515,7 @@ const ReportTrip = () => {
                                         TripDetail.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.DateDelivery}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.DateDelivery,"DD/MM/YYYY"))}</TableCell>
                                                 <TableCell>
                                                     {
                                                         Object.entries(row)

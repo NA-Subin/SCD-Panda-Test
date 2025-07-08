@@ -47,6 +47,7 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InsertDeducetionIncome from "./InsertDeductionIncome";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
+import { formatThaiFull } from "../../theme/DateTH";
 
 const DeductionOfIncome = () => {
 
@@ -58,20 +59,20 @@ const DeductionOfIncome = () => {
     const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
     const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
-        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-        useEffect(() => {
-            const handleResize = () => {
-                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-            };
-    
-            window.addEventListener('resize', handleResize); // เพิ่ม event listener
-    
-            // ลบ event listener เมื่อ component ถูกทำลาย
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const handleDateChangeDateStart = (newValue) => {
         if (newValue) {
@@ -288,131 +289,138 @@ const DeductionOfIncome = () => {
                     </Box>
                 </Grid>
                 <Grid item md={5} xs={12}>
-                          <Box
-                            sx={{
-                              width: "100%", // กำหนดความกว้างของ Paper
-                              height: "40px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginTop: { md: -8, xs: 2 },
-                              marginBottom: 3
-                            }}
-                          >
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                              <DatePicker
+                    <Box
+                        sx={{
+                            width: "100%", // กำหนดความกว้างของ Paper
+                            height: "40px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginTop: { md: -8, xs: 2 },
+                            marginBottom: 3
+                        }}
+                    >
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
-                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
+                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                                 onChange={handleDateChangeDateStart}
-                                sx={{ marginRight: 2, }}
                                 slotProps={{
-                                  textField: {
-                                    size: "small",
-                                    fullWidth: true,
-                                    InputProps: {
-                                      startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                          วันที่เริ่มต้น :
-                                        </InputAdornment>
-                                      ),
-                                      sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                      },
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>วันที่ :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        },
                                     },
-                                  },
                                 }}
-                              />
-                              <DatePicker
+                            />
+                            <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
-                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
+                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
                                 onChange={handleDateChangeDateEnd}
                                 slotProps={{
-                                  textField: {
-                                    size: "small",
-                                    fullWidth: true,
-                                    InputProps: {
-                                      startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                          วันที่สิ้นสุด :
-                                        </InputAdornment>
-                                      ),
-                                      sx: {
-                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                        height: "40px",  // ความสูงของ Input
-                                        padding: "10px", // Padding ภายใน Input
-                                        fontWeight: "bold",
-                                      },
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>ถึงวันที่ :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        },
                                     },
-                                  },
                                 }}
-                              />
-                            </LocalizationProvider>
-                          </Box>
-                        </Grid>
+                            />
+                        </LocalizationProvider>
+                    </Box>
+                </Grid>
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-            <Grid container spacing={2} width="100%">
-                <Grid item xs={12}>
-                    <TableContainer
-                        component={Paper}
-                        sx={{
-                            height: "65vh",
-                            marginTop: 2,
-                        }}
-                    >
-                        <Table
-                            stickyHeader
-                            size="small"
-                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1300px" }}
+                <Grid container spacing={2} width="100%">
+                    <Grid item xs={12}>
+                        <TableContainer
+                            component={Paper}
+                            sx={{
+                                height: "65vh",
+                                marginTop: 2,
+                            }}
                         >
-                            <TableHead sx={{ height: "5vh" }}>
-                                <TableRow>
-                                    <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
-                                        ลำดับ
-                                    </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
-                                        พนักงานขับรถ
-                                    </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                        ชื่อรายการที่หัก
-                                    </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
-                                        รายได้
-                                    </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
-                                        รายหัก
-                                    </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                    table.map((row,index) => (
-                                        <TableRow>
-                                    <TableCell sx={{ textAlign: "center" }}>{index+1}</TableCell>
-                                    <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white", borderRight: "2px solid white" }}>{row.name}</TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}>{row.item}</TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}>{row.income !== "-" ? new Intl.NumberFormat("en-US").format(row.income) : "-"}</TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}>{row.expense !== "-" ? new Intl.NumberFormat("en-US").format(row.expense) : "-"}</TableCell>
-                                    <TableCell sx={{ textAlign: "center" }}>
-                                        {/* <Button variant="contained" size="small" color="error" fullWidth
+                            <Table
+                                stickyHeader
+                                size="small"
+                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1300px" }}
+                            >
+                                <TableHead sx={{ height: "5vh" }}>
+                                    <TableRow>
+                                        <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
+                                            ลำดับ
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
+                                            พนักงานขับรถ
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                            ชื่อรายการที่หัก
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                            รายได้
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                            รายหัก
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        table.map((row, index) => (
+                                            <TableRow>
+                                                <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white", borderRight: "2px solid white" }}>{row.name}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.item}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.income !== "-" ? new Intl.NumberFormat("en-US").format(row.income) : "-"}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.expense !== "-" ? new Intl.NumberFormat("en-US").format(row.expense) : "-"}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {/* <Button variant="contained" size="small" color="error" fullWidth
                                         //onClick={() => handleChangDelete(row.id)}
                                         >ลบ</Button> */}
-                                    </TableCell>
-                                </TableRow>
-                                    ))
-                                }
-                            </TableBody>
-                        </Table>
-                        {/* {
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    }
+                                </TableBody>
+                            </Table>
+                            {/* {
                             reportDetail.length <= 10 ? null :
                                 <TablePagination
                                     rowsPerPageOptions={[10, 25, 30]}
@@ -457,9 +465,9 @@ const DeductionOfIncome = () => {
                                     }}
                                 />
                         } */}
-                    </TableContainer>
+                        </TableContainer>
+                    </Grid>
                 </Grid>
-            </Grid>
             </Box>
         </Container>
 

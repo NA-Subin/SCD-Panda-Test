@@ -2074,9 +2074,32 @@ const UpdateReport = (props) => {
                                                     onChange={(e) => handleChange("BankName", e.target.value)}
                                                 >
                                                     {
-                                                        bankDetail.map((row) => (
-                                                            <MenuItem value={`${row.id}:${row.BankName} - ${row.BankShortName}`} sx={{ fontSize: "14px", }}>{`${row.BankName}....${row.BankShortName}..${row.BankID}`}</MenuItem>
-                                                        ))
+                                                        bankDetail
+                                                            .slice() // 🔁 Clone ก่อนกัน side effect
+                                                            .sort((a, b) => {
+                                                                const aParts = a.BankShortName.split(".....");
+                                                                const bParts = b.BankShortName.split(".....");
+
+                                                                const aHasSplit = aParts.length > 1;
+                                                                const bHasSplit = bParts.length > 1;
+
+                                                                // ✅ ให้ตัวที่ไม่มี "....." อยู่ล่างสุด
+                                                                if (!aHasSplit && bHasSplit) return 1;
+                                                                if (aHasSplit && !bHasSplit) return -1;
+                                                                if (!aHasSplit && !bHasSplit) return 0;
+
+                                                                // ✅ ถ้ามีทั้งคู่ เปรียบเทียบส่วนที่ [1]
+                                                                return aParts[1].localeCompare(bParts[1]);
+                                                            })
+                                                            .map((row) => (
+                                                                <MenuItem
+                                                                    key={row.id}
+                                                                    value={`${row.id}:${row.BankName} - ${row.BankShortName}`}
+                                                                    sx={{ fontSize: "14px" }}
+                                                                >
+                                                                    {`${row.BankName}....${row.BankShortName}..${row.BankID}`}
+                                                                </MenuItem>
+                                                            ))
                                                     }
                                                 </Select>
                                             </FormControl>
