@@ -8,6 +8,7 @@ import {
     FormControlLabel,
     Grid,
     IconButton,
+    InputAdornment,
     Paper,
     Table,
     TableBody,
@@ -50,7 +51,26 @@ const TicketsTransport = () => {
     const transport = transports.filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ");
     const gasStation = gasStations.filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ");
 
-    console.log("gasStation : ",gasStation);
+    console.log("gasStation : ", gasStation);
+
+    const [search, setSearch] = useState("");
+
+    const filtered =
+        open === 1
+            ? transport.filter((item) => {
+                const name = (item.Name?.split(":")[1] || item.Name || "").toLowerCase().trim();
+                const searchText = search.toLowerCase().trim();
+                return name.includes(searchText);
+            })
+            : gasStation.filter((item) => {
+                const name = (item.Name?.split(":")[1] || item.Name || "").toLowerCase().trim();
+                const searchText = search.toLowerCase().trim();
+                return name.includes(searchText);
+            });
+
+
+    console.log("Show :: ", filtered);
+    console.log("search : ", search);
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -269,8 +289,42 @@ const TicketsTransport = () => {
             </Grid>
             <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <Grid container spacing={2}>
-                    <Grid item md={9} xs={12}>
-                        <Typography variant="h6" fontWeight="bold" gutterBottom>{open === 1 ? "รายการลูกค้ารับจ้างขนส่ง" : "รายการปั้มน้ำมัน"}</Typography>
+                    <Grid item md={3} xs={12}>
+                        <Typography variant="h6" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>{open === 1 ? "รายการลูกค้ารับจ้างขนส่ง" : "รายการปั้มน้ำมัน"}</Typography>
+                    </Grid>
+                    <Grid item md={6} xs={12}>
+                        <Paper >
+                            {
+                                open === 1 ?
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <Typography fontWeight="bold">ค้นหาชื่อลูกค้า :</Typography>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                    :
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <Typography fontWeight="bold">ค้นหาชื่อปั้ม :</Typography>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                            }
+                        </Paper>
                     </Grid>
                     <Grid item md={3} xs={12}>
                         {
@@ -319,12 +373,12 @@ const TicketsTransport = () => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        transport === null || transport === undefined ?
+                                        filtered === null || filtered === undefined ?
                                             <TableRow>
-                                                <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
+                                                <TableCell colSpan={9} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
                                             </TableRow>
                                             :
-                                            transport.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            filtered.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow key={index} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
@@ -569,7 +623,7 @@ const TicketsTransport = () => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id,row.StatusCompany, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
@@ -667,9 +721,14 @@ const TicketsTransport = () => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        gasStation.sort((a, b) => a.ShortName.localeCompare(b.ShortName)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                                            <TicketsGasStation key={row.id} row={row} index={index + page * rowsPerPage} />
-                                        ))
+                                        filtered === null || filtered === undefined ?
+                                            <TableRow>
+                                                <TableCell colSpan={7} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
+                                            </TableRow>
+                                            :
+                                            filtered.sort((a, b) => a.ShortName.localeCompare(b.ShortName)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                                <TicketsGasStation key={row.id} row={row} index={index + page * rowsPerPage} />
+                                            ))
                                     }
                                 </TableBody>
                             </Table>
@@ -677,11 +736,11 @@ const TicketsTransport = () => {
                 }
                 {
                     open === 1 ?
-                        transport.length <= 10 ? null :
+                        filtered.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"
-                                count={transport.length}
+                                count={filtered.length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 onPageChange={handleChangePage}
@@ -721,11 +780,11 @@ const TicketsTransport = () => {
                                 }}
                             />
                         :
-                        gasStation.length <= 10 ? null :
+                        filtered.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"
-                                count={gasStation.length}
+                                count={filtered.length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 onPageChange={handleChangePage}

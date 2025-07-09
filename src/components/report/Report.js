@@ -28,6 +28,8 @@ import {
   Typography,
 } from "@mui/material";
 import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
@@ -40,6 +42,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useTripData } from "../../server/provider/TripProvider";
 import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -97,8 +100,8 @@ const Report = () => {
   console.log("selectedRow : ", selectedRow);
   console.log("index : ", indexes);
 
-  // const { tickets, customertransports, customergasstations, customertickets, trip, transferMoney } = useData();
-  const { tickets, customertransports, customergasstations, customertickets, trip, transferMoney } = useTripData();
+  const { customertransports, customergasstations, customertickets } = useBasicData();
+  const { tickets, trip, transferMoney } = useTripData();
   const ticket = Object.values(tickets || {});
   const transports = Object.values(customertransports || {});
   const gasstations = Object.values(customergasstations || {});
@@ -109,6 +112,19 @@ const Report = () => {
   const [dateRangesA, setDateRangesA] = useState({});
   const [dateRangesT, setDateRangesT] = useState({});
   const [dateRangesG, setDateRangesG] = useState({});
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: "asc",
+  });
+
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
 
   console.log("Ticket : ", ticket);
   console.log("Ticket A : ", ticket.filter((item) => (item.CustomerType === "ตั๋วน้ำมัน" && item.Trip !== "ยกเลิก")));
@@ -157,6 +173,10 @@ const Report = () => {
 
       console.log("Rate : ", Rate);
 
+      // ✅ เพิ่มตรงนี้: หา transport ที่ตรงกับ TicketName
+      const ticketId = Number(item.TicketName?.split(":")[0]);
+      const Match = transports.find((t) => t.id === ticketId);
+
       return {
         ...item,
         TotalVolume: totalVolume,
@@ -165,9 +185,12 @@ const Report = () => {
         TotalAmount: (totalVolume * Rate) - (totalVolume * Rate) * 0.01,
         TotalOverdue: totalOverdue,
         Depot: tripdetail?.Depot || "-",
-        Rate: Rate || "-"
+        Rate: Rate || 0,
+        CreditTime: Match?.CreditTime || 0
       };
     });
+
+  console.log(" Resualt transports : ", resultTransport);
 
   const resultGasStation = ticket
     .filter((item) => {
@@ -208,6 +231,10 @@ const Report = () => {
         Rate = item.Rate3;
       }
 
+      // ✅ เพิ่มตรงนี้: หา transport ที่ตรงกับ TicketName
+      const ticketId = Number(item.TicketName?.split(":")[0]);
+      const Match = gasstations.find((t) => t.id === ticketId);
+
       return {
         ...item,
         TotalVolume: totalVolume,
@@ -216,7 +243,8 @@ const Report = () => {
         TotalAmount: (totalVolume * Rate) - (totalVolume * Rate) * 0.01,
         TotalOverdue: totalOverdue,
         Depot: tripdetail?.Depot || "-",
-        Rate: Rate || "-"
+        Rate: Rate || 0,
+        CreditTime: Match?.CreditTime || 0
       };
     });
 
@@ -259,6 +287,10 @@ const Report = () => {
         Rate = item.Rate3;
       }
 
+      // ✅ เพิ่มตรงนี้: หา transport ที่ตรงกับ TicketName
+      const ticketId = Number(item.TicketName?.split(":")[0]);
+      const Match = ticketsOrder.find((t) => t.id === ticketId);
+
       return {
         ...item,
         TotalVolume: totalVolume,
@@ -267,7 +299,8 @@ const Report = () => {
         TotalAmount: (totalVolume * Rate) - (totalVolume * Rate) * 0.01,
         TotalOverdue: totalOverdue,
         Depot: tripdetail?.Depot || "-",
-        Rate: Rate || "-"
+        Rate: Rate || 0,
+        CreditTime: Match?.CreditTime || 0
       };
     });
 
@@ -277,13 +310,28 @@ const Report = () => {
     const monthKey = date.format("YYYY-MM");
 
     // กำหนดช่วงที่ 1-3
+    // let period = "";
+    // if (day >= 1 && day <= 10) {
+    //   period = "ช่วงที่ 1"; // 1-10
+    // } else if (day >= 11 && day <= 20) {
+    //   period = "ช่วงที่ 2"; // 11-20
+    // } else {
+    //   period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+    // }
+    const creditTime = parseInt(item.CreditTime || "0", 10);
     let period = "";
-    if (day >= 1 && day <= 10) {
-      period = "ช่วงที่ 1"; // 1-10
-    } else if (day >= 11 && day <= 20) {
-      period = "ช่วงที่ 2"; // 11-20
+
+    if (creditTime === 10) {
+      if (day <= 10) period = "ช่วงที่ 1";
+      else if (day <= 20) period = "ช่วงที่ 2";
+      else period = "ช่วงที่ 3";
+    } else if (creditTime === 15) {
+      if (day <= 15) period = "ช่วงที่ 1";
+      else period = "ช่วงที่ 2";
+    } else if (creditTime === 30 || creditTime === 0) {
+      period = "ช่วงที่ 1";
     } else {
-      period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+      period = "ไม่ระบุช่วง"; // fallback เผื่อไม่มี CreditTime
     }
 
     // สร้าง key เช่น "2025-04_ช่วงที่ 1"
@@ -315,32 +363,88 @@ const Report = () => {
     const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
 
     // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
-    let DateStart, DateEnd;
-    if (period === "ช่วงที่ 1") {
-      DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
-    } else if (period === "ช่วงที่ 2") {
-      DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
-    } else if (period === "ช่วงที่ 3") {
-      DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
-    }
+    // let DateStart, DateEnd;
+    // if (period === "ช่วงที่ 1") {
+    //   DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
+    // } else if (period === "ช่วงที่ 2") {
+    //   DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
+    // } else if (period === "ช่วงที่ 3") {
+    //   DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
+    // }
 
+    // const grouped = items.reduce((acc, item) => {
+    //   let totalVolume = parseFloat(item.TotalVolume || 0);
+    //   let totalAmount = parseFloat(item.TotalAmount || 0);
+    //   let totalOverdue = parseFloat(item.TotalOverdue || 0);
+    //   let totalPrice = parseFloat(item.TotalPrice || 0);
+    //   let vatOnePercent = parseFloat(item.VatOnePercent || 0);
+
+    //   const key = item.TicketName;
+
+    //   if (!acc[key]) {
+    //     acc[key] = {
+    //       TicketName: item.TicketName,
+    //       DateStart: DateStart,
+    //       DateEnd: DateEnd,
+    //       Date: item.Date,
+    //       Month: month,
+    //       CustomerType: item.CustomerType,
+    //       CreditTime: item.CreditTime === "-" ? 0 : item.CreditTime,
+    //       TotalVolume: 0,
+    //       TotalAmount: 0,
+    //       TotalOverdue: 0,
+    //       TotalPrice: 0,
+    //       VatOnePercent: 0
+    //     };
+    //   }
+
+    //   acc[key].TotalVolume += totalVolume;
+    //   acc[key].TotalAmount += totalAmount;
+    //   acc[key].TotalOverdue += totalOverdue;
+    //   acc[key].TotalPrice += totalPrice;
+    //   acc[key].VatOnePercent += vatOnePercent;
+
+    //   return acc;
+    // }, {});
     const grouped = items.reduce((acc, item) => {
-      let totalVolume = parseFloat(item.TotalVolume || 0);
-      let totalAmount = parseFloat(item.TotalAmount || 0);
-      let totalOverdue = parseFloat(item.TotalOverdue || 0);
-      let totalPrice = parseFloat(item.TotalPrice || 0);
-      let vatOnePercent = parseFloat(item.VatOnePercent || 0);
+      const creditTime = parseInt(item.CreditTime || "0", 10);
+
+      // คำนวณ DateStart / DateEnd ตามแต่ละรายการ
+      let DateStart = "", DateEnd = "";
+      if (creditTime === 10) {
+        if (period === "ช่วงที่ 1") {
+          DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-10`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 2") {
+          DateStart = dayjs(`${monthKey}-11`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-20`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 3") {
+          DateStart = dayjs(`${monthKey}-21`).format("DD/MM/YYYY");
+          DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+        }
+      } else if (creditTime === 15) {
+        if (period === "ช่วงที่ 1") {
+          DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-15`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 2") {
+          DateStart = dayjs(`${monthKey}-16`).format("DD/MM/YYYY");
+          DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+        }
+      } else if (creditTime === 30 || creditTime === 0) {
+        DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+        DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+      }
 
       const key = item.TicketName;
 
       if (!acc[key]) {
         acc[key] = {
           TicketName: item.TicketName,
-          DateStart: DateStart,
-          DateEnd: DateEnd,
+          DateStart,
+          DateEnd,
           Date: item.Date,
           Month: month,
           CustomerType: item.CustomerType,
@@ -353,17 +457,40 @@ const Report = () => {
         };
       }
 
-      acc[key].TotalVolume += totalVolume;
-      acc[key].TotalAmount += totalAmount;
-      acc[key].TotalOverdue += totalOverdue;
-      acc[key].TotalPrice += totalPrice;
-      acc[key].VatOnePercent += vatOnePercent;
+      acc[key].TotalVolume += parseFloat(item.TotalVolume || 0);
+      acc[key].TotalAmount += parseFloat(item.TotalAmount || 0);
+      acc[key].TotalOverdue += parseFloat(item.TotalOverdue || 0);
+      acc[key].TotalPrice += parseFloat(item.TotalPrice || 0);
+      acc[key].VatOnePercent += parseFloat(item.VatOnePercent || 0);
 
       return acc;
     }, {});
 
     return Object.values(grouped);
-  }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
+  }).sort((a, b) => {
+    let aValue, bValue;
+
+    switch (sortConfig.key) {
+      case "DateStart":
+        aValue = dayjs(a.DateStart, "DD/MM/YYYY").toDate();
+        bValue = dayjs(b.DateStart, "DD/MM/YYYY").toDate();
+        break;
+      case "DateEnd":
+        aValue = dayjs(a.DateEnd, "DD/MM/YYYY").toDate();
+        bValue = dayjs(b.DateEnd, "DD/MM/YYYY").toDate();
+        break;
+      case "TicketName":
+        aValue = a.TicketName?.split(":")[1] || "";
+        bValue = b.TicketName?.split(":")[1] || "";
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // ⭐ ใส่ No ตอนสุดท้าย
   resultArrayTickets = resultArrayTickets.map((item, idx) => ({
@@ -381,13 +508,28 @@ const Report = () => {
     const monthKey = date.format("YYYY-MM");
 
     // กำหนดช่วงที่ 1-3
+    // let period = "";
+    // if (day >= 1 && day <= 10) {
+    //   period = "ช่วงที่ 1"; // 1-10
+    // } else if (day >= 11 && day <= 20) {
+    //   period = "ช่วงที่ 2"; // 11-20
+    // } else {
+    //   period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+    // }
+    const creditTime = parseInt(item.CreditTime || "0", 10);
     let period = "";
-    if (day >= 1 && day <= 10) {
-      period = "ช่วงที่ 1"; // 1-10
-    } else if (day >= 11 && day <= 20) {
-      period = "ช่วงที่ 2"; // 11-20
+
+    if (creditTime === 10) {
+      if (day <= 10) period = "ช่วงที่ 1";
+      else if (day <= 20) period = "ช่วงที่ 2";
+      else period = "ช่วงที่ 3";
+    } else if (creditTime === 15) {
+      if (day <= 15) period = "ช่วงที่ 1";
+      else period = "ช่วงที่ 2";
+    } else if (creditTime === 30 || creditTime === 0) {
+      period = "ช่วงที่ 1";
     } else {
-      period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+      period = "ไม่ระบุช่วง"; // fallback เผื่อไม่มี CreditTime
     }
 
     // สร้าง key เช่น "2025-04_ช่วงที่ 1"
@@ -419,32 +561,88 @@ const Report = () => {
     const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
 
     // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
-    let DateStart, DateEnd;
-    if (period === "ช่วงที่ 1") {
-      DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
-    } else if (period === "ช่วงที่ 2") {
-      DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
-    } else if (period === "ช่วงที่ 3") {
-      DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
-    }
+    // let DateStart, DateEnd;
+    // if (period === "ช่วงที่ 1") {
+    //   DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
+    // } else if (period === "ช่วงที่ 2") {
+    //   DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
+    // } else if (period === "ช่วงที่ 3") {
+    //   DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
+    // }
 
+    // const grouped = items.reduce((acc, item) => {
+    //   let totalVolume = parseFloat(item.TotalVolume || 0);
+    //   let totalAmount = parseFloat(item.TotalAmount || 0);
+    //   let totalOverdue = parseFloat(item.TotalOverdue || 0);
+    //   let totalPrice = parseFloat(item.TotalPrice || 0);
+    //   let vatOnePercent = parseFloat(item.VatOnePercent || 0);
+
+    //   const key = item.TicketName;
+
+    //   if (!acc[key]) {
+    //     acc[key] = {
+    //       TicketName: item.TicketName,
+    //       DateStart: DateStart,
+    //       DateEnd: DateEnd,
+    //       Date: item.Date,
+    //       Month: month,
+    //       CustomerType: item.CustomerType,
+    //       CreditTime: item.CreditTime === "-" ? 0 : item.CreditTime,
+    //       TotalVolume: 0,
+    //       TotalAmount: 0,
+    //       TotalOverdue: 0,
+    //       TotalPrice: 0,
+    //       VatOnePercent: 0
+    //     };
+    //   }
+
+    //   acc[key].TotalVolume += totalVolume;
+    //   acc[key].TotalAmount += totalAmount;
+    //   acc[key].TotalOverdue += totalOverdue;
+    //   acc[key].TotalPrice += totalPrice;
+    //   acc[key].VatOnePercent += vatOnePercent;
+
+    //   return acc;
+    // }, {});
     const grouped = items.reduce((acc, item) => {
-      let totalVolume = parseFloat(item.TotalVolume || 0);
-      let totalAmount = parseFloat(item.TotalAmount || 0);
-      let totalOverdue = parseFloat(item.TotalOverdue || 0);
-      let totalPrice = parseFloat(item.TotalPrice || 0);
-      let vatOnePercent = parseFloat(item.VatOnePercent || 0);
+      const creditTime = parseInt(item.CreditTime || "0", 10);
+
+      // คำนวณ DateStart / DateEnd ตามแต่ละรายการ
+      let DateStart = "", DateEnd = "";
+      if (creditTime === 10) {
+        if (period === "ช่วงที่ 1") {
+          DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-10`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 2") {
+          DateStart = dayjs(`${monthKey}-11`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-20`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 3") {
+          DateStart = dayjs(`${monthKey}-21`).format("DD/MM/YYYY");
+          DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+        }
+      } else if (creditTime === 15) {
+        if (period === "ช่วงที่ 1") {
+          DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-15`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 2") {
+          DateStart = dayjs(`${monthKey}-16`).format("DD/MM/YYYY");
+          DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+        }
+      } else if (creditTime === 30 || creditTime === 0) {
+        DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+        DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+      }
 
       const key = item.TicketName;
 
       if (!acc[key]) {
         acc[key] = {
           TicketName: item.TicketName,
-          DateStart: DateStart,
-          DateEnd: DateEnd,
+          DateStart,
+          DateEnd,
           Date: item.Date,
           Month: month,
           CustomerType: item.CustomerType,
@@ -457,17 +655,40 @@ const Report = () => {
         };
       }
 
-      acc[key].TotalVolume += totalVolume;
-      acc[key].TotalAmount += totalAmount;
-      acc[key].TotalOverdue += totalOverdue;
-      acc[key].TotalPrice += totalPrice;
-      acc[key].VatOnePercent += vatOnePercent;
+      acc[key].TotalVolume += parseFloat(item.TotalVolume || 0);
+      acc[key].TotalAmount += parseFloat(item.TotalAmount || 0);
+      acc[key].TotalOverdue += parseFloat(item.TotalOverdue || 0);
+      acc[key].TotalPrice += parseFloat(item.TotalPrice || 0);
+      acc[key].VatOnePercent += parseFloat(item.VatOnePercent || 0);
 
       return acc;
     }, {});
 
     return Object.values(grouped);
-  }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
+  }).sort((a, b) => {
+    let aValue, bValue;
+
+    switch (sortConfig.key) {
+      case "DateStart":
+        aValue = dayjs(a.DateStart, "DD/MM/YYYY").toDate();
+        bValue = dayjs(b.DateStart, "DD/MM/YYYY").toDate();
+        break;
+      case "DateEnd":
+        aValue = dayjs(a.DateEnd, "DD/MM/YYYY").toDate();
+        bValue = dayjs(b.DateEnd, "DD/MM/YYYY").toDate();
+        break;
+      case "TicketName":
+        aValue = a.TicketName?.split(":")[1] || "";
+        bValue = b.TicketName?.split(":")[1] || "";
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // ⭐ ใส่ No ตอนสุดท้าย
   resultArrayGasStation = resultArrayGasStation.map((item, idx) => ({
@@ -527,13 +748,28 @@ const Report = () => {
     const monthKey = date.format("YYYY-MM");
 
     // กำหนดช่วงที่ 1-3
+    // let period = "";
+    // if (day >= 1 && day <= 10) {
+    //   period = "ช่วงที่ 1"; // 1-10
+    // } else if (day >= 11 && day <= 20) {
+    //   period = "ช่วงที่ 2"; // 11-20
+    // } else {
+    //   period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+    // }
+    const creditTime = parseInt(item.CreditTime || "0", 10);
     let period = "";
-    if (day >= 1 && day <= 10) {
-      period = "ช่วงที่ 1"; // 1-10
-    } else if (day >= 11 && day <= 20) {
-      period = "ช่วงที่ 2"; // 11-20
+
+    if (creditTime === 10) {
+      if (day <= 10) period = "ช่วงที่ 1";
+      else if (day <= 20) period = "ช่วงที่ 2";
+      else period = "ช่วงที่ 3";
+    } else if (creditTime === 15) {
+      if (day <= 15) period = "ช่วงที่ 1";
+      else period = "ช่วงที่ 2";
+    } else if (creditTime === 30 || creditTime === 0) {
+      period = "ช่วงที่ 1";
     } else {
-      period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
+      period = "ไม่ระบุช่วง"; // fallback เผื่อไม่มี CreditTime
     }
 
     // สร้าง key เช่น "2025-04_ช่วงที่ 1"
@@ -565,33 +801,89 @@ const Report = () => {
     const [monthKey, period] = month.split("_"); // เช่น ["2025-04", "ช่วงที่ 1"]
 
     // สร้างช่วงเวลา DateStart และ DateEnd ตามช่วงที่กำหนด
-    let DateStart, DateEnd;
-    if (period === "ช่วงที่ 1") {
-      DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
-    } else if (period === "ช่วงที่ 2") {
-      DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
-    } else if (period === "ช่วงที่ 3") {
-      DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
-      DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
-    }
+    // let DateStart, DateEnd;
+    // if (period === "ช่วงที่ 1") {
+    //   DateStart = dayjs(monthKey + "-01", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey + "-10", "YYYY-MM-DD").format("DD/MM/YYYY");
+    // } else if (period === "ช่วงที่ 2") {
+    //   DateStart = dayjs(monthKey + "-11", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey + "-20", "YYYY-MM-DD").format("DD/MM/YYYY");
+    // } else if (period === "ช่วงที่ 3") {
+    //   DateStart = dayjs(monthKey + "-21", "YYYY-MM-DD").format("DD/MM/YYYY");
+    //   DateEnd = dayjs(monthKey, "YYYY-MM").endOf("month").format("DD/MM/YYYY");
+    // }
 
 
+    // const grouped = items.reduce((acc, item) => {
+    //   let totalVolume = parseFloat(item.TotalVolume || 0);
+    //   let totalAmount = parseFloat(item.TotalAmount || 0);
+    //   let totalOverdue = parseFloat(item.TotalOverdue || 0);
+    //   let totalPrice = parseFloat(item.TotalPrice || 0);
+    //   let vatOnePercent = parseFloat(item.VatOnePercent || 0);
+
+    //   const key = item.TicketName;
+
+    //   if (!acc[key]) {
+    //     acc[key] = {
+    //       TicketName: item.TicketName,
+    //       DateStart: DateStart,
+    //       DateEnd: DateEnd,
+    //       Date: item.Date,
+    //       Month: month,
+    //       CustomerType: item.CustomerType,
+    //       CreditTime: item.CreditTime === "-" ? 0 : item.CreditTime,
+    //       TotalVolume: 0,
+    //       TotalAmount: 0,
+    //       TotalOverdue: 0,
+    //       TotalPrice: 0,
+    //       VatOnePercent: 0
+    //     };
+    //   }
+
+    //   acc[key].TotalVolume += totalVolume;
+    //   acc[key].TotalAmount += totalAmount;
+    //   acc[key].TotalOverdue += totalOverdue;
+    //   acc[key].TotalPrice += totalPrice;
+    //   acc[key].VatOnePercent += vatOnePercent;
+
+    //   return acc;
+    // }, {});
     const grouped = items.reduce((acc, item) => {
-      let totalVolume = parseFloat(item.TotalVolume || 0);
-      let totalAmount = parseFloat(item.TotalAmount || 0);
-      let totalOverdue = parseFloat(item.TotalOverdue || 0);
-      let totalPrice = parseFloat(item.TotalPrice || 0);
-      let vatOnePercent = parseFloat(item.VatOnePercent || 0);
+      const creditTime = parseInt(item.CreditTime || "0", 10);
+
+      // คำนวณ DateStart / DateEnd ตามแต่ละรายการ
+      let DateStart = "", DateEnd = "";
+      if (creditTime === 10) {
+        if (period === "ช่วงที่ 1") {
+          DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-10`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 2") {
+          DateStart = dayjs(`${monthKey}-11`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-20`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 3") {
+          DateStart = dayjs(`${monthKey}-21`).format("DD/MM/YYYY");
+          DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+        }
+      } else if (creditTime === 15) {
+        if (period === "ช่วงที่ 1") {
+          DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+          DateEnd = dayjs(`${monthKey}-15`).format("DD/MM/YYYY");
+        } else if (period === "ช่วงที่ 2") {
+          DateStart = dayjs(`${monthKey}-16`).format("DD/MM/YYYY");
+          DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+        }
+      } else if (creditTime === 30 || creditTime === 0) {
+        DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+        DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+      }
 
       const key = item.TicketName;
 
       if (!acc[key]) {
         acc[key] = {
           TicketName: item.TicketName,
-          DateStart: DateStart,
-          DateEnd: DateEnd,
+          DateStart,
+          DateEnd,
           Date: item.Date,
           Month: month,
           CustomerType: item.CustomerType,
@@ -604,17 +896,40 @@ const Report = () => {
         };
       }
 
-      acc[key].TotalVolume += totalVolume;
-      acc[key].TotalAmount += totalAmount;
-      acc[key].TotalOverdue += totalOverdue;
-      acc[key].TotalPrice += totalPrice;
-      acc[key].VatOnePercent += vatOnePercent;
+      acc[key].TotalVolume += parseFloat(item.TotalVolume || 0);
+      acc[key].TotalAmount += parseFloat(item.TotalAmount || 0);
+      acc[key].TotalOverdue += parseFloat(item.TotalOverdue || 0);
+      acc[key].TotalPrice += parseFloat(item.TotalPrice || 0);
+      acc[key].VatOnePercent += parseFloat(item.VatOnePercent || 0);
 
       return acc;
     }, {});
 
     return Object.values(grouped);
-  }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
+  }).sort((a, b) => {
+    let aValue, bValue;
+
+    switch (sortConfig.key) {
+      case "DateStart":
+        aValue = dayjs(a.DateStart, "DD/MM/YYYY").toDate();
+        bValue = dayjs(b.DateStart, "DD/MM/YYYY").toDate();
+        break;
+      case "DateEnd":
+        aValue = dayjs(a.DateEnd, "DD/MM/YYYY").toDate();
+        bValue = dayjs(b.DateEnd, "DD/MM/YYYY").toDate();
+        break;
+      case "TicketName":
+        aValue = a.TicketName?.split(":")[1] || "";
+        bValue = b.TicketName?.split(":")[1] || "";
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // ⭐ ใส่ No ตอนสุดท้าย
   resultArrayTransport = resultArrayTransport.map((item, idx) => ({
@@ -667,6 +982,7 @@ const Report = () => {
   // แปลงจาก object เป็น array ถ้าจะใช้กับ .map() แสดงผลในตาราง
   //const [TransportDetail,setTransportDetail] = useState(Object.values(resultArrayTransport))
   const TransportDetail = Object.values(resultArrayTransport);
+  console.log("Transport Detail : ", TransportDetail);
 
   const handleDateAChange = (index, type, value) => {
     console.log("Show Index ", index);
@@ -728,6 +1044,7 @@ const Report = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -903,14 +1220,41 @@ const Report = () => {
                               <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                 ลำดับ
                               </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              <TablecellHeader onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 วันที่รับ
+                                {sortConfig.key === "DateStart" ? (
+                                  sortConfig.direction === "asc" ? (
+                                    <ArrowDropDownIcon />
+                                  ) : (
+                                    <ArrowDropUpIcon />
+                                  )
+                                ) : (
+                                  <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                )}
                               </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              <TablecellHeader onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 จนถึง
+                                {sortConfig.key === "DateEnd" ? (
+                                  sortConfig.direction === "asc" ? (
+                                    <ArrowDropDownIcon />
+                                  ) : (
+                                    <ArrowDropUpIcon />
+                                  )
+                                ) : (
+                                  <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                )}
                               </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                              <TablecellHeader onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                 ชื่อตั๋ว
+                                {sortConfig.key === "TicketName" ? (
+                                  sortConfig.direction === "asc" ? (
+                                    <ArrowDropDownIcon />
+                                  ) : (
+                                    <ArrowDropUpIcon />
+                                  )
+                                ) : (
+                                  <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                )}
                               </TablecellHeader>
                               <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 ยอดเงิน
@@ -952,7 +1296,7 @@ const Report = () => {
                                           {index + 1}
                                         </TableCell>
                                         {/* วันที่เริ่มต้น */}
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        {/* <TableCell sx={{ textAlign: "center" }}>
                                           <Paper component="form" sx={{ width: "100%" }}>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                               <DatePicker
@@ -987,13 +1331,17 @@ const Report = () => {
                                                     },
                                                   },
                                                 }}
+                                                disabled
                                               />
                                             </LocalizationProvider>
                                           </Paper>
+                                        </TableCell> */}
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
 
                                         {/* วันที่สิ้นสุด */}
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        {/* <TableCell sx={{ textAlign: "center" }}>
                                           <Paper component="form" sx={{ width: "100%" }}>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                               <DatePicker
@@ -1028,9 +1376,13 @@ const Report = () => {
                                                     },
                                                   },
                                                 }}
+                                                disabled
                                               />
                                             </LocalizationProvider>
                                           </Paper>
+                                        </TableCell> */}
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                           {row.TicketName.split(":")[1]}
@@ -1072,7 +1424,7 @@ const Report = () => {
                                         {index + 1}
                                       </TableCell>
                                       {/* วันที่เริ่มต้น */}
-                                      <TableCell sx={{ textAlign: "center" }}>
+                                      {/* <TableCell sx={{ textAlign: "center" }}>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                           <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
@@ -1107,13 +1459,16 @@ const Report = () => {
                                                   },
                                                 },
                                               }}
+                                              disabled
                                             />
                                           </LocalizationProvider>
                                         </Paper>
+                                      </TableCell> */}
+                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                       </TableCell>
-
                                       {/* วันที่สิ้นสุด */}
-                                      <TableCell sx={{ textAlign: "center" }}>
+                                      {/* <TableCell sx={{ textAlign: "center" }}>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                           <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker
@@ -1148,9 +1503,13 @@ const Report = () => {
                                                   },
                                                 },
                                               }}
+                                              disabled
                                             />
                                           </LocalizationProvider>
                                         </Paper>
+                                      </TableCell> */}
+                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                       </TableCell>
                                       <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                         {row.TicketName.split(":")[1]}
@@ -1242,14 +1601,41 @@ const Report = () => {
                                 <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                   ลำดับ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                <TablecellHeader onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   วันที่รับ
+                                  {sortConfig.key === "DateStart" ? (
+                                    sortConfig.direction === "asc" ? (
+                                      <ArrowDropDownIcon />
+                                    ) : (
+                                      <ArrowDropUpIcon />
+                                    )
+                                  ) : (
+                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                  )}
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                <TablecellHeader onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   จนถึง
+                                  {sortConfig.key === "DateEnd" ? (
+                                    sortConfig.direction === "asc" ? (
+                                      <ArrowDropDownIcon />
+                                    ) : (
+                                      <ArrowDropUpIcon />
+                                    )
+                                  ) : (
+                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                  )}
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                <TablecellHeader onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                   ชื่อตั๋ว
+                                  {sortConfig.key === "TicketName" ? (
+                                    sortConfig.direction === "asc" ? (
+                                      <ArrowDropDownIcon />
+                                    ) : (
+                                      <ArrowDropUpIcon />
+                                    )
+                                  ) : (
+                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                  )}
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดเงิน
@@ -1290,7 +1676,7 @@ const Report = () => {
                                           <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                             {index + 1}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center" }}>
+                                          {/* <TableCell sx={{ textAlign: "center" }}>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                               <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DatePicker
@@ -1317,6 +1703,8 @@ const Report = () => {
                                                         "& .MuiInputBase-input": {
                                                           fontSize: "14px",
                                                           marginLeft: -1,
+                                                          fontWeight: "bold", // ✅ เพิ่มความหนาตัวอักษร
+                                                          color: "black"
                                                         },
                                                         "& .MuiInputAdornment-root": {
                                                           marginLeft: -2,
@@ -1325,13 +1713,17 @@ const Report = () => {
                                                       },
                                                     },
                                                   }}
+                                                  disabled
                                                 />
                                               </LocalizationProvider>
                                             </Paper>
+                                          </TableCell> */}
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
 
                                           {/* วันที่สิ้นสุด */}
-                                          <TableCell sx={{ textAlign: "center" }}>
+                                          {/* <TableCell sx={{ textAlign: "center" }}>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                               <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DatePicker
@@ -1358,17 +1750,23 @@ const Report = () => {
                                                         "& .MuiInputBase-input": {
                                                           fontSize: "14px",
                                                           marginLeft: -1,
+                                                          fontWeight: "bold", // ✅ เพิ่มความหนาตัวอักษร
+                                                          color: "black"
                                                         },
                                                         "& .MuiInputAdornment-root": {
                                                           marginLeft: -2,
                                                           paddingLeft: "0px"
-                                                        }
+                                                        },
                                                       },
                                                     },
                                                   }}
+                                                  disabled
                                                 />
                                               </LocalizationProvider>
                                             </Paper>
+                                          </TableCell> */}
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                             {row.TicketName.split(":")[1]}
@@ -1409,7 +1807,7 @@ const Report = () => {
                                         <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                           {index + 1}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        {/* <TableCell sx={{ textAlign: "center" }}>
                                           <Paper component="form" sx={{ width: "100%" }}>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                               <DatePicker
@@ -1447,10 +1845,12 @@ const Report = () => {
                                               />
                                             </LocalizationProvider>
                                           </Paper>
+                                        </TableCell> */}
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
-
                                         {/* วันที่สิ้นสุด */}
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        {/* <TableCell sx={{ textAlign: "center" }}>
                                           <Paper component="form" sx={{ width: "100%" }}>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                               <DatePicker
@@ -1488,6 +1888,9 @@ const Report = () => {
                                               />
                                             </LocalizationProvider>
                                           </Paper>
+                                        </TableCell> */}
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                           {row.TicketName.split(":")[1]}
@@ -1581,14 +1984,41 @@ const Report = () => {
                                 <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                   ลำดับ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                <TablecellHeader onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   วันที่รับ
+                                  {sortConfig.key === "DateStart" ? (
+                                    sortConfig.direction === "asc" ? (
+                                      <ArrowDropDownIcon />
+                                    ) : (
+                                      <ArrowDropUpIcon />
+                                    )
+                                  ) : (
+                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                  )}
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                <TablecellHeader onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   จนถึง
+                                  {sortConfig.key === "DateEnd" ? (
+                                    sortConfig.direction === "asc" ? (
+                                      <ArrowDropDownIcon />
+                                    ) : (
+                                      <ArrowDropUpIcon />
+                                    )
+                                  ) : (
+                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                  )}
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                <TablecellHeader onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                   ชื่อตั๋ว
+                                  {sortConfig.key === "TicketName" ? (
+                                    sortConfig.direction === "asc" ? (
+                                      <ArrowDropDownIcon />
+                                    ) : (
+                                      <ArrowDropUpIcon />
+                                    )
+                                  ) : (
+                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                  )}
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดเงิน
@@ -1629,7 +2059,7 @@ const Report = () => {
                                           <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                             {index + 1}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center" }}>
+                                          {/* <TableCell sx={{ textAlign: "center" }}>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                               <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DatePicker
@@ -1656,6 +2086,8 @@ const Report = () => {
                                                         "& .MuiInputBase-input": {
                                                           fontSize: "14px",
                                                           marginLeft: -1,
+                                                          fontWeight: "bold", // ✅ เพิ่มความหนาตัวอักษร
+                                                          color: "black"
                                                         },
                                                         "& .MuiInputAdornment-root": {
                                                           marginLeft: -2,
@@ -1667,10 +2099,12 @@ const Report = () => {
                                                 />
                                               </LocalizationProvider>
                                             </Paper>
+                                          </TableCell> */}
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
-
                                           {/* วันที่สิ้นสุด */}
-                                          <TableCell sx={{ textAlign: "center" }}>
+                                          {/* <TableCell sx={{ textAlign: "center" }}>
                                             <Paper component="form" sx={{ width: "100%" }}>
                                               <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DatePicker
@@ -1697,6 +2131,8 @@ const Report = () => {
                                                         "& .MuiInputBase-input": {
                                                           fontSize: "14px",
                                                           marginLeft: -1,
+                                                          fontWeight: "bold", // ✅ เพิ่มความหนาตัวอักษร
+                                                          color: "black"
                                                         },
                                                         "& .MuiInputAdornment-root": {
                                                           marginLeft: -2,
@@ -1708,6 +2144,9 @@ const Report = () => {
                                                 />
                                               </LocalizationProvider>
                                             </Paper>
+                                          </TableCell> */}
+                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                            {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                             {row.TicketName.split(":")[1]}
@@ -1748,7 +2187,7 @@ const Report = () => {
                                         <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                           {index + 1}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        {/* <TableCell sx={{ textAlign: "center" }}>
                                           <Paper component="form" sx={{ width: "100%" }}>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                               <DatePicker
@@ -1786,10 +2225,12 @@ const Report = () => {
                                               />
                                             </LocalizationProvider>
                                           </Paper>
+                                        </TableCell> */}
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
-
                                         {/* วันที่สิ้นสุด */}
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        {/* <TableCell sx={{ textAlign: "center" }}>
                                           <Paper component="form" sx={{ width: "100%" }}>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                               <DatePicker
@@ -1827,6 +2268,9 @@ const Report = () => {
                                               />
                                             </LocalizationProvider>
                                           </Paper>
+                                        </TableCell> */}
+                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                           {row.TicketName.split(":")[1]}

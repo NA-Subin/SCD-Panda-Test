@@ -12,6 +12,7 @@ import {
     FormControlLabel,
     Grid,
     IconButton,
+    InputAdornment,
     Paper,
     Table,
     TableBody,
@@ -54,6 +55,20 @@ const TicketsSmallTruck = () => {
     const ticketM = ticket.filter((item) => item.Type === "เชียงใหม่" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
     const ticketR = ticket.filter((item) => item.Type === "บ้านโฮ่ง" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
 
+    const [search, setSearch] = useState("");
+
+    const filtered =
+        open === 1
+            ? ticketM.filter((item) => {
+                const name = (item.Name?.split(":")[1] || item.Name || "").toLowerCase().trim();
+                const searchText = search.toLowerCase().trim();
+                return name.includes(searchText);
+            })
+            : ticketR.filter((item) => {
+                const name = (item.Name?.split(":")[1] || item.Name || "").toLowerCase().trim();
+                const searchText = search.toLowerCase().trim();
+                return name.includes(searchText);
+            });
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
         const handleResize = () => {
@@ -294,8 +309,42 @@ const TicketsSmallTruck = () => {
             </Grid>
             <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <Grid container spacing={2}>
-                    <Grid item md={9} xs={12} >
+                    <Grid item md={3} xs={12} >
                         <Typography variant="h6" fontWeight="bold" gutterBottom>รายการลูกค้าของ{open === 1 ? "เชียงใหม่" : "บ้านโฮ่ง"}</Typography>
+                    </Grid>
+                    <Grid item md={6} xs={12}>
+                        <Paper >
+                            {
+                                open === 1 ?
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <Typography fontWeight="bold">ค้นหาชื่อลูกค้าเชียงใหม่ :</Typography>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                    :
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <Typography fontWeight="bold">ค้นหาชื่อปั้มบ้านโฮ่ง :</Typography>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                            }
+                        </Paper>
                     </Grid>
                     <Grid item md={3} xs={12} >
                         <InsertCustomerSmallTruck show={open} />
@@ -345,12 +394,12 @@ const TicketsSmallTruck = () => {
                             {
                                 open === 1 ?
                                     (
-                                        ticketM === null || ticketM === undefined ?
+                                        filtered === null || filtered === undefined ?
                                             <TableRow>
                                                 <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
                                             </TableRow>
                                             :
-                                            ticketM.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            filtered.sort((a, b) => a.Name.localeCompare(b.Name)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow key={index} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
@@ -681,12 +730,12 @@ const TicketsSmallTruck = () => {
                                     )
                                     :
                                     (
-                                        ticketM === null || ticketM === undefined ?
+                                        filtered === null || filtered === undefined ?
                                             <TableRow>
                                                 <TableCell colSpan={4} sx={{ textAlign: "center" }}>ไม่มีข้อมูล</TableCell>
                                             </TableRow>
                                             :
-                                            ticketR.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow key={row.id} sx={{ backgroundColor: !setting || row.id !== selectedRowId ? "" : "#fff59d" }}>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
@@ -1021,11 +1070,11 @@ const TicketsSmallTruck = () => {
                 </TableContainer>
                 {
                     open === 1 ?
-                        ticketM.length <= 10 ? null :
+                        filtered.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"
-                                count={ticketM.length}
+                                count={filtered.length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 onPageChange={handleChangePage}
@@ -1065,11 +1114,11 @@ const TicketsSmallTruck = () => {
                                 }}
                             />
                         :
-                        ticketR.length <= 10 ? null :
+                        filtered.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
                                 component="div"
-                                count={ticketR.length}
+                                count={filtered.length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 onPageChange={handleChangePage}

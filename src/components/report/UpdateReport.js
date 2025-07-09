@@ -200,6 +200,7 @@ const UpdateReport = (props) => {
         return (
             item.TicketName === ticket.TicketName &&
             item.Trip !== "ยกเลิก" &&
+            item.CustomerType !== "ตั๋วรถเล็ก" &&
             itemDate.isBetween(startDate, endDate, "day", "[]") // [] คือรวมวันแรกกับวันสุดท้ายด้วย
         );
     });
@@ -1031,7 +1032,7 @@ const UpdateReport = (props) => {
                                                     sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle" }}
                                                 >
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {row.Registration.split(":")[1]}
+                                                        {row.Registration.split(":")[1] === "ไม่มี" ? "รถรับจ้างขนส่ง" : row.Registration.split(":")[1]}
                                                     </Typography>
                                                 </TableCell>
                                             )}

@@ -34,6 +34,8 @@ import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import UpdateReport from "./UpdateReport";
 import theme from "../../theme/theme";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -112,14 +114,6 @@ const ReportSmallTruck = () => {
   const trips = Object.values(trip || {});
 
   const tripsDetail = trips.filter((row) => row.TruckType === "รถเล็ก" && row.Depot !== "ยกเลิก" && row.StatusTrip === "จบทริป");
-
-  console.log("Trips Detail: ", tripsDetail);
-
-  const orderDetail = order.filter((row) => row.TicketName === "32:S. 10 ล้อใหม่ 70-1639 ชร.PS2");
-  const customerBDetail = customerB.filter((row) => row.StatusCompany === "อยู่บริษัทในเครือ");
-
-  console.log("Small : ", orderDetail);
-  console.log("CUstomer : ", customerBDetail);
 
   // const matchedOrders = orders
   //   .filter((order) => order.CustomerType === "ตั๋วรถใหญ่" && order.Status === "จัดส่งสำเร็จ" &&
@@ -455,90 +449,6 @@ const ReportSmallTruck = () => {
   const renderSummaryRow = (label, dataKey, bgColor, dataSource = summary) => {
     const total = productTypes.reduce((sum, key) => sum + (dataSource[dataKey][key] || 0), 0);
 
-    // const exportToExcel = () => {
-    //   const exportData = [];
-
-    //   // ✅ สร้าง Header
-    //   const headers = {
-    //     ลำดับ: "ลำดับ",
-    //     วันที่: "วันที่",
-    //     "รับเข้าโดย": "รับเข้าโดย",
-    //     G95: "G95",
-    //     B95: "B95",
-    //     B7: "B7",
-    //     G91: "G91",
-    //     E20: "E20",
-    //     PWD: "PWD",
-    //     "ไปส่งที่": "ไปส่งที่",
-    //   };
-
-    //   // ✅ เพิ่มหัวข้อ "ค่าเที่ยว" ตาม summarizedList
-    //   summarizedList.forEach((s) => {
-    //     const name = `${s.Driver.split(":")[1]}/${s.Registration.split(":")[1]}`;
-    //     headers[`ค่าเที่ยว ${name}`] = `ค่าเที่ยว ${name}`;
-    //   });
-
-    //   exportData.push(headers);
-
-    //   // ✅ สร้างข้อมูลในตาราง
-    //   matchedOrdersWithAll.forEach((row, index) => {
-    //     const dataRow = {
-    //       ลำดับ: index + 1,
-    //       วันที่: row.Date,
-    //       "รับเข้าโดย":
-    //         row.type === "รับเข้า"
-    //           ? `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`
-    //           : "",
-    //     };
-
-    //     // ✅ ปริมาณน้ำมัน
-    //     productTypes.forEach((key) => {
-    //       const volume = row.Product?.[key]?.Volume;
-    //       if (row.type === "รับเข้า") {
-    //         dataRow[key] = volume ? Number(volume) * 1000 : "";
-    //       } else {
-    //         dataRow[key] = volume ? -Number(volume) : "";
-    //       }
-    //     });
-
-    //     // ✅ ชื่อสถานที่ส่ง (ตั๋วรถเล็ก)
-    //     if (row.type === "ส่งออก") {
-    //       dataRow["ไปส่งที่"] = row.TicketName.split(":")[1] || "-";
-    //     }
-
-    //     // ✅ เติมค่าเที่ยวตาม summarizedList
-    //     summarizedList.forEach((d) => {
-    //       const name = `${d.Driver}/${d.Registration}`;
-    //       const match = d.Driver === row.Driver && d.Registration === row.Registration;
-    //       dataRow[`ค่าเที่ยว ${d.Driver.split(":")[1]}/${d.Registration.split(":")[1]}`] = match ? row.Travel : "-";
-    //     });
-
-    //     exportData.push(dataRow);
-    //   });
-
-    //   // ✅ เติมแถวสรุป 3 แถว
-    //   const pushSummaryRow = (title, data, colorName) => {
-    //     const row = { ลำดับ: title };
-    //     productTypes.forEach((key) => {
-    //       row[key] = data[key] ? Number(data[key]) * 1000 : "";
-    //     });
-    //     exportData.push(row);
-    //   };
-
-    //   pushSummaryRow("รวมรับเข้า", inboundSummary, "inbound");
-    //   pushSummaryRow("รวมส่งออก", outboundSummary, "outbound");
-    //   pushSummaryRow("คงเหลือ", differenceBalanceSummary, "balance");
-
-    //   // ✅ สร้างและบันทึก Excel
-    //   const worksheet = XLSX.utils.json_to_sheet(exportData);
-    //   const workbook = XLSX.utils.book_new();
-    //   XLSX.utils.book_append_sheet(workbook, worksheet, "รายงาน");
-
-    //   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    //   saveAs(blob, `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
-    // };
-
     return (
       <TableRow sx={{ backgroundColor: bgColor }}>
         <TableCell
@@ -592,6 +502,91 @@ const ReportSmallTruck = () => {
           ))}
       </TableRow>
     );
+  };
+
+  const exportToExcel = () => {
+    const exportData = [];
+
+    // ✅ Header (แถวที่ 1)
+    const headers = {
+      ลำดับ: "ลำดับ",
+      วันที่: "วันที่",
+      "รับเข้าโดย": "รับเข้าโดย",
+      G95: "G95",
+      B95: "B95",
+      B7: "B7",
+      G91: "G91",
+      E20: "E20",
+      PWD: "PWD",
+      "ไปส่งที่": "ไปส่งที่",
+    };
+
+    summarizedList.forEach((s) => {
+      const name = `${s.Driver.split(":")[1]}/${s.Registration.split(":")[1]}`;
+      headers[`ค่าเที่ยว ${name}`] = `ค่าเที่ยว ${name}`;
+    });
+
+    exportData.push(headers); // แถวที่ 1
+
+    // ✅ เติมข้อมูลตารางหลัก
+    matchedOrdersWithAll.forEach((row, index) => {
+      const dataRow = {
+        ลำดับ: index + 1,
+        วันที่: row.Date,
+        "รับเข้าโดย":
+          row.type === "รับเข้า"
+            ? `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`
+            : "",
+      };
+
+      productTypes.forEach((key) => {
+        const volume = row.Product?.[key]?.Volume;
+        if (row.type === "รับเข้า") {
+          dataRow[key] = volume ? Number(volume) * 1000 : "";
+        } else {
+          dataRow[key] = volume ? -Number(volume) : "";
+        }
+      });
+
+      if (row.type === "ส่งออก") {
+        dataRow["ไปส่งที่"] = row.TicketName.split(":")[1] || "-";
+      }
+
+      summarizedList.forEach((d) => {
+        const match = d.Driver === row.Driver && d.Registration === row.Registration;
+        const label = `ค่าเที่ยว ${d.Driver.split(":")[1]}/${d.Registration.split(":")[1]}`;
+        dataRow[label] = match ? row.Travel : "-";
+      });
+
+      exportData.push(dataRow);
+    });
+
+    // ✅ ฟังก์ชันเพิ่มแถวสรุป
+    const pushSummaryRow = (title, data) => {
+      const row = { ลำดับ: title };
+      productTypes.forEach((key) => {
+        row[key] = data[key] ? Number(data[key]) : "";
+      });
+      return row;
+    };
+
+    // ✅ เพิ่ม "ยอดยกมา" เป็นแถวที่ 2 (หลัง header)
+    const carryOverRow = pushSummaryRow("ยอดยกมา", carryOverSummary);
+    exportData.splice(1, 0, carryOverRow); // แทรกเป็นแถวที่ 2
+
+    // ✅ แถวสรุปตอนท้าย
+    exportData.push(pushSummaryRow("รวมรับเข้า", summary.inbound));
+    exportData.push(pushSummaryRow("รวมส่งออก", summary.outbound));
+    exportData.push(pushSummaryRow("คงเหลือ" , summary.balance));
+
+    // ✅ Export Excel
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "รายงาน");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
   };
 
   return (
@@ -747,6 +742,9 @@ const ReportSmallTruck = () => {
             />
           </Paper>
         </Grid>
+        <Grid item xs={6} sx={{ textAlign: "right" }}>
+          <Button variant="contained" color="success" onClick={exportToExcel} >Export to excel</Button>
+        </Grid>
       </Grid>
       <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
         <TableContainer
@@ -809,7 +807,7 @@ const ReportSmallTruck = () => {
                         {index + 1}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}
+                        {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
                         {`${row.Driver.split(":")[1]} / ${row.Registration.split(":")[1]}`}
@@ -845,7 +843,7 @@ const ReportSmallTruck = () => {
                         {index + 1}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}
+                        {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
 

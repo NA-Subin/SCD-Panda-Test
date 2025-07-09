@@ -254,7 +254,7 @@ const Invoice = () => {
               marginBottom: 3
             }}
           >
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
               <DatePicker
                 openTo="day"
                 views={["year", "month", "day"]}

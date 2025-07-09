@@ -1,10 +1,30 @@
 import dayjs from "dayjs";
 import buddhistEra from "dayjs/plugin/buddhistEra";
 import "dayjs/locale/th";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 // ✅ ติดตั้ง plugin
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
+
+export class AdapterDayjsBuddhist extends AdapterDayjs {
+  formatTokenMap = {
+    ...super.formatTokenMap,
+    BBBB: 'BBBB', // Buddhist year
+  };
+
+  formatByString(date, formatString) {
+    return dayjs(date).locale("th").format(formatString);
+  }
+
+  getYear(date) {
+    return Number(dayjs(date).locale("th").format("BBBB")); // พ.ศ.
+  }
+
+  setYear(date, year) {
+    return dayjs(date).year(year - 543); // แปลง พ.ศ. → ค.ศ.
+  }
+}
 
 // ✅ รูปแบบเต็ม เช่น: 8 กรกฎาคม พ.ศ.2568
 export function formatThaiFull(date) {
