@@ -208,7 +208,7 @@ const FuelPaymentReport = () => {
                 isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
             }
 
-            return isValidStatus && isInDateRange && matchTickets && isInCompany;
+            return isValidStatus && isInDateRange && matchTickets && isInCompany && item.CustomerType !== "ตั๋วรถเล็ก" ;
         });
 
         filteredItemsRef.current = filteredItems;

@@ -54,14 +54,14 @@ import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 
-const ReportTrip = () => {
+const SummaryOilBalanceSmallTruck = () => {
 
     const [date, setDate] = React.useState(false);
     const [check, setCheck] = React.useState(false);
     const [months, setMonths] = React.useState(dayjs(new Date));
     const [years, setYears] = React.useState(dayjs(new Date));
     const [driverDetail, setDriver] = React.useState([]);
-    const [selectDriver, setSelectDriver] = React.useState(null);
+    const [selectDriver, setSelectDriver] = React.useState(0);
     const [selectTickets, setSelectTickets] = React.useState("0:แสดงทั้งหมด");
     const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
     const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
@@ -118,9 +118,8 @@ const ReportTrip = () => {
 
     // const { reportFinancial, drivers } = useData();
     const { drivers, customertransports, customergasstations, customerbigtruck, customersmalltruck, customertickets } = useBasicData();
-    const { order, trip } = useTripData();
+    const { order } = useTripData();
     const orders = Object.values(order || {});
-    const trips = Object.values(trip || {});
     const driver = Object.values(drivers || {});
     const ticketsT = Object.values(customertransports || {});
     const ticketsPS = Object.values(customergasstations || {});
@@ -130,80 +129,107 @@ const ReportTrip = () => {
 
     console.log("Select Driver ID : ", selectDriver);
 
-    const TripDetail = useMemo(() => {
+    const orderDetail = useMemo(() => {
         if (!selectedDateStart || !selectedDateEnd) return [];
 
-        // 1. กรอง orders ที่อยู่ในช่วงวันที่และมี Product
-        const filteredOrders = orders.filter((order) => {
-            if (!order.Product || !order.Date) return false;
-
-            const orderDate = dayjs(order.Date, "DD/MM/YYYY");
-            return orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
-        });
-
-        // 2. สร้าง Map: tripId → totalVolumeProduct
-        const volumeByTripId = filteredOrders.reduce((acc, order) => {
-            const totalVolume = Object.entries(order.Product)
-                .filter(([productName]) => productName !== "P")
-                .reduce((sum, [, productData]) => sum + ((Number(productData.Volume) * 1000) || 0), 0);
-
-            console.log("totalVolume : ", totalVolume);
-            acc[order.Trip] = (acc[order.Trip] || 0) + totalVolume;
-            console.log("acc[order.Trip] : ", acc[order.Trip]);
-            return acc;
-        }, {});
-
-        console.log("volumeByTrip : ", volumeByTripId[0]);
-
-        // 3. กรอง trips แล้วรวม totalVolumeProduct เข้าไป
-        return trips
+        return orders
             .filter((item) => {
-                const itemDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-                const isValidStatus = item.StatusTrip === "จบทริป";
+                const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+
+                // ตรวจสอบว่าเป็นสถานะที่ต้องการ และอยู่ในช่วงวัน
+                const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined;
                 const isInDateRange = itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
-                const matchDrivers = Number(item.Driver.split(":")[0]) === selectDriver?.id;
-                return isValidStatus && isInDateRange && matchDrivers;
+
+                // ตรวจสอบเงื่อนไขของ driver ตาม selectDriver
+                const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
+
+                return isValidStatus && isInDateRange && matchTickets && item.CustomerType === "ตั๋วรถเล็ก" ;
+            })
+            .flatMap((item) => {
+                if (!item.Product) return [];
+
+                return Object.entries(item.Product)
+                    .filter(([productName]) => productName !== "P")
+                    .map(([productName, productData]) => ({
+                        ...item,
+                        ProductName: productName,
+                        VolumeProduct: productData.Volume,
+                        Amount: productData.Amount || 0,
+                        OverdueTransfer: productData.OverdueTransfer || 0,
+                        RateOil: productData.RateOil || 0,
+                    }));
             })
             .sort((a, b) => {
-                const dateA = dayjs(a.DateReceive, "DD/MM/YYYY");
-                const dateB = dayjs(b.DateReceive, "DD/MM/YYYY");
+                const dateA = dayjs(a.Date, "DD/MM/YYYY");
+                const dateB = dayjs(b.Date, "DD/MM/YYYY");
                 if (!dateA.isSame(dateB)) {
                     return dateA - dateB;
                 }
-                return (a.Driver?.split(":")[1] || '').localeCompare(b.Driver?.split(":")[1] || '');
-            })
-            .map((trip) => ({
-                ...trip,
-                totalVolumeProduct: volumeByTripId[trip.id - 1] || 0,
-            }));
-    }, [trips, selectedDateStart, selectedDateEnd, orders, selectDriver]);
+                return (a.driver?.split(":")[1] || '').localeCompare(b.driver?.split(":")[1] || '');
+            });
+    }, [orders, selectedDateStart, selectedDateEnd]);
+
+    const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
+    const totalVolume = orderDetail.reduce((sum, item) => sum + (Number(item.VolumeProduct || 0)), 0);
+
+    const sortedOrderDetail = useMemo(() => {
+        const sorted = [...orderDetail];
+        const key = sortConfig.key || 'Date';
+        const direction = sortConfig.key ? sortConfig.direction : 'asc';
+
+        sorted.sort((a, b) => {
+            let aValue, bValue;
+
+            if (key === 'Date') {
+                aValue = dayjs(a.Date, "DD/MM/YYYY");
+                bValue = dayjs(b.Date, "DD/MM/YYYY");
+            } else if (key === 'Driver') {
+                aValue = a.Driver?.split(":")[1] || '';
+                bValue = b.Driver?.split(":")[1] || '';
+            } else if (key === 'TicketName') {
+                aValue = a.TicketName?.split(":")[1] || '';
+                bValue = b.TicketName?.split(":")[1] || '';
+            } else if (key === 'ProductName') {
+                aValue = a.ProductName || '';
+                bValue = b.ProductName || '';
+            }
+
+            if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        return sorted;
+    }, [orderDetail, sortConfig]);
+
+    const getCustomers = () => {
+        const customers = [
+            { id: "0", Name: "แสดงทั้งหมด", CustomerType: "" },
+            // ...[...ticketsPS]
+            //     .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+            //     .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+            //     .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+
+            // ...[...ticketsT]
+            //     .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+            //     .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+            //     .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+
+            // ...[...ticketsB].filter((item) => item.Status === "ลูกค้าประจำ")
+            //     .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+            //     .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })),
+            // รถใหญ่ใช้ ticketsB
+            ...[...ticketsS].filter((item) => item.Status === "ลูกค้าประจำ")
+                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
+        ];
+
+        return customers.filter((item) => item.id || item.TicketsCode);
+    };
 
 
-    const totalCostTrip = TripDetail.reduce((sum, item) => sum + Number(item.CostTrip || 0), 0);
-    const totalVolume = TripDetail.reduce((sum, item) => sum + Number(item.totalVolumeProduct || 0), 0);
-    //const totalVolume = TripDetail.reduce((sum, item) => sum + (Number(item.WeightHigh) + Number(item.WeightLow)), 0);
-
-    const sortedDrivers = [...driver].sort((a, b) => {
-        // จัดกลุ่มรถใหญ่ไว้ก่อน
-        if (a.TruckType === "รถใหญ่" && b.TruckType !== "รถใหญ่") return -1;
-        if (a.TruckType !== "รถใหญ่" && b.TruckType === "รถใหญ่") return 1;
-
-        // ถ้าเป็นประเภทเดียวกัน ให้เปรียบเทียบ TicketName.split(":")[1]
-        const ticketA = a.Name?.trim() || "";
-        const ticketB = b.Name?.trim() || "";
-        return ticketA.localeCompare(ticketB, "th"); // ใช้ "th" สำหรับเรียงตามพจนานุกรมไทย
-    });
-
-    console.log("Driver : ", sortedDrivers);
-
-    useEffect(() => {
-        if (sortedDrivers.length > 0 && !selectDriver) {
-            setSelectDriver(sortedDrivers[0]);
-        }
-    }, [sortedDrivers, selectDriver]);
-
-    console.log("Trip Detail : ", TripDetail);
-    console.log("Select Driver : ", selectDriver);
+    console.log("Order Detail : ", orderDetail);
+    console.log("Select Tickets : ", selectTickets);
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -217,32 +243,25 @@ const ReportTrip = () => {
         setPage(0);
     };
 
-    console.log(sortedDrivers.find(item => item.id === 1));
-
     const exportToExcel = () => {
-        const exportData = TripDetail.map((row, index) => ({
+        const exportData = sortedOrderDetail.map((row, index) => ({
             ลำดับ: index + 1,
-            "วันที่รับ": formatThaiSlash(dayjs(row.DateReceive,"DD/MM/YYYY")),
-            ไป: Object.entries(row)
-                .filter(([key]) => key.startsWith("Order"))
-                .sort(
-                    (a, b) =>
-                        parseInt(a[0].replace("Order", "")) - parseInt(b[0].replace("Order", ""))
-                )
-                .map(([_, value], idx) => `[${idx + 1}] : ${value.split(":")[1]}`)
-                .join("\n"),  // รวม order หลายๆ อันขึ้นบรรทัดใหม่ในช่องเดียว
-            ค่าเที่ยว: row.CostTrip,
-            คลัง: row.Depot.split(":")[0],
-            "จำนวนลิตร": Number(row.totalVolumeProduct),
+            วันที่ส่ง: formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY")),
+            "ผู้ขับ/ป้ายทะเบียน": `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`,
+            ตั๋ว: row.TicketName.split(":")[1],
+            ชนิดน้ำมัน: row.ProductName,
+            จำนวนลิตร: Number(row.VolumeProduct),
+            ราคาน้ำมัน: row.RateOil,
+            ยอดเงิน: row.Amount,
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานสรุปค่าเที่ยว");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานสรุปยอดน้ำมัน");
 
         const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
         const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-        saveAs(blob, `รายงานสรุปค่าเที่ยว_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+        saveAs(blob, `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
     };
 
     return (
@@ -258,7 +277,7 @@ const ReportTrip = () => {
                         textAlign="center"
                         gutterBottom
                     >
-                        สรุปค่าเที่ยว
+                        สรุปยอดน้ำมันรถเล็ก
                     </Typography>
                 </Grid>
                 <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
@@ -346,7 +365,7 @@ const ReportTrip = () => {
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <Grid container spacing={2} width="100%">
-                    <Grid item xs={5.5}>
+                    <Grid item xs={5}>
                         {/* <Paper>
                             <FormControl size="small" fullWidth>
                                 <Select
@@ -392,14 +411,22 @@ const ReportTrip = () => {
                             <Paper>
                                 <Autocomplete
                                     id="autocomplete-tickets"
-                                    options={sortedDrivers}
-                                    getOptionLabel={(option) => `${option.Name} (${option.TruckType})`}
+                                    options={getCustomers()}
+                                    getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
                                     isOptionEqualToValue={(option, value) =>
-                                        option.id === value.id
+                                        option.id === value.id && option.Name === value.Name
                                     }
-                                    value={selectDriver}
+                                    value={
+                                        selectTickets
+                                            ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
+                                            : null
+                                    }
                                     onChange={(event, newValue) => {
-                                        setSelectDriver(newValue);
+                                        if (newValue) {
+                                            handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
+                                        } else {
+                                            handleChangeTickets({ target: { value: "" } });
+                                        }
                                     }}
                                     renderInput={(params) => (
                                         <TextField
@@ -411,7 +438,7 @@ const ReportTrip = () => {
                                                 ...params.InputProps,
                                                 startAdornment: (
                                                     <InputAdornment position="start" sx={{ marginRight: 1 }}>
-                                                        กรุณาเลือกพนักงานขับรถ/ทะเบียน :
+                                                        กรุณาเลือกตั๋ว :
                                                     </InputAdornment>
                                                 ),
                                                 sx: {
@@ -426,7 +453,7 @@ const ReportTrip = () => {
                                     renderOption={(props, option) => (
                                         <li {...props}>
                                             <Typography fontSize="16px">
-                                                {`${option.Name} (${option.TruckType})`}
+                                                {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
                                             </Typography>
                                         </li>
                                     )}
@@ -471,7 +498,7 @@ const ReportTrip = () => {
                             </FormControl> */}
                         </Paper>
                     </Grid>
-                    <Grid item xs={4.5} />
+                    <Grid item xs={5} />
                     <Grid item xs={2}>
                         <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                     </Grid>
@@ -492,43 +519,83 @@ const ReportTrip = () => {
                                         <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
                                         </TablecellSelling>
+                                        <TablecellSelling
+                                            onClick={() => handleSort("Date")}
+                                            sx={{ textAlign: "center", fontSize: 16, width: 50 }}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                วันที่ส่ง
+                                                {sortConfig.key === "Date" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
+                                        </TablecellSelling>
+
+                                        <TablecellSelling
+                                            onClick={() => handleSort("Driver")}
+                                            sx={{ textAlign: "center", fontSize: 16, width: 150 }}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                ผู้ขับ/ป้ายทะเบียน
+                                                {sortConfig.key === "Driver" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
+                                        </TablecellSelling>
+                                        <TablecellSelling
+                                            onClick={() => handleSort("TicketName")}
+                                            sx={{ textAlign: "center", fontSize: 16, width: 150 }}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                ตั๋ว
+                                                {sortConfig.key === "TicketName" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
+                                        </TablecellSelling>
+                                        <TablecellSelling
+                                            onClick={() => handleSort("ProductName")}
+                                            sx={{ textAlign: "center", fontSize: 16, width: 50 }}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                ชนิดน้ำมัน
+                                                {sortConfig.key === "ProductName" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
+                                        </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
-                                            วันที่รับ
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
-                                            ไป
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
-                                            ค่าเที่ยว
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
-                                            คลัง
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             จำนวนลิตร
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                            ราคาน้ำมัน
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                            ยอดเงิน
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        TripDetail.map((row, index) => (
+                                        sortedOrderDetail.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.DateReceive,"DD/MM/YYYY"))}</TableCell>
-                                                <TableCell>
-                                                    {
-                                                        Object.entries(row)
-                                                            .filter(([key]) => key.startsWith("Order"))
-                                                            .sort((a, b) => parseInt(a[0].replace("Order", "")) - parseInt(b[0].replace("Order", "")))
-                                                            .map(([_, value], idx) => (
-                                                                <div key={idx}>{`[${idx + 1}] : ${value.split(":")[1]}`}</div>
-                                                            ))
-                                                    }
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.CostTrip)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Depot.split(":")[0]}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(Number(row.totalVolumeProduct))}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1]}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(Number(row.VolumeProduct))}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.RateOil}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
                                             </TableRow>
                                         ))
                                     }
@@ -585,7 +652,7 @@ const ReportTrip = () => {
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={new Intl.NumberFormat("en-US").format(totalCostTrip)}
+                                        value={new Intl.NumberFormat("en-US").format(totalAmount)}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '40px',
@@ -622,7 +689,7 @@ const ReportTrip = () => {
                                 {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left", marginLeft: 2 }}>
                                     <Typography variant="h6" sx={{ marginRight: 1, fontWeight: "bold" }} gutterBottom>ยอดเงิน</Typography>
                                     <Paper>
-                                        <TextField fullWidth size="small" value={new Intl.NumberFormat("en-US").format(totalCostTrip)} />
+                                        <TextField fullWidth size="small" value={new Intl.NumberFormat("en-US").format(totalAmount)} />
                                     </Paper>
                                 </Box> */}
                             </Grid>
@@ -636,4 +703,4 @@ const ReportTrip = () => {
     );
 };
 
-export default ReportTrip;
+export default SummaryOilBalanceSmallTruck;

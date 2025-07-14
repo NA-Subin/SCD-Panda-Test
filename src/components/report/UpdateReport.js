@@ -202,6 +202,7 @@ const UpdateReport = (props) => {
             item.Trip !== "ยกเลิก" &&
             item.CustomerType !== "ตั๋วรถเล็ก" &&
             itemDate.isBetween(startDate, endDate, "day", "[]") // [] คือรวมวันแรกกับวันสุดท้ายด้วย
+            //(checkOverdueTransfer || itemDate.isBetween(startDate, endDate, null, "[]"))
         );
     });
 
@@ -336,7 +337,7 @@ const UpdateReport = (props) => {
     };
 
     const processedTickets = processTickets(
-        ticketsList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+        ticketsList,
         showTrips
     );
 
@@ -816,7 +817,7 @@ const UpdateReport = (props) => {
                     sx={{
                         position: "relative",
                         maxWidth: "100%",
-                        height: "200px", // ความสูงรวมของ container หลัก
+                        height: "300px", // ความสูงรวมของ container หลัก
                         overflow: "hidden",
                         marginBottom: 0.5,
                         overflowX: "auto",
@@ -1455,7 +1456,7 @@ const UpdateReport = (props) => {
                     sx={{
                         position: "relative",
                         maxWidth: "100%",
-                        height: "200px", // ความสูงรวมของ container หลัก
+                        height: "300px", // ความสูงรวมของ container หลัก
                         overflow: "hidden",
                         marginBottom: 0.5,
                         overflowX: "auto",

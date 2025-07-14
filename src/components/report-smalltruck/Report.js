@@ -147,7 +147,9 @@ const ReportSmallTruck = () => {
       id: trip.id.toString(),
       type: "ส่งออก",
       ...trip,
-    }));
+    })); 
+
+    console.log("outboundList :",outboundList);
 
   const travelSummary = {};
 

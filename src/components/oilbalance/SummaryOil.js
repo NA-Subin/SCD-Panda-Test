@@ -143,7 +143,7 @@ const SummaryOilBalance = () => {
                 // ตรวจสอบเงื่อนไขของ driver ตาม selectDriver
                 const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
 
-                return isValidStatus && isInDateRange && matchTickets;
+                return isValidStatus && isInDateRange && matchTickets && item.CustomerType !== "ตั๋วรถเล็ก" ;
             })
             .flatMap((item) => {
                 if (!item.Product) return [];
@@ -219,9 +219,9 @@ const SummaryOilBalance = () => {
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })),
             // รถใหญ่ใช้ ticketsB
-            ...[...ticketsS].filter((item) => item.Status === "ลูกค้าประจำ")
-                .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
-                .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
+            // ...[...ticketsS].filter((item) => item.Status === "ลูกค้าประจำ")
+            //     .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
+            //     .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })) // รถเล็กใช้ ticketsS
         ];
 
         return customers.filter((item) => item.id || item.TicketsCode);

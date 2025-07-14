@@ -392,9 +392,9 @@ const Employee = () => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                       เบอร์โทร
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                    {/* <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                       สิทธิ์
-                    </TablecellHeader>
+                    </TablecellHeader> */}
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                       UserID
                     </TablecellHeader>
@@ -412,7 +412,7 @@ const Employee = () => {
                         <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Position.split(":")[1]}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Rights}</TableCell>
+                        {/* <TableCell sx={{ textAlign: "center" }}>{row.Rights}</TableCell> */}
                         <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
                         <UpdateEmployee key={row.id} row={row} />
                       </TableRow>

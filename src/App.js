@@ -51,6 +51,8 @@ import FuelPaymentReport from "./components/invoice/Report";
 import InvoiceSmallTruck from "./components/invoice-smalltruck/Invoice";
 import ReportSmallTruck from "./components/report-smalltruck/Report";
 import PrintTripsSmall from "./components/sellingsmalltruck/PrintTrips";
+import ReportPaymentSmallTruck from "./components/invoice-smalltruck/Report";
+import SummaryOilBalanceSmallTruck from "./components/oilbalance/SummaryOilSmallTruck";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -198,10 +200,16 @@ function App() {
                         <Route path="/summary-oil-balance" element={<SummaryOilBalance />} />
                       </Routes>
                       <Routes>
+                        <Route path="/oil-balance-smalltruck" element={<SummaryOilBalanceSmallTruck />} />
+                      </Routes>
+                      <Routes>
                         <Route path="/report-driver-trip" element={<ReportTrip />} />
                       </Routes>
                       <Routes>
                         <Route path="/report-fuel-payment" element={<FuelPaymentReport />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/payment-smalltruck" element={<ReportPaymentSmallTruck />} />
                       </Routes>
                     </TripDataProvider>
                     <GasStationDataProvider>

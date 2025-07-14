@@ -55,7 +55,7 @@ import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 import ReportDetail from "./ReportDetail";
 
-const FuelPaymentReport = () => {
+const ReportPaymentSmallTruck = () => {
 
     const [date, setDate] = React.useState(false);
     const [check, setCheck] = React.useState(3);
@@ -171,7 +171,7 @@ const FuelPaymentReport = () => {
 
     //         Object.entries(item.Product).forEach(([key, value]) => {
     //             if (key !== "P") {
-    //                 totalVolume += parseFloat(value.Volume || 0) * 1000;
+    //                 totalVolume += parseFloat(value.Volume || 0);
     //                 totalAmount += parseFloat(value.Amount || 0);
     //             }
     //         });
@@ -207,7 +207,7 @@ const FuelPaymentReport = () => {
                 isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
             }
 
-            return isValidStatus && isInDateRange && matchTickets && isInCompany;
+            return isValidStatus && isInDateRange && matchTickets && isInCompany && item.CustomerType === "ตั๋วรถเล็ก";
         });
 
         filteredItemsRef.current = filteredItems;
@@ -234,7 +234,7 @@ const FuelPaymentReport = () => {
                     ...item,
                     IncomingMoneyDetail: incomingMoneyDetail,
                     ProductName: productName,
-                    VolumeProduct: productData.Volume * 1000,
+                    VolumeProduct: productData.Volume,
                     Amount: productData.Amount || 0,
                     IncomingMoney: totalIncomingMoney || 0,
                     OverdueTransfer: (productData.Amount || 0) - (totalIncomingMoney || 0),
@@ -772,4 +772,4 @@ const FuelPaymentReport = () => {
     );
 };
 
-export default FuelPaymentReport;
+export default ReportPaymentSmallTruck;

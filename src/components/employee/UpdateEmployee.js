@@ -73,8 +73,8 @@ const UpdateEmployee = (props) => {
                 Name: name,
                 User: user,
                 Position: position,
-                Phone: phone,
-                Rights: rights === 1 ? "แอดมิน" : rights === 2 ? "หน้าลาน" : rights === 3 ? "เจ้าหนี้น้ำมัน" : ""
+                Phone: phone
+                //Rights: rights === 1 ? "แอดมิน" : rights === 2 ? "หน้าลาน" : rights === 3 ? "เจ้าหนี้น้ำมัน" : ""
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -166,7 +166,7 @@ const UpdateEmployee = (props) => {
                             <Grid item xs={5}>
                                 <TextField fullWidth variant="standard" value={user} disabled />
                             </Grid>
-                            <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
+                            {/* <Grid item xs={12} display="flex" justifyContent="center" alignItems="center">
                                 <FormGroup row>
                                     <FormControlLabel
                                         control={
@@ -199,7 +199,7 @@ const UpdateEmployee = (props) => {
                                         disabled={update ? true : false}
                                         label="เจ้าหนี้น้ำมัน" />
                                 </FormGroup>
-                            </Grid>
+                            </Grid> */}
                         </Grid>
                     </Paper>
                 </DialogContent>

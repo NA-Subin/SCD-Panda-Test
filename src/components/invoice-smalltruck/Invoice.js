@@ -139,7 +139,7 @@ const InvoiceSmallTruck = () => {
         isInCompany.id === customerId &&
         item.CustomerType === "ตั๋วรถเล็ก" &&
         item.Trip !== "ยกเลิก" &&
-        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+        (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
     .map((item) => {
@@ -282,6 +282,7 @@ const InvoiceSmallTruck = () => {
                     },
                   },
                 }}
+                disabled={checkOverdueTransfer ? true : false}
               />
               <DatePicker
                 openTo="day"
@@ -312,6 +313,7 @@ const InvoiceSmallTruck = () => {
                     },
                   },
                 }}
+                disabled={checkOverdueTransfer ? true : false}
               />
             </LocalizationProvider>
           </Box>

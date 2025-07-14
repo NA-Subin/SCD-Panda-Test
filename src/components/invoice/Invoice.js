@@ -141,7 +141,7 @@ const Invoice = () => {
         isInCompany.id === customerId &&
         item.CustomerType === "ตั๋วรถใหญ่" &&
         item.Trip !== "ยกเลิก" &&
-        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+        (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
     .map((item) => {
@@ -284,6 +284,7 @@ const Invoice = () => {
                     },
                   },
                 }}
+                disabled={checkOverdueTransfer ? true : false}
               />
               <DatePicker
                 openTo="day"
@@ -314,6 +315,7 @@ const Invoice = () => {
                     },
                   },
                 }}
+                disabled={checkOverdueTransfer ? true : false}
               />
               {/* <DatePicker
                 openTo="day"
@@ -533,7 +535,7 @@ const Invoice = () => {
                               )
                               )
                             :
-                            sortedOrderDetail.map((row, index) => (
+                            orderDetail.map((row, index) => (
                               <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.Date)}
                                 sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                               >
@@ -620,7 +622,7 @@ const Invoice = () => {
                             : ""
                         ))
                       :
-                      sortedOrderDetail.map((row, index) => (
+                      orderDetail.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?
                           <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} />
                           : ""

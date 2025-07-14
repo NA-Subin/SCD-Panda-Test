@@ -137,7 +137,7 @@ const Report = () => {
       return (
         item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
         item.Trip !== "ยกเลิก" &&
-        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+        (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
     .map((item) => {
@@ -198,7 +198,7 @@ const Report = () => {
       return (
         item.CustomerType === "ตั๋วปั้ม" &&
         item.Trip !== "ยกเลิก" &&
-        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+        (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
     .map((item) => {
@@ -254,7 +254,7 @@ const Report = () => {
       return (
         item.CustomerType === "ตั๋วน้ำมัน" &&
         item.Trip !== "ยกเลิก" &&
-        itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") // "[]" คือรวมวันที่ปลายทางด้วย
+        (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
     .map((item) => {
@@ -1104,6 +1104,7 @@ const Report = () => {
                     },
                   },
                 }}
+                disabled={checkOverdueTransfer ? true : false}
               />
               <DatePicker
                 openTo="day"
@@ -1134,6 +1135,7 @@ const Report = () => {
                     },
                   },
                 }}
+                disabled={checkOverdueTransfer ? true : false}
               />
             </LocalizationProvider>
           </Box>
