@@ -970,7 +970,7 @@ export default function Navbar() {
                   <List
                     sx={
                       !open ? {
-                        backgroundColor: theme.palette.panda.dark,
+                        backgroundColor: "gray",
                         color: theme.palette.primary.contrastText,
                       }
                         : {
@@ -997,7 +997,7 @@ export default function Navbar() {
                             }}
                           >
                             {/* ไอคอนซ้าย */}
-                            <ListItemIcon sx={{ minWidth: 30 }}>
+                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.dark  }}>
                               <BadgeIcon />
                             </ListItemIcon>
 
@@ -1013,7 +1013,7 @@ export default function Navbar() {
                             />
 
                             {/* ไอคอนขวา */}
-                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.dark  }}>
                               <KeyboardArrowDownIcon />
                             </ListItemIcon>
                           </ListItemButton>
@@ -1040,7 +1040,7 @@ export default function Navbar() {
                             }}
                           >
                             {/* ไอคอนซ้าย */}
-                            <ListItemIcon sx={{ minWidth: 30 }}>
+                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.dark  }}>
                               <BadgeIcon />
                             </ListItemIcon>
 
@@ -1056,7 +1056,7 @@ export default function Navbar() {
                             />
 
                             {/* ไอคอนขวา */}
-                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.dark  }}>
                               <KeyboardArrowUpIcon />
                             </ListItemIcon>
                           </ListItemButton>
@@ -1070,7 +1070,7 @@ export default function Navbar() {
                           key={text}
                           disablePadding
                           sx={{
-                            backgroundColor: show1 === index && theme.palette.panda.dark,
+                            backgroundColor: show1 === index && "gray",
                             height: 35, // กำหนดความสูงให้ ListItem
                             paddingY: 1,
                           }}
@@ -1202,11 +1202,11 @@ export default function Navbar() {
               {(
                 showOperation &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.success.main}` }} />
                   <List
                     sx={
                       !open ? {
-                        backgroundColor: theme.palette.panda.dark,
+                        backgroundColor: theme.palette.success.main,
                         color: theme.palette.primary.contrastText,
                       }
                         : {
@@ -1233,7 +1233,7 @@ export default function Navbar() {
                             }}
                           >
                             {/* ไอคอนซ้าย */}
-                            <ListItemIcon sx={{ minWidth: 30 }}>
+                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.success.main }}>
                               <ContactPageIcon />
                             </ListItemIcon>
 
@@ -1249,7 +1249,7 @@ export default function Navbar() {
                             />
 
                             {/* ไอคอนขวา */}
-                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.success.main }}>
                               <KeyboardArrowDownIcon />
                             </ListItemIcon>
                           </ListItemButton>
@@ -1276,7 +1276,7 @@ export default function Navbar() {
                             }}
                           >
                             {/* ไอคอนซ้าย */}
-                            <ListItemIcon sx={{ minWidth: 30 }}>
+                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.success.main }}>
                               <ContactPageIcon />
                             </ListItemIcon>
 
@@ -1292,7 +1292,7 @@ export default function Navbar() {
                             />
 
                             {/* ไอคอนขวา */}
-                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.success.main }}>
                               <KeyboardArrowUpIcon />
                             </ListItemIcon>
                           </ListItemButton>
@@ -1306,7 +1306,7 @@ export default function Navbar() {
                           key={text}
                           disablePadding
                           sx={{
-                            backgroundColor: show2 === index && theme.palette.panda.dark,
+                            backgroundColor: show2 === index && theme.palette.success.main,
                             height: 35, // กำหนดความสูงให้ ListItem
                             paddingY: 1,
                           }}
@@ -1318,6 +1318,7 @@ export default function Navbar() {
                             }
                             sx={{
                               height: 35, // กำหนดความสูงให้ ListItem
+                              color: theme.palette.panda.dark
                             }}
                             onClick={() => (setShow2(index), setSetting(false))}
                             onMouseUp={() => (setShow2(index), setSetting(false))}
@@ -1327,7 +1328,7 @@ export default function Navbar() {
                               shouldDrawerOpen ?
                                 <ListItemIcon
                                   sx={{
-                                    color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.success.main,
                                     mr: !open || show2 === index ? -3 : -2,
                                     ml: !open || show2 === index ? 3 : 2,
                                   }}
@@ -1364,7 +1365,7 @@ export default function Navbar() {
                                 >
                                   <ListItemIcon
                                     sx={{
-                                      color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      color: !open || show2 === index ? theme.palette.primary.contrastText : theme.palette.success.main,
                                       mr: !open || show2 === index ? -3 : -2,
                                       ml: !open || show2 === index ? 3 : 2,
                                     }}
@@ -1397,7 +1398,7 @@ export default function Navbar() {
               {(
                 showFinancial &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.yellow.dark}` }} />
                   <Collapse in={!financial} unmountOnExit={false}>
                     {
                       open &&
@@ -1417,7 +1418,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30 }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.yellow.dark }}>
                             <PaidIcon />
                           </ListItemIcon>
 
@@ -1433,7 +1434,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.yellow.dark }}>
                             <KeyboardArrowDownIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1460,7 +1461,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30 }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.yellow.dark }}>
                             <PaidIcon />
                           </ListItemIcon>
 
@@ -1476,7 +1477,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.yellow.dark }}>
                             <KeyboardArrowUpIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1487,7 +1488,7 @@ export default function Navbar() {
                   <List
                     sx={
                       !open ? {
-                        backgroundColor: theme.palette.panda.dark,
+                        backgroundColor: theme.palette.yellow.dark,
                         color: theme.palette.primary.contrastText,
                       }
                         : {
@@ -1501,7 +1502,7 @@ export default function Navbar() {
                           key={text}
                           disablePadding
                           sx={{
-                            backgroundColor: show3 === index && theme.palette.panda.dark,
+                            backgroundColor: show3 === index && theme.palette.yellow.dark,
                             height: 35, // กำหนดความสูงให้ ListItem
                             paddingY: 1,
                           }}
@@ -1522,7 +1523,7 @@ export default function Navbar() {
                               shouldDrawerOpen ?
                                 <ListItemIcon
                                   sx={{
-                                    color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.yellow.dark,
                                     mr: !open || show3 === index ? -3 : -2,
                                     ml: !open || show3 === index ? 3 : 2,
                                   }}
@@ -1552,14 +1553,14 @@ export default function Navbar() {
                                       sx: {
                                         fontSize: '15px', // ปรับขนาดตัวอักษร
                                         textAlign: 'left', // จัดข้อความชิดซ้าย
-                                        backgroundColor: theme.palette.panda.dark,
+                                        backgroundColor: theme.palette.yellow.dark
                                       },
                                     },
                                   }}
                                 >
                                   <ListItemIcon
                                     sx={{
-                                      color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      color: !open || show3 === index ? theme.palette.primary.contrastText : theme.palette.yellow.dark,
                                       mr: !open || show3 === index ? -3 : -2,
                                       ml: !open || show3 === index ? 3 : 2,
                                     }}
@@ -1592,7 +1593,7 @@ export default function Navbar() {
               {(
                 showReport &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.primary.main}` }} />
                   <Collapse in={!report} unmountOnExit={false}>
                     {
                       open &&
@@ -1612,7 +1613,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30 }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.primary.main }}>
                             <SummarizeIcon />
                           </ListItemIcon>
 
@@ -1628,7 +1629,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.primary.main }}>
                             <KeyboardArrowDownIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1655,7 +1656,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30 }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.primary.main }}>
                             <SummarizeIcon />
                           </ListItemIcon>
 
@@ -1671,7 +1672,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.primary.main }}>
                             <KeyboardArrowUpIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1682,7 +1683,7 @@ export default function Navbar() {
                   <List
                     sx={
                       !open ? {
-                        backgroundColor: theme.palette.panda.dark,
+                        backgroundColor: theme.palette.primary.main,
                         color: theme.palette.primary.contrastText,
                       }
                         : {
@@ -1696,7 +1697,7 @@ export default function Navbar() {
                           key={text}
                           disablePadding
                           sx={{
-                            backgroundColor: show4 === index && theme.palette.panda.dark,
+                            backgroundColor: show4 === index && theme.palette.primary.main,
                             height: 35, // กำหนดความสูงให้ ListItem
                             paddingY: 1,
                           }}
@@ -1717,7 +1718,7 @@ export default function Navbar() {
                               shouldDrawerOpen ?
                                 <ListItemIcon
                                   sx={{
-                                    color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.primary.main,
                                     mr: !open || show4 === index ? -3 : -2,
                                     ml: !open || show4 === index ? 3 : 2,
                                   }}
@@ -1747,14 +1748,14 @@ export default function Navbar() {
                                       sx: {
                                         fontSize: '15px', // ปรับขนาดตัวอักษร
                                         textAlign: 'left', // จัดข้อความชิดซ้าย
-                                        backgroundColor: theme.palette.panda.dark,
+                                        backgroundColor: theme.palette.primary.main,
                                       },
                                     },
                                   }}
                                 >
                                   <ListItemIcon
                                     sx={{
-                                      color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.primary.main,
                                       mr: !open || show4 === index ? -3 : -2,
                                       ml: !open || show4 === index ? 3 : 2,
                                     }}
@@ -1787,7 +1788,7 @@ export default function Navbar() {
               {(
                 showSmallTruck &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1 }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1, border: `1px solid ${theme.palette.pink.main}` }} />
                   <Collapse in={!trucksmall} unmountOnExit={false}>
                     {
                       open &&
@@ -1807,7 +1808,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30 }}>
+                          <ListItemIcon sx={{ minWidth: 30,color: theme.palette.pink.main }}>
                             <LocalShippingIcon />
                           </ListItemIcon>
 
@@ -1823,7 +1824,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end',color: theme.palette.pink.main }}>
                             <KeyboardArrowDownIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1850,7 +1851,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30 }}>
+                          <ListItemIcon sx={{ minWidth: 30,color: theme.palette.pink.main }}>
                             <LocalShippingIcon />
                           </ListItemIcon>
 
@@ -1866,7 +1867,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end' }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end',color: theme.palette.pink.main }}>
                             <KeyboardArrowUpIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1877,7 +1878,7 @@ export default function Navbar() {
                   <List
                     sx={
                       !open ? {
-                        backgroundColor: theme.palette.panda.dark,
+                        backgroundColor: theme.palette.pink.main,
                         color: theme.palette.primary.contrastText,
                       }
                         : {
@@ -1891,7 +1892,7 @@ export default function Navbar() {
                           key={text}
                           disablePadding
                           sx={{
-                            backgroundColor: show5 === index && theme.palette.panda.dark,
+                            backgroundColor: show5 === index && theme.palette.pink.main,
                             height: 35, // กำหนดความสูงให้ ListItem
                             paddingY: 1,
                           }}
@@ -1912,7 +1913,7 @@ export default function Navbar() {
                               shouldDrawerOpen ?
                                 <ListItemIcon
                                   sx={{
-                                    color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                    color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.pink.main,
                                     mr: !open || show5 === index ? -3 : -2,
                                     ml: !open || show5 === index ? 3 : 2,
                                   }}
@@ -1944,14 +1945,14 @@ export default function Navbar() {
                                       sx: {
                                         fontSize: '15px', // ปรับขนาดตัวอักษร
                                         textAlign: 'left', // จัดข้อความชิดซ้าย
-                                        backgroundColor: theme.palette.panda.dark,
+                                        backgroundColor: theme.palette.pink.light,
                                       },
                                     },
                                   }}
                                 >
                                   <ListItemIcon
                                     sx={{
-                                      color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.dark,
+                                      color: !open || show5 === index ? theme.palette.primary.contrastText : theme.palette.pink.main,
                                       mr: !open || show5 === index ? -3 : -2,
                                       ml: !open || show5 === index ? 3 : 2,
                                     }}
@@ -1967,7 +1968,7 @@ export default function Navbar() {
                             <ListItemText
                               primary={shouldDrawerOpen ? text : ""}
                               sx={{
-                                color: show5 === index && theme.palette.primary.contrastText, fontSize: "15px"
+                                color: show5 === index && theme.palette.primary.contrastText , fontSize: "15px"
                               }}
                               primaryTypographyProps={{
                                 fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่

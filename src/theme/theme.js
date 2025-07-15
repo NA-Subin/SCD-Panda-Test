@@ -3,8 +3,8 @@ import "@fontsource/noto-sans-thai";
 
 const theme = createTheme({
   typography: {
-    fontFamily: "Noto Sans Thai, sans-serif",
-    fontWeight: "Semi Bold",
+    fontFamily: '"IBM Plex Mono", monospace',
+    fontWeight: 800,
     fontStyle: "normal",
   },
   palette: {
@@ -18,6 +18,18 @@ const theme = createTheme({
       main: "#244873",
       light: "#417fca",
       dark: "#172e4a",
+      contrastText: "#ffffff",
+    },
+    pink: {
+      main: "#fd6094ff",
+      light: "#fcadc9ff",
+      dark: "#c2185b",
+      contrastText: "#ffffff",
+    },
+    yellow: {
+      main: "#fdd835",
+      light: "#ffee58",
+      dark: "#fbc02d",
       contrastText: "#ffffff",
     },
     // panda: {

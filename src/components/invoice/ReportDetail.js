@@ -72,6 +72,8 @@ const ReportDetail = (props) => {
         setOpen(false);
     };
 
+    console.log("orderDetail : ",orderDetail);
+
     const orders = orderDetail
         .filter(order => order.TicketName === row.TicketName)
         .sort((a, b) => {
@@ -87,13 +89,6 @@ const ReportDetail = (props) => {
             return driverA.localeCompare(driverB);
         });
 
-    const totalAmount = orders.reduce((sum, o) => sum + o.Amount, 0);
-    const totalVolume = orders.reduce((sum, o) => sum + o.VolumeProduct, 0);
-    const totalOverdueTransfer = orders.reduce((sum, o) => sum + o.OverdueTransfer, 0);
-    const totalIncomingMoney = orders.reduce((sum, o) => sum + o.IncomingMoney, 0);
-
-    console.log("Total Amount : ", totalAmount);
-
     // 1. จัดกลุ่มตาม Date + Driver/Registration
     const grouped = orders.reduce((acc, order) => {
         const groupKey = `${order.Date}|${order.Driver}|${row.Registration}`;
@@ -102,8 +97,34 @@ const ReportDetail = (props) => {
         return acc;
     }, {});
 
+    const totalAmount = orders.reduce((sum, o) => sum + o.Amount, 0);
+    const totalVolume = orders.reduce((sum, o) => sum + o.VolumeProduct, 0);
+
+    const seen = new Set();
+
+    let totalOverdueTransfer = 0;
+    let totalIncomingMoney = 0;
+
+    orders.forEach((o) => {
+        const key = `${o.Date}|${o.Driver}|${o.Registration}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            totalOverdueTransfer += Number(o.OverdueTransfer);
+            totalIncomingMoney += Number(o.IncomingMoney);
+        }
+    });
+
+    console.log("Orders : ", orders);
+    console.log("Total Amount : ", totalAmount);
+    console.log("totalVolume : ", totalVolume);
+    console.log("totalOverdueTransfer : ", totalOverdueTransfer);
+    console.log("totalIncomingMoney : ", totalIncomingMoney);
+    console.log("grouped : ", grouped);
+
     // 2. แปลงเป็น array สำหรับแสดงผล
     const groupedOrders = Object.entries(grouped); // [ [key, [order1, order2]], ... ]
+
+    console.log("groupedOrders : ", groupedOrders);
 
     const formatted = `${dayjs(dateStart).locale("th").format("วันที่ D เดือนMMMM พ.ศ.BBBB")} - ${dayjs(dateEnd).format("วันที่ D เดือนMMMM พ.ศ.BBBB")}`;
 
@@ -226,10 +247,17 @@ const ReportDetail = (props) => {
                                             // คำนวณรวม
                                             const totalVolume = groupOrders.reduce((sum, o) => sum + o.VolumeProduct, 0);
                                             const totalAmount = groupOrders.reduce((sum, o) => sum + o.Amount, 0);
-                                            const totalIncomingMoney = groupOrders.reduce((sum, o) => sum + o.IncomingMoney, 0);
+                                            const totalIncomingMoney = groupOrders[0].IncomingMoneyDetail.reduce(
+                                                (sum, o) => sum + Number(o.IncomingMoney || 0), 0
+                                            );
                                             const avgRateOil = totalAmount && totalVolume
                                                 ? totalAmount / totalVolume
                                                 : 0;
+
+                                            console.log("totalAmount : ", totalAmount);
+                                            console.log("totalIncomingMoney : ", totalIncomingMoney);
+                                            console.log("groupOrders : ",groupOrders);
+                                            console.log("groupOrders[0].IncomingMoneyDetail : ",groupOrders[0].IncomingMoneyDetail);
 
                                             return (
                                                 <>

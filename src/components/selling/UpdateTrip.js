@@ -845,7 +845,7 @@ const UpdateTrip = (props) => {
                 WeightTruck: weightTrucks,
                 TotalWeight: totalVolumesTicket.totalWeight,
                 Status: status,
-                StatusTrip: "กำลังจัดเที่ยววิ่ง",
+                StatusTrip: trip.StatusTrip !== "จบทริป" ? "กำลังจัดเที่ยววิ่ง" : "จบทริป",
                 TruckType: registration.split(":")[4] === "รถบริษัท" ? "รถใหญ่" : "รถรับจ้างขนส่ง",
                 ...orderTrip,
                 ...ticketTrip
@@ -1664,7 +1664,7 @@ const UpdateTrip = (props) => {
                                         </Grid>
                                         :
                                         <Grid container>
-                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
+                                            <Grid item md={1} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.success.dark }} gutterBottom>ตั๋วน้ำมัน</Typography>
                                             </Grid>
                                             <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "center", xs: "left" } }}>
@@ -1682,7 +1682,7 @@ const UpdateTrip = (props) => {
                                                     </Box>
                                                 </Typography>
                                             </Grid>
-                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
+                                            <Grid item md={8.5} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>
                                                     ผู้ขับ/ป้ายทะเบียน :{" "}
                                                     <Box
@@ -1699,11 +1699,17 @@ const UpdateTrip = (props) => {
                                                                 ? trip.Driver.split(":")[1]
                                                                 : trip.Driver || "";
 
-                                                            const plate = trip.Registration?.includes(":")
-                                                                ? trip.Registration.split(":")[1]
-                                                                : trip.Registration || "";
+                                                            const [regId, regName] = trip.Registration?.includes(":")
+                                                                ? trip.Registration.split(":")
+                                                                : [null, trip.Registration || ""];
 
-                                                            return `${driverName} / ${plate}`;
+                                                            const matchedReg = truckH.find(reg => reg.id === Number(regId));
+
+                                                            const fullPlate = matchedReg
+                                                                ? `${matchedReg.RegHead} : ${matchedReg.RegTail.split(":")[1]}`
+                                                                : regName;
+
+                                                            return `${driverName} / ${fullPlate}`;
                                                         })()}
                                                     </Box>
                                                 </Typography>
@@ -2500,7 +2506,7 @@ const UpdateTrip = (props) => {
 
                                         :
                                         <Grid container>
-                                            <Grid item md={2.5} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
+                                            <Grid item md={1.5} xs={4} sx={{ textAlign: { md: "right", xs: "right" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, color: theme.palette.info.dark }} gutterBottom>จัดเที่ยววิ่ง</Typography>
                                             </Grid>
                                             <Grid item md={2.5} xs={8} sx={{ textAlign: { md: "right", xs: "left" } }}>
@@ -2518,7 +2524,7 @@ const UpdateTrip = (props) => {
                                                     </Box>
                                                 </Typography>
                                             </Grid>
-                                            <Grid item md={7} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
+                                            <Grid item md={8} xs={12} sx={{ textAlign: { md: "left", xs: "center" } }}>
                                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>
                                                     ผู้ขับ/ป้ายทะเบียน :{" "}
                                                     <Box
@@ -2535,11 +2541,17 @@ const UpdateTrip = (props) => {
                                                                 ? trip.Driver.split(":")[1]
                                                                 : trip.Driver || "";
 
-                                                            const plate = trip.Registration?.includes(":")
-                                                                ? trip.Registration.split(":")[1]
-                                                                : trip.Registration || "";
+                                                            const [regId, regName] = trip.Registration?.includes(":")
+                                                                ? trip.Registration.split(":")
+                                                                : [null, trip.Registration || ""];
 
-                                                            return `${driverName} / ${plate}`;
+                                                            const matchedReg = truckH.find(reg => reg.id === Number(regId));
+
+                                                            const fullPlate = matchedReg
+                                                                ? `${matchedReg.RegHead} : ${matchedReg.RegTail.split(":")[1]}`
+                                                                : regName;
+
+                                                            return `${driverName} / ${fullPlate}`;
                                                         })()}
                                                     </Box>
                                                 </Typography>
@@ -3154,7 +3166,8 @@ const UpdateTrip = (props) => {
                                         </Button>
                                     }
                                     {
-                                        trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        //trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        trip.StatusTrip !== "ยกเลิก" &&
                                         <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
                                     <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>

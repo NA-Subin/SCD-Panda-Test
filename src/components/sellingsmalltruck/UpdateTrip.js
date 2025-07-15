@@ -887,6 +887,7 @@ const UpdateTrip = (props) => {
                 DateReceive: selectedDateReceive,
                 DateDelivery: selectedDateDelivery,
                 DateStart: trip.DateStart,
+                DaetEnd: trip.DateEnd,
                 Driver: driverss,
                 Registration: registration,
                 Depot: depot,
@@ -895,7 +896,7 @@ const UpdateTrip = (props) => {
                 WeightTruck: weightTrucks,
                 TotalWeight: totalVolumesOrder.totalWeight,
                 Status: status,
-                StatusTrip: "กำลังจัดเที่ยววิ่ง",
+                StatusTrip: trip.StatusTrip !== "จบทริป" ? "กำลังจัดเที่ยววิ่ง" : "จบทริป",
                 TruckType: "รถเล็ก",
                 ...orderTrip,
                 ...ticketTrip

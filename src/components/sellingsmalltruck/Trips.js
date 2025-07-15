@@ -87,9 +87,10 @@ const TripsSmallTruck = () => {
         return (
             check === 2 ?
                 item.TruckType === "รถเล็ก" &&
-                item.StatusTrip === "กำลังจัดเที่ยววิ่ง" &&
+                item.StatusTrip === "กำลังจัดเที่ยววิ่ง" 
+                //&&
                 //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
-                itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+                //itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
                 : check === 3 ?
                     item.TruckType === "รถเล็ก" &&
                     item.StatusTrip === "ยกเลิก" &&

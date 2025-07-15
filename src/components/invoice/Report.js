@@ -208,7 +208,7 @@ const FuelPaymentReport = () => {
                 isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
             }
 
-            return isValidStatus && isInDateRange && matchTickets && isInCompany && item.CustomerType !== "ตั๋วรถเล็ก" ;
+            return isValidStatus && isInDateRange && matchTickets && isInCompany && item.CustomerType !== "ตั๋วรถเล็ก";
         });
 
         filteredItemsRef.current = filteredItems;
@@ -229,21 +229,45 @@ const FuelPaymentReport = () => {
 
             console.log("show incoming : ", incomingMoneyDetail);
 
-            return Object.entries(item.Product)
-                .filter(([productName]) => productName !== "P")
-                .map(([productName, productData]) => ({
-                    ...item,
-                    IncomingMoneyDetail: incomingMoneyDetail,
-                    ProductName: productName,
-                    VolumeProduct: productData.Volume * 1000,
-                    Amount: productData.Amount || 0,
-                    IncomingMoney: totalIncomingMoney || 0,
-                    OverdueTransfer: (productData.Amount || 0) - (totalIncomingMoney || 0),
-                    RateOil: productData.RateOil || 0,
-                }));
+            const productEntries = Object.entries(item.Product)
+                .filter(([productName]) => productName !== "P");
+
+            const OverdueTransfer = productEntries.reduce((sum, entry) => {
+                const productData = entry[1];
+                const value = parseFloat(productData.Amount) || 0;
+                return sum + value;
+            }, 0);
+
+            console.log("OverdueTransfer : ", OverdueTransfer);
+
+            return productEntries.map(([productName, productData], index) => ({
+                ...item,
+                IncomingMoneyDetail: index === 0 ? incomingMoneyDetail : 0,
+                ProductName: productName,
+                VolumeProduct: productData.Volume * 1000,
+                Amount: productData.Amount || 0,
+                IncomingMoney: index === 0 ? (totalIncomingMoney || 0) : 0,
+                OverdueTransfer: index === 0 ? ((OverdueTransfer || 0) - (totalIncomingMoney || 0)) : 0,
+                RateOil: productData.RateOil || 0,
+            }));
+
+            // return Object.entries(item.Product)
+            //     .filter(([productName]) => productName !== "P")
+            //     .map(([productName, productData]) => ({
+            //         ...item,
+            //         IncomingMoneyDetail: incomingMoneyDetail,
+            //         ProductName: productName,
+            //         VolumeProduct: productData.Volume * 1000,
+            //         Amount: productData.Amount || 0,
+            //         IncomingMoney: totalIncomingMoney || 0,
+            //         OverdueTransfer: (productData.Amount || 0) - (totalIncomingMoney || 0),
+            //         RateOil: productData.RateOil || 0,
+            //     }));
         });
 
         flattenedRef.current = flattened;
+        
+        console.log("flattened : ",flattened);
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
         const merged = Object.values(flattened.reduce((acc, curr) => {
@@ -277,8 +301,6 @@ const FuelPaymentReport = () => {
         });
 
     }, [orders, selectedDateStart, selectedDateEnd, selectTickets, transferMoneyDetail]);
-
-
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalOverdueTransfer = orderDetail.reduce((sum, item) => sum + Number(item.OverdueTransfer || 0), 0);
