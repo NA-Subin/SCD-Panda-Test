@@ -75,7 +75,7 @@ const InsertGasStation = (props) => {
 
     return (
         <React.Fragment>
-            <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} 
+            <Button variant="contained" color="success" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} 
             endIcon={
                 check === 1 ? <LocalGasStationIcon/>
                 : <WaterDropIcon />

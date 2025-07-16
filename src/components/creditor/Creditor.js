@@ -24,7 +24,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { IconButtonError, RateOils, TablecellGray, TablecellHeader, TablecellSelling } from "../../theme/style";
 import { database } from "../../server/firebase";
 import InsertCreditor from "./InsertCreditor";
 import UpdateCreditor from "./UpdateCreditor";
@@ -113,25 +113,25 @@ const Creditor = () => {
             <Table stickyHeader size="small" sx={{ width: "1250px" }}>
               <TableHead sx={{ height: "7vh" }}>
                 <TableRow>
-                  <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                  <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                     ลำดับ
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  </TablecellSelling>
+                  <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                     ชื่อ-สกุล
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  </TablecellSelling>
+                  <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                     เลขประจำตัวผู้เสียภาษี
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  </TablecellSelling>
+                  <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                     เบอร์โทร
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  </TablecellSelling>
+                  <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                     User
-                  </TablecellHeader>
-                  <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                  </TablecellSelling>
+                  <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                     ระยะเครดิต
-                  </TablecellHeader>
-                  <TablecellHeader />
+                  </TablecellSelling>
+                  <TablecellSelling />
                 </TableRow>
               </TableHead>
               <TableBody>

@@ -38,7 +38,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellTickets } from "../../theme/style";
+import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import InsertType from "./InsertType";
@@ -540,27 +540,27 @@ const CloseFS = () => {
                     <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
                         <TableHead sx={{ height: "5vh" }}>
                             <TableRow>
-                                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
                                     ลำดับ
-                                </TablecellFinancialHead>
-                                <TablecellFinancial sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
                                     ประเภท
-                                </TablecellFinancial>
-                                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
                                     ชื่อรายการ
-                                </TablecellFinancialHead>
-                                <TablecellFinancial sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เฉลี่ยค่าขนส่ง/ลิตร
-                                </TablecellFinancial>
-                                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white" }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white" }}>
                                     รวม
-                                </TablecellFinancialHead>
+                                </TablecellSelling>
                                 {
                                     data.map((row) => (
-                                        <TablecellFinancial sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                             <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1, marginTop: 1 }} gutterBottom>{row.Driver.split(":")[1]}</Typography>
                                             <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{row.Registration.split(":")[1]}</Typography>
-                                        </TablecellFinancial>
+                                        </TablecellSelling>
                                     ))
                                 }
                             </TableRow>

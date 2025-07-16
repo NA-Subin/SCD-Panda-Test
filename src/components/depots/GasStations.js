@@ -97,7 +97,7 @@ const GasStations = () => {
               isMobile ?
                 <Button
                   variant="contained"
-                  color={openMenu === 1 ? "info" : "inherit"}
+                  color={openMenu === 1 ? "success" : "inherit"}
                   fullWidth
                   onClick={() => setOpenMenu(1)}
                   sx={{ height: "10vh", fontSize: openMenu === 1 ? 40 : 16, paddingLeft: openMenu === 1 ? 0 : 3.5 }}
@@ -111,8 +111,8 @@ const GasStations = () => {
                         height: 30, // ความสูงของ Badge
                         top: openMenu === 1 ? 35 : -10,
                         right: openMenu === 1 ? -30 : -10,
-                        color: openMenu === 1 ? theme.palette.info.main : "white",
-                        backgroundColor: openMenu === 1 ? "white" : theme.palette.info.main,
+                        color: openMenu === 1 ? theme.palette.success.main : "white",
+                        backgroundColor: openMenu === 1 ? "white" : theme.palette.success.main,
                         fontWeight: "bold",
                       },
                       fontWeight: "bold",
@@ -124,7 +124,7 @@ const GasStations = () => {
                 :
                 <Button
                   variant="contained"
-                  color={openMenu === 1 ? "info" : "inherit"}
+                  color={openMenu === 1 ? "success" : "inherit"}
                   fullWidth
                   onClick={() => setOpenMenu(1)}
                   sx={{ height: "10vh", fontSize: openMenu === 1 ? 40 : 16, paddingLeft: openMenu === 1 ? 0 : 3.5 }}
@@ -141,8 +141,8 @@ const GasStations = () => {
                         height: 30, // ความสูงของ Badge
                         top: openMenu === 1 ? 35 : -40,
                         right: openMenu === 1 ? -30 : -5,
-                        color: openMenu === 1 ? theme.palette.info.main : "white",
-                        backgroundColor: openMenu === 1 ? "white" : theme.palette.info.main,
+                        color: openMenu === 1 ? theme.palette.success.main : "white",
+                        backgroundColor: openMenu === 1 ? "white" : theme.palette.success.main,
                         fontWeight: "bold",
                       },
                       fontWeight: "bold",
@@ -163,7 +163,7 @@ const GasStations = () => {
               isMobile ?
                 <Button
                   variant="contained"
-                  color={openMenu === 2 ? "info" : "inherit"}
+                  color={openMenu === 2 ? "success" : "inherit"}
                   fullWidth
                   onClick={() => setOpenMenu(2)}
                   sx={{ height: "10vh", fontSize: openMenu === 2 ? 40 : 16, paddingLeft: openMenu === 2 ? 0 : 3.5 }}
@@ -177,8 +177,8 @@ const GasStations = () => {
                         height: 30, // ความสูงของ Badge
                         top: openMenu === 2 ? 35 : -10,
                         right: openMenu === 2 ? -30 : -10,
-                        color: openMenu === 2 ? theme.palette.info.main : "white",
-                        backgroundColor: openMenu === 2 ? "white" : theme.palette.info.main,
+                        color: openMenu === 2 ? theme.palette.success.main : "white",
+                        backgroundColor: openMenu === 2 ? "white" : theme.palette.success.main,
                         fontWeight: "bold",
                       },
                       fontWeight: "bold",
@@ -190,7 +190,7 @@ const GasStations = () => {
                 :
                 <Button
                   variant="contained"
-                  color={openMenu === 2 ? "info" : "inherit"}
+                  color={openMenu === 2 ? "success" : "inherit"}
                   fullWidth
                   onClick={() => setOpenMenu(2)}
                   sx={{ height: "10vh", fontSize: openMenu === 2 ? 40 : 16, paddingLeft: openMenu === 2 ? 0 : 3.5 }}
@@ -207,8 +207,8 @@ const GasStations = () => {
                         height: 30, // ความสูงของ Badge
                         top: openMenu === 2 ? 35 : -40,
                         right: openMenu === 2 ? -30 : -5,
-                        color: openMenu === 2 ? theme.palette.info.main : "white",
-                        backgroundColor: openMenu === 2 ? "white" : theme.palette.info.main,
+                        color: openMenu === 2 ? theme.palette.success.main : "white",
+                        backgroundColor: openMenu === 2 ? "white" : theme.palette.success.main,
                         fontWeight: "bold",
                       },
                       fontWeight: "bold",

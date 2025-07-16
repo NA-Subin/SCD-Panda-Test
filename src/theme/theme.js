@@ -3,7 +3,7 @@ import "@fontsource/noto-sans-thai";
 
 const theme = createTheme({
   typography: {
-    fontFamily: '"IBM Plex Mono", monospace',
+    fontFamily: '"Sarabun", sans-serif',
     fontWeight: 800,
     fontStyle: "normal",
   },
@@ -21,16 +21,16 @@ const theme = createTheme({
       contrastText: "#ffffff",
     },
     pink: {
-      main: "#fd6094ff",
-      light: "#fcadc9ff",
-      dark: "#c2185b",
+      main: "#f06292",
+      light: "#f8bbd0",
+      dark: "#ec407a",
       contrastText: "#ffffff",
     },
     yellow: {
       main: "#fdd835",
       light: "#ffee58",
       dark: "#fbc02d",
-      contrastText: "#ffffff",
+      contrastText: "#000000ff",
     },
     // panda: {
     //     main: '#5C8374',

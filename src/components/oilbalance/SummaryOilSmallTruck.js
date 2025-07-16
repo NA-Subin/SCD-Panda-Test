@@ -46,7 +46,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
-import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
+import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellPink, TablecellSelling, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
@@ -516,10 +516,10 @@ const SummaryOilBalanceSmallTruck = () => {
                             >
                                 <TableHead sx={{ height: "5vh" }}>
                                     <TableRow>
-                                        <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellPink width={20} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
-                                        </TablecellSelling>
-                                        <TablecellSelling
+                                        </TablecellPink>
+                                        <TablecellPink
                                             onClick={() => handleSort("Date")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 50 }}
                                         >
@@ -531,9 +531,9 @@ const SummaryOilBalanceSmallTruck = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
+                                        </TablecellPink>
 
-                                        <TablecellSelling
+                                        <TablecellPink
                                             onClick={() => handleSort("Driver")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 150 }}
                                         >
@@ -545,8 +545,8 @@ const SummaryOilBalanceSmallTruck = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling
+                                        </TablecellPink>
+                                        <TablecellPink
                                             onClick={() => handleSort("TicketName")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 150 }}
                                         >
@@ -558,8 +558,8 @@ const SummaryOilBalanceSmallTruck = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling
+                                        </TablecellPink>
+                                        <TablecellPink
                                             onClick={() => handleSort("ProductName")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 50 }}
                                         >
@@ -571,17 +571,17 @@ const SummaryOilBalanceSmallTruck = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                             จำนวนลิตร
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ราคาน้ำมัน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ยอดเงิน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", width: 20 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -602,7 +602,7 @@ const SummaryOilBalanceSmallTruck = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.dark }}>
+                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.pink.dark }}>
                             <Grid item xs={3} />
                             <Grid item xs={3}>
                                 {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>

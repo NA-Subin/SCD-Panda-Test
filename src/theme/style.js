@@ -67,6 +67,38 @@ const TablecellCustomers = styled(TableCell)(({ theme }) => ({
   fontWeight: "bold",
 }));
 
+const TablecellYellow = styled(TableCell)(({ theme }) => ({
+  backgroundColor: theme.palette.yellow.dark,
+  color: "black",
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
+const TablecellPink = styled(TableCell)(({ theme }) => ({
+  backgroundColor: theme.palette.pink.dark,
+  color: theme.palette.primary.contrastText,
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
+const TablecellGray = styled(TableCell)(({ theme }) => ({
+  backgroundColor: "#616161",
+  color: theme.palette.primary.contrastText,
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
+const TablecellInfo = styled(TableCell)(({ theme }) => ({
+  backgroundColor: theme.palette.info.main,
+  color: theme.palette.primary.contrastText,
+  borderRightColor: theme.palette.primary.contrastText,
+  borderLeft: "1px solid " + theme.palette.primary.contrastText,
+  fontWeight: "bold",
+}));
+
 const TableCellG95 = styled(TableCell)(({ theme }) => ({
   backgroundColor: "#FFC000",
   borderRightColor: theme.palette.primary.contrastText,
@@ -210,6 +242,10 @@ export {
   IconButtonSuccess,
   IconButtonInfo,
   TablecellSelling,
+  TablecellYellow,
+  TablecellPink,
+  TablecellGray,
+  TablecellInfo,
   TableCellG95,
   TableCellG91,
   TableCellB7,

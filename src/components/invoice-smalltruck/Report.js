@@ -47,7 +47,7 @@ import FindInPageIcon from '@mui/icons-material/FindInPage';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
-import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
+import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellPink, TablecellSelling, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
@@ -521,9 +521,9 @@ const ReportPaymentSmallTruck = () => {
                         </Paper> */}
                         <FormGroup row sx={{ marginBottom: -1.5 }}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-                            <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-                            <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
-                            <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
                         </FormGroup>
                     </Grid>
                     <Grid item xs={2}>
@@ -543,10 +543,10 @@ const ReportPaymentSmallTruck = () => {
                             >
                                 <TableHead sx={{ height: "5vh" }}>
                                     <TableRow>
-                                        <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellPink width={20} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
-                                        </TablecellSelling>
-                                        <TablecellSelling
+                                        </TablecellPink>
+                                        <TablecellPink
                                             onClick={() => handleSort("TicketName")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 150 }}
                                         >
@@ -558,20 +558,20 @@ const ReportPaymentSmallTruck = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                             ยอดลิตร
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ยอดเงิน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ยอดโอน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ค้างโอน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", width: 20 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -593,7 +593,7 @@ const ReportPaymentSmallTruck = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.dark }}>
+                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.pink.dark }}>
                             <Grid item xs={3}>
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField

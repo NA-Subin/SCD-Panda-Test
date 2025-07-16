@@ -46,7 +46,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
-import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
+import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellInfo, TablecellPrimary, TablecellSelling, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
@@ -168,6 +168,8 @@ const SummaryOilBalance = () => {
                 return (a.driver?.split(":")[1] || '').localeCompare(b.driver?.split(":")[1] || '');
             });
     }, [orders, selectedDateStart, selectedDateEnd]);
+
+    console.log("Detail : ",orderDetail);
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalVolume = orderDetail.reduce((sum, item) => sum + (Number(item.VolumeProduct || 0) * 1000), 0);
@@ -516,10 +518,10 @@ const SummaryOilBalance = () => {
                             >
                                 <TableHead sx={{ height: "5vh" }}>
                                     <TableRow>
-                                        <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellInfo width={20} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
-                                        </TablecellSelling>
-                                        <TablecellSelling
+                                        </TablecellInfo>
+                                        <TablecellInfo
                                             onClick={() => handleSort("Date")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 50 }}
                                         >
@@ -531,9 +533,9 @@ const SummaryOilBalance = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
+                                        </TablecellInfo>
 
-                                        <TablecellSelling
+                                        <TablecellInfo
                                             onClick={() => handleSort("Driver")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 150 }}
                                         >
@@ -545,8 +547,8 @@ const SummaryOilBalance = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling
+                                        </TablecellInfo>
+                                        <TablecellInfo
                                             onClick={() => handleSort("TicketName")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 150 }}
                                         >
@@ -558,8 +560,8 @@ const SummaryOilBalance = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling
+                                        </TablecellInfo>
+                                        <TablecellInfo
                                             onClick={() => handleSort("ProductName")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 50 }}
                                         >
@@ -571,17 +573,17 @@ const SummaryOilBalance = () => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                             จำนวนลิตร
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ราคาน้ำมัน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ยอดเงิน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", width: 20 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -602,7 +604,7 @@ const SummaryOilBalance = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.dark }}>
+                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.main }}>
                             <Grid item xs={3} />
                             <Grid item xs={3}>
                                 {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>

@@ -60,6 +60,7 @@ import "jspdf-autotable";
 import dayjs from "dayjs";
 import "dayjs/locale/th"; // โหลดภาษาไทย
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
+import { formatThaiFullYear, formatThaiSlash } from "../../theme/DateTH";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
@@ -72,7 +73,7 @@ const ReportDetail = (props) => {
         setOpen(false);
     };
 
-    console.log("orderDetail : ",orderDetail);
+    console.log("orderDetail : ", orderDetail);
 
     const orders = orderDetail
         .filter(order => order.TicketName === row.TicketName)
@@ -163,6 +164,28 @@ const ReportDetail = (props) => {
         }, 300);
     };
 
+    // 1️⃣ เตรียมยอดรวมตามวันที่ล่วงหน้า
+    const outstandingByDate = {};
+    const shownDateOutstanding = new Set();
+
+    groupedOrders.forEach(([groupKey, groupOrders]) => {
+        const [date] = groupKey.split("|");
+
+        const totalAmount = groupOrders.reduce((sum, o) => sum + o.Amount, 0);
+        const totalIncomingMoney = groupOrders[0].IncomingMoneyDetail?.reduce(
+            (sum, o) => sum + Number(o.IncomingMoney || 0),
+            0
+        ) || 0;
+
+        if (!outstandingByDate[date]) {
+            outstandingByDate[date] = { amount: 0, incoming: 0 };
+        }
+
+        // ✅ รวมยอดของทุกคนในวันเดียวกัน
+        outstandingByDate[date].amount += totalAmount;
+        outstandingByDate[date].incoming += totalIncomingMoney;
+    });
+
     return (
         <React.Fragment>
             <IconButton sx={{ marginTop: -0.5, marginBottom: -0.5, color: theme.palette.info.main }} onClick={() => setOpen(true)}>
@@ -242,25 +265,18 @@ const ReportDetail = (props) => {
                                         {groupedOrders.map(([groupKey, groupOrders], groupIndex) => {
                                             const rowSpan = groupOrders.length;
                                             const [date, driver] = groupKey.split("|");
-                                            const registration = row.Registration.split(":")[1] || "";
+                                            const registration = groupOrders[0].Registration?.split(":")[1] || "";
 
-                                            // คำนวณรวม
                                             const totalVolume = groupOrders.reduce((sum, o) => sum + o.VolumeProduct, 0);
                                             const totalAmount = groupOrders.reduce((sum, o) => sum + o.Amount, 0);
-                                            const totalIncomingMoney = groupOrders[0].IncomingMoneyDetail.reduce(
+                                            const totalIncomingMoney = groupOrders[0].IncomingMoneyDetail?.reduce(
                                                 (sum, o) => sum + Number(o.IncomingMoney || 0), 0
-                                            );
-                                            const avgRateOil = totalAmount && totalVolume
-                                                ? totalAmount / totalVolume
-                                                : 0;
+                                            ) || 0;
 
-                                            console.log("totalAmount : ", totalAmount);
-                                            console.log("totalIncomingMoney : ", totalIncomingMoney);
-                                            console.log("groupOrders : ",groupOrders);
-                                            console.log("groupOrders[0].IncomingMoneyDetail : ",groupOrders[0].IncomingMoneyDetail);
+                                            const avgRateOil = totalAmount && totalVolume ? totalAmount / totalVolume : 0;
 
                                             return (
-                                                <>
+                                                <React.Fragment key={groupKey}>
                                                     {groupOrders.map((order, index) => (
                                                         <TableRow key={`${groupKey}-${index}`}>
                                                             {index === 0 && (
@@ -269,7 +285,7 @@ const ReportDetail = (props) => {
                                                                         {groupIndex + 1}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
-                                                                        {date}
+                                                                        {formatThaiSlash(dayjs(date,"DD/MM/YYYY"))}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
                                                                         {`${driver.split(":")[1]}/${registration}`}
@@ -305,9 +321,9 @@ const ReportDetail = (props) => {
                                                         </TableCell>
                                                     </TableRow>
 
-                                                    {/* 🔁 วนลูป IncomingMoneyDetail ถ้ามี */}
+                                                    {/* 🔁 แสดงการชำระเงิน (รายกลุ่ม) */}
                                                     {groupOrders[0].IncomingMoneyDetail?.length > 0 && (
-                                                        <React.Fragment>
+                                                        <>
                                                             {groupOrders[0].IncomingMoneyDetail.map((money, idx) => (
                                                                 <TableRow
                                                                     key={`incoming-${groupKey}-${idx}`}
@@ -315,26 +331,44 @@ const ReportDetail = (props) => {
                                                                 >
                                                                     <TableCell colSpan={6} sx={{ textAlign: "right", fontWeight: "bold" }}>
                                                                         {groupOrders[0].IncomingMoneyDetail.length > 1
-                                                                            ? `ชำระเงินครั้งที่ ${idx + 1} เมื่อ${dayjs(money.DateStart).locale("th").format("วันที่ D เดือนMMMM พ.ศ.BBBB") || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`
-                                                                            : `ชำระเงินเมื่อ${dayjs(money.DateStart).locale("th").format("วันที่ D เดือนMMMM พ.ศ.BBBB") || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`}
+                                                                            ? `ชำระเงินครั้งที่ ${idx + 1} เมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart,"DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`
+                                                                            : `ชำระเงินเมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart,"DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
                                                                         {new Intl.NumberFormat("en-US").format(money.IncomingMoney || 0)}
                                                                     </TableCell>
                                                                 </TableRow>
                                                             ))}
-                                                            <TableRow sx={{ backgroundColor: "#c8e6c9", fontWeight: "bold", borderBottom: "3px solid white" }}>
-                                                                <TableCell colSpan={6} sx={{ textAlign: "right", fontWeight: "bold" }}>
-                                                                    ยอดค้างชำระรวม
-                                                                </TableCell>
-                                                                <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                                                                    {new Intl.NumberFormat("en-US").format(totalAmount - totalIncomingMoney)}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        </React.Fragment>
+                                                        </>
                                                     )}
 
-                                                </>
+                                                    {/* ✅ แสดงยอดค้างของวัน (แค่ครั้งแรกของวันนั้น) */}
+                                                    {(() => {
+                                                        // ตรวจสอบว่ากลุ่มนี้เป็นกลุ่มสุดท้ายของวันที่เดียวกันหรือไม่
+                                                        const isLastGroupOfDate = (() => {
+                                                            const nextGroup = groupedOrders[groupIndex + 1];
+                                                            if (!nextGroup) return true; // ไม่มีกลุ่มถัดไป = กลุ่มสุดท้ายแน่นอน
+                                                            const [nextDate] = nextGroup[0].split("|");
+                                                            return nextDate !== date; // ถ้าวันถัดไปไม่เท่ากัน = อันนี้คือกลุ่มสุดท้ายของวันนั้น
+                                                        })();
+
+                                                        if (!isLastGroupOfDate) return null;
+
+                                                        return (
+                                                            <TableRow sx={{ backgroundColor: "#ffecb3", fontWeight: "bold" }}>
+                                                                <TableCell colSpan={6} sx={{ textAlign: "right", fontWeight: "bold" }}>
+                                                                    ยอดค้างชำระรวมของวันที่ {formatThaiSlash(dayjs(date,"DD/MM/YYYY"))}
+                                                                </TableCell>
+                                                                <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                                    {new Intl.NumberFormat("en-US").format(
+                                                                        outstandingByDate[date].amount - outstandingByDate[date].incoming
+                                                                    )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    })()}
+
+                                                </React.Fragment>
                                             );
                                         })}
                                         <TableRow sx={{ backgroundColor: theme.palette.success.dark }}>

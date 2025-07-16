@@ -46,7 +46,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
-import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
+import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellInfo, TablecellSelling, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
@@ -489,25 +489,25 @@ const ReportTrip = () => {
                             >
                                 <TableHead sx={{ height: "5vh" }}>
                                     <TableRow>
-                                        <TablecellSelling width={20} sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellInfo width={20} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                             วันที่รับ
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
                                             ไป
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ค่าเที่ยว
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             คลัง
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             จำนวนลิตร
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
+                                        </TablecellInfo>
+                                        <TablecellInfo sx={{ textAlign: "center", width: 20 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -535,7 +535,7 @@ const ReportTrip = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.dark }}>
+                        <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.main }}>
                             <Grid item xs={3} />
                             <Grid item xs={3}>
                                 {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>

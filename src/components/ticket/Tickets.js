@@ -26,7 +26,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import theme from "../../theme/theme";
 import InsertTickets from "./InsertTickets";
-import { TablecellHeader } from "../../theme/style";
+import { TablecellHeader, TablecellSelling } from "../../theme/style";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
@@ -210,25 +210,25 @@ const Tickets = () => {
                     <Table stickyHeader size="small" sx={{ width: "1330px" }}>
                         <TableHead sx={{ height: "7vh" }}>
                             <TableRow>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                     ลำดับ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 550 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 550 }}>
                                     ชื่อตั๋ว
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เรทคลังลำปาง
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เรทคลังพิจิตร
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เรทคลังสระบุรี/บางปะอิน/IR
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                     ประเภทรถ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ position: "sticky", right: 0 }} colSpan={2} />
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ position: "sticky", right: 0 }} colSpan={2} />
                             </TableRow>
                         </TableHead>
                         <TableBody>

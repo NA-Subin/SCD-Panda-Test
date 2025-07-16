@@ -30,7 +30,7 @@ import {
   Typography,
 } from "@mui/material";
 import "dayjs/locale/th";
-import { IconButtonError, RateOils, TablecellHeader } from "../../../theme/style";
+import { IconButtonError, RateOils, TablecellHeader, TablecellSelling } from "../../../theme/style";
 import { database } from "../../../server/firebase";
 import UpdateDepot from "./UpdateDepot";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
@@ -121,25 +121,25 @@ const Depots = () => {
           <Table stickyHeader size="small" sx={{ width: "1330px" }}>
             <TableHead sx={{ height: "7vh" }}>
               <TableRow>
-                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                   ลำดับ
-                </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                </TablecellSelling>
+                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                   ชื่อคลังรับน้ำมัน
-                </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                </TablecellSelling>
+                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                   ที่อยู่
-                </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                </TablecellSelling>
+                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                   โซน
-                </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                </TablecellSelling>
+                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   Latitude (ละติจูด)
-                </TablecellHeader>
-                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                </TablecellSelling>
+                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   Longitude (ลองจิจูด)
-                </TablecellHeader>
-                <TablecellHeader sx={{ width: 50, position: "sticky", right: 0 }} />
+                </TablecellSelling>
+                <TablecellSelling sx={{ width: 50, position: "sticky", right: 0 }} />
               </TableRow>
             </TableHead>
             <TableBody>

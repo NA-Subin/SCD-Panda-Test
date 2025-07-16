@@ -28,7 +28,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { IconButtonError, RateOils, TablecellHeader, TablecellPink } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
@@ -354,9 +354,9 @@ const InvoiceSmallTruck = () => {
           <Grid item xs={12}>
             <FormGroup row sx={{ marginBottom: -1.5 }}>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-              <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-              <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
-              <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
+              <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+              <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
+              <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
             </FormGroup>
           </Grid>
           <Grid item xs={12}>
@@ -371,6 +371,7 @@ const InvoiceSmallTruck = () => {
                         <Grid item xs={12} display="flex" justifyContent="right" alignItems="center">
                           <FormControlLabel control={
                             <Checkbox
+                            color="pink"
                               value={checkOverdueTransfer}
                               //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                               onChange={handleChangeCheck}
@@ -391,6 +392,7 @@ const InvoiceSmallTruck = () => {
                             <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
                             <FormControlLabel control={
                               <Checkbox
+                              color="pink"
                                 value={checkOverdueTransfer}
                                 //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                 onChange={handleChangeCheck}
@@ -412,10 +414,10 @@ const InvoiceSmallTruck = () => {
                     <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1330px" }}>
                       <TableHead sx={{ height: "5vh" }}>
                         <TableRow>
-                          <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                          <TablecellPink width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                             ลำดับ
-                          </TablecellHeader>
-                          <TablecellHeader
+                          </TablecellPink>
+                          <TablecellPink
                             onClick={() => handleSort("Date")}
                             sx={{ textAlign: "center", fontSize: 16, width: 120 }}
                           >
@@ -427,8 +429,8 @@ const InvoiceSmallTruck = () => {
                                 <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                               )}
                             </Box>
-                          </TablecellHeader>
-                          <TablecellHeader
+                          </TablecellPink>
+                          <TablecellPink
                             onClick={() => handleSort("DueDate")}
                             sx={{ textAlign: "center", fontSize: 16, width: 120 }}
                           >
@@ -440,8 +442,8 @@ const InvoiceSmallTruck = () => {
                                 <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                               )}
                             </Box>
-                          </TablecellHeader>
-                          <TablecellHeader
+                          </TablecellPink>
+                          <TablecellPink
                             onClick={() => handleSort("TicketName")}
                             sx={{ textAlign: "center", fontSize: 16, width: 300 }}
                           >
@@ -453,19 +455,19 @@ const InvoiceSmallTruck = () => {
                                 <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                               )}
                             </Box>
-                          </TablecellHeader>
-                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          </TablecellPink>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             จำนวนลิตร
-                          </TablecellHeader>
-                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          </TablecellPink>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             ยอดเงิน
-                          </TablecellHeader>
-                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          </TablecellPink>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             ยอดโอน
-                          </TablecellHeader>
-                          <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          </TablecellPink>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             ค้างโอน
-                          </TablecellHeader>
+                          </TablecellPink>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -476,31 +478,31 @@ const InvoiceSmallTruck = () => {
                                 <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.Date)}
                                   sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {index + 1}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {formatThaiSlash(
                                       dayjs(row.Date, "DD/MM/YYYY")
                                         .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : Number(row.CreditTime), "day")
                                     )}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {row.TicketName.split(":")[1]}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
                                   </TableCell>
                                 </TableRow>
@@ -511,30 +513,30 @@ const InvoiceSmallTruck = () => {
                               <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.Date)}
                                 sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                               >
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {index + 1}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {row.Date}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {dayjs(row.Date, "DD/MM/YYYY")
                                     .add(row.CreditTime === "-" ? 0 : row.CreditTime, "day")
                                     .format("DD/MM/YYYY")}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {row.TicketName.split(":")[1]}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow === row.No) || (indexes === index) ? "bold" : "" }}>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
                                 </TableCell>
                               </TableRow>

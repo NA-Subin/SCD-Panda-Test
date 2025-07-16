@@ -1318,7 +1318,6 @@ export default function Navbar() {
                             }
                             sx={{
                               height: 35, // กำหนดความสูงให้ ListItem
-                              color: theme.palette.panda.dark
                             }}
                             onClick={() => (setShow2(index), setSetting(false))}
                             onMouseUp={() => (setShow2(index), setSetting(false))}
@@ -1358,7 +1357,7 @@ export default function Navbar() {
                                       sx: {
                                         fontSize: '15px', // ปรับขนาดตัวอักษร
                                         textAlign: 'left', // จัดข้อความชิดซ้าย
-                                        backgroundColor: theme.palette.panda.dark,
+                                        backgroundColor: theme.palette.success.dark,
                                       },
                                     },
                                   }}
@@ -1579,7 +1578,7 @@ export default function Navbar() {
                                 color: show3 === index && theme.palette.primary.contrastText, fontSize: "15px"
                               }}
                               primaryTypographyProps={{
-                                fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+                                fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
 
                               }}
                             />
@@ -1593,7 +1592,7 @@ export default function Navbar() {
               {(
                 showReport &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.primary.main}` }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.info.main}` }} />
                   <Collapse in={!report} unmountOnExit={false}>
                     {
                       open &&
@@ -1613,7 +1612,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.primary.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.info.main }}>
                             <SummarizeIcon />
                           </ListItemIcon>
 
@@ -1629,7 +1628,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.primary.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.info.main }}>
                             <KeyboardArrowDownIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1656,7 +1655,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.primary.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.info.main }}>
                             <SummarizeIcon />
                           </ListItemIcon>
 
@@ -1672,7 +1671,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.primary.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.info.main }}>
                             <KeyboardArrowUpIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1683,7 +1682,7 @@ export default function Navbar() {
                   <List
                     sx={
                       !open ? {
-                        backgroundColor: theme.palette.primary.main,
+                        backgroundColor: theme.palette.info.main,
                         color: theme.palette.primary.contrastText,
                       }
                         : {
@@ -1697,7 +1696,7 @@ export default function Navbar() {
                           key={text}
                           disablePadding
                           sx={{
-                            backgroundColor: show4 === index && theme.palette.primary.main,
+                            backgroundColor: show4 === index && theme.palette.info.main,
                             height: 35, // กำหนดความสูงให้ ListItem
                             paddingY: 1,
                           }}
@@ -1718,7 +1717,7 @@ export default function Navbar() {
                               shouldDrawerOpen ?
                                 <ListItemIcon
                                   sx={{
-                                    color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.primary.main,
+                                    color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.info.main,
                                     mr: !open || show4 === index ? -3 : -2,
                                     ml: !open || show4 === index ? 3 : 2,
                                   }}
@@ -1748,14 +1747,14 @@ export default function Navbar() {
                                       sx: {
                                         fontSize: '15px', // ปรับขนาดตัวอักษร
                                         textAlign: 'left', // จัดข้อความชิดซ้าย
-                                        backgroundColor: theme.palette.primary.main,
+                                        backgroundColor: theme.palette.info.main,
                                       },
                                     },
                                   }}
                                 >
                                   <ListItemIcon
                                     sx={{
-                                      color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.primary.main,
+                                      color: !open || show4 === index ? theme.palette.primary.contrastText : theme.palette.info.main,
                                       mr: !open || show4 === index ? -3 : -2,
                                       ml: !open || show4 === index ? 3 : 2,
                                     }}
@@ -1774,7 +1773,7 @@ export default function Navbar() {
                                 color: show4 === index && theme.palette.primary.contrastText, fontSize: "15px"
                               }}
                               primaryTypographyProps={{
-                                fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+                                fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
 
                               }}
                             />
@@ -1887,7 +1886,7 @@ export default function Navbar() {
                     }
                   >
                     <Collapse in={!trucksmall} unmountOnExit={false}>
-                      {["จัดเที่ยววิ่ง", "การชำระค่าน้ำมัน", "สรุปยอดน้ำมัน", "รายงานชำระน้ำมัน", "รายงานเที่ยววิ่ง"].map((text, index) => (
+                      {["จัดเที่ยววิ่ง", "ชำระค่าน้ำมัน", "สรุปยอดน้ำมัน", "รายงานชำระน้ำมัน", "รายงานเที่ยววิ่ง"].map((text, index) => (
                         <ListItem
                           key={text}
                           disablePadding
@@ -1971,7 +1970,7 @@ export default function Navbar() {
                                 color: show5 === index && theme.palette.primary.contrastText , fontSize: "15px"
                               }}
                               primaryTypographyProps={{
-                                fontSize: "15px", // กำหนดขนาดตัวอักษรที่นี่
+                                fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่
 
                               }}
                             />

@@ -36,7 +36,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { RateOils, TablecellHeader, TablecellTickets } from "../../theme/style";
+import { RateOils, TablecellHeader, TablecellPink, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
@@ -263,10 +263,10 @@ const TripsSmallTruck = () => {
                     <Grid item xs={12}>
                         <FormGroup row sx={{ marginBottom: -2 }}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-                            <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-                            <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
-                            <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ยกเลิก" />
-                            <FormControlLabel control={<Checkbox checked={check === 4 ? true : false} />} onChange={() => setCheck(4)} label="จบทริป" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ยกเลิก" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 4 ? true : false} />} onChange={() => setCheck(4)} label="จบทริป" />
                         </FormGroup>
                     </Grid>
                     <Grid item xs={12}>
@@ -286,58 +286,58 @@ const TripsSmallTruck = () => {
                             >
                                 <TableHead>
                                     <TableRow sx={{ height: "7vh" }}>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ลำดับ
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             วันที่รับ
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             วันที่ส่ง
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
                                             ชื่อ/ทะเบียนรถ
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 1
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 2
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 3
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 4
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 5
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 6
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 7
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
                                             ลำดับที่ 8
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             ค่าเที่ยว
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             ปริมาณน้ำมัน
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             น้ำหนักรถ
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             น้ำหนักรวม
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             สถานะ
-                                        </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", right: 0 }} />
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", right: 0 }} />
                                         {/* <TablecellHeader sx={{
                                                     textAlign: "center", fontSize: 16, width: 100, position: "sticky",
                                                     right: windowWidth <= 900 ? 0 : "200px", // ติดซ้ายสุด

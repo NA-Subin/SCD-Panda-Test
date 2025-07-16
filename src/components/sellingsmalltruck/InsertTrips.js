@@ -1383,7 +1383,7 @@ const InsertTrips = () => {
 
     return (
         <React.Fragment>
-            <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} endIcon={<AddLocationAltIcon />} >จัดเที่ยววิ่ง</Button>
+            <Button variant="contained" color="pink" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} endIcon={<AddLocationAltIcon />} >จัดเที่ยววิ่ง</Button>
             <Dialog
                 open={open}
                 keepMounted
@@ -1391,11 +1391,11 @@ const InsertTrips = () => {
                 fullScreen={windowWidth <= 900 ? true : false}
                 sx={{
                     "& .MuiDialog-paper": {
-                        width: "1200px", // กำหนดความสูงของ Dialog
+                        width: "1300px", // กำหนดความสูงของ Dialog
                     },
                     zIndex: 1000,
                 }}
-                maxWidth="lg"
+                maxWidth="xl"
             >
                 <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
                     <Grid container marginTop={-1.5} marginBottom={-1.5}>
@@ -1423,7 +1423,7 @@ const InsertTrips = () => {
                                             <DatePicker
                                                 openTo="day"
                                                 views={["year", "month", "day"]}
-                                                value={dayjs(selectedDateReceive)} // แปลงสตริงกลับเป็น dayjs object
+                                                value={(dayjs(selectedDateReceive))} // แปลงสตริงกลับเป็น dayjs object
                                                 format="DD/MM/YYYY"
                                                 onChange={handleDateChangeReceive}
                                                 slotProps={{

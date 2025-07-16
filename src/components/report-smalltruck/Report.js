@@ -28,7 +28,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TablecellFinancial, TablecellFinancialHead, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD } from "../../theme/style";
+import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TablecellFinancial, TablecellFinancialHead, TableCellG91, TableCellG95, TablecellHeader, TablecellPink, TableCellPWD } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
@@ -759,15 +759,15 @@ const ReportSmallTruck = () => {
           <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
             <TableHead sx={{ height: "5vh" }}>
               <TableRow>
-                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
+                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
                   ลำดับ
-                </TablecellFinancialHead>
-                <TablecellFinancial sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
+                </TablecellPink>
+                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
                   วันที่
-                </TablecellFinancial>
-                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
+                </TablecellPink>
+                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
                   รับเข้าโดย
-                </TablecellFinancialHead>
+                </TablecellPink>
                 <TableCellG95 sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
                   G95
                 </TableCellG95>
@@ -786,9 +786,9 @@ const ReportSmallTruck = () => {
                 <TableCellPWD sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
                   PWD
                 </TableCellPWD>
-                <TablecellFinancialHead sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                   ไปส่งที่
-                </TablecellFinancialHead>
+                </TablecellPink>
                 {
                   summarizedList.map((row) => (
                     <TablecellFinancial sx={{ textAlign: "center", fontSize: 16, width: 200 }}>

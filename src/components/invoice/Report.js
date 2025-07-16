@@ -137,7 +137,7 @@ const FuelPaymentReport = () => {
     const ticketsA = Object.values(customertickets || {});
     const transferMoneyDetail = Object.values(transferMoney || {});
 
-    console.log("Select Driver ID : ", selectDriver);
+    console.log("1.Orders : ", orders);
     // const orderDetail = orders
     //     .filter((item) => {
     //         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
@@ -301,6 +301,8 @@ const FuelPaymentReport = () => {
         });
 
     }, [orders, selectedDateStart, selectedDateEnd, selectTickets, transferMoneyDetail]);
+
+    console.log("orderDetail : ",orderDetail);
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalOverdueTransfer = orderDetail.reduce((sum, item) => sum + Number(item.OverdueTransfer || 0), 0);

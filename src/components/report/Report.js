@@ -27,7 +27,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
+import { IconButtonError, RateOils, TablecellYellow } from "../../theme/style";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import InfoIcon from '@mui/icons-material/Info';
@@ -1145,31 +1145,31 @@ const Report = () => {
       <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
         <Grid container spacing={2} marginTop={1}>
           <Grid item xs={4}>
-            <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>ตั๋วน้ำมัน</Button>
+            <Button variant="contained" color={open === 1 ? "yellow" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.warning.dark }} fullWidth onClick={() => setOpen(1)}>ตั๋วน้ำมัน</Button>
           </Grid>
           <Grid item xs={4}>
-            <Button variant="contained" color={open === 2 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(2)}>ตั๋วรับจ้างขนส่ง</Button>
+            <Button variant="contained" color={open === 2 ? "yellow" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 2 && "5px solid" + theme.palette.warning.dark }} fullWidth onClick={() => setOpen(2)}>ตั๋วรับจ้างขนส่ง</Button>
           </Grid>
           <Grid item xs={4}>
-            <Button variant="contained" color={open === 3 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 3 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(3)}>ตั๋วปั้ม</Button>
+            <Button variant="contained" color={open === 3 ? "yellow" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 3 && "5px solid" + theme.palette.warning.dark }} fullWidth onClick={() => setOpen(3)}>ตั๋วปั้ม</Button>
           </Grid>
           <Grid item xs={4} sx={{ marginTop: -3 }}>
             {
-              open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.loght} gutterBottom>||</Typography>
+              open === 1 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.warning.dark} gutterBottom>||</Typography>
             }
           </Grid>
           <Grid item xs={4} sx={{ marginTop: -3 }}>
             {
-              open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+              open === 2 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.warning.dark} gutterBottom>||</Typography>
             }
           </Grid>
           <Grid item xs={4} sx={{ marginTop: -3 }}>
             {
-              open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.panda.light} gutterBottom>||</Typography>
+              open === 3 && <Typography variant="h3" fontWeight="bold" textAlign="center" color={theme.palette.warning.dark} gutterBottom>||</Typography>
             }
           </Grid>
           <Grid item xs={12}>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.warning.dark, marginTop: -5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
               {
                 open === 1 ?
                   <Grid container spacing={2} sx={{ marginTop: -5, }}>
@@ -1180,6 +1180,7 @@ const Report = () => {
                             <Grid item xs={12}>
                               <FormControlLabel control={
                                 <Checkbox
+                                  color="warning"
                                   value={checkOverdueTransfer}
                                   onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                   defaultChecked />
@@ -1200,6 +1201,7 @@ const Report = () => {
                               <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
                               <FormControlLabel control={
                                 <Checkbox
+                                  color="warning"
                                   value={checkOverdueTransfer}
                                   onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                   defaultChecked />
@@ -1219,10 +1221,10 @@ const Report = () => {
                         <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
                           <TableHead sx={{ height: "5vh" }}>
                             <TableRow>
-                              <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                              <TablecellYellow width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                 ลำดับ
-                              </TablecellHeader>
-                              <TablecellHeader onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              </TablecellYellow>
+                              <TablecellYellow onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 วันที่รับ
                                 {sortConfig.key === "DateStart" ? (
                                   sortConfig.direction === "asc" ? (
@@ -1233,8 +1235,8 @@ const Report = () => {
                                 ) : (
                                   <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                 )}
-                              </TablecellHeader>
-                              <TablecellHeader onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              </TablecellYellow>
+                              <TablecellYellow onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 จนถึง
                                 {sortConfig.key === "DateEnd" ? (
                                   sortConfig.direction === "asc" ? (
@@ -1245,8 +1247,8 @@ const Report = () => {
                                 ) : (
                                   <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                 )}
-                              </TablecellHeader>
-                              <TablecellHeader onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                              </TablecellYellow>
+                              <TablecellYellow onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                 ชื่อตั๋ว
                                 {sortConfig.key === "TicketName" ? (
                                   sortConfig.direction === "asc" ? (
@@ -1257,22 +1259,22 @@ const Report = () => {
                                 ) : (
                                   <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                 )}
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              </TablecellYellow>
+                              <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 ยอดเงิน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              </TablecellYellow>
+                              <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 หักภาษี 1%
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              </TablecellYellow>
+                              <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 ยอดชำระ
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              </TablecellYellow>
+                              <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 ยอดโอน
-                              </TablecellHeader>
-                              <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                              </TablecellYellow>
+                              <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                 ค้างโอน
-                              </TablecellHeader>
+                              </TablecellYellow>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1292,7 +1294,7 @@ const Report = () => {
 
                                     return (
                                       <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                       >
                                         <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
                                           {index + 1}
@@ -1383,25 +1385,25 @@ const Report = () => {
                                             </LocalizationProvider>
                                           </Paper>
                                         </TableCell> */}
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
                                         </TableCell>
                                       </TableRow>
@@ -1420,9 +1422,9 @@ const Report = () => {
 
                                   return (
                                     <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                      sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                      sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                     >
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {index + 1}
                                       </TableCell>
                                       {/* วันที่เริ่มต้น */}
@@ -1466,7 +1468,7 @@ const Report = () => {
                                           </LocalizationProvider>
                                         </Paper>
                                       </TableCell> */}
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                       </TableCell>
                                       {/* วันที่สิ้นสุด */}
@@ -1510,25 +1512,25 @@ const Report = () => {
                                           </LocalizationProvider>
                                         </Paper>
                                       </TableCell> */}
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {row.TicketName.split(":")[1]}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
                                       </TableCell>
                                     </TableRow>
@@ -1561,6 +1563,7 @@ const Report = () => {
                               <Grid item xs={12}>
                                 <FormControlLabel control={
                                   <Checkbox
+                                    color="warning"
                                     value={checkOverdueTransfer}
                                     onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                     defaultChecked />
@@ -1581,6 +1584,7 @@ const Report = () => {
                                 <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
                                 <FormControlLabel control={
                                   <Checkbox
+                                    color="warning"
                                     value={checkOverdueTransfer}
                                     onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                     defaultChecked />
@@ -1600,10 +1604,10 @@ const Report = () => {
                           <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
                             <TableHead sx={{ height: "5vh" }}>
                               <TableRow>
-                                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                <TablecellYellow width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                   ลำดับ
-                                </TablecellHeader>
-                                <TablecellHeader onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   วันที่รับ
                                   {sortConfig.key === "DateStart" ? (
                                     sortConfig.direction === "asc" ? (
@@ -1614,8 +1618,8 @@ const Report = () => {
                                   ) : (
                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                   )}
-                                </TablecellHeader>
-                                <TablecellHeader onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   จนถึง
                                   {sortConfig.key === "DateEnd" ? (
                                     sortConfig.direction === "asc" ? (
@@ -1626,8 +1630,8 @@ const Report = () => {
                                   ) : (
                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                   )}
-                                </TablecellHeader>
-                                <TablecellHeader onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                </TablecellYellow>
+                                <TablecellYellow onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                   ชื่อตั๋ว
                                   {sortConfig.key === "TicketName" ? (
                                     sortConfig.direction === "asc" ? (
@@ -1638,22 +1642,22 @@ const Report = () => {
                                   ) : (
                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                   )}
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดเงิน
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   หักภาษี 1%
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดชำระ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดโอน
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ค้างโอน
-                                </TablecellHeader>
+                                </TablecellYellow>
                               </TableRow>
                             </TableHead>
                             <TableBody>
@@ -1673,9 +1677,9 @@ const Report = () => {
 
                                       return (
                                         <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                          sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                          sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                         >
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {index + 1}
                                           </TableCell>
                                           {/* <TableCell sx={{ textAlign: "center" }}>
@@ -1720,7 +1724,7 @@ const Report = () => {
                                               </LocalizationProvider>
                                             </Paper>
                                           </TableCell> */}
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
 
@@ -1767,25 +1771,25 @@ const Report = () => {
                                               </LocalizationProvider>
                                             </Paper>
                                           </TableCell> */}
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {row.TicketName.split(":")[1]}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
                                           </TableCell>
                                         </TableRow>
@@ -1804,9 +1808,9 @@ const Report = () => {
 
                                     return (
                                       <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                       >
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {index + 1}
                                         </TableCell>
                                         {/* <TableCell sx={{ textAlign: "center" }}>
@@ -1848,7 +1852,7 @@ const Report = () => {
                                             </LocalizationProvider>
                                           </Paper>
                                         </TableCell> */}
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
                                         {/* วันที่สิ้นสุด */}
@@ -1891,25 +1895,25 @@ const Report = () => {
                                             </LocalizationProvider>
                                           </Paper>
                                         </TableCell> */}
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
                                         </TableCell>
                                       </TableRow>
@@ -1944,6 +1948,7 @@ const Report = () => {
                               <Grid item xs={12}>
                                 <FormControlLabel control={
                                   <Checkbox
+                                    color="warning"
                                     value={checkOverdueTransfer}
                                     onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                     defaultChecked />
@@ -1964,6 +1969,7 @@ const Report = () => {
                                 <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
                                 <FormControlLabel control={
                                   <Checkbox
+                                    color="warning"
                                     value={checkOverdueTransfer}
                                     onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                     defaultChecked />
@@ -1983,10 +1989,10 @@ const Report = () => {
                           <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
                             <TableHead sx={{ height: "5vh" }}>
                               <TableRow>
-                                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                <TablecellYellow width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                   ลำดับ
-                                </TablecellHeader>
-                                <TablecellHeader onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow onClick={() => handleSort("DateStart")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   วันที่รับ
                                   {sortConfig.key === "DateStart" ? (
                                     sortConfig.direction === "asc" ? (
@@ -1997,8 +2003,8 @@ const Report = () => {
                                   ) : (
                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                   )}
-                                </TablecellHeader>
-                                <TablecellHeader onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow onClick={() => handleSort("DateEnd")} sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   จนถึง
                                   {sortConfig.key === "DateEnd" ? (
                                     sortConfig.direction === "asc" ? (
@@ -2009,8 +2015,8 @@ const Report = () => {
                                   ) : (
                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                   )}
-                                </TablecellHeader>
-                                <TablecellHeader onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                </TablecellYellow>
+                                <TablecellYellow onClick={() => handleSort("TicketName")} sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                   ชื่อตั๋ว
                                   {sortConfig.key === "TicketName" ? (
                                     sortConfig.direction === "asc" ? (
@@ -2021,22 +2027,22 @@ const Report = () => {
                                   ) : (
                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                   )}
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดเงิน
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   หักภาษี 1%
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดชำระ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ยอดโอน
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                </TablecellYellow>
+                                <TablecellYellow sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                   ค้างโอน
-                                </TablecellHeader>
+                                </TablecellYellow>
                               </TableRow>
                             </TableHead>
                             <TableBody>
@@ -2056,9 +2062,9 @@ const Report = () => {
 
                                       return (
                                         <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                          sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                          sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                         >
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {index + 1}
                                           </TableCell>
                                           {/* <TableCell sx={{ textAlign: "center" }}>
@@ -2102,7 +2108,7 @@ const Report = () => {
                                               </LocalizationProvider>
                                             </Paper>
                                           </TableCell> */}
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
                                           {/* วันที่สิ้นสุด */}
@@ -2147,25 +2153,25 @@ const Report = () => {
                                               </LocalizationProvider>
                                             </Paper>
                                           </TableCell> */}
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {row.TicketName.split(":")[1]}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
                                           </TableCell>
                                         </TableRow>
@@ -2184,9 +2190,9 @@ const Report = () => {
 
                                     return (
                                       <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
-                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                                        sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                       >
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {index + 1}
                                         </TableCell>
                                         {/* <TableCell sx={{ textAlign: "center" }}>
@@ -2228,7 +2234,7 @@ const Report = () => {
                                             </LocalizationProvider>
                                           </Paper>
                                         </TableCell> */}
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
                                         {/* วันที่สิ้นสุด */}
@@ -2271,25 +2277,25 @@ const Report = () => {
                                             </LocalizationProvider>
                                           </Paper>
                                         </TableCell> */}
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateEnd || dayjs(row.DateEnd, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalPrice)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.VatOnePercent)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {new Intl.NumberFormat("en-US").format(row.TotalAmount - totalIncomingMoney)}
                                         </TableCell>
                                       </TableRow>

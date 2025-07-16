@@ -28,7 +28,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useBasicData } from "../../../server/provider/BasicDataProvider";
-import { TablecellHeader } from "../../../theme/style";
+import { TablecellHeader, TablecellSelling } from "../../../theme/style";
 import InsertTruckTransport from "./InsertTruckTransport";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
@@ -153,25 +153,25 @@ const TruckTransport = () => {
                     <Table stickyHeader size="small" sx={{ width: "1340px" }}>
                         <TableHead sx={{ height: "7vh" }}>
                             <TableRow>
-                                <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                     ลำดับ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
                                     ชื่อ
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     ทะเบียน
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                     น้ำหนัก
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
                                     บริษัท
-                                </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                </TablecellSelling>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                     สถานะ
-                                </TablecellHeader>
-                                <TablecellHeader colSpan={2} width={50} sx={{ position: "sticky", right: 0 }} />
+                                </TablecellSelling>
+                                <TablecellSelling colSpan={2} width={50} sx={{ position: "sticky", right: 0 }} />
                             </TableRow>
                         </TableHead>
                         <TableBody>

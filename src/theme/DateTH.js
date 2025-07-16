@@ -27,6 +27,13 @@ export class AdapterDayjsBuddhist extends AdapterDayjs {
 }
 
 // ✅ รูปแบบเต็ม เช่น: 8 กรกฎาคม พ.ศ.2568
+export function formatThaiFullYear(date) {
+  return date && dayjs(date).isValid()
+    ? dayjs(date).locale("th").format("D เดือนMMMM พ.ศ.BBBB")
+    : "";
+}
+
+// ✅ รูปแบบเต็ม เช่น: 8 กรกฎาคม พ.ศ.2568
 export function formatThaiFull(date) {
   return date && dayjs(date).isValid()
     ? dayjs(date).locale("th").format("D MMMM BBBB")

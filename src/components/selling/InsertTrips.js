@@ -1568,7 +1568,7 @@ const InsertTrips = () => {
 
     return (
         <React.Fragment>
-            <Button variant="contained" color="info" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} endIcon={<AddLocationAltIcon />} >จัดเที่ยววิ่ง</Button>
+            <Button variant="contained" color="success" onClick={handleClickOpen} sx={{ height: 50, borderRadius: 3 }} endIcon={<AddLocationAltIcon />} >จัดเที่ยววิ่ง</Button>
             <Dialog
                 open={open}
                 keepMounted
@@ -1581,7 +1581,7 @@ const InsertTrips = () => {
                     },
                     zIndex: 1000,
                 }}
-                maxWidth="lg"
+                maxWidth="xl"
             >
                 <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
                     <Grid container marginTop={-1.5} marginBottom={-1.5}>
@@ -2339,7 +2339,7 @@ const InsertTrips = () => {
                                                         (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
                                                 );
                                                 return selectedItem && selectedItem.Type === "รถบริษัท"
-                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""}`
+                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail.split(":")[1] : ""}`
                                                     : selectedItem && selectedItem.Type === "รถรับจ้างขนส่ง"
                                                         ? `${selectedItem.Name ? selectedItem.Name : ""} ${selectedItem.Registration === "ไม่มี" ? "" : `:${selectedItem.Registration}`}`
                                                         : "";
