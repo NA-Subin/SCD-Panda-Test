@@ -21,9 +21,9 @@ const theme = createTheme({
       contrastText: "#ffffff",
     },
     pink: {
-      main: "#f06292",
+      main: "#f06d99ff",
       light: "#f8bbd0",
-      dark: "#ec407a",
+      dark: "#e34c7ef0",
       contrastText: "#ffffff",
     },
     yellow: {

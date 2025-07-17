@@ -180,7 +180,8 @@ const InvoiceSmallTruck = () => {
       return acc;
     }, [])
     .sort((a, b) => a.TicketName.localeCompare(b.TicketName));
-
+    
+    console.log("OrderDetail : ",orderDetail)
 
   const sortedOrderDetail = useMemo(() => {
     const sorted = [...orderDetail];

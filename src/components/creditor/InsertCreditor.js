@@ -111,7 +111,7 @@ const InsertCreditor = (props) => {
 
     return (
         <React.Fragment>
-            <Button variant="contained" color="info" onClick={handleClickOpen} fullWidth endIcon={<PersonAddIcon />} >เพิ่มเจ้าหนี้น้ำมัน</Button>
+            <Button variant="contained" color="info" onClick={handleClickOpen} endIcon={<PersonAddIcon />} >เพิ่มเจ้าหนี้น้ำมัน</Button>
             <Dialog
                 open={open}
                 keepMounted

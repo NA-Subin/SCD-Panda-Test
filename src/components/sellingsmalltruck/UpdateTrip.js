@@ -353,19 +353,8 @@ const UpdateTrip = (props) => {
     const [depot, setDepot] = useState(depotTrip);
     const [registration, setRegistration] = useState(registrations);
 
-    console.log("editMode : ", !editMode);
-
-    console.log("order : ", order);
-    console.log("ticket : ", ticket);
-    console.log("orderTrip : ", orderTrip);
-    console.log("ticketTrip : ", ticketTrip);
-    console.log("registrations : ", registrations);
     console.log("registration : ", registration);
-
-    console.log("1.วันที่รับ : ", trip.DateReceive);
-    console.log("2.วันที่รับ : ", selectedDateReceive);
-    console.log("3.วันที่ส่ง : ", trip.DateDelivery);
-    console.log("3.วันที่ส่ง : ", selectedDateDelivery);
+    console.log("driver : ", driverss);
 
     useEffect(() => {
         if (ticket && ticket.length > 0) {
@@ -886,8 +875,8 @@ const UpdateTrip = (props) => {
                 id: tripID,
                 DateReceive: selectedDateReceive,
                 DateDelivery: selectedDateDelivery,
-                DateStart: trip.DateStart,
-                DaetEnd: trip.DateEnd,
+                DateStart: trip.DateStart || dayjs(new Date).format("DD/MM/YYYY"),
+                DaetEnd: trip.DateEnd || dayjs(new Date).format("DD/MM/YYYY"),
                 Driver: driverss,
                 Registration: registration,
                 Depot: depot,
@@ -916,11 +905,11 @@ const UpdateTrip = (props) => {
                 Status: "ว่าง",
             });
             updateFirebase("truck/small/", Number(registration.split(":")[0]) - 1, {
-                Driver: driverss,
-                Status: "TR:" + (tripID - 1),
+                Driver: trip.StatusTrip !== "จบทริป" ? driverss : "0:ไม่มี",
+                Status: trip.StatusTrip !== "จบทริป" ? `TR:${tripID - 1}` : "ว่าง",
             });
             updateFirebase("employee/drivers/", Number(driverss.split(":")[0]) - 1, {
-                Registration: registration,
+                Registration: trip.StatusTrip !== "จบทริป" ? registration : "0:ไม่มี",
             });
         }
 
@@ -930,11 +919,11 @@ const UpdateTrip = (props) => {
                 Registration: "0:ไม่มี",
             });
             updateFirebase("employee/drivers/", Number(driverss.split(":")[0]) - 1, {
-                Registration: registration,
+                Registration: trip.StatusTrip !== "จบทริป" ? registration : "0:ไม่มี",
             });
             updateFirebase("truck/small/", Number(registration.split(":")[0]) - 1, {
-                Driver: driverss,
-                Status: "TR:" + (tripID - 1),
+                Driver: trip.StatusTrip !== "จบทริป" ? driverss : "0:ไม่มี",
+                Status: trip.StatusTrip !== "จบทริป" ? `TR:${tripID - 1}` : "ว่าง",
             });
         }
 
@@ -1258,6 +1247,16 @@ const UpdateTrip = (props) => {
     // };
 
     const handleChangeStatus = () => {
+        if (!driverss || driverss === "0:0" || driverss === "0:ไม่มี") {
+            ShowError("กรุณาเพิ่มชื่อพนักงานขับรถก่อน");
+            return;
+        }
+
+        if (!registration || registration === "0:0" || registration === "0:ไม่มี") {
+            ShowError("กรุณาเพิ่มทะเบียนรถก่อน");
+            return;
+        }
+
         ShowConfirm(
             `ต้องการจบเที่ยววิ่งใช่หรือไม่`,
             () => {
@@ -1271,12 +1270,11 @@ const UpdateTrip = (props) => {
                     .then(() => {
                         setOpen(false);
                         console.log("Data pushed successfully");
-
                     })
                     .catch((error) => {
                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                         console.error("Error pushing data:", error);
-                    })
+                    });
 
                 database
                     .ref("employee/drivers/")
@@ -1287,22 +1285,21 @@ const UpdateTrip = (props) => {
                     .then(() => {
                         setOpen(false);
                         console.log("Data pushed successfully");
-
                     })
                     .catch((error) => {
                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                         console.error("Error pushing data:", error);
-                    })
+                    });
 
                 database
                     .ref("trip/")
                     .child(Number(tripID) - 1)
                     .update({
                         StatusTrip: "จบทริป",
-                        DateEnd: dayjs(new Date).format("DD/MM/YYYY")
+                        DateEnd: dayjs(new Date()).format("DD/MM/YYYY")
                     })
                     .then(() => {
-                        order.map((row) => (
+                        order.forEach((row) => {
                             database
                                 .ref("order/")
                                 .child(row.No)
@@ -1315,9 +1312,10 @@ const UpdateTrip = (props) => {
                                 .catch((error) => {
                                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                                     console.error("Error pushing data:", error);
-                                })
-                        ))
-                        ticket.map((row) => (
+                                });
+                        });
+
+                        ticket.forEach((row) => {
                             database
                                 .ref("tickets/")
                                 .child(row.No)
@@ -1330,21 +1328,23 @@ const UpdateTrip = (props) => {
                                 .catch((error) => {
                                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                                     console.error("Error pushing data:", error);
-                                })
-                        ))
+                                });
+                        });
+
                         console.log("Data pushed successfully");
                         setOpen(false);
                     })
                     .catch((error) => {
                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                         console.error("Error pushing data:", error);
-                    })
+                    });
             },
             () => {
                 console.log("ยกเลิกลบตั๋ว");
             }
-        )
-    }
+        );
+    };
+
 
     const handleChangeCancelTrip = () => {
         ShowConfirm(
@@ -1593,9 +1593,24 @@ const UpdateTrip = (props) => {
                                                                 format="DD/MM/YYYY"
                                                                 onChange={(newValue) => {
                                                                     if (newValue) {
-                                                                        setSelectedDateReceive(newValue.format("DD/MM/YYYY"));
+                                                                        const formatted = newValue.format("DD/MM/YYYY");
+                                                                        setSelectedDateReceive(formatted);
+
+                                                                        // อัปเดต date ทั้งหมดใน editableTickets
+                                                                        setEditableTickets((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: formatted,
+                                                                            }))
+                                                                        );
                                                                     } else {
-                                                                        setSelectedDateReceive(""); // หรือ null แล้วแต่คุณต้องการ
+                                                                        setSelectedDateReceive("");
+                                                                        setEditableTickets((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: dateReceive,
+                                                                            }))
+                                                                        );
                                                                     }
                                                                 }}
                                                                 slotProps={{
@@ -1629,38 +1644,44 @@ const UpdateTrip = (props) => {
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                                     <Paper
                                                         component="form" sx={{ height: "30px", width: "100%" }}>
-                                                        {/* <TextField size="small" fullWidth disabled
-                                                            sx={{
-                                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                "& .MuiInputBase-input": {
-                                                                    fontSize: "16px",
-                                                                    padding: "1px 4px",
-                                                                },
-                                                                borderRadius: 10
+                                                        <Autocomplete
+                                                            id="autocomplete-registration-1"
+                                                            options={registrationTruck}
+                                                            getOptionLabel={(option) =>
+                                                                `${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`
+                                                            }
+                                                            value={registration ? (registrationTruck.find(
+                                                                (d) => `${d.id}:${d.RegHead}` === registration
+                                                            )) : null}
+                                                            onChange={(event, newValue) => {
+                                                                if (newValue) {
+                                                                    const value = `${newValue.id}:${newValue.RegHead}`;
+                                                                    console.log("Truck : ", value);
+                                                                    handleRegistration(value, newValue.Weight)
+                                                                } else {
+                                                                    setRegistration("0:0");
+                                                                }
                                                             }}
-                                                            value={(() => {
-                                                                const selectedItem = registrationTruck.find(item =>
-                                                                    `${item.Driver}:${item.id}:${item.RegHead}` === registration
-                                                                );
-                                                                return selectedItem && selectedItem.Driver !== "ไม่มี" &&
-                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถเล็ก)`;
-                                                            })()}
-                                                        /> */}
-                                                        <TextField size="small" fullWidth disabled
-                                                            sx={{
-                                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                "& .MuiInputBase-input": {
-                                                                    fontSize: "14px",
-                                                                    padding: "1px 4px",
-                                                                },
-                                                                borderRadius: 10
-                                                            }}
-                                                            value={(() => {
-                                                                const selectedItem = registrationTruck.find(item =>
-                                                                    `${item.id}:${item.RegHead}` === registration
-                                                                );
-                                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
-                                                            })()}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label={!registration || registration === "0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    sx={{
+                                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            fullWidth
+                                                            renderOption={(props, option) => (
+                                                                <li {...props}>
+                                                                    {
+                                                                        <Typography fontSize="16px">{`${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`}</Typography>
+                                                                    }
+                                                                </li>
+                                                            )}
                                                         />
                                                     </Paper>
                                                 </Box>
@@ -2341,9 +2362,24 @@ const UpdateTrip = (props) => {
                                                                 format="DD/MM/YYYY"
                                                                 onChange={(newValue) => {
                                                                     if (newValue) {
-                                                                        setSelectedDateDelivery(newValue.format("DD/MM/YYYY"));
+                                                                        const formatted = newValue.format("DD/MM/YYYY");
+                                                                        setSelectedDateDelivery(formatted);
+
+                                                                        // อัปเดต date ทั้งหมดใน editableTickets
+                                                                        setEditableOrders((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: formatted,
+                                                                            }))
+                                                                        );
                                                                     } else {
-                                                                        setSelectedDateDelivery(""); // หรือ null แล้วแต่คุณต้องการ
+                                                                        setSelectedDateDelivery("");
+                                                                        setEditableOrders((prevTickets) =>
+                                                                            prevTickets.map((ticket) => ({
+                                                                                ...ticket,
+                                                                                Date: dateDelivery,
+                                                                            }))
+                                                                        );
                                                                     }
                                                                 }}
                                                                 slotProps={{
@@ -2376,44 +2412,38 @@ const UpdateTrip = (props) => {
                                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                                     <Paper
                                                         component="form" sx={{ height: "30px", width: "100%" }}>
-                                                        <Autocomplete
-                                                            id="autocomplete-registration-1"
-                                                            options={registrationTruck}
-                                                            getOptionLabel={(option) =>
-                                                                `${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`
-                                                            }
-                                                            value={registration ? (registrationTruck.find(
-                                                                (d) => `${d.id}:${d.RegHead}` === registration
-                                                            )) : null}
-                                                            onChange={(event, newValue) => {
-                                                                if (newValue) {
-                                                                    const value = `${newValue.id}:${newValue.RegHead}`;
-                                                                    console.log("Truck : ", value);
-                                                                    handleRegistration(value, newValue.Weight)
-                                                                } else {
-                                                                    setRegistration("0:0");
-                                                                }
+                                                        {/* <TextField size="small" fullWidth disabled
+                                                            sx={{
+                                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                "& .MuiInputBase-input": {
+                                                                    fontSize: "16px",
+                                                                    padding: "1px 4px",
+                                                                },
+                                                                borderRadius: 10
                                                             }}
-                                                            renderInput={(params) => (
-                                                                <TextField
-                                                                    {...params}
-                                                                    label={!registration || registration === "0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
-                                                                    variant="outlined"
-                                                                    size="small"
-                                                                    sx={{
-                                                                        "& .MuiOutlinedInput-root": { height: "30px" },
-                                                                        "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
-                                                                    }}
-                                                                />
-                                                            )}
-                                                            fullWidth
-                                                            renderOption={(props, option) => (
-                                                                <li {...props}>
-                                                                    {
-                                                                        <Typography fontSize="16px">{`${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`}</Typography>
-                                                                    }
-                                                                </li>
-                                                            )}
+                                                            value={(() => {
+                                                                const selectedItem = registrationTruck.find(item =>
+                                                                    `${item.Driver}:${item.id}:${item.RegHead}` === registration
+                                                                );
+                                                                return selectedItem && selectedItem.Driver !== "ไม่มี" &&
+                                                                    `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""} (รถเล็ก)`;
+                                                            })()}
+                                                        /> */}
+                                                        <TextField size="small" fullWidth disabled
+                                                            sx={{
+                                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                                "& .MuiInputBase-input": {
+                                                                    fontSize: "14px",
+                                                                    padding: "1px 4px",
+                                                                },
+                                                                borderRadius: 10
+                                                            }}
+                                                            value={(() => {
+                                                                const selectedItem = registrationTruck.find(item =>
+                                                                    `${item.id}:${item.RegHead}` === registration
+                                                                );
+                                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
+                                                            })()}
                                                         />
                                                     </Paper>
                                                 </Box>
@@ -3146,7 +3176,8 @@ const UpdateTrip = (props) => {
                                         </Button>
                                     }
                                     {
-                                        trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        //trip.StatusTrip !== "จบทริป" && trip.StatusTrip !== "ยกเลิก" &&
+                                        trip.StatusTrip !== "ยกเลิก" &&
                                         <Button variant="contained" color="warning" size="small" sx={{ marginRight: 1 }} onClick={handleUpdate} endIcon={<EditLocationIcon />} >แก้ไข</Button>
                                     }
                                     <Button variant="contained" size="small" onClick={handleSaveAsImage} endIcon={<SatelliteIcon />} >บันทึกรูปภาพ</Button>

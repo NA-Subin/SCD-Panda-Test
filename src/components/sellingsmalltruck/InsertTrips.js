@@ -90,7 +90,7 @@ const InsertTrips = () => {
     const truckT = Object.values(transport || {});
     const driver = Object.values(drivers || {});
 
-    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี" && (row.TruckType === "รถเล็ก" || row.TruckType === "รถใหญ่/รถเล็ก") );
+    const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี" && (row.TruckType === "รถเล็ก" || row.TruckType === "รถใหญ่/รถเล็ก"));
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -1456,21 +1456,42 @@ const InsertTrips = () => {
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
                                         component="form" sx={{ height: "30px", width: "100%", marginTop: -1 }}>
-                                        <TextField size="small" fullWidth disabled
-                                            sx={{
-                                                "& .MuiOutlinedInput-root": { height: "30px" },
-                                                "& .MuiInputBase-input": {
-                                                    fontSize: "14px",
-                                                    padding: "1px 4px",
-                                                },
-                                                borderRadius: 10
+                                        <Autocomplete
+                                            id="autocomplete-registration-1"
+                                            options={sortedSmallTruck}
+                                            getOptionLabel={(option) =>
+                                                `${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`
+                                            }
+                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
+                                            value={registration ? sortedSmallTruck.find(item => `${item.id}:${item.RegHead}` === registration) : null}
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    const value = `${newValue.id}:${newValue.RegHead}`;
+                                                    handleChangeRegistration(value);
+                                                } else {
+                                                    setRegistration("0:0");
+                                                }
                                             }}
-                                            value={(() => {
-                                                const selectedItem = smallTruck.find(item =>
-                                                    `${item.id}:${item.RegHead}` === registration
-                                                );
-                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
-                                            })()}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label={!registration || registration === "0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        "& .MuiOutlinedInput-root": { height: "30px" },
+                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "1px 2px" },
+                                                    }}
+                                                />
+                                            )}
+                                            fullWidth
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    {
+                                                        <Typography fontSize="14px">{`${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`}</Typography>
+                                                    }
+                                                </li>
+                                            )}
                                         />
                                     </Paper>
                                 </Box>
@@ -1948,42 +1969,21 @@ const InsertTrips = () => {
                                     <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                                     <Paper
                                         component="form" sx={{ height: "30px", width: "100%", marginTop: -1 }}>
-                                        <Autocomplete
-                                            id="autocomplete-registration-1"
-                                            options={sortedSmallTruck}
-                                            getOptionLabel={(option) =>
-                                                `${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`
-                                            }
-                                            isOptionEqualToValue={(option, value) => option.id === value.id && option.type === value.type}
-                                            value={registration ? sortedSmallTruck.find(item => `${item.id}:${item.RegHead}` === registration) : null}
-                                            onChange={(event, newValue) => {
-                                                if (newValue) {
-                                                    const value = `${newValue.id}:${newValue.RegHead}`;
-                                                    handleChangeRegistration(value);
-                                                } else {
-                                                    setRegistration("0:0");
-                                                }
+                                        <TextField size="small" fullWidth disabled
+                                            sx={{
+                                                "& .MuiOutlinedInput-root": { height: "30px" },
+                                                "& .MuiInputBase-input": {
+                                                    fontSize: "14px",
+                                                    padding: "1px 4px",
+                                                },
+                                                borderRadius: 10
                                             }}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label={!registration || registration === "0:0" ? "กรุณาเลือกผู้ขับ/ป้ายทะเบียน" : ""}
-                                                    variant="outlined"
-                                                    size="small"
-                                                    sx={{
-                                                        "& .MuiOutlinedInput-root": { height: "30px" },
-                                                        "& .MuiInputBase-input": { fontSize: "14px", padding: "1px 2px" },
-                                                    }}
-                                                />
-                                            )}
-                                            fullWidth
-                                            renderOption={(props, option) => (
-                                                <li {...props}>
-                                                    {
-                                                        <Typography fontSize="14px">{`${option.ShortName ? option.ShortName : ""} : ${option.RegHead ? option.RegHead : ""}`}</Typography>
-                                                    }
-                                                </li>
-                                            )}
+                                            value={(() => {
+                                                const selectedItem = smallTruck.find(item =>
+                                                    `${item.id}:${item.RegHead}` === registration
+                                                );
+                                                return selectedItem && `${selectedItem.ShortName ? selectedItem.ShortName : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}`;
+                                            })()}
                                         />
                                     </Paper>
                                 </Box>
@@ -2380,14 +2380,14 @@ const InsertTrips = () => {
                     {/* {
                         !isNegative && ( // เพิ่มเงื่อนไขเช็คว่าห้ามมีค่าติดลบ
                             <> */}
-                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                                    <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
-                                    <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
-                                </Box>
-                                <Box textAlign="center" marginTop={1}>
-                                    <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
-                                </Box>
-                            {/* </>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                        <Button onClick={handleCancle} variant="contained" color="error" sx={{ marginRight: 1 }} size="small">ยกเลิก</Button>
+                        <Button onClick={handleSubmit} variant="contained" color="success" size="small">บันทึก</Button>
+                    </Box>
+                    <Box textAlign="center" marginTop={1}>
+                        <Button variant="contained" size="small" onClick={handleSaveAsImage}>บันทึกรูปภาพ</Button>
+                    </Box>
+                    {/* </>
                         )
                     } */}
                 </DialogContent>

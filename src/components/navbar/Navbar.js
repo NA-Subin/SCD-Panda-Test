@@ -438,22 +438,44 @@ export default function Navbar() {
                   }}
                 >
                   {[
-                    { to: "/dashboard", icon: <HomeIcon fontSize="medium" /> },
-                    { to: "/employee", icon: <AccountCircleIcon fontSize="medium" /> },
-                    { to: "/trucks", icon: <LocalShippingIcon fontSize="medium" /> },
-                    { to: "/depots", icon: <StoreMallDirectoryIcon fontSize="medium" /> },
-                    { to: "/ticket", icon: <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} fontSize="medium" /> },
-                    { to: "/transports", icon: <BookOnlineIcon fontSize="medium" sx={{ transform: "rotate(90deg)" }} /> },
-                    { to: "/customer-bigtrucks", icon: <GroupsIcon fontSize="medium" /> },
-                    { to: "/customer-smalltrucks", icon: <GroupsIcon fontSize="medium" /> },
-                    { to: "/creditor", icon: <CurrencyExchangeIcon fontSize="medium" /> },
-                    { to: "/gasstations", icon: <LocalGasStationIcon fontSize="medium" /> },
-                    { to: "/trips-bigtruck", icon: <ListAltIcon fontSize="medium" /> },
-                    { to: "/trips-smalltruck", icon: <ListAltIcon fontSize="medium" /> },
-                    { to: "/invoice", icon: <ListItemIcon fontSize="medium" /> },
-                    { to: "/report", icon: <ListItemIcon fontSize="medium" /> },
-                    { to: "/close-financial", icon: <ListItemIcon fontSize="medium" /> },
-                    { to: "/setting", icon: <SettingsIcon fontSize="medium" /> },
+                    // กลุ่มเทา
+                    { to: "/dashboard", icon: <HomeIcon />, color: theme.palette.grey[700] },
+                    { to: "/employee", icon: <AccountCircleIcon />, color: theme.palette.grey[700] },
+                    { to: "/trucks", icon: <LocalShippingIcon />, color: theme.palette.grey[700] },
+                    { to: "/trucks-transport", icon: <LocalShippingIcon />, color: theme.palette.grey[700] },
+                    { to: "/depots", icon: <StoreMallDirectoryIcon />, color: theme.palette.grey[700] },
+                    { to: "/ticket", icon: <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />, color: theme.palette.grey[700] },
+                    { to: "/transports", icon: <BookOnlineIcon sx={{ transform: "rotate(90deg)" }} />, color: theme.palette.grey[700] },
+                    { to: "/customer-bigtrucks", icon: <GroupsIcon />, color: theme.palette.grey[700] },
+                    { to: "/customer-smalltrucks", icon: <GroupsIcon />, color: theme.palette.grey[700] },
+                    { to: "/creditor", icon: <CurrencyExchangeIcon />, color: theme.palette.grey[700] },
+
+                    // กลุ่มเขียว
+                    { to: "/gasstations", icon: <LocalGasStationIcon />, color: theme.palette.success.main },
+                    { to: "/trips-bigtruck", icon: <ListAltIcon />, color: theme.palette.success.main },
+
+                    // กลุ่มเหลือง
+                    { to: "/invoice", icon: <PaidIcon />, color: theme.palette.yellow.dark },
+                    { to: "/report", icon: <PaidIcon />, color: theme.palette.yellow.dark },
+
+                    // กลุ่มชมพู (เที่ยววิ่งรถเล็ก)
+                    { to: "/trips-smalltruck", icon: <ListAltIcon />, color: theme.palette.pink.main },
+                    { to: "/invoice-smalltruck", icon: <PaidIcon />, color: theme.palette.pink.main },
+                    { to: "/oil-balance-smalltruck", icon: <SummarizeIcon />, color: theme.palette.pink.main },
+                    { to: "/payment-smalltruck", icon: <PaidIcon />, color: theme.palette.pink.main },
+                    { to: "/report-smalltruck", icon: <SummarizeIcon />, color: theme.palette.pink.main },
+
+                    // กลุ่มฟ้า
+                    { to: "/summary-oil-balance", icon: <SummarizeIcon fontSize="medium" />, color: theme.palette.info.main },
+                    { to: "/report-driver-trip", icon: <SummarizeIcon fontSize="medium" />, color: theme.palette.info.main },
+                    { to: "/report-fuel-payment", icon: <SummarizeIcon fontSize="medium" />, color: theme.palette.info.main },
+                    { to: "/financial-deduction", icon: <SummarizeIcon fontSize="medium" />, color: theme.palette.info.main },
+                    { to: "/invoice-financial", icon: <SummarizeIcon fontSize="medium" />, color: theme.palette.info.main },
+                    { to: "/close-financial", icon: <SummarizeIcon fontSize="medium" />, color: theme.palette.info.main },
+
+
+                    // การตั้งค่า
+                    { to: "/setting", icon: <SettingsIcon />, color: theme.palette.panda.dark },
                   ].map((item, index) => (
                     <Button
                       key={index}
@@ -462,7 +484,7 @@ export default function Navbar() {
                       onClick={() => handleButtonClick(index)}
                       sx={{
                         backgroundColor: activeButton === index ? "white" : "inherit",
-                        color: activeButton === index ? "info.main" : "inherit",
+                        color: activeButton === index ? item.color : "inherit",
                         fontWeight: activeButton === index ? "bold" : "normal",
                         paddingLeft: 4,
                         paddingRight: 4
@@ -471,19 +493,34 @@ export default function Navbar() {
                       {item.icon}
                     </Button>
                   ))}
-                  <Button sx={{
-                    paddingLeft: 4, backgroundColor: theme.palette.panda.light,
-                    paddingRight: 4, marginTop: 1
-                  }} onClick={handleBack}>
+
+                  {/* ปุ่มย้อนกลับ */}
+                  <Button
+                    sx={{
+                      paddingLeft: 4,
+                      backgroundColor: theme.palette.panda.light,
+                      paddingRight: 4,
+                      marginTop: 1
+                    }}
+                    onClick={handleBack}
+                  >
                     <ReplyAllIcon sx={{ marginTop: -1 }} />
                   </Button>
-                  <Button sx={{
-                    paddingLeft: 4, backgroundColor: theme.palette.panda.light,
-                    paddingRight: 4, marginTop: 1
-                  }} onClick={UserSignOut}>
+
+                  {/* ปุ่มออกจากระบบ */}
+                  <Button
+                    sx={{
+                      paddingLeft: 4,
+                      backgroundColor: theme.palette.panda.light,
+                      paddingRight: 4,
+                      marginTop: 1
+                    }}
+                    onClick={UserSignOut}
+                  >
                     <MeetingRoomIcon sx={{ marginTop: -1 }} />
                   </Button>
                 </ButtonGroup>
+
               </Box>
             )
               : isMobileMD ? (
@@ -997,7 +1034,7 @@ export default function Navbar() {
                             }}
                           >
                             {/* ไอคอนซ้าย */}
-                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.dark  }}>
+                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.dark }}>
                               <BadgeIcon />
                             </ListItemIcon>
 
@@ -1013,7 +1050,7 @@ export default function Navbar() {
                             />
 
                             {/* ไอคอนขวา */}
-                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.dark  }}>
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.dark }}>
                               <KeyboardArrowDownIcon />
                             </ListItemIcon>
                           </ListItemButton>
@@ -1040,7 +1077,7 @@ export default function Navbar() {
                             }}
                           >
                             {/* ไอคอนซ้าย */}
-                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.dark  }}>
+                            <ListItemIcon sx={{ minWidth: 30, color: theme.palette.dark }}>
                               <BadgeIcon />
                             </ListItemIcon>
 
@@ -1056,7 +1093,7 @@ export default function Navbar() {
                             />
 
                             {/* ไอคอนขวา */}
-                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.dark  }}>
+                            <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.dark }}>
                               <KeyboardArrowUpIcon />
                             </ListItemIcon>
                           </ListItemButton>
@@ -1202,7 +1239,7 @@ export default function Navbar() {
               {(
                 showOperation &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.success.main}` }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1, border: `1px solid ${theme.palette.success.main}` }} />
                   <List
                     sx={
                       !open ? {
@@ -1397,7 +1434,7 @@ export default function Navbar() {
               {(
                 showFinancial &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.yellow.dark}` }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1, border: `1px solid ${theme.palette.yellow.dark}` }} />
                   <Collapse in={!financial} unmountOnExit={false}>
                     {
                       open &&
@@ -1592,7 +1629,7 @@ export default function Navbar() {
               {(
                 showReport &&
                 <>
-                  <Divider sx={{ marginTop: -1, marginBottom: 1,border: `1px solid ${theme.palette.info.main}` }} />
+                  <Divider sx={{ marginTop: -1, marginBottom: 1, border: `1px solid ${theme.palette.info.main}` }} />
                   <Collapse in={!report} unmountOnExit={false}>
                     {
                       open &&
@@ -1807,7 +1844,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30,color: theme.palette.pink.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.pink.main }}>
                             <LocalShippingIcon />
                           </ListItemIcon>
 
@@ -1823,7 +1860,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end',color: theme.palette.pink.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.pink.main }}>
                             <KeyboardArrowDownIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1850,7 +1887,7 @@ export default function Navbar() {
                           }}
                         >
                           {/* ไอคอนซ้าย */}
-                          <ListItemIcon sx={{ minWidth: 30,color: theme.palette.pink.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, color: theme.palette.pink.main }}>
                             <LocalShippingIcon />
                           </ListItemIcon>
 
@@ -1866,7 +1903,7 @@ export default function Navbar() {
                           />
 
                           {/* ไอคอนขวา */}
-                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end',color: theme.palette.pink.main }}>
+                          <ListItemIcon sx={{ minWidth: 30, justifyContent: 'flex-end', color: theme.palette.pink.main }}>
                             <KeyboardArrowUpIcon />
                           </ListItemIcon>
                         </ListItemButton>
@@ -1967,7 +2004,7 @@ export default function Navbar() {
                             <ListItemText
                               primary={shouldDrawerOpen ? text : ""}
                               sx={{
-                                color: show5 === index && theme.palette.primary.contrastText , fontSize: "15px"
+                                color: show5 === index && theme.palette.primary.contrastText, fontSize: "15px"
                               }}
                               primaryTypographyProps={{
                                 fontSize: "14px", // กำหนดขนาดตัวอักษรที่นี่

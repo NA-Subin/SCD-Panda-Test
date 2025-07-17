@@ -143,7 +143,7 @@ const SummaryOilBalance = () => {
                 // ตรวจสอบเงื่อนไขของ driver ตาม selectDriver
                 const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
 
-                return isValidStatus && isInDateRange && matchTickets && item.CustomerType !== "ตั๋วรถเล็ก" ;
+                return isValidStatus && isInDateRange && matchTickets && item.CustomerType !== "ตั๋วรถเล็ก";
             })
             .flatMap((item) => {
                 if (!item.Product) return [];
@@ -169,7 +169,7 @@ const SummaryOilBalance = () => {
             });
     }, [orders, selectedDateStart, selectedDateEnd]);
 
-    console.log("Detail : ",orderDetail);
+    console.log("Detail : ", orderDetail);
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalVolume = orderDetail.reduce((sum, item) => sum + (Number(item.VolumeProduct || 0) * 1000), 0);
@@ -248,7 +248,7 @@ const SummaryOilBalance = () => {
     const exportToExcel = () => {
         const exportData = sortedOrderDetail.map((row, index) => ({
             ลำดับ: index + 1,
-            วันที่ส่ง: formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY")),
+            วันที่ส่ง: formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY")),
             "ผู้ขับ/ป้ายทะเบียน": `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`,
             ตั๋ว: row.TicketName.split(":")[1],
             ชนิดน้ำมัน: row.ProductName,
@@ -366,9 +366,11 @@ const SummaryOilBalance = () => {
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-                <Grid container spacing={2} width="100%">
-                    <Grid item xs={5}>
-                        {/* <Paper>
+                {
+                    windowWidth >= 800 ?
+                        <Grid container spacing={2} width="100%" marginBottom={1} >
+                            <Grid item sm={8} lg={5}>
+                                {/* <Paper>
                             <FormControl size="small" fullWidth>
                                 <Select
                                     value={selectDriver}
@@ -409,65 +411,65 @@ const SummaryOilBalance = () => {
 
                                 </Select>
                             </FormControl> */}
-                        <Paper>
-                            <Paper>
-                                <Autocomplete
-                                    id="autocomplete-tickets"
-                                    options={getCustomers()}
-                                    getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
-                                    isOptionEqualToValue={(option, value) =>
-                                        option.id === value.id && option.Name === value.Name
-                                    }
-                                    value={
-                                        selectTickets
-                                            ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
-                                            : null
-                                    }
-                                    onChange={(event, newValue) => {
-                                        if (newValue) {
-                                            handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
-                                        } else {
-                                            handleChangeTickets({ target: { value: "" } });
-                                        }
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            variant="outlined"
-                                            size="small"
-                                            label=""
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                startAdornment: (
-                                                    <InputAdornment position="start" sx={{ marginRight: 1 }}>
-                                                        กรุณาเลือกตั๋ว :
-                                                    </InputAdornment>
-                                                ),
-                                                sx: {
-                                                    height: "40px",
-                                                    fontSize: "18px",
-                                                    paddingRight: "8px",
+                                <Paper>
+                                    <Paper>
+                                        <Autocomplete
+                                            id="autocomplete-tickets"
+                                            options={getCustomers()}
+                                            getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                            isOptionEqualToValue={(option, value) =>
+                                                option.id === value.id && option.Name === value.Name
+                                            }
+                                            value={
+                                                selectTickets
+                                                    ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
+                                                    : null
+                                            }
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
+                                                } else {
+                                                    handleChangeTickets({ target: { value: "" } });
+                                                }
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label=""
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                                กรุณาเลือกตั๋ว :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            height: "40px",
+                                                            fontSize: "18px",
+                                                            paddingRight: "8px",
+                                                        },
+                                                    }}
+                                                    InputLabelProps={{ shrink: false }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="16px">
+                                                        {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                                    </Typography>
+                                                </li>
+                                            )}
+                                            ListboxProps={{
+                                                style: {
+                                                    maxHeight: 250,
                                                 },
                                             }}
-                                            InputLabelProps={{ shrink: false }}
                                         />
-                                    )}
-                                    renderOption={(props, option) => (
-                                        <li {...props}>
-                                            <Typography fontSize="16px">
-                                                {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
-                                            </Typography>
-                                        </li>
-                                    )}
-                                    ListboxProps={{
-                                        style: {
-                                            maxHeight: 250,
-                                        },
-                                    }}
-                                />
-                            </Paper>
+                                    </Paper>
 
-                            {/* <FormControl size="small" fullWidth>
+                                    {/* <FormControl size="small" fullWidth>
                                 <Select
                                     value={selectTickets}
                                     onChange={handleChangeTickets}
@@ -498,12 +500,81 @@ const SummaryOilBalance = () => {
 
                                 </Select>
                             </FormControl> */}
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={5} />
-                    <Grid item xs={2}>
-                        <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
-                    </Grid>
+                                </Paper>
+                            </Grid>
+                            <Grid item sm={1} lg={5} />
+                            <Grid item sm={3} lg={2}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                        :
+                        <Grid container spacing={2} p={1}>
+                            <Grid item xs={12}>
+                                <Paper>
+                                    <Paper>
+                                        <Autocomplete
+                                            id="autocomplete-tickets"
+                                            options={getCustomers()}
+                                            getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                            isOptionEqualToValue={(option, value) =>
+                                                option.id === value.id && option.Name === value.Name
+                                            }
+                                            value={
+                                                selectTickets
+                                                    ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
+                                                    : null
+                                            }
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
+                                                } else {
+                                                    handleChangeTickets({ target: { value: "" } });
+                                                }
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label=""
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                                กรุณาเลือกตั๋ว :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            height: "40px",
+                                                            fontSize: "18px",
+                                                            paddingRight: "8px",
+                                                        },
+                                                    }}
+                                                    InputLabelProps={{ shrink: false }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="16px">
+                                                        {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                                    </Typography>
+                                                </li>
+                                            )}
+                                            ListboxProps={{
+                                                style: {
+                                                    maxHeight: 250,
+                                                },
+                                            }}
+                                        />
+                                    </Paper>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                }
+                <Grid container spacing={2} width="100%">
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}
@@ -591,7 +662,7 @@ const SummaryOilBalance = () => {
                                         sortedOrderDetail.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1]}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>

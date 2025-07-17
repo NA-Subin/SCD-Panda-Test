@@ -137,14 +137,23 @@ const TruckTransport = () => {
                 รถรับจ้างขนส่ง
             </Typography>
             <Divider sx={{ marginBottom: 1 }} />
-            <Grid container spacing={2} p={1} marginBottom={-2}>
-                <Grid item xs={10}>
-                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>รายการรถรับจ้างขนส่ง</Typography>
-                </Grid>
-                <Grid item xs={2}>
-                    <InsertTruckTransport />
-                </Grid>
-            </Grid>
+            {
+                windowWidth >= 800 ?
+                    <Grid container spacing={2} p={1} marginBottom={-2}>
+                        <Grid item sm={8} lg={10}>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>รายการรถรับจ้างขนส่ง</Typography>
+                        </Grid>
+                        <Grid item sm={4} lg={2} sx={{ textAlign: "right" }}>
+                            <InsertTruckTransport />
+                        </Grid>
+                    </Grid>
+                    :
+                    <Grid container spacing={2} p={1} marginBottom={-2}>
+                        <Grid item xs={12} sx={{ textAlign: "center" }}>
+                            <InsertTruckTransport />
+                        </Grid>
+                    </Grid>
+            }
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <TableContainer
                     component={Paper}
@@ -311,45 +320,45 @@ const TruckTransport = () => {
                                             }
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
-                                        <TableCell sx={{ textAlign: "center",position: "sticky", right: 0, backgroundColor: "white" }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                                             {
-                                            !update || row.id !== rowID ?
-                                                <Button
-                                                    variant="contained"
-                                                    color="warning"
-                                                    startIcon={<EditNoteIcon />}
-                                                    size="small"
-                                                    sx={{ height: "25px" }}
-                                                    onClick={() => handleUpdate(index, row.id, row.Name, row.Registration, row.Weight, row.Company)}
-                                                >
-                                                    แก้ไข
-                                                </Button>
-                                                :
-                                                <Box sx={{ paddingLeft: 1, paddingRight: 1 }}>
+                                                !update || row.id !== rowID ?
                                                     <Button
                                                         variant="contained"
-                                                        fullWidth
-                                                        color="success"
-                                                        endIcon={<SaveIcon />}
-                                                        size="small"
-                                                        sx={{ height: "25px", marginBottom: 0.5 }}
-                                                        onClick={handleSave}
-                                                    >
-                                                        บันทึก
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        fullWidth
-                                                        color="error"
-                                                        endIcon={<CancelIcon />}
+                                                        color="warning"
+                                                        startIcon={<EditNoteIcon />}
                                                         size="small"
                                                         sx={{ height: "25px" }}
-                                                        onClick={handleCancel}
+                                                        onClick={() => handleUpdate(index, row.id, row.Name, row.Registration, row.Weight, row.Company)}
                                                     >
-                                                        ยกเลิก
+                                                        แก้ไข
                                                     </Button>
-                                                </Box>
-                                        }
+                                                    :
+                                                    <Box sx={{ paddingLeft: 1, paddingRight: 1 }}>
+                                                        <Button
+                                                            variant="contained"
+                                                            fullWidth
+                                                            color="success"
+                                                            endIcon={<SaveIcon />}
+                                                            size="small"
+                                                            sx={{ height: "25px", marginBottom: 0.5 }}
+                                                            onClick={handleSave}
+                                                        >
+                                                            บันทึก
+                                                        </Button>
+                                                        <Button
+                                                            variant="contained"
+                                                            fullWidth
+                                                            color="error"
+                                                            endIcon={<CancelIcon />}
+                                                            size="small"
+                                                            sx={{ height: "25px" }}
+                                                            onClick={handleCancel}
+                                                        >
+                                                            ยกเลิก
+                                                        </Button>
+                                                    </Box>
+                                            }
                                         </TableCell>
                                     </TableRow>
                                 ))

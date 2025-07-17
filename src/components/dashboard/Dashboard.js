@@ -100,7 +100,7 @@ const Dashboard = () => {
     customertickets
   } = useBasicData();
 
-  const { gasstation } = useGasStationData();
+  const { gasstationDetail } = useGasStationData();
 
   const orders = Object.values(order || {});
   const trips = Object.values(trip || {});
@@ -108,7 +108,7 @@ const Dashboard = () => {
   const driver = Object.values(drivers || {});
   const ticket = Object.values(tickets || {});
   const officer = Object.values(officers || {});
-  const gasstations = Object.values(gasstation || {});
+  const gasstations = Object.values(gasstationDetail || {});
   const regheads = Object.values(reghead || {});
   const regtails = Object.values(regtail || {});
   const smalls = Object.values(small || {});

@@ -266,8 +266,8 @@ const FuelPaymentReport = () => {
         });
 
         flattenedRef.current = flattened;
-        
-        console.log("flattened : ",flattened);
+
+        console.log("flattened : ", flattened);
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
         const merged = Object.values(flattened.reduce((acc, curr) => {
@@ -302,7 +302,7 @@ const FuelPaymentReport = () => {
 
     }, [orders, selectedDateStart, selectedDateEnd, selectTickets, transferMoneyDetail]);
 
-    console.log("orderDetail : ",orderDetail);
+    console.log("orderDetail : ", orderDetail);
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalOverdueTransfer = orderDetail.reduce((sum, item) => sum + Number(item.OverdueTransfer || 0), 0);
@@ -491,9 +491,11 @@ const FuelPaymentReport = () => {
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-                <Grid container spacing={2} width="100%">
-                    <Grid item xs={10}>
-                        {/* <Paper>
+                {
+                    windowWidth >= 800 ?
+                        <Grid container spacing={2} width="100%" marginBottom={1} >
+                            <Grid item sm={8} lg={9}>
+                                {/* <Paper>
                             <Paper>
                                 <Autocomplete
                                     id="autocomplete-tickets"
@@ -551,16 +553,34 @@ const FuelPaymentReport = () => {
                                 />
                             </Paper>
                         </Paper> */}
-                        <FormGroup row sx={{ marginBottom: -1.5 }}>
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-                            <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-                            <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
-                            <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={2}>
-                        <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
-                    </Grid>
+                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+                                    <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                                    <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
+                                    <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
+                                </FormGroup>
+                            </Grid>
+                            <Grid item sm={1} lg={1} />
+                            <Grid item sm={3} lg={2}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                        :
+                        <Grid container spacing={2} p={1}>
+                            <Grid item xs={12}>
+                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+                                    <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                                    <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
+                                    <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
+                                </FormGroup>
+                            </Grid>
+                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                }
+                <Grid container spacing={2} width="100%">
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}

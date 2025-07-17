@@ -222,7 +222,7 @@ const ReportTrip = () => {
     const exportToExcel = () => {
         const exportData = TripDetail.map((row, index) => ({
             ลำดับ: index + 1,
-            "วันที่รับ": formatThaiSlash(dayjs(row.DateReceive,"DD/MM/YYYY")),
+            "วันที่รับ": formatThaiSlash(dayjs(row.DateReceive, "DD/MM/YYYY")),
             ไป: Object.entries(row)
                 .filter(([key]) => key.startsWith("Order"))
                 .sort(
@@ -345,9 +345,11 @@ const ReportTrip = () => {
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-                <Grid container spacing={2} width="100%">
-                    <Grid item xs={5.5}>
-                        {/* <Paper>
+                {
+                    windowWidth >= 800 ?
+                        <Grid container spacing={2} width="100%" marginBottom={1} >
+                            <Grid item sm={8} lg={5}>
+                                {/* <Paper>
                             <FormControl size="small" fullWidth>
                                 <Select
                                     value={selectDriver}
@@ -388,57 +390,57 @@ const ReportTrip = () => {
 
                                 </Select>
                             </FormControl> */}
-                        <Paper>
-                            <Paper>
-                                <Autocomplete
-                                    id="autocomplete-tickets"
-                                    options={sortedDrivers}
-                                    getOptionLabel={(option) => `${option.Name} (${option.TruckType})`}
-                                    isOptionEqualToValue={(option, value) =>
-                                        option.id === value.id
-                                    }
-                                    value={selectDriver}
-                                    onChange={(event, newValue) => {
-                                        setSelectDriver(newValue);
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            variant="outlined"
-                                            size="small"
-                                            label=""
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                startAdornment: (
-                                                    <InputAdornment position="start" sx={{ marginRight: 1 }}>
-                                                        กรุณาเลือกพนักงานขับรถ/ทะเบียน :
-                                                    </InputAdornment>
-                                                ),
-                                                sx: {
-                                                    height: "40px",
-                                                    fontSize: "18px",
-                                                    paddingRight: "8px",
+                                <Paper>
+                                    <Paper>
+                                        <Autocomplete
+                                            id="autocomplete-tickets"
+                                            options={sortedDrivers}
+                                            getOptionLabel={(option) => `${option.Name} (${option.TruckType})`}
+                                            isOptionEqualToValue={(option, value) =>
+                                                option.id === value.id
+                                            }
+                                            value={selectDriver}
+                                            onChange={(event, newValue) => {
+                                                setSelectDriver(newValue);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label=""
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                                กรุณาเลือกพนักงานขับรถ/ทะเบียน :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            height: "40px",
+                                                            fontSize: "18px",
+                                                            paddingRight: "8px",
+                                                        },
+                                                    }}
+                                                    InputLabelProps={{ shrink: false }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="16px">
+                                                        {`${option.Name} (${option.TruckType})`}
+                                                    </Typography>
+                                                </li>
+                                            )}
+                                            ListboxProps={{
+                                                style: {
+                                                    maxHeight: 250,
                                                 },
                                             }}
-                                            InputLabelProps={{ shrink: false }}
                                         />
-                                    )}
-                                    renderOption={(props, option) => (
-                                        <li {...props}>
-                                            <Typography fontSize="16px">
-                                                {`${option.Name} (${option.TruckType})`}
-                                            </Typography>
-                                        </li>
-                                    )}
-                                    ListboxProps={{
-                                        style: {
-                                            maxHeight: 250,
-                                        },
-                                    }}
-                                />
-                            </Paper>
+                                    </Paper>
 
-                            {/* <FormControl size="small" fullWidth>
+                                    {/* <FormControl size="small" fullWidth>
                                 <Select
                                     value={selectTickets}
                                     onChange={handleChangeTickets}
@@ -469,12 +471,73 @@ const ReportTrip = () => {
 
                                 </Select>
                             </FormControl> */}
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={4.5} />
-                    <Grid item xs={2}>
-                        <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
-                    </Grid>
+                                </Paper>
+                            </Grid>
+                            <Grid item sm={1} lg={5} />
+                            <Grid item sm={3} lg={2}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                        :
+                        <Grid container spacing={2} p={1}>
+                            <Grid item xs={12}>
+                                <Paper>
+                                    <Paper>
+                                        <Autocomplete
+                                            id="autocomplete-tickets"
+                                            options={sortedDrivers}
+                                            getOptionLabel={(option) => `${option.Name} (${option.TruckType})`}
+                                            isOptionEqualToValue={(option, value) =>
+                                                option.id === value.id
+                                            }
+                                            value={selectDriver}
+                                            onChange={(event, newValue) => {
+                                                setSelectDriver(newValue);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label=""
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                                กรุณาเลือกพนักงานขับรถ/ทะเบียน :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            height: "40px",
+                                                            fontSize: "18px",
+                                                            paddingRight: "8px",
+                                                        },
+                                                    }}
+                                                    InputLabelProps={{ shrink: false }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="16px">
+                                                        {`${option.Name} (${option.TruckType})`}
+                                                    </Typography>
+                                                </li>
+                                            )}
+                                            ListboxProps={{
+                                                style: {
+                                                    maxHeight: 250,
+                                                },
+                                            }}
+                                        />
+                                    </Paper>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                }
+                <Grid container spacing={2} width="100%">
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}
@@ -515,7 +578,7 @@ const ReportTrip = () => {
                                         TripDetail.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.DateReceive,"DD/MM/YYYY"))}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.DateReceive, "DD/MM/YYYY"))}</TableCell>
                                                 <TableCell>
                                                     {
                                                         Object.entries(row)

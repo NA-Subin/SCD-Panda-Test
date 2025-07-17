@@ -114,7 +114,7 @@ const InsertTruckTransport = () => {
 
     return (
         <React.Fragment>
-            <Box textAlign="right" marginBottom={-7}>
+            <Box>
                 <Button variant="contained" color="info" onClick={handleClickOpen}>เพิ่มรถรับจ้างขนส่ง</Button>
             </Box>
             <Dialog

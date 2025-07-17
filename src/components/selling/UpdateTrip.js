@@ -878,7 +878,7 @@ const UpdateTrip = (props) => {
             .ref(registration.split(":")[4] === "รถบริษัท" ? "truck/registration/" : "truck/transport")
             .child(Number(registration.split(":")[0]) - 1)
             .update({
-                Status: "TR:" + (tripID - 1)
+                Status: trip.StatusTrip !== "จบทริป" ? `TR:${tripID - 1}` : "ว่าง"
             })
             .then(() => {
                 setOpen(false);
@@ -1228,6 +1228,11 @@ const UpdateTrip = (props) => {
     // };
 
     const handleChangeStatus = () => {
+        // if (!registration || registration === "0:0:0:0" || registration === "0:0:0:ไม่มี") {
+        //     ShowError("กรุณาเพิ่มทะเบียนรถก่อน");
+        //     return;
+        // }
+
         ShowConfirm(
             `ต้องการจบเที่ยววิ่งใช่หรือไม่`,
             () => {
