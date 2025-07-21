@@ -1282,6 +1282,20 @@ const InsertTrips = () => {
         } else {
             setOpen(false);
         }
+        setOrdersTickets({});
+        setSelling({});
+        setVolumeT({});
+        setVolumeS({});
+        setWeightA({});
+        setOrderTrip({});
+        setTicketTrip({});
+        setWeightH(0);
+        setWeightL(0);
+        setCostTrip(0);
+        setDriverss("0:0");
+        setRegistration("0:0");
+        setSelectedDateReceive(dayjs(new Date()));
+        setSelectedDateDelivery(dayjs(new Date()));
     }
 
     const handleTotalWeight = (newHeavyOil, newWeight) => {

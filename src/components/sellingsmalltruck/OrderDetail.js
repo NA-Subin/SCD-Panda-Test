@@ -108,7 +108,7 @@ const OrderDetail = (props) => {
                 {/* <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 5, backgroundColor: "white", borderRight: "1px solid " + theme.palette.panda.main }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" gutterBottom>{detail.TicketName.split(":")[0]+detail.TicketName.split(":")[1]}</Typography>
                 </TableCell> */}
-                <TableCell sx={{ textAlign: "center", height: "20px", padding: "1px 4px", width: 350 }}>
+                <TableCell sx={{ textAlign: "left", height: "20px", padding: "1px 4px", width: 350 }}>
                     {
                         detail.TicketName === "ตั๋วเปล่า" ?
                             <Autocomplete
@@ -129,6 +129,7 @@ const OrderDetail = (props) => {
                                         onUpdateOrderID("TicketName", ""); // รีเซ็ตค่าเมื่อไม่ได้เลือก
                                     }
                                 }}
+                                sx={{ marginLeft: 1.5}}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -159,7 +160,7 @@ const OrderDetail = (props) => {
                                 )}
                             />
                             :
-                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0, marginLeft: 1.5 }} gutterBottom>
                                 {
                                     detail.TicketName.split(":")[1]
                                 }

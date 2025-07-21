@@ -101,8 +101,8 @@ const SellingDetail = (props) => {
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 50, padding: "1px 4px", backgroundColor: theme.palette.info.main, color: "white" }}>
                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{detail.id + 1}</Typography>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center", height: "20px", width: 240, padding: "1px 4px" }}>
-                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                <TableCell sx={{ textAlign: "left", height: "20px", width: 240, padding: "1px 4px" }}>
+                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0, marginLeft: 1.5 }} gutterBottom>
                         {
                             detail.TicketName.split(":")[1]
                         }
