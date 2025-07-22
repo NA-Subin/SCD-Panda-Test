@@ -386,11 +386,13 @@ const TicketsTransport = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
-                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    <TableCell sx={{ textAlign: "left" }}>
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
-                                                                row.Name
+                                                                <Typography variant="subtitle2" sx={{ marginLeft: 3 }} gutterBottom>
+                                                                    {row.Name}
+                                                                </Typography>
                                                                 :
                                                                 <Paper sx={{ width: "100%" }}>
                                                                     <TextField
@@ -704,13 +706,13 @@ const TicketsTransport = () => {
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
                                             ระยะเครดิต
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 150 : 100 }}>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
                                             เรทคลังลำปาง
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 150 : 100 }}>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
                                             เรทคลังพิจิตร
                                         </TablecellHeader>
-                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 150 : 100 }}>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             เรทคลังสระบุรี/บางปะอิน/IR
                                         </TablecellHeader>
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>

@@ -13,6 +13,7 @@ import {
     Grid,
     IconButton,
     InputAdornment,
+    MenuItem,
     Paper,
     Table,
     TableBody,
@@ -22,6 +23,7 @@ import {
     TablePagination,
     TableRow,
     TextField,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import { IconButtonError, TablecellHeader } from "../../theme/style";
@@ -45,12 +47,14 @@ const TicketsSmallTruck = () => {
     const [ticketChecked, setTicketChecked] = useState(false);
     const [recipientChecked, setRecipientChecked] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState(null); // จับ ID ของแถวที่ต้องการแก้ไข
+    const [companies, setCompanies] = React.useState("ไม่มี");
     //const [ticketM, setTicketM] = React.useState([]);
     //const [ticketR, setTicketR] = React.useState([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    const { customersmalltruck } = useBasicData();
+    const { customersmalltruck, company } = useBasicData();
     const ticket = Object.values(customersmalltruck || {});
+    const companyDetail = Object.values(company || {});
 
     const ticketM = ticket.filter((item) => item.Type === "เชียงใหม่" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
     const ticketR = ticket.filter((item) => item.Type === "บ้านโฮ่ง" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
@@ -141,7 +145,7 @@ const TicketsSmallTruck = () => {
     const [rowId, setRowId] = useState(null);
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (index, rowId, statusCompany, status, rowCreditTime, newname
+    const handleSetting = (index, rowId, statusCompany, status, rowCreditTime, newname, newCompany
         // , rowRate1, rowRate2, rowRate3
     ) => {
         setRowId(index + 1);
@@ -163,6 +167,7 @@ const TicketsSmallTruck = () => {
 
         setCreditTimeEdit(rowCreditTime);
         setName(newname);
+        setCompanies(newCompany || "ไม่มี");
         // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
         // setRate1Edit(rowRate1);
         // setRate2Edit(rowRate2);
@@ -193,7 +198,8 @@ const TicketsSmallTruck = () => {
                 Status: newStatus,
                 StatusCompany: ticketCheckedC ? "อยู่บริษัทในเครือ" : "ไม่อยู่บริษัทในเครือ",
                 CreditTime: creditTimeEdit,
-                Name: name
+                Name: name,
+                Company: companies,
                 // Rate1: rate1Edit,
                 // Rate2: rate2Edit,
                 // Rate3: rate3Edit,
@@ -361,7 +367,7 @@ const TicketsSmallTruck = () => {
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                     ลำดับ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                     ชื่อตั๋ว
                                 </TablecellHeader>
                                 {/* <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
@@ -373,16 +379,19 @@ const TicketsSmallTruck = () => {
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เรทคลังสระบุรี/บางปะอิน/IR
                                 </TablecellHeader> */}
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                     ระยะเวลาเครดิต
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                     สถานะบริษัท
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: !setting ? 100 : 150 }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                     สถานะ
                                 </TablecellHeader>
-                                <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 30 : 70, textAlign: "center" }}>
+                                <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                    วางบิลด้วย
+                                </TablecellHeader>
+                                <TablecellHeader sx={{ position: 'sticky', right: !setting ? 20 : 60, width: !setting ? 80 : 100, textAlign: "center" }}>
 
                                 </TablecellHeader>
                                 <TablecellHeader sx={{ position: 'sticky', right: 0, width: !setting ? 10 : 60, textAlign: "center" }}>
@@ -407,11 +416,13 @@ const TicketsSmallTruck = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
-                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    <TableCell sx={{ textAlign: "left" }}>
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
-                                                                row.Name
+                                                                <Typography variant="subtitle2" sx={{ marginLeft: 3 }} gutterBottom>
+                                                                    {row.Name}
+                                                                </Typography>
                                                                 :
                                                                 <Paper sx={{ width: "100%" }}>
                                                                     <TextField
@@ -571,78 +582,122 @@ const TicketsSmallTruck = () => {
                                                         <Box>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
-                                                                    <Typography variant="subtitle2" gutterBottom>{row.StatusCompany || "-"}</Typography>
+                                                                    <Tooltip title={row.StatusCompany} placement="right">
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={row.StatusCompany === "อยู่บริษัทในเครือ" ? true : false}
+                                                                                    disabled
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                        />
+                                                                    </Tooltip>
+                                                                    //<Typography variant="subtitle2" gutterBottom>{row.StatusCompany || "-"}</Typography>
                                                                     :
-                                                                    <>
+                                                                    <Tooltip title={ticketCheckedC === true ? "อยู่บริษัทในเครือ" : "ไม่อยู่บริษัทในเครือ"} placement="right">
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox
                                                                                     checked={ticketCheckedC === true ? true : false}
-                                                                                    onChange={(e) => setTicketCheckedC(true)}
+                                                                                    onChange={(e) => setTicketCheckedC(!ticketCheckedC)}
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    อยู่บริษัทในเครือ
-                                                                                </Typography>
-                                                                            }
                                                                         />
-                                                                        <FormControlLabel
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    checked={ticketCheckedC === false ? true : false}
-                                                                                    onChange={(e) => setTicketCheckedC(false)}
-                                                                                    size="small"
-                                                                                />
-                                                                            }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    ไม่อยู่บริษัทในเครือ
-                                                                                </Typography>
-                                                                            }
-                                                                        />
-                                                                    </>
+                                                                    </Tooltip>
+                                                                // <>
+                                                                //     <FormControlLabel
+                                                                //         control={
+                                                                //             <Checkbox
+                                                                //                 checked={ticketCheckedC === true ? true : false}
+                                                                //                 onChange={(e) => setTicketCheckedC(true)}
+                                                                //                 size="small"
+                                                                //             />
+                                                                //         }
+                                                                //         label={
+                                                                //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                //                 อยู่บริษัทในเครือ
+                                                                //             </Typography>
+                                                                //         }
+                                                                //     />
+                                                                //     <FormControlLabel
+                                                                //         control={
+                                                                //             <Checkbox
+                                                                //                 checked={ticketCheckedC === false ? true : false}
+                                                                //                 onChange={(e) => setTicketCheckedC(false)}
+                                                                //                 size="small"
+                                                                //             />
+                                                                //         }
+                                                                //         label={
+                                                                //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                //                 ไม่อยู่บริษัทในเครือ
+                                                                //             </Typography>
+                                                                //         }
+                                                                //     />
+                                                                // </>
                                                             }
                                                         </Box>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
-                                                                <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
+                                                                <Tooltip title={row.Status} placement="right">
+                                                                    <FormControlLabel
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={row.Status === "ลูกค้าประจำ" ? true : false}
+                                                                                disabled
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Tooltip>
+                                                                //<Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
                                                                 :
-                                                                <>
+                                                                <Tooltip title={ticketChecked === true ? "ลูกค้าประจำ" : "ลูกค้าไม่ประจำ"} placement="right">
                                                                     <FormControlLabel
-                                                                        sx={{ whiteSpace: "nowrap" }}
                                                                         control={
                                                                             <Checkbox
-                                                                                checked={ticketChecked && !recipientChecked ? true : false}
-                                                                                onChange={handleChangeTicketChecked}
+                                                                                checked={ticketChecked === true ? true : false}
+                                                                                onChange={(e) => setTicketChecked(!ticketChecked)}
                                                                                 size="small"
                                                                             />
                                                                         }
-                                                                        label={
-                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                ลูกค้าประจำ
-                                                                            </Typography>
-                                                                        }
                                                                     />
-                                                                    <FormControlLabel
-                                                                        sx={{ whiteSpace: "nowrap" }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={!ticketChecked && recipientChecked ? true : false}
-                                                                                onChange={handleChangeRecipientChecked}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                        label={
-                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                ลูกค้าไม่ประจำ
-                                                                            </Typography>
-                                                                        }
-                                                                    />
-                                                                </>
+                                                                </Tooltip>
+                                                            // <>
+                                                            //     <FormControlLabel
+                                                            //         sx={{ whiteSpace: "nowrap" }}
+                                                            //         control={
+                                                            //             <Checkbox
+                                                            //                 checked={ticketChecked && !recipientChecked ? true : false}
+                                                            //                 onChange={handleChangeTicketChecked}
+                                                            //                 size="small"
+                                                            //             />
+                                                            //         }
+                                                            //         label={
+                                                            //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                            //                 ลูกค้าประจำ
+                                                            //             </Typography>
+                                                            //         }
+                                                            //     />
+                                                            //     <FormControlLabel
+                                                            //         sx={{ whiteSpace: "nowrap" }}
+                                                            //         control={
+                                                            //             <Checkbox
+                                                            //                 checked={!ticketChecked && recipientChecked ? true : false}
+                                                            //                 onChange={handleChangeRecipientChecked}
+                                                            //                 size="small"
+                                                            //             />
+                                                            //         }
+                                                            //         label={
+                                                            //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                            //                 ลูกค้าไม่ประจำ
+                                                            //             </Typography>
+                                                            //         }
+                                                            //     />
+                                                            // </>
                                                         }
                                                     </TableCell>
                                                     {/* <TableCell width={70} sx={{ position: "sticky", right: 0, backgroundColor: "white" }}>
@@ -658,6 +713,49 @@ const TicketsSmallTruck = () => {
                                                             }
                                                         </Box>
                                                     </TableCell> */}
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Company
+                                                                :
+                                                                <Paper sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        select
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        value={companies}
+                                                                        onChange={(e) => setCompanies(e.target.value)}
+                                                                        SelectProps={{
+                                                                            MenuProps: {
+                                                                                PaperProps: {
+                                                                                    style: { maxHeight: 150 },
+                                                                                },
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของช่อง
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                fontSize: '14px', // ขนาด font
+                                                                                fontWeight: 'bold',
+                                                                                padding: '2px 6px', // padding ภายใน
+                                                                                textAlign: 'center',
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <MenuItem value="ไม่มี">กรุณาเลือกบริษัท</MenuItem>
+                                                                        {companyDetail.map((item, index) => (
+                                                                            <MenuItem key={item.id} value={`${item.id}:${item.Name}`}>
+                                                                                {item.Name}
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </TextField>
+                                                                </Paper>
+
+                                                        }
+                                                    </TableCell>
                                                     <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 30 : 70, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
@@ -743,11 +841,13 @@ const TicketsSmallTruck = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell> */}
-                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                    <TableCell sx={{ textAlign: "left", paddingLeft: 2 }}>
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
-                                                                row.Name
+                                                                <Typography variant="subtitle2" sx={{ marginLeft: 3 }} gutterBottom>
+                                                                    {row.Name}
+                                                                </Typography>
                                                                 :
                                                                 <Paper sx={{ width: "100%" }}>
                                                                     <TextField
@@ -907,78 +1007,122 @@ const TicketsSmallTruck = () => {
                                                         <Box>
                                                             {
                                                                 !setting || row.id !== selectedRowId ?
-                                                                    <Typography variant="subtitle2" gutterBottom>{row.StatusCompany || "-"}</Typography>
+                                                                    <Tooltip title={row.StatusCompany} placement="right">
+                                                                        <FormControlLabel
+                                                                            control={
+                                                                                <Checkbox
+                                                                                    checked={row.StatusCompany === "อยู่บริษัทในเครือ" ? true : false}
+                                                                                    disabled
+                                                                                    size="small"
+                                                                                />
+                                                                            }
+                                                                        />
+                                                                    </Tooltip>
+                                                                    //<Typography variant="subtitle2" gutterBottom>{row.StatusCompany || "-"}</Typography>
                                                                     :
-                                                                    <>
+                                                                    <Tooltip title={ticketCheckedC === true ? "อยู่บริษัทในเครือ" : "ไม่อยู่บริษัทในเครือ"} placement="right">
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox
                                                                                     checked={ticketCheckedC === true ? true : false}
-                                                                                    onChange={(e) => setTicketCheckedC(true)}
+                                                                                    onChange={(e) => setTicketCheckedC(!ticketCheckedC)}
                                                                                     size="small"
                                                                                 />
                                                                             }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    อยู่บริษัทในเครือ
-                                                                                </Typography>
-                                                                            }
                                                                         />
-                                                                        <FormControlLabel
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    checked={ticketCheckedC === false ? true : false}
-                                                                                    onChange={(e) => setTicketCheckedC(false)}
-                                                                                    size="small"
-                                                                                />
-                                                                            }
-                                                                            label={
-                                                                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                    ไม่อยู่บริษัทในเครือ
-                                                                                </Typography>
-                                                                            }
-                                                                        />
-                                                                    </>
+                                                                    </Tooltip>
+                                                                // <>
+                                                                //     <FormControlLabel
+                                                                //         control={
+                                                                //             <Checkbox
+                                                                //                 checked={ticketCheckedC === true ? true : false}
+                                                                //                 onChange={(e) => setTicketCheckedC(true)}
+                                                                //                 size="small"
+                                                                //             />
+                                                                //         }
+                                                                //         label={
+                                                                //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                //                 อยู่บริษัทในเครือ
+                                                                //             </Typography>
+                                                                //         }
+                                                                //     />
+                                                                //     <FormControlLabel
+                                                                //         control={
+                                                                //             <Checkbox
+                                                                //                 checked={ticketCheckedC === false ? true : false}
+                                                                //                 onChange={(e) => setTicketCheckedC(false)}
+                                                                //                 size="small"
+                                                                //             />
+                                                                //         }
+                                                                //         label={
+                                                                //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                                //                 ไม่อยู่บริษัทในเครือ
+                                                                //             </Typography>
+                                                                //         }
+                                                                //     />
+                                                                // </>
                                                             }
                                                         </Box>
                                                     </TableCell>
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
-                                                                <Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
+                                                                <Tooltip title={row.Status} placement="right">
+                                                                    <FormControlLabel
+                                                                        control={
+                                                                            <Checkbox
+                                                                                checked={row.Status === "ลูกค้าประจำ" ? true : false}
+                                                                                disabled
+                                                                                size="small"
+                                                                            />
+                                                                        }
+                                                                    />
+                                                                </Tooltip>
+                                                                //<Typography variant="subtitle2" gutterBottom>{row.Status}</Typography>
                                                                 :
-                                                                <>
+                                                                <Tooltip title={ticketChecked === true ? "ลูกค้าประจำ" : "ลูกค้าไม่ประจำ"} placement="right">
                                                                     <FormControlLabel
-                                                                        sx={{ whiteSpace: "nowrap" }}
                                                                         control={
                                                                             <Checkbox
-                                                                                checked={ticketChecked && !recipientChecked ? true : false}
-                                                                                onChange={handleChangeTicketChecked}
+                                                                                checked={ticketChecked === true ? true : false}
+                                                                                onChange={(e) => setTicketChecked(!ticketChecked)}
                                                                                 size="small"
                                                                             />
                                                                         }
-                                                                        label={
-                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                ลูกค้าประจำ
-                                                                            </Typography>
-                                                                        }
                                                                     />
-                                                                    <FormControlLabel
-                                                                        sx={{ whiteSpace: "nowrap" }}
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={!ticketChecked && recipientChecked ? true : false}
-                                                                                onChange={handleChangeRecipientChecked}
-                                                                                size="small"
-                                                                            />
-                                                                        }
-                                                                        label={
-                                                                            <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                                                                ลูกค้าไม่ประจำ
-                                                                            </Typography>
-                                                                        }
-                                                                    />
-                                                                </>
+                                                                </Tooltip>
+                                                            // <>
+                                                            //     <FormControlLabel
+                                                            //         sx={{ whiteSpace: "nowrap" }}
+                                                            //         control={
+                                                            //             <Checkbox
+                                                            //                 checked={ticketChecked && !recipientChecked ? true : false}
+                                                            //                 onChange={handleChangeTicketChecked}
+                                                            //                 size="small"
+                                                            //             />
+                                                            //         }
+                                                            //         label={
+                                                            //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                            //                 ลูกค้าประจำ
+                                                            //             </Typography>
+                                                            //         }
+                                                            //     />
+                                                            //     <FormControlLabel
+                                                            //         sx={{ whiteSpace: "nowrap" }}
+                                                            //         control={
+                                                            //             <Checkbox
+                                                            //                 checked={!ticketChecked && recipientChecked ? true : false}
+                                                            //                 onChange={handleChangeRecipientChecked}
+                                                            //                 size="small"
+                                                            //             />
+                                                            //         }
+                                                            //         label={
+                                                            //             <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                                            //                 ลูกค้าไม่ประจำ
+                                                            //             </Typography>
+                                                            //         }
+                                                            //     />
+                                                            // </>
                                                         }
                                                     </TableCell>
                                                     {/* <TableCell width={70} sx={{ backgroundColor: "white",position: "sticky", right: 0 }}>
@@ -994,6 +1138,49 @@ const TicketsSmallTruck = () => {
                                                             }
                                                         </Box>
                                                     </TableCell> */}
+                                                    <TableCell sx={{ textAlign: "center" }}>
+                                                        {
+                                                            !setting || row.id !== selectedRowId ?
+                                                                row.Company
+                                                                :
+                                                                <Paper sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        select
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                        value={companies}
+                                                                        onChange={(e) => setCompanies(e.target.value)}
+                                                                        SelectProps={{
+                                                                            MenuProps: {
+                                                                                PaperProps: {
+                                                                                    style: { maxHeight: 150 },
+                                                                                },
+                                                                            },
+                                                                        }}
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': {
+                                                                                height: '30px', // ปรับความสูงของช่อง
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                fontSize: '14px', // ขนาด font
+                                                                                fontWeight: 'bold',
+                                                                                padding: '2px 6px', // padding ภายใน
+                                                                                textAlign: 'center',
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <MenuItem value="ไม่มี">กรุณาเลือกบริษัท</MenuItem>
+                                                                        {companyDetail.map((item, index) => (
+                                                                            <MenuItem key={item.id} value={`${item.id}:${item.Name}`}>
+                                                                                {item.Name}
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </TextField>
+                                                                </Paper>
+
+                                                        }
+                                                    </TableCell>
                                                     <TableCell sx={{ width: !setting || row.id !== selectedRowId ? 30 : 70, height: "30px", position: "sticky", right: !setting || row.id !== selectedRowId ? 0 : 60, backgroundColor: "white", textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
+  Card,
   Checkbox,
   Container,
   Dialog,
@@ -156,6 +157,56 @@ const Setting = () => {
 
   };
 
+  const handleUpdate = (newIndex, newID, newName, newBasicData, newOperationData, newFinancialData, newReportData, newBigTruckData, newSmallTruckData, newGasStationData, newDriverData) => {
+    setCheckID(newID - 1);
+    setCheckIndex(newIndex);
+    setName(newName);
+    setCheckBasicData(newBasicData === 0 ? false : true);
+    setCheckOprerationData(newOperationData === 0 ? false : true);
+    setCheckFinancialData(newFinancialData === 0 ? false : true);
+    setCheckReportData(newReportData === 0 ? false : true);
+    setCheckBigTruckData(newBigTruckData === 0 ? false : true);
+    setCheckSmallTruckData(newSmallTruckData === 0 ? false : true);
+    setCheckGasStationData(newGasStationData === 0 ? false : true);
+    setCheckDriverData(newDriverData === 0 ? false : true);
+    setUpdatePosition(false);
+  }
+
+  const [companyID, setCompanyID] = useState(0);
+  const [newName, setNewName] = useState("");
+  const [newAddress, setNewAddress] = useState({
+    no: "",
+    village: "",
+    road: "",
+    subDistrict: "",
+    district: "",
+    province: "",
+    zipCode: "",
+  });
+  const [newLat, setNewLat] = useState("");
+  const [newLng, setNewLng] = useState("");
+  const [newCardID, setNewCardID] = useState("");
+
+  const handleEditCompany = (row) => {
+    setOpenDetailCompany(row.id);
+    setCompanyID(row.id);
+    setNewName(row.Name || "");
+    setNewAddress({
+      no: row.Address?.no || "",
+      village: row.Address?.village || "",
+      road: row.Address?.road || "",
+      subDistrict: row.Address?.subDistrict || "",
+      district: row.Address?.district || "",
+      province: row.Address?.province || "",
+      zipCode: row.Address?.zipCode || "",
+    });
+    setNewLat(row.Lat || "");
+    setNewLng(row.Lng || "");
+    setNewCardID(row.CardID || "");
+    setUpdate(true); // เริ่มแบบดูอย่างเดียวก่อน
+  };
+
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -208,22 +259,57 @@ const Setting = () => {
   //   getCompany();
   // }, []);
 
-  const handleUpdate = (newIndex, newID, newName, newBasicData, newOperationData, newFinancialData, newReportData, newBigTruckData, newSmallTruckData, newGasStationData, newDriverData) => {
-    setCheckID(newID - 1);
-    setCheckIndex(newIndex);
-    setName(newName);
-    setCheckBasicData(newBasicData === 0 ? false : true);
-    setCheckOprerationData(newOperationData === 0 ? false : true);
-    setCheckFinancialData(newFinancialData === 0 ? false : true);
-    setCheckReportData(newReportData === 0 ? false : true);
-    setCheckBigTruckData(newBigTruckData === 0 ? false : true);
-    setCheckSmallTruckData(newSmallTruckData === 0 ? false : true);
-    setCheckGasStationData(newGasStationData === 0 ? false : true);
-    setCheckDriverData(newDriverData === 0 ? false : true);
-    setUpdatePosition(false);
-  }
-
   console.log("BasucData : ", checkBasicData);
+
+  const formatAddress = (address) => {
+    if (!address) return "-";
+
+    const {
+      no,
+      village,
+      road,
+      subDistrict,
+      district,
+      province,
+      zipCode,
+    } = address;
+
+    const parts = [];
+
+    if (no && no !== "-") parts.push(`บ้านเลขที่ ${no}`);
+    if (village && village !== "-") parts.push(`หมู่ที่ ${village}`);
+    if (road && road !== "-") parts.push(`ถนน ${road}`);
+    if (subDistrict && subDistrict !== "-") parts.push(`ตำบล${subDistrict}`);
+    if (district && district !== "-") parts.push(`อำเภอ${district}`);
+    if (province && province !== "-") parts.push(`จังหวัด${province}`);
+    if (zipCode && zipCode !== "-") parts.push(`รหัสไปรษณีย์ ${zipCode}`);
+
+    return parts.join(" ");
+  };
+
+
+  const handleSaveCompany = () => {
+    const updatedData = {
+      Name: newName,
+      Address: newAddress,
+      Lat: newLat,
+      Lng: newLng,
+      CardID: newCardID,
+    };
+
+    database
+      .ref("company")
+      .child(Number(companyID) - 1)
+      .update(updatedData)
+      .then(() => {
+        ShowSuccess("อัปเดตข้อมูลสำเร็จ");
+        setUpdate(true);
+      })
+      .catch((err) => {
+        ShowError("เกิดข้อผิดพลาดในการอัปเดต");
+        console.error(err);
+      });
+  }
 
   const handleSavePosition = () => {
     database
@@ -299,7 +385,7 @@ const Setting = () => {
                     <Grid item xs={6}>
                       <Box display="flex" textAlign="center" justifyContent="left" alignItems="center">
                         <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 2 }} gutterBottom>ตำแหน่ง : </Typography>
-                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Position}</Typography>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>{userDetail.Position.split(":")[1]}</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={6}>
@@ -445,10 +531,10 @@ const Setting = () => {
                             companyDetail.map((row, index) => (
                               <TableRow>
                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                                <TableCell sx={{ textAlign: "center" }}>{row.Address}</TableCell>
+                                <TableCell sx={{ textAlign: "left" }}>{row.Name}</TableCell>
+                                <TableCell sx={{ textAlign: "left" }}>{formatAddress(row.Address)}</TableCell>
                                 <TableCell sx={{ textAlign: "center" }}>
-                                  <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpenDetailCompany(row.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
+                                  <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => handleEditCompany(row)}><InfoIcon color="info" fontSize="12px" /></IconButton>
                                 </TableCell>
                                 <Dialog
                                   open={openDetailCompany === row.id ? true : false}
@@ -478,63 +564,296 @@ const Setting = () => {
                                       sx={{ p: 2, border: "1px solid" + theme.palette.grey[600], marginTop: 2, marginBottom: 2 }}
                                     >
                                       <Grid container spacing={1}>
-                                        <Grid item xs={1}>
-                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ชื่อ-สกุล</Typography>
-                                        </Grid>
-                                        <Grid item xs={11}>
-                                          <TextField fullWidth variant="standard" value={row.Name} disabled={update ? true : false} />
-                                        </Grid>
-                                        <Grid item xs={1.5}>
-                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>บ้านเลขที่</Typography>
-                                        </Grid>
-                                        <Grid item xs={2.5}>
-                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[0] === undefined ? "-" : row.Address.split(",")[0]} disabled={update ? true : false} />
-                                        </Grid>
-                                        <Grid item xs={1}>
-                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>หมู่ที่</Typography>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[1] === undefined ? "-" : row.Address.split(",")[1]} disabled={update ? true : false} />
-                                        </Grid>
-                                        <Grid item xs={1}>
-                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ตำบล</Typography>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[2] === undefined ? "-" : row.Address.split(",")[2]} disabled={update ? true : false} />
-                                        </Grid>
+                                        <Grid item xs={12}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              ชื่อบริษัท
+                                            </Typography>
 
-                                        <Grid item xs={1}>
-                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>อำเภอ</Typography>
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newName : row.Name}
+                                              onChange={(e) => setNewName(e.target.value)}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
-                                        <Grid item xs={3}>
-                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[3] === undefined ? "-" : row.Address.split(",")[3]} disabled={update ? true : false} />
-                                        </Grid>
-                                        <Grid item xs={1}>
-                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>จังหวัด</Typography>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[4] === undefined ? "-" : row.Address.split(",")[4]} disabled={update ? true : false} />
+                                        <Grid item xs={12}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              เลขที่ภาษี
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newCardID : row.CardID}
+                                              onChange={(e) => setNewCardID(e.target.value)}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
                                         <Grid item xs={2}>
-                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รหัสไปรษณีย์</Typography>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              บ้านเลขที่
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newAddress.no : row.Address.no}
+                                              onChange={(e) => setNewAddress({ ...newAddress, no: e.target.value })}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
                                         <Grid item xs={2}>
-                                          <TextField fullWidth variant="standard" value={row.Address.split(",")[5] === undefined ? "-" : row.Address.split(",")[5]} disabled={update ? true : false} />
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              หมู่ที่
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newAddress.village : row.Address.village}
+                                              onChange={(e) => setNewAddress({ ...newAddress, village: e.target.value })}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
-                                        <Grid item xs={2.5}>
-                                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Latitude(ละติจูด)</Typography>
+                                        <Grid item xs={4}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              ถนน
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newAddress.road : row.Address.road}
+                                              onChange={(e) => setNewAddress({ ...newAddress, road: e.target.value })}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
-                                        <Grid item xs={3.5}>
-                                          <TextField fullWidth variant="standard" value={row.Lat} disabled={update ? true : false} />
+                                        <Grid item xs={4}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              ตำบล
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newAddress.subDistrict : row.Address.subDistrict}
+                                              onChange={(e) => setNewAddress({ ...newAddress, subDistrict: e.target.value })}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
-                                        <Grid item xs={2.5}>
-                                          <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>Longitude(ลองจิจูด)</Typography>
+                                        <Grid item xs={4}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              อำเภอ
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newAddress.district : row.Address.district}
+                                              onChange={(e) => setNewAddress({ ...newAddress, district: e.target.value })}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
-                                        <Grid item xs={3.5}>
-                                          <TextField fullWidth variant="standard" value={row.Lng} disabled={update ? true : false} />
+                                        <Grid item xs={4}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              จังหวัด
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newAddress.province : row.Address.province}
+                                              onChange={(e) => setNewAddress({ ...newAddress, province: e.target.value })}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              รหัสไปรษณีย์
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newAddress.zipCode : row.Address.zipCode}
+                                              onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              Latitude(ละติจูด)
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newLat : row.Lat}
+                                              onChange={(e) => setNewLat(e.target.value)}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center", // ให้แนวตั้งตรงกัน
+                                              width: "100%",
+                                              gap: 1, // ระยะห่างระหว่าง label กับช่องกรอก
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="subtitle1"
+                                              fontWeight="bold"
+                                              sx={{ whiteSpace: "nowrap" }} // ป้องกันตัดบรรทัด
+                                            >
+                                              Longitude(ลองจิจูด)
+                                            </Typography>
+
+                                            <TextField
+                                              variant="standard"
+                                              value={update ? newLng : row.Lng}
+                                              onChange={(e) => setNewLng(e.target.value)}
+                                              disabled={update}
+                                              fullWidth
+                                            />
+                                          </Box>
                                         </Grid>
                                       </Grid>
                                     </Paper>
+                                  </DialogContent>
+                                  <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark, display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     {
                                       update ?
                                         <Box marginBottom={2} textAlign="center">
@@ -543,14 +862,10 @@ const Setting = () => {
                                         </Box>
                                         :
                                         <Box marginBottom={2} textAlign="center">
-                                          <Button variant="contained" color="success" sx={{ marginRight: 2 }} onClick={() => setUpdate(true)} >บันทึก</Button>
+                                          <Button variant="contained" color="success" sx={{ marginRight: 2 }} onClick={handleSaveCompany} >บันทึก</Button>
                                           <Button variant="contained" color="error" onClick={() => setUpdate(true)} >ยกเลิก</Button>
                                         </Box>
                                     }
-                                  </DialogContent>
-                                  <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                                    <Button onClick={() => setOpenDetailCompany(false)} variant="contained" color="success">บันทึก</Button>
-                                    <Button onClick={() => setOpenDetailCompany(false)} variant="contained" color="error">ยกเลิก</Button>
                                   </DialogActions>
                                 </Dialog>
                               </TableRow>
@@ -610,7 +925,7 @@ const Setting = () => {
                                 <TablecellSetting sx={{ textAlign: "center", fontSize: 16, width: 900 }} colSpan={8}>
                                   สิทธิ์
                                 </TablecellSetting>
-                                <TablecellSetting rowSpan={2} width={50} sx={{ textAlign: "center",position: 'sticky', zIndex: 3, right: 0, }}>
+                                <TablecellSetting rowSpan={2} width={50} sx={{ textAlign: "center", position: 'sticky', zIndex: 3, right: 0, }}>
                                   <IconButtonInfo onClick={() => setInsertPositions(false)}>
                                     <AddBoxIcon />
                                   </IconButtonInfo>
@@ -650,7 +965,7 @@ const Setting = () => {
                                     <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                     <TableCell sx={{ textAlign: "center" }}>
                                       {
-                                        !updatePosition && checkIndex === index  ?
+                                        !updatePosition && checkIndex === index ?
                                           <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField size="small" fullWidth
                                               InputLabelProps={{
@@ -827,7 +1142,7 @@ const Setting = () => {
                                         }
                                       </Box>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center",position: 'sticky', right: 0,backgroundColor: "white" }}>
+                                    <TableCell sx={{ textAlign: "center", position: 'sticky', right: 0, backgroundColor: "white" }}>
                                       {
                                         !updatePosition && checkIndex === index ?
                                           <Box>

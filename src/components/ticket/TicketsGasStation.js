@@ -103,8 +103,12 @@ const TicketsGasStation = (props) => {
             {
                 !open ?
                     <TableRow key={index} >
-                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{name}</TableCell>
+                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{index + 1}</TableCell>
+                        <TableCell sx={{ textAlign: "left" }}>
+                            {<Typography variant="subtitle2" sx={{ marginLeft: 3 }} gutterBottom>
+                                {row.Name}
+                            </Typography>}
+                        </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{creditTime}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate1}</TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{rate2}</TableCell>

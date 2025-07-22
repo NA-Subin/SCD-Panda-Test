@@ -56,7 +56,7 @@ import BankDetail from "./BankDetail";
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
-import { formatThaiSlash } from "../../theme/DateTH";
+import { formatThaiFullYear, formatThaiSlash } from "../../theme/DateTH";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
@@ -723,18 +723,29 @@ const UpdateReport = (props) => {
     let groupTotals1 = {};
     let groupTotals2 = {};
 
+    const formatNumber = (value) =>
+        value === 0 || value === '0'
+            ? '0'
+            : new Intl.NumberFormat("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(value);
 
 
     console.log("Show Company 1 ", company1Tickets);
     console.log("show company 2 ", company2Tickets);
+    console.log("Ticket: ", ticket);
 
     return (
         <React.Fragment>
             <Box sx={{ width: "100%" }}>
                 <Grid container spacing={1}>
                     <Grid item md={7} xs={12}>
+                        <Typography variant="subtitle1" sx={{ marginBottom: -1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
+                            รายละเอียด : วันที่ส่ง : {formatThaiFullYear(dayjs(ticket.DateStart, "DD/MM/YYYY"))} ถึง {formatThaiFullYear(dayjs(ticket.DateEnd, "DD/MM/YYYY"))}
+                        </Typography>
                         <Typography variant="subtitle1" sx={{ marginBottom: -2, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                            รายละเอียด : วันที่ส่ง : {ticket.Date} จากตั๋ว : {ticket.TicketName.split(":")[1]}
+                            จากตั๋ว : {ticket.TicketName.split(":")[1]}
                         </Typography>
                     </Grid>
                     {
@@ -1052,19 +1063,19 @@ const UpdateReport = (props) => {
                                         <React.Fragment key={`${row.TicketName}-${row.ProductName}-${index}`}>
                                             <TableRow>
                                                 {rowSpan > 0 && (
-                                                    <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}>
                                                         {displayIndex1}
                                                     </TableCell>
                                                 )}
                                                 {rowSpan > 0 && (
-                                                    <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                             {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                                                         </Typography>
                                                     </TableCell>
                                                 )}
                                                 {rowSpan > 0 && (
-                                                    <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                             {row.Registration.split(":")[1] === "ไม่มี" ? "รถรับจ้างขนส่ง" : row.Registration.split(":")[1]} / {row.RegTail.split(":")[1]}
                                                         </Typography>
@@ -1089,51 +1100,51 @@ const UpdateReport = (props) => {
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.Volume)}
+                                                        {formatNumber(row.Volume)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.Rate)}
+                                                        {formatNumber(row.Rate)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
+                                                        {formatNumber(total)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total * 0.01)}
+                                                        {formatNumber(total * 0.01)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total * 0.99)}
+                                                        {formatNumber(total * 0.99)}
                                                     </Typography>
                                                 </TableCell>
                                             </TableRow>
 
                                             {isLastInGroup && (
                                                 <TableRow>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         รวม
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals1[key].volume)}
                                                     </TableCell>
-                                                    <TableCell sx={{ backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals1[key].amount)}
                                                     </TableCell>
-                                                    <TableCell sx={{ backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
@@ -1184,7 +1195,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total1.totalVolume)}
+                                                value={formatNumber(total1.totalVolume)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1219,7 +1230,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total1.totalAmount)}
+                                                value={formatNumber(total1.totalAmount)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1254,7 +1265,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total1.totalTax)}
+                                                value={formatNumber(total1.totalTax)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1289,7 +1300,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total1.totalPayment)}
+                                                value={formatNumber(total1.totalPayment)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1324,7 +1335,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(CountCompany1)}
+                                                value={formatNumber(CountCompany1)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1359,7 +1370,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(total1.totalPayment) - Number(CountCompany1))}
+                                                value={formatNumber(Number(total1.totalPayment) - Number(CountCompany1))}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1606,14 +1617,14 @@ const UpdateReport = (props) => {
                                             <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
                                                 {rowSpan > 0 && (
                                                     <TableCell rowSpan={rowSpan + 1}
-                                                        sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle", borderBottom: "2px solid lightgray" }}>
+                                                        sx={{ textAlign: "center", height: '30px', width: 50, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}>
                                                         {displayIndex2}
                                                     </TableCell>
                                                 )}
                                                 {rowSpan > 0 && (
                                                     <TableCell
                                                         rowSpan={rowSpan + 1}
-                                                        sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle", borderBottom: "2px solid lightgray" }}>
+                                                        sx={{ textAlign: "center", height: '30px', width: 100, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                             {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                                                         </Typography>
@@ -1622,7 +1633,7 @@ const UpdateReport = (props) => {
                                                 {rowSpan > 0 && (
                                                     <TableCell
                                                         rowSpan={rowSpan + 1}
-                                                        sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "2px solid lightgray" }}
+                                                        sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}
                                                     >
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                             {row.Registration.split(":")[1]} / {row.RegTail.split(":")[1]}
@@ -1648,51 +1659,51 @@ const UpdateReport = (props) => {
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.Volume)}
+                                                        {formatNumber(row.Volume)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.Rate)}
+                                                        {formatNumber(row.Rate)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.Volume * row.Rate)}
+                                                        {formatNumber(row.Volume * row.Rate)}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((row.Volume * row.Rate) * (0.01))}
+                                                        {formatNumber((row.Volume * row.Rate) * (0.01))}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((row.Volume * row.Rate) - ((row.Volume * row.Rate) * (0.01)))}
+                                                        {formatNumber((row.Volume * row.Rate) - ((row.Volume * row.Rate) * (0.01)))}
                                                     </Typography>
                                                 </TableCell>
                                             </TableRow>
 
                                             {isLastInGroup && (
                                                 <TableRow>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         รวม
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals2[key].volume)}
                                                     </TableCell>
-                                                    <TableCell sx={{ backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals2[key].amount)}
                                                     </TableCell>
-                                                    <TableCell sx={{ backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#f0f0f0", borderBottom: "2px solid lightgray" }}>
+                                                    <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
+                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
@@ -1742,7 +1753,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total2.totalVolume)}
+                                                value={formatNumber(total2.totalVolume)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1777,7 +1788,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total2.totalAmount)}
+                                                value={formatNumber(total2.totalAmount)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1812,7 +1823,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total2.totalTax)}
+                                                value={formatNumber(total2.totalTax)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1847,7 +1858,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total2.totalPayment)}
+                                                value={formatNumber(total2.totalPayment)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1882,7 +1893,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(CountCompany2)}
+                                                value={formatNumber(CountCompany2)}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1917,7 +1928,7 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(total2.totalPayment) - Number(CountCompany2))}
+                                                value={formatNumber(Number(total2.totalPayment) - Number(CountCompany2))}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -1998,7 +2009,7 @@ const UpdateReport = (props) => {
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>{formatThaiSlash(dayjs(row.DateStart, "DD/MM/YYYY"))}</TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.BankName}</TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.Transport.split(":")[1]}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 130 }}>{new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.IncomingMoney)}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 130 }}>{formatNumber(row.IncomingMoney)}</TableCell>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
                                                 </TableRow>
                                             ))
@@ -2016,7 +2027,7 @@ const UpdateReport = (props) => {
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 280, backgroundColor: "#616161", color: "white" }} colSpan={2}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalIncomingMoney)}
+                                                {formatNumber(totalIncomingMoney)}
                                             </Typography>
                                         </TableCell>
                                         {/* <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 210, backgroundColor: "#616161", color: "white" }}>

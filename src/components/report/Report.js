@@ -1023,6 +1023,14 @@ const Report = () => {
     }));
   };
 
+  const formatNumber = (value) =>
+    value === 0 || value === '0'
+      ? '0'
+      : new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+
   console.log("dateRanges A : ", dateRangesA);
   console.log("dateRanges T : ", dateRangesT);
   console.log("dateRanges G : ", dateRangesG);
@@ -1392,19 +1400,19 @@ const Report = () => {
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalPrice)}
+                                          {formatNumber(row.TotalPrice)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.VatOnePercent)}
+                                          {formatNumber(row.VatOnePercent)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount)}
+                                          {formatNumber(row.TotalAmount)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(totalIncomingMoney)}
+                                          {formatNumber(totalIncomingMoney)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount - totalIncomingMoney)}
+                                          {formatNumber(row.TotalAmount - totalIncomingMoney)}
                                         </TableCell>
                                       </TableRow>
                                     );
@@ -1519,19 +1527,19 @@ const Report = () => {
                                         {row.TicketName.split(":")[1]}
                                       </TableCell>
                                       <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                        {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalPrice)}
+                                        {formatNumber(row.TotalPrice)}
                                       </TableCell>
                                       <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                        {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.VatOnePercent)}
+                                        {formatNumber(row.VatOnePercent)}
                                       </TableCell>
                                       <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                        {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount)}
+                                        {formatNumber(row.TotalAmount)}
                                       </TableCell>
                                       <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                        {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(totalIncomingMoney)}
+                                        {formatNumber(totalIncomingMoney)}
                                       </TableCell>
                                       <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                        {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount - totalIncomingMoney)}
+                                        {formatNumber(row.TotalAmount - totalIncomingMoney)}
                                       </TableCell>
                                     </TableRow>
                                   );
@@ -1778,19 +1786,19 @@ const Report = () => {
                                             {row.TicketName.split(":")[1]}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalPrice)}
+                                            {formatNumber(row.TotalPrice)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.VatOnePercent)}
+                                            {formatNumber(row.VatOnePercent)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount)}
+                                            {formatNumber(row.TotalAmount)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(totalIncomingMoney)}
+                                            {formatNumber(totalIncomingMoney)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount - totalIncomingMoney)}
+                                            {formatNumber(row.TotalAmount - totalIncomingMoney)}
                                           </TableCell>
                                         </TableRow>
                                       );
@@ -1902,19 +1910,19 @@ const Report = () => {
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalPrice)}
+                                          {formatNumber(row.TotalPrice)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.VatOnePercent)}
+                                          {formatNumber(row.VatOnePercent)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount)}
+                                          {formatNumber(row.TotalAmount)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(totalIncomingMoney)}
+                                          {formatNumber(totalIncomingMoney)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount - totalIncomingMoney)}
+                                          {formatNumber(row.TotalAmount - totalIncomingMoney)}
                                         </TableCell>
                                       </TableRow>
                                     );
@@ -2160,19 +2168,19 @@ const Report = () => {
                                             {row.TicketName.split(":")[1]}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalPrice)}
+                                            {formatNumber(row.TotalPrice)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.VatOnePercent)}
+                                            {formatNumber(row.VatOnePercent)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount)}
+                                            {formatNumber(row.TotalAmount)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(totalIncomingMoney)}
+                                            {formatNumber(totalIncomingMoney)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount - totalIncomingMoney)}
+                                            {formatNumber(row.TotalAmount - totalIncomingMoney)}
                                           </TableCell>
                                         </TableRow>
                                       );
@@ -2284,19 +2292,19 @@ const Report = () => {
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalPrice)}
+                                          {formatNumber(row.TotalPrice)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.VatOnePercent)}
+                                          {formatNumber(row.VatOnePercent)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount)}
+                                          {formatNumber(row.TotalAmount)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(totalIncomingMoney)}
+                                          {formatNumber(totalIncomingMoney)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {new Intl.NumberFormat("en-US", {  minimumFractionDigits: 2,  maximumFractionDigits: 2}).format(row.TotalAmount - totalIncomingMoney)}
+                                          {formatNumber(row.TotalAmount - totalIncomingMoney)}
                                         </TableCell>
                                       </TableRow>
                                     );

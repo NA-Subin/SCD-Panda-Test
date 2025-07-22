@@ -82,8 +82,8 @@ const Tickets = () => {
     const [name, setName] = useState("");
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (index,rowId, status, rowRate1, rowRate2, rowRate3, newname) => {
-        setRowIndex(index+1);
+    const handleSetting = (index, rowId, status, rowRate1, rowRate2, rowRate3, newname) => {
+        setRowIndex(index + 1);
         setSetting(true);
         setSelectedRowId(rowId);
         // ตั้งค่าของ checkbox ตามสถานะที่มีอยู่
@@ -213,7 +213,7 @@ const Tickets = () => {
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                     ลำดับ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 550 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
                                     ชื่อตั๋ว
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
@@ -222,7 +222,7 @@ const Tickets = () => {
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เรทคลังพิจิตร
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                     เรทคลังสระบุรี/บางปะอิน/IR
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
@@ -246,11 +246,13 @@ const Tickets = () => {
                                                 </Typography>
                                             </TableCell>
                                             {/* <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Name}</Typography> */}
-                                            <TableCell sx={{ textAlign: "center" }}>
+                                            <TableCell sx={{ textAlign: "left" }}>
                                                 {
                                                     // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                     !setting || row.id !== selectedRowId ?
-                                                        row.Name
+                                                        <Typography variant="subtitle2" sx={{ marginLeft: 3 }} gutterBottom>
+                                                            {row.Name}
+                                                        </Typography>
                                                         :
                                                         <Paper sx={{ width: "100%" }}>
                                                             <TextField
@@ -413,7 +415,7 @@ const Tickets = () => {
                                                                 startIcon={<EditNoteIcon />}
                                                                 size="small"
                                                                 sx={{ height: "25px" }}
-                                                                onClick={() => handleSetting(index,row.id, row.Type, row.Rate1, row.Rate2, row.Rate3, row.Name)}
+                                                                onClick={() => handleSetting(index, row.id, row.Type, row.Rate1, row.Rate2, row.Rate3, row.Name)}
                                                                 fullWidth
                                                             >
                                                                 แก้ไข
