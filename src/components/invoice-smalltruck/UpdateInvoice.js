@@ -122,7 +122,21 @@ const UpdateInvoice = (props) => {
     console.log("totalIncomingMoney : ", totalIncomingMoney);
 
     const companyName = companies.find(item => item.id === 1);
-    const orderList = orders.filter(item => item.Date === ticket.Date && item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] && item.CustomerType === ticket.CustomerType && item.Trip !== "ยกเลิก");
+    //const orderList = orders.filter(item => item.Date === ticket.Date && item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] && item.CustomerType === ticket.CustomerType && item.Trip !== "ยกเลิก");
+    const orderList = orders
+        .filter(item =>
+            item.Date === ticket.Date &&
+            item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] &&
+            item.CustomerType === ticket.CustomerType &&
+            item.Trip !== "ยกเลิก"
+        )
+        .map(item => {
+            return {
+                ...item,
+                DateReceive: ticket.DateReceive,
+                DateDelivery: ticket.DateDelivery,
+            };
+        });
     const [code, setCode] = React.useState(`lV${dayjs(new Date).format("YYYYMM")}`)
 
     console.log("transferMoneyDetail : ", transferMoneyDetail.length)
@@ -780,7 +794,7 @@ const UpdateInvoice = (props) => {
                                         ลำดับ
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                        วันที่
+                                        วันที่รับ
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ผู้ขับ/ป้ายทะเบียน
@@ -816,6 +830,8 @@ const UpdateInvoice = (props) => {
                                                     Registration: row.Registration,
                                                     ProductName: productName,
                                                     Volume: Volume.Volume,
+                                                    DateDelivery: row.DateDelivery,
+                                                    DateReceive: row.DateReceive,
                                                     uniqueRowId: `${index}:${productName}:${row.No}`,
                                                 }))
                                         )
@@ -825,7 +841,7 @@ const UpdateInvoice = (props) => {
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(report[row.uniqueRowId]?.Date || row.Date,"DD/MM/YYYY"))}</Typography>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(report[row.uniqueRowId]?.Date || row.Date, "DD/MM/YYYY"))}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px' }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
@@ -1016,7 +1032,7 @@ const UpdateInvoice = (props) => {
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     {
-                                                        !updateTranfer || row.id !== tranferID ? formatThaiSlash(dayjs(row.DateStart,"DD/MM/YYYY"))
+                                                        !updateTranfer || row.id !== tranferID ? formatThaiSlash(dayjs(row.DateStart, "DD/MM/YYYY"))
                                                             :
                                                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
                                                                 <DatePicker

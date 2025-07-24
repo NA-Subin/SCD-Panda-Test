@@ -116,9 +116,10 @@ const InvoiceSmallTruck = () => {
 
   // const { order, transferMoney } = useData();
   const { customersmalltruck } = useBasicData();
-  const { order, transferMoney } = useTripData();
+  const { order, transferMoney, trip } = useTripData();
   const orders = Object.values(order || {});
   const customerS = Object.values(customersmalltruck || {});
+  const trips = Object.values(trip || {});
   const transferMoneyDetail = Object.values(transferMoney || {});
 
   console.log("Transfer Money : ", transferMoneyDetail);
@@ -127,6 +128,7 @@ const InvoiceSmallTruck = () => {
     .filter((item) => {
       const itemDate = dayjs(item.Date, "DD/MM/YYYY");
       const customerId = Number(item.TicketName.split(":")[0]);
+
       let isInCompany =
         check === 1
           ? customerS.find((customer) => customer.id === customerId)
@@ -145,6 +147,7 @@ const InvoiceSmallTruck = () => {
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
+      const tripsDate = trips.find((row) => (row.id - 1) === item.Trip);
 
       const totalIncomingMoney = transferMoneyDetail
         .filter((trans) => trans.TicketNo === item.No)
@@ -162,6 +165,8 @@ const InvoiceSmallTruck = () => {
         TotalVolume: totalVolume,
         TotalAmount: totalAmount,
         TotalOverdue: totalIncomingMoney,
+        DateReceive: tripsDate?.DateReceive,
+        DateDelivery: tripsDate?.DateDelivery,
       };
     })
     // 🔽 รวมรายการซ้ำกันตรงนี้
@@ -180,8 +185,8 @@ const InvoiceSmallTruck = () => {
       return acc;
     }, [])
     .sort((a, b) => a.TicketName.localeCompare(b.TicketName));
-    
-    console.log("OrderDetail : ",orderDetail)
+
+  console.log("OrderDetail : ", orderDetail)
 
   const sortedOrderDetail = useMemo(() => {
     const sorted = [...orderDetail];
@@ -210,7 +215,7 @@ const InvoiceSmallTruck = () => {
     return sorted;
   }, [orderDetail, sortConfig]);
 
-  console.log("Order : ", orders);
+  console.log("sortedOrderDetail : ", sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0)));
   console.log("Order Detail : ", orderDetail);
 
   const [page, setPage] = useState(0);
@@ -253,7 +258,7 @@ const InvoiceSmallTruck = () => {
               marginBottom: 3
             }}
           >
-            <LocalizationProvider dateAdapter={AdapterDayjs}  adapterLocale="th">
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
               <DatePicker
                 openTo="day"
                 views={["year", "month", "day"]}
@@ -372,7 +377,7 @@ const InvoiceSmallTruck = () => {
                         <Grid item xs={12} display="flex" justifyContent="right" alignItems="center">
                           <FormControlLabel control={
                             <Checkbox
-                            color="pink"
+                              color="pink"
                               value={checkOverdueTransfer}
                               //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                               onChange={handleChangeCheck}
@@ -393,7 +398,7 @@ const InvoiceSmallTruck = () => {
                             <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", marginBottom: -1, marginRight: 1 }} gutterBottom>*เลือกดูเฉพาะค้างโอนหรือดูทั้งหมด กดตรงนี้*</Typography>
                             <FormControlLabel control={
                               <Checkbox
-                              color="pink"
+                                color="pink"
                                 value={checkOverdueTransfer}
                                 //onChange={() => setCheckOverdueTransfer(!checkOverdueTransfer)}
                                 onChange={handleChangeCheck}

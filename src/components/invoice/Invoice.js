@@ -117,9 +117,10 @@ const Invoice = () => {
 
   // const { order, transferMoney } = useData();
   const { customerbigtruck } = useBasicData();
-  const { order, transferMoney } = useTripData();
+  const { order, trip, transferMoney } = useTripData();
   const orders = Object.values(order || {});
   const customerB = Object.values(customerbigtruck || {});
+  const trips = Object.values(trip || {});
   const transferMoneyDetail = Object.values(transferMoney || {});
 
   console.log("Transfer Money : ", transferMoneyDetail);
@@ -147,6 +148,7 @@ const Invoice = () => {
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
+      const tripsDate = trips.find((row) => (row.id - 1) === item.Trip);
 
       const totalIncomingMoney = transferMoneyDetail
         .filter((trans) => trans.TicketNo === item.No)
@@ -164,6 +166,8 @@ const Invoice = () => {
         TotalVolume: totalVolume,
         TotalAmount: totalAmount,
         TotalOverdue: totalIncomingMoney,
+        DateReceive: tripsDate?.DateReceive,
+        DateDelivery: tripsDate?.DateDelivery,
       };
     })
     // 🔽 รวมรายการซ้ำกันตรงนี้
@@ -211,7 +215,7 @@ const Invoice = () => {
     return sorted;
   }, [orderDetail, sortConfig]);
 
-  console.log("Order : ", orders);
+  console.log("sortedOrderDetail : ", sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0)));
   console.log("Order Detail : ", orderDetail);
 
   const [page, setPage] = useState(0);
@@ -531,13 +535,13 @@ const Invoice = () => {
                                     {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                    {new Intl.NumberFormat("en-US").format(Number(row.TotalAmount) - Number(row.TotalOverdue))}
                                   </TableCell>
                                 </TableRow>
                               )
                               )
                             :
-                            orderDetail.map((row, index) => (
+                            sortedOrderDetail.map((row, index) => (
                               <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.Date)}
                                 sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                               >
@@ -565,7 +569,7 @@ const Invoice = () => {
                                   {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
                                 </TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                  {new Intl.NumberFormat("en-US").format(Number(row.TotalAmount) - Number(row.TotalOverdue))}
                                 </TableCell>
                               </TableRow>
                             ))
@@ -624,7 +628,7 @@ const Invoice = () => {
                             : ""
                         ))
                       :
-                      orderDetail.map((row, index) => (
+                      sortedOrderDetail.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?
                           <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} />
                           : ""

@@ -123,7 +123,22 @@ const UpdateInvoice = (props) => {
     console.log("totalIncomingMoney : ", totalIncomingMoney);
 
     const companyName = companies.find(item => item.id === 1);
-    const orderList = orders.filter(item => item.Date === ticket.Date && item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] && item.CustomerType === ticket.CustomerType && item.Trip !== "ยกเลิก");
+    //const orderList = orders.filter(item => item.Date === ticket.Date && item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] && item.CustomerType === ticket.CustomerType && item.Trip !== "ยกเลิก");
+    const orderList = orders
+        .filter(item =>
+            item.Date === ticket.Date &&
+            item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] &&
+            item.CustomerType === ticket.CustomerType &&
+            item.Trip !== "ยกเลิก"
+        )
+        .map(item => {
+            return {
+                ...item,
+                DateReceive: ticket.DateReceive,
+                DateDelivery: ticket.DateDelivery,
+            };
+        });
+
     const [code, setCode] = React.useState(`lV${dayjs(new Date).format("YYYYMM")}`)
 
     console.log("transferMoneyDetail : ", transferMoneyDetail.length)
@@ -378,6 +393,8 @@ const UpdateInvoice = (props) => {
                         Registration: row.Registration.split(":")[1],
                         ProductName: productName,
                         Volume: Volume.Volume * 1000,
+                        DateDelivery: row.DateDelivery,
+                        DateReceive: row.DateReceive,
                         uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
                     }))
             ),
@@ -464,6 +481,8 @@ const UpdateInvoice = (props) => {
                     Registration: row.Registration,
                     ProductName: productName,
                     Volume: Volume.Volume * 1000,
+                    DateDelivery: row.DateDelivery,
+                    DateReceive: row.DateReceive,
                     uniqueRowId: `${productName}:${row.No}`,
                 }))
         )
@@ -817,7 +836,7 @@ const UpdateInvoice = (props) => {
                                         ลำดับ
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                        วันที่
+                                        วันที่รับ
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ผู้ขับ/ป้ายทะเบียน
@@ -864,7 +883,7 @@ const UpdateInvoice = (props) => {
                                                                 sx={{ textAlign: "center", height: "30px", width: 150 }}
                                                             >
                                                                 <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                                    {formatThaiSlash(dayjs(report[row.uniqueRowId]?.Date || row.Date, "DD/MM/YYYY"))}
+                                                                    {formatThaiSlash(dayjs(report[row.uniqueRowId]?.DateReceive || row.DateReceive, "DD/MM/YYYY"))}
                                                                 </Typography>
                                                             </TableCell>
                                                             <TableCell
