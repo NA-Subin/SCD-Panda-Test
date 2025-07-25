@@ -1078,6 +1078,32 @@ const InsertTrips = () => {
     };
 
     const handleSubmit = () => {
+        for (const key in selling) {
+            const item = selling[key];
+
+            // ❌ ไม่มี Product หรือไม่มี key นอกจาก 'P'
+            const productKeys = Object.keys(item.Product || {});
+            if (productKeys.length === 0 || (productKeys.length === 1 && productKeys[0] === 'P')) {
+                ShowError(`รายการที่ ${+key + 1} กรุณาเพิ่มจำนวนสินค้าให้ครบ`);
+                return;
+            }
+
+            if (!item.Rate || item.Rate === 0) {
+                ShowError(`รายการที่ ${+key + 1} กรุณาระบุค่าบรรทุก ให้ครบ`);
+                return;
+            }
+
+            if (!item.CreditTime || item.CreditTime === "-") {
+                ShowError(`รายการที่ ${+key + 1} กรุณาระบุ CreditTime ให้ครบ`);
+                return;
+            }
+
+            if (!item.Travel || item.Travel === 0) {
+                ShowError(`รายการที่ ${+key + 1} กรุณาระบุจำนวนเที่ยว ให้ครบ`);
+                return;
+            }
+        }
+
         const orderRef = database.ref("order/");
         const ticketsRef = database.ref("tickets/");
 

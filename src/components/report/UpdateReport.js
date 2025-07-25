@@ -675,34 +675,67 @@ const UpdateReport = (props) => {
     }
 
     const handleSubmit = () => {
-        database
-            .ref("transfermoney/")
-            .child(transferMoneyDetail.length)
-            .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-            .then(() => {
-                let total = Number(newNumber) + 1
-                let formattedNumber = String(total).padStart(4, "0");
-                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
-                console.log("บันทึกข้อมูลเรียบร้อย ✅");
-                setPrice({
-                    id: transferMoneyDetail.length,
-                    Code: currentCode,
-                    Number: formattedNumber,
-                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                    BankName: "",
-                    Transport: "",
-                    IncomingMoney: "",
-                    TicketName: ticket.TicketName,
-                    TicketNo: ticket.No,
-                    TicketType: ticket.CustomerType,
-                    Note: "",
+            const newId = transferMoneyDetail.length;
+            const total = Number(newNumber) + 1;
+            //const formattedNumber = String(total).padStart(4, "0");
+    
+            const newPrice = {
+                ...price,
+                id: newId,
+                //Number: formattedNumber,
+            };
+    
+            database
+                .ref("transfermoney/")
+                .child(newId)
+                .set(newPrice)
+                .then(() => {
+                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
+    
+                    // เตรียมค่าใหม่สำหรับ price หลังบันทึก
+                    const nextFormattedNumber = String(total).padStart(4, "0");
+                    setPrice({
+                        ...newPrice,
+                        id: newId + 1,
+                        Number: nextFormattedNumber,
+                    });
                 })
-            })
-            .catch((error) => {
-                ShowError("ไม่สำเร็จ");
-                console.error("Error updating data:", error);
-            });
-    }
+                .catch((error) => {
+                    ShowError("ไม่สำเร็จ");
+                    console.error("Error updating data:", error);
+                });
+        };
+
+    // const handleSubmit = () => {
+    //     database
+    //         .ref("transfermoney/")
+    //         .child(transferMoneyDetail.length)
+    //         .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+    //         .then(() => {
+    //             let total = Number(newNumber) + 1
+    //             let formattedNumber = String(total).padStart(4, "0");
+    //             ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+    //             console.log("บันทึกข้อมูลเรียบร้อย ✅");
+    //             setPrice({
+    //                 id: transferMoneyDetail.length,
+    //                 Code: currentCode,
+    //                 Number: formattedNumber,
+    //                 DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+    //                 BankName: "",
+    //                 Transport: "",
+    //                 IncomingMoney: "",
+    //                 TicketName: ticket.TicketName,
+    //                 TicketNo: ticket.No,
+    //                 TicketType: ticket.CustomerType,
+    //                 Note: "",
+    //             })
+    //         })
+    //         .catch((error) => {
+    //             ShowError("ไม่สำเร็จ");
+    //             console.error("Error updating data:", error);
+    //         });
+    // }
 
     const rowSpanMap1 = company1Tickets.reduce((acc, row) => {
         const key = `${row.Date} : ${row.Driver} : ${row.Registration}`;

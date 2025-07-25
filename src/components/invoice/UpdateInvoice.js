@@ -616,89 +616,38 @@ const UpdateInvoice = (props) => {
     }
 
     const handleSubmit = () => {
+        const newId = transferMoneyDetail.length;
+        const total = Number(newNumber) + 1;
+        //const formattedNumber = String(total).padStart(4, "0");
+
+        const newPrice = {
+            ...price,
+            id: newId,
+            //Number: formattedNumber,
+        };
+
         database
             .ref("transfermoney/")
-            .child(transferMoneyDetail.length)
-            .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
+            .child(newId)
+            .set(newPrice)
             .then(() => {
-                let total = Number(newNumber) + 1
-                let formattedNumber = String(total).padStart(4, "0");
                 ShowSuccess("บันทึกข้อมูลเรียบร้อย");
                 console.log("บันทึกข้อมูลเรียบร้อย ✅");
+
+                // เตรียมค่าใหม่สำหรับ price หลังบันทึก
+                const nextFormattedNumber = String(total).padStart(4, "0");
                 setPrice({
-                    id: transferMoneyDetail.length,
-                    Code: currentCode,
-                    Number: formattedNumber,
-                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                    BankName: "",
-                    Transport: `${companyName.id}:${companyName.Name}`,
-                    IncomingMoney: "",
-                    TicketName: ticket.TicketName,
-                    TicketNo: ticket.No,
-                    TicketType: ticket.CustomerType,
-                    Note: "",
-                })
+                    ...newPrice,
+                    id: newId + 1,
+                    Number: nextFormattedNumber,
+                });
             })
             .catch((error) => {
                 ShowError("ไม่สำเร็จ");
                 console.error("Error updating data:", error);
             });
-        // console.log("Using Price:", price);
-        // console.log("Ticket Name:", ticket?.TicketName);
-
-        // if (!price || price.length === 0) {
-        //     ShowError("Price เป็นค่าว่าง");
-        //     return;
-        // }
-
-        // let foundItem;
-        // let refPath = "";
-
-        // if (ticket.CustomerType === "ตั๋วรถใหญ่") {
-        //     foundItem = orders.find(item => item.No === ticket.No && item.Trip !== "ยกเลิก");
-        //     if (foundItem) refPath = "/order";
-        // } else {
-        //     ShowError("Ticket Name ไม่ถูกต้อง");
-        //     return;
-        // }
-
-        // console.log("Item :", foundItem);
-        // console.log("Path :", refPath);
-
-        // const TotalPrice = price.reduce((acc, item) => acc + (Number(item.IncomingMoney) || 0), 0);
-
-        // console.log("price : ", TotalPrice);
-
-        // if (foundItem) {
-        //     database
-        //         .ref(refPath)
-        //         .child(`${foundItem.No}/Price/`)
-        //         .set(price) // ใช้ .set() แทน .update() เพื่อแทนที่ข้อมูลทั้งหมด
-        //         .then(() => {
-
-        //             ShowSuccess("บันทึกข้อมูลเรียบร้อย");
-        //             console.log("บันทึกข้อมูลเรียบร้อย ✅");
-        //             // const pathOrder = `order/${ticket.id - 1}`;
-        //             // update(ref(database, pathOrder), {
-        //             //     TransferAmount: TotalPrice,
-        //             //     TotalOverdueTransfer: ticket.OverdueTransfer - TotalPrice
-        //             // })
-        //             //     .then(() => {
-        //             //         console.log("บันทึกข้อมูลเรียบร้อย ✅");
-        //             //     })
-        //             //     .catch((error) => {
-        //             //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-        //             //         console.error("Error pushing data:", error);
-        //             //     });
-        //         })
-        //         .catch((error) => {
-        //             ShowError("ไม่สำเร็จ");
-        //             console.error("Error updating data:", error);
-        //         });
-        // } else {
-        //     ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
-        // }
     };
+
 
     console.log("Transfer : ", transfer);
 
