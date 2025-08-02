@@ -37,6 +37,7 @@ import 'dayjs/locale/th'; // เพิ่มการใช้งาน locale �
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useGasStationData } from "../../server/provider/GasStationProvider";
+import JsonUploader from "../../server/UploadJson";
 //import DriverTable from "./ProviderTest";
 
 dayjs.locale('th'); // ตั้งค่าให้ dayjs ใช้ภาษาไทย
@@ -330,18 +331,23 @@ const Dashboard = () => {
   // });
 
   ticket.forEach((t) => {
-    if (t.Trip === "ยกเลิก") {
+    if (t.Trip === "ยกเลิก" && typeof t.Date === "string" && t.Date.includes("/")) {
       const [day, monthStr] = t.Date.split('/');
       const monthIndex = parseInt(monthStr, 10) - 1;
-      const monthName = months[monthIndex];
 
-      if (!monthTicketCancel[monthName]) {
-        monthTicketCancel[monthName] = { month: monthName, ticketCancel: 0 };
+      // ตรวจสอบว่า monthIndex อยู่ในช่วง 0-11 และ months มีข้อมูล
+      if (!isNaN(monthIndex) && monthIndex >= 0 && monthIndex < 12) {
+        const monthName = months[monthIndex];
+
+        if (!monthTicketCancel[monthName]) {
+          monthTicketCancel[monthName] = { month: monthName, ticketCancel: 0 };
+        }
+
+        monthTicketCancel[monthName].ticketCancel += 1;
       }
-
-      monthTicketCancel[monthName].ticketCancel += 1;
     }
   });
+
 
   trips.forEach((r) => {
     const [day, monthStr] = r.DateStart.split('/');
@@ -439,6 +445,7 @@ const Dashboard = () => {
         </Box>
       </Box>
       <Divider />
+      {/* <JsonUploader /> */}
       <Grid
         container
         spacing={4}

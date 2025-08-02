@@ -160,9 +160,10 @@ const ReportTrip = () => {
             .filter((item) => {
                 const itemDate = dayjs(item.DateReceive, "DD/MM/YYYY");
                 const isValidStatus = item.StatusTrip === "จบทริป";
+                const isTruckType = item.TruckType === "รถใหญ่";
                 const isInDateRange = itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
                 const matchDrivers = Number(item.Driver.split(":")[0]) === selectDriver?.id;
-                return isValidStatus && isInDateRange && matchDrivers;
+                return isValidStatus && isInDateRange && matchDrivers && isTruckType;
             })
             .sort((a, b) => {
                 const dateA = dayjs(a.DateReceive, "DD/MM/YYYY");

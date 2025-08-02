@@ -200,11 +200,11 @@ const ReportPaymentSmallTruck = () => {
             let isInCompany = false;
 
             if (check === 1) {
-                isInCompany = ticketsB.some(customer => customer.id === customerId);
+                isInCompany = ticketsS.some(customer => customer.id === customerId);
             } else if (check === 2) {
-                isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ");
+                isInCompany = ticketsS.some(customer => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ");
             } else if (check === 3) {
-                isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
+                isInCompany = ticketsS.some(customer => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
             }
 
             return isValidStatus && isInDateRange && matchTickets && isInCompany && item.CustomerType === "ตั๋วรถเล็ก";
@@ -234,10 +234,10 @@ const ReportPaymentSmallTruck = () => {
                     ...item,
                     IncomingMoneyDetail: incomingMoneyDetail,
                     ProductName: productName,
-                    VolumeProduct: productData.Volume,
+                    VolumeProduct: Number(productData.Volume),
                     Amount: productData.Amount || 0,
                     IncomingMoney: totalIncomingMoney || 0,
-                    OverdueTransfer: (productData.Amount || 0) - (totalIncomingMoney || 0),
+                    OverdueTransfer: Number(productData.Amount || 0) - Number(totalIncomingMoney || 0),
                     RateOil: productData.RateOil || 0,
                 }));
         });
@@ -251,10 +251,10 @@ const ReportPaymentSmallTruck = () => {
             if (!acc[key]) {
                 acc[key] = { ...curr };
             } else {
-                acc[key].VolumeProduct += curr.VolumeProduct;
-                acc[key].Amount += curr.Amount;
-                acc[key].IncomingMoney += curr.IncomingMoney;
-                acc[key].OverdueTransfer += curr.OverdueTransfer;
+                acc[key].VolumeProduct += Number(curr.VolumeProduct);
+                acc[key].Amount += Number(curr.Amount);
+                acc[key].IncomingMoney += Number(curr.IncomingMoney);
+                acc[key].OverdueTransfer += Number(curr.OverdueTransfer);
 
                 // กรณีข้อมูลรวมอ้างอิงวันเดียว: ให้เลือกวันล่าสุดหรือแรกสุดก็ได้ (ตัวอย่างใช้วันล่าสุด)
                 // const dateA = dayjs(acc[key].Date, "DD/MM/YYYY");

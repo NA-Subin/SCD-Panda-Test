@@ -194,21 +194,31 @@ const FuelPaymentReport = () => {
             const isInDateRange = itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
             const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
 
-            // หาค่า customerId จาก TicketName
             const customerId = Number(item.TicketName.split(":")[0]);
 
-            // ตรวจสอบเงื่อนไข check กับ customerB
             let isInCompany = false;
+            let iscompanyid = false;
 
             if (check === 1) {
+                // ทั้งหมด ยกเว้นตั๋วรถเล็ก
                 isInCompany = ticketsB.some(customer => customer.id === customerId);
+                iscompanyid = item.CustomerType !== "ตั๋วรถเล็ก";
             } else if (check === 2) {
-                isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ");
+                // รถใหญ่ต้องอยู่ในเครือ / ตั๋วปั้มไม่ต้องเช็ค
+                const isInCompanyForBigTruck = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ");
+
+                isInCompany =
+                    (item.CustomerType === "ตั๋วรถใหญ่" && isInCompanyForBigTruck) ||
+                    (item.CustomerType === "ตั๋วปั้ม");
+
+                iscompanyid = item.CustomerType === "ตั๋วรถใหญ่" || item.CustomerType === "ตั๋วปั้ม";
             } else if (check === 3) {
+                // ไม่อยู่ในเครือ ต้องเป็นรถใหญ่เท่านั้น
                 isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
+                iscompanyid = item.CustomerType === "ตั๋วรถใหญ่";
             }
 
-            return isValidStatus && isInDateRange && matchTickets && isInCompany && item.CustomerType !== "ตั๋วรถเล็ก";
+            return isValidStatus && isInDateRange && matchTickets && isInCompany && iscompanyid && item.CustomerType !== "ตั๋วรับจ้างขนส่ง";
         });
 
         filteredItemsRef.current = filteredItems;

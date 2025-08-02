@@ -137,6 +137,7 @@ const Report = () => {
       return (
         item.CustomerType === "ตั๋วรับจ้างขนส่ง" &&
         item.Trip !== "ยกเลิก" &&
+        item.Status !== "ยกเลิก" &&
         (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
@@ -198,6 +199,7 @@ const Report = () => {
       return (
         item.CustomerType === "ตั๋วปั้ม" &&
         item.Trip !== "ยกเลิก" &&
+        item.Status !== "ยกเลิก" &&
         (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
@@ -254,6 +256,7 @@ const Report = () => {
       return (
         item.CustomerType === "ตั๋วน้ำมัน" &&
         item.Trip !== "ยกเลิก" &&
+        item.Status !== "ยกเลิก" &&
         (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })

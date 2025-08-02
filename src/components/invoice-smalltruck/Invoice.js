@@ -141,6 +141,7 @@ const InvoiceSmallTruck = () => {
         isInCompany.id === customerId &&
         item.CustomerType === "ตั๋วรถเล็ก" &&
         item.Trip !== "ยกเลิก" &&
+        item.Status !== "ยกเลิก" &&
         (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
@@ -481,18 +482,18 @@ const InvoiceSmallTruck = () => {
                           checkOverdueTransfer ?
                             sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
                               .map((row, index) => (
-                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.Date)}
+                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.DateDelivery)}
                                   sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                                 >
                                   <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {index + 1}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
+                                    {formatThaiSlash(dayjs(row.DateDelivery, "DD/MM/YYYY"))}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {formatThaiSlash(
-                                      dayjs(row.Date, "DD/MM/YYYY")
+                                      dayjs(row.DateDelivery, "DD/MM/YYYY")
                                         .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : Number(row.CreditTime), "day")
                                     )}
                                   </TableCell>
@@ -516,17 +517,17 @@ const InvoiceSmallTruck = () => {
                               )
                             :
                             sortedOrderDetail.map((row, index) => (
-                              <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.Date)}
+                              <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.DateDelivery)}
                                 sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
                               >
                                 <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                   {index + 1}
                                 </TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {row.Date}
+                                  {row.DateDelivery}
                                 </TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {dayjs(row.Date, "DD/MM/YYYY")
+                                  {dayjs(row.DateDelivery, "DD/MM/YYYY")
                                     .add(row.CreditTime === "-" ? 0 : row.CreditTime, "day")
                                     .format("DD/MM/YYYY")}
                                 </TableCell>

@@ -127,6 +127,14 @@ const SummaryOilBalance = () => {
     const ticketsS = Object.values(customersmalltruck || {});
     const ticketsA = Object.values(customertickets || {});
 
+    const formatNumber = (value) =>
+    value === 0 || value === '0'
+      ? '0'
+      : new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+
     console.log("Select Driver ID : ", selectDriver);
 
     const orderDetail = useMemo(() => {
@@ -666,9 +674,9 @@ const SummaryOilBalance = () => {
                                                 <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1]}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(Number(row.VolumeProduct) * 1000)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.RateOil}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{Number(row.VolumeProduct) * 1000}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatNumber(row.RateOil)}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatNumber(row.Amount)}</TableCell>
                                             </TableRow>
                                         ))
                                     }
