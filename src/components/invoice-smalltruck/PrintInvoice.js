@@ -5,41 +5,55 @@ import html2pdf from "html2pdf.js";
 import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const PrintInvoice = () => {
   useEffect(() => {
-      const data = JSON.parse(sessionStorage.getItem("invoiceData"));
-  
-      // หน่วงให้ DOM render ก่อน
-      const timer = setTimeout(() => {
-        const element = document.querySelector("#invoiceContent");
-      
-        const opt = {
-          margin:       0, // ไม่ต้องเว้น margin นอก page ถ้าใน element มี padding แล้ว
-          filename:     `O-${data.Code}.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  {
-            scale: 2,           // เพิ่มความคมชัด
-            useCORS: true       // รองรับภาพจาก URL ต่างโดเมน (ถ้ามี)
-          },
-          jsPDF: {
-            unit: 'cm',         // ใช้หน่วยเดียวกับ CSS
-            format: 'a4',
-            orientation: 'portrait'
-          }
-        };
-      
-        html2pdf().set(opt).from(element).save();
-      }, 500);
-      
-  
-      return () => clearTimeout(timer);
-    }, []);
-  
-    const invoiceData = JSON.parse(sessionStorage.getItem("invoiceData"));
-    if (!invoiceData) return <div>กำลังโหลด...</div>;
+    const data = JSON.parse(sessionStorage.getItem("invoiceData"));
+
+    // หน่วงให้ DOM render ก่อน
+    const timer = setTimeout(() => {
+      const element = document.querySelector("#invoiceContent");
+
+      const opt = {
+        margin: 0, // ไม่ต้องเว้น margin นอก page ถ้าใน element มี padding แล้ว
+        filename: `O-${data.Code}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,           // เพิ่มความคมชัด
+          useCORS: true       // รองรับภาพจาก URL ต่างโดเมน (ถ้ามี)
+        },
+        jsPDF: {
+          unit: 'cm',         // ใช้หน่วยเดียวกับ CSS
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    }, 500);
+
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const { customerbigtruck, company } = useBasicData();
+  const customerB = Object.values(customerbigtruck || {});
+  const companyDetail = Object.values(company || {});
+
+  const invoiceData = JSON.parse(sessionStorage.getItem("invoiceData"));
+  if (!invoiceData) return <div>กำลังโหลด...</div>;
 
   const address = invoiceData?.Order[0].Address || ''; // ดึงที่อยู่จาก invoiceData
+
+  const customer = customerB.find((row, index) => (row.id === Number(invoiceData?.Order[0].TicketName.split(":")[0])));
+  const invoiceC = companyDetail.find((row) => {
+    const companyIdStr = customer?.Company;
+    if (!companyIdStr) return false;
+
+    const companyId = Number(companyIdStr.split(":")[0]);
+    return row.id === companyId;
+  });
 
   let formattedAddress = "-"; // ค่าเริ่มต้นเป็น "-"
 
@@ -167,24 +181,38 @@ const PrintInvoice = () => {
           backgroundColor: "#fff",
           padding: "1cm",      // เว้น margin ภายในเนื้อหา
           boxSizing: "border-box"
-        }}  
+        }}
       >
         <Grid container spacing={2}>
           <Grid item xs={8}>
-            {
-              invoiceData &&
-              (
-                <React.Fragment>
-                  <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>{invoiceData?.Company}</Typography>
-                  <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>
-                    {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}</Typography>
-                  <Typography variant="subtitle1" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
-                </React.Fragment>
-              )
-            }
+            {invoiceC ? (
+              <React.Fragment>
+                <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>
+                  {invoiceC.Name}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>
+                  {formatAddress(invoiceC.Address)} เบอร์โทร : {formatPhoneNumber(invoiceC.Phone)}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceC.CardID)}
+                </Typography>
+              </React.Fragment>
+            ) : invoiceData && (
+              <React.Fragment>
+                <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>
+                  {invoiceData.Company}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>
+                  {formatAddress(invoiceData.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData.Phone)}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData.CardID)}
+                </Typography>
+              </React.Fragment>
+            )}
           </Grid>
           <Grid item xs={4} textAlign="right">
-            <Typography variant="h6" sx={{ marginRight: 2,fontWeight: "Light" }}>
+            <Typography variant="h6" sx={{ marginRight: 2, fontWeight: "Light" }}>
               ใบวางบิล / ใบแจ้งหนี้
             </Typography>
           </Grid>
@@ -307,7 +335,7 @@ const PrintInvoice = () => {
                   <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
                   <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
                 </Grid>
-                <Grid item xs={3} sx={{ textAlign: "center"}}>
+                <Grid item xs={3} sx={{ textAlign: "center" }}>
                   <Typography variant="subtitle2" gutterBottom>_________________________</Typography>
                   <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
                 </Grid>

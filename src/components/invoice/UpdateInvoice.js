@@ -159,7 +159,7 @@ const UpdateInvoice = (props) => {
         return `${day} ${month} ${year}`;
     };
 
-    const currentCode = dayjs(new Date()).format("YYYYMM");
+    const currentCode = dayjs(new Date).format("YYYYMM");
 
     // ดึงรายการล่าสุด
     const lastItem = transferMoneyDetail[transferMoneyDetail.length - 1];
@@ -178,7 +178,7 @@ const UpdateInvoice = (props) => {
         id: transferMoneyDetail.length,
         Code: currentCode,
         Number: formattedNumber,
-        DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+        DateStart: dayjs(new Date).format("DD/MM/YYYY"),
         BankName: "",
         Transport: `${companyName.id}:${companyName.Name}`,
         IncomingMoney: "",
@@ -205,7 +205,7 @@ const UpdateInvoice = (props) => {
     //                 id: transferMoneyDetail.length,
     //                 Code: dayjs(new Date).format("YYYYMM"),
     //                 Number: "",
-    //                 DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+    //                 DateStart: dayjs(new Date).format("DD/MM/YYYY"),
     //                 BankName: "",
     //                 Transport: `${companyName.id}:${companyName.Name}`,
     //                 IncomingMoney: "",
@@ -267,21 +267,23 @@ const UpdateInvoice = (props) => {
     // }, [ticket]);
 
     const calculateDueDate = (dateString, creditDays) => {
-        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่"; // ตรวจสอบค่าว่าง
+        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่";
 
         const [day, month, year] = dateString.split("/").map(Number);
-        const date = new Date(year, month - 1, day); // สร้าง Date object (month - 1 เพราะเริ่มที่ 0-11)
+        const date = new Date(year, month - 1, day);
 
-        date.setDate(date.getDate() + Number(creditDays)); // เพิ่มจำนวนวัน
+        date.setDate(date.getDate() + Number(creditDays));
 
-        // แปลงเป็นวันที่ภาษาไทย
-        const formattedDate = new Intl.DateTimeFormat("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        }).format(date);
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
 
-        return `กำหนดชำระเงิน: ${formattedDate}`;
+        const dueDay = date.getDate();
+        const dueMonth = thaiMonths[date.getMonth()];
+        const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
+
+        return `กำหนดชำระเงิน: วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
     };
 
     // 🔥 ทดสอบโค้ด
@@ -364,7 +366,7 @@ const UpdateInvoice = (props) => {
                     id: invoiceDetail.length,
                     Code: `lV${currentCode}`,
                     Number: formattedNumberInvoice,
-                    DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                    DateStart: dayjs(new Date).format("DD/MM/YYYY"),
                     Transport: `${companyName.id}:${companyName.Name}`,
                     TicketName: ticket.TicketName,
                     TicketNo: ticket.No,
@@ -557,7 +559,7 @@ const UpdateInvoice = (props) => {
             const newIndex = prevPrice.length > 0 ? Math.max(...prevPrice.map(item => Number(item.id))) + 1 : 0;
             const newRow = {
                 id: newIndex,
-                DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
+                DateStart: dayjs(new Date).format("DD/MM/YYYY"),
                 Code: dayjs(new Date).format("YYYYMM"),
                 Number: "",
                 BankName: "",

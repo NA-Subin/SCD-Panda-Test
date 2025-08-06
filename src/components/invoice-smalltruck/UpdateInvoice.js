@@ -264,22 +264,42 @@ const UpdateInvoice = (props) => {
     //     getPrice();
     // }, [ticket]);
 
+    // const calculateDueDate = (dateString, creditDays) => {
+    //     if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่"; // ตรวจสอบค่าว่าง
+
+    //     const [day, month, year] = dateString.split("/").map(Number);
+    //     const date = new Date(year, month - 1, day); // สร้าง Date object (month - 1 เพราะเริ่มที่ 0-11)
+
+    //     date.setDate(date.getDate() + Number(creditDays)); // เพิ่มจำนวนวัน
+
+    //     // แปลงเป็นวันที่ภาษาไทย
+    //     const formattedDate = new Intl.DateTimeFormat("th-TH", {
+    //         year: "numeric",
+    //         month: "long",
+    //         day: "numeric",
+    //     }).format(date);
+
+    //     return `กำหนดชำระเงิน: ${formattedDate}`;
+    // };
+
     const calculateDueDate = (dateString, creditDays) => {
-        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่"; // ตรวจสอบค่าว่าง
+        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่";
 
         const [day, month, year] = dateString.split("/").map(Number);
-        const date = new Date(year, month - 1, day); // สร้าง Date object (month - 1 เพราะเริ่มที่ 0-11)
+        const date = new Date(year, month - 1, day);
 
-        date.setDate(date.getDate() + Number(creditDays)); // เพิ่มจำนวนวัน
+        date.setDate(date.getDate() + Number(creditDays));
 
-        // แปลงเป็นวันที่ภาษาไทย
-        const formattedDate = new Intl.DateTimeFormat("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        }).format(date);
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
 
-        return `กำหนดชำระเงิน: ${formattedDate}`;
+        const dueDay = date.getDate();
+        const dueMonth = thaiMonths[date.getMonth()];
+        const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
+
+        return `กำหนดชำระเงิน: วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
     };
 
     // 🔥 ทดสอบโค้ด
@@ -643,7 +663,7 @@ const UpdateInvoice = (props) => {
             <Grid container spacing={2}>
                 <Grid item md={12}>
                     <Typography variant="subtitle1" sx={{ fontSize: "18px", marginBottom: -2 }} fontWeight="bold" gutterBottom>
-                        รายละเอียด : วันที่ส่ง : {ticket.Date} ตั๋ว : {ticket.TicketName.split(":")[1]}
+                        รายละเอียด : วันที่ส่ง : {dayjs(ticket.Date, "DD/MM/YYYY").format("D เดือนMMMM พ.ศ.BBBB")} / ตั๋ว : {ticket.TicketName.split(":")[1]}
                     </Typography>
                     {/* <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -2.5, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography> */}
                 </Grid>

@@ -5,53 +5,100 @@ import html2pdf from "html2pdf.js";
 import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const PrintInvoice = () => {
   useEffect(() => {
-      const data = JSON.parse(sessionStorage.getItem("invoiceData"));
-  
-      // หน่วงให้ DOM render ก่อน
-      const timer = setTimeout(() => {
-        const element = document.querySelector("#invoiceContent");
-      
-        const opt = {
-          margin:       0, // ไม่ต้องเว้น margin นอก page ถ้าใน element มี padding แล้ว
-          filename:     `O-${data.Code}.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  {
-            scale: 2,           // เพิ่มความคมชัด
-            useCORS: true       // รองรับภาพจาก URL ต่างโดเมน (ถ้ามี)
-          },
-          jsPDF: {
-            unit: 'cm',         // ใช้หน่วยเดียวกับ CSS
-            format: 'a4',
-            orientation: 'portrait'
-          }
-        };
-      
-        html2pdf().set(opt).from(element).save();
-      }, 500);
-      
-  
-      return () => clearTimeout(timer);
-    }, []);
-  
-    const invoiceData = JSON.parse(sessionStorage.getItem("invoiceData"));
-    if (!invoiceData) return <div>กำลังโหลด...</div>;
+    const data = JSON.parse(sessionStorage.getItem("invoiceData"));
+
+    // หน่วงให้ DOM render ก่อน
+    const timer = setTimeout(() => {
+      const element = document.querySelector("#invoiceContent");
+
+      const opt = {
+        margin: 0, // ไม่ต้องเว้น margin นอก page ถ้าใน element มี padding แล้ว
+        filename: `O-${data.Code}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,           // เพิ่มความคมชัด
+          useCORS: true       // รองรับภาพจาก URL ต่างโดเมน (ถ้ามี)
+        },
+        jsPDF: {
+          unit: 'cm',         // ใช้หน่วยเดียวกับ CSS
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    }, 500);
+
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const { customerbigtruck, company } = useBasicData();
+  const customerB = Object.values(customerbigtruck || {});
+  const companyDetail = Object.values(company || {});
+
+  const invoiceData = JSON.parse(sessionStorage.getItem("invoiceData"));
+  if (!invoiceData) return <div>กำลังโหลด...</div>;
 
   const address = invoiceData?.Order[0].Address || ''; // ดึงที่อยู่จาก invoiceData
 
-  let formattedAddress = "-"; // ค่าเริ่มต้นเป็น "-"
+  console.log("customer bigtruck : ", customerB);
+  console.log("TicketName :  ", invoiceData?.Order[0].TicketName);
+  console.log("company : ", companyDetail);
 
-  if (address !== "-") {
-    // แยกที่อยู่เป็นส่วนๆ โดยใช้ split(" ")
-    const addressParts = address.split(" ");
+  const customer = customerB.find((row, index) => (row.id === Number(invoiceData?.Order[0].TicketName.split(":")[0])));
+  const invoiceC = companyDetail.find((row) => {
+    const companyIdStr = customer?.Company;
+    if (!companyIdStr) return false;
 
-    // ตรวจสอบว่ามีค่าพอให้ใช้งานหรือไม่ (ป้องกัน error)
-    if (addressParts.length >= 6) {
-      formattedAddress = `บ้านเลขที่${addressParts[0]} หมู่ที่${addressParts[1]} ตำบล${addressParts[2]} อำเภอ${addressParts[3]} จังหวัด${addressParts[4]} รหัสไปรษณีย์${addressParts[5]}`;
+    const companyId = Number(companyIdStr.split(":")[0]);
+    return row.id === companyId;
+  });
+
+  console.log("invoice : ", invoiceC);
+  console.log("customer : ", customer);
+  console.log("invoiceData?.Order[0] : ", invoiceData?.Order[0]);
+
+  // let formattedAddress = "-"; // ค่าเริ่มต้นเป็น "-"
+
+  // if (address !== "-") {
+  //   // แยกที่อยู่เป็นส่วนๆ โดยใช้ split(" ")
+  //   const addressParts = address.split(" ");
+
+  //   // ตรวจสอบว่ามีค่าพอให้ใช้งานหรือไม่ (ป้องกัน error)
+  //   if (addressParts.length >= 6) {
+  //     formattedAddress = `บ้านเลขที่${addressParts[0]} หมู่ที่${addressParts[1]} ตำบล${addressParts[2]} อำเภอ${addressParts[3]} จังหวัด${addressParts[4]} รหัสไปรษณีย์${addressParts[5]}`;
+  //   }
+  // }
+
+  // Step 1: จัดกลุ่มข้อมูล
+  const groupedData = [];
+  const seenKeys = {};
+
+  invoiceData.Report.forEach((row, index) => {
+    const key = `${row.Date}_${row.Driver}_${row.Registration}`;
+    if (seenKeys[key]) {
+      seenKeys[key].count += 1;
+    } else {
+      seenKeys[key] = { index: groupedData.length, count: 1 };
+      groupedData.push({ ...row, key }); // เพิ่ม key ไว้เช็คตอน render
     }
-  }
+  });
+
+  const formatAddressS = (address) => {
+    // แยกข้อมูลโดยใช้ช่องว่างเป็นตัวแบ่ง
+    const parts = address.trim().split(/\s+/);
+
+    if (parts.length < 6) return "รูปแบบที่อยู่ไม่ถูกต้อง";
+
+    const [houseNo, moo, subdistrict, district, province, postalCode] = parts;
+
+    return `${houseNo} หมู่ ${moo} ต.${subdistrict} อ.${district} จ.${province} ${postalCode}`;
+  };
 
   const numberToThaiText = (num) => {
     const thaiNumbers = ["ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
@@ -112,14 +159,18 @@ const PrintInvoice = () => {
   };
 
   const formatAddress = (address) => {
-    // แยกข้อมูลจาก address โดยใช้ , หรือ เว้นวรรคเป็นตัวแบ่ง
-    const parts = address.split(/,|\s+/).filter(Boolean);
+    if (
+      !address.no ||
+      !address.village ||
+      !address.subDistrict ||
+      !address.district ||
+      !address.province ||
+      !address.zipCode
+    ) {
+      return "รูปแบบที่อยู่ไม่ถูกต้อง";
+    }
 
-    if (parts.length < 5) return "รูปแบบที่อยู่ไม่ถูกต้อง";
-
-    const [houseNo, moo, subdistrict, district, province, postalCode] = parts;
-
-    return `${houseNo} หมู่ ${moo} ต.${subdistrict} อ.${district} จ.${province} ${postalCode}`;
+    return `${address.no} หมู่ ${address.village} ต.${address.subDistrict} อ.${address.district} จ.${address.province} ${address.zipCode}`;
   };
 
   const formatTaxID = (taxID) => {
@@ -167,24 +218,38 @@ const PrintInvoice = () => {
           backgroundColor: "#fff",
           padding: "1cm",      // เว้น margin ภายในเนื้อหา
           boxSizing: "border-box"
-        }}  
+        }}
       >
         <Grid container spacing={2}>
           <Grid item xs={8}>
-            {
-              invoiceData &&
-              (
-                <React.Fragment>
-                  <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>{invoiceData?.Company}</Typography>
-                  <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>
-                    {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}</Typography>
-                  <Typography variant="subtitle1" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
-                </React.Fragment>
-              )
-            }
+            {invoiceC ? (
+              <React.Fragment>
+                <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>
+                  {invoiceC.Name}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>
+                  {formatAddress(invoiceC.Address)} เบอร์โทร : {formatPhoneNumber(invoiceC.Phone)}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceC.CardID)}
+                </Typography>
+              </React.Fragment>
+            ) : invoiceData && (
+              <React.Fragment>
+                <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: -1 }} gutterBottom>
+                  {invoiceData.Company}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ marginBottom: -1 }} gutterBottom>
+                  {formatAddress(invoiceData.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData.Phone)}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData.CardID)}
+                </Typography>
+              </React.Fragment>
+            )}
           </Grid>
           <Grid item xs={4} textAlign="right">
-            <Typography variant="h6" sx={{ marginRight: 2,fontWeight: "Light" }}>
+            <Typography variant="h6" sx={{ marginRight: 2, fontWeight: "Light" }}>
               ใบวางบิล / ใบแจ้งหนี้
             </Typography>
           </Grid>
@@ -194,7 +259,7 @@ const PrintInvoice = () => {
             {/* ส่วนข้อมูลบริษัท */}
             <Grid item xs={10} sx={{ border: "2px solid black", height: "140px" }}>
               <Typography variant="subtitle2"><b>ชื่อบริษัท:</b> {invoiceData?.Order[0].CompanyName}</Typography>
-              <Typography variant="subtitle2"><b>ที่อยู่:</b> {formattedAddress}</Typography>
+              <Typography variant="subtitle2"><b>ที่อยู่:</b> {formatAddressS(address)}</Typography>
               <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b> {invoiceData?.Order[0].CodeID}</Typography>
             </Grid>
 
@@ -217,7 +282,7 @@ const PrintInvoice = () => {
             </Grid>
 
             {/* ตารางใบวางบิล */}
-            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, marginTop: 5, border: "2px solid black" }}>
+            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, marginTop: 3, border: "2px solid black" }}>
               <TableHead>
                 <TableRow sx={{ borderBottom: "2px solid black", height: "50px" }}>
                   <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "12%" }}>
@@ -241,32 +306,61 @@ const PrintInvoice = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {
-                  invoiceData.Report.map((row) => (
-                    <TableRow sx={{ borderBottom: "2px solid black", height: "30px" }}>
-                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.Date}</Typography>
+                {invoiceData.Report.map((row, index) => {
+                  const key = `${row.Date}_${row.Driver}_${row.Registration}`;
+                  const group = seenKeys[key];
+
+                  // ถ้า index ไม่ตรงกับ index แรกของกลุ่ม ให้ skip cell ที่ซ้ำ
+                  const isFirstRowInGroup = group.index === index;
+
+                  return (
+                    <TableRow key={index} sx={{ borderBottom: "2px solid black", height: "30px" }}>
+                      {isFirstRowInGroup && (
+                        <TableCell
+                          rowSpan={group.count}
+                          sx={{ borderRight: "2px solid black", textAlign: "center" }}
+                        >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                            {row.Date}
+                          </Typography>
+                        </TableCell>
+                      )}
+
+                      {isFirstRowInGroup && (
+                        <TableCell
+                          rowSpan={group.count}
+                          sx={{ borderRight: "2px solid black", textAlign: "center" }}
+                        >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                            {`${row.Driver} / ${row.Registration}`}
+                          </Typography>
+                        </TableCell>
+                      )}
+
+                      {/* คอลัมน์อื่น ๆ render ทุกแถวตามปกติ */}
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center" }}>
+                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                          {row.ProductName}
+                        </Typography>
                       </TableCell>
-                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{`${row.Driver} / ${row.Registration}`}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center" }}>
                         <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                           {new Intl.NumberFormat("en-US").format(row.Volume)}
                         </Typography>
                       </TableCell>
-                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.RateOil)}</Typography>
+                      <TableCell sx={{ borderRight: "2px solid black", textAlign: "center" }}>
+                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                          {new Intl.NumberFormat("en-US").format(row.RateOil)}
+                        </Typography>
                       </TableCell>
-                      <TableCell sx={{ textAlign: "center", }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.Amount)}</Typography>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                          {new Intl.NumberFormat("en-US").format(row.Amount)}
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))
-                }
+                  );
+                })}
                 <TableRow sx={{ borderBottom: "2px solid black", height: "30px" }}>
                   <TableCell colSpan={2} sx={{ textAlign: "left" }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{invoiceData?.DateEnd}</Typography>
@@ -307,7 +401,7 @@ const PrintInvoice = () => {
                   <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
                   <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
                 </Grid>
-                <Grid item xs={3} sx={{ textAlign: "center"}}>
+                <Grid item xs={3} sx={{ textAlign: "center" }}>
                   <Typography variant="subtitle2" gutterBottom>_________________________</Typography>
                   <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
                 </Grid>

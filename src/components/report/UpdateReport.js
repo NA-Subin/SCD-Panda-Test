@@ -219,21 +219,41 @@ const UpdateReport = (props) => {
 
     console.log("Price : ", price);
 
+    // const calculateDueDate = (dateString, creditDays) => {
+    //     if (!dateString || creditDays === null || creditDays === undefined) return "ไม่พบข้อมูลวันที่";
+
+    //     const [day, month, year] = dateString.split("/").map(Number);
+    //     const date = new Date(year, month - 1, day);
+
+    //     date.setDate(date.getDate() + creditDays);
+
+    //     const formattedDate = new Intl.DateTimeFormat("th-TH", {
+    //         year: "numeric",
+    //         month: "long",
+    //         day: "numeric",
+    //     }).format(date);
+
+    //     return `กำหนดชำระเงินวันที่ ${formattedDate}`;
+    // };
+
     const calculateDueDate = (dateString, creditDays) => {
-        if (!dateString || creditDays === null || creditDays === undefined) return "ไม่พบข้อมูลวันที่";
+        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่";
 
         const [day, month, year] = dateString.split("/").map(Number);
         const date = new Date(year, month - 1, day);
 
-        date.setDate(date.getDate() + creditDays);
+        date.setDate(date.getDate() + Number(creditDays));
 
-        const formattedDate = new Intl.DateTimeFormat("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        }).format(date);
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
 
-        return `กำหนดชำระเงินวันที่ ${formattedDate}`;
+        const dueDay = date.getDate();
+        const dueMonth = thaiMonths[date.getMonth()];
+        const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
+
+        return `กำหนดชำระเงิน: วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
     };
 
     // 🔥 ทดสอบโค้ด
@@ -366,10 +386,17 @@ const UpdateReport = (props) => {
 
         // รีเซ็ต No ให้กับแต่ละส่วน
         const resetNo = (tickets) => {
-            return tickets.map((row, index) => ({
-                ...row,
-                No: index + 1, // เริ่ม No ใหม่ตามลำดับ
-            }));
+            return tickets.map((row, index) => {
+                const companyCode = row.Company.split(":")[0];
+                const companyName = companyCode === "2"
+                    ? "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)"
+                    : "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)";
+                return {
+                    ...row,
+                    No: index + 1,
+                    Company: `${companyCode}:${companyName}`,
+                };
+            });
         };
 
         return {
@@ -426,10 +453,23 @@ const UpdateReport = (props) => {
     console.log("Total for บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", total1);
     console.log("Total for หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", total2);
 
-    console.log("processedTickets : ", processedTickets);
+    console.log("invoiceDetail : ", invoiceDetail);
+    console.log("ticket No : ", ticket?.No);
+    console.log("ticket Name : ", ticket?.TicketName);
+    console.log("Company 1 : ", company1Tickets[0]?.Company);
+    console.log("Company 2 : ", company2Tickets[0]?.Company);
 
-    const invoices1 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company1Tickets.Company);
-    const invoices2 = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Transport === company2Tickets.Company);
+    const invoices1 = invoiceDetail.filter((row) =>
+        String(row.TicketNo) === String(ticket?.No) &&
+        String(row.TicketName) === String(ticket?.TicketName) &&
+        String(row.Transport) === String(company1Tickets[0]?.Company)
+    );
+
+    const invoices2 = invoiceDetail.filter((row) =>
+        String(row.TicketNo) === String(ticket?.No) &&
+        String(row.TicketName) === String(ticket?.TicketName) &&
+        String(row.Transport) === String(company2Tickets[0]?.Company)
+    );
 
     console.log("invoices1 : ", invoices1);
     console.log("invoices2 : ", invoices2);
@@ -437,7 +477,7 @@ const UpdateReport = (props) => {
     const generatePDFCompany1 = () => {
         let Code = ""
         if (invoices1.length !== 0) {
-            Code = `${invoices1[0].Code}-${invoices1[0].Number}`
+            Code = `${invoices1[0]?.Code}-${invoices1[0]?.Number}`
         } else {
             const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
             let newNumberInvoice = 1;
@@ -456,7 +496,7 @@ const UpdateReport = (props) => {
                     Code: `lV${currentCode}`,
                     Number: formattedNumberInvoice,
                     DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                    Transport: company1Tickets[0].Company,
+                    Transport: company1Tickets[0]?.Company,
                     TicketName: ticket.TicketName,
                     TicketNo: ticket.No,
                     TicketType: ticket.CustomerType,
@@ -473,12 +513,12 @@ const UpdateReport = (props) => {
         const invoiceData = {
             Report: company1Tickets,
             Total: total1,
-            Company: company1Tickets[0].Company.split(":")[1],
-            Address: company1Tickets[0].CompanyAddress,
-            CardID: company1Tickets[0].CardID,
-            Phone: company1Tickets[0].Phone,
+            Company: company1Tickets[0]?.Company.split(":")[1],
+            Address: company1Tickets[0]?.CompanyAddress,
+            CardID: company1Tickets[0]?.CardID,
+            Phone: company1Tickets[0]?.Phone,
             Code: Code,
-            Date: invoices1[0].DateStart,
+            Date: invoices1[0]?.DateStart,
             DateStart: ticket.Date,
             DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };
@@ -510,7 +550,7 @@ const UpdateReport = (props) => {
     const generatePDFCompany2 = () => {
         let Code = ""
         if (invoices2.length !== 0) {
-            Code = `${invoices2[0].Code}-${invoices2[0].Number}`
+            Code = `${invoices2[0]?.Code}-${invoices2[0]?.Number}`
         } else {
             const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
             let newNumberInvoice = 1;
@@ -529,7 +569,7 @@ const UpdateReport = (props) => {
                     Code: `lV${currentCode}`,
                     Number: formattedNumberInvoice,
                     DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                    Transport: company1Tickets[0].Company,
+                    Transport: company2Tickets[0]?.Company,
                     TicketName: ticket.TicketName,
                     TicketNo: ticket.No,
                     TicketType: ticket.CustomerType,
@@ -546,12 +586,12 @@ const UpdateReport = (props) => {
         const invoiceData = {
             Report: company2Tickets,
             Total: total2,
-            Company: company2Tickets[0].Company.split(":")[1],
-            Address: company2Tickets[0].CompanyAddress,
-            CardID: company2Tickets[0].CardID,
-            Phone: company2Tickets[0].Phone,
+            Company: company2Tickets[0]?.Company.split(":")[1],
+            Address: company2Tickets[0]?.CompanyAddress,
+            CardID: company2Tickets[0]?.CardID,
+            Phone: company2Tickets[0]?.Phone,
             Code: Code,
-            Date: invoices2[0].DateStart,
+            Date: invoices2[0]?.DateStart,
             DateStart: ticket.Date,
             DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };
@@ -675,37 +715,37 @@ const UpdateReport = (props) => {
     }
 
     const handleSubmit = () => {
-            const newId = transferMoneyDetail.length;
-            const total = Number(newNumber) + 1;
-            //const formattedNumber = String(total).padStart(4, "0");
-    
-            const newPrice = {
-                ...price,
-                id: newId,
-                //Number: formattedNumber,
-            };
-    
-            database
-                .ref("transfermoney/")
-                .child(newId)
-                .set(newPrice)
-                .then(() => {
-                    ShowSuccess("บันทึกข้อมูลเรียบร้อย");
-                    console.log("บันทึกข้อมูลเรียบร้อย ✅");
-    
-                    // เตรียมค่าใหม่สำหรับ price หลังบันทึก
-                    const nextFormattedNumber = String(total).padStart(4, "0");
-                    setPrice({
-                        ...newPrice,
-                        id: newId + 1,
-                        Number: nextFormattedNumber,
-                    });
-                })
-                .catch((error) => {
-                    ShowError("ไม่สำเร็จ");
-                    console.error("Error updating data:", error);
-                });
+        const newId = transferMoneyDetail.length;
+        const total = Number(newNumber) + 1;
+        //const formattedNumber = String(total).padStart(4, "0");
+
+        const newPrice = {
+            ...price,
+            id: newId,
+            //Number: formattedNumber,
         };
+
+        database
+            .ref("transfermoney/")
+            .child(newId)
+            .set(newPrice)
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+
+                // เตรียมค่าใหม่สำหรับ price หลังบันทึก
+                const nextFormattedNumber = String(total).padStart(4, "0");
+                setPrice({
+                    ...newPrice,
+                    id: newId + 1,
+                    Number: nextFormattedNumber,
+                });
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+    };
 
     // const handleSubmit = () => {
     //     database
@@ -2192,14 +2232,14 @@ const UpdateReport = (props) => {
                                                     value={price.Transport || ""}
                                                     onChange={(e) => handleChange("Transport", e.target.value)}
                                                 >
-                                                    {
+                                                    {/* {
                                                         companies.map((row) => (
                                                             row.id !== 1 &&
                                                             <MenuItem value={`${row.id}:${row.Name}`} sx={{ fontSize: "14px", }}>{row.Name}</MenuItem>
                                                         ))
-                                                    }
-                                                    {/* <MenuItem value="บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
-                                                        <MenuItem value="หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem> */}
+                                                    } */}
+                                                    <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
+                                                    <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
                                                 </Select>
                                             </FormControl>
                                         </Paper>
