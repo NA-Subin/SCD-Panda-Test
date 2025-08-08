@@ -16,6 +16,7 @@ import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import ModeOfTravelIcon from '@mui/icons-material/ModeOfTravel';
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import ApartmentIcon from '@mui/icons-material/Apartment';
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -1102,7 +1103,7 @@ export default function Navbar() {
                       }
                     </Collapse>
                     <Collapse in={!openData} unmountOnExit={false}>
-                      {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "รถรับจ้างขนส่ง", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน"].map((text, index) => (
+                      {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "รถรับจ้างขนส่ง", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน", "รายได้รายหัก", "บริษัทที่สั่งจ่าย"].map((text, index) => (
                         <ListItem
                           key={text}
                           disablePadding
@@ -1130,7 +1131,9 @@ export default function Navbar() {
                                             : index === 6 ? "/transports"
                                               : index === 7 ? "/customer-bigtrucks"
                                                 : index === 8 ? "/customer-smalltrucks"
-                                                  : "/creditor";
+                                                  : index === 9 ? "/creditor"
+                                                    : index === 10 ? "/deductible-income"
+                                                      : "/company-payment";
 
                               setPendingPath(path); // ขอไปหน้านั้น
                             }}
@@ -1162,6 +1165,8 @@ export default function Navbar() {
                                     <GroupsIcon />
                                   ) : index === 8 ? (
                                     <GroupsIcon />
+                                  ) : index === 11 ? (
+                                    <ApartmentIcon />
                                   ) : (
                                     <CurrencyExchangeIcon />
                                   )}
@@ -1213,6 +1218,8 @@ export default function Navbar() {
                                       <GroupsIcon />
                                     ) : index === 7 ? (
                                       <GroupsIcon />
+                                    ) : index === 11 ? (
+                                      <ApartmentIcon />
                                     ) : (
                                       <CurrencyExchangeIcon />
                                     )}

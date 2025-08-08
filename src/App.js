@@ -53,6 +53,8 @@ import ReportSmallTruck from "./components/report-smalltruck/Report";
 import PrintTripsSmall from "./components/sellingsmalltruck/PrintTrips";
 import ReportPaymentSmallTruck from "./components/invoice-smalltruck/Report";
 import SummaryOilBalanceSmallTruck from "./components/oilbalance/SummaryOilSmallTruck";
+import DeductibleIncomeDetail from "./components/deductible-income/DeductibleIncome";
+import CompanyPayment from "./components/deductible-income/CompanyPayment";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -137,6 +139,12 @@ function App() {
                     </Routes> */}
                     <Routes>
                       <Route path="/creditor" element={<Creditor />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/deductible-income" element={<DeductibleIncomeDetail />} />
+                    </Routes>
+                    <Routes>
+                      <Route path="/company-payment" element={<CompanyPayment />} />
                     </Routes>
                     <Routes>
                       <Route path="/trucks" element={<Trucks />} />

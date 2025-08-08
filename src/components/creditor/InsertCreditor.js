@@ -278,7 +278,7 @@ const InsertCreditor = (props) => {
                         </Grid>
                     </Grid>
                 </DialogContent>
-                <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
+                <DialogActions sx={{ textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark, display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <Button onClick={handlePost} variant="contained" color="success">บันทึก</Button>
                     <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
                 </DialogActions>
