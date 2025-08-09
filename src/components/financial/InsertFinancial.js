@@ -39,7 +39,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
-import { IconButtonError } from "../../theme/style";
+import { IconButtonError, TablecellSelling } from "../../theme/style";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useData } from "../../server/path";
@@ -51,17 +51,16 @@ import { useTripData } from "../../server/provider/TripProvider";
 
 const InsertFinancial = () => {
     // const { reghead, regtail, small, report, reportType } = useData();
-    const { reghead, regtail, small } = useBasicData();
+    const { reghead, regtail, small, companypayment } = useBasicData();
     const { report, reportType } = useTripData();
     const registrationH = Object.values(reghead);
     const registrationT = Object.values(regtail);
     const registrationS = Object.values(small);
     const reportDetail = Object.values(report);
-    const reportTypeDetail = Object.values(reportType);
+    const companypaymentDetail = Object.values(companypayment);
     const [open, setOpen] = React.useState(false);
     const [registrationTruck, setRegistrationTruck] = React.useState("");
     const [invoiceID, setInvoiceID] = React.useState("");
-    const [spendingAbout, setSpendingAbout] = React.useState("");
     const [note, setNote] = React.useState("");
     const [company, setCompany] = React.useState("");
     const [bank, setBank] = React.useState("");
@@ -72,20 +71,22 @@ const InsertFinancial = () => {
     const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [result, setResult] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
-        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-        useEffect(() => {
-            const handleResize = () => {
-                setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-            };
-    
-            window.addEventListener('resize', handleResize); // เพิ่ม event listener
-    
-            // ลบ event listener เมื่อ component ถูกทำลาย
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
+    const [type, setType] = useState("หัวรถ");
+    const [group, setGroup] = useState("เดี่ยว");
+
+    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const handleReceiveData = (data) => {
         console.log('Data from child:', data);
@@ -130,7 +131,14 @@ const InsertFinancial = () => {
     };
 
     console.log("Show Registration : ", getRegistration());
-    console.log("spendingAbout : ", spendingAbout);
+    console.log("company : ", company);
+
+    const truckTypeMap = {
+        "หัวรถ": "หัวรถใหญ่",
+        "หางรถ": "หางรถใหญ่",
+        "รถเล็ก": "รถเล็ก"
+    };
+
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -155,9 +163,9 @@ const InsertFinancial = () => {
                                 ? `${registrationTruck.id}:${registrationTruck.RegHead}:${registrationTruck.TruckType}`
                                 : "",
                 InvoiceID: invoiceID,
-                SpendingAbout: `${spendingAbout.id}:${spendingAbout.Name}`,
+                // SpendingAbout: `${company.id}:${company.Name}`,
                 Note: note,
-                Company: company,
+                Company: `${company.id}:${company.Name}`,
                 Bank: bank,
                 Price: price,
                 Vat: vat,
@@ -171,9 +179,8 @@ const InsertFinancial = () => {
                 console.log("Data pushed successfully");
                 setRegistrationTruck("");
                 setInvoiceID("");
-                setSpendingAbout("");
-                setNote("");
                 setCompany("");
+                setNote("");
                 setBank("");
                 setPrice(0);
                 setVat(0);
@@ -187,6 +194,9 @@ const InsertFinancial = () => {
             });
     };
 
+    console.log("registrationTruck: ", registrationTruck);
+    console.log("Group : ", group);
+
 
     return (
         <React.Fragment>
@@ -196,9 +206,9 @@ const InsertFinancial = () => {
                 keepMounted
                 fullScreen={windowWidth <= 900 ? true : false}
                 onClose={handleClose}
-                maxWidth="md"
+                maxWidth="sm"
                 sx={
-                    !result ?
+                    (!result && group === "เดี่ยว") ?
                         {
                             zIndex: 1200,
                         }
@@ -206,7 +216,8 @@ const InsertFinancial = () => {
                         {
                             '& .MuiDialog-container': {
                                 justifyContent: 'flex-start', // 👈 ชิดซ้าย
-            alignItems: 'center',
+                                alignItems: 'center',
+                                marginLeft: 15
                             },
                             zIndex: 1200,
                         }
@@ -226,7 +237,7 @@ const InsertFinancial = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} marginTop={1} marginBottom={1}>
-                        <Grid item md={5} xs={12}>
+                        <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>เลขที่บิล</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -234,149 +245,81 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item md={3.5} xs={6}>
-                            <Paper component="form" sx={{ width: "100%" }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker
-                                        openTo="day"
-                                        views={["year", "month", "day"]}
-                                        value={dayjs(selectedDateInvoice, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
-                                        format="DD/MM/YYYY"
-                                        onChange={handleDateChangeDateInvoice}
-                                        sx={{ marginRight: 2, }}
-                                        slotProps={{
-                                            textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                InputProps: {
-                                                    startAdornment: (
-                                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                            วันที่บิล :
-                                                        </InputAdornment>
-                                                    ),
-                                                    sx: {
-                                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                        height: "40px",  // ความสูงของ Input
-                                                        padding: "10px", // Padding ภายใน Input
-                                                        fontWeight: "bold",
-                                                    },
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </LocalizationProvider>
-                            </Paper>
-                        </Grid>
-                        <Grid item md={3.5} xs={6}>
-                            <Paper component="form" sx={{ width: "100%" }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker
-                                        openTo="day"
-                                        views={["year", "month", "day"]}
-                                        value={dayjs(selectedDateTransfer, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
-                                        format="DD/MM/YYYY"
-                                        onChange={handleDateChangeDateTransfer}
-                                        sx={{ marginRight: 2, }}
-                                        slotProps={{
-                                            textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                InputProps: {
-                                                    startAdornment: (
-                                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                            วันที่โอน :
-                                                        </InputAdornment>
-                                                    ),
-                                                    sx: {
-                                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                        height: "40px",  // ความสูงของ Input
-                                                        padding: "10px", // Padding ภายใน Input
-                                                        fontWeight: "bold",
-                                                    },
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </LocalizationProvider>
-                            </Paper>
-                        </Grid>
-                        <Grid item md={6} xs={12}>
+                        <Grid item md={6} xs={6}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1.5 }} gutterBottom>ป้ายทะเบียน</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 5 }} gutterBottom>วันที่บิล</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <Autocomplete
-                                        id="autocomplete-tickets"
-                                        options={getRegistration()}
-                                        getOptionLabel={(option) =>
-                                            option.TruckType === "หัวรถใหญ่"
-                                                ? `${option.RegHead}(${option.TruckType})`
-                                                : option.TruckType === "หางรถใหญ่"
-                                                    ? `${option.RegTail}(${option.TruckType})`
-                                                    : option.TruckType === "รถเล็ก"
-                                                        ? `${option.RegHead}(${option.TruckType})`
-                                                        : ""
-                                        }
-                                        value={registrationTruck} // registrationTruck เป็น object แล้ว
-                                        onChange={(event, newValue) => {
-                                            if (newValue) {
-                                                setRegistrationTruck(newValue); // เก็บทั้ง object
-                                            } else {
-                                                setRegistrationTruck(null); // หรือ default object ถ้ามี
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label={!registrationTruck ? "เลือกทะเบียนรถที่ต้องการเพิ่ม" : ""}
-                                                variant="outlined"
-                                                size="small"
-                                            //   sx={{
-                                            //     "& .MuiOutlinedInput-root": { height: "30px" },
-                                            //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
-                                            //   }}
-                                            />
-                                        )}
-                                        renderOption={(props, option) => (
-                                            <li {...props}>
-                                                <Typography fontSize="16px">
-                                                    {option.TruckType === "หัวรถใหญ่"
-                                                        ? `${option.RegHead}(${option.TruckType})`
-                                                        : option.TruckType === "หางรถใหญ่"
-                                                            ? `${option.RegTail}(${option.TruckType})`
-                                                            : option.TruckType === "รถเล็ก"
-                                                                ? `${option.RegHead}(${option.TruckType})`
-                                                                : ""}
-                                                </Typography>
-                                            </li>
-                                        )}
-                                    />
-
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(selectedDateInvoice, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
+                                            format="DD/MM/YYYY"
+                                            onChange={handleDateChangeDateInvoice}
+                                            sx={{ marginRight: 2, }}
+                                            slotProps={{
+                                                textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                },
+                                            }}
+                                        />
+                                    </LocalizationProvider>
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item md={6} xs={12}>
+                        <Grid item md={6} xs={6}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ใช้จ่ายเกี่ยวกับ</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5 }} gutterBottom>วันที่โอน</Typography>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                            openTo="day"
+                                            views={["year", "month", "day"]}
+                                            value={dayjs(selectedDateTransfer, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
+                                            format="DD/MM/YYYY"
+                                            onChange={handleDateChangeDateTransfer}
+                                            sx={{ marginRight: 2, }}
+                                            slotProps={{
+                                                textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                },
+                                            }}
+                                        />
+                                    </LocalizationProvider>
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        <Grid item md={12} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ชื่อบริษัท</Typography>
                                 {/* <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={spendingAbout} onChange={(e) => setSpendingAbout(e.target.value)} />
+                                    <TextField size="small" fullWidth value={company} onChange={(e) => setCompany(e.target.value)} />
                                 </Paper> */}
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <Autocomplete
                                         id="autocomplete-tickets"
-                                        options={reportTypeDetail}
+                                        options={companypaymentDetail}
                                         getOptionLabel={(option) => option?.Name || ""}
-                                        value={spendingAbout} // registrationTruck เป็น object แล้ว
+                                        value={company} // registrationTruck เป็น object แล้ว
                                         onChange={(event, newValue) => {
                                             if (newValue) {
-                                                setSpendingAbout(newValue); // เก็บทั้ง object
+                                                setCompany(newValue); // เก็บทั้ง object
                                             } else {
-                                                setSpendingAbout(null); // หรือ default object ถ้ามี
+                                                setCompany(null); // หรือ default object ถ้ามี
+                                            }
+                                        }}
+                                        ListboxProps={{
+                                            sx: {
+                                                maxHeight: 200, // ความสูงสูงสุดของ list
+                                                overflow: 'auto',
                                             }
                                         }}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
-                                                label={!spendingAbout ? "เลือกประเภทค่าใช้จ่ายที่ต้องการเพิ่ม" : ""}
+                                                label={!company ? "เลือกประเภทค่าใช้จ่ายที่ต้องการเพิ่ม" : ""}
                                                 variant="outlined"
                                                 size="small"
                                             //   sx={{
@@ -402,21 +345,79 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>หมายเหตุ</Typography>
+                                <FormGroup row>
+                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1 }} gutterBottom>เลือกประเภทรถ</Typography>
+                                    <FormControlLabel control={<Checkbox checked={type === "หัวรถ" ? true : false} color="info" onChange={() => { setType("หัวรถ"); setRegistrationTruck("") }} />} label="หัวรถ" />
+                                    <FormControlLabel control={<Checkbox checked={type === "หางรถ" ? true : false} color="info" onChange={() => { setType("หางรถ"); setRegistrationTruck("") }} />} label="หางรถ" />
+                                    <FormControlLabel control={<Checkbox checked={type === "รถเล็ก" ? true : false} color="info" onChange={() => { setType("รถเล็ก"); setRegistrationTruck("") }} />} label="รถเล็ก" />
+                                </FormGroup>
+                            </Box>
+                        </Grid>
+                        <Grid item md={12} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <FormGroup row>
+                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1 }} gutterBottom>เลือกประเภทรถ</Typography>
+                                    <FormControlLabel control={<Checkbox checked={group === "เดี่ยว" ? true : false} color="info" onChange={() => setGroup("เดี่ยว")} />} label="เดี่ยว" />
+                                    <FormControlLabel control={<Checkbox checked={group === "กลุ่ม" ? true : false} color="info" onChange={() => setGroup("กลุ่ม")} />} label="กลุ่ม" />
+                                </FormGroup>
+                            </Box>
+                        </Grid>
+                        <Grid item md={12} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1 }} gutterBottom>ป้ายทะเบียน</Typography>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <Autocomplete
+                                        id="autocomplete-tickets"
+                                        options={getRegistration().filter(option => option.TruckType === truckTypeMap[type])}
+                                        getOptionLabel={(option) => {
+                                            if (!option) return ""; // ถ้ายังไม่มีค่าให้ return ค่าว่าง
+                                            if (type === "หัวรถ" || type === "รถเล็ก") {
+                                                return `${option.RegHead}(${option.TruckType})`;
+                                            }
+                                            if (type === "หางรถ") {
+                                                return `${option.RegTail}(${option.TruckType})`;
+                                            }
+                                            return "";
+                                        }}
+                                        value={registrationTruck}
+                                        onChange={(event, newValue) => {
+                                            setRegistrationTruck(newValue || null);
+                                        }}
+                                        ListboxProps={{
+                                            sx: {
+                                                maxHeight: 200, // ความสูงสูงสุดของ list
+                                                overflow: 'auto',
+                                            }
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label={!registrationTruck ? `กรุณาเลือก${type}` : ""}
+                                                variant="outlined"
+                                                size="small"
+                                            />
+                                        )}
+                                        renderOption={(props, option) => (
+                                            <li {...props}>
+                                                <Typography fontSize="16px">
+                                                    {(type === "หัวรถ" || type === "รถเล็ก") && `${option.RegHead}(${option.TruckType})`}
+                                                    {type === "หางรถ" && `${option.RegTail}(${option.TruckType})`}
+                                                </Typography>
+                                            </li>
+                                        )}
+                                    />
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        <Grid item md={12} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1.5 }} gutterBottom>รายละเอียด</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth value={note} onChange={(e) => setNote(e.target.value)} />
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item md={6} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>ชื่อบริษัท</Typography>
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={company} onChange={(e) => setCompany(e.target.value)} />
-                                </Paper>
-                            </Box>
-                        </Grid>
-                        <Grid item md={6} xs={12}>
+                        <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>ชื่อบัญชี</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -426,7 +427,7 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={4.5} xs={7}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7 }} gutterBottom>ยอด</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7.5 }} gutterBottom>ยอด</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" type="number" fullWidth
                                         value={price}
@@ -468,7 +469,7 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={5} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 4} }} gutterBottom>ยอดรวม</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" type="number" fullWidth
                                         value={total}
@@ -487,11 +488,69 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
+                        <Grid item md={12} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3 }} gutterBottom>หมายเหตุ</Typography>
+                                <Paper component="form" sx={{ width: "100%" }}>
+                                    <TextField size="small" fullWidth value={note} onChange={(e) => setNote(e.target.value)} />
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        {
+                            group === "กลุ่ม" &&
+                            <Grid item xs={12}>
+                                <Paper
+                                    sx={{
+                                        position: 'fixed',
+                                        top: '50%',            // กึ่งกลางแนวตั้ง
+                                        right: 150,              // ชิดขวาสุด
+                                        transform: 'translateY(-50%)',  // เลื่อนขึ้นครึ่งความสูงเพื่อกึ่งกลางจริงๆ
+                                        width: '500px',
+                                        height: '42vh',
+                                        zIndex: 1300,
+                                        p: 2,
+                                    }}
+                                >
+                                    <TableContainer component={Paper}>
+                                        <Table
+                                            stickyHeader
+                                            size="small"
+                                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                                        >
+                                            <TableHead sx={{ height: "5vh" }}>
+                                                <TableRow>
+                                                    <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                                        ลำดับ
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                                        รหัส
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                        ชื่อ
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                                                        ประเภท
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                                                        ประจำ
+                                                    </TablecellSelling>
+                                                    <TablecellSelling sx={{ textAlign: "center", width: 80, position: "sticky", right: 0 }} />
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {/* ...rows */}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Paper>
+
+                            </Grid>
+                        }
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{ display: "flex", textAlign: "center", alignItems: "center", justifyContent: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                    <Button onClick={handlePost} variant="contained" color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
+                    <Button onClick={handlePost} variant="contained" fullWidth color="success">บันทึก</Button>
+                    <Button onClick={handleClose} variant="contained" fullWidth color="error">ยกเลิก</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

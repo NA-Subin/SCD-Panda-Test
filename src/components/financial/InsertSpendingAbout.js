@@ -38,6 +38,11 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import DisabledByDefaultIcon from '@mui/icons-material/DisabledByDefault';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
 import { IconButtonError, TablecellSelling } from "../../theme/style";
@@ -47,13 +52,18 @@ import { useData } from "../../server/path";
 import dayjs from "dayjs";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useTripData } from "../../server/provider/TripProvider";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const InsertSpendingAbout = ({ onSend }) => {
     const [open, setOpen] = React.useState(false);
     const [type, setType] = React.useState("");
-    // const { reportType } = useData();
-    const { reportType } = useTripData();
-    const reportTypeDetail = Object.values(reportType);
+    const [update, setUpdate] = React.useState(false);
+    const [status, setStatus] = React.useState('ไม่ประจำ');
+    const [ID, setID] = React.useState("");
+    const [name, setName] = React.useState("");
+    // const { companypayment } = useData();
+    const { companypayment } = useBasicData();
+    const companypaymentDetail = Object.values(companypayment);
 
     console.log("Type : ", type);
 
@@ -79,12 +89,44 @@ const InsertSpendingAbout = ({ onSend }) => {
         setPage(0);
     };
 
+    const handleUpdate = (data) => {
+        setID(data.id);
+        setName(data.Name);
+        setStatus(data.Status === "ประจำ" ? true : false);
+    }
+
+    const handleCancel = () => {
+        setID("");
+        setName("");
+        setStatus("ไม่ประจำ");
+    }
+    const handleSave = () => {
+        database
+            .ref("/companypayment/")
+            .child(Number(ID) - 1)
+            .update({
+                Name: name,
+                Status: "อยู่ในระบบ"
+            })
+            .then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+                setID("");
+                setName("");
+                setStatus("");
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    };
+
     const handlePost = () => {
         database
-            .ref("report/type")
-            .child(reportTypeDetail.length)
+            .ref("companypayment/")
+            .child(companypaymentDetail.length)
             .update({
-                id: reportTypeDetail.length,
+                id: companypaymentDetail.length,
                 Name: type,
                 Status: "อยู่ในระบบ"
             })
@@ -104,7 +146,7 @@ const InsertSpendingAbout = ({ onSend }) => {
             `ต้องการลบบิลลำดับที่ ${id + 1} ใช่หรือไม่`,
             () => {
                 database
-                    .ref("report/type")
+                    .ref("companypayment/")
                     .child(id)
                     .update({
                         Status: "ยกเลิก"
@@ -140,6 +182,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                     '& .MuiDialog-container': {
                         justifyContent: 'flex-end', // 👈 ชิดซ้าย
                         alignItems: 'center',
+                        marginRight: 15
                     },
                     zIndex: 1200
                 }}
@@ -184,16 +227,80 @@ const InsertSpendingAbout = ({ onSend }) => {
                                     </TableHead>
                                     <TableBody>
                                         {
-                                            reportTypeDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            companypaymentDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow>
-                                                    <TableCell sx={{ textAlign: "center" }}>
-                                                        <Typography variant="subtitle1" fontSize="14px" sx={{ lineHeight: 1, whiteSpace: "nowrap" }} gutterBottom>{index + 1}</Typography>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
-                                                        <Typography variant="subtitle1" fontSize="14px" sx={{ lineHeight: 1, whiteSpace: "nowrap" }} gutterBottom>{row.Name}</Typography>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        {
+                                                            ID !== row.id ?
+                                                                <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Name}</Typography>
+                                                                :
+                                                                <Paper>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        value={name}
+                                                                        onChange={(e) => setName(e.target.value)}
+                                                                        size="small"
+                                                                        sx={{
+                                                                            '& .MuiInputBase-root': {
+                                                                                height: 30, // ปรับความสูงรวม
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                                                fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                                                            },
+                                                                        }}
+                                                                        InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
+                                                                    />
+                                                                </Paper>
+                                                        }
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>
-                                                        <Button variant="contained" size="small" color="error" sx={{ height: "22px" }} fullWidth onClick={() => handleChangDelete(row.id)}>ลบ</Button>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        {
+                                                            ID !== row.id ?
+                                                                <IconButton size="small" onClick={() => handleUpdate(row)}>
+                                                                    <SettingsIcon fontSize="small" color="warning" />
+                                                                </IconButton>
+                                                                :
+                                                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginLeft: -2, marginRight: -2 }}>
+                                                                    <IconButton size="small" onClick={() => handleCancel()}>
+                                                                        <Paper
+                                                                            elevation={0}
+                                                                            sx={{
+                                                                                p: 0, // ไม่มี padding
+                                                                                m: 0, // ไม่มี margin
+                                                                                display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
+                                                                                width: 'fit-content', // ปรับตาม Checkbox
+                                                                                height: 'fit-content',
+                                                                                backgroundColor: 'white'
+                                                                            }}
+                                                                        >
+                                                                            <DisabledByDefaultIcon fontSize="small" color="error" />
+                                                                        </Paper>
+                                                                    </IconButton>
+                                                                    <IconButton size="small" onClick={() => handleSave()}>
+                                                                        <Paper
+                                                                            elevation={0}
+                                                                            sx={{
+                                                                                p: 0, // ไม่มี padding
+                                                                                m: 0, // ไม่มี margin
+                                                                                display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
+                                                                                width: 'fit-content', // ปรับตาม Checkbox
+                                                                                height: 'fit-content',
+                                                                                backgroundColor: 'white'
+                                                                            }}
+                                                                        >
+                                                                            <AssignmentTurnedInIcon fontSize="small" color="success" />
+                                                                        </Paper>
+                                                                    </IconButton>
+                                                                </Box>
+                                                        }
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -201,11 +308,11 @@ const InsertSpendingAbout = ({ onSend }) => {
                                     </TableBody>
                                 </Table>
                                 {
-                                    reportTypeDetail.length <= 10 ? null :
+                                    companypaymentDetail.length <= 10 ? null :
                                         <TablePagination
                                             rowsPerPageOptions={[10, 25, 30]}
                                             component="div"
-                                            count={reportTypeDetail.length}
+                                            count={companypaymentDetail.length}
                                             rowsPerPage={rowsPerPage}
                                             page={page}
                                             onPageChange={handleChangePage}
@@ -247,17 +354,34 @@ const InsertSpendingAbout = ({ onSend }) => {
                                 }
                             </TableContainer>
                         </Grid>
-                        <Grid item xs={10}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ประเภทค่าใช้จ่าย</Typography>
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={type} onChange={(e) => setType(e.target.value)} />
-                                </Paper>
-                            </Box>
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Button onClick={handlePost} variant="contained" fullWidth color="success">บันทึก</Button>
-                        </Grid>
+                        {
+                            update ?
+                                <React.Fragment>
+                                    <Grid item xs={12}>
+                                        <Divider sx={{ marginTop: 1 }}><Chip label="เพิ่มข้อมูล" size="small" /></Divider>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เพิ่มบริษัทสั่งจ่าย</Typography>
+                                            <Paper component="form" sx={{ width: "100%" }}>
+                                                <TextField size="small" fullWidth value={type} onChange={(e) => setType(e.target.value)} />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center" >
+                                            <Button onClick={handlePost} variant="contained" fullWidth color="success" size="small" sx={{ marginRight: 2 }}>บันทึก</Button>
+                                            <Button onClick={() => setUpdate(false)} variant="contained" fullWidth size="small" color="error">ยกเลิก</Button>
+                                        </Box>
+                                    </Grid>
+                                </React.Fragment>
+                                :
+                                <Grid item xs={12}>
+                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                        <Button onClick={() => setUpdate(true)} variant="contained" size="small" color="info">เพิ่มชื่อบริษัทสั่งจ่าย</Button>
+                                    </Box>
+                                </Grid>
+                        }
                     </Grid>
                 </DialogContent>
             </Dialog>

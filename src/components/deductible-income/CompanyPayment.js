@@ -88,7 +88,7 @@ const CompanyPayment = () => {
             .update({
                 id: companypayments.length + 1,
                 Name: name,
-                Status: ""
+                Status: "อยู่ในระบบ"
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");

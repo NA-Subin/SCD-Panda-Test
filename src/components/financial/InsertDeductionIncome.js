@@ -55,12 +55,12 @@ const InsertDeducetionIncome = () => {
     const [type, setType] = React.useState("");
     const [check, setCheck] = React.useState(true);
     // const { reportType, drivers, typeFinancial, reportFinancial } = useData();
-    const { drivers } = useBasicData();
-    const { reportType, typeFinancial, reportFinancial } = useTripData();
-    
+    const { drivers, deductibleincome } = useBasicData();
+    const { reportFinancial } = useTripData();
+
     const reportTypeDetail = Object.values(reportType);
     const driverDetail = Object.values(drivers);
-    const typeFinancialDetail = Object.values(typeFinancial);
+    const deductibleincomeDetail = Object.values(deductibleincome);
     const reportFinancialDetail = Object.values(reportFinancial);
     const [result, setResult] = useState(false);
     const [driver, setDriver] = useState("");
@@ -113,7 +113,7 @@ const InsertDeducetionIncome = () => {
 
     const handlePost = () => {
         database
-            .ref("financial/report")
+            .ref("report/financial")
             .child(reportFinancialDetail.length)
             .update({
                 id: reportFinancialDetail.length,
@@ -150,12 +150,16 @@ const InsertDeducetionIncome = () => {
                 maxWidth="md"
                 sx={
                     !result ?
-                        { zIndex: 1200 }
+                        {
+                            zIndex: 1200
+                        }
                         :
                         {
                             '& .MuiDialog-container': {
                                 justifyContent: 'flex-start', // 👈 ชิดซ้าย
                                 alignItems: 'center',
+                                width: "800px",
+                                marginLeft: 10
                             },
                             zIndex: 1200,
                         }}
@@ -175,9 +179,9 @@ const InsertDeducetionIncome = () => {
                 <DialogContent sx={{ height: "40vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Grid container spacing={2} marginTop={1} marginBottom={1}>
                         {
-                            windowWidth >= 900 && <Grid item md={9} sx={12}/>
+                            windowWidth >= 900 && <Grid item md={6} sx={12} />
                         }
-                        <Grid item md={3} xs={12}>
+                        <Grid item md={6} xs={12} display="flex" alignItems="center" justifyContent="right" >
                             <Tooltip title="เพิ่มประเภท" placement="top">
                                 <InsertTypeDeduction onSend={handleReceiveData} />
                             </Tooltip>
@@ -237,7 +241,7 @@ const InsertDeducetionIncome = () => {
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <Autocomplete
                                                 id="autocomplete-tickets"
-                                                options={typeFinancialDetail.filter((row) => row.Type === "รายได้")}
+                                                options={deductibleincomeDetail.filter((row) => row.Type === "รายได้")}
                                                 getOptionLabel={(option) => option?.Name || ""}
                                                 value={type} // registrationTruck เป็น object แล้ว
                                                 onChange={(event, newValue) => {
@@ -275,7 +279,7 @@ const InsertDeducetionIncome = () => {
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <Autocomplete
                                                 id="autocomplete-tickets"
-                                                options={typeFinancialDetail.filter((row) => row.Type === "รายหัก")}
+                                                options={deductibleincomeDetail.filter((row) => row.Type === "รายหัก")}
                                                 getOptionLabel={(option) => option?.Name || ""}
                                                 value={type} // registrationTruck เป็น object แล้ว
                                                 onChange={(event, newValue) => {
@@ -311,7 +315,7 @@ const InsertDeducetionIncome = () => {
                         </Grid>
                         <Grid item md={6} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: {md: 0, xs: 6} }} gutterBottom>จำนวน</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 6 } }} gutterBottom>จำนวน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth type="number"
                                         value={money} onChange={(e) => setMoney(e.target.value)}
@@ -332,8 +336,8 @@ const InsertDeducetionIncome = () => {
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{ display: "flex", textAlign: "center", alignItems: "center", justifyContent: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                    <Button onClick={handlePost} variant="contained" color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
+                    <Button onClick={handlePost} variant="contained" fullWidth color="success">บันทึก</Button>
+                    <Button onClick={handleClose} variant="contained" fullWidth color="error">ยกเลิก</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

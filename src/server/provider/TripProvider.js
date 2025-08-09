@@ -32,7 +32,7 @@ export const TripDataProvider = ({ children }) => {
         trip: ref(database, "/trip"),
         tickets: ref(database, "/tickets"),
         typeFinancial: ref(database, "/financial/type/"),
-        reportFinancial: ref(database, "/financial/report/"),
+        reportFinancial: ref(database, "/report/financial"),
         transferMoney: ref(database, "/transfermoney/"),
         invoiceReport: ref(database, "/invoice/"),
         report: ref(database, "/report/invoice"),
