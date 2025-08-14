@@ -95,10 +95,21 @@ const DriverDetail = () => {
 
     // const { reghead, trip, order, depots, drivers } = useData();
     const { reghead, drivers, depots } = useBasicData();
-    const { trip, order} = useTripData();
+    const { trip, order } = useTripData();
     const regheads = Object.values(reghead || {});
-    const trips = Object.values(trip || {});
-    const orders = Object.values(order || {});
+    // const trips = Object.values(trip || {});
+    const trips = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+    });
+    // const orders = Object.values(order || {});
+    const orders = Object.values(order || {}).filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    });
     const depot = Object.values(depots || {});
     const driverDetails = Object.values(drivers || {});
 
@@ -325,7 +336,7 @@ const DriverDetail = () => {
                     marginBottom: { xs: -1, sm: -2, md: -3 },
                 }}>
                     <Box textAlign="right" marginTop={-6.5} marginBottom={4} sx={{ marginRight: { xs: -2, sm: -3, md: -4 } }}>
-                    <Button variant="contained" color="warning" sx={{ border: "3px solid white" }} endIcon={<SettingsIcon fontSize="small" />} onClick={handleBack}>ตั้งค่า</Button>
+                        <Button variant="contained" color="warning" sx={{ border: "3px solid white" }} endIcon={<SettingsIcon fontSize="small" />} onClick={handleBack}>ตั้งค่า</Button>
                         {
                             //    isMobile ?
                             //        <>
@@ -523,67 +534,67 @@ const DriverDetail = () => {
                                 </Box>
                             </Grid>
                             <Grid item xs={6} lg={4}>
-                        <Box display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ทะเบียนหัว : </Typography>
-                            <TextField
-                                size="small"
-                                fullWidth
-                                variant="standard"
-                                value={registrationDetail?.RegHead}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        height: '25px', // ปรับความสูงของ TextField
-                                        display: 'flex', // ใช้ flexbox
-                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                    },
-                                    '& .MuiInputBase-input': {
-                                        fontSize: '18px', // ขนาด font เวลาพิมพ์
-                                        fontWeight: 'bold',
-                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                        marginLeft: 2,
-                                        color: "#616161"
-                                    },
-                                    "& .MuiInput-underline:before": {
-                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
-                                    },
-                                    "& .MuiInput-underline:after": {
-                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
-                                    }
-                                }}
-                            />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={6} lg={4}>
-                        <Box display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ทะเบียนหาง : </Typography>
-                            <TextField
-                                size="small"
-                                fullWidth
-                                variant="standard"
-                                value={registrationDetail?.RegTail.split(":")[1]}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        height: '25px', // ปรับความสูงของ TextField
-                                        display: 'flex', // ใช้ flexbox
-                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                    },
-                                    '& .MuiInputBase-input': {
-                                        fontSize: '18px', // ขนาด font เวลาพิมพ์
-                                        fontWeight: 'bold',
-                                        padding: '2px 6px', // ปรับ padding ภายใน input
-                                        marginLeft: 2,
-                                        color: "#616161"
-                                    },
-                                    "& .MuiInput-underline:before": {
-                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
-                                    },
-                                    "& .MuiInput-underline:after": {
-                                        borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
-                                    }
-                                }}
-                            />
-                        </Box>
-                    </Grid>
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ทะเบียนหัว : </Typography>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        variant="standard"
+                                        value={registrationDetail?.RegHead}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                marginLeft: 2,
+                                                color: "#616161"
+                                            },
+                                            "& .MuiInput-underline:before": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            },
+                                            "& .MuiInput-underline:after": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6} lg={4}>
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ทะเบียนหาง : </Typography>
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        variant="standard"
+                                        value={registrationDetail?.RegTail.split(":")[1]}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '25px', // ปรับความสูงของ TextField
+                                                display: 'flex', // ใช้ flexbox
+                                                alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px', // ขนาด font เวลาพิมพ์
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px', // ปรับ padding ภายใน input
+                                                marginLeft: 2,
+                                                color: "#616161"
+                                            },
+                                            "& .MuiInput-underline:before": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            },
+                                            "& .MuiInput-underline:after": {
+                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid item xs={0.5} lg={1} />

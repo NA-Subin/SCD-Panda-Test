@@ -102,11 +102,22 @@ const Report = () => {
 
   const { customertransports, customergasstations, customertickets } = useBasicData();
   const { tickets, trip, transferMoney } = useTripData();
-  const ticket = Object.values(tickets || {});
+  //const ticket = Object.values(tickets || {});
+  const ticket = Object.values(tickets || {}).filter(item => {
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+    return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+  });
   const transports = Object.values(customertransports || {});
   const gasstations = Object.values(customergasstations || {});
   const ticketsOrder = Object.values(customertickets || {});
-  const trips = Object.values(trip || {});
+  // const trips = Object.values(trip || {});
+  const trips = Object.values(trip || {}).filter(item => {
+    const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+    const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+    const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+    return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+  });
   const transferMoneyDetail = Object.values(transferMoney || {});
 
   const [dateRangesA, setDateRangesA] = useState({});
@@ -1307,7 +1318,7 @@ const Report = () => {
                                       <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
                                         sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                       >
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {index + 1}
                                         </TableCell>
                                         {/* วันที่เริ่มต้น */}
@@ -1351,7 +1362,7 @@ const Report = () => {
                                             </LocalizationProvider>
                                           </Paper>
                                         </TableCell> */}
-                                        <TableCell sx={{ textAlign: "center", fontWeight: (selectedRow.No === row.No) || (indexes === index) ? "bold" : "" }}>
+                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {formatThaiSlash(dayjs(dateRangesA[row.No]?.dateStart || dayjs(row.DateStart, "DD/MM/YYYY"), "DD/MM/YYYY"))}
                                         </TableCell>
 

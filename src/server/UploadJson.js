@@ -4,65 +4,79 @@ import { saveAs } from "file-saver";
 
 export default function JsonUploader() {
     const [fileName, setFileName] = useState("");
-    const [jsonData, setJsonData] = useState(null);
+    const [jsonData1, setJsonData1] = useState(null); // JSON ตัวแรก
+    const [jsonData2, setJsonData2] = useState(null); // JSON ตัวสอง
 
-    const handleUpload = (e) => {
+    // สำหรับอัปโหลด JSON ตัวแรก
+    const handleUpload1 = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         setFileName(file.name);
-
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
                 const data = JSON.parse(event.target.result);
-                setJsonData(data);
+                setJsonData1(data);
             } catch (error) {
-                alert("ไฟล์ไม่ใช่ JSON ที่ถูกต้อง");
+                alert("ไฟล์ JSON ตัวแรกไม่ถูกต้อง");
             }
         };
         reader.readAsText(file);
     };
 
-    const resetIdOnly = () => {
-        if (!jsonData) return;
-        const updated = jsonData.map((item, index) => ({
-            ...item,
-            id: index + 1,
-        }));
-        downloadJson(updated, "updated_id_" + fileName);
+    // สำหรับอัปโหลด JSON ตัวที่สอง
+    const handleUpload2 = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                setJsonData2(data);
+            } catch (error) {
+                alert("ไฟล์ JSON ตัวที่สองไม่ถูกต้อง");
+            }
+        };
+        reader.readAsText(file);
     };
 
-    const resetNoAndTrip = () => {
-        if (!jsonData) return;
+    // ฟังก์ชันแปลง resetNoAndTrip + รวม JSON2 โดย map TicketNo
+    const resetNoAndTripWithJson2 = () => {
+        if (!jsonData1 || !jsonData2) return;
 
         const tripMap = {};
         let tripCounter = 0;
 
-        const updated = jsonData.map((item, index) => {
+        // Map No เก่า → No ใหม่ (index)
+        const noMap = {};
+
+        // แปลง JSON ตัวแรกเพื่อหาการแมป No เดิม → No ใหม่
+        jsonData1.forEach((item, index) => {
             const originalTrip = item.Trip;
             const isCancelled = item.Status === "ยกเลิก";
 
-            let newTrip;
-
-            if (isCancelled) {
-                newTrip = "ยกเลิก";
-            } else {
-                if (!(originalTrip in tripMap)) {
-                    tripMap[originalTrip] = tripCounter++;
-                }
-                newTrip = tripMap[originalTrip];
+            if (!(originalTrip in tripMap) && !isCancelled) {
+                tripMap[originalTrip] = tripCounter++;
             }
+
+            noMap[item.No] = index; // No ใหม่ = index ของ item ตัวแรก
+        });
+
+        // แปลง JSON ตัวที่สอง โดยปรับ TicketNo ตาม noMap และปรับ id ใหม่เรียงลำดับ 0...
+        const updated2 = jsonData2.map((item, index) => {
+            const oldTicketNo = item.TicketNo;
+            const newTicketNo = noMap.hasOwnProperty(oldTicketNo) ? noMap[oldTicketNo] : oldTicketNo;
 
             return {
                 ...item,
-                No: index,
-                Trip: newTrip,
+                TicketNo: newTicketNo,
+                id: index, // id ใหม่เรียง 0,1,2,...
             };
         });
 
-        downloadJson(updated, "updated_trip_no_" + fileName);
+        downloadJson(updated2, "updated_json2_" + fileName);
     };
+
 
     const downloadJson = (data, fileName) => {
         const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -79,22 +93,21 @@ export default function JsonUploader() {
 
             <Box display="flex" flexDirection="column" gap={2}>
                 <Button variant="contained" component="label">
-                    เลือกไฟล์ JSON
-                    <input type="file" hidden accept=".json" onChange={handleUpload} />
+                    เลือกไฟล์ JSON ตัวแรก
+                    <input type="file" hidden accept=".json" onChange={handleUpload1} />
                 </Button>
 
-                {jsonData && (
+                <Button variant="contained" component="label">
+                    เลือกไฟล์ JSON ตัวที่สอง (ถ้ามี)
+                    <input type="file" hidden accept=".json" onChange={handleUpload2} />
+                </Button>
+
+                {jsonData1 && (
                     <>
-                        <Typography color="success.main">
-                            ✔️ อัปโหลดสำเร็จ: {fileName}
-                        </Typography>
+                        <Typography color="success.main">✔️ อัปโหลด JSON ตัวแรกสำเร็จ: {fileName}</Typography>
 
-                        <Button variant="outlined" color="primary" onClick={resetIdOnly}>
-                            ดาวน์โหลด (รีเซ็ต ID เรียงใหม่)
-                        </Button>
-
-                        <Button variant="outlined" color="secondary" onClick={resetNoAndTrip}>
-                            ดาวน์โหลด (รีเซ็ต No และ Trip)
+                        <Button variant="outlined" color="secondary" onClick={resetNoAndTripWithJson2}>
+                            ดาวน์โหลด (รีเซ็ต No และ Trip พร้อม JSON ตัวสอง)
                         </Button>
                     </>
                 )}

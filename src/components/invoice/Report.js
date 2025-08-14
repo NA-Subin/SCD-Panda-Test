@@ -128,7 +128,11 @@ const FuelPaymentReport = () => {
     // const { reportFinancial, drivers } = useData();
     const { drivers, customertransports, customergasstations, customerbigtruck, customersmalltruck, customertickets } = useBasicData();
     const { order, transferMoney } = useTripData();
-    const orders = Object.values(order || {});
+    // const orders = Object.values(order || {});
+    const orders = Object.values(order || {}).filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    });
     const driver = Object.values(drivers || {});
     const ticketsT = Object.values(customertransports || {});
     const ticketsPS = Object.values(customergasstations || {});

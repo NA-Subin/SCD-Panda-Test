@@ -103,11 +103,26 @@ const Dashboard = () => {
 
   const { gasstationDetail } = useGasStationData();
 
-  const orders = Object.values(order || {});
-  const trips = Object.values(trip || {});
+  // const orders = Object.values(order || {});
+  const orders = Object.values(order || {}).filter(item => {
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+    return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+  });
+  // const trips = Object.values(trip || {});
+  const trips = Object.values(trip || {}).filter(item => {
+    const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+    const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+    const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+    return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+  });
   const creditor = Object.values(creditors || {});
   const driver = Object.values(drivers || {});
-  const ticket = Object.values(tickets || {});
+  //const ticket = Object.values(tickets || {});
+  const ticket = Object.values(tickets || {}).filter(item => {
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+    return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+  });
   const officer = Object.values(officers || {});
   const gasstations = Object.values(gasstationDetail || {});
   const regheads = Object.values(reghead || {});

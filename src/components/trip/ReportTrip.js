@@ -119,8 +119,20 @@ const ReportTrip = () => {
     // const { reportFinancial, drivers } = useData();
     const { drivers, customertransports, customergasstations, customerbigtruck, customersmalltruck, customertickets } = useBasicData();
     const { order, trip } = useTripData();
-    const orders = Object.values(order || {});
-    const trips = Object.values(trip || {});
+    // const orders = Object.values(order || {});
+    const orders = Object.values(order || {}).filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    });
+
+    // const trips = Object.values(trip || {});
+    const trips = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+    });
     const driver = Object.values(drivers || {});
     const ticketsT = Object.values(customertransports || {});
     const ticketsPS = Object.values(customergasstations || {});
@@ -129,31 +141,28 @@ const ReportTrip = () => {
     const ticketsA = Object.values(customertickets || {});
 
     console.log("Select Driver ID : ", selectDriver);
+    console.log("orders : ", orders);
 
     const TripDetail = useMemo(() => {
         if (!selectedDateStart || !selectedDateEnd) return [];
 
         // 1. กรอง orders ที่อยู่ในช่วงวันที่และมี Product
-        const filteredOrders = orders.filter((order) => {
-            if (!order.Product || !order.Date) return false;
+        // const filteredOrders = orders.filter((order) => {
+        //     if (!order.Product || !order.Date) return false;
 
-            const orderDate = dayjs(order.Date, "DD/MM/YYYY");
-            return orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
-        });
+        //     const orderDate = dayjs(order.Date, "DD/MM/YYYY");
+        //     return orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+        // });
 
         // 2. สร้าง Map: tripId → totalVolumeProduct
-        const volumeByTripId = filteredOrders.reduce((acc, order) => {
+        const volumeByTripId = orders.reduce((acc, order) => {
             const totalVolume = Object.entries(order.Product)
                 .filter(([productName]) => productName !== "P")
                 .reduce((sum, [, productData]) => sum + ((Number(productData.Volume) * 1000) || 0), 0);
 
-            console.log("totalVolume : ", totalVolume);
             acc[order.Trip] = (acc[order.Trip] || 0) + totalVolume;
-            console.log("acc[order.Trip] : ", acc[order.Trip]);
             return acc;
         }, {});
-
-        console.log("volumeByTrip : ", volumeByTripId[0]);
 
         // 3. กรอง trips แล้วรวม totalVolumeProduct เข้าไป
         return trips

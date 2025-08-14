@@ -77,7 +77,14 @@ const TripsSmallTruck = () => {
 
     // const { trip } = useData();
     const { trip } = useTripData();
-    const trips = Object.values(trip || {});
+    // const trips = Object.values(trip || {});
+    const trips = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+    });
 
     //const tripDetail = trips.filter((item) => item.TruckType === "รถเล็ก" && item.StatusTrip !== "ยกเลิก" );
     const tripDetail = trips.filter((item) => {
@@ -87,7 +94,7 @@ const TripsSmallTruck = () => {
         return (
             check === 2 ?
                 item.TruckType === "รถเล็ก" &&
-                item.StatusTrip === "กำลังจัดเที่ยววิ่ง" 
+                item.StatusTrip === "กำลังจัดเที่ยววิ่ง"
                 //&&
                 //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
                 //itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")

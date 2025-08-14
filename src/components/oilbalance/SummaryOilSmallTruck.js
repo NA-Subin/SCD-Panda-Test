@@ -119,7 +119,11 @@ const SummaryOilBalanceSmallTruck = () => {
     // const { reportFinancial, drivers } = useData();
     const { drivers, customertransports, customergasstations, customerbigtruck, customersmalltruck, customertickets } = useBasicData();
     const { order } = useTripData();
-    const orders = Object.values(order || {});
+    // const orders = Object.values(order || {});
+    const orders = Object.values(order || {}).filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    });
     const driver = Object.values(drivers || {});
     const ticketsT = Object.values(customertransports || {});
     const ticketsPS = Object.values(customergasstations || {});
@@ -143,7 +147,7 @@ const SummaryOilBalanceSmallTruck = () => {
                 // ตรวจสอบเงื่อนไขของ driver ตาม selectDriver
                 const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
 
-                return isValidStatus && isInDateRange && matchTickets && item.CustomerType === "ตั๋วรถเล็ก" ;
+                return isValidStatus && isInDateRange && matchTickets && item.CustomerType === "ตั๋วรถเล็ก";
             })
             .flatMap((item) => {
                 if (!item.Product) return [];
@@ -246,7 +250,7 @@ const SummaryOilBalanceSmallTruck = () => {
     const exportToExcel = () => {
         const exportData = sortedOrderDetail.map((row, index) => ({
             ลำดับ: index + 1,
-            วันที่ส่ง: formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY")),
+            วันที่ส่ง: formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY")),
             "ผู้ขับ/ป้ายทะเบียน": `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`,
             ตั๋ว: row.TicketName.split(":")[1],
             ชนิดน้ำมัน: row.ProductName,
@@ -589,7 +593,7 @@ const SummaryOilBalanceSmallTruck = () => {
                                         sortedOrderDetail.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date,"DD/MM/YYYY"))}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1]}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>

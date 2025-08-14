@@ -91,7 +91,18 @@ const DeductionOfIncome = () => {
     // const { reportFinancial, drivers } = useData();
     const { drivers } = useBasicData();
     const { reportFinancial } = useTripData();
-    const reports = Object.values(reportFinancial || {});
+    const reports = Object.values(reportFinancial || {})
+        .filter(r => {
+            const reportDate = dayjs(r.Date, "DD/MM/YYYY"); // แปลง string เป็น dayjs
+            return reportDate.isSameOrAfter(selectedDateStart, 'day') &&
+                reportDate.isSameOrBefore(selectedDateEnd, 'day');
+        })
+        .sort((a, b) => {
+            const driverA = (a.Driver || "").split(":")[1]?.trim() || "";
+            const driverB = (b.Driver || "").split(":")[1]?.trim() || "";
+            return driverA.localeCompare(driverB, 'th', { numeric: true });
+        });
+
     const driver = Object.values(drivers || {});
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
     // const formatted = [];
@@ -247,7 +258,7 @@ const DeductionOfIncome = () => {
             `ต้องการลบบิลลำดับที่ ${id + 1} ใช่หรือไม่`,
             () => {
                 database
-                    .ref("report/invoice")
+                    .ref("report/financial")
                     .child(id)
                     .update({
                         Status: "ยกเลิก"
@@ -402,7 +413,7 @@ const DeductionOfIncome = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {
+                                    {/* {
                                         table.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
@@ -411,9 +422,25 @@ const DeductionOfIncome = () => {
                                                 <TableCell sx={{ textAlign: "center" }}>{row.income !== "-" ? new Intl.NumberFormat("en-US").format(row.income) : "-"}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.expense !== "-" ? new Intl.NumberFormat("en-US").format(row.expense) : "-"}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>
-                                                    {/* <Button variant="contained" size="small" color="error" fullWidth
-                                        //onClick={() => handleChangDelete(row.id)}
-                                        >ลบ</Button> */}
+                                                    
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    } */}
+                                    {
+                                        reports.map((row, index) => (
+                                            <TableRow>
+                                                <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white", borderRight: "2px solid white" }}>{row.Driver.split(":")[1]}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Name.split(":")[1]}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Type === "รายได้" ? new Intl.NumberFormat("en-US").format(row.Money) : "-"}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Type === "รายหัก" ? new Intl.NumberFormat("en-US").format(row.Money) : "-"}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    <Tooltip title="ลบข้อมูล" placement="right">
+                                                        <IconButton size="small" color="error" onClick={() => handleChangDelete(row.id)}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 </TableCell>
                                             </TableRow>
                                         ))

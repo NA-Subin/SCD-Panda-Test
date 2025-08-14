@@ -32,6 +32,7 @@ import {
 import { IconButtonError, IconButtonInfo, IconButtonSuccess, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD, TablecellSelling } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BackspaceIcon from '@mui/icons-material/Backspace';
@@ -56,7 +57,7 @@ import BankDetail from "./BankDetail";
 import buddhistEra from 'dayjs/plugin/buddhistEra'; // ใช้ plugin Buddhist Era (พ.ศ.)
 import { useTripData } from "../../server/provider/TripProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
-import { formatThaiFullYear, formatThaiSlash } from "../../theme/DateTH";
+import { formatThaiFullYear, formatThaiShort, formatThaiSlash } from "../../theme/DateTH";
 
 dayjs.locale('th');
 dayjs.extend(buddhistEra);
@@ -112,18 +113,29 @@ const UpdateReport = (props) => {
     const productOrder = ["G95", "B95", "B7", "G91", "E20", "E85", "PWD"];
     console.log("Show Data ", ticket);
 
-    const showTickets = Object.values(tickets || {});
+    //const showTickets = Object.values(tickets || {});
+    const showTickets = Object.values(tickets || {}).filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    });
     const customertransport = Object.values(customertransports || {});
     const customergasstation = Object.values(customergasstations || {});
     const customerTickets = Object.values(customertickets || {});
-    const showTrips = Object.values(trip || {});
+    //const showTrips = Object.values(trip || {});
+    const showTrips = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+    });
     const registrationHead = Object.values(reghead || {});
     const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {});
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);
+    const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName);
 
     console.log("Ticket No ", ticket.No);
     console.log("Tranfer : ", transfer);
@@ -146,12 +158,15 @@ const UpdateReport = (props) => {
     console.log("ยอดบริษัท 2:", CountCompany2);
 
     const totalIncomingMoney = transferMoneyDetail
-        .filter(trans => trans.TicketName === ticket.TicketName)
+        .filter(trans => trans.TicketName === ticket.TicketName && trans.TicketType === "ตั๋วรับจ้างขนส่ง")
         .reduce((sum, trans) => {
             const value = parseFloat(trans.IncomingMoney) || 0;
             return sum + value;
         }, 0);
     const currentCode = dayjs(new Date()).format("YYYYMM");
+
+    console.log("transferMoneyDetail : ", transferMoneyDetail.filter(trans => trans.TicketName === ticket.TicketName && trans.TicketType === "ตั๋วรับจ้างขนส่ง"))
+    console.log("totalIncomingMoney : ", totalIncomingMoney);
 
     // ดึงรายการล่าสุด
     const lastItem = transferMoneyDetail[transferMoneyDetail.length - 1];
@@ -206,6 +221,26 @@ const UpdateReport = (props) => {
             //(checkOverdueTransfer || itemDate.isBetween(startDate, endDate, null, "[]"))
         );
     });
+
+    const [tranferID, setTranferID] = useState(null);
+    const [tranferDateStart, setTranferDateStart] = useState("");
+    const [tranferBankName, setTranferBankName] = useState("");
+    const [transport, setTransport] = useState("");
+    const [tranferIncomingMoney, setTranferIncomingMoney] = useState("");
+    const [tranferNote, setTranferNote] = useState("");
+    const [updateTranfer, setUpdateTranfer] = useState(false);
+
+    console.log("handleClickTranfer : ", tranferID, tranferDateStart, tranferBankName, tranferIncomingMoney, tranferNote);
+
+    const handleClickTranfer = (id, DateStart, BankName, Transport, IncomingMoney, Note) => {
+        setUpdateTranfer(true);
+        setTranferID(id);
+        setTranferDateStart(DateStart);
+        setTranferBankName(BankName);
+        setTransport(Transport);
+        setTranferIncomingMoney(IncomingMoney);
+        setTranferNote(Note);
+    }
 
     console.log(" Month : ", months);
     console.log("ticketsList: ", ticketsList)
@@ -623,6 +658,41 @@ const UpdateReport = (props) => {
     console.log("price : ", price);
     console.log("tickets : ", ticket);
 
+    const handleSaveTranfer = () => {
+        if (tranferID === null) {
+            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+            return;
+        }
+
+        const updatedData = {
+            DateStart: tranferDateStart,
+            BankName: tranferBankName,
+            Transport: transport,
+            IncomingMoney: tranferIncomingMoney,
+            Note: tranferNote,
+        };
+
+        database
+            .ref("transfermoney/")
+            .child(tranferID)
+            .update(updatedData)
+            .then(() => {
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                setUpdateTranfer(false);
+                setTranferID(null);
+                setTranferDateStart("");
+                setTranferBankName("");
+                setTransport("");
+                setTranferIncomingMoney("");
+                setTranferNote("");
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+    }
+
     const handleSave = () => {
         Object.entries(report).forEach(([uniqueRowId, data]) => {
             // ตรวจสอบว่า data.id และ data.ProductName ไม่ใช่ null หรือ undefined
@@ -808,6 +878,7 @@ const UpdateReport = (props) => {
     console.log("Show Company 1 ", company1Tickets);
     console.log("show company 2 ", company2Tickets);
     console.log("Ticket: ", ticket);
+    console.log("transfer : ", transfer);
 
     return (
         <React.Fragment>
@@ -2053,12 +2124,13 @@ const UpdateReport = (props) => {
                                     <TableHead>
                                         <TableRow>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 120, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 250, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 250, height: "30px", backgroundColor: theme.palette.success.main }}>บริษัทรับจ้างขนส่ง</TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 130, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: "30px", backgroundColor: theme.palette.success.main }}>หมายเหตุ</TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main, position: 'sticky', right: 0, }} />
                                             {/* <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 60, height: "30px", backgroundColor: "white" }}>
                                                     <Tooltip title="เพิ่มข้อมูลการโอนเงิน" placement="left">
                                                         <IconButton color="success"
@@ -2078,12 +2150,191 @@ const UpdateReport = (props) => {
                                             transfer.map((row, index) => (
                                                 <TableRow>
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 120 }}>{`${row.Code} - ${row.Number}`}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>{formatThaiSlash(dayjs(row.DateStart, "DD/MM/YYYY"))}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.BankName}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>{row.Transport.split(":")[1]}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 130 }}>{formatNumber(row.IncomingMoney)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>{row.Note}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                        {
+                                                            !updateTranfer || row.id !== tranferID ? formatThaiSlash(dayjs(row.DateStart, "DD/MM/YYYY"))
+                                                                :
+                                                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
+                                                                    <DatePicker
+                                                                        openTo="day"
+                                                                        views={["year", "month", "day"]}
+                                                                        value={dayjs(tranferDateStart, "DD/MM/YYYY")}
+                                                                        onChange={(newValue) => setTranferDateStart(dayjs(newValue).format("DD/MM/YYYY"))}
+                                                                        format="DD MMMM YYYY"
+                                                                        slotProps={{
+                                                                            textField: {
+                                                                                size: "small",
+                                                                                fullWidth: true,
+                                                                                inputProps: {
+                                                                                    value: formatThaiShort(dayjs(tranferDateStart, "DD/MM/YYYY")), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                                                    readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                                                },
+                                                                                sx: {
+                                                                                    "& .MuiOutlinedInput-root": { height: "30px", paddingRight: "8px" },
+                                                                                    "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1, marginRight: -1 },
+                                                                                },
+                                                                                InputProps: {
+                                                                                    startAdornment: (
+                                                                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                                            วันที่ :
+                                                                                        </InputAdornment>
+                                                                                    ),
+                                                                                }
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </LocalizationProvider>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>
+                                                        {
+                                                            !updateTranfer || row.id !== tranferID ? row.BankName.split(":")[1]
+                                                                :
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <FormControl
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                                                        }}
+                                                                    >
+                                                                        <Select
+                                                                            value={tranferBankName}
+                                                                            onChange={(e) => setTranferBankName(e.target.value)}
+                                                                            MenuProps={{
+                                                                                PaperProps: {
+                                                                                    style: {
+                                                                                        maxHeight: 200,
+                                                                                        width: 300,
+                                                                                    },
+                                                                                },
+                                                                                anchorOrigin: {
+                                                                                    vertical: "bottom", // dropdown จะเริ่มจากด้านล่าง select
+                                                                                    horizontal: "left",
+                                                                                },
+                                                                                transformOrigin: {
+                                                                                    vertical: "top",
+                                                                                    horizontal: "left",
+                                                                                },
+                                                                            }}
+                                                                        >
+                                                                            <MenuItem value={tranferBankName} sx={{ fontSize: "14px", }}>{tranferBankName.split(":")[1]}</MenuItem>
+                                                                            {
+                                                                                bankDetail
+                                                                                    .slice() // 🔁 Clone ก่อนกัน side effect
+                                                                                    .sort((a, b) => {
+                                                                                        const aParts = a.BankShortName.split(".....");
+                                                                                        const bParts = b.BankShortName.split(".....");
+
+                                                                                        const aHasSplit = aParts.length > 1;
+                                                                                        const bHasSplit = bParts.length > 1;
+
+                                                                                        // ✅ ให้ตัวที่ไม่มี "....." อยู่ล่างสุด
+                                                                                        if (!aHasSplit && bHasSplit) return 1;
+                                                                                        if (aHasSplit && !bHasSplit) return -1;
+                                                                                        if (!aHasSplit && !bHasSplit) return 0;
+
+                                                                                        // ✅ ถ้ามีทั้งคู่ เปรียบเทียบส่วนที่ [1]
+                                                                                        return aParts[1].localeCompare(bParts[1]);
+                                                                                    })
+                                                                                    .map((row) => (
+                                                                                        <MenuItem
+                                                                                            key={row.id}
+                                                                                            value={`${row.id}:${row.BankName} - ${row.BankShortName}`}
+                                                                                            sx={{ fontSize: "14px" }}
+                                                                                        >
+                                                                                            {`${row.BankName}....${row.BankShortName}..${row.BankID}`}
+                                                                                        </MenuItem>
+                                                                                    ))
+                                                                            }
+                                                                        </Select>
+                                                                    </FormControl>
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 250 }}>
+                                                        {
+                                                            !updateTranfer || row.id !== tranferID ? row.Transport.split(":")[1]
+                                                                :
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <FormControl
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                                                        }}
+                                                                    >
+                                                                        <Select
+                                                                            value={transport}
+                                                                            onChange={(e) => setTransport(e.target.value)}
+                                                                        >
+                                                                            <MenuItem value={transport} sx={{ fontSize: "14px", }}>{transport.split(":")[1]}</MenuItem>
+                                                                            {Number(transport.split(":")[0]) !== 2 && <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
+                                                                            {Number(transport.split(":")[0]) !== 3 && <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
+                                                                        </Select>
+                                                                    </FormControl>
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                        {
+                                                            !updateTranfer || row.id !== tranferID ? new Intl.NumberFormat("en-US").format(row.IncomingMoney)
+                                                                :
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        type="number"
+                                                                        value={tranferIncomingMoney}
+                                                                        onChange={(e) => setTranferIncomingMoney(e.target.value)}
+                                                                        size="small"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                        {
+                                                            !updateTranfer || row.id !== tranferID ? row.Note
+                                                                :
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        type="number"
+                                                                        value={tranferNote}
+                                                                        onChange={(e) => setTranferNote(e.target.value)}
+                                                                        size="small"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            '& .MuiOutlinedInput-root': { height: '30px' },
+                                                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", height: '30px', width: 50, position: 'sticky', right: 0, backgroundColor: "white" }}>
+                                                        {
+                                                            !updateTranfer || row.id !== tranferID ?
+                                                                <IconButton color="warning" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.Transport, row.IncomingMoney, row.Note)} size="small" sx={{ borderRadius: 2 }}>
+                                                                    <EditIcon />
+                                                                </IconButton>
+                                                                :
+                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                    <IconButton color="error" onClick={() => setUpdateTranfer(false)} size="small" sx={{ borderRadius: 2 }}>
+                                                                        <CancelIcon />
+                                                                    </IconButton>
+                                                                    <IconButton color="success" onClick={handleSaveTranfer} size="small" sx={{ borderRadius: 2 }}>
+                                                                        <SaveIcon />
+                                                                    </IconButton>
+                                                                </Box>
+                                                        }
+
+                                                    </TableCell>
                                                 </TableRow>
                                             ))
                                         }

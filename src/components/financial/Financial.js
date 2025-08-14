@@ -284,7 +284,7 @@ const Financial = () => {
                                         <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             เลขที่บิล
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
@@ -293,8 +293,11 @@ const Financial = () => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             วันที่โอน
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
                                             ป้ายทะเบียน
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                            รายละเอียด
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
                                             ชื่อบริษัท
@@ -308,7 +311,7 @@ const Financial = () => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                             รวม
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", width: 150, position: "sticky", right: 0 }} />
+                                        <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -319,11 +322,18 @@ const Financial = () => {
                                                 <TableCell sx={{ textAlign: "center" }}>{row.InvoiceID}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateInvoice}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateTransfer}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{`${row.Registration.split(":")[1]}(${row.Registration.split(":")[2]})`}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Company}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Price}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Vat}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Total}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{`${row.Registration.split(":")[1]} (${row.TruckType})`}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Details}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Company.split(":")[1]}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {row.Price?.toFixed(2)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {row.Vat?.toFixed(2)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {row.Total?.toFixed(2)}
+                                                </TableCell>
                                                 <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                                                     {/* <Box display="flex" alignItems="center" justifyContent="center">
                                                     <Tooltip title="แก้ไขข้อมูล" placement="left" sx={{ marginRight: 1 }}>
@@ -338,7 +348,12 @@ const Financial = () => {
                                                     </Tooltip>
 
                                                 </Box> */}
-                                                    <Button variant="contained" size="small" color="error" fullWidth onClick={() => handleChangDelete(row.id)}>ลบ</Button>
+                                                    <Tooltip title="ลบข้อมูล" placement="right">
+                                                        <IconButton size="small" color="error" onClick={() => handleChangDelete(row.id)}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    {/* <Button variant="contained" size="small" color="error" fullWidth onClick={() => handleChangDelete(row.id)}>ลบ</Button> */}
                                                 </TableCell>
                                             </TableRow>
                                         ))

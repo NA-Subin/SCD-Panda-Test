@@ -74,9 +74,20 @@ const CloseFS = () => {
     const companies = Object.values(company || {});
     const driver = Object.values(drivers || {});
     const typeF = Object.values(typeFinancial || {});
-    const orders = Object.values(order || {});
+    // const orders = Object.values(order || {});
+    const orders = Object.values(order || {}).filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    });
     const registration = Object.values(reghead || {});
-    const trips = Object.values(trip || {});
+    // const trips = Object.values(trip || {});
+    const trips = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+    });
 
     const formatmonth = (dateString) => {
         if (!dateString) return "ไม่พบข้อมูลวันที่"; // ถ้า undefined หรือ null ให้คืนค่าเริ่มต้น
@@ -336,177 +347,177 @@ const CloseFS = () => {
             </Typography>
             <Divider sx={{ marginBottom: 2 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-            <Grid container spacing={2}>
-                <Grid item md={2} xs={6}>
-                    <FormGroup row>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={date === false ? false : true}
-                                    onChange={() => setDate(true)}
-                                />
-                            }
-                            label={
-                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                    รายปี
-                                </Typography>
-                            }
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={date === true ? false : true}
-                                    onChange={() => setDate(false)}
-                                />
-                            }
-                            label={
-                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                    รายเดือน
-                                </Typography>
-                            }
-                        />
-                    </FormGroup>
-                </Grid>
-                <Grid item md={3} xs={6}>
-                    {
-                        date ?
-                            <Paper component="form" sx={{ width: "100%", height: "30px", marginTop: 1 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker
-                                        openTo="year"
-                                        views={["year"]}
-                                        value={dayjs(years)} // แปลงสตริงกลับเป็น dayjs object
-                                        format="YYYY"
-                                        onChange={handleYear}
-                                        sx={{ marginRight: 2, }}
-                                        slotProps={{
-                                            textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                InputProps: {
-                                                    startAdornment: (
-                                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                            งวดการจ่ายปี :
-                                                        </InputAdornment>
-                                                    ),
-                                                    sx: {
-                                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                        height: "30px",  // ความสูงของ Input
-                                                        padding: "10px", // Padding ภายใน Input
-                                                        fontWeight: "bold",
+                <Grid container spacing={2}>
+                    <Grid item md={2} xs={6}>
+                        <FormGroup row>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={date === false ? false : true}
+                                        onChange={() => setDate(true)}
+                                    />
+                                }
+                                label={
+                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                        รายปี
+                                    </Typography>
+                                }
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={date === true ? false : true}
+                                        onChange={() => setDate(false)}
+                                    />
+                                }
+                                label={
+                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                        รายเดือน
+                                    </Typography>
+                                }
+                            />
+                        </FormGroup>
+                    </Grid>
+                    <Grid item md={3} xs={6}>
+                        {
+                            date ?
+                                <Paper component="form" sx={{ width: "100%", height: "30px", marginTop: 1 }}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                            openTo="year"
+                                            views={["year"]}
+                                            value={dayjs(years)} // แปลงสตริงกลับเป็น dayjs object
+                                            format="YYYY"
+                                            onChange={handleYear}
+                                            sx={{ marginRight: 2, }}
+                                            slotProps={{
+                                                textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    InputProps: {
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                งวดการจ่ายปี :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                            height: "30px",  // ความสูงของ Input
+                                                            padding: "10px", // Padding ภายใน Input
+                                                            fontWeight: "bold",
+                                                        },
                                                     },
                                                 },
-                                            },
-                                        }}
-                                    />
-                                </LocalizationProvider>
-                            </Paper>
-                            :
-                            <Paper component="form" sx={{ width: "100%", height: "30px", marginTop: 1 }}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker
-                                        openTo="month"
-                                        views={["month"]}
-                                        value={dayjs(months)} // แปลงสตริงกลับเป็น dayjs object
-                                        format="MMMM"
-                                        onChange={handleMonth}
-                                        sx={{ marginRight: 2, }}
-                                        slotProps={{
-                                            textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                InputProps: {
-                                                    startAdornment: (
-                                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                            งวดการจ่ายเดือน :
-                                                        </InputAdornment>
-                                                    ),
-                                                    sx: {
-                                                        fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                        height: "30px",  // ความสูงของ Input
-                                                        padding: "10px", // Padding ภายใน Input
-                                                        fontWeight: "bold",
+                                            }}
+                                        />
+                                    </LocalizationProvider>
+                                </Paper>
+                                :
+                                <Paper component="form" sx={{ width: "100%", height: "30px", marginTop: 1 }}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DatePicker
+                                            openTo="month"
+                                            views={["month"]}
+                                            value={dayjs(months)} // แปลงสตริงกลับเป็น dayjs object
+                                            format="MMMM"
+                                            onChange={handleMonth}
+                                            sx={{ marginRight: 2, }}
+                                            slotProps={{
+                                                textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    InputProps: {
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                งวดการจ่ายเดือน :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                            height: "30px",  // ความสูงของ Input
+                                                            padding: "10px", // Padding ภายใน Input
+                                                            fontWeight: "bold",
+                                                        },
                                                     },
                                                 },
-                                            },
-                                        }}
-                                    />
-                                </LocalizationProvider>
-                            </Paper>
-                    }
-                </Grid>
-                <Grid item md={7} xs={12}>
-                    <FormControl fullWidth size="small" sx={{ marginTop: 1 }}>
-                        <InputLabel id="demo-simple-select-label" sx={{ fontSize: "16px" }}>กรุณาเลือกบริษัท</InputLabel>
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label="กรุณาเลือกบริษัท"
-                            value={companyName}
-                            onChange={(e) => handleCompany(e.target.value)}
-                            sx={{
-                                fontSize: "16px",
-                                fontWeight: "bold",
-                                height: "30px", // ความสูงโดยรวม
-                                '.MuiSelect-select': {
-                                    padding: "8px 14px", // padding ข้างใน input
-                                    display: "flex",
-                                    alignItems: "center",
-                                },
-                            }}
-                        >
-                            {
-                                companies.map((row) => (
-                                    <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
-                                ))
-                            }
-                        </Select>
-                    </FormControl>
+                                            }}
+                                        />
+                                    </LocalizationProvider>
+                                </Paper>
+                        }
+                    </Grid>
+                    <Grid item md={7} xs={12}>
+                        <FormControl fullWidth size="small" sx={{ marginTop: 1 }}>
+                            <InputLabel id="demo-simple-select-label" sx={{ fontSize: "16px" }}>กรุณาเลือกบริษัท</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                label="กรุณาเลือกบริษัท"
+                                value={companyName}
+                                onChange={(e) => handleCompany(e.target.value)}
+                                sx={{
+                                    fontSize: "16px",
+                                    fontWeight: "bold",
+                                    height: "30px", // ความสูงโดยรวม
+                                    '.MuiSelect-select': {
+                                        padding: "8px 14px", // padding ข้างใน input
+                                        display: "flex",
+                                        alignItems: "center",
+                                    },
+                                }}
+                            >
+                                {
+                                    companies.map((row) => (
+                                        <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
 
-                </Grid>
-                <Grid item md={12} xs={12}>
-                    <FormGroup row sx={{ marginTop: -2 }}>
-                        <Typography variant="subtitle2" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={check === 1 ? true : false}
-                                    onChange={() => setCheck(1)}
-                                />
-                            }
-                            label={
-                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                    ทั้งหมด
-                                </Typography>
-                            }
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={check === 2 ? true : false}
-                                    onChange={() => setCheck(2)}
-                                />
-                            }
-                            label={
-                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                    รายได้
-                                </Typography>
-                            }
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={check === 3 ? true : false}
-                                    onChange={() => setCheck(3)}
-                                />
-                            }
-                            label={
-                                <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                    ค่าใช้จ่าย
-                                </Typography>
-                            }
-                        />
-                        {/* {
+                    </Grid>
+                    <Grid item md={12} xs={12}>
+                        <FormGroup row sx={{ marginTop: -2 }}>
+                            <Typography variant="subtitle2" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={check === 1 ? true : false}
+                                        onChange={() => setCheck(1)}
+                                    />
+                                }
+                                label={
+                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                        ทั้งหมด
+                                    </Typography>
+                                }
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={check === 2 ? true : false}
+                                        onChange={() => setCheck(2)}
+                                    />
+                                }
+                                label={
+                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                        รายได้
+                                    </Typography>
+                                }
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={check === 3 ? true : false}
+                                        onChange={() => setCheck(3)}
+                                    />
+                                }
+                                label={
+                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                        ค่าใช้จ่าย
+                                    </Typography>
+                                }
+                            />
+                            {/* {
                             Object.entries(typeF).map(([key, label]) => (
                                 <FormControlLabel
                                     key={key}
@@ -525,9 +536,9 @@ const CloseFS = () => {
                             ))
                         }
                         <InsertType typeFinancial={typeF} /> */}
-                    </FormGroup>
+                        </FormGroup>
+                    </Grid>
                 </Grid>
-            </Grid>
             </Box>
             <Box display="flex" justifyContent="center" alignItems="center" width="100%" sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <TableContainer

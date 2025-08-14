@@ -100,7 +100,11 @@ const UpdateInvoice = (props) => {
 
     const { company } = useBasicData();
 
-    const orders = Object.values(order || {});
+    // const orders = Object.values(order || {});
+    const orders = Object.values(order || {}).filter(item => {
+            const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+            return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+        });
     const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {});
     const transferMoneyDetail = Object.values(transferMoney || {});
@@ -112,7 +116,7 @@ const UpdateInvoice = (props) => {
     console.log("invoice : ", invoices);
 
     const totalIncomingMoney = transferMoneyDetail
-        .filter(trans => trans.TicketNo === ticket.No)
+        .filter(trans => trans.TicketNo === ticket.No && trans.TicketType === "ตั๋วรถเล็ก")
         .reduce((sum, trans) => {
             const value = parseFloat(trans.IncomingMoney) || 0;
             return sum + value;

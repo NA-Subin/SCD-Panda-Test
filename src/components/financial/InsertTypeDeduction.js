@@ -68,9 +68,21 @@ const InsertTypeDeduction = ({ onSend }) => {
     const [update, setUpdate] = React.useState(false);
     const [typeDeduction, setTypeDeduction] = React.useState(true);
     const [typeIncome, setTypeIncome] = React.useState(true);
-    const dataSource = typeIncome && !typeDeduction ? income
-        : !typeIncome && typeDeduction ? deduction
+    const [search, setSearch] = React.useState("");
+
+    // เลือกชุดข้อมูลตาม typeIncome / typeDeduction ก่อน
+    const filteredByType = typeIncome && !typeDeduction
+        ? income
+        : !typeIncome && typeDeduction
+            ? deduction
             : deductibleIncome;
+
+    // กรองข้อมูลตาม search (ทั้ง Name และ Code)
+    const dataSource = filteredByType.filter(row =>
+        row?.Name?.toLowerCase().includes(search.toLowerCase()) ||
+        row?.Code?.toLowerCase().includes(search.toLowerCase())
+    );
+
 
     const [type, setType] = React.useState("รายได้");
     const [status, setStatus] = React.useState('ไม่ประจำ');
@@ -241,6 +253,29 @@ const InsertTypeDeduction = ({ onSend }) => {
                             </FormGroup>
                         </Grid>
                         <Grid item xs={12}>
+                            <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 2, paddingRight: 2 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: -0.5 }} gutterBottom>ค้นหา</Typography>
+                                <Paper sx={{ marginTop: -1, marginBottom: 1, width: "100%" }} >
+                                    <TextField
+                                        fullWidth
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        size="small"
+                                        sx={{
+                                            '& .MuiInputBase-root': {
+                                                height: 30, // ปรับความสูงรวม
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                            },
+                                        }}
+                                        InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
+                                    />
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
                             <TableContainer
                                 component={Paper}
                                 sx={{
@@ -268,7 +303,7 @@ const InsertTypeDeduction = ({ onSend }) => {
                                                 ประเภท
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
-                                                ประจำ
+                                                สถานะ
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", width: 80, position: "sticky", right: 0 }} />
                                         </TableRow>
@@ -277,13 +312,13 @@ const InsertTypeDeduction = ({ onSend }) => {
                                         {
                                             dataSource.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{row.Code}</Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         {
                                                             ID !== row.id ?
                                                                 <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Name}</Typography>
@@ -308,13 +343,14 @@ const InsertTypeDeduction = ({ onSend }) => {
                                                                 </Paper>
                                                         }
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         <Typography variant="subtitle1" fontSize="14px" sx={{ lineHeight: 1, whiteSpace: "nowrap", fontWeight: ID === row.id && "bold" }} gutterBottom>{row.Type}</Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         {
                                                             ID !== row.id ?
-                                                                <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>{row.Status === "ประจำ" ? <CheckIcon fontSize="small" /> : <ClearIcon fontSize="small" />}</Typography>
+                                                                <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>{row.Status}</Typography>
+                                                                // <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 1 }} gutterBottom>{row.Status === "ประจำ" ? <CheckIcon fontSize="small" /> : <ClearIcon fontSize="small" />}</Typography>
                                                                 :
                                                                 <Paper
                                                                     elevation={0}
@@ -341,7 +377,7 @@ const InsertTypeDeduction = ({ onSend }) => {
                                                                 </Paper>
                                                         }
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         {
                                                             ID !== row.id ?
                                                                 <IconButton size="small" onClick={() => handleUpdate(row)}>

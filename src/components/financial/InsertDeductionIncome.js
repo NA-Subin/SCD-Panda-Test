@@ -58,7 +58,7 @@ const InsertDeducetionIncome = () => {
     const { drivers, deductibleincome } = useBasicData();
     const { reportFinancial } = useTripData();
 
-    const reportTypeDetail = Object.values(reportType);
+    //const reportTypeDetail = Object.values(reportType);
     const driverDetail = Object.values(drivers);
     const deductibleincomeDetail = Object.values(deductibleincome);
     const reportFinancialDetail = Object.values(reportFinancial);

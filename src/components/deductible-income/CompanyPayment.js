@@ -31,6 +31,7 @@ import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { TablecellSelling } from "../../theme/style";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { database } from "../../server/firebase";
+import ImportExcel from "./ExportExcel";
 
 const CompanyPayment = () => {
     const [update, setUpdate] = React.useState(true);
@@ -135,6 +136,7 @@ const CompanyPayment = () => {
             >
                 บริษัทที่สั่งจ่าย
             </Typography>
+            {/* <ImportExcel /> */}
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 {
@@ -170,7 +172,7 @@ const CompanyPayment = () => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                                             ชื่อบริษัท
                                         </TablecellSelling>
-                                        <TablecellSelling />
+                                        <TablecellSelling width={50} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -277,19 +279,6 @@ const CompanyPayment = () => {
                                             </TableCell>
                                         </TableRow>
                                     }
-                                    <TableRow>
-                                        <TableCell sx={{ textAlign: "center" }} colSpan={3}>
-                                            {
-                                                open ?
-                                                    <Box display="flex" alignItems="center" justifyContent="center" >
-                                                        <Button variant="contained" color="error" sx={{ marginRight: 2 }} size="small" onClick={() => setOpen(false)}>ยกเลิก</Button>
-                                                        <Button variant="contained" color="success" size="small" onClick={() => handleSave()}>บันทึก</Button>
-                                                    </Box>
-                                                    :
-                                                    <Button variant="contained" size="small" onClick={() => setOpen(true)}>เพิ่มบริษัทสั่งจ่าย</Button>
-                                            }
-                                        </TableCell>
-                                    </TableRow>
                                 </TableBody>
                             </Table>
                         </TableContainer>
@@ -340,6 +329,17 @@ const CompanyPayment = () => {
                         }
                     </Grid>
                 </Grid>
+                <Box sx={{ marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {
+                        open ?
+                            <Box display="flex" alignItems="center" justifyContent="center" >
+                                <Button variant="contained" color="error" sx={{ marginRight: 2 }} size="small" onClick={() => setOpen(false)}>ยกเลิก</Button>
+                                <Button variant="contained" color="success" size="small" onClick={() => handleSave()}>บันทึก</Button>
+                            </Box>
+                            :
+                            <Button variant="contained" size="small" onClick={() => setOpen(true)}>เพิ่มบริษัทสั่งจ่าย</Button>
+                    }
+                </Box>
             </Box>
         </Container>
     );

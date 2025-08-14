@@ -18,6 +18,7 @@ import {
     IconButton,
     InputAdornment,
     InputBase,
+    List,
     MenuItem,
     Paper,
     Popover,
@@ -35,6 +36,7 @@ import {
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { database } from "../../server/firebase";
@@ -48,6 +50,7 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InsertSpendingAbout from "./InsertSpendingAbout";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
+import { Details } from "@mui/icons-material";
 
 const InsertFinancial = () => {
     // const { reghead, regtail, small, report, reportType } = useData();
@@ -62,6 +65,7 @@ const InsertFinancial = () => {
     const [registrationTruck, setRegistrationTruck] = React.useState("");
     const [invoiceID, setInvoiceID] = React.useState("");
     const [note, setNote] = React.useState("");
+    const [details, setDetails] = React.useState("");
     const [company, setCompany] = React.useState("");
     const [bank, setBank] = React.useState("");
     const [price, setPrice] = React.useState(0);
@@ -93,33 +97,6 @@ const InsertFinancial = () => {
         setResult(data);
     };
 
-    console.log("Date Invoice : ", dayjs(selectedDateInvoice));
-    console.log("Date Transfer : ", dayjs(selectedDateTransfer));
-
-    const handleDateChangeDateInvoice = (newValue) => {
-        if (newValue) {
-            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
-            setSelectedDateInvoice(formattedDate);
-        }
-    };
-
-    const handleDateChangeDateTransfer = (newValue) => {
-        if (newValue) {
-            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
-            setSelectedDateTransfer(formattedDate);
-        }
-    };
-
-    console.log("Registration Truck : ",
-        registrationTruck.TruckType === "หัวรถใหญ่"
-            ? `${registrationTruck.RegHead}(${registrationTruck.TruckType})`
-            : registrationTruck.TruckType === "หางรถใหญ่"
-                ? `${registrationTruck.RegTail}(${registrationTruck.TruckType})`
-                : registrationTruck.TruckType === "รถเล็ก"
-                    ? `${registrationTruck.RegHead}(${registrationTruck.TruckType})`
-                    : ""
-    );
-
     const getRegistration = () => {
         const registartion = [
             ...registrationH.map((item) => ({ ...item, TruckType: "หัวรถใหญ่" })),
@@ -139,6 +116,58 @@ const InsertFinancial = () => {
         "รถเล็ก": "รถเล็ก"
     };
 
+    console.log("Date Invoice : ", dayjs(selectedDateInvoice));
+    console.log("Date Transfer : ", dayjs(selectedDateTransfer));
+
+    const handleDateChangeDateInvoice = (newValue) => {
+        if (newValue) {
+            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            setSelectedDateInvoice(formattedDate);
+        }
+    };
+
+    const handleDateChangeDateTransfer = (newValue) => {
+        if (newValue) {
+            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            setSelectedDateTransfer(formattedDate);
+        }
+    };
+
+    //const [registrationTruck, setRegistrationTruck] = useState(null);
+    const [list, setList] = useState([]);
+    const [selectedValue, setSelectedValue] = useState(null);
+
+    const handleAdd = () => {
+        if (!registrationTruck) return;
+        const reg =
+            type === "หัวรถ" || type === "รถเล็ก"
+                ? registrationTruck?.RegHead
+                : registrationTruck?.RegTail;
+
+        setList((prev) => [
+            ...prev,
+            {
+                id: prev.length + 1,
+                registration: reg,
+                truckType: registrationTruck?.TruckType,
+            },
+        ]);
+        setRegistrationTruck("");
+    };
+
+    const handleDelete = (id) => {
+        setList((prev) => prev.filter((item) => item.id !== id));
+    };
+
+    console.log("Registration Truck : ",
+        registrationTruck.TruckType === "หัวรถใหญ่"
+            ? `${registrationTruck.RegHead}(${registrationTruck.TruckType})`
+            : registrationTruck.TruckType === "หางรถใหญ่"
+                ? `${registrationTruck.RegTail}(${registrationTruck.TruckType})`
+                : registrationTruck.TruckType === "รถเล็ก"
+                    ? `${registrationTruck.RegHead}(${registrationTruck.TruckType})`
+                    : ""
+    );
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -149,44 +178,56 @@ const InsertFinancial = () => {
     };
 
     const handlePost = () => {
-        database
-            .ref("report/invoice")
-            .child(reportDetail.length)
-            .update({
-                id: reportDetail.length,
-                Registration:
-                    registrationTruck.TruckType === "หัวรถใหญ่"
-                        ? `${registrationTruck.id}:${registrationTruck.RegHead}:${registrationTruck.TruckType}`
-                        : registrationTruck.TruckType === "หางรถใหญ่"
-                            ? `${registrationTruck.id}:${registrationTruck.RegTail}:${registrationTruck.TruckType}`
-                            : registrationTruck.TruckType === "รถเล็ก"
-                                ? `${registrationTruck.id}:${registrationTruck.RegHead}:${registrationTruck.TruckType}`
-                                : "",
+        if (!list || list.length === 0) {
+            ShowError("ไม่มีข้อมูลที่จะบันทึก");
+            return;
+        }
+
+        const startId = reportDetail.length; // ใช้ต่อจากของเดิม
+        const updates = {};
+
+        list.forEach((item, index) => {
+            const id = startId + index;
+
+            updates[id] = {
+                id: id,
                 InvoiceID: invoiceID,
-                // SpendingAbout: `${company.id}:${company.Name}`,
-                Note: note,
-                Company: `${company.id}:${company.Name}`,
-                Bank: bank,
-                Price: price,
-                Vat: vat,
-                Total: total,
                 SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
                 SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                Registration: item.truckType === "หัวรถ" || item.truckType === "รถเล็ก"
+                    ? `${item.registration}:${item?.RegHead || ""}`
+                    : `${item.registration}:${item?.RegTail || ""}`,
+                Company: `${company?.id}:${company?.Name}`,
+                Details: details,
+                Bank: bank,
+                Note: note,
+                Price: parseFloat((price / list.length).toFixed(2)),
+                Vat: parseFloat((vat / list.length).toFixed(2)),
+                Total: parseFloat(((Number(price) + Number(vat)) / list.length).toFixed(2)),
+                TruckType: item.truckType,
                 Status: "อยู่ในระบบ"
-            })
+            };
+        });
+
+        console.log("updates : ", updates);
+
+        database
+            .ref("report/invoice")
+            .update(updates)
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                console.log("Data pushed successfully");
-                setRegistrationTruck("");
+                console.log("All data pushed successfully");
+                setList([]); // ล้าง list
                 setInvoiceID("");
-                setCompany("");
-                setNote("");
-                setBank("");
-                setPrice(0);
-                setVat(0);
-                setTotal(0);
                 setSelectedDateInvoice(dayjs(new Date).format("DD/MM/YYYY"));
                 setSelectedDateTransfer(dayjs(new Date).format("DD/MM/YYYY"));
+                setCompany("");
+                setDetails("");
+                setBank("");
+                setNote("");
+                setPrice("");
+                setVat("");
+                setOpen(false);
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -196,6 +237,7 @@ const InsertFinancial = () => {
 
     console.log("registrationTruck: ", registrationTruck);
     console.log("Group : ", group);
+    console.log("List : ", list);
 
 
     return (
@@ -355,44 +397,71 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <FormGroup row>
-                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1 }} gutterBottom>เลือกประเภทรถ</Typography>
-                                    <FormControlLabel control={<Checkbox checked={group === "เดี่ยว" ? true : false} color="info" onChange={() => setGroup("เดี่ยว")} />} label="เดี่ยว" />
-                                    <FormControlLabel control={<Checkbox checked={group === "กลุ่ม" ? true : false} color="info" onChange={() => setGroup("กลุ่ม")} />} label="กลุ่ม" />
-                                </FormGroup>
-                            </Box>
-                        </Grid>
-                        <Grid item md={12} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1 }} gutterBottom>ป้ายทะเบียน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <Autocomplete
                                         id="autocomplete-tickets"
-                                        options={getRegistration().filter(option => option.TruckType === truckTypeMap[type])}
+                                        sx={{ flex: 1 }}
+                                        options={(getRegistration() || []).filter(
+                                            (option) => option?.TruckType === truckTypeMap[type]
+                                        )}
                                         getOptionLabel={(option) => {
-                                            if (!option) return ""; // ถ้ายังไม่มีค่าให้ return ค่าว่าง
+                                            if (!option) return "";
                                             if (type === "หัวรถ" || type === "รถเล็ก") {
-                                                return `${option.RegHead}(${option.TruckType})`;
+                                                return `${option?.RegHead} (${option?.TruckType})`;
                                             }
                                             if (type === "หางรถ") {
-                                                return `${option.RegTail}(${option.TruckType})`;
+                                                return `${option?.RegTail} (${option?.TruckType})`;
                                             }
                                             return "";
                                         }}
-                                        value={registrationTruck}
+                                        value={selectedValue}  // แสดงค่าที่เลือกปัจจุบัน
                                         onChange={(event, newValue) => {
-                                            setRegistrationTruck(newValue || null);
+                                            if (newValue) {
+                                                const reg =
+                                                    type === "หัวรถ" || type === "รถเล็ก"
+                                                        ? `${newValue.id}:${newValue.RegHead}`
+                                                        : `${newValue.id}:${newValue.RegTail}`;
+
+                                                setSelectedValue(newValue);
+
+                                                setList((prev) => {
+                                                    const newItem = {
+                                                        id: prev.length,
+                                                        invoiceID: invoiceID,
+                                                        dateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                                                        dateTranfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                                                        registration: reg,
+                                                        company: company,
+                                                        details: details,
+                                                        bank: bank,
+                                                        note: note,
+                                                        price: price,
+                                                        vat: vat,
+                                                        total: Number(price) + Number(vat),
+                                                        truckType: newValue?.TruckType,
+                                                    };
+
+                                                    if (group === "เดี่ยว") {
+                                                        return [newItem]; // ให้มีแค่ 1 รายการ
+                                                    } else {
+                                                        return [...prev, newItem]; // เพิ่มได้หลายรายการ
+                                                    }
+                                                });
+                                            } else {
+                                                setSelectedValue(null);  // เคลียร์ถ้าเลือกลบค่า
+                                            }
                                         }}
                                         ListboxProps={{
                                             sx: {
-                                                maxHeight: 200, // ความสูงสูงสุดของ list
-                                                overflow: 'auto',
-                                            }
+                                                maxHeight: 200,
+                                                overflow: "auto",
+                                            },
                                         }}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
-                                                label={!registrationTruck ? `กรุณาเลือก${type}` : ""}
+                                                label={`กรุณาเลือก${type}`}
                                                 variant="outlined"
                                                 size="small"
                                             />
@@ -400,8 +469,10 @@ const InsertFinancial = () => {
                                         renderOption={(props, option) => (
                                             <li {...props}>
                                                 <Typography fontSize="16px">
-                                                    {(type === "หัวรถ" || type === "รถเล็ก") && `${option.RegHead}(${option.TruckType})`}
-                                                    {type === "หางรถ" && `${option.RegTail}(${option.TruckType})`}
+                                                    {(type === "หัวรถ" || type === "รถเล็ก") &&
+                                                        `${option?.RegHead} (${option?.TruckType})`}
+                                                    {type === "หางรถ" &&
+                                                        `${option?.RegTail} (${option?.TruckType})`}
                                                 </Typography>
                                             </li>
                                         )}
@@ -411,9 +482,61 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
+                                <FormGroup row>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        textAlign="right"
+                                        sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1 }}
+                                        gutterBottom
+                                    >
+                                        เลือกประเภทรถ
+                                    </Typography>
+
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={group === "เดี่ยว"}
+                                                color="info"
+                                                onChange={() => {
+                                                    setGroup("เดี่ยว");
+                                                    setList([]);
+                                                    setSelectedValue(null); 
+                                                }}
+                                            />
+                                        }
+                                        label="เดี่ยว"
+                                    />
+
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={group === "กลุ่ม"}
+                                                color="info"
+                                                onChange={() => {
+                                                    setGroup("กลุ่ม");
+                                                    setList([]);
+                                                    setSelectedValue(null); 
+                                                }}
+                                            />
+                                        }
+                                        label="กลุ่ม"
+                                    />
+                                </FormGroup>
+                            </Box>
+                        </Grid>
+                        <Grid item md={12} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1.5 }} gutterBottom>รายละเอียด</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={note} onChange={(e) => setNote(e.target.value)} />
+                                    <TextField
+                                        size="small"
+                                        multiline
+                                        rows={3}
+                                        fullWidth
+                                        value={details}
+                                        onChange={(e) => setDetails(e.target.value)}
+                                    />
                                 </Paper>
                             </Box>
                         </Grid>
@@ -425,74 +548,87 @@ const InsertFinancial = () => {
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item md={4.5} xs={7}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7.5 }} gutterBottom>ยอด</Typography>
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" type="number" fullWidth
-                                        value={price}
-                                        onChange={(e) => setPrice(e.target.value)}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") {
-                                                setPrice(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                            }
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") {
-                                                setPrice(0); // ถ้าค่าว่างให้เป็น 0
-                                            }
-                                        }}
-                                    />
-                                </Paper>
-                            </Box>
-                        </Grid>
-                        <Grid item md={2.5} xs={5}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>Vat</Typography>
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" type="number" fullWidth
-                                        value={vat}
-                                        onChange={(e) => setVat(e.target.value)}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") {
-                                                setVat(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                            }
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") {
-                                                setVat(0); // ถ้าค่าว่างให้เป็น 0
-                                            }
-                                        }}
-                                    />
-                                </Paper>
-                            </Box>
-                        </Grid>
-                        <Grid item md={5} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
-                                <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" type="number" fullWidth
-                                        value={total}
-                                        onChange={(e) => setTotal(e.target.value)}
-                                        onFocus={(e) => {
-                                            if (e.target.value === "0") {
-                                                setTotal(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                            }
-                                        }}
-                                        onBlur={(e) => {
-                                            if (e.target.value === "") {
-                                                setTotal(0); // ถ้าค่าว่างให้เป็น 0
-                                            }
-                                        }}
-                                    />
-                                </Paper>
-                            </Box>
-                        </Grid>
+                        {
+                            group !== "กลุ่ม" &&
+                            <React.Fragment>
+                                <Grid item md={4.5} xs={7}>
+                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7.5 }} gutterBottom>ยอด</Typography>
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" type="number" fullWidth
+                                                value={price}
+                                                onChange={(e) => setPrice(e.target.value)}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") {
+                                                        setPrice(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                    }
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") {
+                                                        setPrice(0); // ถ้าค่าว่างให้เป็น 0
+                                                    }
+                                                }}
+                                            />
+                                        </Paper>
+                                    </Box>
+                                </Grid>
+                                <Grid item md={2.5} xs={5}>
+                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>Vat</Typography>
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" type="number" fullWidth
+                                                value={vat}
+                                                onChange={(e) => setVat(e.target.value)}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") {
+                                                        setVat(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                    }
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") {
+                                                        setVat(0); // ถ้าค่าว่างให้เป็น 0
+                                                    }
+                                                }}
+                                            />
+                                        </Paper>
+                                    </Box>
+                                </Grid>
+                                <Grid item md={5} xs={12}>
+                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
+                                        <Paper component="form" sx={{ width: "100%" }}>
+                                            <TextField size="small" type="number" fullWidth
+                                                value={Number(price) + Number(vat)}
+                                                onChange={(e) => setTotal(e.target.value)}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") {
+                                                        setTotal(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                    }
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") {
+                                                        setTotal(0); // ถ้าค่าว่างให้เป็น 0
+                                                    }
+                                                }}
+                                                disabled
+                                            />
+                                        </Paper>
+                                    </Box>
+                                </Grid>
+                            </React.Fragment>
+                        }
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3 }} gutterBottom>หมายเหตุ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={note} onChange={(e) => setNote(e.target.value)} />
+                                    <TextField
+                                        size="small"
+                                        multiline
+                                        rows={3}
+                                        fullWidth
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
+                                    />
                                 </Paper>
                             </Box>
                         </Grid>
@@ -506,12 +642,13 @@ const InsertFinancial = () => {
                                         right: 150,              // ชิดขวาสุด
                                         transform: 'translateY(-50%)',  // เลื่อนขึ้นครึ่งความสูงเพื่อกึ่งกลางจริงๆ
                                         width: '500px',
-                                        height: '42vh',
+                                        height: '80vh',
                                         zIndex: 1300,
-                                        p: 2,
+                                        p: 4,
                                     }}
                                 >
-                                    <TableContainer component={Paper}>
+                                    <Typography variant="h6" fontWeight="bold" textAlign="center" marginTop={0.5} gutterBottom>รายการทะเบียนรถ</Typography>
+                                    <TableContainer component={Paper} sx={{ marginTop: 1, width: "100%", height: "35vh" }}>
                                         <Table
                                             stickyHeader
                                             size="small"
@@ -522,26 +659,168 @@ const InsertFinancial = () => {
                                                     <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                                         ลำดับ
                                                     </TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
-                                                        รหัส
-                                                    </TablecellSelling>
                                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
-                                                        ชื่อ
+                                                        ทะเบียนรถ
                                                     </TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                                         ประเภท
                                                     </TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
-                                                        ประจำ
-                                                    </TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", width: 80, position: "sticky", right: 0 }} />
+                                                    <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {/* ...rows */}
+                                                {list.map((item, index) => (
+                                                    <TableRow key={item.id}>
+                                                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {item.registration?.includes(":")
+                                                                ? item.registration.split(":")[1]
+                                                                : item.registration}
+                                                        </TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>{item.truckType}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            <IconButton size="smal" color="error" onClick={() => handleDelete(item.id)}>
+                                                                <DeleteForeverIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
+                                    <Grid container spacing={2} marginTop={2}>
+                                        <Grid item md={5} xs={5}>
+                                            <Grid container spacing={2}>
+                                                <Grid item md={12} xs={12}>
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด</Typography>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField size="small" type="number" fullWidth
+                                                                value={price}
+                                                                onChange={(e) => setPrice(e.target.value)}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        setPrice(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        setPrice(0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </Paper>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item md={12} xs={12}>
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>Vat</Typography>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField size="small" type="number" fullWidth
+                                                                value={vat}
+                                                                onChange={(e) => setVat(e.target.value)}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        setVat(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        setVat(0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </Paper>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item md={12} xs={12}>
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField size="small" type="number" fullWidth
+                                                                value={Number(price) + Number(vat)}
+                                                                onChange={(e) => setTotal(e.target.value)}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        setTotal(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        setTotal(0); // ถ้าค่าว่างให้เป็น 0
+                                                                    }
+                                                                }}
+                                                                disabled
+                                                            />
+                                                        </Paper>
+                                                    </Box>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item md={2} xs={2} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <Typography
+                                                fontWeight="bold"
+                                                sx={{
+                                                    fontSize: "60px",     // ขนาดพื้นฐาน
+                                                    display: "inline-block",
+                                                    transform: "scaleY(3)", // ยืดแนวตั้ง 2 เท่า
+                                                    transformOrigin: "center",
+                                                    marginTop: -3,
+                                                    marginRight: -3,
+                                                    color: theme.palette.panda.dark
+                                                }}
+                                            >
+                                                {"➤"}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item md={5} xs={5}>
+                                            <Grid container spacing={2}>
+                                                <Grid item md={12} xs={12}>
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด</Typography>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                fullWidth
+                                                                value={price / (list.length !== 0 && list.length)}
+                                                                disabled
+                                                            />
+                                                        </Paper>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item md={12} xs={12}>
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>Vat</Typography>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                fullWidth
+                                                                value={vat / (list.length !== 0 && list.length)}
+                                                                disabled
+                                                            />
+                                                        </Paper>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item md={12} xs={12}>
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
+                                                        <Paper component="form" sx={{ width: "100%" }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                fullWidth
+                                                                value={(Number(price) + Number(vat)) / (list.length !== 0 && list.length)}
+                                                                disabled
+                                                            />
+                                                        </Paper>
+                                                    </Box>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
                                 </Paper>
 
                             </Grid>

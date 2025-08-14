@@ -108,10 +108,21 @@ const ReportSmallTruck = () => {
   const companies = Object.values(company || {});
   const driver = Object.values(drivers || {});
   const typeF = Object.values(typeFinancial || {});
-  const orders = Object.values(order || {});
+  // const orders = Object.values(order || {});
+  const orders = Object.values(order || {}).filter(item => {
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+    return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+  });
   const customerB = Object.values(customerbigtruck || {});
   const registration = Object.values(small || {});
-  const trips = Object.values(trip || {});
+  // const trips = Object.values(trip || {});
+  const trips = Object.values(trip || {}).filter(item => {
+    const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+    const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+    const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+    return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+  });
 
   const tripsDetail = trips.filter((row) => row.TruckType === "รถเล็ก" && row.Depot !== "ยกเลิก" && row.StatusTrip === "จบทริป");
 
@@ -147,9 +158,9 @@ const ReportSmallTruck = () => {
       id: trip.id.toString(),
       type: "ส่งออก",
       ...trip,
-    })); 
+    }));
 
-    console.log("outboundList :",outboundList);
+  console.log("outboundList :", outboundList);
 
   const travelSummary = {};
 
@@ -579,7 +590,7 @@ const ReportSmallTruck = () => {
     // ✅ แถวสรุปตอนท้าย
     exportData.push(pushSummaryRow("รวมรับเข้า", summary.inbound));
     exportData.push(pushSummaryRow("รวมส่งออก", summary.outbound));
-    exportData.push(pushSummaryRow("คงเหลือ" , summary.balance));
+    exportData.push(pushSummaryRow("คงเหลือ", summary.balance));
 
     // ✅ Export Excel
     const worksheet = XLSX.utils.json_to_sheet(exportData);

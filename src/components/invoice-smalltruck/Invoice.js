@@ -117,24 +117,47 @@ const InvoiceSmallTruck = () => {
   // const { order, transferMoney } = useData();
   const { customersmalltruck } = useBasicData();
   const { order, transferMoney, trip } = useTripData();
-  const orders = Object.values(order || {});
+  // const orders = Object.values(order || {});
+  const orders = Object.values(order || {}).filter(item => {
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+    return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+  });
   const customerS = Object.values(customersmalltruck || {});
-  const trips = Object.values(trip || {});
+  // const trips = Object.values(trip || {});
+  const trips = Object.values(trip || {}).filter(item => {
+    const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+    const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+    const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+    return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+  });
   const transferMoneyDetail = Object.values(transferMoney || {});
 
   console.log("Transfer Money : ", transferMoneyDetail);
 
   const orderDetail = orders
+    .map((item) => {
+      const tripsDate = trips.find((row) => (row.id - 1) === item.Trip); // หา tripsDate ก่อน
+      return { ...item, tripsDate };
+    })
     .filter((item) => {
-      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+      const itemDate = dayjs(item.tripsDate?.DateDelivery, "DD/MM/YYYY"); // ใช้ DateDelivery
       const customerId = Number(item.TicketName.split(":")[0]);
 
       let isInCompany =
         check === 1
           ? customerS.find((customer) => customer.id === customerId)
           : check === 2
-            ? customerS.find((customer) => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ")
-            : customerS.find((customer) => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
+            ? customerS.find(
+              (customer) =>
+                customer.id === customerId &&
+                customer.StatusCompany === "อยู่บริษัทในเครือ"
+            )
+            : customerS.find(
+              (customer) =>
+                customer.id === customerId &&
+                customer.StatusCompany === "ไม่อยู่บริษัทในเครือ"
+            );
 
       return (
         isInCompany &&
@@ -142,13 +165,13 @@ const InvoiceSmallTruck = () => {
         item.CustomerType === "ตั๋วรถเล็ก" &&
         item.Trip !== "ยกเลิก" &&
         item.Status !== "ยกเลิก" &&
-        (checkOverdueTransfer || itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
+        (checkOverdueTransfer ||
+          itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
       );
     })
     .map((item) => {
       let totalVolume = 0;
       let totalAmount = 0;
-      const tripsDate = trips.find((row) => (row.id - 1) === item.Trip);
 
       const totalIncomingMoney = transferMoneyDetail
         .filter((trans) => trans.TicketNo === item.No)
@@ -156,7 +179,7 @@ const InvoiceSmallTruck = () => {
 
       Object.entries(item.Product).forEach(([key, value]) => {
         if (key !== "P") {
-          totalVolume += parseFloat(value.Volume || 0);
+          totalVolume += parseFloat(value.Volume || 0) * 1000;
           totalAmount += parseFloat(value.Amount || 0);
         }
       });
@@ -166,21 +189,23 @@ const InvoiceSmallTruck = () => {
         TotalVolume: totalVolume,
         TotalAmount: totalAmount,
         TotalOverdue: totalIncomingMoney,
-        DateReceive: tripsDate?.DateReceive,
-        DateDelivery: tripsDate?.DateDelivery,
+        DateReceive: item.tripsDate?.DateReceive,
+        DateDelivery: item.tripsDate?.DateDelivery,
       };
     })
     // 🔽 รวมรายการซ้ำกันตรงนี้
     .reduce((acc, curr) => {
-      const key = `${curr.Date}_${curr.TicketName}`;
-      const existing = acc.find((item) => `${item.Date}_${item.TicketName}` === key);
+      const key = `${curr.tripsDate?.DateDelivery}_${curr.TicketName}`; // ใช้ DateDelivery เป็น key
+      const existing = acc.find(
+        (item) => `${item.tripsDate?.DateDelivery}_${item.TicketName}` === key
+      );
 
       if (existing) {
         existing.TotalVolume += curr.TotalVolume;
         existing.TotalAmount += curr.TotalAmount;
         existing.TotalOverdue += curr.TotalOverdue;
       } else {
-        acc.push({ ...curr }); // clone ไว้ไม่กระทบต้นฉบับ
+        acc.push({ ...curr });
       }
 
       return acc;
@@ -198,14 +223,14 @@ const InvoiceSmallTruck = () => {
       let aValue, bValue;
 
       if (key === 'Date') {
-        aValue = dayjs(a.Date, "DD/MM/YYYY");
-        bValue = dayjs(b.Date, "DD/MM/YYYY");
+        aValue = dayjs(a.DateDelivery, "DD/MM/YYYY");
+        bValue = dayjs(b.DateDelivery, "DD/MM/YYYY");
       } else if (key === 'TicketName') {
         aValue = a.TicketName?.split(":")[1] || '';
         bValue = b.TicketName?.split(":")[1] || '';
       } else if (key === 'DueDate') {
-        aValue = dayjs(a.Date, "DD/MM/YYYY").add((a.CreditTime === "-" || a.CreditTime === "0") ? 0 : Number(a.CreditTime), "day");
-        bValue = dayjs(b.Date, "DD/MM/YYYY").add((b.CreditTime === "-" || b.CreditTime === "0") ? 0 : Number(b.CreditTime), "day");
+        aValue = dayjs(a.DateDelivery, "DD/MM/YYYY").add((a.CreditTime === "-" || a.CreditTime === "0") ? 0 : Number(a.CreditTime), "day");
+        bValue = dayjs(b.DateDelivery, "DD/MM/YYYY").add((b.CreditTime === "-" || b.CreditTime === "0") ? 0 : Number(b.CreditTime), "day");
       }
 
       if (aValue < bValue) return direction === 'asc' ? -1 : 1;

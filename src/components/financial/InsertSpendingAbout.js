@@ -61,9 +61,14 @@ const InsertSpendingAbout = ({ onSend }) => {
     const [status, setStatus] = React.useState('ไม่ประจำ');
     const [ID, setID] = React.useState("");
     const [name, setName] = React.useState("");
+    const [search, setSearch] = React.useState("");
     // const { companypayment } = useData();
     const { companypayment } = useBasicData();
-    const companypaymentDetail = Object.values(companypayment);
+    const filteredByType = Object.values(companypayment);
+
+    const companypaymentDetail = filteredByType.filter(row =>
+        row?.Name?.toLowerCase().includes(search.toLowerCase())
+    );
 
     console.log("Type : ", type);
 
@@ -202,11 +207,33 @@ const InsertSpendingAbout = ({ onSend }) => {
                 <DialogContent>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
+                            <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 2, paddingRight: 2, marginTop: 2 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: -0.5 }} gutterBottom>ค้นหา</Typography>
+                                <Paper sx={{ width: "100%" }} >
+                                    <TextField
+                                        fullWidth
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        size="small"
+                                        sx={{
+                                            '& .MuiInputBase-root': {
+                                                height: 30, // ปรับความสูงรวม
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                            },
+                                        }}
+                                        InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
+                                    />
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
                             <TableContainer
                                 component={Paper}
                                 sx={{
                                     height: "37vh",
-                                    marginTop: 2,
                                 }}
                             >
                                 <Table
@@ -229,10 +256,10 @@ const InsertSpendingAbout = ({ onSend }) => {
                                         {
                                             companypaymentDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         {
                                                             ID !== row.id ?
                                                                 <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Name}</Typography>
@@ -257,7 +284,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                                                                 </Paper>
                                                         }
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         {
                                                             ID !== row.id ?
                                                                 <IconButton size="small" onClick={() => handleUpdate(row)}>
