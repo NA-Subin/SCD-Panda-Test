@@ -55,11 +55,20 @@ const InsertDeducetionIncome = () => {
     const [type, setType] = React.useState("");
     const [check, setCheck] = React.useState(true);
     // const { reportType, drivers, typeFinancial, reportFinancial } = useData();
-    const { drivers, deductibleincome } = useBasicData();
+    const { drivers, deductibleincome, reghead } = useBasicData();
     const { reportFinancial } = useTripData();
 
     //const reportTypeDetail = Object.values(reportType);
-    const driverDetail = Object.values(drivers);
+    const driverDetail = Object.values(reghead).sort((a, b) => {
+        const driverA = a?.Driver?.includes(":")
+            ? a.Driver.split(":")[1]
+            : a?.Driver || "";
+        const driverB = b?.Driver?.includes(":")
+            ? b.Driver.split(":")[1]
+            : b?.Driver || "";
+
+        return driverA.localeCompare(driverB, "th"); // "th" สำหรับเรียงแบบภาษาไทย
+    });
     const deductibleincomeDetail = Object.values(deductibleincome);
     const reportFinancialDetail = Object.values(reportFinancial);
     const [result, setResult] = useState(false);
@@ -67,7 +76,7 @@ const InsertDeducetionIncome = () => {
     const [income, setIncome] = useState("");
     const [deduction, setDeduction] = useState("");
     const [note, setNote] = useState("");
-    const [money, setMoney] = useState("");
+    const [money, setMoney] = useState(0);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -118,7 +127,10 @@ const InsertDeducetionIncome = () => {
             .update({
                 id: reportFinancialDetail.length,
                 Date: dayjs(new Date).format("DD/MM/YYYY"),
-                Driver: `${driver.id}:${driver.Name}`,
+                Driver: driver.Driver,
+                RegHead: `${driver.id}:${driver.RegHead}`,
+                RegTail: driver.RegTail,
+                Code: type.Code,
                 Name: `${type.id}:${type.Name}`,
                 Type: check ? "รายได้" : "รายหัก",
                 Money: money,
@@ -131,7 +143,7 @@ const InsertDeducetionIncome = () => {
                 setDriver("");
                 setType("");
                 setNote("");
-                setMoney("");
+                setMoney(0);
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -147,7 +159,7 @@ const InsertDeducetionIncome = () => {
                 keepMounted
                 fullScreen={windowWidth <= 900 ? true : false}
                 onClose={handleClose}
-                maxWidth="md"
+                maxWidth="sm"
                 sx={
                     !result ?
                         {
@@ -159,7 +171,7 @@ const InsertDeducetionIncome = () => {
                                 justifyContent: 'flex-start', // 👈 ชิดซ้าย
                                 alignItems: 'center',
                                 width: "800px",
-                                marginLeft: 10
+                                marginLeft: windowWidth <= 900 ? 0 : 15
                             },
                             zIndex: 1200,
                         }}
@@ -176,7 +188,7 @@ const InsertDeducetionIncome = () => {
                         </Grid>
                     </Grid>
                 </DialogTitle>
-                <DialogContent sx={{ height: "40vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <DialogContent sx={{ height: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Grid container spacing={2} marginTop={1} marginBottom={1}>
                         {
                             windowWidth >= 900 && <Grid item md={6} sx={12} />
@@ -186,14 +198,29 @@ const InsertDeducetionIncome = () => {
                                 <InsertTypeDeduction onSend={handleReceiveData} />
                             </Tooltip>
                         </Grid>
-                        <Grid item md={6} xs={12}>
+                        <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>พนักงานขับรถ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <Autocomplete
                                         id="autocomplete-tickets"
                                         options={driverDetail}
-                                        getOptionLabel={(option) => option?.Name || ""}
+                                        getOptionLabel={(option) => {
+                                            const driverD = option?.Driver?.includes(":")
+                                                ? option.Driver.split(":")[1]
+                                                : option?.Driver || "";
+
+                                            const regHead = option?.RegHead || "";
+
+                                            const regTail = option?.RegTail?.includes(":")
+                                                ? option.RegTail.split(":")[1]
+                                                : option?.RegTail || "";
+
+                                            // ถ้าทั้งหมดไม่มีค่าเลย
+                                            if (!driverD && !regHead && !regTail) return "";
+
+                                            return `${driverD} ${regHead}/${regTail}`.trim();
+                                        }}
                                         value={driver} // registrationTruck เป็น object แล้ว
                                         onChange={(event, newValue) => {
                                             if (newValue) {
@@ -214,26 +241,46 @@ const InsertDeducetionIncome = () => {
                                             //   }}
                                             />
                                         )}
-                                        renderOption={(props, option) => (
-                                            <li {...props}>
-                                                <Typography fontSize="16px">
-                                                    {option.Name}
-                                                </Typography>
-                                            </li>
-                                        )}
-                                    />
+                                        renderOption={(props, option) => {
+                                            const driverD = option?.Driver?.includes(":")
+                                                ? option.Driver.split(":")[1]
+                                                : option?.Driver || "";
 
+                                            const regHead = option?.RegHead || "";
+
+                                            const regTail = option?.RegTail?.includes(":")
+                                                ? option.RegTail.split(":")[1]
+                                                : option?.RegTail || "";
+
+                                            // ถ้าทั้งหมดไม่มีค่าเลย
+                                            if (!driverD && !regHead && !regTail) {
+                                                return (
+                                                    <li {...props}>
+                                                        <Typography fontSize="16px"></Typography>
+                                                    </li>
+                                                );
+                                            }
+
+                                            return (
+                                                <li {...props}>
+                                                    <Typography fontSize="16px">
+                                                        {`${driverD} ${regHead}/${regTail}`.trim()}
+                                                    </Typography>
+                                                </li>
+                                            );
+                                        }}
+                                    />
                                 </Paper>
                             </Box>
                         </Grid>
-                        <Grid item md={6} xs={12}>
-                            <FormGroup row>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>เลือกประเภท</Typography>
+                        <Grid item md={12} xs={12}>
+                            <FormGroup row sx={{ marginTop:-1, marginBottom: -1 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1 }} gutterBottom>เลือกประเภท</Typography>
                                 <FormControlLabel control={<Checkbox checked={check} />} label="รายได้" onClick={() => setCheck(true)} />
                                 <FormControlLabel control={<Checkbox checked={!check} />} label="รายหัก" onClick={() => setCheck(false)} />
                             </FormGroup>
                         </Grid>
-                        <Grid item md={6} xs={12}>
+                        <Grid item md={8.5} xs={12}>
                             {
                                 check ?
                                     <Box display="flex" justifyContent="center" alignItems="center">
@@ -241,7 +288,10 @@ const InsertDeducetionIncome = () => {
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <Autocomplete
                                                 id="autocomplete-tickets"
-                                                options={deductibleincomeDetail.filter((row) => row.Type === "รายได้")}
+                                                options={deductibleincomeDetail
+                                                    .filter((row) => row.Type === "รายได้")
+                                                    .sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th"))
+                                                }
                                                 getOptionLabel={(option) => option?.Name || ""}
                                                 value={type} // registrationTruck เป็น object แล้ว
                                                 onChange={(event, newValue) => {
@@ -254,7 +304,7 @@ const InsertDeducetionIncome = () => {
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
-                                                        label={!type ? "เลือกรายได้พนักงาน" : ""}
+                                                        label={!type ? "เลือกรายได้" : ""}
                                                         variant="outlined"
                                                         size="small"
                                                     //   sx={{
@@ -275,11 +325,15 @@ const InsertDeducetionIncome = () => {
                                     </Box>
                                     :
                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 6 }} gutterBottom>รายหัก</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>รายหัก</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <Autocomplete
                                                 id="autocomplete-tickets"
-                                                options={deductibleincomeDetail.filter((row) => row.Type === "รายหัก")}
+                                                options={deductibleincomeDetail
+                                                    .filter((row) => row.Type === "รายหัก")
+                                                    .sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th"))
+                                                }
+
                                                 getOptionLabel={(option) => option?.Name || ""}
                                                 value={type} // registrationTruck เป็น object แล้ว
                                                 onChange={(event, newValue) => {
@@ -292,7 +346,7 @@ const InsertDeducetionIncome = () => {
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
-                                                        label={!type ? "เลือกรายได้พนักงาน" : ""}
+                                                        label={!type ? "เลือกรายหัก" : ""}
                                                         variant="outlined"
                                                         size="small"
                                                     //   sx={{
@@ -313,12 +367,23 @@ const InsertDeducetionIncome = () => {
                                     </Box>
                             }
                         </Grid>
-                        <Grid item md={6} xs={12}>
+                        <Grid item md={3.5} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 6 } }} gutterBottom>จำนวน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth type="number"
-                                        value={money} onChange={(e) => setMoney(e.target.value)}
+                                        value={money}
+                                        onChange={(e) => setMoney(e.target.value)}
+                                        onFocus={(e) => {
+                                            if (e.target.value === "0") {
+                                                setMoney(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                            }
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value === "") {
+                                                setMoney(0); // ถ้าค่าว่างให้เป็น 0
+                                            }
+                                        }}
                                     />
                                 </Paper>
                             </Box>
@@ -327,8 +392,13 @@ const InsertDeducetionIncome = () => {
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>หมายเหตุ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth
-                                        value={note} onChange={(e) => setNote(e.target.value)}
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        value={note}
+                                        multiline
+                                        rows={3}
+                                        onChange={(e) => setNote(e.target.value)}
                                     />
                                 </Paper>
                             </Box>

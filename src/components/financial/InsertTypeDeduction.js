@@ -64,6 +64,20 @@ const InsertTypeDeduction = ({ onSend }) => {
     const deduction = deductibleIncome.filter(row => row.Type === "รายหัก");
     const income = deductibleIncome.filter(row => row.Type === "รายได้");
 
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     const [open, setOpen] = React.useState(false);
     const [update, setUpdate] = React.useState(false);
     const [typeDeduction, setTypeDeduction] = React.useState(true);
@@ -226,7 +240,7 @@ const InsertTypeDeduction = ({ onSend }) => {
                     '& .MuiDialog-container': {
                         justifyContent: 'flex-end', // 👈 ชิดซ้าย
                         alignItems: 'center',
-                        marginRight: 10
+                        marginRight: windowWidth <= 900 ? 0 : 15,
                     },
                     zIndex: 1200
                 }}

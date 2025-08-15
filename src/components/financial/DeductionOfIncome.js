@@ -390,7 +390,7 @@ const DeductionOfIncome = () => {
                             <Table
                                 stickyHeader
                                 size="small"
-                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1300px" }}
+                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1900px" }}
                             >
                                 <TableHead sx={{ height: "5vh" }}>
                                     <TableRow>
@@ -399,6 +399,9 @@ const DeductionOfIncome = () => {
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
                                             พนักงานขับรถ
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                            รหัส
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ชื่อรายการที่หัก
@@ -410,6 +413,9 @@ const DeductionOfIncome = () => {
                                             รายหัก
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", width: 20 }} />
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                            หมายเหตุ
+                                        </TablecellSelling>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -432,6 +438,7 @@ const DeductionOfIncome = () => {
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white", borderRight: "2px solid white" }}>{row.Driver.split(":")[1]}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Code}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.Name.split(":")[1]}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.Type === "รายได้" ? new Intl.NumberFormat("en-US").format(row.Money) : "-"}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.Type === "รายหัก" ? new Intl.NumberFormat("en-US").format(row.Money) : "-"}</TableCell>
@@ -442,6 +449,7 @@ const DeductionOfIncome = () => {
                                                         </IconButton>
                                                     </Tooltip>
                                                 </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Note}</TableCell>
                                             </TableRow>
                                         ))
                                     }

@@ -32,6 +32,7 @@ import {
 import { IconButtonError, IconButtonInfo, IconButtonSuccess, IconButtonWarning, RateOils, TableCellB7, TableCellB95, TableCellE20, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD, TablecellSelling } from "../../theme/style";
 import InfoIcon from '@mui/icons-material/Info';
 import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BackspaceIcon from '@mui/icons-material/Backspace';
@@ -44,7 +45,7 @@ import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import theme from "../../theme/theme";
 import { ref, update } from "firebase/database";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import dayjs from "dayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -137,7 +138,8 @@ const UpdateInvoice = (props) => {
             item.Date === ticket.Date &&
             item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] &&
             item.CustomerType === ticket.CustomerType &&
-            item.Trip !== "ยกเลิก"
+            item.Trip !== "ยกเลิก" &&
+            item.Status !== "ยกเลิก"
         )
         .map(item => {
             return {
@@ -624,6 +626,36 @@ const UpdateInvoice = (props) => {
                 console.error("Error updating data:", error);
             });
     }
+
+    const handleDeleteReport = (newID) => {
+        if (newID === null) {
+            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+            return;
+        }
+
+        ShowConfirm(
+            "คุณต้องการยกเลิกรายการนี้ใช่หรือไม่?",
+            () => {
+                // ✅ ถ้ากดยืนยัน
+                database
+                    .ref("transfermoney/")
+                    .child(newID)
+                    .update({ Status: "ยกเลิก" })
+                    .then(() => {
+                        ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                        console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                    })
+                    .catch((error) => {
+                        ShowError("ไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
+            },
+            () => {
+                // ❌ ถ้ากดยกเลิก
+                console.log("ยกเลิกการลบข้อมูล ❌");
+            }
+        );
+    };
 
     const handleSubmit = () => {
         const newId = transferMoneyDetail.length;
@@ -1284,9 +1316,14 @@ const UpdateInvoice = (props) => {
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 50, position: 'sticky', right: 0, backgroundColor: "white" }}>
                                                     {
                                                         !updateTranfer || row.id !== tranferID ?
-                                                            <IconButton color="warning" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.IncomingMoney, row.Note)} size="small" sx={{ borderRadius: 2 }}>
-                                                                <EditIcon />
-                                                            </IconButton>
+                                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                <IconButton color="warning" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.IncomingMoney, row.Note)} size="small" sx={{ borderRadius: 2 }}>
+                                                                    <EditIcon />
+                                                                </IconButton>
+                                                                <IconButton color="error" onClick={() => handleDeleteReport(row.id)} size="small">
+                                                                    <DeleteForeverIcon />
+                                                                </IconButton>
+                                                            </Box>
                                                             :
                                                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                                                 <IconButton color="error" onClick={() => setUpdateTranfer(false)} size="small" sx={{ borderRadius: 2 }}>

@@ -118,8 +118,8 @@ const Report = () => {
 
     return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
   });
-  const transferMoneyDetail = Object.values(transferMoney || {});
 
+  const transferMoneyDetail = Object.values(transferMoney || {});
   const [dateRangesA, setDateRangesA] = useState({});
   const [dateRangesT, setDateRangesT] = useState({});
   const [dateRangesG, setDateRangesG] = useState({});
@@ -137,6 +137,7 @@ const Report = () => {
     }));
   };
 
+  console.log("transferMoneyDetailss : ", transferMoneyDetail.filter((row) => row.TicketType === "ตั๋วรับจ้างขนส่ง" && row.Status !== "ยกเลิก"));
   console.log("Ticket : ", ticket);
   console.log("Ticket A : ", ticket.filter((item) => (item.CustomerType === "ตั๋วน้ำมัน" && item.Trip !== "ยกเลิก")));
   console.log("Ticket T : ", ticket.filter((item) => (item.CustomerType === "ตั๋วรับจ้างขนส่ง" && item.Trip !== "ยกเลิก")));

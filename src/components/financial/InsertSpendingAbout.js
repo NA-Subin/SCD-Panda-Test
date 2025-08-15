@@ -72,6 +72,20 @@ const InsertSpendingAbout = ({ onSend }) => {
 
     console.log("Type : ", type);
 
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+        };
+
+        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+
+        // ลบ event listener เมื่อ component ถูกทำลาย
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     const handleClickOpen = () => {
         setOpen(true);
         onSend(true);
@@ -187,7 +201,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                     '& .MuiDialog-container': {
                         justifyContent: 'flex-end', // 👈 ชิดซ้าย
                         alignItems: 'center',
-                        marginRight: 15
+                        marginRight: windowWidth <= 900 ? 0 : 15,
                     },
                     zIndex: 1200
                 }}

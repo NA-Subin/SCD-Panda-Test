@@ -179,7 +179,7 @@ const InvoiceSmallTruck = () => {
 
       Object.entries(item.Product).forEach(([key, value]) => {
         if (key !== "P") {
-          totalVolume += parseFloat(value.Volume || 0) * 1000;
+          totalVolume += parseFloat(value.Volume || 0);
           totalAmount += parseFloat(value.Amount || 0);
         }
       });

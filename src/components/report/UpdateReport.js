@@ -33,6 +33,7 @@ import { IconButtonError, IconButtonInfo, IconButtonSuccess, RateOils, TableCell
 import InfoIcon from '@mui/icons-material/Info';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BackspaceIcon from '@mui/icons-material/Backspace';
@@ -44,7 +45,7 @@ import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import theme from "../../theme/theme";
 import { ref, update } from "firebase/database";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import dayjs from "dayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -127,18 +128,19 @@ const UpdateReport = (props) => {
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
         const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
 
-        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+        return (deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day')) && item.StatusTrip !== "ยกเลิก";
     });
     const registrationHead = Object.values(reghead || {});
     const companies = Object.values(company || {});
-    const bankDetail = Object.values(banks || {});
+    const bankDetail = Object.values(banks || {}).filter((row) => row.Status !== "ยกเลิก");
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName);
+    const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName && row.Status !== "ยกเลิก" && row.month === months);
 
     console.log("Ticket No ", ticket.No);
     console.log("Tranfer : ", transfer);
+    console.log("Tranfer Transport : ", transferMoneyDetail.filter((row) => row.TicketType === "ตั๋วรับจ้างขนส่ง" && row.Status !== "ยกเลิก" && row.month === months))
 
     let CountCompany1 = 0;
     let CountCompany2 = 0;
@@ -158,7 +160,7 @@ const UpdateReport = (props) => {
     console.log("ยอดบริษัท 2:", CountCompany2);
 
     const totalIncomingMoney = transferMoneyDetail
-        .filter(trans => trans.TicketName === ticket.TicketName && trans.TicketType === "ตั๋วรับจ้างขนส่ง")
+        .filter(trans => trans.TicketName === ticket.TicketName && trans.TicketType === "ตั๋วรับจ้างขนส่ง" && trans.Status !== "ยกเลิก" && trans.month === months)
         .reduce((sum, trans) => {
             const value = parseFloat(trans.IncomingMoney) || 0;
             return sum + value;
@@ -216,6 +218,7 @@ const UpdateReport = (props) => {
         return (
             item.TicketName === ticket.TicketName &&
             item.Trip !== "ยกเลิก" &&
+            item.Status !== "ยกเลิก" &&
             item.CustomerType !== "ตั๋วรถเล็ก" &&
             itemDate.isBetween(startDate, endDate, "day", "[]") // [] คือรวมวันแรกกับวันสุดท้ายด้วย
             //(checkOverdueTransfer || itemDate.isBetween(startDate, endDate, null, "[]"))
@@ -693,6 +696,36 @@ const UpdateReport = (props) => {
             });
     }
 
+    const handleDeleteReport = (newID) => {
+        if (newID === null) {
+            ShowError("ไม่พบข้อมูลที่ต้องการอัปเดต");
+            return;
+        }
+
+        ShowConfirm(
+            "คุณต้องการยกเลิกรายการนี้ใช่หรือไม่?",
+            () => {
+                // ✅ ถ้ากดยืนยัน
+                database
+                    .ref("transfermoney/")
+                    .child(newID)
+                    .update({ Status: "ยกเลิก" })
+                    .then(() => {
+                        ShowSuccess("บันทึกข้อมูลเรียบร้อย");
+                        console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                    })
+                    .catch((error) => {
+                        ShowError("ไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
+            },
+            () => {
+                // ❌ ถ้ากดยกเลิก
+                console.log("ยกเลิกการลบข้อมูล ❌");
+            }
+        );
+    };
+
     const handleSave = () => {
         Object.entries(report).forEach(([uniqueRowId, data]) => {
             // ตรวจสอบว่า data.id และ data.ProductName ไม่ใช่ null หรือ undefined
@@ -792,6 +825,7 @@ const UpdateReport = (props) => {
         const newPrice = {
             ...price,
             id: newId,
+            month: months,
             //Number: formattedNumber,
         };
 
@@ -2320,15 +2354,20 @@ const UpdateReport = (props) => {
                                                     <TableCell sx={{ textAlign: "center", height: '30px', width: 50, position: 'sticky', right: 0, backgroundColor: "white" }}>
                                                         {
                                                             !updateTranfer || row.id !== tranferID ?
-                                                                <IconButton color="warning" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.Transport, row.IncomingMoney, row.Note)} size="small" sx={{ borderRadius: 2 }}>
-                                                                    <EditIcon />
-                                                                </IconButton>
+                                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                    <IconButton color="warning" size="small" onClick={() => handleClickTranfer(row.id, row.DateStart, row.BankName, row.Transport, row.IncomingMoney, row.Note)} sx={{ marginRight: -1 }}>
+                                                                        <EditIcon />
+                                                                    </IconButton>
+                                                                    <IconButton color="error" onClick={() => handleDeleteReport(row.id)} size="small">
+                                                                        <DeleteForeverIcon />
+                                                                    </IconButton>
+                                                                </Box>
                                                                 :
                                                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                                    <IconButton color="error" onClick={() => setUpdateTranfer(false)} size="small" sx={{ borderRadius: 2 }}>
+                                                                    <IconButton color="error" onClick={() => setUpdateTranfer(false)} size="small">
                                                                         <CancelIcon />
                                                                     </IconButton>
-                                                                    <IconButton color="success" onClick={handleSaveTranfer} size="small" sx={{ borderRadius: 2 }}>
+                                                                    <IconButton color="success" onClick={handleSaveTranfer} size="small">
                                                                         <SaveIcon />
                                                                     </IconButton>
                                                                 </Box>

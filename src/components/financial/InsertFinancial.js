@@ -259,7 +259,7 @@ const InsertFinancial = () => {
                             '& .MuiDialog-container': {
                                 justifyContent: 'flex-start', // 👈 ชิดซ้าย
                                 alignItems: 'center',
-                                marginLeft: 15
+                                marginLeft: windowWidth <= 900 ? 0 : 15
                             },
                             zIndex: 1200,
                         }
@@ -278,7 +278,7 @@ const InsertFinancial = () => {
                     </Grid>
                 </DialogTitle>
                 <DialogContent>
-                    <Grid container spacing={2} marginTop={1} marginBottom={1}>
+                    <Grid container spacing={2} marginTop={0.5} marginBottom={-0.5}>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>เลขที่บิล</Typography>
@@ -386,12 +386,12 @@ const InsertFinancial = () => {
                             </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
+                            <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginTop: -1.5, marginBottom: -1.5 }} >
                                 <FormGroup row>
                                     <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1 }} gutterBottom>เลือกประเภทรถ</Typography>
-                                    <FormControlLabel control={<Checkbox checked={type === "หัวรถ" ? true : false} color="info" onChange={() => { setType("หัวรถ"); setRegistrationTruck("") }} />} label="หัวรถ" />
-                                    <FormControlLabel control={<Checkbox checked={type === "หางรถ" ? true : false} color="info" onChange={() => { setType("หางรถ"); setRegistrationTruck("") }} />} label="หางรถ" />
-                                    <FormControlLabel control={<Checkbox checked={type === "รถเล็ก" ? true : false} color="info" onChange={() => { setType("รถเล็ก"); setRegistrationTruck("") }} />} label="รถเล็ก" />
+                                    <FormControlLabel control={<Checkbox checked={type === "หัวรถ" ? true : false} color="info" onChange={() => { setType("หัวรถ"); setSelectedValue(null) }} />} label="หัวรถ" />
+                                    <FormControlLabel control={<Checkbox checked={type === "หางรถ" ? true : false} color="info" onChange={() => { setType("หางรถ"); setSelectedValue(null) }} />} label="หางรถ" />
+                                    <FormControlLabel control={<Checkbox checked={type === "รถเล็ก" ? true : false} color="info" onChange={() => { setType("รถเล็ก"); setSelectedValue(null) }} />} label="รถเล็ก" />
                                 </FormGroup>
                             </Box>
                         </Grid>
@@ -481,7 +481,7 @@ const InsertFinancial = () => {
                             </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
+                            <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginTop: -1.5, marginBottom: -1.5 }} >
                                 <FormGroup row>
                                     <Typography
                                         variant="subtitle1"
@@ -490,7 +490,7 @@ const InsertFinancial = () => {
                                         sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1 }}
                                         gutterBottom
                                     >
-                                        เลือกประเภทรถ
+                                        เลือกการเพิ่มข้อมูลรถ
                                     </Typography>
 
                                     <FormControlLabel
@@ -501,7 +501,7 @@ const InsertFinancial = () => {
                                                 onChange={() => {
                                                     setGroup("เดี่ยว");
                                                     setList([]);
-                                                    setSelectedValue(null); 
+                                                    setSelectedValue(null);
                                                 }}
                                             />
                                         }
@@ -516,7 +516,7 @@ const InsertFinancial = () => {
                                                 onChange={() => {
                                                     setGroup("กลุ่ม");
                                                     setList([]);
-                                                    setSelectedValue(null); 
+                                                    setSelectedValue(null);
                                                 }}
                                             />
                                         }
@@ -549,11 +549,11 @@ const InsertFinancial = () => {
                             </Box>
                         </Grid>
                         {
-                            group !== "กลุ่ม" &&
+                            (group !== "กลุ่ม") &&
                             <React.Fragment>
-                                <Grid item md={4.5} xs={7}>
+                                <Grid item md={6} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7.5 }} gutterBottom>ยอด</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5 }} gutterBottom>ยอดก่อน Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField size="small" type="number" fullWidth
                                                 value={price}
@@ -572,9 +572,9 @@ const InsertFinancial = () => {
                                         </Paper>
                                     </Box>
                                 </Grid>
-                                <Grid item md={2.5} xs={5}>
+                                <Grid item md={6} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>Vat</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอด Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField size="small" type="number" fullWidth
                                                 value={vat}
@@ -593,9 +593,9 @@ const InsertFinancial = () => {
                                         </Paper>
                                     </Box>
                                 </Grid>
-                                <Grid item md={5} xs={12}>
+                                <Grid item md={12} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>ยอดรวม</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField size="small" type="number" fullWidth
                                                 value={Number(price) + Number(vat)}
@@ -633,194 +633,209 @@ const InsertFinancial = () => {
                             </Box>
                         </Grid>
                         {
-                            group === "กลุ่ม" &&
+                            (!result && group === "กลุ่ม") &&
                             <Grid item xs={12}>
                                 <Paper
                                     sx={{
                                         position: 'fixed',
                                         top: '50%',            // กึ่งกลางแนวตั้ง
-                                        right: 150,              // ชิดขวาสุด
+                                        right: 100,              // ชิดขวาสุด
                                         transform: 'translateY(-50%)',  // เลื่อนขึ้นครึ่งความสูงเพื่อกึ่งกลางจริงๆ
-                                        width: '500px',
+                                        width: '650px',
                                         height: '80vh',
                                         zIndex: 1300,
-                                        p: 4,
                                     }}
                                 >
-                                    <Typography variant="h6" fontWeight="bold" textAlign="center" marginTop={0.5} gutterBottom>รายการทะเบียนรถ</Typography>
-                                    <TableContainer component={Paper} sx={{ marginTop: 1, width: "100%", height: "35vh" }}>
-                                        <Table
-                                            stickyHeader
-                                            size="small"
-                                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
-                                        >
-                                            <TableHead sx={{ height: "5vh" }}>
-                                                <TableRow>
-                                                    <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
-                                                        ลำดับ
-                                                    </TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
-                                                        ทะเบียนรถ
-                                                    </TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                                        ประเภท
-                                                    </TablecellSelling>
-                                                    <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {list.map((item, index) => (
-                                                    <TableRow key={item.id}>
-                                                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>
-                                                            {item.registration?.includes(":")
-                                                                ? item.registration.split(":")[1]
-                                                                : item.registration}
-                                                        </TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>{item.truckType}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center" }}>
-                                                            <IconButton size="smal" color="error" onClick={() => handleDelete(item.id)}>
-                                                                <DeleteForeverIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                    <Grid container spacing={2} marginTop={2}>
-                                        <Grid item md={5} xs={5}>
-                                            <Grid container spacing={2}>
-                                                <Grid item md={12} xs={12}>
-                                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด</Typography>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField size="small" type="number" fullWidth
-                                                                value={price}
-                                                                onChange={(e) => setPrice(e.target.value)}
-                                                                onFocus={(e) => {
-                                                                    if (e.target.value === "0") {
-                                                                        setPrice(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                                                    }
-                                                                }}
-                                                                onBlur={(e) => {
-                                                                    if (e.target.value === "") {
-                                                                        setPrice(0); // ถ้าค่าว่างให้เป็น 0
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </Paper>
-                                                    </Box>
-                                                </Grid>
-                                                <Grid item md={12} xs={12}>
-                                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>Vat</Typography>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField size="small" type="number" fullWidth
-                                                                value={vat}
-                                                                onChange={(e) => setVat(e.target.value)}
-                                                                onFocus={(e) => {
-                                                                    if (e.target.value === "0") {
-                                                                        setVat(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                                                    }
-                                                                }}
-                                                                onBlur={(e) => {
-                                                                    if (e.target.value === "") {
-                                                                        setVat(0); // ถ้าค่าว่างให้เป็น 0
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </Paper>
-                                                    </Box>
-                                                </Grid>
-                                                <Grid item md={12} xs={12}>
-                                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField size="small" type="number" fullWidth
-                                                                value={Number(price) + Number(vat)}
-                                                                onChange={(e) => setTotal(e.target.value)}
-                                                                onFocus={(e) => {
-                                                                    if (e.target.value === "0") {
-                                                                        setTotal(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                                                    }
-                                                                }}
-                                                                onBlur={(e) => {
-                                                                    if (e.target.value === "") {
-                                                                        setTotal(0); // ถ้าค่าว่างให้เป็น 0
-                                                                    }
-                                                                }}
-                                                                disabled
-                                                            />
-                                                        </Paper>
-                                                    </Box>
-                                                </Grid>
-                                            </Grid>
+                                    <Grid container sx={{ backgroundColor: theme.palette.panda.dark, height: "50px", borderTopLeftRadius: 5, borderTopRightRadius: 5 }} >
+                                        <Grid item xs={10}>
+                                            <Typography variant="h6" fontWeight="bold" color="white" sx={{ marginTop: 1, marginLeft: 2 }} >รายการทะเบียนรถ</Typography>
                                         </Grid>
-                                        <Grid item md={2} xs={2} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                            <Typography
-                                                fontWeight="bold"
-                                                sx={{
-                                                    fontSize: "60px",     // ขนาดพื้นฐาน
-                                                    display: "inline-block",
-                                                    transform: "scaleY(3)", // ยืดแนวตั้ง 2 เท่า
-                                                    transformOrigin: "center",
-                                                    marginTop: -3,
-                                                    marginRight: -3,
-                                                    color: theme.palette.panda.dark
-                                                }}
-                                            >
-                                                {"➤"}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item md={5} xs={5}>
-                                            <Grid container spacing={2}>
-                                                <Grid item md={12} xs={12}>
-                                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด</Typography>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField
-                                                                size="small"
-                                                                type="number"
-                                                                fullWidth
-                                                                value={price / (list.length !== 0 && list.length)}
-                                                                disabled
-                                                            />
-                                                        </Paper>
-                                                    </Box>
-                                                </Grid>
-                                                <Grid item md={12} xs={12}>
-                                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>Vat</Typography>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField
-                                                                size="small"
-                                                                type="number"
-                                                                fullWidth
-                                                                value={vat / (list.length !== 0 && list.length)}
-                                                                disabled
-                                                            />
-                                                        </Paper>
-                                                    </Box>
-                                                </Grid>
-                                                <Grid item md={12} xs={12}>
-                                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>ยอดรวม</Typography>
-                                                        <Paper component="form" sx={{ width: "100%" }}>
-                                                            <TextField
-                                                                size="small"
-                                                                type="number"
-                                                                fullWidth
-                                                                value={(Number(price) + Number(vat)) / (list.length !== 0 && list.length)}
-                                                                disabled
-                                                            />
-                                                        </Paper>
-                                                    </Box>
-                                                </Grid>
-                                            </Grid>
+                                        <Grid item xs={2} textAlign="right">
+                                            <IconButtonError onClick={() => setGroup("เดี่ยว")} sx={{ marginTop: 1, marginRight: 2 }}>
+                                                <CancelIcon fontSize="small" />
+                                            </IconButtonError>
                                         </Grid>
                                     </Grid>
+                                    {/* <Typography variant="h6" fontWeight="bold" textAlign="center" marginTop={0.5} gutterBottom>รายการทะเบียนรถ</Typography> */}
+                                    <Box sx={{ p: 4 }}>
+                                        <TableContainer component={Paper} sx={{ width: "100%", height: "35vh" }}>
+                                            <Table
+                                                stickyHeader
+                                                size="small"
+                                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                                            >
+                                                <TableHead sx={{ height: "5vh" }}>
+                                                    <TableRow>
+                                                        <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                                            ลำดับ
+                                                        </TablecellSelling>
+                                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                            ทะเบียนรถ
+                                                        </TablecellSelling>
+                                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                            ประเภท
+                                                        </TablecellSelling>
+                                                        <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {list.map((item, index) => (
+                                                        <TableRow key={item.id}>
+                                                            <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                {item.registration?.includes(":")
+                                                                    ? item.registration.split(":")[1]
+                                                                    : item.registration}
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>{item.truckType}</TableCell>
+                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                                <IconButton size="smal" color="error" onClick={() => handleDelete(item.id)} sx={{ marginTop: -0.5, marginBottom: -0.5 }}>
+                                                                    <DeleteForeverIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                        <Paper sx={{ backgroundColor: "lightgray", p: 2, marginTop: 2 }}>
+                                            <Grid container spacing={2}>
+                                                <Grid item md={5} xs={5}>
+                                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="center" sx={{ marginBottom: 0.5, marginTop: -1, color: theme.palette.panda.light }}>กรอกข้อมูลตรงนี้</Typography>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item md={12} xs={12}>
+                                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอดก่อน Vat</Typography>
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField size="small" type="number" fullWidth
+                                                                        value={price}
+                                                                        onChange={(e) => setPrice(e.target.value)}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0") {
+                                                                                setPrice(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                            }
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            if (e.target.value === "") {
+                                                                                setPrice(0); // ถ้าค่าว่างให้เป็น 0
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item md={12} xs={12}>
+                                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด Vat</Typography>
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField size="small" type="number" fullWidth
+                                                                        value={vat}
+                                                                        onChange={(e) => setVat(e.target.value)}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0") {
+                                                                                setVat(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                            }
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            if (e.target.value === "") {
+                                                                                setVat(0); // ถ้าค่าว่างให้เป็น 0
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item md={12} xs={12}>
+                                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField size="small" type="number" fullWidth
+                                                                        value={Number(price) + Number(vat)}
+                                                                        onChange={(e) => setTotal(e.target.value)}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0") {
+                                                                                setTotal(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
+                                                                            }
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            if (e.target.value === "") {
+                                                                                setTotal(0); // ถ้าค่าว่างให้เป็น 0
+                                                                            }
+                                                                        }}
+                                                                        disabled
+                                                                    />
+                                                                </Paper>
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item md={2} xs={2} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                    <Typography
+                                                        fontWeight="bold"
+                                                        sx={{
+                                                            fontSize: "60px",     // ขนาดพื้นฐาน
+                                                            display: "inline-block",
+                                                            transform: "scaleY(3.5)", // ยืดแนวตั้ง 2 เท่า
+                                                            transformOrigin: "center",
+                                                            marginTop: -3,
+                                                            marginRight: -3,
+                                                            color: theme.palette.panda.dark
+                                                        }}
+                                                    >
+                                                        {"➤"}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item md={5} xs={5}>
+                                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="center" sx={{ marginBottom: 0.5, marginTop: -1, color: theme.palette.panda.light }}>ผลการคำนวณ</Typography>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item md={12} xs={12}>
+                                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอดก่อน Vat</Typography>
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="number"
+                                                                        fullWidth
+                                                                        value={price / (list.length !== 0 && list.length)}
+                                                                        disabled
+                                                                    />
+                                                                </Paper>
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item md={12} xs={12}>
+                                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด Vat</Typography>
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="number"
+                                                                        fullWidth
+                                                                        value={vat / (list.length !== 0 && list.length)}
+                                                                        disabled
+                                                                    />
+                                                                </Paper>
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item md={12} xs={12}>
+                                                            <Box display="flex" justifyContent="center" alignItems="center">
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
+                                                                <Paper component="form" sx={{ width: "100%" }}>
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="number"
+                                                                        fullWidth
+                                                                        value={(Number(price) + Number(vat)) / (list.length !== 0 && list.length)}
+                                                                        disabled
+                                                                    />
+                                                                </Paper>
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </Paper>
+                                    </Box>
                                 </Paper>
 
                             </Grid>

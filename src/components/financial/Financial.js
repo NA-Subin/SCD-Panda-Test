@@ -57,6 +57,7 @@ const Financial = () => {
     const [driverDetail, setDriver] = React.useState([]);
     const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
     const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
+    const [search, setSearch] = useState("");
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -92,14 +93,26 @@ const Financial = () => {
     const reports = Object.values(report || {});
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
 
-    const reportDetail = reports
-        .filter((item) => {
-            const itemDate = dayjs(item.SelectedDateInvoice, "DD/MM/YYYY");
-            return (
-                itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") &&
-                item.Status !== "ยกเลิก"
-            );
-        });
+    const reportDetail = reports.filter((item) => {
+        const itemDate = dayjs(item.SelectedDateInvoice, "DD/MM/YYYY");
+        const registrations = item?.Registration?.includes(":")
+            ? item.Registration.split(":")[1]
+            : item?.Registration || "";
+        const company = item?.Company?.includes(":")
+            ? item.Company.split(":")[1]
+            : item?.Company || "";
+        const bank = item?.Bank || "";
+
+        return (
+            itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]") &&
+            item.Status !== "ยกเลิก" &&
+            (
+                registrations.toLowerCase().includes(search.toLowerCase()) ||
+                company.toLowerCase().includes(search.toLowerCase()) ||
+                bank.toLowerCase().includes(search.toLowerCase())
+            )
+        );
+    });
 
     console.log("Report : ", reports);
     console.log("Report Detail : ", reportDetail);
@@ -263,7 +276,30 @@ const Financial = () => {
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-                <Grid container spacing={2} width="100%">
+                <Grid container spacing={2} width="100%" sx={{ marginTop: 1, }}>
+                    <Grid item xs={12}>
+                        <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 5, paddingRight: 5 }}>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 0.5 }} gutterBottom>ค้นหา</Typography>
+                            <Paper sx={{ width: "100%" }} >
+                                <TextField
+                                    fullWidth
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    size="small"
+                                    sx={{
+                                        '& .MuiInputBase-root': {
+                                            height: 35, // ปรับความสูงรวม
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            padding: '4px 8px', // ปรับ padding ด้านใน input
+                                            fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                        },
+                                    }}
+                                    InputProps={{ sx: { height: 35 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
+                                />
+                            </Paper>
+                        </Box>
+                    </Grid>
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}
@@ -271,7 +307,6 @@ const Financial = () => {
                                 maxWidth: "1350px",
                                 height: "65vh",
                                 overflowX: "auto", // แสดง scrollbar แนวนอน
-                                marginTop: 2,
                             }}
                         >
                             <Table
@@ -297,19 +332,22 @@ const Financial = () => {
                                             ป้ายทะเบียน
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
-                                            รายละเอียด
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
                                             ชื่อบริษัท
                                         </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
+                                            ชื่อบัญชี
+                                        </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                            ยอด
+                                            ยอดก่อน Vat
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                            VAT
+                                            ยอด VAT
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                             รวม
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
+                                            หมายเหตุ
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
                                     </TableRow>
@@ -323,8 +361,8 @@ const Financial = () => {
                                                 <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateInvoice}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateTransfer}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{`${row.Registration.split(":")[1]} (${row.TruckType})`}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Details}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.Company.split(":")[1]}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Bank}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>
                                                     {row.Price?.toFixed(2)}
                                                 </TableCell>
@@ -334,6 +372,7 @@ const Financial = () => {
                                                 <TableCell sx={{ textAlign: "center" }}>
                                                     {row.Total?.toFixed(2)}
                                                 </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Note}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                                                     {/* <Box display="flex" alignItems="center" justifyContent="center">
                                                     <Tooltip title="แก้ไขข้อมูล" placement="left" sx={{ marginRight: 1 }}>
