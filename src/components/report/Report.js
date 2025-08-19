@@ -119,7 +119,7 @@ const Report = () => {
     return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
   });
 
-  const transferMoneyDetail = Object.values(transferMoney || {});
+  const transferMoneyDetail = Object.values(transferMoney || {}).filter((row) => row.Status !== "ยกเลิก");
   const [dateRangesA, setDateRangesA] = useState({});
   const [dateRangesT, setDateRangesT] = useState({});
   const [dateRangesG, setDateRangesG] = useState({});
@@ -1307,8 +1307,11 @@ const Report = () => {
                                   .map((row, index) => {
                                     // <<<<<< เพิ่มตรงนี้
                                     const transfer = transferMoneyDetail.filter((transferRow) =>
-                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                     );
+
+                                    console.log("Tranfer Detail : ", transfer);
+                                    console.log("month Detail : ", row.Month);
 
                                     const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
                                       return sum + (Number(transferRow.IncomingMoney) || 0);
@@ -1427,7 +1430,11 @@ const Report = () => {
                                           {formatNumber(totalIncomingMoney)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {formatNumber(row.TotalAmount - totalIncomingMoney)}
+                                          {formatNumber(
+                                            Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
+                                              ? 0
+                                              : Number(row.TotalAmount) - totalIncomingMoney
+                                          )}
                                         </TableCell>
                                       </TableRow>
                                     );
@@ -1435,8 +1442,11 @@ const Report = () => {
                                 : TicketsDetail.map((row, index) => {
                                   // <<<<<< เพิ่มตรงนี้
                                   const transfer = transferMoneyDetail.filter((transferRow) =>
-                                    transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                    transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                   );
+
+                                  console.log("Tranfer Detail : ", transfer);
+                                  console.log("month Detail : ", row.Month);
 
                                   const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
                                     return sum + (Number(transferRow.IncomingMoney) || 0);
@@ -1554,7 +1564,11 @@ const Report = () => {
                                         {formatNumber(totalIncomingMoney)}
                                       </TableCell>
                                       <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                        {formatNumber(row.TotalAmount - totalIncomingMoney)}
+                                        {formatNumber(
+                                          Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
+                                            ? 0
+                                            : Number(row.TotalAmount) - totalIncomingMoney
+                                        )}
                                       </TableCell>
                                     </TableRow>
                                   );
@@ -1690,8 +1704,11 @@ const Report = () => {
                                     .map((row, index) => {
                                       // <<<<<< เพิ่มตรงนี้
                                       const transfer = transferMoneyDetail.filter((transferRow) =>
-                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                       );
+
+                                      console.log("Tranfer Detail : ", transfer);
+                                      console.log("month Detail : ", row.Month);
 
                                       const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
                                         return sum + (Number(transferRow.IncomingMoney) || 0);
@@ -1813,7 +1830,11 @@ const Report = () => {
                                             {formatNumber(totalIncomingMoney)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {formatNumber(row.TotalAmount - totalIncomingMoney)}
+                                            {formatNumber(
+                                              Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
+                                                ? 0
+                                                : Number(row.TotalAmount) - totalIncomingMoney
+                                            )}
                                           </TableCell>
                                         </TableRow>
                                       );
@@ -1821,8 +1842,11 @@ const Report = () => {
                                   : TransportDetail.map((row, index) => {
                                     // <<<<<< เพิ่มตรงนี้
                                     const transfer = transferMoneyDetail.filter((transferRow) =>
-                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                     );
+
+                                    console.log("Tranfer Detail : ", transfer);
+                                    console.log("month Detail : ", row.Month);
 
                                     const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
                                       return sum + (Number(transferRow.IncomingMoney) || 0);
@@ -1937,7 +1961,11 @@ const Report = () => {
                                           {formatNumber(totalIncomingMoney)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {formatNumber(row.TotalAmount - totalIncomingMoney)}
+                                          {formatNumber(
+                                            Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
+                                              ? 0
+                                              : Number(row.TotalAmount) - totalIncomingMoney
+                                          )}
                                         </TableCell>
                                       </TableRow>
                                     );
@@ -2075,8 +2103,11 @@ const Report = () => {
                                     .map((row, index) => {
                                       // <<<<<< เพิ่มตรงนี้
                                       const transfer = transferMoneyDetail.filter((transferRow) =>
-                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                       );
+
+                                      console.log("Tranfer Detail : ", transfer);
+                                      console.log("month Detail : ", row.Month);
 
                                       const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
                                         return sum + (Number(transferRow.IncomingMoney) || 0);
@@ -2195,7 +2226,11 @@ const Report = () => {
                                             {formatNumber(totalIncomingMoney)}
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                            {formatNumber(row.TotalAmount - totalIncomingMoney)}
+                                            {formatNumber(
+                                              Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
+                                                ? 0
+                                                : Number(row.TotalAmount) - totalIncomingMoney
+                                            )}
                                           </TableCell>
                                         </TableRow>
                                       );
@@ -2203,8 +2238,11 @@ const Report = () => {
                                   : GasStationDetail.map((row, index) => {
                                     // <<<<<< เพิ่มตรงนี้
                                     const transfer = transferMoneyDetail.filter((transferRow) =>
-                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName
+                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                     );
+
+                                    console.log("Tranfer Detail : ", transfer);
+                                    console.log("month Detail : ", row.Month);
 
                                     const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
                                       return sum + (Number(transferRow.IncomingMoney) || 0);
@@ -2319,7 +2357,11 @@ const Report = () => {
                                           {formatNumber(totalIncomingMoney)}
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
-                                          {formatNumber(row.TotalAmount - totalIncomingMoney)}
+                                          {formatNumber(
+                                            Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
+                                              ? 0
+                                              : Number(row.TotalAmount) - totalIncomingMoney
+                                          )}
                                         </TableCell>
                                       </TableRow>
                                     );

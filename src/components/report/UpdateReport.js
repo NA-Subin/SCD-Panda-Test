@@ -133,7 +133,7 @@ const UpdateReport = (props) => {
     const registrationHead = Object.values(reghead || {});
     const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {}).filter((row) => row.Status !== "ยกเลิก");
-    const transferMoneyDetail = Object.values(transferMoney || {});
+    const transferMoneyDetail = Object.values(transferMoney || {}).filter((row) => row.Status !== "ยกเลิก");
     const invoiceDetail = Object.values(invoiceReport || {});
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName && row.Status !== "ยกเลิก" && row.month === months);
@@ -355,9 +355,9 @@ const UpdateReport = (props) => {
 
     const processTickets = (tickets, showTrips) => {
         return tickets.flatMap((row) => {
-            const matchedTrip = showTrips.find(trip => trip.id === row.Trip + 1);
+            const matchedTrip = showTrips.find(trip => (trip.id - 1) === row.Trip);
 
-            const company = registrationHead.find(trip => trip.id === Number(matchedTrip.Registration.split(":")[0]));
+            const company = registrationHead.find(trip => trip.id === Number(matchedTrip?.Registration.split(":")[0]));
 
             //console.log("RegTail :", `"${company.RegTail}"`);
             // console.log("Company (trim):", `"${company.Company.trim()}"`);
@@ -374,16 +374,18 @@ const UpdateReport = (props) => {
                 .map(([productName, Volume], index) => ({
                     No: row.No,
                     TicketName: row.TicketName,
-                    Rate: matchedTrip.Depot.split(":")[1] === "ลำปาง" ? (row.Rate1 || 0)
-                        : matchedTrip.Depot.split(":")[1] === "พิจิตร" ? (row.Rate2 || 0)
-                            : matchedTrip.Depot.split(":")[1] === "สระบุรี" || matchedTrip.Depot.split(":")[1] === "บางปะอิน" || matchedTrip.Depot.split(":")[1] === "IR" ? (row.Rate3 || 0)
+                    Rate: matchedTrip?.Depot.split(":")[1] === "ลำปาง" ? (row.Rate1 || 0)
+                        : matchedTrip?.Depot.split(":")[1] === "พิจิตร" ? (row.Rate2 || 0)
+                            : matchedTrip?.Depot.split(":")[1] === "สระบุรี" || matchedTrip?.Depot.split(":")[1] === "บางปะอิน" || matchedTrip?.Depot.split(":")[1] === "IR" ? (row.Rate3 || 0)
                                 : 0,
                     Amount: Volume.Amount || 0,
-                    Depot: matchedTrip ? matchedTrip.Depot : row.Depot,
+                    Depot: matchedTrip ? matchedTrip?.Depot : row.Depot,
                     //Date: matchedTrip ? matchedTrip.DateDelivery : row.DateDelivery,
+                    DateDelivery: matchedTrip ? matchedTrip?.DateDelivery : row.DateDelivery,
+                    DateReceive: matchedTrip ? matchedTrip?.DateReceive : row.DateReceive,
                     Date: row.Date,
-                    Driver: matchedTrip ? matchedTrip.Driver : row.Driver,
-                    Registration: matchedTrip ? matchedTrip.Registration : row.Registration,
+                    Driver: matchedTrip ? matchedTrip?.Driver : row.Driver,
+                    Registration: matchedTrip ? matchedTrip?.Registration : row.Registration,
                     RegTail: company?.RegTail,
                     ProductName: productName,
                     Volume: Volume.Volume * 1000,
@@ -1548,7 +1550,12 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={formatNumber(Number(total1.totalPayment) - Number(CountCompany1))}
+                                                value={formatNumber(
+                                                    Math.abs(Number(total1.totalPayment) - Number(CountCompany1)) < 1e-6
+                                                        ? 0
+                                                        : Number(total1.totalPayment) - Number(CountCompany1)
+                                                )}
+
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
@@ -2106,7 +2113,11 @@ const UpdateReport = (props) => {
                                                         textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                                     },
                                                 }}
-                                                value={formatNumber(Number(total2.totalPayment) - Number(CountCompany2))}
+                                                value={formatNumber(
+                                                    Math.abs(Number(total2.totalPayment) - Number(CountCompany2)) < 1e-6
+                                                        ? 0
+                                                        : Number(total2.totalPayment) - Number(CountCompany2)
+                                                )}
                                             />
                                         </Paper>
                                         {/* <Typography variant="subtitle2" fontSize="14px" sx={{ marginTop: -1.5 }} gutterBottom>
