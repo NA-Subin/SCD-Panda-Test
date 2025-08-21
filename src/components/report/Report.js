@@ -1307,7 +1307,7 @@ const Report = () => {
                                   .map((row, index) => {
                                     // <<<<<< เพิ่มตรงนี้
                                     const transfer = transferMoneyDetail.filter((transferRow) =>
-                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
+                                      transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                     );
 
                                     console.log("Tranfer Detail : ", transfer);
@@ -1442,7 +1442,7 @@ const Report = () => {
                                 : TicketsDetail.map((row, index) => {
                                   // <<<<<< เพิ่มตรงนี้
                                   const transfer = transferMoneyDetail.filter((transferRow) =>
-                                    transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
+                                    transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                   );
 
                                   console.log("Tranfer Detail : ", transfer);
@@ -1704,7 +1704,7 @@ const Report = () => {
                                     .map((row, index) => {
                                       // <<<<<< เพิ่มตรงนี้
                                       const transfer = transferMoneyDetail.filter((transferRow) =>
-                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
+                                        transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                       );
 
                                       console.log("Tranfer Detail : ", transfer);
@@ -1842,7 +1842,7 @@ const Report = () => {
                                   : TransportDetail.map((row, index) => {
                                     // <<<<<< เพิ่มตรงนี้
                                     const transfer = transferMoneyDetail.filter((transferRow) =>
-                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
+                                      transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                     );
 
                                     console.log("Tranfer Detail : ", transfer);
@@ -2103,7 +2103,7 @@ const Report = () => {
                                     .map((row, index) => {
                                       // <<<<<< เพิ่มตรงนี้
                                       const transfer = transferMoneyDetail.filter((transferRow) =>
-                                        transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
+                                        transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                       );
 
                                       console.log("Tranfer Detail : ", transfer);
@@ -2238,7 +2238,7 @@ const Report = () => {
                                   : GasStationDetail.map((row, index) => {
                                     // <<<<<< เพิ่มตรงนี้
                                     const transfer = transferMoneyDetail.filter((transferRow) =>
-                                      transferRow.TicketNo === row.No && transferRow.TicketName === row.TicketName && transferRow.month === row.Month
+                                      transferRow.TicketName === row.TicketName && transferRow.month === row.Month
                                     );
 
                                     console.log("Tranfer Detail : ", transfer);

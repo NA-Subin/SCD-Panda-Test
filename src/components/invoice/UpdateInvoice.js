@@ -112,20 +112,20 @@ const UpdateInvoice = (props) => {
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);
+    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && ticket.Status !== "ยกเลิก");
     const invoices = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);
 
     console.log("invoice : ", invoices);
 
     const totalIncomingMoney = transferMoneyDetail
-        .filter(trans => trans.TicketNo === ticket.No && trans.TicketType === "ตั๋วรถใหญ่")
+        .filter(trans => trans.TicketNo === ticket.No && trans.TicketType === "ตั๋วรถใหญ่" && trans.Status !== "ยกเลิก")
         .reduce((sum, trans) => {
             const value = parseFloat(trans.IncomingMoney) || 0;
             return sum + value;
         }, 0);
 
     const totalIncomingDetail = transferMoneyDetail
-        .filter(trans => trans.TicketNo === ticket.No)
+        .filter(trans => trans.TicketNo === ticket.No && trans.Status !== "ยกเลิก")
 
     console.log("totalIncomingDetail : ", totalIncomingDetail);
     console.log("Money : ", transfer);
@@ -682,6 +682,8 @@ const UpdateInvoice = (props) => {
                     ...newPrice,
                     id: newId + 1,
                     Number: nextFormattedNumber,
+                    IncomingMoney: "",
+                    BankName: "",
                 });
             })
             .catch((error) => {
@@ -1419,11 +1421,41 @@ const UpdateInvoice = (props) => {
                                                     disableElevation
                                                     sx={{
                                                         padding: 0.5,
-                                                        minWidth: 'auto',
+                                                        minWidth: "auto",
                                                         height: "25px",
-                                                        fontSize: '0.75rem',
-                                                        textTransform: 'none',
-                                                        marginLeft: 1
+                                                        fontSize: "0.75rem",
+                                                        textTransform: "none",
+                                                        marginLeft: 1,
+                                                    }}
+                                                    onClick={() => {
+                                                        const code = dayjs(new Date()).format("YYYYMM");
+
+                                                        // filter เอาเฉพาะ Code = เดือนปัจจุบัน
+                                                        const filtered = transferMoneyDetail.filter(
+                                                            (row) => row.Code === code
+                                                        );
+
+                                                        // หา Number ล่าสุด
+                                                        let lastNumber = 0;
+                                                        if (filtered.length > 0) {
+                                                            lastNumber = Math.max(
+                                                                ...filtered.map((row) => Number(row.Number) || 0)
+                                                            );
+                                                        }
+
+                                                        const nextNumber = String(lastNumber + 1).padStart(4, "0");
+
+                                                        // reset state
+                                                        setPrice({
+                                                            ...price,
+                                                            id: transferMoneyDetail.length,
+                                                            Code: code,
+                                                            Number: nextNumber,
+                                                            IncomingMoney: "",
+                                                            BankName: "",
+                                                        });
+
+                                                        console.log("NEW → reset Number =", nextNumber, "Code =", code);
                                                     }}
                                                 >
                                                     NEW
