@@ -48,7 +48,7 @@ import { fetchRealtimeData } from "../../server/data";
 import { useData } from "../../server/path";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 
-const Trucks = () => {
+const Trucks = ({ openNavbar }) => {
   const [open, setOpen] = useState(1);
   const [openTab, setOpenTab] = React.useState(true);
   const [openMenu, setOpenMenu] = React.useState(1);
@@ -58,27 +58,32 @@ const Trucks = () => {
     setOpenTab(newOpen);
   };
 
-        // const { reghead,regtail,small } = useData();
-        const { reghead,regtail,small } = useBasicData();
-        const datareghead = Object.values(reghead || {}); 
-        const dataregtail = Object.values(regtail || {}); 
-        const datasmall = Object.values(small || {}); 
+  // const { reghead,regtail,small } = useData();
+  const { reghead, regtail, small } = useBasicData();
+  const datareghead = Object.values(reghead || {});
+  const dataregtail = Object.values(regtail || {});
+  const datasmall = Object.values(small || {});
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-      
-        // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-        useEffect(() => {
-          const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-          };
-      
-          window.addEventListener('resize', handleResize); // เพิ่ม event listener
-      
-          // ลบ event listener เมื่อ component ถูกทำลาย
-          return () => {
-            window.removeEventListener('resize', handleResize);
-          };
-        }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      let width = window.innerWidth;
+      if (!openNavbar) {
+        width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+      }
+      setWindowWidth(width);
+    };
+
+    // เรียกครั้งแรกตอน mount
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
   const [repair, setRepair] = React.useState(false);
 
@@ -86,20 +91,20 @@ const Trucks = () => {
   const status = dataregtail.filter(row => row.Status && row.Status !== "เชื่อมทะเบียนหัวแล้ว");
   const repairSmallTruck = datasmall.filter(row => row.RepairTruck && row.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
 
-//   const repairRegHead = useMemo(() => {
-//     return Object.entries(reghead).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
-// }, [reghead]);
+  //   const repairRegHead = useMemo(() => {
+  //     return Object.entries(reghead).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
+  // }, [reghead]);
 
-// const status = useMemo(() => {
-//   return Object.entries(regtail).filter(([id, emp]) => emp.Status !== "เชื่อมทะเบียนหัวแล้ว");
-// }, [regtail]);
+  // const status = useMemo(() => {
+  //   return Object.entries(regtail).filter(([id, emp]) => emp.Status !== "เชื่อมทะเบียนหัวแล้ว");
+  // }, [regtail]);
 
-// const repairSmallTruck = useMemo(() => {
-//   return Object.entries(small).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
-// }, [small]);
+  // const repairSmallTruck = useMemo(() => {
+  //   return Object.entries(small).filter(([id, emp]) => emp.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ");
+  // }, [small]);
 
   return (
-    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
       <Typography
         variant="h3"
         fontWeight="bold"
@@ -108,13 +113,13 @@ const Trucks = () => {
       >
         {
           repair === false ?
-          (
-            openMenu === 1 ? "รถใหญ่"
-            : openMenu === 2 ? "หางรถ"
-              : openMenu === 3 ? "รถเล็ก"
-                : ""
-          )
-          : "ตรวจสอบสภาพรถ"
+            (
+              openMenu === 1 ? "รถใหญ่"
+                : openMenu === 2 ? "หางรถ"
+                  : openMenu === 3 ? "รถเล็ก"
+                    : ""
+            )
+            : "ตรวจสอบสภาพรถ"
         }
       </Typography>
       <Divider />
@@ -129,7 +134,7 @@ const Trucks = () => {
       {
         repair === false ?
           <>
-            <Grid container spacing={5} marginTop={0.5} marginBottom={2} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth-95) : windowWidth <= 600 ? (windowWidth) : (windowWidth-230) }}>
+            <Grid container spacing={5} marginTop={0.5} marginBottom={2} sx={{ width: "100%" }}>
               <Grid item xs={openMenu === 1 ? 6 : 3} sm={openMenu === 1 ? 8 : 2} lg={openMenu === 1 ? 10 : 1}>
                 <Tooltip title="รถใหญ่" placement="top">
                   <Button
@@ -238,12 +243,12 @@ const Trucks = () => {
                 <InsertTruck openMenu={openMenu} />
               </Grid>
               <Grid item xs={12}>
-              {
-                openMenu === 1 ? <BigTruckRegHead repair={repairRegHead} loading={loading} />
-                  : openMenu === 2 ? <BigTruckRegTail status={status} />
-                    : <SmallTruck repair={repairSmallTruck} />
+                {
+                  openMenu === 1 ? <BigTruckRegHead repair={repairRegHead} loading={loading} />
+                    : openMenu === 2 ? <BigTruckRegTail status={status} />
+                      : <SmallTruck repair={repairSmallTruck} />
 
-              }
+                }
               </Grid>
             </Grid>
           </>

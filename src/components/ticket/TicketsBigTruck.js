@@ -39,7 +39,7 @@ import ExcelUploader from "../excel/ImportExcel";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const TicketsBigTruck = () => {
+const TicketsBigTruck = ({ openNavbar }) => {
     const [update, setUpdate] = React.useState("");
     const [newName, setNewName] = React.useState("");
     //const [ticket, setTicket] = React.useState([]);
@@ -75,18 +75,25 @@ const TicketsBigTruck = () => {
                 return name.includes(searchText);
             });
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+
     useEffect(() => {
         const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            let width = window.innerWidth;
+            if (!openNavbar) {
+                width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+            }
+            setWindowWidth(width);
         };
 
-        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+        // เรียกครั้งแรกตอน mount
+        handleResize();
 
-        // ลบ event listener เมื่อ component ถูกทำลาย
+        window.addEventListener('resize', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
     console.log("ticketM", ticketM);
     console.log("ticketR", ticketR);
@@ -281,7 +288,7 @@ const TicketsBigTruck = () => {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Typography
                 variant="h3"
                 fontWeight="bold"
@@ -310,7 +317,7 @@ const TicketsBigTruck = () => {
                     }
                 </Grid>
             </Grid>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: "100%" }}>
                 <Grid container spacing={2}>
                     <Grid item md={3} xs={12}>
                         <Typography variant="h6" fontWeight="bold" gutterBottom>ลูกค้าของ{open === 1 ? "เชียงใหม่" : "เชียงราย"}</Typography>
@@ -358,7 +365,7 @@ const TicketsBigTruck = () => {
                     component={Paper}
                     sx={{ marginTop: 2 }}
                 >
-                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
+                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "100%" }}>
                         <TableHead sx={{ height: "7vh" }}>
                             <TableRow>
                                 <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
@@ -740,11 +747,15 @@ const TicketsBigTruck = () => {
                                                                         }}
                                                                     >
                                                                         <MenuItem value="ไม่มี">กรุณาเลือกบริษัท</MenuItem>
-                                                                        {companyDetail.map((item, index) => (
-                                                                            <MenuItem key={item.id} value={`${item.id}:${item.Name}`}>
-                                                                                {item.Name}
-                                                                            </MenuItem>
-                                                                        ))}
+                                                                        {companyDetail
+                                                                            .slice() // ทำสำเนา array กัน side effect
+                                                                            .sort((a, b) => a.Name.localeCompare(b.Name, "th")) // ✅ เรียงตาม Name (ภาษาไทยก็โอเค)
+                                                                            .map((item) => (
+                                                                                item.Name !== "บริษัท แพนด้า สตาร์ ออยล์  จำกัด  (สำนักงานใหญ่)" &&
+                                                                                <MenuItem key={item.id} value={`${item.id}:${item.Name}`}>
+                                                                                    {item.Name}
+                                                                                </MenuItem>
+                                                                            ))}
                                                                     </TextField>
                                                                 </Paper>
 
@@ -1166,11 +1177,15 @@ const TicketsBigTruck = () => {
                                                                         }}
                                                                     >
                                                                         <MenuItem value="ไม่มี">กรุณาเลือกบริษัท</MenuItem>
-                                                                        {companyDetail.map((item, index) => (
-                                                                            <MenuItem key={item.id} value={`${item.id}:${item.Name}`}>
-                                                                                {item.Name}
-                                                                            </MenuItem>
-                                                                        ))}
+                                                                        {companyDetail
+                                                                            .slice() // ทำสำเนา array กัน side effect
+                                                                            .sort((a, b) => a.Name.localeCompare(b.Name, "th")) // ✅ เรียงตาม Name (ภาษาไทยก็โอเค)
+                                                                            .map((item) => (
+                                                                                item.Name !== "บริษัท แพนด้า สตาร์ ออยล์  จำกัด  (สำนักงานใหญ่)" &&
+                                                                                <MenuItem key={item.id} value={`${item.id}:${item.Name}`}>
+                                                                                    {item.Name}
+                                                                                </MenuItem>
+                                                                            ))}
                                                                     </TextField>
                                                                 </Paper>
 

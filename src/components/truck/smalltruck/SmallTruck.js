@@ -53,7 +53,7 @@ const SmallTruck = (props) => {
 
   // const { small } = useData();
   const { small } = useBasicData();
-    const truck = Object.values(small || {});
+  const truck = Object.values(small || {});
 
   const isMobile = useMediaQuery("(max-width:1100px)");
 
@@ -134,7 +134,7 @@ const SmallTruck = (props) => {
             }
           </Grid>
         ) : (
-          <Grid item xs={0.7} sx={{ borderRight: "1px solid lightgray" }}>
+          <Grid item xs={0.5} sx={{ borderRight: "1px solid lightgray" }}>
             <Tooltip title="ซ่อนแถบ" placement="left">
               <Button
                 variant="contained"
@@ -147,10 +147,11 @@ const SmallTruck = (props) => {
             </Tooltip>
           </Grid>
         )}
-        <Grid item xs={openTab ? 10.5 : 11.3}>
+        <Grid item xs={openTab ? 10.5 : 11.5}>
           <Paper
             sx={{
               p: 2,
+              width: "100%",
             }}
           >
             <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -161,7 +162,7 @@ const SmallTruck = (props) => {
               component={Paper}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small" sx={{ width: "1080px" }}>
+              <Table stickyHeader size="small" sx={{ width: "100%" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -188,7 +189,7 @@ const SmallTruck = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       พนักงานขับรถ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ position: "sticky", right: 0 }}/>
+                    <TablecellHeader sx={{ position: "sticky", right: 0 }} />
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -211,50 +212,50 @@ const SmallTruck = (props) => {
               </Table>
             </TableContainer>
             {
-  truck.length <= 10 ? null :
-    <TablePagination
-      rowsPerPageOptions={[10, 25, 30]}
-      component="div"
-      count={truck.length}
-      rowsPerPage={rowsPerPage}
-      page={page}
-      onPageChange={handleChangePage}
-      onRowsPerPageChange={handleChangeRowsPerPage}
-      labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
-      labelDisplayedRows={({ from, to, count }) =>
-        `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
-      }
-      sx={{
-        overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
-        borderBottomLeftRadius: 5,
-        borderBottomRightRadius: 5,
-        '& .MuiTablePagination-toolbar': {
-          backgroundColor: "lightgray",
-          height: "20px", // กำหนดความสูงของ toolbar
-          alignItems: "center",
-          paddingY: 0, // ลด padding บนและล่างให้เป็น 0
-          overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
-          fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
-        },
-        '& .MuiTablePagination-select': {
-          paddingY: 0,
-          fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
-        },
-        '& .MuiTablePagination-actions': {
-          '& button': {
-            paddingY: 0,
-            fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
-          },
-        },
-        '& .MuiTablePagination-displayedRows': {
-          fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
-        },
-        '& .MuiTablePagination-selectLabel': {
-          fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
-        }
-      }}
-    />
-}
+              truck.length <= 10 ? null :
+                <TablePagination
+                  rowsPerPageOptions={[10, 25, 30]}
+                  component="div"
+                  count={truck.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+                  }
+                  sx={{
+                    overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+                    borderBottomLeftRadius: 5,
+                    borderBottomRightRadius: 5,
+                    '& .MuiTablePagination-toolbar': {
+                      backgroundColor: "lightgray",
+                      height: "20px", // กำหนดความสูงของ toolbar
+                      alignItems: "center",
+                      paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+                      overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+                      fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+                    },
+                    '& .MuiTablePagination-select': {
+                      paddingY: 0,
+                      fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                    },
+                    '& .MuiTablePagination-actions': {
+                      '& button': {
+                        paddingY: 0,
+                        fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+                      },
+                    },
+                    '& .MuiTablePagination-displayedRows': {
+                      fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+                    },
+                    '& .MuiTablePagination-selectLabel': {
+                      fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                    }
+                  }}
+                />
+            }
 
           </Paper>
         </Grid>

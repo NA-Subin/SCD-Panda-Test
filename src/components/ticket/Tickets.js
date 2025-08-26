@@ -30,7 +30,7 @@ import { TablecellHeader, TablecellSelling } from "../../theme/style";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const Tickets = () => {
+const Tickets = ({openNavbar}) => {
     const [update, setUpdate] = React.useState("");
     const [newName, setNewName] = React.useState("");
     //const [ticket, setTicket] = React.useState([]);
@@ -45,19 +45,24 @@ const Tickets = () => {
     const ticket = tickets.filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ");
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
         const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            let width = window.innerWidth;
+            if (!openNavbar) {
+                width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+            }
+            setWindowWidth(width);
         };
 
-        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+        // เรียกครั้งแรกตอน mount
+        handleResize();
 
-        // ลบ event listener เมื่อ component ถูกทำลาย
+        window.addEventListener('resize', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
     // const getTicket = async () => {
     //     database.ref("/customers/tickets").on("value", (snapshot) => {
@@ -189,7 +194,7 @@ const Tickets = () => {
     console.log("selectedRowId ", selectedRowId - 1);
 
     return (
-        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Typography
                 variant="h3"
                 fontWeight="bold"
@@ -202,12 +207,12 @@ const Tickets = () => {
                 <InsertTickets />
             </Box>
             <Divider sx={{ marginBottom: 1, marginTop: 5 }} />
-            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Box sx={{ width: "100%" }}>
                 <TableContainer
                     component={Paper}
                     sx={{ marginTop: 2 }}
                 >
-                    <Table stickyHeader size="small" sx={{ width: "1330px" }}>
+                    <Table stickyHeader size="small" sx={{ width: "100%" }}>
                         <TableHead sx={{ height: "7vh" }}>
                             <TableRow>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>

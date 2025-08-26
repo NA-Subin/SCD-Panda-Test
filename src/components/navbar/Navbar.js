@@ -153,7 +153,7 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function Navbar() {
+export default function Navbar({ open, onOpenChange }) {
   const [pendingPath, setPendingPath] = useState(null);
   const navigate = useNavigate();
   const { loading } = useBasicData();
@@ -168,7 +168,7 @@ export default function Navbar() {
 
   // const dataToSend = { position: "admin" };
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
+  //const [open, setOpen] = React.useState(true);
   const [setting, setSetting] = React.useState(false);
   const [show1, setShow1] = React.useState(false);
   const [show2, setShow2] = React.useState(false);
@@ -189,7 +189,7 @@ export default function Navbar() {
 
   // ปรับค่า open ตามขนาดหน้าจอเมื่อโหลดครั้งแรก
   React.useEffect(() => {
-    setOpen(!isMobileMD); // true ถ้า desktop, false ถ้า mobile
+    onOpenChange(!isMobileMD); // true ถ้า desktop, false ถ้า mobile
 
     if (isMobileMD) {
       setOpenData(false);
@@ -270,7 +270,7 @@ export default function Navbar() {
   console.log("shouldDrawerOpen : ", shouldDrawerOpen);
 
   const handleDrawerOpen = () => {
-    setOpen((prev) => !prev);
+    onOpenChange((prev) => !prev);
     setOpenData(false);
     setOperation(false);
     setReport(false);
@@ -278,7 +278,7 @@ export default function Navbar() {
   };
 
   const handleDrawerClose = () => {
-    setOpen(false);
+    onOpenChange(false);
   };
 
   const handleSetting = () => {
@@ -1735,7 +1735,7 @@ export default function Navbar() {
                     }
                   >
                     <Collapse in={!report} unmountOnExit={false}>
-                      {["สรุปยอดส่งน้ำมัน", "สรุปค่าเที่ยว", "การชำระค่าน้ำมัน", "รายได้รายหัก", "บิลค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
+                      {["สรุปยอดส่งน้ำมัน", "สรุปค่าเที่ยว", "การชำระค่าน้ำมัน", "ค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
                         <ListItem
                           key={text}
                           disablePadding
@@ -1748,8 +1748,9 @@ export default function Navbar() {
                           <ListItemButton
                             component={Link}
                             to={
-                              index === 0 ? "/summary-oil-balance" : index === 1 ? "/report-driver-trip" : index === 2 ? "/report-fuel-payment" : index === 3 ? "/financial-deduction" : index === 4 ? "/invoice-financial" : "/close-financial"
+                              index === 0 ? "/summary-oil-balance" : index === 1 ? "/report-driver-trip" : index === 2 ? "/report-fuel-payment" : index === 3 ? "/expenses" : "/close-financial"
                             }
+                            state={{ opennavbar: open }}   // 👈 ส่ง state แบบนี้
                             sx={{
                               height: 35, // กำหนดความสูงให้ ListItem
                             }}

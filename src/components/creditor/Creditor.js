@@ -31,7 +31,7 @@ import UpdateCreditor from "./UpdateCreditor";
 import { useData } from "../../server/path";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 
-const Creditor = () => {
+const Creditor = ({ openNavbar }) => {
   const [update, setUpdate] = React.useState(true);
   const [open, setOpen] = useState(false);
 
@@ -51,19 +51,24 @@ const Creditor = () => {
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
   useEffect(() => {
     const handleResize = () => {
-      setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+      let width = window.innerWidth;
+      if (!openNavbar) {
+        width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+      }
+      setWindowWidth(width);
     };
 
-    window.addEventListener('resize', handleResize); // เพิ่ม event listener
+    // เรียกครั้งแรกตอน mount
+    handleResize();
 
-    // ลบ event listener เมื่อ component ถูกทำลาย
+    window.addEventListener('resize', handleResize);
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
   //const { creditors } = useData();
   const { creditors } = useBasicData();
@@ -82,7 +87,7 @@ const Creditor = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
       <Typography
         variant="h3"
         fontWeight="bold"
@@ -92,7 +97,7 @@ const Creditor = () => {
         เจ้าหนี้น้ำมัน
       </Typography>
       <Divider sx={{ marginBottom: 1 }} />
-      <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+      <Box sx={{ width: "100%" }}>
         {
           windowWidth >= 800 ?
             <Grid container spacing={2} p={1}>
@@ -117,7 +122,7 @@ const Creditor = () => {
               style={{ maxHeight: "70vh" }}
               sx={{ marginBottom: 2 }}
             >
-              <Table stickyHeader size="small" sx={{ width: "1250px" }}>
+              <Table stickyHeader size="small" sx={{ width: "100%" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>

@@ -55,6 +55,7 @@ import ReportPaymentSmallTruck from "./components/invoice-smalltruck/Report";
 import SummaryOilBalanceSmallTruck from "./components/oilbalance/SummaryOilSmallTruck";
 import DeductibleIncomeDetail from "./components/deductible-income/DeductibleIncome";
 import CompanyPayment from "./components/deductible-income/CompanyPayment";
+import Expenses from "./components/financial/Expenses";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -98,6 +99,8 @@ function App() {
     checkForUpdate();
   }, []);
 
+  const [open, setOpen] = React.useState(true);
+
   return (
     <BrowserRouter>
       <BasicDataProvider>
@@ -119,7 +122,7 @@ function App() {
               path="/*"
               element={
                 <Box sx={{ display: "flex" }}>
-                  <Navbar />
+                  <Navbar open={open} onOpenChange={setOpen} />
                   <Box
                     sx={{
                       flexGrow: 1,
@@ -129,7 +132,7 @@ function App() {
                     <TripDataProvider>
                       <GasStationDataProvider>
                         <Routes>
-                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/dashboard" element={<Dashboard openNavbar={open} />} />
                         </Routes>
                       </GasStationDataProvider>
                     </TripDataProvider>
@@ -138,91 +141,94 @@ function App() {
                       <Route path="/customer" element={<Customer />} />
                     </Routes> */}
                     <Routes>
-                      <Route path="/creditor" element={<Creditor />} />
+                      <Route path="/creditor" element={<Creditor openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/deductible-income" element={<DeductibleIncomeDetail />} />
+                      <Route path="/deductible-income" element={<DeductibleIncomeDetail openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/company-payment" element={<CompanyPayment />} />
+                      <Route path="/company-payment" element={<CompanyPayment openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/trucks" element={<Trucks />} />
+                      <Route path="/trucks" element={<Trucks openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/trucks-transport" element={<TruckTransport />} />
+                      <Route path="/trucks-transport" element={<TruckTransport openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/depots" element={<Depots />} />
+                      <Route path="/depots" element={<Depots openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/transports" element={<TicketsTransport />} />
+                      <Route path="/transports" element={<TicketsTransport openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/customer-bigtrucks" element={<TicketsBigTruck />} />
+                      <Route path="/customer-bigtrucks" element={<TicketsBigTruck openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/customer-smalltrucks" element={<TicketSmallTruck />} />
+                      <Route path="/customer-smalltrucks" element={<TicketSmallTruck openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/setting" element={<Setting />} />
+                      <Route path="/setting" element={<Setting openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/edit-firebase" element={<Editfirebase />} />
+                      <Route path="/edit-firebase" element={<Editfirebase openNavbar={open} />} />
                     </Routes>
                     <Routes>
-                      <Route path="/employee" element={<Employee />} />
+                      <Route path="/employee" element={<Employee openNavbar={open} />} />
                     </Routes>
                     <TripDataProvider>
                       <Routes>
-                        <Route path="/ticket" element={<Tickets />} />
+                        <Route path="/ticket" element={<Tickets openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/trips-bigtruck" element={<TripsBigTruck />} />
+                        <Route path="/trips-bigtruck" element={<TripsBigTruck openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/trips-smalltruck" element={<TripsSmallTruck />} />
+                        <Route path="/trips-smalltruck" element={<TripsSmallTruck openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/invoice" element={<Invoice />} />
+                        <Route path="/invoice" element={<Invoice openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/invoice-smalltruck" element={<InvoiceSmallTruck />} />
+                        <Route path="/invoice-smalltruck" element={<InvoiceSmallTruck openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/report" element={<Report />} />
+                        <Route path="/report" element={<Report openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/report-smalltruck" element={<ReportSmallTruck />} />
+                        <Route path="/report-smalltruck" element={<ReportSmallTruck openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/invoice-financial" element={<Financial />} />
+                        <Route path="/invoice-financial" element={<Financial openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/close-financial" element={<CloseFS />} />
+                        <Route path="/expenses" element={<Expenses openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/financial-deduction" element={<DeductionOfIncome />} />
+                        <Route path="/close-financial" element={<CloseFS openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/summary-oil-balance" element={<SummaryOilBalance />} />
+                        <Route path="/financial-deduction" element={<DeductionOfIncome openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/oil-balance-smalltruck" element={<SummaryOilBalanceSmallTruck />} />
+                        <Route path="/summary-oil-balance" element={<SummaryOilBalance openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/report-driver-trip" element={<ReportTrip />} />
+                        <Route path="/oil-balance-smalltruck" element={<SummaryOilBalanceSmallTruck openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/report-fuel-payment" element={<FuelPaymentReport />} />
+                        <Route path="/report-driver-trip" element={<ReportTrip openNavbar={open} />} />
                       </Routes>
                       <Routes>
-                        <Route path="/payment-smalltruck" element={<ReportPaymentSmallTruck />} />
+                        <Route path="/report-fuel-payment" element={<FuelPaymentReport openNavbar={open} />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/payment-smalltruck" element={<ReportPaymentSmallTruck openNavbar={open} />} />
                       </Routes>
                     </TripDataProvider>
                     <GasStationDataProvider>
                       <Routes>
-                        <Route path="/gasstations" element={<GasStations />} />
+                        <Route path="/gasstations" element={<GasStations openNavbar={open} />} />
                       </Routes>
                     </GasStationDataProvider>
                   </Box>

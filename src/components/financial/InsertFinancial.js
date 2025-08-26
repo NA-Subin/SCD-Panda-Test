@@ -39,6 +39,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
 import { IconButtonError, TablecellSelling } from "../../theme/style";
@@ -242,7 +243,20 @@ const InsertFinancial = () => {
 
     return (
         <React.Fragment>
-            <Button variant="contained" color="primary" fullWidth size="large" sx={{ fontSize: "20px", fontWeight: "bold" }} onClick={handleClickOpen}>เพิ่มบิล</Button>
+            <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                fullWidth
+                sx={{
+                    fontSize: "16px",
+                    fontWeight: "bold"
+                }}
+                endIcon={<NoteAddIcon />}   // 👈 ใส่ไอคอนด้านหน้า
+                onClick={handleClickOpen}
+            >
+                เพิ่มบิล
+            </Button>
             <Dialog
                 open={open}
                 keepMounted

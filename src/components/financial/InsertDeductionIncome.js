@@ -38,6 +38,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
 import { IconButtonError, TablecellSelling } from "../../theme/style";
@@ -49,11 +50,20 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InsertTypeDeduction from "./InsertTypeDeduction";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
+import { formatThaiFull } from "../../theme/DateTH";
 
-const InsertDeducetionIncome = () => {
+const InsertDeducetionIncome = ({ year, periodData, periods }) => {
     const [open, setOpen] = React.useState(false);
     const [type, setType] = React.useState("");
     const [check, setCheck] = React.useState(true);
+    const [period, setPeriod] = React.useState(periodData || 1);
+    const [selectedDate, setSelectedDate] = useState(year || dayjs()); // ✅ เป็น dayjs object
+
+    const handleDateChangeDate = (newValue) => {
+        if (newValue) {
+            setSelectedDate(newValue); // ✅ newValue เป็น dayjs อยู่แล้ว
+        }
+    };
     // const { reportType, drivers, typeFinancial, reportFinancial } = useData();
     const { drivers, deductibleincome, reghead } = useBasicData();
     const { reportFinancial } = useTripData();
@@ -102,10 +112,14 @@ const InsertDeducetionIncome = () => {
 
     const handleClickOpen = () => {
         setOpen(true);
+        setPeriod(periodData);
+        setSelectedDate(year);
     };
 
     const handleClose = () => {
         setOpen(false);
+        setPeriod(periodData);
+        setSelectedDate(year);
     };
 
     const [page, setPage] = useState(0);
@@ -126,6 +140,8 @@ const InsertDeducetionIncome = () => {
             .child(reportFinancialDetail.length)
             .update({
                 id: reportFinancialDetail.length,
+                Year: selectedDate.format("YYYY"),
+                Period: period,
                 Date: dayjs(new Date).format("DD/MM/YYYY"),
                 Driver: driver.Driver,
                 RegHead: `${driver.id}:${driver.RegHead}`,
@@ -153,7 +169,19 @@ const InsertDeducetionIncome = () => {
 
     return (
         <React.Fragment>
-            <Button variant="contained" color="primary" fullWidth size="large" sx={{ fontSize: "20px", fontWeight: "bold" }} onClick={handleClickOpen}>เพิ่มรายได้รายหัก</Button>
+            <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                size="small"
+                sx={{
+                    fontSize: "16px",
+                    fontWeight: "bold"
+                }}
+                onClick={handleClickOpen}
+            >
+                เพิ่มรายได้รายหัก
+            </Button>
             <Dialog
                 open={open}
                 keepMounted
@@ -188,7 +216,7 @@ const InsertDeducetionIncome = () => {
                         </Grid>
                     </Grid>
                 </DialogTitle>
-                <DialogContent sx={{ height: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <DialogContent sx={{ height: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Grid container spacing={2} marginTop={1} marginBottom={1}>
                         {
                             windowWidth >= 900 && <Grid item md={6} sx={12} />
@@ -197,6 +225,59 @@ const InsertDeducetionIncome = () => {
                             <Tooltip title="เพิ่มประเภท" placement="top">
                                 <InsertTypeDeduction onSend={handleReceiveData} />
                             </Tooltip>
+                        </Grid>
+                        <Grid item md={6} xs={12} >
+                            <Box display="flex" justifyContent="center" alignItems="center" sx={{ width: "100%" }}>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>งวดการจ่ายปี</Typography>
+                                <Paper sx={{ width: "100%" }}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
+                                        <DatePicker
+                                            openTo="year"
+                                            views={["year"]}
+                                            value={selectedDate}
+                                            format="YYYY"
+                                            onChange={handleDateChangeDate}
+                                            slotProps={{
+                                                textField: {
+                                                    size: "small",
+                                                    fullWidth: true,
+                                                    inputProps: {
+                                                        value: selectedDate ? selectedDate.format("YYYY") : "",
+                                                        readOnly: true,
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                    </LocalizationProvider>
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        <Grid item md={6} xs={12}>
+                            <Box display="flex" justifyContent="center" alignItems="center" width="100%" >
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 3 } }} gutterBottom>ลำดับงวด</Typography>
+                                <Paper sx={{ width: "100%" }}>
+                                    <TextField
+                                        fullWidth
+                                        type="number"
+                                        value={period}
+                                        onChange={(e) => setPeriod(Number(e.target.value))} // ✅ แปลงเป็น number
+                                        size="small"
+                                    />
+                                </Paper>
+                            </Box>
+                        </Grid>
+                        <Grid item md={12} xs={12} >
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: -2 }}>
+                                {
+                                    periods
+                                        .filter((p) => p.no === period) // ✅ ใช้ filter
+                                        .map((p) => (
+                                            <Typography key={p.id} variant="subtitle1" fontWeight="bold" color="gray" sx={{ marginTop: 0.5, marginLeft: 1, }}>
+                                                {`( วันที่ ${formatThaiFull(dayjs(p.start, "DD/MM/YYYY"))} - วันที่ ${formatThaiFull(dayjs(p.end, "DD/MM/YYYY"))} )`}
+                                            </Typography>
+                                        ))
+                                }
+                            </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
@@ -274,7 +355,7 @@ const InsertDeducetionIncome = () => {
                             </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
-                            <FormGroup row sx={{ marginTop:-1, marginBottom: -1 }}>
+                            <FormGroup row sx={{ marginTop: -1, marginBottom: -1 }}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1 }} gutterBottom>เลือกประเภท</Typography>
                                 <FormControlLabel control={<Checkbox checked={check} />} label="รายได้" onClick={() => setCheck(true)} />
                                 <FormControlLabel control={<Checkbox checked={!check} />} label="รายหัก" onClick={() => setCheck(false)} />

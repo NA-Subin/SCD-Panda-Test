@@ -142,7 +142,7 @@ const BigTruckRegTail = (props) => {
             }
           </Grid>
         ) : (
-          <Grid item xs={0.7} sx={{ borderRight: "1px solid lightgray" }}>
+          <Grid item xs={0.5} sx={{ borderRight: "1px solid lightgray" }}>
             <Tooltip title="ซ่อนแถบ" placement="left">
               <Button
                 variant="contained"
@@ -155,10 +155,11 @@ const BigTruckRegTail = (props) => {
             </Tooltip>
           </Grid>
         )}
-        <Grid item xs={openTab ? 10.5 : 11.3}>
+        <Grid item xs={openTab ? 10.5 : 11.5}>
           <Paper
             sx={{
               p: 2,
+              width: "100%",
             }}
           >
             <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -169,7 +170,7 @@ const BigTruckRegTail = (props) => {
               component={Paper}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small" sx={{ width: "1050px" }}>
+              <Table stickyHeader size="small" sx={{ width: "100%" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>

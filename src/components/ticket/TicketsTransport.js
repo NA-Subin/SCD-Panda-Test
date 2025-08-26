@@ -34,7 +34,7 @@ import TicketsGasStation from "./TicketsGasStation";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const TicketsTransport = () => {
+const TicketsTransport = ({ openNavbar }) => {
     //const [transport, setTransport] = useState([]);
     //const [gasStation, setGasStation] = React.useState([]);
     const [setting, setSetting] = useState(false);
@@ -74,19 +74,24 @@ const TicketsTransport = () => {
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
         const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            let width = window.innerWidth;
+            if (!openNavbar) {
+                width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+            }
+            setWindowWidth(width);
         };
 
-        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+        // เรียกครั้งแรกตอน mount
+        handleResize();
 
-        // ลบ event listener เมื่อ component ถูกทำลาย
+        window.addEventListener('resize', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
     // ดึงข้อมูลจาก Firebase
     // const getTransport = async () => {
@@ -259,7 +264,7 @@ const TicketsTransport = () => {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Typography
                 variant="h3"
                 fontWeight="bold"
@@ -287,7 +292,7 @@ const TicketsTransport = () => {
                     }
                 </Grid>
             </Grid>
-            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: "100%" }}>
                 <Grid container spacing={2}>
                     <Grid item md={3} xs={12}>
                         <Typography variant="h6" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>{open === 1 ? "รายการลูกค้ารับจ้างขนส่ง" : "รายการปั้มน้ำมัน"}</Typography>
@@ -339,7 +344,7 @@ const TicketsTransport = () => {
                             component={Paper}
                             sx={{ marginTop: 2 }}
                         >
-                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
+                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "100%" }}>
                                 <TableHead sx={{ height: "7vh" }}>
                                     <TableRow>
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
@@ -694,7 +699,7 @@ const TicketsTransport = () => {
                             component={Paper}
                             sx={{ marginTop: 2 }}
                         >
-                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1250px" }}>
+                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "100%" }}>
                                 <TableHead sx={{ height: "7vh" }} >
                                     <TableRow>
                                         <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 50 }}>

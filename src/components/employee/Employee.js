@@ -54,7 +54,7 @@ import { fetchRealtimeData } from "../../server/data";
 //import DriverTable from "../dashboard/ProviderTest";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 
-const Employee = () => {
+const Employee = ({ openNavbar }) => {
   //const [update, setUpdate] = React.useState(true);
   const [open, setOpen] = React.useState(1);
   //const [openMenu, setOpenMenu] = useState(1);
@@ -63,20 +63,26 @@ const Employee = () => {
   const [setting, setSetting] = React.useState("");
   const [truck, setTruck] = React.useState("0:ไม่มี:ไม่มี");
 
-  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     const handleResize = () => {
-      setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+      let width = window.innerWidth;
+      if (!openNavbar) {
+        width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+      }
+      setWindowWidth(width);
     };
 
-    window.addEventListener('resize', handleResize); // เพิ่ม event listener
+    // เรียกครั้งแรกตอน mount
+    handleResize();
 
-    // ลบ event listener เมื่อ component ถูกทำลาย
+    window.addEventListener('resize', handleResize);
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -152,7 +158,7 @@ const Employee = () => {
   // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
 
   console.log("setting : ", setting);
-  console.log("trucks : ",truck);
+  console.log("trucks : ", truck);
 
   const handlePost = () => {
     database
@@ -322,7 +328,7 @@ const Employee = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
       <Typography
         variant="h3"
         fontWeight="bold"
@@ -332,7 +338,7 @@ const Employee = () => {
         พนักงาน
       </Typography>
       <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} marginTop={1} sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
+      <Grid container spacing={2} marginTop={1} sx={{ width: "100%" }}>
         <Grid item xs={6}>
           <Button variant="contained" color={open === 1 ? "info" : "inherit"} sx={{ height: "10vh", fontSize: "22px", fontWeight: "bold", borderRadius: 3, borderBottom: open === 1 && "5px solid" + theme.palette.panda.light }} fullWidth onClick={() => setOpen(1)}>พนักงานขับรถ</Button>
         </Grid>
@@ -350,7 +356,7 @@ const Employee = () => {
           }
         </Grid>
       </Grid>
-      <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
+      <Paper sx={{ backgroundColor: "#fafafa", borderRadius: 3, p: 5, borderTop: "5px solid" + theme.palette.panda.light, marginTop: -2.5, width: "100%" }}>
         <Grid container spacing={2}>
           <Grid item md={open === 1 ? 3 : 5} xs={12} >
             <Typography variant="h6" fontWeight="bold" gutterBottom>รายชื่อพนักงาน{open === 2 ? "ภายในบริษัท" : "ขับรถ"}</Typography>

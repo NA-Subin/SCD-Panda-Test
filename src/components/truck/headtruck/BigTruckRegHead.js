@@ -124,7 +124,7 @@ const BigTruckRegHead = (props) => {
 
   return (
     <React.Fragment>
-      <Grid container spacing={3} marginTop={1} marginLeft={-7}>
+      <Grid container spacing={3} marginTop={1} marginLeft={-7} width={"100%"}>
         {shouldDrawerOpen ? (
           <Grid item xs={1.5}>
             <Button
@@ -165,7 +165,7 @@ const BigTruckRegHead = (props) => {
             }
           </Grid>
         ) : (
-          <Grid item xs={0.7} sx={{ borderRight: "1px solid lightgray" }}>
+          <Grid item xs={0.5} sx={{ borderRight: "1px solid lightgray" }}>
             <Tooltip title="ซ่อนแถบ" placement="left">
               <Button
                 variant="contained"
@@ -178,10 +178,11 @@ const BigTruckRegHead = (props) => {
             </Tooltip>
           </Grid>
         )}
-        <Grid item xs={openTab ? 10.5 : 11.3}>
+        <Grid item xs={openTab ? 10.5 : 11.5}>
           <Paper
             sx={{
               p: 2,
+              width: "100%"
             }}
           >
             <Typography variant="h6" fontWeight="bold" gutterBottom>

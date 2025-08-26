@@ -36,7 +36,7 @@ import InsertDeductibleIncome from "./InsertDeductibleIncome";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const DeductibleIncomeDetail = () => {
+const DeductibleIncomeDetail = ({openNavbar}) => {
     const [update, setUpdate] = React.useState({});
     const [open, setOpen] = useState(false);
     const [typeIncome, setTypeIncome] = React.useState(true);
@@ -61,19 +61,24 @@ const DeductibleIncomeDetail = () => {
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
         const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            let width = window.innerWidth;
+            if (!openNavbar) {
+                width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+            }
+            setWindowWidth(width);
         };
 
-        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+        // เรียกครั้งแรกตอน mount
+        handleResize();
 
-        // ลบ event listener เมื่อ component ถูกทำลาย
+        window.addEventListener('resize', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
     //const { creditors } = useData();
     const { creditors, deductibleincome } = useBasicData();

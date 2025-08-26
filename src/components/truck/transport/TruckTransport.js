@@ -33,7 +33,7 @@ import InsertTruckTransport from "./InsertTruckTransport";
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 
-const TruckTransport = () => {
+const TruckTransport = ({ openNavbar }) => {
     const [open, setOpen] = useState(1);
     const [openTab, setOpenTab] = React.useState(true);
     const [openMenu, setOpenMenu] = React.useState(1);
@@ -51,19 +51,25 @@ const TruckTransport = () => {
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
         const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            let width = window.innerWidth;
+            if (!openNavbar) {
+                width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+            }
+            setWindowWidth(width);
         };
 
-        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+        // เรียกครั้งแรกตอน mount
+        handleResize();
 
-        // ลบ event listener เมื่อ component ถูกทำลาย
+        window.addEventListener('resize', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
+
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -127,7 +133,7 @@ const TruckTransport = () => {
     };
 
     return (
-        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Typography
                 variant="h3"
                 fontWeight="bold"
@@ -154,12 +160,12 @@ const TruckTransport = () => {
                         </Grid>
                     </Grid>
             }
-            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Box sx={{ width: "100%" }}>
                 <TableContainer
                     component={Paper}
                     sx={{ marginTop: 2 }}
                 >
-                    <Table stickyHeader size="small" sx={{ width: "1340px" }}>
+                    <Table stickyHeader size="small" sx={{ width: "100%" }}>
                         <TableHead sx={{ height: "7vh" }}>
                             <TableRow>
                                 <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>

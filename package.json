@@ -6,7 +6,7 @@
     "@emotion/styled": "^11.14.0",
     "@fontsource/noto-sans-thai": "^5.1.1",
     "@fontsource/sarabun": "^5.1.1",
-    "@mui/icons-material": "^6.3.0",
+    "@mui/icons-material": "^6.5.0",
     "@mui/material": "^6.4.4",
     "@mui/x-charts": "^7.23.2",
     "@mui/x-date-pickers": "^7.28.3",
