@@ -37,6 +37,7 @@ import {
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from "@mui/icons-material/Delete";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { database } from "../../server/firebase";
@@ -55,7 +56,41 @@ import { formatThaiFull } from "../../theme/DateTH";
 const InsertDeducetionIncome = ({ year, periodData, periods }) => {
     const [open, setOpen] = React.useState(false);
     const [type, setType] = React.useState("");
-    const [check, setCheck] = React.useState(true);
+    const [check, setCheck] = useState(true); // true = รายได้, false = รายหัก
+    const [incomeRows, setIncomeRows] = useState([{ type: null, money: 0 }]);
+    const [deductRows, setDeductRows] = useState([{ type: null, money: 0 }]);
+
+    // reset เวลาเปลี่ยนประเภท
+    useEffect(() => {
+        if (check) {
+            setIncomeRows([{ type: null, money: 0 }]);
+        } else {
+            setDeductRows([{ type: null, money: 0 }]);
+        }
+    }, [check]);
+
+    const handleAddRow = () => {
+        if (check) {
+            setIncomeRows([...incomeRows, { type: null, money: 0 }]);
+        } else {
+            setDeductRows([...deductRows, { type: null, money: 0 }]);
+        }
+    };
+
+    console.log("Deduction Rows : ", deductRows);
+    console.log("Income Rows : ", incomeRows);
+
+    const handleRemoveRow = (index, isIncome) => {
+        if (isIncome) {
+            const updated = [...incomeRows];
+            updated.splice(index, 1);
+            setIncomeRows(updated);
+        } else {
+            const updated = [...deductRows];
+            updated.splice(index, 1);
+            setDeductRows(updated);
+        }
+    };
     const [period, setPeriod] = React.useState(periodData || 1);
     const [selectedDate, setSelectedDate] = useState(year || dayjs()); // ✅ เป็น dayjs object
 
@@ -65,20 +100,64 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
         }
     };
     // const { reportType, drivers, typeFinancial, reportFinancial } = useData();
-    const { drivers, deductibleincome, reghead } = useBasicData();
+    const { drivers, deductibleincome, reghead, small } = useBasicData();
     const { reportFinancial } = useTripData();
 
     //const reportTypeDetail = Object.values(reportType);
-    const driverDetail = Object.values(reghead).sort((a, b) => {
-        const driverA = a?.Driver?.includes(":")
-            ? a.Driver.split(":")[1]
-            : a?.Driver || "";
-        const driverB = b?.Driver?.includes(":")
-            ? b.Driver.split(":")[1]
-            : b?.Driver || "";
+    // const sortByDriver = (a, b) => {
+    //     const driverA = a?.Driver?.includes(":")
+    //         ? a.Driver.split(":")[1]
+    //         : a?.Driver || "";
+    //     const driverB = b?.Driver?.includes(":")
+    //         ? b.Driver.split(":")[1]
+    //         : b?.Driver || "";
 
-        return driverA.localeCompare(driverB, "th"); // "th" สำหรับเรียงแบบภาษาไทย
-    });
+    //     return driverA.localeCompare(driverB, "th");
+    // };
+
+    // const regheadSorted = Object.values(reghead)
+    //     .map(item => ({ ...item, vehicleType: "รถใหญ่" }))
+    //     .sort(sortByDriver);
+
+    // const smallSorted = Object.values(small)
+    //     .map(item => ({ ...item, vehicleType: "รถเล็ก" }))
+    //     .sort(sortByDriver);
+
+    const sortByDriver = (a, b) => {
+        const driverA = a?.Name
+        const driverB = b?.Name
+
+        return driverA.localeCompare(driverB, "th");
+    };
+
+    console.log("Driver : ", Object.values(drivers));
+
+    const regheadSorted = Object.values(drivers)
+        .filter((item) => item.TruckType === "รถใหญ่")
+        .map((item) => {
+            const tail = Object.values(reghead).find((t) => t.id === Number(item.Registration.split(":")[0]));
+            return {
+                ...item,
+                RegTail: tail ? tail.RegTail : ""  // ถ้าเจอใน reghead → ดึงค่า RegTail จริง, ถ้าไม่เจอ → ค่าว่าง
+            };
+        })
+        .sort(sortByDriver);
+
+    const smallSorted = Object.values(drivers)
+        .filter((item) => item.TruckType === "รถเล็ก")
+        .map((item) => {
+            const smallD = Object.values(small).find((t) => t.id === Number(item.Registration.split(":")[0]));
+            return {
+                ...item,
+                RegTail: smallD ? smallD.RegTail : "",  // ถ้าเจอใน reghead → ดึงค่า RegTail จริง, ถ้าไม่เจอ → ค่าว่าง
+                ShortName: smallD ? smallD.ShortName : "",
+            };
+        })
+        .sort(sortByDriver);
+
+
+    const driverDetail = [...regheadSorted, ...smallSorted];
+
     const deductibleincomeDetail = Object.values(deductibleincome);
     const reportFinancialDetail = Object.values(reportFinancial);
     const [result, setResult] = useState(false);
@@ -134,38 +213,105 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
         setPage(0);
     };
 
+    // const handlePost = () => {
+    //     database
+    //         .ref("report/financial")
+    //         .child(reportFinancialDetail.length)
+    //         .update({
+    //             id: reportFinancialDetail.length,
+    //             Year: selectedDate.format("YYYY"),
+    //             Period: period,
+    //             Date: dayjs(new Date).format("DD/MM/YYYY"),
+    //             Driver: driver.Driver,
+    //             RegHead: `${driver.id}:${driver.RegHead}`,
+    //             RegTail: driver.RegTail,
+    //             Code: type.Code,
+    //             Name: `${type.id}:${type.Name}`,
+    //             Type: check ? "รายได้" : "รายหัก",
+    //             Money: money,
+    //             Note: note,
+    //             Status: "อยู่ในระบบ"
+    //         })
+    //         .then(() => {
+    //             ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+    //             console.log("Data pushed successfully");
+    //             setDriver("");
+    //             setType("");
+    //             setNote("");
+    //             setMoney(0);
+    //         })
+    //         .catch((error) => {
+    //             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+    //             console.error("Error pushing data:", error);
+    //         });
+    // };
+    console.log("Driver vehicleType : ", driver.vehicleType)
+
     const handlePost = () => {
-        database
-            .ref("report/financial")
-            .child(reportFinancialDetail.length)
-            .update({
-                id: reportFinancialDetail.length,
+        // เลือกว่าจะใช้ incomeRows หรือ deductRows
+        const rows = check ? incomeRows : deductRows;
+
+        if (!rows || rows.length === 0) {
+            ShowError("ไม่มีข้อมูลสำหรับบันทึก");
+            return;
+        }
+
+        const updates = rows.map((row, index) => {
+            const newId = reportFinancialDetail.length + index; // ให้ id ต่อเนื่อง
+
+            return {
+                id: newId,
                 Year: selectedDate.format("YYYY"),
                 Period: period,
-                Date: dayjs(new Date).format("DD/MM/YYYY"),
-                Driver: driver.Driver,
-                RegHead: `${driver.id}:${driver.RegHead}`,
+                Date: dayjs(new Date()).format("DD/MM/YYYY"),
+                Driver: `${driver.id}:${driver.Name}`,
+                RegHead: driver.Registration,
                 RegTail: driver.RegTail,
-                Code: type.Code,
-                Name: `${type.id}:${type.Name}`,
+                Code: row.type.Code, // ใช้ Code ของ row ถ้ามี ไม่งั้นใช้ type.Code
+                Name: `${row.type.id}:${row.type.Name}`, // ใช้ Name ของ row
                 Type: check ? "รายได้" : "รายหัก",
-                Money: money,
+                VehicleType: driver.TruckType,
+                ShortName: driver.ShortName || "",
+                Money: row.money, // เงินจาก row
                 Note: note,
                 Status: "อยู่ในระบบ"
-            })
+            };
+        });
+
+        console.log("updates : ", updates);
+
+        // loop บันทึกเข้า firebase
+        const promises = updates.map((data) =>
+            database.ref("report/financial")
+                .child(data.id)
+                .update(data)
+        );
+
+        Promise.all(promises)
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
+
+                // reset state
                 setDriver("");
                 setType("");
                 setNote("");
                 setMoney(0);
+                if (check) {
+                    setIncomeRows([{ type: null, money: 0 }]);
+                } else {
+                    setDeductRows([{ type: null, money: 0 }]);
+                }
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
     };
+
+
+    console.log("Driver Detail : ", driverDetail);
+    console.log("Driver : ", driver);
 
     return (
         <React.Fragment>
@@ -191,7 +337,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                 sx={
                     !result ?
                         {
-                            zIndex: 1200
+                            zIndex: 1200,
                         }
                         :
                         {
@@ -216,7 +362,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                         </Grid>
                     </Grid>
                 </DialogTitle>
-                <DialogContent sx={{ height: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <DialogContent sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Grid container spacing={2} marginTop={1} marginBottom={1}>
                         {
                             windowWidth >= 900 && <Grid item md={6} sx={12} />
@@ -287,20 +433,34 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                         id="autocomplete-tickets"
                                         options={driverDetail}
                                         getOptionLabel={(option) => {
-                                            const driverD = option?.Driver?.includes(":")
-                                                ? option.Driver.split(":")[1]
-                                                : option?.Driver || "";
+                                            const driverD = option?.Name || "";
 
-                                            const regHead = option?.RegHead || "";
+                                            let regHead = "";
+                                            if (option?.Registration !== "0:ไม่มี") {
+                                                regHead = option?.Registration?.includes(":")
+                                                    ? option.Registration.split(":")[1]
+                                                    : option?.Registration || "";
+                                            } else {
+                                                regHead = "( ไม่ได้ผูกทะเบียนรถ )";
+                                            }
 
-                                            const regTail = option?.RegTail?.includes(":")
-                                                ? option.RegTail.split(":")[1]
-                                                : option?.RegTail || "";
+                                            let regTail = "";
+                                            if (option?.TruckType === "รถใหญ่") {
+                                                if (option?.RegTail !== "0:ไม่มี") {
+                                                    regTail = option.RegTail.includes(":")
+                                                        ? `/${option.RegTail.split(":")[1]}`
+                                                        : `/${option.RegTail}`;
+                                                }else{
+                                                    regTail = "( ไม่ได้ผูกทะเบียนหาง )"
+                                                }
+                                            } else {
+                                                regTail = ""
+                                            }
 
                                             // ถ้าทั้งหมดไม่มีค่าเลย
                                             if (!driverD && !regHead && !regTail) return "";
 
-                                            return `${driverD} ${regHead}/${regTail}`.trim();
+                                            return `${driverD} ${regHead}${regTail}`.trim();
                                         }}
                                         value={driver} // registrationTruck เป็น object แล้ว
                                         onChange={(event, newValue) => {
@@ -323,15 +483,30 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                             />
                                         )}
                                         renderOption={(props, option) => {
-                                            const driverD = option?.Driver?.includes(":")
-                                                ? option.Driver.split(":")[1]
-                                                : option?.Driver || "";
+                                            const driverD = option?.Name || "";
 
-                                            const regHead = option?.RegHead || "";
+                                            let regHead = "";
+                                            if (option?.Registration !== "0:ไม่มี") {
+                                                regHead = option?.Registration?.includes(":")
+                                                    ? option.Registration.split(":")[1]
+                                                    : option?.Registration || "";
+                                            } else {
+                                                regHead = "( ไม่ได้ผูกทะเบียนรถ )";
+                                            }
+                                            //const type = option?.vehicleType;
 
-                                            const regTail = option?.RegTail?.includes(":")
-                                                ? option.RegTail.split(":")[1]
-                                                : option?.RegTail || "";
+                                            let regTail = "";
+                                            if (option?.TruckType === "รถใหญ่") {
+                                                if (option?.RegTail !== "0:ไม่มี") {
+                                                    regTail = option.RegTail.includes(":")
+                                                        ? `/${option.RegTail.split(":")[1]}`
+                                                        : `/${option.RegTail}`;
+                                                }else{
+                                                    regTail = "( ไม่ได้ผูกทะเบียนหาง )"
+                                                }
+                                            } else {
+                                                regTail = ""
+                                            }
 
                                             // ถ้าทั้งหมดไม่มีค่าเลย
                                             if (!driverD && !regHead && !regTail) {
@@ -345,7 +520,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                             return (
                                                 <li {...props}>
                                                     <Typography fontSize="16px">
-                                                        {`${driverD} ${regHead}/${regTail}`.trim()}
+                                                        {`${driverD} ${regHead}${regTail}`.trim()}
                                                     </Typography>
                                                 </li>
                                             );
@@ -356,12 +531,30 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <FormGroup row sx={{ marginTop: -1, marginBottom: -1 }}>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1 }} gutterBottom>เลือกประเภท</Typography>
-                                <FormControlLabel control={<Checkbox checked={check} />} label="รายได้" onClick={() => setCheck(true)} />
-                                <FormControlLabel control={<Checkbox checked={!check} />} label="รายหัก" onClick={() => setCheck(false)} />
+                                <Typography
+                                    variant="subtitle1"
+                                    fontWeight="bold"
+                                    textAlign="right"
+                                    marginTop={1}
+                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1 }}
+                                    gutterBottom
+                                >
+                                    เลือกประเภท
+                                </Typography>
+                                <FormControlLabel
+                                    control={<Checkbox checked={check} />}
+                                    label="รายได้"
+                                    onClick={() => setCheck(true)}
+                                />
+                                <FormControlLabel
+                                    control={<Checkbox checked={!check} />}
+                                    label="รายหัก"
+                                    onClick={() => setCheck(false)}
+                                />
                             </FormGroup>
                         </Grid>
-                        <Grid item md={8.5} xs={12}>
+                        {/* 
+                            <Grid item md={7} xs={12}>
                             {
                                 check ?
                                     <Box display="flex" justifyContent="center" alignItems="center">
@@ -446,9 +639,202 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                             />
                                         </Paper>
                                     </Box>
-                            }
-                        </Grid>
-                        <Grid item md={3.5} xs={12}>
+                                    </Grid>
+                            } */}
+                        {check
+                            ? incomeRows.map((row, index) => (
+                                <React.Fragment key={index}>
+                                    <Grid item md={7.5} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography
+                                                variant="subtitle1"
+                                                fontWeight="bold"
+                                                marginTop={1}
+                                                sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 6.5 }}
+                                                gutterBottom
+                                            >
+                                                รายได้
+                                            </Typography>
+                                            <Paper sx={{ width: "100%" }}>
+                                                <Autocomplete
+                                                    options={deductibleincomeDetail
+                                                        .filter((row) => row.Type === "รายได้")
+                                                        .sort((a, b) =>
+                                                            (a?.Name || "").localeCompare(b?.Name || "", "th")
+                                                        )}
+                                                    getOptionLabel={(option) => option?.Name || ""}
+                                                    value={row.type}
+                                                    onChange={(e, newValue) => {
+                                                        const updated = [...incomeRows];
+                                                        updated[index].type = newValue;
+                                                        setIncomeRows(updated);
+                                                    }}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label={!row.type ? "เลือกรายได้" : ""}
+                                                            variant="outlined"
+                                                            size="small"
+                                                        />
+                                                    )}
+                                                />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item md={3.5} xs={10}>
+                                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginLeft: { md: 0, xs: 6 } }}>
+                                            <Typography
+                                                variant="subtitle1"
+                                                fontWeight="bold"
+                                                marginTop={1}
+                                                sx={{ whiteSpace: "nowrap", marginRight: 1 }}
+                                                gutterBottom
+                                            >
+                                                จำนวน
+                                            </Typography>
+                                            <Paper sx={{ width: "100%" }}>
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    type="number"
+                                                    value={row.money}
+                                                    onChange={(e) => {
+                                                        const updated = [...incomeRows];
+                                                        updated[index].money = e.target.value;
+                                                        setIncomeRows(updated);
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        if (e.target.value === "0") {
+                                                            const updated = [...incomeRows];
+                                                            updated[index].money = "";
+                                                            setIncomeRows(updated);
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        if (e.target.value === "") {
+                                                            const updated = [...incomeRows];
+                                                            updated[index].money = 0;
+                                                            setIncomeRows(updated);
+                                                        }
+                                                    }}
+                                                />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
+
+                                    {/* ❌ ปุ่มลบ (ถ้ามีเกิน 1 ช่อง) */}
+                                    {incomeRows.length > 1 && (
+                                        <Grid item md={1} xs={1}>
+                                            <Tooltip title="ยกเลิกข้อมูล" placement="left">
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() => handleRemoveRow(index, true)}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Grid>
+                                    )}
+                                </React.Fragment>
+                            ))
+                            : deductRows.map((row, index) => (
+                                <React.Fragment key={index}>
+                                    <Grid item md={7.5} xs={12}>
+                                        <Box display="flex" justifyContent="center" alignItems="center">
+                                            <Typography
+                                                variant="subtitle1"
+                                                fontWeight="bold"
+                                                marginTop={1}
+                                                sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 6 }}
+                                                gutterBottom
+                                            >
+                                                รายหัก
+                                            </Typography>
+                                            <Paper sx={{ width: "100%" }}>
+                                                <Autocomplete
+                                                    options={deductibleincomeDetail
+                                                        .filter((row) => row.Type === "รายหัก")
+                                                        .sort((a, b) =>
+                                                            (a?.Name || "").localeCompare(b?.Name || "", "th")
+                                                        )}
+                                                    getOptionLabel={(option) => option?.Name || ""}
+                                                    value={row.type}
+                                                    onChange={(e, newValue) => {
+                                                        const updated = [...deductRows];
+                                                        updated[index].type = newValue;
+                                                        setDeductRows(updated);
+                                                    }}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label={!row.type ? "เลือกรายหัก" : ""}
+                                                            variant="outlined"
+                                                            size="small"
+                                                        />
+                                                    )}
+                                                />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item md={3.5} xs={10}>
+                                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginLeft: { md: 0, xs: 6 } }}>
+                                            <Typography
+                                                variant="subtitle1"
+                                                fontWeight="bold"
+                                                marginTop={1}
+                                                sx={{ whiteSpace: "nowrap", marginRight: 1 }}
+                                                gutterBottom
+                                            >
+                                                จำนวน
+                                            </Typography>
+                                            <Paper sx={{ width: "100%" }}>
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    type="number"
+                                                    value={row.money}
+                                                    onChange={(e) => {
+                                                        const updated = [...deductRows];
+                                                        updated[index].money = e.target.value;
+                                                        setDeductRows(updated);
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        if (e.target.value === "0") {
+                                                            const updated = [...deductRows];
+                                                            updated[index].money = "";
+                                                            setDeductRows(updated);
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        if (e.target.value === "") {
+                                                            const updated = [...deductRows];
+                                                            updated[index].money = 0;
+                                                            setDeductRows(updated);
+                                                        }
+                                                    }}
+                                                />
+                                            </Paper>
+                                        </Box>
+                                    </Grid>
+
+                                    {/* ❌ ปุ่มลบ (ถ้ามีเกิน 1 ช่อง) */}
+                                    {deductRows.length > 1 && (
+                                        <Grid item md={1} xs={1}>
+                                            <Tooltip title="ยกเลิกข้อมูล" placement="left">
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() => handleRemoveRow(index, false)}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Grid>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        {/* <Grid item md={3.5} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: { md: 0, xs: 6 } }} gutterBottom>จำนวน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -468,9 +854,27 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                     />
                                 </Paper>
                             </Box>
+                        </Grid> */}
+                        <Grid item md={(deductRows.length > 1 || incomeRows.length > 1) ? 12 : 1} xs={1}>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginTop: (deductRows.length > 1 || incomeRows.length > 1) && -2 }}>
+                                {
+                                    (deductRows.length > 1 || incomeRows.length > 1) ?
+                                        <Tooltip title="เพิ่มช่องกรอกข้อมูล" placement="left">
+                                            <Button variant="contained" size="small" sx={{ marginTop: 1.5, marginBottom: 1.5 }} onClick={handleAddRow} >
+                                                เพิ่มช่องกรอกข้อมูล
+                                            </Button>
+                                        </Tooltip>
+                                        :
+                                        <Tooltip title="เพิ่มช่องกรอกข้อมูล" placement="top">
+                                            <IconButton color="primary" onClick={handleAddRow}>
+                                                <AddBoxIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                }
+                            </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center">
+                            <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginTop: (deductRows.length > 1 || incomeRows.length > 1) && -2 }} >
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>หมายเหตุ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField

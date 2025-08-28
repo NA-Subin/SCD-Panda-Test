@@ -207,14 +207,29 @@ const DeductionOfIncome = (props) => {
     // ✅ กรองก่อน group
     const filteredReportDetail = reportDetail.filter((row) => {
         const driverName = row.Driver.split(":")[1]?.trim() || "";
-        return driverName.includes(search); // หรือใช้ toLowerCase() ก็ได้
+        const regHead = row.RegHead.split(":")[1]?.trim() || "";
+        const regTail = row.RegTail.split(":")[1]?.trim() || "";
+
+        // คุณจะใช้แค่ driverName filter หรือรวมก็ได้
+        return (
+            driverName.includes(search) ||
+            regHead.includes(search) ||
+            regTail.includes(search)
+        );
     });
 
     // ✅ Group
     const groupedData = filteredReportDetail.reduce((acc, row) => {
-        const driverName = row.Driver.split(":")[1]?.trim();
-        if (!acc[driverName]) acc[driverName] = [];
-        acc[driverName].push(row);
+        const driverName = row.Driver.split(":")[1]?.trim() || "";
+        const regHead = row.RegHead.split(":")[1]?.trim() || "";
+        const regTail = row.RegTail.split(":")[1]?.trim() || "";
+        const shortName = row.ShortName || "";
+
+        // ✅ รวมเป็น key เดียว เช่น "ชื่อนามสกุล | หัว | หาง"
+        const key = row.VehicleType === "รถใหญ่" ? `${driverName} | ${regHead} | ${regTail}` : `${driverName} | ${shortName}`;
+
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(row);
         return acc;
     }, {});
 
@@ -504,7 +519,7 @@ const DeductionOfIncome = (props) => {
                                 <TablecellSelling width={30} sx={{ textAlign: "center", fontSize: 16 }}>
                                     ลำดับ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
                                     พนักงานขับรถ
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 60 }}>
@@ -561,12 +576,12 @@ const DeductionOfIncome = (props) => {
                                             <TableCell
                                                 rowSpan={sortedRows.length}
                                                 sx={{
-                                                    textAlign: "center",
+                                                    textAlign: "left",
                                                     position: "sticky",
                                                     left: 0,
                                                     backgroundColor: "white",
                                                     borderRight: "2px solid white",
-                                                    borderBottom: "2px solid lightgray"
+                                                    borderBottom: "2px solid lightgray",
                                                 }}
                                             >
                                                 {driverName}

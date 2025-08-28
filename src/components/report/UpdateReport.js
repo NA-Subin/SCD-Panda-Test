@@ -285,7 +285,7 @@ const UpdateReport = (props) => {
         const dueMonth = thaiMonths[date.getMonth()];
         const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
 
-        return `กำหนดชำระเงิน: วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
+        return `วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
     };
 
     // 🔥 ทดสอบโค้ด

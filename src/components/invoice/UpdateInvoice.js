@@ -100,7 +100,8 @@ const UpdateInvoice = (props) => {
         invoiceReport
     } = useTripData();
 
-    const { company } = useBasicData();
+    const { company, reghead } = useBasicData();
+    const registrationHead = Object.values(reghead || {});
 
     // const orders = Object.values(order || {});
     const orders = Object.values(order || {}).filter(item => {
@@ -132,6 +133,8 @@ const UpdateInvoice = (props) => {
     console.log("totalIncomingMoney : ", totalIncomingMoney);
 
     const companyName = companies.find(item => item.id === 1);
+
+    console.log("companyName : ", companyName);
     //const orderList = orders.filter(item => item.Date === ticket.Date && item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] && item.CustomerType === ticket.CustomerType && item.Trip !== "ยกเลิก");
     const orderList = orders
         .filter(item =>
@@ -142,10 +145,16 @@ const UpdateInvoice = (props) => {
             item.Status !== "ยกเลิก"
         )
         .map(item => {
+            // ✅ หา registration ที่ id ตรงกับ Registration.split(":")[0]
+            const regMatch = registrationHead.find(
+                reg => reg.id === Number(item.Registration.split(":")[0])
+            );
+
             return {
                 ...item,
                 DateReceive: ticket.DateReceive,
                 DateDelivery: ticket.DateDelivery,
+                RegTail: regMatch ? regMatch.RegTail : null, // เก็บค่า RegTail ถ้าเจอ
             };
         });
 
@@ -293,7 +302,7 @@ const UpdateInvoice = (props) => {
         const dueMonth = thaiMonths[date.getMonth()];
         const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
 
-        return `กำหนดชำระเงิน: วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
+        return `วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
     };
 
     // 🔥 ทดสอบโค้ด
@@ -403,6 +412,7 @@ const UpdateInvoice = (props) => {
                         Date: row.Date,
                         Driver: row.Driver.split(":")[1],
                         Registration: row.Registration.split(":")[1],
+                        RegTail: row.RegTail.split(":")[1] || "",
                         ProductName: productName,
                         Volume: Volume.Volume * 1000,
                         DateDelivery: row.DateDelivery,
@@ -491,6 +501,7 @@ const UpdateInvoice = (props) => {
                     Date: row.Date,
                     Driver: row.Driver,
                     Registration: row.Registration,
+                    RegTail: row.RegTail || "",
                     ProductName: productName,
                     Volume: Volume.Volume * 1000,
                     DateDelivery: row.DateDelivery,
@@ -884,7 +895,7 @@ const UpdateInvoice = (props) => {
                                                                 sx={{ textAlign: "center", height: "30px" }}
                                                             >
                                                                 <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                                    {report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}
+                                                                    {report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]} / {report[row.uniqueRowId]?.RegTail || row.RegTail.split(":")[1]}
                                                                 </Typography>
                                                             </TableCell>
                                                         </>
