@@ -262,7 +262,7 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: "100%" }}>
+    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
       <Grid container>
         <Grid item md={3} xs={12}>
 
@@ -629,13 +629,13 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                       sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
                         .map((row, index) => (
                           (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} />
+                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate}  openNavbar={openNavbar} />
                             : ""
                         ))
                       :
                       sortedOrderDetail.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?
-                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} />
+                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate}  openNavbar={openNavbar} />
                           : ""
                       ))
                   }

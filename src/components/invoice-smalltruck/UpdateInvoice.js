@@ -63,7 +63,7 @@ dayjs.locale('th');
 dayjs.extend(buddhistEra);
 
 const UpdateInvoice = (props) => {
-    const { ticket, ticketNo, date } = props;
+    const { ticket, ticketNo, date, openNavbar } = props;
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
@@ -305,7 +305,7 @@ const UpdateInvoice = (props) => {
         const dueMonth = thaiMonths[date.getMonth()];
         const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
 
-        return `กำหนดชำระเงิน: วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
+        return `วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
     };
 
     // 🔥 ทดสอบโค้ด
@@ -367,10 +367,13 @@ const UpdateInvoice = (props) => {
         });
     };
 
+    console.log("company 2 : ", companyName.Address);
+    console.log("order : ", order);
+
     const generatePDF = () => {
         let Code = ""
         if (invoices.length !== 0) {
-            Code = `${invoices[0].Code}-${invoices[0].Number}`
+            Code = `${invoices[0]?.Code}-${invoices[0]?.Number}`
         } else {
             const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
             let newNumberInvoice = 1;
@@ -429,7 +432,7 @@ const UpdateInvoice = (props) => {
             }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
             Volume: ticket.TotalVolume || 0,
             Amount: ticket.TotalAmount || 0,
-            Date: invoices[0].DateStart,
+            Date: invoices[0]?.DateStart,
             DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
             Company: companyName.Name,
             Address: companyName.Address,
@@ -450,7 +453,7 @@ const UpdateInvoice = (props) => {
         const top = (screenHeight - windowHeight) / 2;
 
         const printWindow = window.open(
-            "/print-invoice",
+            "/print-invoice-small",
             "_blank",
             `width=${windowWidth},height=${windowHeight},left=${left},top=${top}`
         );
@@ -823,7 +826,7 @@ const UpdateInvoice = (props) => {
                         component={Paper}
                         sx={{ borderRadius: 2, marginTop: -1 }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1330px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1230px" : "1330px" }}>
                             <TableHead>
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px', backgroundColor: theme.palette.primary.dark }}>
@@ -982,7 +985,7 @@ const UpdateInvoice = (props) => {
                                 }
                             </TableBody>
                         </Table>
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1330px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1230px" : "1330px" }}>
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={4}>
@@ -1029,14 +1032,14 @@ const UpdateInvoice = (props) => {
                 </Grid>
             </Grid>
             <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: 5, fontSize: "18px" }} gutterBottom>ข้อมูลการโอน</Typography>
-            <Box sx={{ width: windowWidths <= 900 && windowWidths > 600 ? (windowWidths - 110) : windowWidths <= 600 ? (windowWidths) : (windowWidths - 260) }}>
+            <Box sx={{ width: "100%" }}>
                 <Grid container spacing={2}>
                     <Grid item md={12} xs={12}>
                         <TableContainer
                             component={Paper}
                             sx={{ marginBottom: 2, borderRadius: 2, width: "100%" }}
                         >
-                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1330px" }}>
+                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1330px" : "1440px" }}>
                                 <TableHead>
                                     <TableRow>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
@@ -1219,7 +1222,7 @@ const UpdateInvoice = (props) => {
                                     }
                                 </TableBody>
                             </Table>
-                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: "1330px" }}>
+                            <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1330px" : "1440px" }}>
                                 <TableBody>
                                     <TableRow>
                                         <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 720 }} colSpan={4}>

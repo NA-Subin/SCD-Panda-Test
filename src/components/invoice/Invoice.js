@@ -657,13 +657,13 @@ const Invoice = ({ openNavbar }) => {
                       sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
                         .map((row, index) => (
                           (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} />
+                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
                             : ""
                         ))
                       :
                       sortedOrderDetail.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?
-                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} />
+                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
                           : ""
                       ))
                   }

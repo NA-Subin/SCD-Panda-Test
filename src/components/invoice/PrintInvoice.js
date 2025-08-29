@@ -38,8 +38,9 @@ const PrintInvoice = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const { customerbigtruck, company } = useBasicData();
+  const { customerbigtruck, customersmalltruck, company } = useBasicData();
   const customerB = Object.values(customerbigtruck || {});
+  const customerS = Object.values(customersmalltruck || {});
   const companyDetail = Object.values(company || {});
 
   const invoiceData = JSON.parse(sessionStorage.getItem("invoiceData"));
@@ -48,6 +49,7 @@ const PrintInvoice = () => {
   const address = invoiceData?.Order[0].Address || ''; // ดึงที่อยู่จาก invoiceData
 
   console.log("customer bigtruck : ", customerB);
+  console.log("customer smalltruck : ", customerS);
   console.log("TicketName :  ", invoiceData?.Order[0].TicketName);
 
   const customer = customerB.find((row, index) => (row.id === Number(invoiceData?.Order[0].TicketName.split(":")[0])));
@@ -90,14 +92,25 @@ const PrintInvoice = () => {
   });
 
   const formatAddressS = (address) => {
-    // แยกข้อมูลโดยใช้ช่องว่างเป็นตัวแบ่ง
-    const parts = address.trim().split(/\s+/);
+    if (!address) return "ที่อยู่ไม่ถูกต้อง";
 
-    if (parts.length < 6) return "รูปแบบที่อยู่ไม่ถูกต้อง";
+    // แยกข้อมูลโดยใช้ช่องว่าง
+    let parts = address.trim().split(/\s+/);
 
-    const [houseNo, moo, subdistrict, district, province, postalCode] = parts;
+    // กรองคำที่ขึ้นต้นด้วย "ถ." ออก
+    parts = parts.filter(part => !part.startsWith("ถ."));
 
-    return `${houseNo} หมู่ ${moo} ต.${subdistrict} อ.${district} จ.${province} ${postalCode}`;
+    // ถ้าส่วนท้ายเป็นตัวเลข 5 หลัก ให้ถือว่าเป็นรหัสไปรษณีย์
+    let postalCode = "";
+    if (/^\d{5}$/.test(parts[parts.length - 1])) {
+      postalCode = parts.pop();
+    }
+
+    if (parts.length < 5) return "รูปแบบที่อยู่ไม่ถูกต้อง";
+
+    const [houseNo, moo, subdistrict, district, province] = parts;
+
+    return `${houseNo} หมู่ ${moo} ต.${subdistrict} อ.${district} จ.${province}${postalCode ? " " + postalCode : ""}`;
   };
 
   const numberToThaiText = (num) => {
@@ -237,7 +250,7 @@ const PrintInvoice = () => {
                 </React.Fragment>
               ) : invoiceData && (
                 <React.Fragment>
-                  <Typography variant="h6" fontWeight="bold"  gutterBottom>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
                     {invoiceData.Company}
                   </Typography>
                   <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
@@ -414,19 +427,40 @@ const PrintInvoice = () => {
 
               <Grid item xs={12}>
                 <Grid container spacing={2} justifyContent="center" alignItems="center">
-                  <Grid item xs={5}>
-                    <Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด กสิกรไทย</Typography>
-                    <Typography variant="subtitle2" gutterBottom>1. เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
-                    <Typography variant="subtitle2" gutterBottom>2. ป่าแดด...เชียงราย 062-8-16524-6</Typography>
-                    <Typography variant="subtitle2" gutterBottom>3. พะเยา - แม่ต่ำ 065-1-88088-2</Typography>
+                  <Grid item xs={8}>
+                    {
+                      invoiceC?.Name?.includes("หจก.นาครา ปิโตรเลียม 2016") ?
+                        <Box>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ชื่อบัญชี :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 2 }} gutterBottom>หจก.นาครา ปิโตรเลียม 2016</Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>กสิกรไทย :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 1 }} gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-00976-8</Typography>
+                          </Box>
+                        </Box>
+                        :
+                        <Box>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ชื่อบัญชี :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 2 }} gutterBottom>บริษัท แพนด้า สตาร์ ออยล์ จำกัด</Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>กสิกรไทย :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 1 }} gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
+                          </Box>
+                        </Box>
+                    }
                   </Grid>
-                  <Grid item xs={4}>
+                  {/* <Grid item xs={4}>
                     <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
                     <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
-                  </Grid>
-                  <Grid item xs={3} sx={{ textAlign: "center" }}>
-                    <Typography variant="subtitle2" gutterBottom>__________________________________</Typography>
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
+                  </Grid> */}
+                  <Grid item xs={4} sx={{ textAlign: "center" }}>
+                    <Box width="100%" borderTop="2px solid black" sx={{ marginTop: 3.5 }}>
+                      <Typography variant="subtitle2" fontWeight="bold" sx={{ marginTop: 0.5 }} gutterBottom>ผู้วางบิล</Typography>
+                    </Box>
                   </Grid>
                 </Grid>
               </Grid>

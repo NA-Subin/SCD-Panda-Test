@@ -249,6 +249,35 @@ const PrintReport = () => {
     return `${day}/${month}/${year}`;
   }
 
+  const chunkArray = (arr, size) => {
+    const result = [];
+    for (let i = 0; i < arr.length; i += size) {
+      result.push(arr.slice(i, i + size));
+    }
+    return result;
+  };
+
+  const paginateRows = (rows) => {
+    const pages = [];
+    let i = 0;
+
+    while (i < rows.length) {
+      // 👉 ถ้าเหลือไม่เกิน 16 แถว แสดงเป็น "หน้าสุดท้าย"
+      if (rows.length - i <= 13) {
+        pages.push(rows.slice(i, i + 13));
+        i += 13;
+      } else {
+        // 👉 หน้าอื่น ๆ ให้ 20 แถว
+        pages.push(rows.slice(i, i + 15));
+        i += 15;
+      }
+    }
+
+    return pages;
+  };
+
+  const pages = paginateRows(rows);
+
   console.log("invoiceData : ", invoiceData);
   console.log("Tickets Order : ", invoiceData?.Report);
   console.log("Total Order : ", invoiceData?.Total);
@@ -256,256 +285,266 @@ const PrintReport = () => {
   return (
     <Box display="flex" justifyContent="center" alignItems="center" marginTop={3}>
       <Box>
-        <Box
-          id="invoiceContent"
-          sx={{
-            width: "21cm",
-            minHeight: "27cm", // ใช้ minHeight เผื่อเนื้อหาเกิน
-            backgroundColor: "#fff",
-            padding: "0.7cm",      // เว้น margin ภายในเนื้อหา
-            paddingRight: 1,
-            boxSizing: "border-box",
-            border: "1px solid lightgray"
-          }}
-        >
-          <Grid container spacing={2}>
-            <Grid item xs={9}>
-              {
-                invoiceData &&
-                (
-                  <React.Fragment>
-                    <Typography variant="h6" fontWeight="bold" gutterBottom>
-                      {
-                        invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                          : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                      }
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>
-                      {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}</Typography>
-                    <Typography variant="subtitle2" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
-                  </React.Fragment>
-                )
-              }
-            </Grid>
-            <Grid item xs={3} textAlign="right">
-              <Typography variant="h6" sx={{ marginRight: 2, fontSize: "18px" }}>
-                ใบวางบิล/ใบแจ้งหนี้
-              </Typography>
-            </Grid>
-          </Grid>
-          {invoiceData && (
-            <Grid container spacing={2} marginTop={2} sx={{ px: 2 }}>
-              {/* ส่วนข้อมูลบริษัท */}
-              <Grid item xs={10} sx={{ border: "2px solid black", height: "140px" }}>
-                <Box sx={{ padding: 0.5 }}>
-                  <Box display="flex" alignItems="center" justifyContent="left" >
-                    <Typography variant="subtitle2"><b>ชื่อบริษัท:</b></Typography>
-                    <Typography variant="subtitle2" marginLeft={1}>
-                      {
-                        invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                          : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                      }
-                    </Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
-                    <Typography variant="subtitle2"><b>ที่อยู่:</b></Typography>
-                    <Typography variant="subtitle2" marginLeft={4}>{formatAddress(invoiceData?.Address)}</Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
-                    <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b></Typography>
-                    <Typography variant="subtitle2" marginLeft={1}>{formatTaxID(invoiceData?.CardID)}</Typography>
-                  </Box>
-                </Box>
-              </Grid>
-
-              {/* ส่วนวันที่และเลขที่เอกสาร */}
-              <Grid item xs={2}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
-                  </Grid>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{formatThai(invoiceData?.Date)}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
-                  </Grid>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{invoiceData?.Code}</Typography>
-                  </Grid>
+        <Box id="invoiceContent">
+          {pages.map((pageRows, pageIndex) => (
+            <Box
+              key={pageIndex}
+              sx={{
+                width: "21cm",
+                minHeight: "29.6cm", // ใช้ minHeight เผื่อเนื้อหาเกิน
+                backgroundColor: "#fff",
+                paddingTop: "1cm",
+                paddingBottom: "1cm",
+                paddingLeft: "0.9cm",
+                paddingRight: "0.5cm",
+                boxSizing: "border-box",
+                border: "1px solid lightgray",
+              }}
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={9}>
+                  {
+                    invoiceData &&
+                    (
+                      <React.Fragment>
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>
+                          {
+                            invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                              : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                          }
+                        </Typography>
+                        <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>
+                          {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}</Typography>
+                        <Typography variant="subtitle2" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
+                      </React.Fragment>
+                    )
+                  }
+                </Grid>
+                <Grid item xs={3} textAlign="right">
+                  <Typography variant="h6" sx={{ marginRight: 2, fontSize: "18px" }}>
+                    ใบวางบิล/ใบแจ้งหนี้
+                  </Typography>
                 </Grid>
               </Grid>
-
-              <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "5px" }, border: "2px solid black", marginTop: 3 }}>
-                <TableHead>
-                  <TableRow sx={{ height: "35px" }}>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "80px" }} rowSpan={2} >
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>วันที่</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }} colSpan={7} >
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>รายการ</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} rowSpan={2} >
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} rowSpan={2} >
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>ค่าบรรทุก</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "100px" }} rowSpan={2} >
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>ยอดเงิน</Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow sx={{ borderBottom: "2px solid black", height: "35px" }}>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>G95</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} >
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>B95</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>B7</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>G91</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>E20</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>E85</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>PWD</Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row, index) => (
-                    <TableRow key={index} sx={{ height: "35px" }} >
-                      <TableCell sx={{ textAlign: "center", width: "80px" }}>
-                        {formatThaiSlash(dayjs(row.date).format("DD/MM/YYYY"))}
-                      </TableCell>
-
-                      {/* แสดงตาม product name */}
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.G95 || 0)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.B95 || 0)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.B7 || 0)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.G91 || 0)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.E20 || 0)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.E85 || 0)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.PWD || 0)}</Typography>
-                      </TableCell>
-
-                      {/* รวมลิตร */}
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", }}>
-                        {new Intl.NumberFormat("en-US").format(row.totalVolume)}
-                      </TableCell>
-
-                      {/* ค่าบรรทุก */}
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", }}>
-                        {row.rate}
-                      </TableCell>
-
-                      {/* ยอดเงิน */}
-                      <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", }}>
-                        {new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        }).format(row.transportFee)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-
-                  {/* ✅ แถวสรุปผลรวม */}
-                  <TableRow sx={{ height: "35px", borderTop: "2px solid black" }}>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
-                      รวม
-                    </TableCell>
-
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.G95)}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.B95)}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.B7)}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.G91)}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.E20)}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.E85)}</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.PWD)}</TableCell>
-
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
-                      {new Intl.NumberFormat("en-US").format(totals.totalVolume)}
-                    </TableCell>
-
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
-                      เป็นเงิน
-                    </TableCell>
-
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
-                      {new Intl.NumberFormat("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      }).format(totals.transportFee)}
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow sx={{ height: "25px", borderTop: "2px solid black" }}>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={8} rowSpan={2}>
-                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold", marginRight: 1 }} gutterBottom>กำหนดชำระเงิน : </Typography>
-                        <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{calculateDueDate(invoiceData?.Date, 2)}</Typography>
+              {invoiceData && (
+                <Grid container spacing={2} marginTop={2} sx={{ px: 2 }}>
+                  {/* ส่วนข้อมูลบริษัท */}
+                  <Grid item xs={10} sx={{ border: "2px solid black", height: "140px" }}>
+                    <Box sx={{ padding: 0.5 }}>
+                      <Box display="flex" alignItems="center" justifyContent="left" >
+                        <Typography variant="subtitle2"><b>ชื่อบริษัท:</b></Typography>
+                        <Typography variant="subtitle2" marginLeft={1}>
+                          {
+                            invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                              : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                          }
+                        </Typography>
                       </Box>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }} colSpan={2}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
-                        หัก ณ ที่จ่าย
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
-                        {new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        }).format(invoiceData?.Total.totalTax)}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                      <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
+                        <Typography variant="subtitle2"><b>ที่อยู่:</b></Typography>
+                        <Typography variant="subtitle2" marginLeft={4}>{formatAddress(invoiceData?.Address)}</Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
+                        <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b></Typography>
+                        <Typography variant="subtitle2" marginLeft={1}>{formatTaxID(invoiceData?.CardID)}</Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
 
-                  <TableRow sx={{ height: "25px" }}>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={2}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
-                        ยอดชำระ
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
-                        {new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        }).format(invoiceData?.Total.totalPayment)}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                  {/* ส่วนวันที่และเลขที่เอกสาร */}
+                  <Grid item xs={2}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
+                      </Grid>
+                      <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
+                        <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{formatThai(invoiceData?.Date)}</Typography>
+                      </Grid>
+                      <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
+                      </Grid>
+                      <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
+                        <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{invoiceData?.Code}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Grid>
 
-                  <TableRow sx={{ borderBottom: "2px solid black", borderTop: "2px solid black", height: "25px" }}>
-                    <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={11}>
-                      <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
-                        {`( ${numberToThaiText(invoiceData?.Total.totalPayment)} )`}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                  <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "5px" }, border: "2px solid black", marginTop: 3 }}>
+                    <TableHead>
+                      <TableRow sx={{ height: "35px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "80px" }} rowSpan={2} >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>วันที่</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }} colSpan={7} >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>รายการ</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} rowSpan={2} >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} rowSpan={2} >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>ค่าบรรทุก</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "100px" }} rowSpan={2} >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>ยอดเงิน</Typography>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow sx={{ borderBottom: "2px solid black", height: "35px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>G95</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>B95</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>B7</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>G91</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>E20</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>E85</Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>PWD</Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {pageRows.map((row, index) => (
+                        <TableRow key={index} sx={{ height: "35px" }} >
+                          <TableCell sx={{ textAlign: "center", width: "80px" }}>
+                            {/* {formatThaiSlash(dayjs(row.date).format("DD/MM/YYYY"))} */}
+                            {formatThai(row.date)}
+                          </TableCell>
 
-                  {/* 
+                          {/* แสดงตาม product name */}
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.G95 || 0)}</Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.B95 || 0)}</Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.B7 || 0)}</Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.G91 || 0)}</Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.E20 || 0)}</Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.E85 || 0)}</Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{new Intl.NumberFormat("en-US").format(row.products.PWD || 0)}</Typography>
+                          </TableCell>
+
+                          {/* รวมลิตร */}
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", }}>
+                            {new Intl.NumberFormat("en-US").format(row.totalVolume)}
+                          </TableCell>
+
+                          {/* ค่าบรรทุก */}
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", }}>
+                            {row.rate}
+                          </TableCell>
+
+                          {/* ยอดเงิน */}
+                          <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", }}>
+                            {new Intl.NumberFormat("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            }).format(row.transportFee)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+
+                      {/* ✅ แถวสรุปผลรวม */}
+                      {
+                        pageIndex === pages.length - 1 &&
+                        <React.Fragment>
+                          <TableRow sx={{ height: "35px", borderTop: "2px solid black" }}>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
+                              รวม
+                            </TableCell>
+
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.G95)}</TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.B95)}</TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.B7)}</TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.G91)}</TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.E20)}</TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.E85)}</TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(totals.products.PWD)}</TableCell>
+
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
+                              {new Intl.NumberFormat("en-US").format(totals.totalVolume)}
+                            </TableCell>
+
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
+                              เป็นเงิน
+                            </TableCell>
+
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", fontWeight: "bold" }}>
+                              {new Intl.NumberFormat("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                              }).format(totals.transportFee)}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ height: "25px", borderTop: "2px solid black" }}>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={8} rowSpan={2}>
+                              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                                <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold", marginRight: 1 }} gutterBottom>กำหนดชำระเงิน : </Typography>
+                                <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{calculateDueDate(invoiceData?.Date, 2)}</Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }} colSpan={2}>
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
+                                หัก ณ ที่จ่าย
+                              </Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }}>
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
+                                {new Intl.NumberFormat("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2
+                                }).format(invoiceData?.Total.totalTax)}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ height: "25px" }}>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={2}>
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
+                                ยอดชำระ
+                              </Typography>
+                            </TableCell>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }}>
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
+                                {new Intl.NumberFormat("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2
+                                }).format(invoiceData?.Total.totalPayment)}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow sx={{ borderBottom: "2px solid black", borderTop: "2px solid black", height: "25px" }}>
+                            <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={11}>
+                              <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>
+                                {`( ${numberToThaiText(invoiceData?.Total.totalPayment)} )`}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        </React.Fragment>
+                      }
+
+                      {/* 
                 <TableRow sx={{ borderBottom: "2px solid black", borderTop: "2px solid black", height: "25px" }}>
                   <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black" }} colSpan={3}>
                     <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>รวม</Typography>
@@ -674,28 +713,31 @@ const PrintReport = () => {
                   </TableCell>
                 </TableRow>
                 */}
-                </TableBody>
-              </Table>
-              <Grid item xs={12}>
-                <Grid container spacing={2}>
-                  <Grid item xs={8}>
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>โอนเงินเข้าบัญชี
-                      {
-                        invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                          : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                      }
-                    </Typography>
-                    <Typography variant="subtitle2" gutterBottom>1. KBANK สาขา เฟสติเวล 663-1-00798-6</Typography>
-                    <Typography variant="subtitle2" gutterBottom>2. KBANK สาขาป่าแดด 064-8-29539-1</Typography>
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: "center", marginTop: 4 }}>
-                    <Typography variant="subtitle2" gutterBottom>_________________________________________</Typography>
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ผู้วางบิล</Typography>
+                    </TableBody>
+                  </Table>
+                  <Grid item xs={12}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={8}>
+                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>โอนเงินเข้าบัญชี
+                          {
+                            invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                              : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                          }
+                        </Typography>
+                        <Typography variant="subtitle2" gutterBottom>1. KBANK สาขา เฟสติเวล 663-1-00798-6</Typography>
+                        <Typography variant="subtitle2" gutterBottom>2. KBANK สาขาป่าแดด 064-8-29539-1</Typography>
+                      </Grid>
+                      <Grid item xs={4} sx={{ textAlign: "center", marginTop: 4 }}>
+                        <Box width="100%" borderTop="2px solid black" sx={{ marginTop: 3.5 }}>
+                          <Typography variant="subtitle2" fontWeight="bold" sx={{ marginTop: 0.5 }} gutterBottom>ผู้วางบิล</Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
                   </Grid>
                 </Grid>
-              </Grid>
-            </Grid>
-          )}
+              )}
+            </Box>
+          ))}
         </Box>
         <div style={{ textAlign: "center", marginTop: "20px" }}>
           <Button variant="contained" onClick={handleDownloadImage}>

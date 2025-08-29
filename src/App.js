@@ -56,6 +56,7 @@ import SummaryOilBalanceSmallTruck from "./components/oilbalance/SummaryOilSmall
 import DeductibleIncomeDetail from "./components/deductible-income/DeductibleIncome";
 import CompanyPayment from "./components/deductible-income/CompanyPayment";
 import Expenses from "./components/financial/Expenses";
+import PrintInvoiceSmallTruck from "./components/invoice-smalltruck/PrintInvoice";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -111,6 +112,7 @@ function App() {
             <Route path="/gasstation-attendant" element={<GasStationDataProvider><GasStationA /></GasStationDataProvider>} />
             <Route path="/gasStation-admin" element={<GasStationDataProvider><GasStationAdmin /></GasStationDataProvider>} />
             <Route path="/print-invoice" element={<TripDataProvider><PrintInvoice /></TripDataProvider>} />
+            <Route path="/print-invoice-small" element={<TripDataProvider><PrintInvoiceSmallTruck /></TripDataProvider>} />
             <Route path="/print-trips" element={<TripDataProvider><PrintTrips /></TripDataProvider>} />
             <Route path="/print-tripssmall" element={<TripDataProvider><PrintTripsSmall /></TripDataProvider>} />
             <Route path="/print-report" element={<TripDataProvider><PrintReport /></TripDataProvider>} />
