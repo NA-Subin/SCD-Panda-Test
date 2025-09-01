@@ -53,3 +53,10 @@ export function formatThaiSlash(date) {
     ? dayjs(date).locale("th").format("DD/MM/BBBB")
     : "";
 }
+
+// ✅ รูปแบบตัวเลข เช่น: 2568
+export function formatThaiYear(date) {
+  return date && dayjs(date).isValid()
+    ? dayjs(date).locale("th").format("BBBB")
+    : "";
+}

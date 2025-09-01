@@ -79,11 +79,6 @@ const DeductionOfIncome = (props) => {
     const { drivers } = useBasicData();
     const { reportFinancial } = useTripData();
     const reports = Object.values(reportFinancial || {})
-        .filter(r => {
-            const reportDate = dayjs(r.Date, "DD/MM/YYYY"); // แปลง string เป็น dayjs
-            return reportDate.isSameOrAfter(selectedDateStart, 'day') &&
-                reportDate.isSameOrBefore(selectedDateEnd, 'day');
-        })
         .sort((a, b) => {
             const driverA = (a.Driver || "").split(":")[1]?.trim() || "";
             const driverB = (b.Driver || "").split(":")[1]?.trim() || "";

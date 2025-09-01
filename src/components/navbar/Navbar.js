@@ -1735,7 +1735,7 @@ export default function Navbar({ open, onOpenChange }) {
                     }
                   >
                     <Collapse in={!report} unmountOnExit={false}>
-                      {["สรุปยอดส่งน้ำมัน", "สรุปค่าเที่ยว", "การชำระค่าน้ำมัน", "ค่าใช้จ่าย", "ปิดงบบัญชีการเงิน"].map((text, index) => (
+                      {["สรุปยอดส่งน้ำมัน", "สรุปค่าเที่ยว", "การชำระค่าน้ำมัน", "ค่าใช้จ่าย", "เงินเดือน", "ปิดงบบัญชีการเงิน"].map((text, index) => (
                         <ListItem
                           key={text}
                           disablePadding
@@ -1748,7 +1748,7 @@ export default function Navbar({ open, onOpenChange }) {
                           <ListItemButton
                             component={Link}
                             to={
-                              index === 0 ? "/summary-oil-balance" : index === 1 ? "/report-driver-trip" : index === 2 ? "/report-fuel-payment" : index === 3 ? "/expenses" : "/close-financial"
+                              index === 0 ? "/summary-oil-balance" : index === 1 ? "/report-driver-trip" : index === 2 ? "/report-fuel-payment" : index === 3 ? "/expenses" : index === 4 ? "/salary" : "/close-financial"
                             }
                             state={{ opennavbar: open }}   // 👈 ส่ง state แบบนี้
                             sx={{
