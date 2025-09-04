@@ -55,13 +55,14 @@ import { Details } from "@mui/icons-material";
 
 const InsertFinancial = () => {
     // const { reghead, regtail, small, report, reportType } = useData();
-    const { reghead, regtail, small, companypayment } = useBasicData();
+    const { reghead, regtail, small, companypayment, expenseitems } = useBasicData();
     const { report, reportType } = useTripData();
     const registrationH = Object.values(reghead);
     const registrationT = Object.values(regtail);
     const registrationS = Object.values(small);
     const reportDetail = Object.values(report);
     const companypaymentDetail = Object.values(companypayment);
+    const expenseitem = Object.values(expenseitems);
     const [open, setOpen] = React.useState(false);
     const [registrationTruck, setRegistrationTruck] = React.useState("");
     const [invoiceID, setInvoiceID] = React.useState("");
@@ -200,7 +201,7 @@ const InsertFinancial = () => {
                     : `${item.registration}:${item?.RegTail || ""}`,
                 Company: `${company?.id}:${company?.Name}`,
                 Details: details,
-                Bank: bank,
+                Bank: `${bank?.id}:${bank?.Name}`,
                 Note: note,
                 Price: parseFloat((price / list.length).toFixed(2)),
                 Vat: parseFloat((vat / list.length).toFixed(2)),
@@ -375,7 +376,7 @@ const InsertFinancial = () => {
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
-                                                label={!company ? "เลือกประเภทค่าใช้จ่ายที่ต้องการเพิ่ม" : ""}
+                                                label={!company ? "เลือกบริษัทที่ต้องการเพิ่ม" : ""}
                                                 variant="outlined"
                                                 size="small"
                                             //   sx={{
@@ -558,8 +559,48 @@ const InsertFinancial = () => {
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>ชื่อบัญชี</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={bank} onChange={(e) => setBank(e.target.value)} />
+                                    <Autocomplete
+                                        id="autocomplete-tickets"
+                                        options={expenseitem.filter((item) => item.Status === "อยู่ในระบบ") // ✅ filter ตาม Status
+                                            .sort((a, b) => a.Name.localeCompare(b.Name))}
+                                        getOptionLabel={(option) => option?.Name || ""}
+                                        value={bank} // registrationTruck เป็น object แล้ว
+                                        onChange={(event, newValue) => {
+                                            if (newValue) {
+                                                setBank(newValue); // เก็บทั้ง object
+                                            } else {
+                                                setBank(null); // หรือ default object ถ้ามี
+                                            }
+                                        }}
+                                        ListboxProps={{
+                                            sx: {
+                                                maxHeight: 200, // ความสูงสูงสุดของ list
+                                                overflow: 'auto',
+                                            }
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label={!bank ? "เลือกชื่อบัญชีที่ต้องการเพิ่ม" : ""}
+                                                variant="outlined"
+                                                size="small"
+                                            //   sx={{
+                                            //     "& .MuiOutlinedInput-root": { height: "30px" },
+                                            //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
+                                            //   }}
+                                            />
+                                        )}
+                                        renderOption={(props, option) => (
+                                            <li {...props}>
+                                                <Typography fontSize="16px">
+                                                    {option.Name}
+                                                </Typography>
+                                            </li>
+                                        )}
+                                    />
+
                                 </Paper>
+                                {/* <TextField size="small" fullWidth value={bank} onChange={(e) => setBank(e.target.value)} />*/}
                             </Box>
                         </Grid>
                         {

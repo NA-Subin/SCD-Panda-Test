@@ -80,118 +80,136 @@ const TripsDetail = (props) => {
         <React.Fragment>
             <TableRow>
                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateReceive,"DD/MM/YYYY"))}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateDelivery,"DD/MM/YYYY"))}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Driver.split(":")[1] !== undefined ?
-                        trips.Driver.split(":")[1]
-                        :
-                        trips.Driver
-                    }/
-                    {
-                        trips.Registration.split(":")[1] !== undefined ?
-                        trips.Registration.split(":")[1]
-                        :
-                        trips.Registration
-                    }
+                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateReceive, "DD/MM/YYYY"))}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateDelivery, "DD/MM/YYYY"))}</TableCell>
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Driver.split(":")[1] !== undefined ?
+                                trips.Driver.split(":")[1]
+                                :
+                                trips.Driver
+                        }/
+                        {
+                            trips.Registration.split(":")[1] !== undefined ?
+                                trips.Registration.split(":")[1]
+                                :
+                                trips.Registration
+                        }
+                    </Box>
                     {/* {trips.Driver}/{trips.Registration} */}
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order1 === undefined ?
-                            "-"
-                            :
-                            (trips.Order1.split(":")[1] !== undefined ?
-                                trips.Order1.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order1 === undefined ?
+                                "-"
                                 :
-                                trips.Order1
-                            )
-                    }
+                                (trips.Order1.split(":")[1] !== undefined ?
+                                    trips.Order1.split(":")[1]
+                                    :
+                                    trips.Order1
+                                )
+                        }
+                    </Box>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order2 === undefined ?
-                            "-"
-                            :
-                            (trips.Order2.split(":")[1] !== undefined ?
-                                trips.Order2.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order2 === undefined ?
+                                "-"
                                 :
-                                trips.Order2
-                            )
-                    }
+                                (trips.Order2.split(":")[1] !== undefined ?
+                                    trips.Order2.split(":")[1]
+                                    :
+                                    trips.Order2
+                                )
+                        }
+                    </Box>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order3 === undefined ?
-                            "-"
-                            :
-                            (trips.Order3.split(":")[1] !== undefined ?
-                                trips.Order3.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order3 === undefined ?
+                                "-"
                                 :
-                                trips.Order3
-                            )
-                    }
+                                (trips.Order3.split(":")[1] !== undefined ?
+                                    trips.Order3.split(":")[1]
+                                    :
+                                    trips.Order3
+                                )
+                        }
+                    </Box>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order4 === undefined ?
-                            "-"
-                            :
-                            (trips.Order4.split(":")[1] !== undefined ?
-                                trips.Order4.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order4 === undefined ?
+                                "-"
                                 :
-                                trips.Order4
-                            )
-                    }
+                                (trips.Order4.split(":")[1] !== undefined ?
+                                    trips.Order4.split(":")[1]
+                                    :
+                                    trips.Order4
+                                )
+                        }
+                    </Box>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order5 === undefined ?
-                            "-"
-                            :
-                            (trips.Order5.split(":")[1] !== undefined ?
-                                trips.Order5.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order5 === undefined ?
+                                "-"
                                 :
-                                trips.Order5
-                            )
-                    }
+                                (trips.Order5.split(":")[1] !== undefined ?
+                                    trips.Order5.split(":")[1]
+                                    :
+                                    trips.Order5
+                                )
+                        }
+                    </Box>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order6 === undefined ?
-                            "-"
-                            :
-                            (trips.Order6.split(":")[1] !== undefined ?
-                                trips.Order6.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order6 === undefined ?
+                                "-"
                                 :
-                                trips.Order6
-                            )
-                    }
+                                (trips.Order6.split(":")[1] !== undefined ?
+                                    trips.Order6.split(":")[1]
+                                    :
+                                    trips.Order6
+                                )
+                        }
+                    </Box>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order7 === undefined ?
-                            "-"
-                            :
-                            (trips.Order7.split(":")[1] !== undefined ?
-                                trips.Order7.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order7 === undefined ?
+                                "-"
                                 :
-                                trips.Order7
-                            )
-                    }
+                                (trips.Order7.split(":")[1] !== undefined ?
+                                    trips.Order7.split(":")[1]
+                                    :
+                                    trips.Order7
+                                )
+                        }
+                    </Box>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                    {
-                        trips.Order8 === undefined ?
-                            "-"
-                            :
-                            (trips.Order8.split(":")[1] !== undefined ?
-                                trips.Order8.split(":")[1]
+                <TableCell sx={{ textAlign: "left" }}>
+                    <Box sx={{ marginLeft: 2 }}>
+                        {
+                            trips.Order8 === undefined ?
+                                "-"
                                 :
-                                trips.Order8
-                            )
-                    }
+                                (trips.Order8.split(":")[1] !== undefined ?
+                                    trips.Order8.split(":")[1]
+                                    :
+                                    trips.Order8
+                                )
+                        }
+                    </Box>
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,

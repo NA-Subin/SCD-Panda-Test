@@ -101,7 +101,7 @@ const DocSalary = ({ openNavbar }) => {
 
     // const { reportFinancial, drivers } = useData();
     const { drivers, reghead, small } = useBasicData();
-    const { reportFinancial } = useTripData();
+    const { reportFinancial, trip } = useTripData();
     const reports = Object.values(reportFinancial || {})
         .sort((a, b) => {
             const driverA = (a.Driver || "").split(":")[1]?.trim() || "";
@@ -110,7 +110,23 @@ const DocSalary = ({ openNavbar }) => {
         });
 
     const driver = Object.values(drivers || {});
+    const tripDetail = Object.values(trip || {});
 
+    const trips = periods
+        .filter((p) => p.no === period)
+        .flatMap((p) =>
+            tripDetail.filter((item) => {
+                const itemDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+                return (
+                    itemDate.isBetween(dayjs(p.start, "DD/MM/YYYY"), dayjs(p.end, "DD/MM/YYYY"), null, "[]") &&
+                    item.StatusTrip === "จบทริป" &&
+                    (item.TruckType === "รถใหญ่" || item.TruckType === "รถเล็ก")
+                );
+            })
+        );
+
+    console.log("trips : ", trips);
+    console.log("tripDetail : ", tripDetail);
     console.log("Driver : ", driver);
     console.log("Report : ", reports);
 
@@ -163,10 +179,10 @@ const DocSalary = ({ openNavbar }) => {
     const uniqueNames = [
         ...new Map(
             reportDetail
-                .filter((item) => {
-                    const name = item.Name.split(":")[1];
-                    return !excludeNames.includes(name); // กรองชื่อที่ไม่ต้องการ
-                })
+                // .filter((item) => {
+                //     const name = item.Name.split(":")[1];
+                //     return !excludeNames.includes(name); // กรองชื่อที่ไม่ต้องการ
+                // })
                 .map((item) => {
                     const [id, name] = item.Name.split(":");
                     return [id, { id, name, type: item.Type }];
@@ -419,11 +435,8 @@ const DocSalary = ({ openNavbar }) => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             เลขบัญชี
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 60 }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ค่าเที่ยว
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                            ค่ารอบ
                                         </TablecellSelling>
                                         {uniqueNames.map((col) => (
                                             <TablecellSelling key={col.id} sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
@@ -450,7 +463,7 @@ const DocSalary = ({ openNavbar }) => {
                                         // คำนวณ total ของ row (ยกเว้นเงินค้ำประกัน, เงินกู้ยืม)
                                         const total = row.document.reduce((acc, doc) => {
                                             const [id, name] = doc.Name.split(":");
-                                            if (["เงินค้ำประกัน", "เบิกเงินกู้ยืม"].includes(name)) return acc;
+                                            // if (["เงินค้ำประกัน", "เบิกเงินกู้ยืม"].includes(name)) return acc;
 
                                             const col = uniqueNames.find((c) => c.id === id);
                                             if (!col) return acc;
@@ -459,6 +472,10 @@ const DocSalary = ({ openNavbar }) => {
                                                 ? acc + Number(doc.Money)
                                                 : acc - Number(doc.Money);
                                         }, 0);
+
+                                        const costrip = trips
+                                            .filter((item) => Number(item.Driver.split(":")[0]) === row.id && item.TruckType === row.TruckType)
+                                            .reduce((acc, cos) => acc + Number(cos.CostTrip || 0), 0);
 
                                         // คำนวณ เงินค้ำประกัน
                                         const moneyGuarantee = reports
@@ -486,8 +503,7 @@ const DocSalary = ({ openNavbar }) => {
                                                 <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}> </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}> </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(costrip)}</TableCell>
 
                                                 {uniqueNames.map((col) => {
                                                     const found = row.document.find(

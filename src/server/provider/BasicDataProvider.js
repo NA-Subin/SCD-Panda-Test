@@ -26,7 +26,8 @@ export const BasicDataProvider = ({ children }) => {
         customersmalltruck: {},
         customertickets: {},
         deductibleincome: {},
-        companypayment: {}
+        companypayment: {},
+        expenseitems: {}
     });
 
     const [loading, setLoading] = useState(true);
@@ -50,6 +51,7 @@ export const BasicDataProvider = ({ children }) => {
         customertickets: ref(database, "/customers/tickets/"),
         deductibleincome: ref(database, "/deductibleincome"),
         companypayment: ref(database, "/companypayment"),
+        expenseitems: ref(database, "/expenseitems"),
     }), []);
 
     useEffect(() => {

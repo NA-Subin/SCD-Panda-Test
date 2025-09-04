@@ -48,6 +48,28 @@ const TicketsSmallTruck = ({ openNavbar }) => {
     const [recipientChecked, setRecipientChecked] = useState(false);
     const [selectedRowId, setSelectedRowId] = useState(null); // จับ ID ของแถวที่ต้องการแก้ไข
     const [companies, setCompanies] = React.useState("ไม่มี");
+    const [openCustomer, setOpenCustomer] = React.useState("");
+
+    const [no, setNo] = React.useState("");
+    const [village, setVillage] = React.useState("");
+    const [subDistrict, setSubDistrict] = React.useState("");
+    const [district, setDistrict] = React.useState("");
+    const [province, setProvince] = React.useState("");
+    const [zipCode, setZipCode] = React.useState("");
+    const [ticketsName, setTicketsName] = React.useState("");
+    const [rate1, setRate1] = React.useState("");
+    const [rate2, setRate2] = React.useState("");
+    const [rate3, setRate3] = React.useState("");
+    const [creditTime, setCreditTime] = React.useState("");
+    const [code, setCode] = React.useState("");
+    const [codeID, setCodeID] = React.useState("");
+    const [companyName, setCompanyName] = React.useState("");
+    const [phone, setPhone] = React.useState("");
+    const [companyChecked, setCompanyChecked] = React.useState(true);
+    const [type, setType] = React.useState("");
+    const [credit, setCredit] = React.useState("");
+    const [bill, setBill] = React.useState("");
+
     //const [ticketM, setTicketM] = React.useState([]);
     //const [ticketR, setTicketR] = React.useState([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -186,6 +208,8 @@ const TicketsSmallTruck = ({ openNavbar }) => {
             (ticketChecked && !recipientChecked ? "ลูกค้าประจำ" :
                 !ticketChecked && recipientChecked ? "ลูกค้าไม่ประจำ" : "ยกเลิก")
 
+        console.log("Status : ", newStatus);
+
         // บันทึกสถานะใหม่ไปยัง Firebase
         // await database.ref(`/customers/smalltruck/${selectedRowId - 1}`).update({
         //     Status: newStatus,
@@ -201,7 +225,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
             .ref("/customers/smalltruck/")
             .child(selectedRowId - 1)
             .update({
-                Status: newStatus,
+                Status: ticketChecked ? "ลูกค้าประจำ" : "ลูกค้าไม่ประจำ",
                 StatusCompany: ticketCheckedC ? "อยู่บริษัทในเครือ" : "ไม่อยู่บริษัทในเครือ",
                 CreditTime: creditTimeEdit,
                 Name: name,
@@ -227,6 +251,42 @@ const TicketsSmallTruck = ({ openNavbar }) => {
         setSetting(false);
         setSelectedRowId(null);
     };
+
+    const handleCustomer = (row) => {
+        setOpenCustomer(row.id);
+        setName(row.Name)
+        setTicketsName(row.Name)
+        setRate1(row.Rate1)
+        setRate2(row.Rate2)
+        setRate3(row.Rate3)
+        setCode(row.Code)
+        setCodeID(row.CodeID)
+        setCompanyName(row.CompanyName)
+        setPhone(row.Phone)
+        setCreditTime(row.CreditTime)
+        setCredit(row.Credit);
+        setBill(row.Bill);
+        setType(row.Type);
+        if (row.StatusCompany === "อยู่บริษัทในเครือ") {
+            setCompanyChecked(true);
+        } else {
+            setCompanyChecked(false);
+        }
+
+        if (row.Status === "ลูกค้าประจำ") {
+            setTicketChecked(true);
+        } else {
+            setTicketChecked(false);
+        }
+        const parts = row.Address.split(" ");
+        setNo(parts[0] || "-")
+        setVillage(parts[1] || "-")
+        setSubDistrict(parts[2] || "-")
+        setDistrict(parts[3] ? parts[3].replace("อ.", "") : "-")
+        setProvince(parts[4] || "-")
+        setZipCode(parts[5] || "-")
+        //setCompanyChecked
+    }
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -422,7 +482,16 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.Name}</TableCell> */}
-                                                    <TableCell sx={{ textAlign: "left" }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "left",
+                                                            cursor: "pointer",
+                                                            "&:hover": {
+                                                                backgroundColor: "#ffebee",
+                                                            },
+                                                        }}
+                                                        onClick={() => handleCustomer(row)}
+                                                    >
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
@@ -851,7 +920,16 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                         </Typography>
                                                     </TableCell>
                                                     {/* <TableCell sx={{ textAlign: "center", fontWeight: !setting || row.id !== selectedRowId ? "" : "bold" }}>{row.TicketsName}</TableCell> */}
-                                                    <TableCell sx={{ textAlign: "left", paddingLeft: 2 }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "left",
+                                                            cursor: "pointer",
+                                                            "&:hover": {
+                                                                backgroundColor: "#ffebee",
+                                                            },
+                                                        }}
+                                                        onClick={() => handleCustomer(row)}
+                                                    >
                                                         {
                                                             // ถ้า row นี้กำลังอยู่ในโหมดแก้ไขให้แสดง TextField พร้อมค่าเดิม
                                                             !setting || row.id !== selectedRowId ?
@@ -1360,7 +1438,207 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                             />
                 }
             </Paper>
-        </Container>
+            <Dialog
+                open={!!openCustomer}
+                keepMounted
+                fullScreen={windowWidth <= 600}
+                onClose={() => setOpenCustomer("")}
+                maxWidth="md"
+            >
+                <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={10}>
+                            <Typography variant="h6" fontWeight="bold" color="white">
+                                ชื่อลูกค้า :{" "}
+                                {filtered.find((r) => r.id === openCustomer)?.Name || ""}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={2} textAlign="right">
+                            <IconButtonError onClick={() => setOpenCustomer("")}>
+                                <CancelIcon />
+                            </IconButtonError>
+                        </Grid>
+                    </Grid>
+                </DialogTitle>
+
+                <DialogContent>
+                    <Grid container spacing={2} marginTop={2} marginBottom={2}>
+                        <Grid item md={12} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" marginRight={1}>เลือกประเภทของตั๋วลูกค้ารถเล็ก :</Typography>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={type === "เชียงใหม่" ? true : false}
+                                        size="small"
+                                        disabled={type === "บ้านโฮ่ง" ? true : false}
+                                    />
+                                }
+                                label="เชียงใหม่"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={type === "บ้านโฮ่ง" ? true : false}
+                                        size="small"
+                                        disabled={type === "เชียงใหม่" ? true : false}
+                                    />
+                                }
+                                label="บ้านโฮ่ง"
+                            />
+                        </Grid>
+                        <Grid item md={7} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Grid container spacing={2}>
+                                <Grid item md={12} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 9 } }} gutterBottom>ชื่อ</Typography>
+                                    <TextField size="small" fullWidth value={ticketsName} onChange={(e) => setTicketsName(e.target.value)} />
+                                </Grid>
+                                <Grid item md={12} xs={12} display="flex" justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1 }} gutterBottom>รอบการวางบิล</Typography>
+                                    <TextField size="small" fullWidth value={bill} onChange={(e) => setBill(e.target.value)} />
+                                </Grid>
+                                <Grid item md={12} xs={12} display="flex" justifyContent="left" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" marginRight={1} sx={{ marginLeft: { md: 0, xs: 4 } }}>สถานะตั๋ว :</Typography>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={ticketChecked === true ? true : false}
+                                                onChange={() => setTicketChecked(true)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="ลูกค้าประจำ"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={ticketChecked === false ? true : false}
+                                                onChange={() => setTicketChecked(false)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="ลูกค้าไม่ประจำ"
+                                    />
+                                </Grid>
+                                <Grid item md={12} xs={12} display="flex" justifyContent="left" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" marginRight={1} sx={{ marginLeft: { md: 0, xs: 4 } }}>สถานะบริษัท :</Typography>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={companyChecked === true ? true : false}
+                                                onChange={() => setCompanyChecked(true)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="อยู่บริษัทในเครือ"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={companyChecked === false ? true : false}
+                                                onChange={() => setCompanyChecked(false)}
+                                                size="small"
+                                            />
+                                        }
+                                        label="ไม่อยู่บริษัทในเครือ"
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item md={5} xs={12}>
+                            <Grid container spacing={2}>
+                                <Grid item md={12} xs={12} display='flex' justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1, marginLeft: { md: 8, xs: 5 } }} gutterBottom>เครดิต :</Typography>
+                                    <TextField size="small" fullWidth value={credit} onChange={(e) => setCredit(e.target.value)} />
+                                </Grid>
+                                <Grid item md={12} xs={12} display='flex' justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: -2 } }} gutterBottom>ระยะเวลาเครดิต :</Typography>
+                                    <TextField size="small" fullWidth value={creditTime} onChange={(e) => setCreditTime(e.target.value)} />
+                                </Grid>
+                                <Grid item md={12} xs={12} display='flex' justifyContent="center" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 1, marginLeft: { md: 6, xs: 3.5 } }} gutterBottom>เบอร์โทร :</Typography>
+                                    <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                </Grid>
+                                <Grid item md={12} xs={12} display='flex' justifyContent="center" alignItems="center">
+                                    <TextField
+                                        select
+                                        fullWidth
+                                        size="small"
+                                        value={companies}
+                                        SelectProps={{ MenuProps: { PaperProps: { style: { maxHeight: 150 } } } }}
+                                        onChange={(e) => setCompanies(e.target.value)}
+                                    >
+                                        <MenuItem value="ไม่มี">กรุณาเลือกบริษัท</MenuItem>
+                                        {
+                                            companyDetail.map((item, index) => (
+                                                <MenuItem value={`${item.id}:${item.Name}`}>{item.Name}</MenuItem>
+                                            ))
+                                        }
+                                    </TextField>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item md={12} xs={12}>
+                            <Divider>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ใบวางบิล/ใบแจ้งหนี้</Typography>
+                            </Divider>
+                        </Grid>
+                        <Grid item md={3} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 8 } }} gutterBottom>รหัส</Typography>
+                            <TextField size="small" fullWidth value={code} onChange={(e) => setCode(e.target.value)} />
+                        </Grid>
+                        <Grid item md={9} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 4.5 } }} gutterBottom>ชื่อบริษัท</Typography>
+                            <TextField size="small" fullWidth value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                        </Grid>
+                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>บ้านเลขที่</Typography>
+                            <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} />
+                        </Grid>
+                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 7 } }} gutterBottom>ตำบล</Typography>
+                            <TextField size="small" fullWidth value={subDistrict} onChange={(e) => setSubDistrict(e.target.value)} />
+                        </Grid>
+                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 6.5 } }} gutterBottom>อำเภอ</Typography>
+                            <TextField size="small" fullWidth value={district} onChange={(e) => setDistrict(e.target.value)} />
+                        </Grid>
+                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 6 } }} gutterBottom>จังหวัด</Typography>
+                            <TextField size="small" fullWidth value={province} onChange={(e) => setProvince(e.target.value)} />
+                        </Grid>
+                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 2 } }} gutterBottom>รหัสไปรณีย์</Typography>
+                            <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
+                        </Grid>
+                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 1 } }} gutterBottom>เลขผู้เสียภาษี</Typography>
+                            <TextField size="small" fullWidth value={codeID} onChange={(e) => setCodeID(e.target.value)} />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+
+                {/* <DialogActions
+                                sx={{
+                                    textAlign: "center",
+                                    borderTop: "2px solid " + theme.palette.panda.dark,
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Button variant="contained" color="success">
+                                    บันทึก
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() => setOpenCustomer("")}
+                                >
+                                    ยกเลิก
+                                </Button>
+                            </DialogActions> */}
+            </Dialog >
+        </Container >
     );
 };
 

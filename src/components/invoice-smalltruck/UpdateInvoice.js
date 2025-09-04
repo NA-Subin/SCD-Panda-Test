@@ -413,7 +413,7 @@ const UpdateInvoice = (props) => {
                     .map(([productName, Volume], index) => ({
                         No: row.No,
                         TicketName: row.TicketName,
-                        RateOil: Volume.RateOil || 0,
+                        RateOil: Volume.RateOil.toFixed(2) || 0,
                         Amount: Volume.Amount || 0,
                         Date: row.Date,
                         Driver: row.Driver.split(":")[1],
@@ -821,12 +821,12 @@ const UpdateInvoice = (props) => {
                         </Button>
                     </Tooltip>
                 </Grid> */}
-                <Grid item md={11} xs={12}>
+                <Grid item md={10} xs={12}>
                     <TableContainer
                         component={Paper}
                         sx={{ borderRadius: 2, marginTop: -1 }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1230px" : "1330px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1080px" : "1150px" }}>
                             <TableHead>
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px', backgroundColor: theme.palette.primary.dark }}>
@@ -841,13 +841,13 @@ const UpdateInvoice = (props) => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ชนิดน้ำมัน
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                        จำนวนลิตร
-                                    </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ราคาน้ำมัน
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 140, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        จำนวนลิตร
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 140, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ยอดเงิน
                                     </TablecellSelling>
                                 </TableRow>
@@ -862,7 +862,7 @@ const UpdateInvoice = (props) => {
                                                 .map(([productName, Volume], index) => ({
                                                     No: row.No,
                                                     TicketName: row.TicketName,
-                                                    RateOil: Volume.RateOil || 0,
+                                                    RateOil: Volume.RateOil.toFixed(2) || 0,
                                                     Amount: Volume.Amount || 0,
                                                     Date: row.Date,
                                                     Driver: row.Driver,
@@ -882,8 +882,8 @@ const UpdateInvoice = (props) => {
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(report[row.uniqueRowId]?.Date || row.Date, "DD/MM/YYYY"))}</Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
+                                                <TableCell sx={{ textAlign: "left", height: '30px' }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0, marginLeft: 4 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{
                                                     textAlign: "center", height: '30px', width: 100,
@@ -899,11 +899,6 @@ const UpdateInvoice = (props) => {
                                                                                         "#FFFFFF"
                                                 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.ProductName || row.ProductName}</Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US").format(row.Volume)}
-                                                    </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 100 }}>
                                                     <Paper component="form" sx={{ marginTop: -1, marginBottom: -1 }}>
@@ -977,6 +972,11 @@ const UpdateInvoice = (props) => {
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {new Intl.NumberFormat("en-US").format(row.Volume)}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {new Intl.NumberFormat("en-US").format(report[row.uniqueRowId]?.Amount || row.Amount)}
                                                     </Typography>
                                                 </TableCell>
@@ -985,25 +985,20 @@ const UpdateInvoice = (props) => {
                                 }
                             </TableBody>
                         </Table>
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1230px" : "1330px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1080px" : "1150px" }}>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={4}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={5}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             รวม
                                         </Typography>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 140, backgroundColor: "#616161", color: "white" }}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             {new Intl.NumberFormat("en-US").format(ticket.TotalVolume)}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 100, backgroundColor: "#616161", color: "white" }}>
-                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                            0
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 150, backgroundColor: "#616161", color: "white" }}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 140, backgroundColor: "#616161", color: "white" }}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             {new Intl.NumberFormat("en-US").format(ticket.TotalAmount)}
                                         </Typography>
@@ -1013,9 +1008,9 @@ const UpdateInvoice = (props) => {
                         </Table>
                     </TableContainer>
                 </Grid>
-                <Grid item md={1} xs={12} display="flex" alignItems="center" justifyContent="center">
+                <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
                     <Tooltip title="บันทึกข้อมูล" placement="top">
-                        <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginLeft: -1, marginRight: -1, marginTop: 1, width: { md: "100%", xs: "100px" } }}>
+                        <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginRight: 7, marginTop: 1, width: { md: "100%", xs: "100px" } }}>
                             <Button
                                 color="inherit"
                                 fullWidth

@@ -1871,7 +1871,7 @@ const UpdateTrip = (props) => {
                                                         </TableCell>
 
                                                         {/* Ticket Name */}
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 350 }}>
+                                                        <TableCell sx={{ textAlign: "left", height: "25px", padding: "1px 4px", width: 350 }}>
                                                             {editMode && row.TicketName === "1:ตั๋วเปล่า" ? (
                                                                 <Autocomplete
                                                                     id="autocomplete-tickets"
@@ -1928,31 +1928,33 @@ const UpdateTrip = (props) => {
                                                                 />
                                                             )
                                                                 : (
-                                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                        {
-                                                                            // (() => {
-                                                                            //     const branches = [
-                                                                            //         "( สาขาที่  00001)/",
-                                                                            //         "( สาขาที่  00002)/",
-                                                                            //         "( สาขาที่  00003)/",
-                                                                            //         "(สำนักงานใหญ่)/"
-                                                                            //     ];
+                                                                    <Box sx={{ marginLeft: 2 }}>
+                                                                        <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                            {
+                                                                                // (() => {
+                                                                                //     const branches = [
+                                                                                //         "( สาขาที่  00001)/",
+                                                                                //         "( สาขาที่  00002)/",
+                                                                                //         "( สาขาที่  00003)/",
+                                                                                //         "(สำนักงานใหญ่)/"
+                                                                                //     ];
 
-                                                                            //     for (const branch of branches) {
-                                                                            //         if (row.TicketName.includes(branch)) {
-                                                                            //             return row.TicketName.split(branch)[1];
-                                                                            //         }
-                                                                            //     }
+                                                                                //     for (const branch of branches) {
+                                                                                //         if (row.TicketName.includes(branch)) {
+                                                                                //             return row.TicketName.split(branch)[1];
+                                                                                //         }
+                                                                                //     }
 
-                                                                            //     return row.TicketName;
-                                                                            // })()
-                                                                            row.TicketName.split(":")[1] !== undefined ?
-                                                                                row.TicketName.split(":")[1]
-                                                                                :
-                                                                                row.TicketName
+                                                                                //     return row.TicketName;
+                                                                                // })()
+                                                                                row.TicketName.split(":")[1] !== undefined ?
+                                                                                    row.TicketName.split(":")[1]
+                                                                                    :
+                                                                                    row.TicketName
 
-                                                                        }
-                                                                    </Typography>
+                                                                            }
+                                                                        </Typography>
+                                                                    </Box>
                                                                 )}
                                                         </TableCell>
 
@@ -2099,7 +2101,7 @@ const UpdateTrip = (props) => {
                                                                     >ยกเลิก</Button>
                                                                 </TableCell>
                                                                 :
-                                                                <TableCell width={60} />
+                                                                <TableCell width={80} />
 
                                                         }
                                                     </TableRow>
@@ -2649,7 +2651,7 @@ const UpdateTrip = (props) => {
                                                             </Typography>
                                                         </TableCell>
 
-                                                        <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 240 }}>
+                                                        <TableCell sx={{ textAlign: "left", height: "25px", padding: "1px 4px", width: 240 }}>
                                                             {/* {editMode ? (
                                                             <TextField
                                                                 value={editableOrders[rowIdx]?.TicketName || ""}
@@ -2665,30 +2667,32 @@ const UpdateTrip = (props) => {
                                                                 {row.TicketName.includes("/") ? row.TicketName.split("/")[1] : row.TicketName}
                                                             </Typography>
                                                         )} */}
-                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                {
-                                                                    // (() => {
-                                                                    //     const branches = [
-                                                                    //         "( สาขาที่  00001)/",
-                                                                    //         "( สาขาที่  00002)/",
-                                                                    //         "( สาขาที่  00003)/",
-                                                                    //         "(สำนักงานใหญ่)/"
-                                                                    //     ];
+                                                            <Box sx={{ marginLeft: 2 }}>
+                                                                <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                    {
+                                                                        // (() => {
+                                                                        //     const branches = [
+                                                                        //         "( สาขาที่  00001)/",
+                                                                        //         "( สาขาที่  00002)/",
+                                                                        //         "( สาขาที่  00003)/",
+                                                                        //         "(สำนักงานใหญ่)/"
+                                                                        //     ];
 
-                                                                    //     for (const branch of branches) {
-                                                                    //         if (row.TicketName.includes(branch)) {
-                                                                    //             return row.TicketName.split(branch)[1];
-                                                                    //         }
-                                                                    //     }
+                                                                        //     for (const branch of branches) {
+                                                                        //         if (row.TicketName.includes(branch)) {
+                                                                        //             return row.TicketName.split(branch)[1];
+                                                                        //         }
+                                                                        //     }
 
-                                                                    //     return row.TicketName;
-                                                                    // })()
-                                                                    row.TicketName.split(":")[1] !== undefined ?
-                                                                        row.TicketName.split(":")[1]
-                                                                        :
-                                                                        row.TicketName
-                                                                }
-                                                            </Typography>
+                                                                        //     return row.TicketName;
+                                                                        // })()
+                                                                        row.TicketName.split(":")[1] !== undefined ?
+                                                                            row.TicketName.split(":")[1]
+                                                                            :
+                                                                            row.TicketName
+                                                                    }
+                                                                </Typography>
+                                                            </Box>
                                                         </TableCell>
 
                                                         <TableCell sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 60 }}>

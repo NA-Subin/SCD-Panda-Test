@@ -1103,7 +1103,7 @@ export default function Navbar({ open, onOpenChange }) {
                       }
                     </Collapse>
                     <Collapse in={!openData} unmountOnExit={false}>
-                      {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "รถรับจ้างขนส่ง", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน", "รายได้รายหัก", "บริษัทที่สั่งจ่าย"].map((text, index) => (
+                      {["หน้าหลัก", "พนักงาน", "รถบรรทุก", "รถรับจ้างขนส่ง", "คลังรับน้ำมัน", "ตั๋วน้ำมัน", "ลูกค้ารับจ้างขนส่ง", "ลูกค้ารถใหญ่", "ลูกค้ารถเล็ก", "เจ้าหนี้น้ำมัน", "รายได้รายหัก", "รายการค่าใช้จ่าย", "บริษัทที่สั่งจ่าย"].map((text, index) => (
                         <ListItem
                           key={text}
                           disablePadding
@@ -1133,7 +1133,8 @@ export default function Navbar({ open, onOpenChange }) {
                                                 : index === 8 ? "/customer-smalltrucks"
                                                   : index === 9 ? "/creditor"
                                                     : index === 10 ? "/deductible-income"
-                                                      : "/company-payment";
+                                                      : index === 11 ? "/expense-items"
+                                                        : "/company-payment";
 
                               setPendingPath(path); // ขอไปหน้านั้น
                             }}
@@ -1166,6 +1167,8 @@ export default function Navbar({ open, onOpenChange }) {
                                   ) : index === 8 ? (
                                     <GroupsIcon />
                                   ) : index === 11 ? (
+                                    <CurrencyExchangeIcon />
+                                  ) : index === 12 ? (
                                     <ApartmentIcon />
                                   ) : (
                                     <CurrencyExchangeIcon />

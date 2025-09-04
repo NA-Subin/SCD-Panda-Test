@@ -122,11 +122,11 @@ const InsertTickets = () => {
                 CodeID: codeID,
                 Address:
                     (no === "-" ? "-" : no) +
-                    (village === "-" ? "" : "," + village) +
-                    (subDistrict === "-" ? "" : "," + subDistrict) +
-                    (district === "-" ? "" : "," + district) +
-                    (province === "-" ? "" : "," + province) +
-                    (zipCode === "-" ? "" : "," + zipCode)
+                    (village === "-" ? "" : ` ${village}`) +
+                    (subDistrict === "-" ? "" : ` ${subDistrict}`) +
+                    (district === "-" ? "" : ` ${district}`) +
+                    (province === "-" ? "" : ` ${province}`) +
+                    (zipCode === "-" ? "" : ` ${zipCode}`)
                 ,
                 lat: lat,
                 lng: lng,
@@ -194,7 +194,7 @@ const InsertTickets = () => {
                         <Grid item md={7} xs={12} display="flex" justifyContent="center" alignItems="center">
                             <Grid container spacing={2}>
                                 <Grid item md={12} xs={12} display="flex" justifyContent="center" alignItems="center">
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 9} }} gutterBottom>ชื่อ</Typography>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 9 } }} gutterBottom>ชื่อ</Typography>
                                     <TextField size="small" fullWidth value={ticketsName} onChange={(e) => setTicketsName(e.target.value)} />
                                 </Grid>
                                 <Grid item md={12} xs={12} display="flex" justifyContent="center" alignItems="center">
@@ -271,39 +271,39 @@ const InsertTickets = () => {
                             </Divider>
                         </Grid>
                         <Grid item md={3} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 9} }} gutterBottom>รหัส</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 9 } }} gutterBottom>รหัส</Typography>
                             <TextField size="small" fullWidth value={code} onChange={(e) => setCode(e.target.value)} />
                         </Grid>
                         <Grid item md={9} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 5.5} }} gutterBottom>ชื่อบริษัท</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5.5 } }} gutterBottom>ชื่อบริษัท</Typography>
                             <TextField size="small" fullWidth value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 5} }} gutterBottom>บ้านเลขที่</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5 } }} gutterBottom>บ้านเลขที่</Typography>
                             <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 8} }} gutterBottom>ตำบล</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 8 } }} gutterBottom>ตำบล</Typography>
                             <TextField size="small" fullWidth value={subDistrict} onChange={(e) => setSubDistrict(e.target.value)} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 7.5} }} gutterBottom>อำเภอ</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 7.5 } }} gutterBottom>อำเภอ</Typography>
                             <TextField size="small" fullWidth value={district} onChange={(e) => setDistrict(e.target.value)} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 7} }} gutterBottom>จังหวัด</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 7 } }} gutterBottom>จังหวัด</Typography>
                             <TextField size="small" fullWidth value={province} onChange={(e) => setProvince(e.target.value)} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 3.5} }} gutterBottom>รหัสไปรณีย์</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 3.5 } }} gutterBottom>รหัสไปรณีย์</Typography>
                             <TextField size="small" fullWidth value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 5.5} }} gutterBottom>เบอร์โทร</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5.5 } }} gutterBottom>เบอร์โทร</Typography>
                             <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
                         </Grid>
                         <Grid item md={6} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: {md: 0, xs: 2.5} }} gutterBottom>เลขผู้เสียภาษี</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 2.5 } }} gutterBottom>เลขผู้เสียภาษี</Typography>
                             <TextField size="small" fullWidth value={codeID} onChange={(e) => setCodeID(e.target.value)} />
                         </Grid>
                         <Grid item md={6} xs={12} display="flex" justifyContent="center" alignItems="center">

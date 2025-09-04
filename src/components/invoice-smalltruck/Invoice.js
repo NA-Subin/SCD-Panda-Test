@@ -482,7 +482,7 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                           </TablecellPink>
                           <TablecellPink
                             onClick={() => handleSort("TicketName")}
-                            sx={{ textAlign: "center", fontSize: 16, width: 300 }}
+                            sx={{ textAlign: "center", fontSize: 16, width: 350 }}
                           >
                             <Box display="flex" alignItems="center" justifyContent="center">
                               ชื่อตั๋ว
@@ -493,16 +493,16 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                               )}
                             </Box>
                           </TablecellPink>
-                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                             จำนวนลิตร
                           </TablecellPink>
-                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                             ยอดเงิน
                           </TablecellPink>
-                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                             ยอดโอน
                           </TablecellPink>
-                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                             ค้างโอน
                           </TablecellPink>
                         </TableRow>
@@ -527,8 +527,10 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                         .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : Number(row.CreditTime), "day")
                                     )}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {row.TicketName.split(":")[1]}
+                                  <TableCell sx={{ textAlign: "left", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                    <Box sx={{ marginLeft: 4 }}>
+                                      {row.TicketName.split(":")[1]}
+                                    </Box>
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
@@ -629,13 +631,13 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                       sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
                         .map((row, index) => (
                           (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate}  openNavbar={openNavbar} />
+                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
                             : ""
                         ))
                       :
                       sortedOrderDetail.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?
-                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate}  openNavbar={openNavbar} />
+                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
                           : ""
                       ))
                   }
