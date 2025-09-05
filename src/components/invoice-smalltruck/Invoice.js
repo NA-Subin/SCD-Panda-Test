@@ -249,6 +249,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
   console.log("sortedOrderDetail : ", sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0)));
   console.log("Order Detail : ", orderDetail);
 
+  console.log("show : ", sortedOrderDetail);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 

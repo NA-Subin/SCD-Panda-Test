@@ -160,6 +160,16 @@ const TripsSmallTruck = ({ openNavbar }) => {
         setPage(0);
     };
 
+    const maxOrder = tripDetail.length > 0
+        ? Math.max(
+            ...tripDetail.map(row =>
+                Object.keys(row)
+                    .filter(k => k.startsWith("Order"))
+                    .map(k => Number(k.replace("Order", "")))
+            ).flat()
+        )
+        : 0;
+
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
             {/* <Typography
@@ -298,7 +308,7 @@ const TripsSmallTruck = ({ openNavbar }) => {
                             >
                                 <TableHead>
                                     <TableRow sx={{ height: "7vh" }}>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 60 }}>
                                             ลำดับ
                                         </TablecellPink>
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
@@ -307,43 +317,40 @@ const TripsSmallTruck = ({ openNavbar }) => {
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             วันที่ส่ง
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                             ชื่อ/ทะเบียนรถ
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 1
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 2
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 3
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 4
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 5
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 6
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 7
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
-                                            ลำดับที่ 8
-                                        </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        {(() => {
+                                            // หา key ที่เป็น Order*
+                                            const maxOrder = tripDetail.length > 0
+                                                ? Math.max(
+                                                    ...tripDetail.map(row =>
+                                                        Object.keys(row)
+                                                            .filter(k => k.startsWith("Order"))
+                                                            .map(k => Number(k.replace("Order", "")))
+                                                    ).flat()
+                                                )
+                                                : 0;
+
+                                            return Array.from({ length: maxOrder }, (_, i) => (
+                                                <TablecellPink
+                                                    key={`order-${i + 1}`}
+                                                    sx={{ textAlign: "center", fontSize: 16, width: 250 }}
+                                                >
+                                                    {`รายการที่ ${i + 1}`}
+                                                </TablecellPink>
+                                            ));
+                                        })()}
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ค่าเที่ยว
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ปริมาณน้ำมัน
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             น้ำหนักรถ
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
                                             น้ำหนักรวม
                                         </TablecellPink>
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
@@ -378,7 +385,7 @@ const TripsSmallTruck = ({ openNavbar }) => {
                                 <TableBody>
                                     {
                                         tripDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                                            <TripsDetail key={row.id} trips={row} index={index} windowWidth={windowWidth} />
+                                            <TripsDetail key={row.id} trips={row} index={index} windowWidth={windowWidth} maxOrder={maxOrder} />
                                         ))
                                     }
                                 </TableBody>

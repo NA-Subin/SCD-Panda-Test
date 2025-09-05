@@ -329,46 +329,46 @@ const TripsBigTruck = ({ openNavbar }) => {
                                         <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             วันที่ส่ง
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                                             คลังรับน้ำมัน
                                         </TablecellTickets>
                                         <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
                                             ชื่อ/ทะเบียนรถ
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 1
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 2
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 3
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 4
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 5
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 6
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 7
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 230 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 280 }}>
                                             ลำดับที่ 8
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ค่าเที่ยว
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ปริมาณน้ำมัน
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             น้ำหนักรถ
                                         </TablecellTickets>
-                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             น้ำหนักรวม
                                         </TablecellTickets>
                                         <TablecellTickets sx={{ textAlign: "center", fontSize: 16, width: 120 }}>

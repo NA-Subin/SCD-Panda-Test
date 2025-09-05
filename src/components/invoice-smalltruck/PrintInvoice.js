@@ -16,24 +16,25 @@ const PrintInvoiceSmallTruck = () => {
     const timer = setTimeout(() => {
       const element = document.querySelector("#invoiceContent");
 
+      const isA4 = data?.PaperSize === "แนวตั้ง";
+
       const opt = {
-        margin: 0, // ไม่ต้องเว้น margin นอก page ถ้าใน element มี padding แล้ว
+        margin: 0,
         filename: `O-${data.Code}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
-          scale: 2,           // เพิ่มความคมชัด
-          useCORS: true       // รองรับภาพจาก URL ต่างโดเมน (ถ้ามี)
+          scale: 2,
+          useCORS: true
         },
         jsPDF: {
-          unit: 'cm',         // ใช้หน่วยเดียวกับ CSS
-          format: 'a4',
-          orientation: 'portrait'
+          unit: "cm",
+          format: isA4 ? "a4" : "a5",                  // ✅ สลับ A4/A5
+          orientation: isA4 ? "portrait" : "landscape" // ✅ แนวตั้ง / แนวนอน
         }
       };
 
       html2pdf().set(opt).from(element).save();
     }, 500);
-
 
     return () => clearTimeout(timer);
   }, []);
@@ -235,8 +236,8 @@ const PrintInvoiceSmallTruck = () => {
         <Box
           id="invoiceContent"
           sx={{
-            width: "21cm",
-            minHeight: "27cm", // ใช้ minHeight เผื่อเนื้อหาเกิน
+            width: invoiceData?.PaperSize === "แนวตั้ง" ? "21cm" : "21cm",        // ✅ กว้างตามแนวนอน A5
+            height: invoiceData?.PaperSize === "แนวตั้ง" ? "29.5cm" : "14.7cm",  // ✅ สูงตาม A5 แนวนอน
             backgroundColor: "#fff",
             padding: "0.7cm",      // เว้น margin ภายในเนื้อหา
             paddingRight: 1,
@@ -244,7 +245,7 @@ const PrintInvoiceSmallTruck = () => {
             border: "1px solid lightgray"
           }}
         >
-          <Grid container spacing={2}>
+          <Grid container spacing={2} marginTop={-3}>
             <Grid item xs={8}>
               {invoiceC ? (
                 <React.Fragment>
@@ -279,10 +280,10 @@ const PrintInvoiceSmallTruck = () => {
             </Grid>
           </Grid>
           {invoiceData && (
-            <Grid container spacing={2} marginTop={2} sx={{ px: 2 }}>
+            <Grid container spacing={2} marginTop={0.5} sx={{ px: 2 }}>
               {/* ส่วนข้อมูลบริษัท */}
-              <Grid item xs={10} sx={{ border: "2px solid black", height: "140px" }}>
-                <Box sx={{ padding: 0.5 }}>
+              <Grid item xs={10} sx={{ border: "2px solid black", height: "115px" }}>
+                <Box>
                   <Box display="flex" alignItems="center" justifyContent="left" >
                     <Typography variant="subtitle2"><b>ชื่อบริษัท:</b></Typography>
                     <Typography variant="subtitle2" marginLeft={1}>{invoiceData?.Order[0].CompanyName}</Typography>
@@ -304,41 +305,41 @@ const PrintInvoiceSmallTruck = () => {
               {/* ส่วนวันที่และเลขที่เอกสาร */}
               <Grid item xs={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
+                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "25px" }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
                   </Grid>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
+                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
                     <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{formatThai(invoiceData?.Date)}</Typography>
                   </Grid>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
+                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "25px" }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
                   </Grid>
-                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "40px" }}>
+                  <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", borderBottom: "2px solid black", height: "35px" }}>
                     <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{invoiceData?.Code}</Typography>
                   </Grid>
                 </Grid>
               </Grid>
 
               {/* ตารางใบวางบิล */}
-              <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, marginTop: 5, border: "2px solid black" }}>
+              <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, marginTop: 2, border: "2px solid black" }}>
                 <TableHead>
                   <TableRow sx={{ borderBottom: "2px solid black", height: "50px" }}>
-                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "12%" }}>
+                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "48px" }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>วันที่</Typography>
                     </TableCell>
-                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "47%" }}>
+                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "250px" }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>ผู้ขับ/ป้ายทะเบียน</Typography>
                     </TableCell>
-                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "8%" }}>
+                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "40px" }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: -0.5 }} gutterBottom>ชนิดน้ำมัน</Typography>
                     </TableCell>
-                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "11%" }}>
+                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "44px" }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>จำนวนลิตร</Typography>
                     </TableCell>
-                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "11%" }}>
+                    <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", width: "47px" }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>ราคาต่อลิตร</Typography>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center", width: "11%" }}>
+                    <TableCell sx={{ textAlign: "center", width: "50px" }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>ยอดเงิน</Typography>
                     </TableCell>
                   </TableRow>
@@ -350,8 +351,10 @@ const PrintInvoiceSmallTruck = () => {
                         <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY").format("DD/MM/YYYY"))}</Typography>
                         </TableCell>
-                        <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{`${row.Driver} / ${row.Registration}`}</Typography>
+                        <TableCell sx={{ borderRight: "2px solid black", textAlign: "left", }}>
+                          <Box marginLeft={1}>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{`${row.Driver} ${row.ShortName} ${row.Registration}`}</Typography>
+                          </Box>
                         </TableCell>
                         <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{row.ProductName}</Typography>
@@ -380,7 +383,7 @@ const PrintInvoiceSmallTruck = () => {
                     <TableCell colSpan={2} sx={{ textAlign: "left" }}>
                       <Box sx={{ display: "flex", justifyContent: "left", alignItems: "center" }}>
                         <Typography variant="subtitle2" fontWeight="bold" fontSize="15px" sx={{ marginRight: 1 }} gutterBottom>กำหนดชำระเงิน : </Typography>
-                        <Typography variant="subtitle2" gutterBottom>{invoiceData?.DateEnd}</Typography>
+                        <Typography variant="subtitle1" gutterBottom>{invoiceData?.DateEnd}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
@@ -414,18 +417,20 @@ const PrintInvoiceSmallTruck = () => {
               </Table>
 
               <Grid item xs={12}>
-                <Grid container spacing={2} justifyContent="center" alignItems="center">
-                  <Grid item xs={5}>
-                    <Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด กสิกรไทย</Typography>
-                    <Typography variant="subtitle2" gutterBottom>1. เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
-                    <Typography variant="subtitle2" gutterBottom>2. ป่าแดด...เชียงราย 062-8-16524-6</Typography>
-                    <Typography variant="subtitle2" gutterBottom>3. พะเยา - แม่ต่ำ 065-1-88088-2</Typography>
+                <Grid container spacing={2} marginTop={-3} justifyContent="center" alignItems="center">
+                  <Grid item xs={4.5}>
+                    <Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด</Typography>
+                    <Typography variant="subtitle2" gutterBottom>กสิกรไทย</Typography>
+                    <Typography variant="subtitle2" gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
+                    <Typography variant="subtitle2" gutterBottom>ป่าแดด...เชียงราย 062-8-16524-6</Typography>
+                    <Typography variant="subtitle2" gutterBottom>พะเยา - แม่ต่ำ 065-1-88088-2</Typography>
                   </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="subtitle2" gutterBottom>กรุงเทพ เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
+                  <Grid item xs={5}>
+                    <Typography variant="subtitle2" gutterBottom>กรุงเทพ</Typography>
+                    <Typography variant="subtitle2" gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
                     <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
                   </Grid>
-                  <Grid item xs={3} sx={{ textAlign: "center" }}>
+                  <Grid item xs={2.5} sx={{ textAlign: "center" }}>
                     <Box width="100%" borderTop="2px solid black" sx={{ marginTop: 3.5 }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ marginTop: 0.5 }} gutterBottom>ผู้วางบิล</Typography>
                     </Box>

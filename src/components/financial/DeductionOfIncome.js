@@ -47,7 +47,7 @@ import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InsertDeducetionIncome from "./InsertDeductionIncome";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
-import { formatThaiFull } from "../../theme/DateTH";
+import { formatThaiFull, formatThaiYear } from "../../theme/DateTH";
 import { buildPeriodsForYear, findCurrentPeriod } from "./Paid";
 
 const DeductionOfIncome = (props) => {
@@ -390,7 +390,7 @@ const DeductionOfIncome = (props) => {
                                     size: "small",
                                     fullWidth: true,
                                     inputProps: {
-                                        value: selectedDate ? selectedDate.format("YYYY") : "",
+                                        value: selectedDate ? formatThaiYear(selectedDate.format("YYYY")) : "",
                                         readOnly: true,
                                     },
                                     InputProps: {

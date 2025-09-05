@@ -38,6 +38,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import AddIcon from '@mui/icons-material/Add';
+import NoteIcon from '@mui/icons-material/Note';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import PrintIcon from '@mui/icons-material/Print';
@@ -68,6 +69,7 @@ const UpdateInvoice = (props) => {
     const [formData, setFormData] = useState({}); // เก็บค่าฟอร์มชั่วคราว
     const [show, setShow] = useState(false);
     const [test, setTest] = useState([]);
+    const [paperSize, setPaperSize] = useState("แนวตั้ง");
     const FUEL_ORDER = ["G95", "B95", "B7", "G91", "E20", "PWD"];
     const [windowWidths, setWindowWidths] = useState(window.innerWidth);
 
@@ -435,7 +437,8 @@ const UpdateInvoice = (props) => {
             Address: companyName.Address,
             CardID: companyName.CardID,
             Phone: companyName.Phone,
-            Code: Code
+            Code: Code,
+            PaperSize: paperSize
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -715,8 +718,8 @@ const UpdateInvoice = (props) => {
                     </Typography>
                     {/* <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -2.5, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography> */}
                 </Grid>
-                <Grid item md={5.5} xs={12}></Grid>
-                <Grid item md={4.5} xs={8} textAlign="right">
+                <Grid item md={4.5} xs={12}></Grid>
+                <Grid item md={4.5} xs={7} textAlign="right">
                     <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 0.5 }}>
                         <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice}>
                             NEW
@@ -787,6 +790,71 @@ const UpdateInvoice = (props) => {
                             value={"สาขาสำนักงานใหญ่"}
                         />
                     </Box>
+                </Grid>
+                <Grid item md={1} xs={1}>
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                        {/* ปุ่มแนวตั้ง */}
+                        <Box
+                            onClick={() => setPaperSize("แนวตั้ง")}
+                            sx={{
+                                p: 0.5,
+                                borderRadius: 2,
+                                cursor: "pointer",
+                                border: paperSize === "แนวตั้ง" ? "2px solid #1976d2" : "1px solid lightgray",
+                                backgroundColor: paperSize === "แนวตั้ง" ? "#E3F2FD" : "transparent",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <NoteIcon sx={{ transform: "rotate(270deg)" }} />
+                        </Box>
+
+                        {/* ปุ่มแนวนอน */}
+                        <Box
+                            onClick={() => setPaperSize("แนวนอน")}
+                            sx={{
+                                p: 0.5,
+                                borderRadius: 2,
+                                cursor: "pointer",
+                                border: paperSize === "แนวนอน" ? "2px solid #1976d2" : "1px solid lightgray",
+                                backgroundColor: paperSize === "แนวนอน" ? "#E3F2FD" : "transparent",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <NoteIcon sx={{ transform: "rotate(0deg)" }} />
+                        </Box>
+                    </Box>
+                    {/* <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                        <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            InputLabelProps={{
+                                sx: {
+                                    fontSize: '14px',
+                                },
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    height: '25px', // ปรับความสูงของ TextField
+                                    display: 'flex', // ใช้ flexbox
+                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                },
+                                '& .MuiInputBase-input': {
+                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                },
+                            }}
+                            value={paperSize}
+                            onChange={(e) => setPaperSize(e.target.value)}
+                        >
+                            <MenuItem value="แนวตั้ง">แนวตั้ง</MenuItem>
+                            <MenuItem value="แนวนอน">แนวนอน</MenuItem>
+                        </TextField>
+                    </Box> */}
                 </Grid>
                 <Grid item md={1.5} xs={4}>
                     <Tooltip title="พิมพ์ใบวางบิล" placement="top">

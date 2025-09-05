@@ -52,6 +52,7 @@ import InsertSpendingAbout from "./InsertSpendingAbout";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 import { Details } from "@mui/icons-material";
+import { formatThaiFull, formatThaiShort, formatThaiSlash } from "../../theme/DateTH";
 
 const InsertFinancial = () => {
     // const { reghead, regtail, small, report, reportType } = useData();
@@ -70,9 +71,18 @@ const InsertFinancial = () => {
     const [details, setDetails] = React.useState("");
     const [company, setCompany] = React.useState("");
     const [bank, setBank] = React.useState("");
-    const [price, setPrice] = React.useState(0);
-    const [vat, setVat] = React.useState(0);
-    const [total, setTotal] = React.useState(0);
+    const [price, setPrice] = useState(0);
+    const [vat, setVat] = useState(0);
+    const [total, setTotal] = useState(0);
+    const [manualTotal, setManualTotal] = useState(false); // เช็คว่าผู้ใช้แก้ total โดยตรง
+
+    // คำนวณ total เมื่อ price หรือ vat เปลี่ยน และ total ไม่ได้แก้เอง
+    useEffect(() => {
+        if (!manualTotal) {
+            setTotal(Number(price) + Number(vat));
+        }
+    }, [price, vat]);
+
     const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [result, setResult] = useState(false);
@@ -318,6 +328,10 @@ const InsertFinancial = () => {
                                                 textField: {
                                                     size: "small",
                                                     fullWidth: true,
+                                                    inputProps: {
+                                                        value: formatThaiSlash(selectedDateInvoice), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                        readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                    },
                                                 },
                                             }}
                                         />
@@ -341,6 +355,10 @@ const InsertFinancial = () => {
                                                 textField: {
                                                     size: "small",
                                                     fullWidth: true,
+                                                    inputProps: {
+                                                        value: formatThaiSlash(selectedDateTransfer), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                        readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                    },
                                                 },
                                             }}
                                         />
@@ -610,62 +628,57 @@ const InsertFinancial = () => {
                                     <Box display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5 }} gutterBottom>ยอดก่อน Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                            <TextField size="small" type="number" fullWidth
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                fullWidth
                                                 value={price}
-                                                onChange={(e) => setPrice(e.target.value)}
-                                                onFocus={(e) => {
-                                                    if (e.target.value === "0") {
-                                                        setPrice(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                                    }
+                                                onChange={(e) => {
+                                                    setPrice(e.target.value);
+                                                    setManualTotal(false); // price เปลี่ยน → total คำนวณอัตโนมัติ
                                                 }}
-                                                onBlur={(e) => {
-                                                    if (e.target.value === "") {
-                                                        setPrice(0); // ถ้าค่าว่างให้เป็น 0
-                                                    }
-                                                }}
+                                                onFocus={(e) => e.target.value === "0" && setPrice("")}
+                                                onBlur={(e) => e.target.value === "" && setPrice(0)}
                                             />
                                         </Paper>
                                     </Box>
                                 </Grid>
+
                                 <Grid item md={6} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอด Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                            <TextField size="small" type="number" fullWidth
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                fullWidth
                                                 value={vat}
-                                                onChange={(e) => setVat(e.target.value)}
-                                                onFocus={(e) => {
-                                                    if (e.target.value === "0") {
-                                                        setVat(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                                    }
+                                                onChange={(e) => {
+                                                    setVat(e.target.value);
+                                                    setManualTotal(false); // vat เปลี่ยน → total คำนวณอัตโนมัติ
                                                 }}
-                                                onBlur={(e) => {
-                                                    if (e.target.value === "") {
-                                                        setVat(0); // ถ้าค่าว่างให้เป็น 0
-                                                    }
-                                                }}
+                                                onFocus={(e) => e.target.value === "0" && setVat("")}
+                                                onBlur={(e) => e.target.value === "" && setVat(0)}
                                             />
                                         </Paper>
                                     </Box>
                                 </Grid>
+
                                 <Grid item md={12} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>ยอดรวม</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                            <TextField size="small" type="number" fullWidth
-                                                value={Number(price) + Number(vat)}
-                                                onChange={(e) => setTotal(e.target.value)}
-                                                onFocus={(e) => {
-                                                    if (e.target.value === "0") {
-                                                        setTotal(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
-                                                    }
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                fullWidth
+                                                value={total}
+                                                onChange={(e) => {
+                                                    setTotal(e.target.value);
+                                                    setManualTotal(true); // ผู้ใช้แก้ total โดยตรง
                                                 }}
-                                                onBlur={(e) => {
-                                                    if (e.target.value === "") {
-                                                        setTotal(0); // ถ้าค่าว่างให้เป็น 0
-                                                    }
-                                                }}
-                                                disabled
+                                                onFocus={(e) => e.target.value === "0" && setTotal("")}
+                                                onBlur={(e) => e.target.value === "" && setTotal(0)}
                                             />
                                         </Paper>
                                     </Box>
@@ -765,7 +778,10 @@ const InsertFinancial = () => {
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     <TextField size="small" type="number" fullWidth
                                                                         value={price}
-                                                                        onChange={(e) => setPrice(e.target.value)}
+                                                                        onChange={(e) => {
+                                                                            setPrice(e.target.value);
+                                                                            setManualTotal(false); // vat เปลี่ยน → total คำนวณอัตโนมัติ
+                                                                        }}
                                                                         onFocus={(e) => {
                                                                             if (e.target.value === "0") {
                                                                                 setPrice(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
@@ -786,7 +802,10 @@ const InsertFinancial = () => {
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     <TextField size="small" type="number" fullWidth
                                                                         value={vat}
-                                                                        onChange={(e) => setVat(e.target.value)}
+                                                                        onChange={(e) => {
+                                                                            setVat(e.target.value);
+                                                                            setManualTotal(false); // vat เปลี่ยน → total คำนวณอัตโนมัติ
+                                                                        }}
                                                                         onFocus={(e) => {
                                                                             if (e.target.value === "0") {
                                                                                 setVat(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
@@ -806,8 +825,11 @@ const InsertFinancial = () => {
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     <TextField size="small" type="number" fullWidth
-                                                                        value={Number(price) + Number(vat)}
-                                                                        onChange={(e) => setTotal(e.target.value)}
+                                                                        value={total}
+                                                                        onChange={(e) => {
+                                                                            setTotal(e.target.value);
+                                                                            setManualTotal(true); // ผู้ใช้แก้ total โดยตรง
+                                                                        }}
                                                                         onFocus={(e) => {
                                                                             if (e.target.value === "0") {
                                                                                 setTotal(""); // ล้างค่า 0 เมื่อเริ่มพิมพ์
@@ -818,7 +840,6 @@ const InsertFinancial = () => {
                                                                                 setTotal(0); // ถ้าค่าว่างให้เป็น 0
                                                                             }
                                                                         }}
-                                                                        disabled
                                                                     />
                                                                 </Paper>
                                                             </Box>

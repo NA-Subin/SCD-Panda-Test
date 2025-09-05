@@ -39,7 +39,7 @@ import UpdateTrip from "./UpdateTrip";
 import { formatThaiSlash } from "../../theme/DateTH";
 
 const TripsDetail = (props) => {
-    const { trips, windowWidth, index } = props;
+    const { trips, windowWidth, index, maxOrder } = props;
     const [approve, setApprove] = React.useState(false);
 
     const handleApprove = () => {
@@ -99,118 +99,19 @@ const TripsDetail = (props) => {
                     </Box>
                     {/* {trips.Driver}/{trips.Registration} */}
                 </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order1 === undefined ?
-                                "-"
-                                :
-                                (trips.Order1.split(":")[1] !== undefined ?
-                                    trips.Order1.split(":")[1]
-                                    :
-                                    trips.Order1
-                                )
-                        }
-                    </Box>
-                </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order2 === undefined ?
-                                "-"
-                                :
-                                (trips.Order2.split(":")[1] !== undefined ?
-                                    trips.Order2.split(":")[1]
-                                    :
-                                    trips.Order2
-                                )
-                        }
-                    </Box>
-                </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order3 === undefined ?
-                                "-"
-                                :
-                                (trips.Order3.split(":")[1] !== undefined ?
-                                    trips.Order3.split(":")[1]
-                                    :
-                                    trips.Order3
-                                )
-                        }
-                    </Box>
-                </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order4 === undefined ?
-                                "-"
-                                :
-                                (trips.Order4.split(":")[1] !== undefined ?
-                                    trips.Order4.split(":")[1]
-                                    :
-                                    trips.Order4
-                                )
-                        }
-                    </Box>
-                </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order5 === undefined ?
-                                "-"
-                                :
-                                (trips.Order5.split(":")[1] !== undefined ?
-                                    trips.Order5.split(":")[1]
-                                    :
-                                    trips.Order5
-                                )
-                        }
-                    </Box>
-                </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order6 === undefined ?
-                                "-"
-                                :
-                                (trips.Order6.split(":")[1] !== undefined ?
-                                    trips.Order6.split(":")[1]
-                                    :
-                                    trips.Order6
-                                )
-                        }
-                    </Box>
-                </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order7 === undefined ?
-                                "-"
-                                :
-                                (trips.Order7.split(":")[1] !== undefined ?
-                                    trips.Order7.split(":")[1]
-                                    :
-                                    trips.Order7
-                                )
-                        }
-                    </Box>
-                </TableCell>
-                <TableCell sx={{ textAlign: "left" }}>
-                    <Box sx={{ marginLeft: 2 }}>
-                        {
-                            trips.Order8 === undefined ?
-                                "-"
-                                :
-                                (trips.Order8.split(":")[1] !== undefined ?
-                                    trips.Order8.split(":")[1]
-                                    :
-                                    trips.Order8
-                                )
-                        }
-                    </Box>
-                </TableCell>
+                {/* ✅ Order dynamic */}
+                {Array.from({ length: maxOrder }, (_, i) => {
+                    const key = `Order${i + 1}`;
+                    return (
+                        <TableCell key={key} sx={{ textAlign: "left" }}>
+                            <Box sx={{ marginLeft: 2 }}>
+                                {trips[key]
+                                    ? (trips[key].split(":")[1] ?? trips[key])
+                                    : "-"}
+                            </Box>
+                        </TableCell>
+                    );
+                })}
                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,

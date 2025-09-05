@@ -47,7 +47,7 @@ import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
-import { formatThaiFull } from "../../theme/DateTH";
+import { formatThaiFull, formatThaiYear } from "../../theme/DateTH";
 import { buildPeriodsForYear, findCurrentPeriod } from "../financial/Paid";
 import MoneyGuarantee from "./MoneyGuarantee";
 import MoneyLoan from "./MoneyLoan";
@@ -305,7 +305,7 @@ const DocSalary = ({ openNavbar }) => {
                                             size: "small",
                                             fullWidth: true,
                                             inputProps: {
-                                                value: selectedDate ? selectedDate.format("YYYY") : "",
+                                                value: selectedDate ? formatThaiYear(selectedDate.format("YYYY")) : "",
                                                 readOnly: true,
                                             },
                                             InputProps: {
