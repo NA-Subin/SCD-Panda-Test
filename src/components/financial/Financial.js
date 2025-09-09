@@ -26,6 +26,7 @@ import {
     TableBody,
     TableCell,
     TableContainer,
+    TableFooter,
     TableHead,
     TablePagination,
     TableRow,
@@ -391,7 +392,7 @@ const Financial = () => {
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     วันที่โอน
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 5 }}>
                                     ป้ายทะเบียน
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
@@ -423,7 +424,7 @@ const Financial = () => {
                                         <TableCell sx={{ textAlign: "center" }}>{row.InvoiceID}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateInvoice}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateTransfer}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{`${row.Registration.split(":")[1]} (${row.TruckType})`}</TableCell>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white" }}>{`${row.Registration.split(":")[1]} (${row.TruckType})`}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Company.split(":")[1]}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>{row.Bank}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
@@ -461,6 +462,34 @@ const Financial = () => {
                                 ))
                             }
                         </TableBody>
+                        {
+                            reportDetail.length !== 0 &&
+                            <TableFooter
+                                sx={{
+                                    position: "sticky",
+                                    height: "5vh",
+                                    bottom: 0,
+                                    zIndex: 2,
+                                    backgroundColor: theme.palette.primary.dark,
+                                }}
+                            >
+                                <TableRow>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }} colSpan={7} >
+                                        รวม
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                        ยอดก่อน Vat
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        ยอด VAT
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 600 }} colSpan={2}>
+                                        รวม
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
+                                </TableRow>
+                            </TableFooter>
+                        }
                     </Table>
                     {
                         reportDetail.length <= 10 ? null :

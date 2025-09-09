@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
     Badge,
     Box,
@@ -26,6 +26,7 @@ import {
     TableBody,
     TableCell,
     TableContainer,
+    TableFooter,
     TableHead,
     TablePagination,
     TableRow,
@@ -275,6 +276,46 @@ const DeductionOfIncome = (props) => {
         );
     }
 
+    const { processedGroups, totalIncome, totalExpense } = useMemo(() => {
+        let income = 0;
+        let expense = 0;
+
+        // ✅ สร้าง array ของ groups ที่ sort แล้ว
+        const processed = sortedGroups.map(([driverName, rows]) => {
+            const sortedRows = [...rows].sort((a, b) => {
+                const codeA = a.Code;
+                const codeB = b.Code;
+
+                if (codeA[0] !== codeB[0]) {
+                    if (codeA[0] === "R") return -1;
+                    if (codeB[0] === "R") return 1;
+                }
+
+                const numA = parseInt(codeA.slice(1), 10);
+                const numB = parseInt(codeB.slice(1), 10);
+                return numA - numB;
+            });
+
+            // ✅ รวมยอดใน group
+            sortedRows.forEach((row) => {
+                if (row.Type === "รายได้") {
+                    income += Number(row.Money);
+                } else if (row.Type === "รายหัก") {
+                    expense += Number(row.Money);
+                }
+            });
+
+            return { driverName, sortedRows };
+        });
+
+        return {
+            processedGroups: processed,
+            totalIncome: income,
+            totalExpense: expense,
+        };
+    }, [sortedGroups]); // 👈 คำนวณใหม่เมื่อ sortedGroups เปลี่ยน
+
+
     return (
         // <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
         //     <Grid container>
@@ -505,11 +546,18 @@ const DeductionOfIncome = (props) => {
                     }}
                 >
                     <Table
-                        stickyHeader
                         size="small"
                         sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "100%" }}
                     >
-                        <TableHead sx={{ height: "5vh" }}>
+                        <TableHead
+                            sx={{
+                                position: "sticky",
+                                height: "5vh",
+                                top: 0,
+                                zIndex: 2,
+                                backgroundColor: theme.palette.primary.dark,
+                            }}
+                        >
                             <TableRow>
                                 <TablecellSelling width={30} sx={{ textAlign: "center", fontSize: 16 }}>
                                     ลำดับ
@@ -536,25 +584,8 @@ const DeductionOfIncome = (props) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {sortedGroups.map(([driverName, rows]) => {
-                                // ✅ sort ข้างใน group
-                                const sortedRows = [...rows].sort((a, b) => {
-                                    const codeA = a.Code;
-                                    const codeB = b.Code;
-
-                                    // 1) ถ้า prefix ต่างกัน ให้ R มาก่อน D
-                                    if (codeA[0] !== codeB[0]) {
-                                        if (codeA[0] === "R") return -1;
-                                        if (codeB[0] === "R") return 1;
-                                    }
-
-                                    // 2) ถ้า prefix เหมือนกัน ให้เปรียบเทียบตัวเลขหลัง prefix
-                                    const numA = parseInt(codeA.slice(1), 10);
-                                    const numB = parseInt(codeB.slice(1), 10);
-                                    return numA - numB;
-                                });
-
-                                return sortedRows.map((row, rowIndex) => (
+                            {processedGroups.map(({ driverName, sortedRows }) =>
+                                sortedRows.map((row, rowIndex) => (
                                     <TableRow key={row.id}>
                                         {/* ✅ ลำดับแสดงเฉพาะแถวแรกของ driver */}
                                         {rowIndex === 0 && (
@@ -612,11 +643,39 @@ const DeductionOfIncome = (props) => {
                                             </Tooltip>
                                         </TableCell>
                                     </TableRow>
-                                ));
-                            })}
+                                ))
+                            )}
                         </TableBody>
+                        {
+                            sortedGroups.length !== 0 &&
+                            <TableFooter
+                                sx={{
+                                    position: "sticky",
+                                    height: "5vh",
+                                    bottom: 0,
+                                    zIndex: 2,
+                                    backgroundColor: theme.palette.primary.dark,
+                                }}
+                            >
+                                <TableRow>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }} colSpan={4}>
+                                        รวม
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        {new Intl.NumberFormat("en-US").format(totalIncome)}
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                        {new Intl.NumberFormat("en-US").format(totalExpense)}
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                        {new Intl.NumberFormat("en-US").format(totalIncome - totalExpense)}
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", width: 20, position: "sticky", right: 0, }} />
+                                </TableRow>
+                            </TableFooter>
+                        }
                     </Table>
-                    {
+                    {/* {
                         reportDetail.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
@@ -660,7 +719,7 @@ const DeductionOfIncome = (props) => {
                                     }
                                 }}
                             />
-                    }
+                    } */}
                 </TableContainer>
             </Grid>
         </Grid>

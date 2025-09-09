@@ -26,6 +26,7 @@ import {
     TableBody,
     TableCell,
     TableContainer,
+    TableFooter,
     TableHead,
     TablePagination,
     TableRow,
@@ -110,7 +111,13 @@ const DocSalary = ({ openNavbar }) => {
         });
 
     const driver = Object.values(drivers || {});
-    const tripDetail = Object.values(trip || {});
+    const tripDetail = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+    });
 
     const trips = periods
         .filter((p) => p.no === period)
@@ -274,6 +281,90 @@ const DocSalary = ({ openNavbar }) => {
         setPage(0);
     };
 
+    // 1) เตรียมตัวแปร summary ไว้
+    let summary = {
+        costrip: 0,
+        columns: Object.fromEntries(uniqueNames.map((c) => [c.id, 0])),
+        total: 0,
+        guarantee: 0,
+        loan: 0,
+    };
+
+    // 2) คำนวณทั้งหมดและเก็บลง summary
+    const processed = document.map((row, index) => {
+        const currentPeriod = Number(row.Period || period);
+        const tripsDetails = trips.filter((item) => item.TruckType === "รถใหญ่");
+
+        // ค่าเที่ยว
+        const costrip = tripsDetails
+            .filter(
+                (item) =>
+                    Number(item.Driver.split(":")[0]) === row.id &&
+                    item.TruckType === row.TruckType
+            )
+            .reduce((acc, cos) => acc + Number(cos.CostTrip || 0), 0);
+        summary.costrip += costrip;
+
+        // total ของ row
+        const total = row.document.reduce((acc, doc) => {
+            const [id] = doc.Name.split(":");
+            const col = uniqueNames.find((c) => c.id === id);
+            if (!col) return acc;
+            return col.type === "รายได้"
+                ? acc + Number(doc.Money)
+                : acc - Number(doc.Money);
+        }, 0);
+        summary.total += total;
+
+        // columns
+        row.document.forEach((doc) => {
+            const [id] = doc.Name.split(":");
+            const col = uniqueNames.find((c) => c.id === id);
+            if (!col) return;
+            const value = Number(doc.Money);
+            summary.columns[id] += col.type === "รายได้" ? value : -value;
+        });
+
+        // เงินค้ำประกัน
+        const moneyGuarantee = reports.filter(
+            (doc) =>
+                doc.Name.split(":")[1] === "เงินค้ำประกัน" &&
+                doc.Status !== "ยกเลิก" &&
+                Number(doc.Period) <= currentPeriod &&
+                String(doc.Driver).split(":")[0] === String(row.id)
+        );
+        const guaranteeTotal = moneyGuarantee.reduce(
+            (acc, doc) => acc + Number(doc.Money),
+            0
+        );
+        summary.guarantee += guaranteeTotal;
+
+        // เงินกู้ยืม
+        const moneyLoan = reports.filter(
+            (doc) =>
+                doc.Name.split(":")[1] === "เบิกเงินกู้ยืม" &&
+                doc.Status !== "ยกเลิก" &&
+                Number(doc.Period) <= currentPeriod &&
+                String(doc.Driver).split(":")[0] === String(row.id)
+        );
+        const loanTotal = moneyLoan.reduce(
+            (acc, doc) => acc + Number(doc.Money),
+            0
+        );
+        summary.loan += loanTotal;
+
+        // return object สำหรับ render ทีหลัง
+        return {
+            index,
+            row,
+            costrip,
+            total,
+            moneyGuarantee: moneyGuarantee,
+            moneyLoan: moneyLoan,
+        };
+    });
+
+
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
             <Grid container>
@@ -413,17 +504,192 @@ const DocSalary = ({ openNavbar }) => {
                             component={Paper}
                             sx={{
                                 height: "65vh",
-                                marginLeft: 1
+                                display: "flex",
+                                flexDirection: "column",
+                                marginLeft: 1,
+                                overflowX: "auto"
                             }}
                         >
+                            {/* <Box sx={{ flex: "0 0 auto", width: "1600px" }}>
+                                <Table
+                                    size="small"
+                                    sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                                >
+                                    <TableHead
+                                        sx={{ backgroundColor: theme.palette.primary.dark, }}
+                                    >
+                                        <TableRow>
+                                            <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                                ลำดับ
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
+                                                พนักงานขับรถ
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                                ป้ายทะเบียน
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                                เลขบัญชี
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                ค่าเที่ยว
+                                            </TablecellSelling>
+                                            {uniqueNames.map((col) => (
+                                                <TablecellSelling key={col.id} sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                                    {col.name}
+                                                </TablecellSelling>
+                                            ))}
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                                ยอดรวม
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 170 }}>
+                                                ยอดสะสมเงินค้ำประกัน
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 170 }}>
+                                                ยอดสะสมเงินกู้ยืม
+                                            </TablecellSelling>
+                                        </TableRow>
+                                    </TableHead>
+                                </Table>
+                            </Box>
+
+                            <Box sx={{ flex: "1 1 auto", width: "1600px", overflow: "auto" }}>
+                                <Table
+                                    size="small"
+                                    sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                                >
+                                    <TableBody>
+                                        {processed.map(({ index, row, costrip, total, moneyGuarantee, moneyLoan }) => (
+                                            <TableRow key={index}>
+                                                <TableCell sx={{ textAlign: "center", width: 50 }}>{index + 1}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 200, position: "sticky", left: 0, zIndex: 5, backgroundColor: "white" }}>{row.Name}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 250 }}>{row.Registration}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 150 }}>{row.BankID}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 100 }}>{new Intl.NumberFormat("en-US").format(costrip)}</TableCell>
+
+                                                {uniqueNames.map((col) => {
+                                                    const found = row.document.find(
+                                                        (doc) => doc.Name.split(":")[0] === col.id
+                                                    );
+
+                                                    let displayMoney = "";
+                                                    if (found) {
+                                                        displayMoney = col.type === "รายได้" ? found.Money : `-${found.Money}`;
+                                                    }
+
+                                                    return (
+                                                        <TableCell key={col.id} align="center" sx={{ width: 150 }}>
+                                                            {new Intl.NumberFormat("en-US").format(displayMoney || 0)}
+                                                        </TableCell>
+                                                    );
+                                                })}
+
+                                                <TableCell align="center" sx={{ width: 120 }}>{new Intl.NumberFormat("en-US").format(total)}</TableCell>
+
+                                                <TableCell sx={{ width: 170 }}>
+                                                    <Box
+                                                        display="flex"
+                                                        justifyContent="space-between" // ไอคอนชิดขวา
+                                                        alignItems="center"           // ตัวเลขและไอคอนกึ่งกลางแนวตั้ง
+                                                        width="100%"
+                                                    >
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            sx={{
+                                                                lineHeight: 1,
+                                                                textAlign: "center",
+                                                                width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
+                                                            }}
+                                                        >
+                                                            {new Intl.NumberFormat("en-US").format(moneyGuarantee.reduce((acc, doc) => acc + Number(doc.Money), 0))}
+                                                        </Typography>
+
+                                                        <MoneyGuarantee money={moneyGuarantee} periods={periods} />
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell sx={{ width: 170 }}>
+                                                    <Box
+                                                        display="flex"
+                                                        justifyContent="space-between" // ไอคอนชิดขวา
+                                                        alignItems="center"           // ตัวเลขและไอคอนกึ่งกลางแนวตั้ง
+                                                        width="100%"
+                                                    >
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            sx={{
+                                                                lineHeight: 1,
+                                                                textAlign: "center",
+                                                                width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
+                                                            }}
+                                                        >
+                                                            {new Intl.NumberFormat("en-US").format(moneyLoan.reduce((acc, doc) => acc + Number(doc.Money), 0))}
+                                                        </Typography>
+
+                                                        <MoneyLoan money={moneyLoan} periods={periods} />
+                                                    </Box>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                        )}
+
+                                    </TableBody>
+                                </Table>
+                            </Box>
+
+                            <Box sx={{ flex: "0 0 auto", width: "1600px" }}>
+                                <Table
+                                    size="small"
+                                    sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" } }}
+                                >
+                                    <TableHead
+                                        sx={{ backgroundColor: theme.palette.primary.dark, }}
+                                    >
+                                        <TableRow>
+                                            <TablecellSelling colSpan={4} sx={{ textAlign: "center", fontSize: 16, width: 650 }}>
+                                                รวม
+                                            </TablecellSelling>
+
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                                {new Intl.NumberFormat("en-US").format(summary.costrip)}
+                                            </TablecellSelling>
+
+                                            {uniqueNames.map((col) => (
+                                                <TablecellSelling key={col.id} sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                                    {new Intl.NumberFormat("en-US").format(summary.columns[col.id] || 0)}
+                                                </TablecellSelling>
+                                            ))}
+
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                                {new Intl.NumberFormat("en-US").format(summary.total)}
+                                            </TablecellSelling>
+
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 170 }}>
+                                                {new Intl.NumberFormat("en-US").format(summary.guarantee)}
+                                            </TablecellSelling>
+
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 170 }}>
+                                                {new Intl.NumberFormat("en-US").format(summary.loan)}
+                                            </TablecellSelling>
+                                        </TableRow>
+                                    </TableHead>
+                                </Table>
+                            </Box> */}
+
                             <Table
-                                stickyHeader
                                 size="small"
                                 sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1600px" }}
                             >
-                                <TableHead sx={{ height: "5vh" }}>
+                                <TableHead
+                                    sx={{
+                                        position: "sticky",
+                                        height: "5vh",
+                                        top: 0,
+                                        zIndex: 2,
+                                        backgroundColor: theme.palette.primary.dark,
+                                    }}
+                                >
                                     <TableRow>
-                                        <TablecellSelling width={30} sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
@@ -452,178 +718,167 @@ const DocSalary = ({ openNavbar }) => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 170 }}>
                                             ยอดสะสมเงินกู้ยืม
                                         </TablecellSelling>
-                                        {/* <TablecellSelling sx={{ textAlign: "center", width: 20, position: "sticky", right: 0, }} /> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {document.map((row, index) => {
-                                        // คำนวณ total ของ row นี้ (ยกเว้น เงินค้ำประกัน, เงินกู้ยืม)
-                                        const currentPeriod = Number(row.Period || period); // ใช้ period ปัจจุบันถ้า row ไม่มี
+                                    {processed.map(({ index, row, costrip, total, moneyGuarantee, moneyLoan }) => (
+                                        <TableRow key={index}>
+                                            <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
+                                            <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white" }}>{row.Name}</TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(costrip)}</TableCell>
 
-                                        // คำนวณ total ของ row (ยกเว้นเงินค้ำประกัน, เงินกู้ยืม)
-                                        const total = row.document.reduce((acc, doc) => {
-                                            const [id, name] = doc.Name.split(":");
-                                            // if (["เงินค้ำประกัน", "เบิกเงินกู้ยืม"].includes(name)) return acc;
+                                            {uniqueNames.map((col) => {
+                                                const found = row.document.find(
+                                                    (doc) => doc.Name.split(":")[0] === col.id
+                                                );
 
-                                            const col = uniqueNames.find((c) => c.id === id);
-                                            if (!col) return acc;
+                                                let displayMoney = "";
+                                                if (found) {
+                                                    displayMoney = col.type === "รายได้" ? found.Money : `-${found.Money}`;
+                                                }
 
-                                            return col.type === "รายได้"
-                                                ? acc + Number(doc.Money)
-                                                : acc - Number(doc.Money);
-                                        }, 0);
+                                                return (
+                                                    <TableCell key={col.id} align="center">
+                                                        {new Intl.NumberFormat("en-US").format(displayMoney || 0)}
+                                                    </TableCell>
+                                                );
+                                            })}
 
-                                        const costrip = trips
-                                            .filter((item) => Number(item.Driver.split(":")[0]) === row.id && item.TruckType === row.TruckType)
-                                            .reduce((acc, cos) => acc + Number(cos.CostTrip || 0), 0);
+                                            <TableCell align="center">{new Intl.NumberFormat("en-US").format(total)}</TableCell>
 
-                                        // คำนวณ เงินค้ำประกัน
-                                        const moneyGuarantee = reports
-                                            .filter(
-                                                (doc) =>
-                                                    doc.Name.split(":")[1] === "เงินค้ำประกัน" &&
-                                                    doc.Status !== "ยกเลิก" &&
-                                                    Number(doc.Period) <= currentPeriod &&
-                                                    String(doc.Driver).split(":")[0] === String(row.id)
-                                            );
-
-                                        // คำนวณ เบิกเงินกู้ยืม จาก reports (รวมสะสมแต่ Period <= currentPeriod)
-                                        const moneyLoan = reports
-                                            .filter(
-                                                (doc) =>
-                                                    doc.Name.split(":")[1] === "เบิกเงินกู้ยืม" &&
-                                                    doc.Status !== "ยกเลิก" &&
-                                                    Number(doc.Period) <= currentPeriod &&
-                                                    String(doc.Driver).split(":")[0] === String(row.id)
-                                            );
-
-                                        return (
-                                            <TableRow key={index}>
-                                                <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(costrip)}</TableCell>
-
-                                                {uniqueNames.map((col) => {
-                                                    const found = row.document.find(
-                                                        (doc) => doc.Name.split(":")[0] === col.id
-                                                    );
-
-                                                    let displayMoney = "";
-                                                    if (found) {
-                                                        displayMoney = col.type === "รายได้" ? found.Money : `-${found.Money}`;
-                                                    }
-
-                                                    return (
-                                                        <TableCell key={col.id} align="center">
-                                                            {new Intl.NumberFormat("en-US").format(displayMoney || 0)}
-                                                        </TableCell>
-                                                    );
-                                                })}
-
-                                                {/* แสดงผลรวมของ row */}
-                                                <TableCell align="center">{new Intl.NumberFormat("en-US").format(total)}</TableCell>
-
-                                                {/* แสดง เงินค้ำประกัน และ เงินกู้ยืม แยก column */}
-                                                <TableCell>
-                                                    <Box
-                                                        display="flex"
-                                                        justifyContent="space-between" // ไอคอนชิดขวา
-                                                        alignItems="center"           // ตัวเลขและไอคอนกึ่งกลางแนวตั้ง
-                                                        width="100%"
+                                            <TableCell>
+                                                <Box
+                                                    display="flex"
+                                                    justifyContent="space-between" // ไอคอนชิดขวา
+                                                    alignItems="center"           // ตัวเลขและไอคอนกึ่งกลางแนวตั้ง
+                                                    width="100%"
+                                                >
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            lineHeight: 1,
+                                                            textAlign: "center",
+                                                            width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
+                                                        }}
                                                     >
-                                                        {/* ตัวเลขอยู่กลางแนวตั้ง แต่ไม่ขยับไปซ้าย/ขวา */}
-                                                        <Typography
-                                                            variant="subtitle2"
-                                                            sx={{
-                                                                lineHeight: 1,
-                                                                textAlign: "center",
-                                                                width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
-                                                            }}
-                                                        >
-                                                            {new Intl.NumberFormat("en-US").format(moneyGuarantee.reduce((acc, doc) => acc + Number(doc.Money), 0))}
-                                                        </Typography>
+                                                        {new Intl.NumberFormat("en-US").format(moneyGuarantee.reduce((acc, doc) => acc + Number(doc.Money), 0))}
+                                                    </Typography>
 
-                                                        {/* Icon ชิดขวา */}
-                                                        <MoneyGuarantee money={moneyGuarantee} periods={periods} />
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Box
-                                                        display="flex"
-                                                        justifyContent="space-between" // ไอคอนชิดขวา
-                                                        alignItems="center"           // ตัวเลขและไอคอนกึ่งกลางแนวตั้ง
-                                                        width="100%"
+                                                    <MoneyGuarantee money={moneyGuarantee} periods={periods} />
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box
+                                                    display="flex"
+                                                    justifyContent="space-between" // ไอคอนชิดขวา
+                                                    alignItems="center"           // ตัวเลขและไอคอนกึ่งกลางแนวตั้ง
+                                                    width="100%"
+                                                >
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            lineHeight: 1,
+                                                            textAlign: "center",
+                                                            width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
+                                                        }}
                                                     >
-                                                        {/* ตัวเลขอยู่กลางแนวตั้ง แต่ไม่ขยับไปซ้าย/ขวา */}
-                                                        <Typography
-                                                            variant="subtitle2"
-                                                            sx={{
-                                                                lineHeight: 1,
-                                                                textAlign: "center",
-                                                                width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
-                                                            }}
-                                                        >
-                                                            {new Intl.NumberFormat("en-US").format(moneyLoan.reduce((acc, doc) => acc + Number(doc.Money), 0))}
-                                                        </Typography>
+                                                        {new Intl.NumberFormat("en-US").format(moneyLoan.reduce((acc, doc) => acc + Number(doc.Money), 0))}
+                                                    </Typography>
 
-                                                        {/* Icon ชิดขวา */}
-                                                        <MoneyLoan money={moneyLoan} periods={periods} />
-                                                    </Box>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
+                                                    <MoneyLoan money={moneyLoan} periods={periods} />
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                    )}
 
                                 </TableBody>
+                                <TableFooter
+                                    sx={{
+                                        position: "sticky",
+                                        height: "5vh",
+                                        bottom: 0,
+                                        zIndex: 2,
+                                        backgroundColor: theme.palette.primary.dark,
+                                    }}
+                                >
+                                    <TableRow>
+                                        <TablecellSelling colSpan={4} sx={{ textAlign: "center", fontSize: 16 }}>
+                                            รวม
+                                        </TablecellSelling>
+
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            {new Intl.NumberFormat("en-US").format(summary.costrip)}
+                                        </TablecellSelling>
+
+                                        {uniqueNames.map((col) => (
+                                            <TablecellSelling key={col.id} sx={{ textAlign: "center", fontSize: 16 }}>
+                                                {new Intl.NumberFormat("en-US").format(summary.columns[col.id] || 0)}
+                                            </TablecellSelling>
+                                        ))}
+
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            {new Intl.NumberFormat("en-US").format(summary.total)}
+                                        </TablecellSelling>
+
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            {new Intl.NumberFormat("en-US").format(summary.guarantee)}
+                                        </TablecellSelling>
+
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            {new Intl.NumberFormat("en-US").format(summary.loan)}
+                                        </TablecellSelling>
+                                    </TableRow>
+                                </TableFooter>
                             </Table>
-                            {
-                                reportDetail.length <= 10 ? null :
-                                    <TablePagination
-                                        rowsPerPageOptions={[10, 25, 30]}
-                                        component="div"
-                                        count={reportDetail.length}
-                                        rowsPerPage={rowsPerPage}
-                                        page={page}
-                                        onPageChange={handleChangePage}
-                                        onRowsPerPageChange={handleChangeRowsPerPage}
-                                        labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
-                                        labelDisplayedRows={({ from, to, count }) =>
-                                            `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
-                                        }
-                                        sx={{
-                                            overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
-                                            borderBottomLeftRadius: 5,
-                                            borderBottomRightRadius: 5,
-                                            '& .MuiTablePagination-toolbar': {
-                                                backgroundColor: "lightgray",
-                                                height: "20px", // กำหนดความสูงของ toolbar
-                                                alignItems: "center",
-                                                paddingY: 0, // ลด padding บนและล่างให้เป็น 0
-                                                overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
-                                                fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
-                                            },
-                                            '& .MuiTablePagination-select': {
-                                                paddingY: 0,
-                                                fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
-                                            },
-                                            '& .MuiTablePagination-actions': {
-                                                '& button': {
-                                                    paddingY: 0,
-                                                    fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
-                                                },
-                                            },
-                                            '& .MuiTablePagination-displayedRows': {
-                                                fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
-                                            },
-                                            '& .MuiTablePagination-selectLabel': {
-                                                fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
-                                            }
-                                        }}
-                                    />
-                            }
                         </TableContainer>
+                        {/* {
+                            document.length <= 10 ? null :
+                                <TablePagination
+                                    rowsPerPageOptions={[10, 25, 30]}
+                                    component="div"
+                                    count={document.length}
+                                    rowsPerPage={rowsPerPage}
+                                    page={page}
+                                    onPageChange={handleChangePage}
+                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                    labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+                                    labelDisplayedRows={({ from, to, count }) =>
+                                        `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+                                    }
+                                    sx={{
+                                        overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+                                        borderBottomLeftRadius: 5,
+                                        borderBottomRightRadius: 5,
+                                        '& .MuiTablePagination-toolbar': {
+                                            backgroundColor: "lightgray",
+                                            height: "20px", // กำหนดความสูงของ toolbar
+                                            alignItems: "center",
+                                            paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+                                            overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+                                            fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+                                        },
+                                        '& .MuiTablePagination-select': {
+                                            paddingY: 0,
+                                            fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                                        },
+                                        '& .MuiTablePagination-actions': {
+                                            '& button': {
+                                                paddingY: 0,
+                                                fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+                                            },
+                                        },
+                                        '& .MuiTablePagination-displayedRows': {
+                                            fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+                                        },
+                                        '& .MuiTablePagination-selectLabel': {
+                                            fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                                        }
+                                    }}
+                                />
+                        } */}
                     </Grid>
                 </Grid>
             </Box>

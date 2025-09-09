@@ -10,34 +10,34 @@ import { formatThaiSlash } from "../../theme/DateTH";
 
 const PrintInvoice = () => {
   useEffect(() => {
-      const data = JSON.parse(sessionStorage.getItem("invoiceData"));
-  
-      // หน่วงให้ DOM render ก่อน
-      const timer = setTimeout(() => {
-        const element = document.querySelector("#invoiceContent");
-  
-        const isA4 = data?.PaperSize === "แนวตั้ง";
-  
-        const opt = {
-          margin: 0,
-          filename: `O-${data.Code}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true
-          },
-          jsPDF: {
-            unit: "cm",
-            format: isA4 ? "a4" : "a5",                  // ✅ สลับ A4/A5
-            orientation: isA4 ? "portrait" : "landscape" // ✅ แนวตั้ง / แนวนอน
-          }
-        };
-  
-        html2pdf().set(opt).from(element).save();
-      }, 500);
-  
-      return () => clearTimeout(timer);
-    }, []);
+    const data = JSON.parse(sessionStorage.getItem("invoiceData"));
+
+    // หน่วงให้ DOM render ก่อน
+    const timer = setTimeout(() => {
+      const element = document.querySelector("#invoiceContent");
+
+      const isA4 = data?.PaperSize === "แนวตั้ง";
+
+      const opt = {
+        margin: 0,
+        filename: `O-${data.Code}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true
+        },
+        jsPDF: {
+          unit: "cm",
+          format: isA4 ? "a4" : "a5",                  // ✅ สลับ A4/A5
+          orientation: isA4 ? "portrait" : "landscape" // ✅ แนวตั้ง / แนวนอน
+        }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
   // useEffect(() => {
   //   const data = JSON.parse(sessionStorage.getItem("invoiceData"));
 
@@ -265,7 +265,7 @@ const PrintInvoice = () => {
         >
           <Grid container spacing={1}>
             <Grid item xs={8}>
-              {invoiceC ? (
+              {/* {invoiceC ? (
                 <React.Fragment>
                   <Typography variant="h6" fontWeight="bold" gutterBottom>
                     {invoiceC.Name}
@@ -289,7 +289,16 @@ const PrintInvoice = () => {
                     เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData.CardID)}
                   </Typography>
                 </React.Fragment>
-              )}
+              )} */}
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                {invoiceData.Company}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
+                {formatAddress(invoiceData.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData.Phone)}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
+                เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData.CardID)}
+              </Typography>
             </Grid>
             <Grid item xs={4} textAlign="right">
               <Typography variant="h6" sx={{ marginRight: 2, fontWeight: "Light" }}>

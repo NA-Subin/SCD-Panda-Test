@@ -102,7 +102,8 @@ const UpdateInvoice = (props) => {
         invoiceReport
     } = useTripData();
 
-    const { company, reghead } = useBasicData();
+    const { company, reghead, customerbigtruck } = useBasicData();
+    const customerB = Object.values(customerbigtruck || {});
     const registrationHead = Object.values(reghead || {});
 
     // const orders = Object.values(order || {});
@@ -366,6 +367,15 @@ const UpdateInvoice = (props) => {
         });
     };
 
+    const customer = customerB.find((row, index) => (row.id === Number(ticket.TicketName.split(":")[0])));
+    const invoiceC = companies.find((row) => {
+        const companyIdStr = customer?.Company;
+        if (!companyIdStr || companyIdStr === "ไม่มี") return false;
+
+        const companyId = Number(companyIdStr.split(":")[0]);
+        return row.id === companyId;
+    });
+
     const generatePDF = () => {
         let Code = ""
         if (invoices.length !== 0) {
@@ -433,10 +443,10 @@ const UpdateInvoice = (props) => {
             Amount: ticket.TotalAmount || 0,
             Date: invoices[0].DateStart,
             DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
-            Company: companyName.Name,
-            Address: companyName.Address,
-            CardID: companyName.CardID,
-            Phone: companyName.Phone,
+            Company: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Name : customer?.Company.split(":")[1],
+            Address: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Address : customer?.Address,
+            CardID: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.CardID : customer?.CardID,
+            Phone: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Phone : customer?.Phone,
             Code: Code,
             PaperSize: paperSize
         };
@@ -709,6 +719,13 @@ const UpdateInvoice = (props) => {
 
     console.log("Transfer : ", transfer);
 
+    console.log("ticket : ", ticket);
+    console.log("customer : ", customer);
+    console.log("invoiceC : ", invoiceC);
+    console.log("customer?.Company : ", customer?.Company);
+    console.log("companyName?.Name : ", companyName?.Name);
+    console.log("companyName : ", companyName);
+
     return (
         <React.Fragment>
             <Grid container spacing={2}>
@@ -718,8 +735,8 @@ const UpdateInvoice = (props) => {
                     </Typography>
                     {/* <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -2.5, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography> */}
                 </Grid>
-                <Grid item md={4.5} xs={12}></Grid>
-                <Grid item md={4.5} xs={7} textAlign="right">
+                <Grid item md={3.5} xs={12}></Grid>
+                <Grid item md={5.5} xs={7} textAlign="right">
                     <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 0.5 }}>
                         <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice}>
                             NEW
@@ -742,6 +759,7 @@ const UpdateInvoice = (props) => {
                                     textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                     marginLeft: -1
                                 },
+                                width: "250px"
                             }}
                             value={invoices[0]?.Code || `lV${currentCode}`}
                         />
@@ -764,31 +782,41 @@ const UpdateInvoice = (props) => {
                                     marginRight: -2
                                 },
                                 marginRight: 1,
-                                width: "250px"
+                                width: "200px"
                             }}
                             value={invoices[0]?.Number || ""}
                         />
-                        <TextField size="small"
-                            disabled
-                            InputLabelProps={{
-                                sx: {
-                                    fontSize: '14px',
-                                },
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '25px', // ปรับความสูงของ TextField
-                                    display: 'flex', // ใช้ flexbox
-                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                },
-                                '& .MuiInputBase-input': {
-                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
-                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                },
-                                width: "700px"
-                            }}
-                            value={"สาขาสำนักงานใหญ่"}
-                        />
+                        <Tooltip
+                            title={
+                                (
+                                    customer?.Company === "ไม่มี" || customer?.Company === undefined)
+                                    ? companyName.Name
+                                    : customer?.Company.split(":")[1]
+                            }
+                            placement="top"
+                        >
+                            <TextField size="small"
+                                disabled
+                                InputLabelProps={{
+                                    sx: {
+                                        fontSize: '14px',
+                                    },
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        height: '25px', // ปรับความสูงของ TextField
+                                        display: 'flex', // ใช้ flexbox
+                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                    },
+                                    width: "1000px"
+                                }}
+                                value={(customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Name : customer?.Company.split(":")[1]}
+                            />
+                        </Tooltip>
                     </Box>
                 </Grid>
                 <Grid item md={1} xs={1}>

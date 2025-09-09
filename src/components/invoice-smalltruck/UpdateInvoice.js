@@ -70,6 +70,11 @@ const UpdateInvoice = (props) => {
     const [show, setShow] = useState(false);
     const [test, setTest] = useState([]);
     const [paperSize, setPaperSize] = useState("แนวตั้ง");
+    const numberFormat = new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+
     const [windowWidths, setWindowWidths] = useState(window.innerWidth);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -101,7 +106,8 @@ const UpdateInvoice = (props) => {
         invoiceReport
     } = useTripData();
 
-    const { company, small } = useBasicData();
+    const { company, small, customersmalltruck } = useBasicData();
+    const customerS = Object.values(customersmalltruck || {});
 
     // const orders = Object.values(order || {});
     const orders = Object.values(order || {}).filter(item => {
@@ -197,6 +203,15 @@ const UpdateInvoice = (props) => {
         TicketNo: ticket.No,
         TicketType: ticket.CustomerType,
         Note: "",
+    });
+
+    const customer = customerS.find((row, index) => (row.id === Number(ticket.TicketName.split(":")[0])));
+    const invoiceC = companies.find((row) => {
+        const companyIdStr = customer?.Company;
+        if (!companyIdStr || companyIdStr === "ไม่มี") return false;
+
+        const companyId = Number(companyIdStr.split(":")[0]);
+        return row.id === companyId;
     });
 
     const [invoice, setInvoice] = React.useState({});
@@ -295,33 +310,56 @@ const UpdateInvoice = (props) => {
     //     return `กำหนดชำระเงิน: ${formattedDate}`;
     // };
 
+    // const calculateDueDate = (dateString, creditDays) => {
+    //     if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่";
+
+    //     const [day, month, year] = dateString.split("/").map(Number);
+    //     const date = new Date(year, month - 1, day);
+
+    //     date.setDate(date.getDate() + Number(creditDays));
+
+    //     const thaiMonths = [
+    //         "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    //         "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    //     ];
+
+    //     const dueDay = date.getDate();
+    //     const dueMonth = String(date.getMonth() + 1).padStart(2, "0");
+    //     // const dueDay = date.getDate();
+    //     // const dueMonth = thaiMonths[date.getMonth()];
+    //     const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
+
+    //     return `${dueDay}/${dueMonth}/${dueYear}`;
+    //     //return `วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
+    // };
+
     const calculateDueDate = (dateString, creditDays) => {
-        if (!dateString || !creditDays) return "ไม่พบข้อมูลวันที่";
+        if (!dateString) return "ไม่พบข้อมูลวันที่";
+
+        // แปลง creditDays เป็นเลข (ถ้าไม่ใช่ตัวเลขให้เป็น 0)
+        const days = Number(creditDays);
+        const safeCreditDays = isNaN(days) ? 0 : days;
 
         const [day, month, year] = dateString.split("/").map(Number);
         const date = new Date(year, month - 1, day);
 
-        date.setDate(date.getDate() + Number(creditDays));
-
-        const thaiMonths = [
-            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-        ];
+        date.setDate(date.getDate() + safeCreditDays);
 
         const dueDay = date.getDate();
         const dueMonth = String(date.getMonth() + 1).padStart(2, "0");
-        // const dueDay = date.getDate();
-        // const dueMonth = thaiMonths[date.getMonth()];
         const dueYear = date.getFullYear() + 543; // แปลงเป็น พ.ศ.
 
         return `${dueDay}/${dueMonth}/${dueYear}`;
-        //return `วันที่ ${dueDay} เดือน${dueMonth} พ.ศ.${dueYear}`;
     };
+
 
     // 🔥 ทดสอบโค้ด
     console.log("Date:", ticket.Date);
     console.log("Credit Time:", ticket.CreditTime);
-    console.log(calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime));
+    console.log(calculateDueDate(
+        ticket.Date,
+        Number(ticket.CreditTime) > 0 ? ticket.CreditTime : 0
+    ));
 
     console.log("orderList : ", orderList);
 
@@ -423,7 +461,7 @@ const UpdateInvoice = (props) => {
                         No: row.No,
                         TicketName: row.TicketName,
                         ShortName: row.ShortName,
-                        RateOil: Volume.RateOil.toFixed(2) || 0,
+                        RateOil: isNaN(Volume.RateOil) ? 0 : numberFormat.format(Volume.RateOil),
                         Amount: Volume.Amount || 0,
                         Date: row.Date,
                         Driver: row.Driver.split(":")[1],
@@ -443,11 +481,14 @@ const UpdateInvoice = (props) => {
             Volume: ticket.TotalVolume || 0,
             Amount: ticket.TotalAmount || 0,
             Date: invoices[0]?.DateStart,
-            DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
-            Company: companyName.Name,
-            Address: companyName.Address,
-            CardID: companyName.CardID,
-            Phone: companyName.Phone,
+            DateEnd: calculateDueDate(
+                ticket.Date,
+                Number(ticket.CreditTime) > 0 ? ticket.CreditTime : 0
+            ),
+            Company: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Name : customer?.Company.split(":")[1],
+            Address: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Address : customer?.Address,
+            CardID: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.CardID : customer?.CardID,
+            Phone: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Phone : customer?.Phone,
             Code: Code,
             PaperSize: paperSize
         };
@@ -710,6 +751,13 @@ const UpdateInvoice = (props) => {
     //         });
     // };
 
+    console.log("ticket : ", ticket);
+    console.log("customer : ", customer);
+    console.log("invoiceC : ", invoiceC);
+    console.log("customer?.Company : ", customer?.Company);
+    console.log("companyName?.Name : ", companyName?.Name);
+    console.log("companyName : ", companyName);
+
     return (
         <React.Fragment>
             <Grid container spacing={2}>
@@ -719,8 +767,8 @@ const UpdateInvoice = (props) => {
                     </Typography>
                     {/* <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -2.5, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography> */}
                 </Grid>
-                <Grid item md={4.5} xs={12}></Grid>
-                <Grid item md={4.5} xs={7} textAlign="right">
+                <Grid item md={3.5} xs={12}></Grid>
+                <Grid item md={5.5} xs={7} textAlign="right">
                     <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 0.5 }}>
                         <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice}>
                             NEW
@@ -743,6 +791,7 @@ const UpdateInvoice = (props) => {
                                     textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
                                     marginLeft: -1
                                 },
+                                width: "250px"
                             }}
                             value={invoices[0]?.Code || `lV${currentCode}`}
                         />
@@ -769,27 +818,37 @@ const UpdateInvoice = (props) => {
                             }}
                             value={invoices[0]?.Number || ""}
                         />
-                        <TextField size="small"
-                            disabled
-                            InputLabelProps={{
-                                sx: {
-                                    fontSize: '14px',
-                                },
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '25px', // ปรับความสูงของ TextField
-                                    display: 'flex', // ใช้ flexbox
-                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
-                                },
-                                '& .MuiInputBase-input': {
-                                    fontSize: '14px', // ขนาด font เวลาพิมพ์
-                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                },
-                                width: "700px"
-                            }}
-                            value={"สาขาสำนักงานใหญ่"}
-                        />
+                        <Tooltip
+                            title={
+                                (
+                                    customer?.Company === "ไม่มี" || customer?.Company === undefined)
+                                    ? companyName.Name
+                                    : customer?.Company.split(":")[1]
+                            }
+                            placement="top"
+                        >
+                            <TextField size="small"
+                                disabled
+                                InputLabelProps={{
+                                    sx: {
+                                        fontSize: '14px',
+                                    },
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        height: '25px', // ปรับความสูงของ TextField
+                                        display: 'flex', // ใช้ flexbox
+                                        alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        fontSize: '14px', // ขนาด font เวลาพิมพ์
+                                        textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                    },
+                                    width: "1000px"
+                                }}
+                                value={(customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Name : customer?.Company.split(":")[1]}
+                            />
+                        </Tooltip>
                     </Box>
                 </Grid>
                 <Grid item md={1} xs={1}>
@@ -938,7 +997,7 @@ const UpdateInvoice = (props) => {
                                                 .map(([productName, Volume], index) => ({
                                                     No: row.No,
                                                     TicketName: row.TicketName,
-                                                    RateOil: Volume.RateOil ? Volume.RateOil.toFixed(2) : 0,
+                                                    RateOil: isNaN(Volume.RateOil) ? 0 : numberFormat.format(Volume.RateOil),
                                                     Amount: Volume.Amount || 0,
                                                     Date: row.Date,
                                                     Driver: row.Driver,

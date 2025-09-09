@@ -56,11 +56,13 @@ const PrintInvoiceSmallTruck = () => {
   const customer = customerS.find((row, index) => (row.id === Number(invoiceData?.Order[0].TicketName.split(":")[0])));
   const invoiceC = companyDetail.find((row) => {
     const companyIdStr = customer?.Company;
-    if (!companyIdStr) return false;
+    if (!companyIdStr || companyIdStr === "ไม่มี") return false;
 
     const companyId = Number(companyIdStr.split(":")[0]);
     return row.id === companyId;
   });
+
+  console.log("customer?.Company : ", customer?.Company);
 
   let formattedAddress = "-"; // ค่าเริ่มต้นเป็น "-"
 
@@ -129,7 +131,7 @@ const PrintInvoiceSmallTruck = () => {
 
     const buddhistYear = year + 543; // แปลงปี ค.ศ. เป็น พ.ศ.
 
-    return `วันที่ ${day} เดือน ${formattedDate} พ.ศ. ${buddhistYear}`;
+    return `${date}`;
   };
 
   const formatAddressS = (address) => {
@@ -230,6 +232,9 @@ const PrintInvoiceSmallTruck = () => {
     });
   };
 
+  console.log("invoice C : ", invoiceC);
+  console.log("invoiceData : ", invoiceData);
+
   return (
     <Box display="flex" alignItems="center" justifyContent="center" marginTop={5} >
       <Box>
@@ -247,7 +252,7 @@ const PrintInvoiceSmallTruck = () => {
         >
           <Grid container spacing={2} marginTop={-3}>
             <Grid item xs={8}>
-              {invoiceC ? (
+              {/* {invoiceC ? (
                 <React.Fragment>
                   <Typography variant="h6" fontWeight="bold" gutterBottom>
                     {invoiceC.Name}
@@ -271,7 +276,16 @@ const PrintInvoiceSmallTruck = () => {
                     เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData.CardID)}
                   </Typography>
                 </React.Fragment>
-              )}
+              )} */}
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                {invoiceData.Company}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
+                {formatAddress(invoiceData.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData.Phone)}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
+                เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData.CardID)}
+              </Typography>
             </Grid>
             <Grid item xs={4} textAlign="right">
               <Typography variant="h6" sx={{ marginRight: 2, fontWeight: "Light" }}>
@@ -349,7 +363,7 @@ const PrintInvoiceSmallTruck = () => {
                     invoiceData.Report.map((row) => (
                       <TableRow sx={{ borderBottom: "2px solid black", height: "30px" }}>
                         <TableCell sx={{ borderRight: "2px solid black", textAlign: "center", }}>
-                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY").format("DD/MM/YYYY"))}</Typography>
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThai(row.Date)}</Typography>
                         </TableCell>
                         <TableCell sx={{ borderRight: "2px solid black", textAlign: "left", }}>
                           <Box marginLeft={1}>
