@@ -70,9 +70,34 @@ const MoneyLoan = ({ money, periods }) => {
 
     return (
         <React.Fragment>
-            <IconButton size="small" color="primary" onClick={handleClickOpen}>
-                <OpenInNewIcon sx={{ fontSize: "16px" }} />
-            </IconButton>
+            <TableCell
+                sx={{
+                    textAlign: "left",
+                    cursor: "pointer",
+                    "&:hover": {
+                        backgroundColor: "#ebf1ffff",
+                    },
+                }}
+                onClick={handleClickOpen}
+            >
+                <Box
+                    display="flex"
+                    justifyContent="space-between" // ไอคอนชิดขวา
+                    alignItems="center"           // ตัวเลขและไอคอนกึ่งกลางแนวตั้ง
+                    width="100%"
+                >
+                    <Typography
+                        variant="subtitle2"
+                        sx={{
+                            lineHeight: 1,
+                            textAlign: "center",
+                            width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
+                        }}
+                    >
+                        {new Intl.NumberFormat("en-US").format(money.reduce((acc, doc) => acc + Number(doc.Money), 0))}
+                    </Typography>
+                </Box>
+            </TableCell>
             <Dialog
                 open={open}
                 keepMounted

@@ -71,15 +71,40 @@ const InsertFinancial = () => {
     const [details, setDetails] = React.useState("");
     const [company, setCompany] = React.useState("");
     const [bank, setBank] = React.useState("");
-    const [price, setPrice] = useState(0);
-    const [vat, setVat] = useState(0);
-    const [total, setTotal] = useState(0);
+    const [price, setPrice] = useState("0.00");
+    const [vat, setVat] = useState("0.00");
+    const [total, setTotal] = useState("0.00");
+    const [resultPrice, setResultPrice] = useState("0.00");
+    const [resultVat, setResultVat] = useState("0.00");
+    const [resultTotal, setResultTotal] = useState("0.00");
     const [manualTotal, setManualTotal] = useState(false); // เช็คว่าผู้ใช้แก้ total โดยตรง
+
+    console.log("P : ", price);
+    console.log("V : ", vat);
+    console.log("T : ", total);
+    console.log("M : ", manualTotal);
+
+    console.log("RP : ", resultPrice);
+    console.log("RV : ", resultVat);
+    console.log("RT : ", resultTotal);
+
+    const parseNumber = (val) => {
+        if (typeof val === "string") {
+            return parseFloat(val.replace(/,/g, "")) || 0;
+        }
+        return Number(val) || 0;
+    };
+
 
     // คำนวณ total เมื่อ price หรือ vat เปลี่ยน และ total ไม่ได้แก้เอง
     useEffect(() => {
-        if (!manualTotal) {
-            setTotal(Number(price) + Number(vat));
+        if (manualTotal) {
+            const priceNum = parseNumber(price);
+            const vatNum = parseNumber(vat);
+            setTotal((priceNum + vatNum).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }));
         }
     }, [price, vat]);
 
@@ -111,9 +136,9 @@ const InsertFinancial = () => {
 
     const getRegistration = () => {
         const registartion = [
-            ...registrationH.map((item) => ({ ...item, TruckType: "หัวรถใหญ่" })),
-            ...registrationT.map((item) => ({ ...item, TruckType: "หางรถใหญ่" })),
-            ...registrationS.map((item) => ({ ...item, TruckType: "รถเล็ก" })),
+            ...registrationH.map((item) => ({ ...item, Registration: item.RegHead, TruckType: "หัวรถใหญ่" })),
+            ...registrationT.map((item) => ({ ...item, Registration: item.RegTail, TruckType: "หางรถใหญ่" })),
+            ...registrationS.map((item) => ({ ...item, Registration: item.RegHead, TruckType: "รถเล็ก" })),
         ];
 
         return registartion;
@@ -181,6 +206,32 @@ const InsertFinancial = () => {
                     : ""
     );
 
+    useEffect(() => {
+        if (manualTotal) {
+            if (list.length > 0) {
+                const priceNum = parseNumber(price);
+                const vatNum = parseNumber(vat);
+                const totalNum = parseNumber(total);
+                setResultPrice((priceNum / list.length).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }))
+                setResultVat((vatNum / list.length).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }))
+                setResultTotal((totalNum / list.length).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }))
+            } else {
+                setResultPrice("0.00");
+                setResultVat("0.00");
+                setResultTotal("0.00");
+            }
+        }
+    }, [price, vat, list]);  // 👈 เพิ่ม list เข้าไป
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -206,16 +257,17 @@ const InsertFinancial = () => {
                 InvoiceID: invoiceID,
                 SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
                 SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
-                Registration: item.truckType === "หัวรถ" || item.truckType === "รถเล็ก"
-                    ? `${item.registration}:${item?.RegHead || ""}`
-                    : `${item.registration}:${item?.RegTail || ""}`,
+                // Registration: item.truckType === "หัวรถ" || item.truckType === "รถเล็ก"
+                //     ? `${item.registration}:${item?.RegHead || ""}`
+                //     : `${item.registration}:${item?.RegTail || ""}`,
+                Registration: item.registration,
                 Company: `${company?.id}:${company?.Name}`,
                 Details: details,
                 Bank: `${bank?.id}:${bank?.Name}`,
                 Note: note,
-                Price: parseFloat((price / list.length).toFixed(2)),
-                Vat: parseFloat((vat / list.length).toFixed(2)),
-                Total: parseFloat(((Number(price) + Number(vat)) / list.length).toFixed(2)),
+                Price: list.length <= 1 ? parseNumber(price) : parseNumber(resultPrice),
+                Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
+                Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
                 TruckType: item.truckType,
                 Status: "อยู่ในระบบ"
             };
@@ -250,7 +302,6 @@ const InsertFinancial = () => {
     console.log("registrationTruck: ", registrationTruck);
     console.log("Group : ", group);
     console.log("List : ", list);
-
 
     return (
         <React.Fragment>
@@ -438,24 +489,10 @@ const InsertFinancial = () => {
                                         options={(getRegistration() || []).filter(
                                             (option) => option?.TruckType === truckTypeMap[type]
                                         )}
-                                        getOptionLabel={(option) => {
-                                            if (!option) return "";
-                                            if (type === "หัวรถ" || type === "รถเล็ก") {
-                                                return `${option?.RegHead} (${option?.TruckType})`;
-                                            }
-                                            if (type === "หางรถ") {
-                                                return `${option?.RegTail} (${option?.TruckType})`;
-                                            }
-                                            return "";
-                                        }}
+                                        getOptionLabel={(option) => { return `${option?.Registration} (${option?.TruckType})`; }}
                                         value={selectedValue}  // แสดงค่าที่เลือกปัจจุบัน
                                         onChange={(event, newValue) => {
                                             if (newValue) {
-                                                const reg =
-                                                    type === "หัวรถ" || type === "รถเล็ก"
-                                                        ? `${newValue.id}:${newValue.RegHead}`
-                                                        : `${newValue.id}:${newValue.RegTail}`;
-
                                                 setSelectedValue(newValue);
 
                                                 setList((prev) => {
@@ -464,14 +501,14 @@ const InsertFinancial = () => {
                                                         invoiceID: invoiceID,
                                                         dateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
                                                         dateTranfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
-                                                        registration: reg,
+                                                        registration: `${newValue.id}:${newValue.Registration}`,
                                                         company: company,
                                                         details: details,
                                                         bank: bank,
                                                         note: note,
-                                                        price: price,
-                                                        vat: vat,
-                                                        total: Number(price) + Number(vat),
+                                                        price: parseNumber(price),
+                                                        vat: parseNumber(vat),
+                                                        total: parseNumber(price) + parseNumber(vat),
                                                         truckType: newValue?.TruckType,
                                                     };
 
@@ -481,6 +518,18 @@ const InsertFinancial = () => {
                                                         return [...prev, newItem]; // เพิ่มได้หลายรายการ
                                                     }
                                                 });
+                                                // setResultPrice((Number(price) / list.length).toLocaleString("en-US", {
+                                                //     minimumFractionDigits: 2,
+                                                //     maximumFractionDigits: 2,
+                                                // }))
+                                                // setResultVat((Number(vat) / list.length).toLocaleString("en-US", {
+                                                //     minimumFractionDigits: 2,
+                                                //     maximumFractionDigits: 2,
+                                                // }))
+                                                // setResultTotal(((Number(price) + Number(vat)) / list.length).toLocaleString("en-US", {
+                                                //     minimumFractionDigits: 2,
+                                                //     maximumFractionDigits: 2,
+                                                // }))
                                             } else {
                                                 setSelectedValue(null);  // เคลียร์ถ้าเลือกลบค่า
                                             }
@@ -535,6 +584,8 @@ const InsertFinancial = () => {
                                                     setGroup("เดี่ยว");
                                                     setList([]);
                                                     setSelectedValue(null);
+                                                    setPrice("0.00");
+                                                    setVat("0.00");
                                                 }}
                                             />
                                         }
@@ -550,6 +601,8 @@ const InsertFinancial = () => {
                                                     setGroup("กลุ่ม");
                                                     setList([]);
                                                     setSelectedValue(null);
+                                                    setPrice("0.00");
+                                                    setVat("0.00");
                                                 }}
                                             />
                                         }
@@ -628,7 +681,7 @@ const InsertFinancial = () => {
                                     <Box display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5 }} gutterBottom>ยอดก่อน Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                            <TextField
+                                            {/* <TextField
                                                 size="small"
                                                 type="number"
                                                 fullWidth
@@ -639,6 +692,40 @@ const InsertFinancial = () => {
                                                 }}
                                                 onFocus={(e) => e.target.value === "0" && setPrice("")}
                                                 onBlur={(e) => e.target.value === "" && setPrice(0)}
+                                            /> */}
+                                            <TextField
+                                                size="small"
+                                                type="text"
+                                                fullWidth
+                                                value={price}
+                                                onChange={(e) => {
+                                                    // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                    const raw = e.target.value.replace(/,/g, "");
+                                                    if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                        setPrice(raw);
+                                                    }
+                                                    setManualTotal(true);
+                                                }}
+                                                onBlur={(e) => {
+                                                    const val = parseFloat(price);
+                                                    if (isNaN(val)) {
+                                                        setPrice("0" || "0.00");
+                                                    } else {
+                                                        setPrice(
+                                                            val.toLocaleString("en-US", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })
+                                                        );
+                                                    }
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0" || e.target.value === "0.00") {
+                                                        setPrice("");
+                                                    } else {
+                                                        setPrice(price.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                    }
+                                                }}
                                             />
                                         </Paper>
                                     </Box>
@@ -648,7 +735,7 @@ const InsertFinancial = () => {
                                     <Box display="flex" justifyContent="center" alignItems="center">
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอด Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                            <TextField
+                                            {/* <TextField
                                                 size="small"
                                                 type="number"
                                                 fullWidth
@@ -659,6 +746,40 @@ const InsertFinancial = () => {
                                                 }}
                                                 onFocus={(e) => e.target.value === "0" && setVat("")}
                                                 onBlur={(e) => e.target.value === "" && setVat(0)}
+                                            /> */}
+                                            <TextField
+                                                size="small"
+                                                type="text"
+                                                fullWidth
+                                                value={vat}
+                                                onChange={(e) => {
+                                                    // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                    const raw = e.target.value.replace(/,/g, "");
+                                                    if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                        setVat(raw);
+                                                    }
+                                                    setManualTotal(true);
+                                                }}
+                                                onBlur={(e) => {
+                                                    const val = parseFloat(vat);
+                                                    if (isNaN(val)) {
+                                                        setVat("0" || "0.00");
+                                                    } else {
+                                                        setVat(
+                                                            val.toLocaleString("en-US", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })
+                                                        );
+                                                    }
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0" || e.target.value === "0.00") {
+                                                        setVat("");
+                                                    } else {
+                                                        setVat(vat.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                    }
+                                                }}
                                             />
                                         </Paper>
                                     </Box>
@@ -670,22 +791,66 @@ const InsertFinancial = () => {
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField
                                                 size="small"
-                                                type="number"
+                                                type="text"
                                                 fullWidth
                                                 value={total}
                                                 onChange={(e) => {
-                                                    setTotal(e.target.value);
+                                                    // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                    const raw = e.target.value.replace(/,/g, "");
+                                                    if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                        setTotal(raw);
+                                                    }
+                                                    setManualTotal(true);
+                                                }}
+                                                onBlur={(e) => {
+                                                    const val = parseFloat(total);
+                                                    if (isNaN(val)) {
+                                                        setTotal("0" || "0.00");
+                                                    } else {
+                                                        setTotal(
+                                                            val.toLocaleString("en-US", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            })
+                                                        );
+                                                    }
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0" || e.target.value === "0.00") {
+                                                        setTotal("");
+                                                    } else {
+                                                        setTotal(total.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                    }
+                                                }}
+                                            />
+                                            {/* <TextField
+                                                size="small"
+                                                type="text" // ❗ ต้องใช้ text ไม่ใช่ number เพื่อให้ format 1,234.56 แสดงได้
+                                                fullWidth
+                                                value={Number(total).toLocaleString("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })}
+                                                onChange={(e) => {
+                                                    // ลบ comma ออกก่อนแล้ว parse เป็น float
+                                                    const raw = e.target.value.replace(/,/g, "");
+                                                    const val = parseFloat(raw);
+                                                    setTotal(isNaN(val) ? 0 : val);
                                                     setManualTotal(true); // ผู้ใช้แก้ total โดยตรง
                                                 }}
-                                                onFocus={(e) => e.target.value === "0" && setTotal("")}
-                                                onBlur={(e) => e.target.value === "" && setTotal(0)}
-                                            />
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0.00") setTotal("");
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") setTotal(0);
+                                                }}
+                                            /> */}
                                         </Paper>
                                     </Box>
                                 </Grid>
                             </React.Fragment>
                         }
-                        <Grid item md={12} xs={12}>
+                        {/* <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3 }} gutterBottom>หมายเหตุ</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
@@ -699,7 +864,7 @@ const InsertFinancial = () => {
                                     />
                                 </Paper>
                             </Box>
-                        </Grid>
+                        </Grid> */}
                         {
                             (!result && group === "กลุ่ม") &&
                             <Grid item xs={12}>
@@ -776,7 +941,7 @@ const InsertFinancial = () => {
                                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอดก่อน Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                                    <TextField size="small" type="number" fullWidth
+                                                                    {/* <TextField size="small" type="number" fullWidth
                                                                         value={price}
                                                                         onChange={(e) => {
                                                                             setPrice(e.target.value);
@@ -792,6 +957,40 @@ const InsertFinancial = () => {
                                                                                 setPrice(0); // ถ้าค่าว่างให้เป็น 0
                                                                             }
                                                                         }}
+                                                                    /> */}
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={price}
+                                                                        onChange={(e) => {
+                                                                            // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                                            const raw = e.target.value.replace(/,/g, "");
+                                                                            if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                                                setPrice(raw);
+                                                                            }
+                                                                            setManualTotal(true);
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            const val = parseFloat(price);
+                                                                            if (isNaN(val)) {
+                                                                                setPrice("0" || "0.00");
+                                                                            } else {
+                                                                                setPrice(
+                                                                                    val.toLocaleString("en-US", {
+                                                                                        minimumFractionDigits: 2,
+                                                                                        maximumFractionDigits: 2,
+                                                                                    })
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0" || e.target.value === "0.00") {
+                                                                                setPrice("");
+                                                                            } else {
+                                                                                setPrice(price.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                                            }
+                                                                        }}
                                                                     />
                                                                 </Paper>
                                                             </Box>
@@ -800,7 +999,7 @@ const InsertFinancial = () => {
                                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                                    <TextField size="small" type="number" fullWidth
+                                                                    {/* <TextField size="small" type="number" fullWidth
                                                                         value={vat}
                                                                         onChange={(e) => {
                                                                             setVat(e.target.value);
@@ -816,6 +1015,40 @@ const InsertFinancial = () => {
                                                                                 setVat(0); // ถ้าค่าว่างให้เป็น 0
                                                                             }
                                                                         }}
+                                                                    /> */}
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={vat}
+                                                                        onChange={(e) => {
+                                                                            // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                                            const raw = e.target.value.replace(/,/g, "");
+                                                                            if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                                                setVat(raw);
+                                                                            }
+                                                                            setManualTotal(true);
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            const val = parseFloat(vat);
+                                                                            if (isNaN(val)) {
+                                                                                setVat("0" || "0.00");
+                                                                            } else {
+                                                                                setVat(
+                                                                                    val.toLocaleString("en-US", {
+                                                                                        minimumFractionDigits: 2,
+                                                                                        maximumFractionDigits: 2,
+                                                                                    })
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0" || e.target.value === "0.00") {
+                                                                                setVat("");
+                                                                            } else {
+                                                                                setVat(vat.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                                            }
+                                                                        }}
                                                                     />
                                                                 </Paper>
                                                             </Box>
@@ -824,7 +1057,7 @@ const InsertFinancial = () => {
                                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                                    <TextField size="small" type="number" fullWidth
+                                                                    {/* <TextField size="small" type="number" fullWidth
                                                                         value={total}
                                                                         onChange={(e) => {
                                                                             setTotal(e.target.value);
@@ -838,6 +1071,40 @@ const InsertFinancial = () => {
                                                                         onBlur={(e) => {
                                                                             if (e.target.value === "") {
                                                                                 setTotal(0); // ถ้าค่าว่างให้เป็น 0
+                                                                            }
+                                                                        }}
+                                                                    /> */}
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={total}
+                                                                        onChange={(e) => {
+                                                                            // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                                            const raw = e.target.value.replace(/,/g, "");
+                                                                            if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                                                setTotal(raw);
+                                                                            }
+                                                                            setManualTotal(true);
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            const val = parseFloat(total);
+                                                                            if (isNaN(val)) {
+                                                                                setTotal("0" || "0.00");
+                                                                            } else {
+                                                                                setTotal(
+                                                                                    val.toLocaleString("en-US", {
+                                                                                        minimumFractionDigits: 2,
+                                                                                        maximumFractionDigits: 2,
+                                                                                    })
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0" || e.target.value === "0.00") {
+                                                                                setTotal("");
+                                                                            } else {
+                                                                                setTotal(total.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                                             }
                                                                         }}
                                                                     />
@@ -869,12 +1136,46 @@ const InsertFinancial = () => {
                                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอดก่อน Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                                    <TextField
+                                                                    {/* <TextField
                                                                         size="small"
                                                                         type="number"
                                                                         fullWidth
                                                                         value={price / (list.length !== 0 && list.length)}
                                                                         disabled
+                                                                    /> */}
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={resultPrice}
+                                                                        onChange={(e) => {
+                                                                            // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                                            const raw = e.target.value.replace(/,/g, "");
+                                                                            if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                                                setResultPrice(raw);
+                                                                            }
+                                                                            setManualTotal(true);
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            const val = parseFloat(resultPrice);
+                                                                            if (isNaN(val)) {
+                                                                                setResultPrice("0" || "0.00");
+                                                                            } else {
+                                                                                setResultPrice(
+                                                                                    val.toLocaleString("en-US", {
+                                                                                        minimumFractionDigits: 2,
+                                                                                        maximumFractionDigits: 2,
+                                                                                    })
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0" || e.target.value === "0.00") {
+                                                                                setResultPrice("");
+                                                                            } else {
+                                                                                setResultPrice(resultPrice.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                                            }
+                                                                        }}
                                                                     />
                                                                 </Paper>
                                                             </Box>
@@ -883,12 +1184,46 @@ const InsertFinancial = () => {
                                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                                    <TextField
+                                                                    {/* <TextField
                                                                         size="small"
                                                                         type="number"
                                                                         fullWidth
                                                                         value={vat / (list.length !== 0 && list.length)}
                                                                         disabled
+                                                                    /> */}
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={resultVat}
+                                                                        onChange={(e) => {
+                                                                            // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                                            const raw = e.target.value.replace(/,/g, "");
+                                                                            if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                                                setResultVat(raw);
+                                                                            }
+                                                                            setManualTotal(true);
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            const val = parseFloat(resultVat);
+                                                                            if (isNaN(val)) {
+                                                                                setResultVat("0" || "0.00");
+                                                                            } else {
+                                                                                setResultVat(
+                                                                                    val.toLocaleString("en-US", {
+                                                                                        minimumFractionDigits: 2,
+                                                                                        maximumFractionDigits: 2,
+                                                                                    })
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0" || e.target.value === "0.00") {
+                                                                                setResultVat("");
+                                                                            } else {
+                                                                                setResultVat(resultVat.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                                            }
+                                                                        }}
                                                                     />
                                                                 </Paper>
                                                             </Box>
@@ -897,12 +1232,46 @@ const InsertFinancial = () => {
                                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
-                                                                    <TextField
+                                                                    {/* <TextField
                                                                         size="small"
                                                                         type="number"
                                                                         fullWidth
                                                                         value={(Number(price) + Number(vat)) / (list.length !== 0 && list.length)}
                                                                         disabled
+                                                                    /> */}
+                                                                    <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={resultTotal}
+                                                                        onChange={(e) => {
+                                                                            // อนุญาตให้พิมพ์ว่างหรือทศนิยมได้
+                                                                            const raw = e.target.value.replace(/,/g, "");
+                                                                            if (raw === "" || /^-?\d*\.?\d*$/.test(raw)) {
+                                                                                setResultTotal(raw);
+                                                                            }
+                                                                            setManualTotal(true);
+                                                                        }}
+                                                                        onBlur={(e) => {
+                                                                            const val = parseFloat(resultTotal);
+                                                                            if (isNaN(val)) {
+                                                                                setResultTotal("0" || "0.00");
+                                                                            } else {
+                                                                                setResultTotal(
+                                                                                    val.toLocaleString("en-US", {
+                                                                                        minimumFractionDigits: 2,
+                                                                                        maximumFractionDigits: 2,
+                                                                                    })
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                        onFocus={(e) => {
+                                                                            if (e.target.value === "0" || e.target.value === "0.00") {
+                                                                                setResultTotal("");
+                                                                            } else {
+                                                                                setResultTotal(resultTotal.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
+                                                                            }
+                                                                        }}
                                                                     />
                                                                 </Paper>
                                                             </Box>

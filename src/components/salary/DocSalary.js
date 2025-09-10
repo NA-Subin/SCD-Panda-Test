@@ -314,7 +314,7 @@ const DocSalary = ({ openNavbar }) => {
                 ? acc + Number(doc.Money)
                 : acc - Number(doc.Money);
         }, 0);
-        summary.total += total;
+        summary.total += total + costrip;
 
         // columns
         row.document.forEach((doc) => {
@@ -724,7 +724,9 @@ const DocSalary = ({ openNavbar }) => {
                                     {processed.map(({ index, row, costrip, total, moneyGuarantee, moneyLoan }) => (
                                         <TableRow key={index}>
                                             <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                            <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white" }}>{row.Name}</TableCell>
+                                            <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "#eeeeee", fontWeight: "bold" }}>
+                                                {row.Name}
+                                            </TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(costrip)}</TableCell>
@@ -746,9 +748,9 @@ const DocSalary = ({ openNavbar }) => {
                                                 );
                                             })}
 
-                                            <TableCell align="center">{new Intl.NumberFormat("en-US").format(total)}</TableCell>
+                                            <TableCell align="center" sx={{ backgroundColor: "#eeeeee", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(total + costrip)}</TableCell>
 
-                                            <TableCell>
+                                            {/* <TableCell>
                                                 <Box
                                                     display="flex"
                                                     justifyContent="space-between" // ไอคอนชิดขวา
@@ -768,8 +770,8 @@ const DocSalary = ({ openNavbar }) => {
 
                                                     <MoneyGuarantee money={moneyGuarantee} periods={periods} />
                                                 </Box>
-                                            </TableCell>
-                                            <TableCell>
+                                            </TableCell> */}
+                                            {/* <TableCell>
                                                 <Box
                                                     display="flex"
                                                     justifyContent="space-between" // ไอคอนชิดขวา
@@ -789,7 +791,9 @@ const DocSalary = ({ openNavbar }) => {
 
                                                     <MoneyLoan money={moneyLoan} periods={periods} />
                                                 </Box>
-                                            </TableCell>
+                                            </TableCell> */}
+                                            <MoneyGuarantee money={moneyGuarantee} periods={periods} />
+                                            <MoneyLoan money={moneyLoan} periods={periods} />
                                         </TableRow>
                                     )
                                     )}

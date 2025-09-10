@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
+    Autocomplete,
     Badge,
     Box,
     Button,
@@ -39,6 +40,9 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DeleteIcon from '@mui/icons-material/Delete';
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
 import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
@@ -47,8 +51,9 @@ import { useData } from "../../server/path";
 import InsertFinancial from "./InsertFinancial";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useTripData } from "../../server/provider/TripProvider";
-import { formatThaiFull } from "../../theme/DateTH";
+import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 import { buildPeriodsForYear, findCurrentPeriod } from "./Paid";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const Financial = () => {
     const [search, setSearch] = useState("");
@@ -69,9 +74,27 @@ const Financial = () => {
     };
 
     // const { report } = useData();
+    const { reghead, regtail, small, companypayment, expenseitems } = useBasicData();
     const { report } = useTripData();
     const reports = Object.values(report || {});
+    const registrationH = Object.values(reghead);
+    const registrationT = Object.values(regtail);
+    const registrationS = Object.values(small);
+    const expenseitem = Object.values(expenseitems);
+    const companypaymentDetail = Object.values(companypayment);
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
+
+    const getRegistration = () => {
+        const registartion = [
+            ...registrationH.map((item) => ({ ...item, Registration: item.RegHead, TruckType: "หัวรถใหญ่" })),
+            ...registrationT.map((item) => ({ ...item, Registration: item.RegTail, TruckType: "หางรถใหญ่" })),
+            ...registrationS.map((item) => ({ ...item, Registration: item.RegHead, TruckType: "รถเล็ก" })),
+        ];
+
+        return registartion;
+    };
+
+    console.log("getRegistration : ", getRegistration());
 
     const reportDetail = reports.filter((item) => {
         const itemDate = dayjs(item.SelectedDateInvoice, "DD/MM/YYYY");
@@ -133,6 +156,115 @@ const Financial = () => {
             }
         );
     }
+
+    const [billID, setBillID] = useState("");
+    const [invoiceID, setInvoiceID] = useState("");
+    const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date).format("DD/MM/YYYY"));
+    const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
+    const [registration, setRegistration] = useState("");
+    const [company, setCompany] = useState("");
+    const [bank, setBank] = useState("");
+    const [price, setPrice] = useState("");
+    const [vat, setVat] = useState("");
+    const [total, setTotal] = useState("");
+    const [details, setDetails] = useState("");
+    const [trucktype, setTruckType] = useState("");
+
+    const handleUpdateBill = (row) => {
+        console.log("ROW : ", row);
+        setBillID(row.id);
+        setInvoiceID(row.InvoiceID);
+        setSelectedDateInvoice(row.SelectedDateInvoice);
+        setSelectedDateTransfer(row.SelectedDateTransfer);
+        setRegistration(row.Registration);
+        setCompany(row.Company);
+        setBank(row.Bank);
+        setPrice(row.Price);
+        setVat(row.Vat);
+        setTotal(row.Total);
+        setDetails(row.Details)
+        setTruckType(row.TruckType);
+    }
+
+    const handleDateChangeDateInvoice = (newValue) => {
+        if (newValue) {
+            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            setSelectedDateInvoice(formattedDate);
+        }
+    };
+
+    const handleDateChangeDateTransfer = (newValue) => {
+        if (newValue) {
+            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            setSelectedDateTransfer(formattedDate);
+        }
+    };
+
+    const handleCloseBill = () => {
+        setBillID("");
+        setInvoiceID("");
+        setSelectedDateInvoice("");
+        setSelectedDateTransfer("");
+        setRegistration("");
+        setCompany("");
+        setBank("");
+        setPrice("");
+        setVat("");
+        setTotal("");
+        setDetails("");
+        setTruckType("");
+    }
+
+    const handleSaveBill = () => {
+        database.ref("report/invoice")
+            .child(billID)
+            .update({
+                InvoiceID: invoiceID,
+                SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                Registration: registration,
+                Company: company,
+                Bank: bank,
+                Price: price,
+                Vat: vat,
+                Total: total,
+                Note: details
+            }).then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+
+                // reset state
+                setBillID("");
+                setInvoiceID("");
+                setSelectedDateInvoice("");
+                setSelectedDateTransfer("");
+                setRegistration("");
+                setCompany("");
+                setBank("");
+                setPrice("");
+                setVat("");
+                setTotal("");
+                setDetails("");
+                setTruckType("");
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    }
+
+    const summary = reportDetail.reduce(
+        (acc, row) => {
+            acc.price += Number(row.Price || 0);
+            acc.vat += Number(row.Vat || 0);
+            return acc;
+        },
+        { price: 0, vat: 0 }
+    );
+
+    summary.total = summary.price + summary.vat;
+
+    console.log("Registration : ", registration);
 
     return (
         // <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -331,9 +463,9 @@ const Financial = () => {
                 </Box>
             </Grid>
             <Grid item xl={4.5} xs={12}>
-                <Box display="flex" alignItems="center" justifyContent="center" sx={{ marginLeft: { xl: 0, xs: 1 }, }} >
+                <Box display="flex" alignItems="center" justifyContent="center" sx={{ marginLeft: { xl: 0, xs: 1 } }} >
                     {/* <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 0.5 }} gutterBottom>ค้นหา</Typography> */}
-                    <Paper sx={{ width: "100%" }} >
+                    <Paper sx={{ width: "100%", marginTop: 0.5 }} >
                         <TextField
                             fullWidth
                             value={search}
@@ -386,16 +518,16 @@ const Financial = () => {
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เลขที่บิล
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180 }}>
                                     วันที่บิล
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180 }}>
                                     วันที่โอน
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 5 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 0, zIndex: 3 }}>
                                     ป้ายทะเบียน
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 220 }}>
                                     ชื่อบริษัท
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
@@ -411,32 +543,347 @@ const Financial = () => {
                                     รวม
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
-                                    หมายเหตุ
+                                    รายละเอียด
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
+                                <TablecellSelling sx={{ textAlign: "center", width: 80, position: "sticky", right: 0 }} />
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {
-                                reportDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                reportDetail.map((row, index) => (
                                     <TableRow>
                                         <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.InvoiceID}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateInvoice}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.SelectedDateTransfer}</TableCell>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "white" }}>{`${row.Registration.split(":")[1]} (${row.TruckType})`}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.Company.split(":")[1]}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.Bank}</TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
-                                            {row.Price?.toFixed(2)}
+                                            {
+                                                billID !== row.id ?
+                                                    row.InvoiceID
+                                                    :
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        value={invoiceID}
+                                                        sx={{
+                                                            "& .MuiInputBase-root": {
+                                                                height: 30,
+                                                            },
+                                                            "& .MuiInputBase-input": {
+                                                                padding: "4px 8px",
+                                                                marginLeft: -0.5,
+                                                                width: "100%"
+                                                            },
+                                                        }}
+                                                        onChange={(e) => { setInvoiceID(e.target.value); }}
+                                                    />
+                                            }
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
-                                            {row.Vat?.toFixed(2)}
+                                            {
+                                                billID !== row.id ?
+                                                    formatThaiSlash(dayjs(row.SelectedDateInvoice, "DD/MM/YYYY"))
+                                                    :
+                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                        <DatePicker
+                                                            openTo="day"
+                                                            views={["year", "month", "day"]}
+                                                            value={dayjs(selectedDateInvoice, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
+                                                            format="DD/MM/YYYY"
+                                                            onChange={handleDateChangeDateInvoice}
+                                                            sx={{ marginRight: 2, }}
+                                                            slotProps={{
+                                                                textField: {
+                                                                    size: "small",
+                                                                    fullWidth: true,
+                                                                    inputProps: {
+                                                                        value: formatThaiSlash(dayjs(selectedDateInvoice, "DD/MM/YYYY")), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                                        readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                                    },
+                                                                    sx: {
+                                                                        "& .MuiInputBase-root": {
+                                                                            height: 30,
+                                                                        },
+                                                                        "& .MuiInputBase-input": {
+                                                                            padding: "4px 8px",
+                                                                            marginLeft: -0.5,
+                                                                            width: "100%"
+                                                                        },
+                                                                    }
+                                                                },
+                                                            }}
+                                                        />
+                                                    </LocalizationProvider>
+                                            }
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
-                                            {row.Total?.toFixed(2)}
+                                            {
+                                                billID !== row.id ?
+                                                    formatThaiSlash(dayjs(row.SelectedDateTransfer, "DD/MM/YYYY"))
+                                                    :
+                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                        <DatePicker
+                                                            openTo="day"
+                                                            views={["year", "month", "day"]}
+                                                            value={dayjs(selectedDateTransfer, "DD/MM/YYYY")} // แปลงสตริงกลับเป็น dayjs object
+                                                            format="DD/MM/YYYY"
+                                                            onChange={handleDateChangeDateTransfer}
+                                                            sx={{ marginRight: 2, }}
+                                                            slotProps={{
+                                                                textField: {
+                                                                    size: "small",
+                                                                    fullWidth: true,
+                                                                    inputProps: {
+                                                                        value: formatThaiSlash(dayjs(selectedDateTransfer, "DD/MM/YYYY")), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                                        readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                                    },
+                                                                    sx: {
+                                                                        "& .MuiInputBase-root": {
+                                                                            height: 30,
+                                                                        },
+                                                                        "& .MuiInputBase-input": {
+                                                                            padding: "4px 8px",
+                                                                            marginLeft: -0.5,
+                                                                            width: "100%"
+                                                                        },
+                                                                    }
+                                                                },
+                                                            }}
+                                                        />
+                                                    </LocalizationProvider>
+                                            }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.Note}</TableCell>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 2, backgroundColor: "#eeeeee" }}>
+                                            {
+                                                billID !== row.id ?
+                                                    (`${row.Registration.split(":")[1]} (${row.TruckType})`)
+                                                    :
+                                                    <Autocomplete
+                                                        options={(getRegistration() || []).filter((row) => row.TruckType === trucktype)
+                                                        }
+                                                        getOptionLabel={(option) => { return `${option?.Registration} (${option?.TruckType})`; }}
+                                                        value={
+                                                            (getRegistration() || []).find(
+                                                                (opt) => `${opt.id}:${opt.Registration}` === registration
+                                                            ) || null
+                                                        }
+                                                        onChange={(e, newValue) => {
+                                                            if (newValue) {
+                                                                const registrations = `${newValue.id}:${newValue.Registration}`;
+                                                                setRegistration(registrations);
+                                                            } else {
+                                                                setRegistration("");
+                                                            }
+                                                        }}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    "& .MuiInputBase-root": { height: 30 },
+                                                                    "& .MuiInputBase-input": {
+                                                                        padding: "4px 8px",
+                                                                        marginLeft: -0.5,
+                                                                        width: "100%",
+                                                                    },
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {
+                                                billID !== row.id ?
+                                                    row.Company.split(":")[1]
+                                                    :
+                                                    <Autocomplete
+                                                        options={companypaymentDetail.sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th"))
+                                                        }
+                                                        getOptionLabel={(option) => option?.Name || ""}
+                                                        value={
+                                                            companypaymentDetail.find(
+                                                                (opt) => `${opt.id}:${opt.Name}` === company
+                                                            ) || null
+                                                        }
+                                                        onChange={(e, newValue) => {
+                                                            if (newValue) {
+                                                                const companies = `${newValue.id}:${newValue.Name}`;
+                                                                setCompany(companies);
+                                                            } else {
+                                                                setCompany("");
+                                                            }
+                                                        }}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    "& .MuiInputBase-root": { height: 30 },
+                                                                    "& .MuiInputBase-input": {
+                                                                        padding: "4px 8px",
+                                                                        marginLeft: -0.5,
+                                                                        width: "100%",
+                                                                    },
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {
+                                                billID !== row.id ?
+                                                    row.Bank.split(":")[1]
+                                                    :
+                                                    <Autocomplete
+                                                        options={expenseitem.filter((item) => item.Status === "อยู่ในระบบ") // ✅ filter ตาม Status
+                                                            .sort((a, b) => a.Name.localeCompare(b.Name))}
+                                                        getOptionLabel={(option) => option?.Name || ""}
+                                                        value={
+                                                            expenseitem.find(
+                                                                (opt) => `${opt.id}:${opt.Name}` === bank
+                                                            ) || null
+                                                        }
+                                                        onChange={(e, newValue) => {
+                                                            if (newValue) {
+                                                                const banks = `${newValue.id}:${newValue.Name}`;
+                                                                setBank(banks);
+                                                            } else {
+                                                                setBank("");
+                                                            }
+                                                        }}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    "& .MuiInputBase-root": { height: 30 },
+                                                                    "& .MuiInputBase-input": {
+                                                                        padding: "4px 8px",
+                                                                        marginLeft: -0.5,
+                                                                        width: "100%",
+                                                                    },
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {
+                                                billID !== row.id ?
+                                                    new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    }).format(row.Price)
+                                                    :
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        type="number"
+                                                        value={price}
+                                                        sx={{
+                                                            "& .MuiInputBase-root": {
+                                                                height: 30,
+                                                            },
+                                                            "& .MuiInputBase-input": {
+                                                                padding: "4px 8px",
+                                                                marginLeft: -0.5,
+                                                                width: "100%"
+                                                            },
+                                                        }}
+                                                        onChange={(e) => {
+                                                            setPrice(e.target.value);
+                                                            setTotal(Number(e.target.value) + Number(vat));
+                                                        }}
+                                                    />
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {
+                                                billID !== row.id ?
+                                                    new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    }).format(row.Vat)
+                                                    :
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        type="number"
+                                                        value={vat}
+                                                        sx={{
+                                                            "& .MuiInputBase-root": {
+                                                                height: 30,
+                                                            },
+                                                            "& .MuiInputBase-input": {
+                                                                padding: "4px 8px",
+                                                                marginLeft: -0.5,
+                                                                width: "100%"
+                                                            },
+                                                        }}
+                                                        onChange={(e) => {
+                                                            setVat(e.target.value);
+                                                            setTotal(Number(e.target.value) + Number(price));
+                                                        }}
+                                                    />
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#eeeeee", fontWeight: "bold" }}>
+                                            {
+                                                billID !== row.id ?
+                                                    new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    }).format(row.Total)
+                                                    :
+                                                    new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    }).format(total)
+                                                // <TextField
+                                                //     size="small"
+                                                //     fullWidth
+                                                //     type="number"
+                                                //     value={total}
+                                                //     sx={{
+                                                //         "& .MuiInputBase-root": {
+                                                //             height: 30,
+                                                //         },
+                                                //         "& .MuiInputBase-input": {
+                                                //             padding: "4px 8px",
+                                                //             marginLeft: -0.5,
+                                                //             width: "100%"
+                                                //         },
+                                                //     }}
+                                                //     onChange={(e) => { setTotal(e.target.value); }}
+                                                // />
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>
+                                            {
+                                                billID !== row.id ?
+                                                    row.Details
+                                                    :
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        value={details}
+                                                        sx={{
+                                                            "& .MuiInputBase-root": {
+                                                                height: 30,
+                                                            },
+                                                            "& .MuiInputBase-input": {
+                                                                padding: "4px 8px",
+                                                                marginLeft: -0.5,
+                                                                width: "100%"
+                                                            },
+                                                        }}
+                                                        onChange={(e) => { setDetails(e.target.value); }}
+                                                    />
+                                            }
+                                        </TableCell>
                                         <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
                                             {/* <Box display="flex" alignItems="center" justifyContent="center">
                                                     <Tooltip title="แก้ไขข้อมูล" placement="left" sx={{ marginRight: 1 }}>
@@ -451,11 +898,38 @@ const Financial = () => {
                                                     </Tooltip>
 
                                                 </Box> */}
-                                            <Tooltip title="ลบข้อมูล" placement="right">
-                                                <IconButton size="small" color="error" onClick={() => handleChangDelete(row.id)}>
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                            {
+                                                billID !== row.id ?
+                                                    <Box>
+                                                        <IconButton size="small" color="warning" onClick={() => handleUpdateBill(row)}>
+                                                            <DriveFileRenameOutlineIcon />
+                                                        </IconButton>
+
+                                                        <IconButton size="small" color="error" onClick={() => handleChangDelete(row.id)}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+
+                                                    </Box>
+                                                    :
+                                                    <Box>
+                                                        <IconButton
+                                                            size="small"
+                                                            color="error"
+                                                            onClick={handleCloseBill}
+                                                            sx={{ marginRight: -0.5 }}
+                                                        >
+                                                            <CloseIcon />
+                                                        </IconButton>
+
+                                                        <IconButton
+                                                            size="small"
+                                                            color="success"
+                                                            onClick={() => handleSaveBill()}
+                                                        >
+                                                            <SaveIcon />
+                                                        </IconButton>
+                                                    </Box>
+                                            }
                                             {/* <Button variant="contained" size="small" color="error" fullWidth onClick={() => handleChangDelete(row.id)}>ลบ</Button> */}
                                         </TableCell>
                                     </TableRow>
@@ -478,20 +952,35 @@ const Financial = () => {
                                         รวม
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                        ยอดก่อน Vat
+                                        {
+                                            new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            }).format(summary.price)
+                                        }
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
-                                        ยอด VAT
+                                        {
+                                            new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            }).format(summary.vat)
+                                        }
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 600 }} colSpan={2}>
-                                        รวม
+                                        {
+                                            new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            }).format(summary.total)
+                                        }
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
                                 </TableRow>
                             </TableFooter>
                         }
                     </Table>
-                    {
+                    {/* {
                         reportDetail.length <= 10 ? null :
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 30]}
@@ -535,7 +1024,7 @@ const Financial = () => {
                                     }
                                 }}
                             />
-                    }
+                    } */}
                 </TableContainer>
             </Grid>
         </Grid>

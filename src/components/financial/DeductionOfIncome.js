@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
+    Autocomplete,
     Badge,
     Box,
     Button,
@@ -39,6 +40,9 @@ import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DeleteIcon from '@mui/icons-material/Delete';
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
 import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
@@ -77,7 +81,7 @@ const DeductionOfIncome = (props) => {
     }, [selectedDate]);
 
     // const { reportFinancial, drivers } = useData();
-    const { drivers } = useBasicData();
+    const { drivers, deductibleincome } = useBasicData();
     const { reportFinancial } = useTripData();
     const reports = Object.values(reportFinancial || {})
         .sort((a, b) => {
@@ -87,6 +91,7 @@ const DeductionOfIncome = (props) => {
         });
 
     const driver = Object.values(drivers || {});
+    const deductibleincomeDetail = Object.values(deductibleincome);
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
     // const formatted = [];
 
@@ -315,6 +320,58 @@ const DeductionOfIncome = (props) => {
         };
     }, [sortedGroups]); // 👈 คำนวณใหม่เมื่อ sortedGroups เปลี่ยน
 
+    const [deductionID, setDeductionID] = useState("");
+    const [deductionCode, setDeductionCode] = useState("");
+    const [deductionName, setDeductionName] = useState("");
+    const [deductionMoney, setDeductionMoney] = useState("");
+    const [deductionNote, setDeductionNote] = useState("");
+    const [deductionType, setDeductionType] = useState("");
+
+    const handleUpdateDeduction = (row) => {
+        console.log("ROW : ", row);
+        console.log("Code : ", row.Code);
+        setDeductionCode(row.Code);
+        setDeductionID(row.id);
+        setDeductionName(row.Name);
+        setDeductionMoney(row.Money);
+        setDeductionNote(row.Note);
+        setDeductionType(row.Type);
+    }
+
+    const handleCloseDeduction = () => {
+        setDeductionID("");
+        setDeductionCode("");
+        setDeductionName("");
+        setDeductionMoney("");
+        setDeductionNote("");
+        setDeductionType("");
+    }
+
+    const handleSaveDeduction = () => {
+        database.ref("report/financial")
+            .child(deductionID)
+            .update({
+                Code: deductionCode,
+                Name: deductionName,
+                Money: deductionMoney,
+                Note: deductionNote,
+            }).then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+
+                // reset state
+                setDeductionID("");
+                setDeductionCode("");
+                setDeductionName("");
+                setDeductionMoney("");
+                setDeductionNote("");
+                setDeductionType("");
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    }
 
     return (
         // <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
@@ -565,7 +622,7 @@ const DeductionOfIncome = (props) => {
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
                                     พนักงานขับรถ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 60 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                     รหัส
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
@@ -578,9 +635,9 @@ const DeductionOfIncome = (props) => {
                                     รายหัก
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
-                                    หมายเหตุ
+                                    รายละเอียด
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", width: 20, position: "sticky", right: 0, }} />
+                                <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0, }} />
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -614,33 +671,228 @@ const DeductionOfIncome = (props) => {
                                             </TableCell>
                                         )}
 
-                                        <TableCell sx={{ textAlign: "center", borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}>{row.Code}</TableCell>
                                         <TableCell sx={{ textAlign: "center", borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}>
-                                            {row.Name.split(":")[1]}
+                                            {
+                                                deductionID !== row.id ?
+                                                    row.Code
+                                                    :
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        value={deductionCode}
+                                                        sx={{
+                                                            "& .MuiInputBase-root": {
+                                                                height: 30,
+                                                            },
+                                                            "& .MuiInputBase-input": {
+                                                                padding: "4px 8px",
+                                                                marginLeft: -0.5,
+                                                                width: "100%"
+                                                            },
+                                                        }}
+                                                        disabled
+                                                    />
+                                            }
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}>
-                                            {row.Type === "รายได้"
-                                                ? new Intl.NumberFormat("en-US").format(row.Money)
-                                                : "-"}
+                                            {
+                                                deductionID !== row.id ?
+                                                    row.Name.split(":")[1]
+                                                    :
+                                                    <Autocomplete
+                                                        options={deductibleincomeDetail
+                                                            .filter((row) => row.Type === deductionType)
+                                                            .sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th"))
+                                                        }
+                                                        getOptionLabel={(option) => option?.Name || ""}
+                                                        value={
+                                                            deductibleincomeDetail.find(
+                                                                (opt) => `${opt.id}:${opt.Name}` === deductionName
+                                                            ) || null
+                                                        }
+                                                        onChange={(e, newValue) => {
+                                                            if (newValue) {
+                                                                const deductionnames = `${newValue.id}:${newValue.Name}`;
+                                                                setDeductionName(deductionnames);
+                                                                setDeductionCode(newValue.Code);
+                                                            } else {
+                                                                setDeductionName("");
+                                                                setDeductionCode("");
+                                                            }
+                                                        }}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    "& .MuiInputBase-root": { height: 30 },
+                                                                    "& .MuiInputBase-input": {
+                                                                        padding: "4px 8px",
+                                                                        marginLeft: -0.5,
+                                                                        width: "100%",
+                                                                    },
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+                                            }
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}>
-                                            {row.Type === "รายหัก"
-                                                ? new Intl.NumberFormat("en-US").format(row.Money)
-                                                : "-"}
+                                            {
+                                                deductionID !== row.id ?
+                                                    (
+                                                        row.Type === "รายได้"
+                                                            ? new Intl.NumberFormat("en-US").format(row.Money)
+                                                            : "-"
+                                                    )
+                                                    :
+                                                    (
+                                                        deductionType === "รายได้"
+                                                            ?
+                                                            <TextField
+                                                                size="small"
+                                                                fullWidth
+                                                                type="number"
+                                                                value={deductionMoney}
+                                                                sx={{
+                                                                    "& .MuiInputBase-root": {
+                                                                        height: 30,
+                                                                    },
+                                                                    "& .MuiInputBase-input": {
+                                                                        padding: "4px 8px",
+                                                                        marginLeft: -0.5,
+                                                                        width: "100%"
+                                                                    },
+                                                                }}
+                                                                onChange={(e) => { setDeductionMoney(e.target.value); }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        setDeductionMoney(e.target.value);
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        setDeductionMoney(e.target.value);
+                                                                    }
+                                                                }}
+                                                            />
+                                                            : "-"
+                                                    )
+                                            }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}>{row.Note}</TableCell>
+                                        <TableCell sx={{ textAlign: "center", borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}>
+                                            {
+                                                deductionID !== row.id ?
+                                                    (
+                                                        row.Type === "รายหัก"
+                                                            ? new Intl.NumberFormat("en-US").format(row.Money)
+                                                            : "-")
+                                                    :
+                                                    (
+                                                        deductionType === "รายหัก"
+                                                            ?
+                                                            <TextField
+                                                                size="small"
+                                                                fullWidth
+                                                                type="number"
+                                                                value={deductionMoney}
+                                                                sx={{
+                                                                    "& .MuiInputBase-root": {
+                                                                        height: 30,
+                                                                    },
+                                                                    "& .MuiInputBase-input": {
+                                                                        padding: "4px 8px",
+                                                                        marginLeft: -0.5,
+                                                                        width: "100%"
+                                                                    },
+                                                                }}
+                                                                onChange={(e) => { setDeductionMoney(e.target.value); }}
+                                                                onFocus={(e) => {
+                                                                    if (e.target.value === "0") {
+                                                                        setDeductionMoney(e.target.value);
+                                                                    }
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        setDeductionMoney(e.target.value);
+                                                                    }
+                                                                }}
+                                                            />
+                                                            : "-"
+                                                    )
+                                            }
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center", borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}>
+                                            {
+                                                deductionID !== row.id ?
+                                                    row.Note
+                                                    :
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        value={deductionNote}
+                                                        sx={{
+                                                            "& .MuiInputBase-root": {
+                                                                height: 30,
+                                                            },
+                                                            "& .MuiInputBase-input": {
+                                                                padding: "4px 8px",
+                                                                marginLeft: -0.5,
+                                                                width: "100%"
+                                                            },
+                                                        }}
+                                                        onChange={(e) => { setDeductionNote(e.target.value); }}
+                                                    />
+                                            }
+                                        </TableCell>
                                         <TableCell
                                             sx={{ textAlign: "center", position: "sticky", right: 0, borderBottom: (sortedRows.length - 1) === rowIndex && "2px solid lightgray" }}
                                         >
-                                            <Tooltip title="ลบข้อมูล" placement="right">
-                                                <IconButton
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={() => handleChangDelete(row.id)}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                            {
+                                                deductionID !== row.id ?
+                                                    <Box display="flex" alignItems="center" justifyContent="center" >
+
+                                                        <IconButton
+                                                            size="small"
+                                                            color="warning"
+                                                            onClick={() => handleUpdateDeduction(row)}
+                                                            sx={{ marginRight: -0.5 }}
+                                                        >
+                                                            <DriveFileRenameOutlineIcon />
+                                                        </IconButton>
+
+                                                        <IconButton
+                                                            size="small"
+                                                            color="error"
+                                                            onClick={() => handleChangDelete(row.id)}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </IconButton>
+
+                                                    </Box>
+                                                    :
+                                                    <Box display="flex" alignItems="center" justifyContent="center" >
+
+                                                        <IconButton
+                                                            size="small"
+                                                            color="error"
+                                                            onClick={handleCloseDeduction}
+                                                            sx={{ marginRight: -0.5 }}
+                                                        >
+                                                            <CloseIcon />
+                                                        </IconButton>
+
+                                                        <IconButton
+                                                            size="small"
+                                                            color="success"
+                                                            onClick={() => handleSaveDeduction()}
+                                                        >
+                                                            <SaveIcon />
+                                                        </IconButton>
+
+                                                    </Box>
+                                            }
                                         </TableCell>
                                     </TableRow>
                                 ))

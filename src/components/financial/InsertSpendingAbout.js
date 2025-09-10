@@ -221,7 +221,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                 <DialogContent>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
-                            <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 2, paddingRight: 2, marginTop: 2 }}>
+                            <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 2, paddingRight: 2, marginTop: 1, marginBottom: -1 }}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: -0.5 }} gutterBottom>ค้นหา</Typography>
                                 <Paper sx={{ width: "100%" }} >
                                     <TextField
@@ -247,7 +247,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                             <TableContainer
                                 component={Paper}
                                 sx={{
-                                    height: "37vh",
+                                    height: "58vh",
                                 }}
                             >
                                 <Table
@@ -368,7 +368,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                                                 borderBottomRightRadius: 5,
                                                 '& .MuiTablePagination-toolbar': {
                                                     backgroundColor: "lightgray",
-                                                    height: "20px", // กำหนดความสูงของ toolbar
+                                                    height: "15px", // กำหนดความสูงของ toolbar
                                                     alignItems: "center",
                                                     paddingY: 0, // ลด padding บนและล่างให้เป็น 0
                                                     overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
@@ -399,7 +399,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                             update ?
                                 <React.Fragment>
                                     <Grid item xs={12}>
-                                        <Divider sx={{ marginTop: 1 }}><Chip label="เพิ่มข้อมูล" size="small" /></Divider>
+                                        <Divider sx={{ marginBottom: -1, marginTop: -0.5 }}><Chip label="เพิ่มข้อมูล" size="small" /></Divider>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
