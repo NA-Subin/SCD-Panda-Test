@@ -37,6 +37,7 @@ import {
 } from "@mui/material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import ExcelJS from "exceljs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -253,25 +254,87 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
         setPage(0);
     };
 
-    const exportToExcel = () => {
-        const exportData = sortedOrderDetail.map((row, index) => ({
-            ลำดับ: index + 1,
-            วันที่ส่ง: formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY")),
-            "ผู้ขับ/ป้ายทะเบียน": `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`,
-            ตั๋ว: row.TicketName.split(":")[1],
-            ชนิดน้ำมัน: row.ProductName,
-            จำนวนลิตร: Number(row.VolumeProduct),
-            ราคาน้ำมัน: row.RateOil,
-            ยอดเงิน: row.Amount,
-        }));
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานสรุปยอดน้ำมัน");
 
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานสรุปยอดน้ำมัน");
+        // 1️⃣ กำหนด columns
+        worksheet.columns = [
+            { header: "ลำดับ", key: "no", width: 8 },
+            { header: "วันที่ส่ง", key: "date", width: 15 },
+            { header: "ผู้ขับ/ป้ายทะเบียน", key: "driverReg", width: 40 },
+            { header: "ตั๋ว", key: "ticket", width: 45 },
+            { header: "ชนิดน้ำมัน", key: "product", width: 15 },
+            { header: "จำนวนลิตร", key: "volume", width: 30 },
+            { header: "ราคาน้ำมัน", key: "rate", width: 25 },
+            { header: "ยอดเงิน", key: "amount", width: 30 },
+        ];
 
-        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-        saveAs(blob, `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+        // 2️⃣ Title merge
+        worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = "รายงานสรุปยอดน้ำมัน";
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.font = { size: 16, bold: true };
+        titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
+        worksheet.getRow(1).height = 30;
+
+        // 3️⃣ Header row (row 2)
+        const headerRow = worksheet.addRow(worksheet.columns.map(c => c.header));
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.height = 25;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 4️⃣ Data rows
+        sortedOrderDetail.forEach((row, index) => {
+            const dataRow = {
+                no: index + 1,
+                date: formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY")),
+                driverReg: `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`,
+                ticket: row.TicketName.split(":")[1],
+                product: row.ProductName,
+                volume: Number(row.VolumeProduct) * 1000,
+                rate: Number(row.RateOil),
+                amount: Number(row.Amount),
+            };
+
+            const newRow = worksheet.addRow(dataRow);
+            newRow.height = 20;
+            newRow.alignment = { vertical: "middle", horizontal: "center" };
+            newRow.eachCell((cell, colNumber) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                // ยกเว้น column "no"
+                if (worksheet.columns[colNumber - 1].key !== "no") {
+                    cell.numFmt = "#,##0.00";
+                }
+            });
+        });
+
+        // 5️⃣ Footer row รวมค่า
+        const footerRow = worksheet.addRow({
+            ticket: "รวม",
+            volume: sortedOrderDetail.reduce((acc, r) => acc + Number(r.VolumeProduct) * 1000, 0),
+            amount: sortedOrderDetail.reduce((acc, r) => acc + Number(r.Amount), 0),
+        });
+
+        footerRow.font = { bold: true };
+        footerRow.alignment = { horizontal: "center", vertical: "middle" };
+        footerRow.height = 25;
+        footerRow.eachCell((cell, colNumber) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE699" } }; // สีเหลือง
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+            if (worksheet.columns[colNumber - 1].key !== "no" && worksheet.columns[colNumber - 1].key !== "driverReg" && worksheet.columns[colNumber - 1].key !== "ticket" && worksheet.columns[colNumber - 1].key !== "product") {
+                cell.numFmt = "#,##0.00";
+            }
+        });
+
+        // 6️⃣ Save
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
     };
 
     return (

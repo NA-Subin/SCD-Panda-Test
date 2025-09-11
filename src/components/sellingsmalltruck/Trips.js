@@ -38,6 +38,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
 import { RateOils, TablecellHeader, TablecellPink, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import TripsDetail from "./TripsDetail";
 import InsertTrips from "./InsertTrips";
 import { useData } from "../../server/path";
@@ -86,6 +88,26 @@ const TripsSmallTruck = ({ openNavbar }) => {
         return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });
 
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "desc" });
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                // ✅ ถ้าคลิกซ้ำ -> สลับ asc/desc
+                return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+            } else {
+                // ✅ คลิกใหม่ -> asc ก่อน
+                return { key, direction: "asc" };
+            }
+        });
+    };
+
+    const parseDate = (dateStr) => {
+        if (!dateStr) return null;
+        const [day, month, year] = dateStr.split("/").map(Number);
+        return new Date(year, month - 1, day);
+    };
+
     //const tripDetail = trips.filter((item) => item.TruckType === "รถเล็ก" && item.StatusTrip !== "ยกเลิก" );
     const tripDetail = trips.filter((item) => {
         // const itemDateR = dayjs(item.DateReceive, "DD/MM/YYYY");
@@ -114,14 +136,33 @@ const TripsSmallTruck = ({ openNavbar }) => {
                         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
         );
     }).sort((a, b) => {
-        const dateA = dayjs(a.DateReceive, "DD/MM/YYYY");
-        const dateB = dayjs(b.DateReceive, "DD/MM/YYYY");
+        if (!sortConfig.key) return 0;
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
 
-        if (dateB.isAfter(dateA)) return 1;
-        if (dateB.isBefore(dateA)) return -1;
+        // ถ้าเป็น number
+        if (typeof aValue === "number" && typeof bValue === "number") {
+            return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+        }
 
-        // ถ้าวันเท่ากัน ให้เรียงตาม id มากไปน้อย
-        return b.id - a.id;
+        // ถ้าเป็นวันที่
+        if (
+            typeof aValue === "string" &&
+            typeof bValue === "string" &&
+            /^\d{2}\/\d{2}\/\d{4}$/.test(aValue) &&
+            /^\d{2}\/\d{2}\/\d{4}$/.test(bValue)
+        ) {
+            const dateA = parseDate(aValue);
+            const dateB = parseDate(bValue);
+            return sortConfig.direction === "asc"
+                ? dateA - dateB
+                : dateB - dateA;
+        }
+
+        // ถ้าเป็น string (ตัวหนังสือ)
+        return sortConfig.direction === "asc"
+            ? String(aValue).localeCompare(String(bValue), "th")
+            : String(bValue).localeCompare(String(aValue), "th");
     });
 
     console.log("Trip Detail : ", tripDetail);
@@ -311,14 +352,41 @@ const TripsSmallTruck = ({ openNavbar }) => {
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 60 }}>
                                             ลำดับ
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                            วันที่รับ
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120, cursor: "pointer" }}
+                                            onClick={() => handleSort("DateReceive")}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                วันที่รับ
+                                                {sortConfig.key === "DateReceive" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                            วันที่ส่ง
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120, cursor: "pointer" }}
+                                            onClick={() => handleSort("DateDelivery")}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                วันที่ส่ง
+                                                {sortConfig.key === "DateDelivery" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
-                                            ชื่อ/ทะเบียนรถ
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 300, cursor: "pointer" }}
+                                            onClick={() => handleSort("Driver")}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                ชื่อ/ทะเบียนรถ
+                                                {sortConfig.key === "Driver" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
                                         </TablecellPink>
                                         {(() => {
                                             // หา key ที่เป็น Order*

@@ -43,6 +43,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
 import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
@@ -54,6 +56,9 @@ import { useTripData } from "../../server/provider/TripProvider";
 import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 import { buildPeriodsForYear, findCurrentPeriod } from "./Paid";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import ExcelJS from "exceljs";
 
 const Financial = () => {
     const [search, setSearch] = useState("");
@@ -96,6 +101,26 @@ const Financial = () => {
 
     console.log("getRegistration : ", getRegistration());
 
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+
+    const parseDate = (dateStr) => {
+        if (!dateStr) return null;
+        const [day, month, year] = dateStr.split("/").map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                // ✅ ถ้าคลิกซ้ำ -> สลับ asc/desc
+                return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+            } else {
+                // ✅ คลิกใหม่ -> asc ก่อน
+                return { key, direction: "asc" };
+            }
+        });
+    };
+
     const reportDetail = reports.filter((item) => {
         const itemDate = dayjs(item.SelectedDateInvoice, "DD/MM/YYYY");
         const registrations = item?.Registration?.includes(":")
@@ -115,6 +140,34 @@ const Financial = () => {
                 bank.toLowerCase().includes(search.toLowerCase())
             )
         );
+    }).sort((a, b) => {
+        if (!sortConfig.key) return 0;
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        // ถ้าเป็น number
+        if (typeof aValue === "number" && typeof bValue === "number") {
+            return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+        }
+
+        // ถ้าเป็นวันที่
+        if (
+            typeof aValue === "string" &&
+            typeof bValue === "string" &&
+            /^\d{2}\/\d{2}\/\d{4}$/.test(aValue) &&
+            /^\d{2}\/\d{2}\/\d{4}$/.test(bValue)
+        ) {
+            const dateA = parseDate(aValue);
+            const dateB = parseDate(bValue);
+            return sortConfig.direction === "asc"
+                ? dateA - dateB
+                : dateB - dateA;
+        }
+
+        // ถ้าเป็น string (ตัวหนังสือ)
+        return sortConfig.direction === "asc"
+            ? String(aValue).localeCompare(String(bValue), "th")
+            : String(bValue).localeCompare(String(aValue), "th");
     });
 
     console.log("Report : ", reports);
@@ -131,6 +184,93 @@ const Financial = () => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานชำระค่าน้ำมัน");
+
+        // 1️⃣ กำหนด columns
+        worksheet.columns = [
+            { header: "ลำดับ", key: "no", width: 8 },
+            { header: "เลขที่บิล", key: "invoice", width: 15 },
+            { header: "วันที่บิล", key: "dateInvoice", width: 15 },
+            { header: "วันที่โอน", key: "dateTransfer", width: 15 },
+            { header: "ป้ายทะเบียน", key: "registration", width: 35 },
+            { header: "ชื่อบริษัท", key: "company", width: 30 },
+            { header: "ชื่อบัญชี", key: "bank", width: 30 },
+            { header: "ยอดก่อนVat", key: "price", width: 15 },
+            { header: "ยอดVat", key: "vat", width: 15 },
+            { header: "รวม", key: "total", width: 15 },
+            { header: "รายละเอียด", key: "note", width: 30 },
+        ];
+
+        // 2️⃣ Title merge
+        worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = "รายงานชำระค่าน้ำมัน";
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.font = { size: 16, bold: true };
+        titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
+        worksheet.getRow(1).height = 30;
+
+        // 3️⃣ Header row (row 2)
+        const headerRow = worksheet.addRow(worksheet.columns.map(c => c.header));
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.height = 25;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 4️⃣ Data rows
+        reportDetail.forEach((row, index) => {
+            const dataRow = {
+                no: index + 1,
+                invoice: row.InvoiceID,
+                dateInvoice: formatThaiSlash(dayjs(row.SelectedDateInvoice, "DD/MM/YYYY")),
+                dateTransfer: formatThaiSlash(dayjs(row.SelectedDateTransfer, "DD/MM/YYYY")),
+                registration: `${row.Registration.split(":")[1]} (${row.TruckType})`,
+                company: row.Company.split(":")[1],
+                bank: row.Bank.split(":")[1],
+                price: row.Price,
+                vat: row.Vat,
+                total: row.Total,
+                note: row.Note,
+            };
+            const newRow = worksheet.addRow(dataRow);
+            newRow.height = 20;
+            newRow.alignment = { horizontal: "center", vertical: "middle" };
+            newRow.eachCell((cell, colNumber) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                // ยกเว้น column "no"
+                if (worksheet.columns[colNumber - 1].key !== "no") {
+                    cell.numFmt = "#,##0.00";
+                }
+            });
+        });
+
+        // 5️⃣ Footer row รวมค่า
+        const footerRow = worksheet.addRow({
+            bank: "รวม",
+            price: reportDetail.reduce((acc, r) => acc + Number(r.Price), 0),
+            vat: reportDetail.reduce((acc, r) => acc + Number(r.Vat), 0),
+            total: reportDetail.reduce((acc, r) => acc + Number(r.Total), 0),
+        });
+        footerRow.font = { bold: true };
+        footerRow.alignment = { horizontal: "center", vertical: "middle" };
+        footerRow.height = 25;
+        footerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE699" } }; // เหลือง
+            cell.numFmt = "#,##0.00";
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 6️⃣ Save
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `รายงานบิลค่าใช้จ่าย_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+    };
+
 
     const handleChangDelete = (id) => {
         ShowConfirm(
@@ -366,7 +506,11 @@ const Financial = () => {
         //     </Grid>
         //     <Divider sx={{ marginBottom: 1 }} />
         //     <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-        <Grid container spacing={2} width="100%" sx={{ marginTop: -1 }}>
+        <Grid container spacing={2} width="100%" sx={{ marginTop: -4 }}>
+            <Grid item xl={7.5} xs={12} />
+            <Grid item xl={4.5} xs={12}>
+                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+            </Grid>
             <Grid item xl={5.5} xs={12} >
                 <Box
                     sx={{
@@ -515,23 +659,77 @@ const Financial = () => {
                                 <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                     ลำดับ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
-                                    เลขที่บิล
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150, cursor: "pointer" }}
+                                    onClick={() => handleSort("InvoiceID")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        เลขที่บิล
+                                        {sortConfig.key === "InvoiceID" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180 }}>
-                                    วันที่บิล
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180, cursor: "pointer" }}
+                                    onClick={() => handleSort("SelectedDateInvoice")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        วันที่บิล
+                                        {sortConfig.key === "SelectedDateInvoice" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180 }}>
-                                    วันที่โอน
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180, cursor: "pointer" }}
+                                    onClick={() => handleSort("SelectedDateTransfer")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        วันที่โอน
+                                        {sortConfig.key === "SelectedDateTransfer" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 0, zIndex: 3 }}>
-                                    ป้ายทะเบียน
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 0, zIndex: 3, cursor: "pointer" }}
+                                    onClick={() => handleSort("Registration")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        ป้ายทะเบียน
+                                        {sortConfig.key === "Registration" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 220 }}>
-                                    ชื่อบริษัท
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 220, cursor: "pointer" }}
+                                    onClick={() => handleSort("Company")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        ชื่อบริษัท
+                                        {sortConfig.key === "Company" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
-                                    ชื่อบัญชี
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350, cursor: "pointer" }}
+                                    onClick={() => handleSort("Bank")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        ชื่อบัญชี
+                                        {sortConfig.key === "Bank" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     ยอดก่อน Vat

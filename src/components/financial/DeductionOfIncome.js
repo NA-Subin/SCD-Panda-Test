@@ -43,6 +43,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
 import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
@@ -54,6 +56,9 @@ import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 import { formatThaiFull, formatThaiYear } from "../../theme/DateTH";
 import { buildPeriodsForYear, findCurrentPeriod } from "./Paid";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import ExcelJS from "exceljs";
 
 const DeductionOfIncome = (props) => {
     const { selectedDateStart, selectedDateEnd } = props;
@@ -125,6 +130,20 @@ const DeductionOfIncome = (props) => {
     // console.table("Driver formatted : ", formatted);
     console.log("Driver : ", driver);
     console.log("Report : ", reports);
+
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                // ✅ ถ้าคลิกซ้ำ -> สลับ asc/desc
+                return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+            } else {
+                // ✅ คลิกใหม่ -> asc ก่อน
+                return { key, direction: "asc" };
+            }
+        });
+    };
 
     const reportDetail = reports
         .filter((item) => {
@@ -256,6 +275,95 @@ const DeductionOfIncome = (props) => {
         setPage(0);
     };
 
+    const exportToExcel = async () => {
+        let order = 1;
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานชำระค่าน้ำมัน");
+
+        // 1️⃣ กำหนด columns
+        worksheet.columns = [
+            { header: "ลำดับ", key: "no", width: 8 },
+            { header: "พนักงานขับรถ", key: "driver", width: 60 },
+            { header: "รหัส", key: "code", width: 10 },
+            { header: "ชื่อรายการที่หัก", key: "name", width: 25 },
+            { header: "รายได้", key: "income", width: 15 },
+            { header: "รายหัก", key: "expense", width: 15 },
+            { header: "รายละเอียด", key: "note", width: 30 },
+        ];
+
+        // 2️⃣ Title merge
+        worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = `รายงานรายได้รายหักงวดที่${period}`;
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.font = { size: 16, bold: true };
+        titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
+        worksheet.getRow(1).height = 30;
+
+        // 3️⃣ Header row (row 2)
+        const headerRow = worksheet.addRow(worksheet.columns.map(c => c.header));
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.height = 25;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 4️⃣ Data rows
+        processedGroups.forEach(({ driverName, sortedRows }) => {
+            sortedRows.forEach((row) => {
+                const dataRow = {
+                    no: order++,
+                    driver: driverName,
+                    code: row.Code,
+                    name: row.Name.split(":")[1],
+                    income: row.Type === "รายได้" ? Number(row.Money) : 0,
+                    expense: row.Type === "รายหัก" ? Number(row.Money) : 0,
+                    note: row.Note || "",
+                };
+
+                const newRow = worksheet.addRow({
+                    ...dataRow,
+                    income: dataRow.income === 0 ? "-" : dataRow.income,
+                    expense: dataRow.expense === 0 ? "-" : dataRow.expense,
+                });
+
+                newRow.height = 20;
+                newRow.alignment = { horizontal: "center", vertical: "middle" };
+                newRow.eachCell((cell, colNumber) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                // ยกเว้น column "no"
+                if (worksheet.columns[colNumber - 1].key !== "no") {
+                    cell.numFmt = "#,##0.00";
+                }
+            });
+            });
+        });
+
+        // 5️⃣ Footer row รวม
+        const footerRow = worksheet.addRow({
+            name: "รวม",
+            income: processedGroups.flatMap(g => g.sortedRows).reduce((acc, r) => r.Type === "รายได้" ? acc + Number(r.Money) : acc, 0),
+            expense: processedGroups.flatMap(g => g.sortedRows).reduce((acc, r) => r.Type === "รายหัก" ? acc + Number(r.Money) : acc, 0),
+            note: processedGroups.flatMap(g => g.sortedRows).reduce((acc, r) => r.Type === "รายได้" ? acc + Number(r.Money) : acc, 0) - processedGroups.flatMap(g => g.sortedRows).reduce((acc, r) => r.Type === "รายหัก" ? acc + Number(r.Money) : acc, 0)
+        });
+
+        footerRow.font = { bold: true };
+        footerRow.alignment = { horizontal: "center", vertical: "middle" };
+        footerRow.height = 25;
+        footerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE699" } }; // สีเหลือง
+            cell.numFmt = "#,##0.00";
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 6️⃣ Save
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `รายงานรายได้รายหักงวดที่${period}_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+    };
+
     const handleChangDelete = (id) => {
         ShowConfirm(
             `ต้องการลบบิลลำดับที่ ${id + 1} ใช่หรือไม่`,
@@ -299,6 +407,14 @@ const DeductionOfIncome = (props) => {
                 const numA = parseInt(codeA.slice(1), 10);
                 const numB = parseInt(codeB.slice(1), 10);
                 return numA - numB;
+            }).sort((a, b) => {
+                if (!sortConfig.key) return 0;
+                const aValue = a[sortConfig.key];
+                const bValue = b[sortConfig.key];
+
+                if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+                return 0;
             });
 
             // ✅ รวมยอดใน group
@@ -311,7 +427,7 @@ const DeductionOfIncome = (props) => {
             });
 
             return { driverName, sortedRows };
-        });
+        })
 
         return {
             processedGroups: processed,
@@ -473,7 +589,11 @@ const DeductionOfIncome = (props) => {
         //     </Grid>
         //     <Divider sx={{ marginBottom: 1 }} />
         //     <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-        <Grid container spacing={2} width="100%" sx={{ marginTop: -1 }}>
+        <Grid container spacing={2} width="100%" sx={{ marginTop: -4 }}>
+            <Grid item xl={7.5} xs={12} />
+            <Grid item xl={4.5} xs={12}>
+                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+            </Grid>
             <Grid item xl={2.5} md={4} xs={12} >
                 <Paper sx={{ marginLeft: { xl: 0, md: 1, xs: 1 }, }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
@@ -619,14 +739,41 @@ const DeductionOfIncome = (props) => {
                                 <TablecellSelling width={30} sx={{ textAlign: "center", fontSize: 16 }}>
                                     ลำดับ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
-                                    พนักงานขับรถ
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white", cursor: "pointer" }}
+                                    onClick={() => handleSort("driverName")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        พนักงานขับรถ
+                                        {sortConfig.key === "driverName" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
-                                    รหัส
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50, cursor: "pointer" }}
+                                    onClick={() => handleSort("Code")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        รหัส
+                                        {sortConfig.key === "Code" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
-                                    ชื่อรายการที่หัก
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120, cursor: "pointer" }}
+                                    onClick={() => handleSort("Name")}
+                                >
+                                    <Box display="flex" alignItems="center" justifyContent="center">
+                                        ชื่อรายการที่หัก
+                                        {sortConfig.key === "Name" ? (
+                                            sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                        ) : (
+                                            <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                        )}
+                                    </Box>
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                     รายได้

@@ -37,6 +37,7 @@ import {
 } from "@mui/material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import ExcelJS from "exceljs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -391,25 +392,83 @@ const FuelPaymentReport = ({ openNavbar }) => {
         setPage(0);
     };
 
-    const exportToExcel = () => {
-        const exportData = sortedOrderDetail.map((row, index) => ({
-            ลำดับ: index + 1,
-            ตั๋ว: row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName,
-            "ยอดลิตร": new Intl.NumberFormat("en-US").format(row.VolumeProduct),
-            "ยอดเงิน": new Intl.NumberFormat("en-US").format(row.Amount),
-            "ยอดโอน": new Intl.NumberFormat("en-US").format(row.IncomingMoney),
-            "ค้างโอน": new Intl.NumberFormat("en-US").format(row.OverdueTransfer),
-        }));
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานชำระค่าน้ำมัน");
 
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานชำระค่าน้ำมัน");
+        // 1️⃣ กำหนด columns
+        worksheet.columns = [
+            { header: "ลำดับ", key: "no", width: 8 },
+            { header: "ตั๋ว", key: "ticket", width: 55 },
+            { header: "ยอดลิตร", key: "volume", width: 25 },
+            { header: "ยอดเงิน", key: "amount", width: 25 },
+            { header: "ยอดโอน", key: "incoming", width: 25 },
+            { header: "ค้างโอน", key: "overdue", width: 25 },
+        ];
 
-        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-        saveAs(blob, `รายงานชำระค่าน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+        // 2️⃣ Title merge
+        worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = "รายงานชำระค่าน้ำมัน";
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.font = { size: 16, bold: true };
+        titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
+        worksheet.getRow(1).height = 30;
+
+        // 3️⃣ Header row (row 2)
+        const headerRow = worksheet.addRow(worksheet.columns.map(c => c.header));
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.height = 25;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 4️⃣ Data rows
+        sortedOrderDetail.forEach((row, index) => {
+            const dataRow = {
+                no: index + 1,
+                ticket: row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName,
+                volume: Number(row.VolumeProduct),
+                amount: Number(row.Amount),
+                incoming: Number(row.IncomingMoney),
+                overdue: Number(row.OverdueTransfer),
+            };
+
+            const newRow = worksheet.addRow(dataRow);
+            newRow.height = 20;
+            newRow.alignment = { horizontal: "center", vertical: "middle" };
+            newRow.eachCell((cell, colNumber) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                if (worksheet.columns[colNumber - 1].key !== "no") {
+                    cell.numFmt = "#,##0.00";
+                }
+            });
+        });
+
+        // 5️⃣ Footer row รวมค่า
+        const footerRow = worksheet.addRow({
+            ticket: "รวม",
+            volume: sortedOrderDetail.reduce((acc, r) => acc + Number(r.VolumeProduct), 0),
+            amount: sortedOrderDetail.reduce((acc, r) => acc + Number(r.Amount), 0),
+            incoming: sortedOrderDetail.reduce((acc, r) => acc + Number(r.IncomingMoney), 0),
+            overdue: sortedOrderDetail.reduce((acc, r) => acc + Number(r.OverdueTransfer), 0),
+        });
+
+        footerRow.font = { bold: true };
+        footerRow.alignment = { horizontal: "center", vertical: "middle" };
+        footerRow.height = 25;
+        footerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE699" } }; // สีเหลือง
+            cell.numFmt = "#,##0.00"; // format ตัวเลข
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 6️⃣ Save
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `รายงานชำระค่าน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
     };
-
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>

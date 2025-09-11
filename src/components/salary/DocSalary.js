@@ -38,6 +38,8 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -52,6 +54,9 @@ import { formatThaiFull, formatThaiYear } from "../../theme/DateTH";
 import { buildPeriodsForYear, findCurrentPeriod } from "../financial/Paid";
 import MoneyGuarantee from "./MoneyGuarantee";
 import MoneyLoan from "./MoneyLoan";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import ExcelJS from "exceljs";
 
 const DocSalary = ({ openNavbar }) => {
     // const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
@@ -111,6 +116,8 @@ const DocSalary = ({ openNavbar }) => {
         });
 
     const driver = Object.values(drivers || {});
+    const smalls = Object.values(small || {});
+    const registrationH = Object.values(reghead || {});
     const tripDetail = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
@@ -137,6 +144,20 @@ const DocSalary = ({ openNavbar }) => {
     console.log("Driver : ", driver);
     console.log("Report : ", reports);
 
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                // ✅ ถ้าคลิกซ้ำ -> สลับ asc/desc
+                return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+            } else {
+                // ✅ คลิกใหม่ -> asc ก่อน
+                return { key, direction: "asc" };
+            }
+        });
+    };
+
     const reportDetail = reports.filter((item) => {
         //const itemDate = dayjs(item.Date, "DD/MM/YYYY");
         return (
@@ -155,12 +176,12 @@ const DocSalary = ({ openNavbar }) => {
 
             let Registration = "";
             if (item.TruckType === "รถใหญ่") {
-                const Registrations = reghead.find(
+                const Registrations = registrationH.find(
                     (row) => row.id === Number(item.Registration.split(":")[0])
                 );
                 Registration = `${Registrations?.RegHead}/${Registrations?.RegTail.split(":")[1]}`;
             } else if (item.TruckType === "รถเล็ก") {
-                const Registrations = small.find(
+                const Registrations = smalls.find(
                     (row) => row.id === Number(item.Registration.split(":")[0])
                 );
                 Registration = Registrations?.RegHead;
@@ -179,6 +200,14 @@ const DocSalary = ({ openNavbar }) => {
                 item.Name?.toLowerCase().includes(lowerSearch) ||
                 item.Registration?.toLowerCase().includes(lowerSearch)
             );
+        }).sort((a, b) => {
+            if (!sortConfig.key) return 0;
+            const aValue = a[sortConfig.key];
+            const bValue = b[sortConfig.key];
+
+            if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+            return 0;
         });
 
     const excludeNames = ["เงินค้ำประกัน", "เบิกเงินกู้ยืม"];
@@ -362,8 +391,142 @@ const DocSalary = ({ openNavbar }) => {
             moneyGuarantee: moneyGuarantee,
             moneyLoan: moneyLoan,
         };
-    });
+    })
 
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานเงินเดือน");
+
+        // ✅ กำหนด column (width + header)
+        worksheet.columns = [
+            { header: "ลำดับ", key: "no", width: 8 },
+            { header: "พนักงานขับรถ", key: "driver", width: 25 },
+            { header: "ป้ายทะเบียน", key: "registration", width: 35 },
+            { header: "เลขที่บัญชี", key: "bank", width: 20 },
+            { header: "ค่าเที่ยว", key: "trip", width: 20 },
+            ...uniqueNames.map((col) => ({
+                header: col.name,
+                key: col.id,
+                width: 20,
+            })),
+            { header: "ยอดรวม", key: "total", width: 25 },
+            { header: "ยอดสะสมเงินค้ำประกัน", key: "guarantee", width: 20 },
+            { header: "ยอดสะสมเงินกู้ยืม", key: "loan", width: 20 },
+        ];
+
+        // Title
+        worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = "รายงานเงินเดือน";
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.font = { size: 16, bold: true };
+        titleCell.height = 40;
+        titleCell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFDDEBF7" },
+        };
+
+        // Header row (row 2)
+        const headerValues = worksheet.columns.map((col) => col.header);
+        const headerRow = worksheet.addRow(headerValues); // ✅ สร้าง row header ใหม่
+        headerRow.font = { bold: true };
+        headerRow.height = 25;
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // ✅ Data rows
+        processed.forEach(({ index, row, costrip, total, moneyGuarantee, moneyLoan }) => {
+            const dataRow = {
+                no: index + 1,
+                driver: row.Name,
+                registration: row.Registration,
+                bank: row.BankID,
+                trip: costrip,
+                ...uniqueNames.reduce((acc, col) => {
+                    const found = row.document.find(
+                        (doc) => doc.Name.split(":")[0] === col.id
+                    );
+                    acc[col.id] = found
+                        ? col.type === "รายได้"
+                            ? found.Money
+                            : -found.Money
+                        : "";
+                    return acc;
+                }, {}),
+                total: total + costrip,
+                guarantee: moneyGuarantee.reduce((acc, d) => acc + Number(d.Money), 0),
+                loan: moneyLoan.reduce((acc, d) => acc + Number(d.Money), 0),
+            };
+
+            const newRow = worksheet.addRow(dataRow);
+            newRow.alignment = { vertical: "middle", horizontal: "center" };
+            newRow.height = 20;
+            newRow.eachCell((cell, colNumber) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                // ยกเว้น column "no"
+                if (worksheet.columns[colNumber - 1].key !== "no" && worksheet.columns[colNumber - 1].key !== "orders") {
+                    cell.numFmt = "#,##0.00";
+                }
+            });
+        });
+
+        // ✅ รวมค่าของ dynamic columns
+        const dynamicTotals = uniqueNames.reduce((acc, col) => {
+            // sum เฉพาะ column นั้น ๆ
+            const sumCol = processed.reduce((acc2, p) => {
+                const found = p.row.document.find(
+                    (doc) => doc.Name.split(":")[0] === col.id
+                );
+                if (!found) return acc2;
+                return acc2 + (col.type === "รายได้" ? Number(found.Money) : -Number(found.Money));
+            }, 0);
+
+            acc[col.id] = sumCol; // ✅ key ต้องตรงกับ worksheet.columns ที่กำหนด
+            return acc;
+        }, {});
+
+        // ✅ Footer รวม
+        const footerRow = worksheet.addRow({
+            bank: "รวม",
+            trip: processed.reduce((acc, p) => acc + p.costrip, 0),
+            ...dynamicTotals,
+            total: processed.reduce((acc, p) => acc + p.total + p.costrip, 0),
+            guarantee: processed.reduce(
+                (acc, p) => acc + p.moneyGuarantee.reduce((a, d) => a + Number(d.Money), 0),
+                0
+            ),
+            loan: processed.reduce(
+                (acc, p) => acc + p.moneyLoan.reduce((a, d) => a + Number(d.Money), 0),
+                0
+            ),
+        });
+
+        footerRow.font = { bold: true };
+        footerRow.alignment = { horizontal: "center", vertical: "middle" };
+        footerRow.height = 25;
+        footerRow.eachCell((cell) => {
+            cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFFFE699" }, // เหลือง
+            };
+            cell.numFmt = "#,##0.00";
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" },
+            };
+        });
+
+        // ✅ Save File
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `รายงานเงินเดือน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+    };
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
@@ -377,6 +540,10 @@ const DocSalary = ({ openNavbar }) => {
                     >
                         เงินเดือน
                     </Typography>
+                </Grid>
+                <Grid item xl={9.5} xs={12} />
+                <Grid item xl={2.5} xs={12}>
+                    <Button variant="contained" size="small" color="success" sx={{ marginTop: -10 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                 </Grid>
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
@@ -692,11 +859,29 @@ const DocSalary = ({ openNavbar }) => {
                                         <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
-                                            พนักงานขับรถ
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white", cursor: "pointer" }}
+                                            onClick={() => handleSort("Name")}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                พนักงานขับรถ
+                                                {sortConfig.key === "Name" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
-                                            ป้ายทะเบียน
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, cursor: "pointer" }}
+                                            onClick={() => handleSort("Registration")}
+                                        >
+                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                ป้ายทะเบียน
+                                                {sortConfig.key === "Registration" ? (
+                                                    sortConfig.direction === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />
+                                                ) : (
+                                                    <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                                )}
+                                            </Box>
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             เลขบัญชี

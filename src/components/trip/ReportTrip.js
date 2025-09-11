@@ -37,6 +37,7 @@ import {
 } from "@mui/material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import ExcelJS from "exceljs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -235,30 +236,89 @@ const ReportTrip = ({ openNavbar }) => {
 
     console.log(sortedDrivers.find(item => item.id === 1));
 
-    const exportToExcel = () => {
-        const exportData = TripDetail.map((row, index) => ({
-            ลำดับ: index + 1,
-            "วันที่รับ": formatThaiSlash(dayjs(row.DateReceive, "DD/MM/YYYY")),
-            ไป: Object.entries(row)
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานสรุปค่าเที่ยว");
+
+        // 1️⃣ กำหนด columns
+        worksheet.columns = [
+            { header: "ลำดับ", key: "no", width: 8 },
+            { header: "วันที่รับ", key: "date", width: 15 },
+            { header: "ไป", key: "orders", width: 50 },
+            { header: "ค่าเที่ยว", key: "cost", width: 20 },
+            { header: "คลัง", key: "depot", width: 30 },
+            { header: "จำนวนลิตร", key: "volume", width: 30 },
+        ];
+
+        // 2️⃣ Title merge
+        worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = "รายงานสรุปค่าเที่ยว";
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.font = { size: 16, bold: true };
+        titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
+        worksheet.getRow(1).height = 30;
+
+        // 3️⃣ Header row (row 2)
+        const headerRow = worksheet.addRow(worksheet.columns.map(c => c.header));
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.height = 25;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 4️⃣ Data rows
+        TripDetail.forEach((row, index) => {
+            const ordersText = Object.entries(row)
                 .filter(([key]) => key.startsWith("Order"))
-                .sort(
-                    (a, b) =>
-                        parseInt(a[0].replace("Order", "")) - parseInt(b[0].replace("Order", ""))
-                )
+                .sort((a, b) => parseInt(a[0].replace("Order", "")) - parseInt(b[0].replace("Order", "")))
                 .map(([_, value], idx) => `[${idx + 1}] : ${value.split(":")[1]}`)
-                .join("\n"),  // รวม order หลายๆ อันขึ้นบรรทัดใหม่ในช่องเดียว
-            ค่าเที่ยว: row.CostTrip,
-            คลัง: row.Depot.split(":")[0],
-            "จำนวนลิตร": Number(row.totalVolumeProduct),
-        }));
+                .join("\n");
 
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานสรุปค่าเที่ยว");
+            const dataRow = {
+                no: index + 1,
+                date: formatThaiSlash(dayjs(row.DateReceive, "DD/MM/YYYY")),
+                orders: ordersText,
+                cost: Number(row.CostTrip),
+                depot: row.Depot.split(":")[0],
+                volume: Number(row.totalVolumeProduct),
+            };
 
-        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-        saveAs(blob, `รายงานสรุปค่าเที่ยว_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+            const newRow = worksheet.addRow(dataRow);
+            newRow.height = 100;
+            newRow.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+            newRow.eachCell((cell, colNumber) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                // ยกเว้น column "no"
+                if (worksheet.columns[colNumber - 1].key !== "no" && worksheet.columns[colNumber - 1].key !== "orders") {
+                    cell.numFmt = "#,##0.00";
+                }
+            });
+        });
+
+        // 5️⃣ Footer row รวมค่า
+        const footerRow = worksheet.addRow({
+            orders: "รวม",
+            cost: TripDetail.reduce((acc, r) => acc + Number(r.CostTrip), 0),
+            volume: TripDetail.reduce((acc, r) => acc + Number(r.totalVolumeProduct), 0),
+        });
+
+        footerRow.font = { bold: true };
+        footerRow.alignment = { horizontal: "center", vertical: "middle" };
+        footerRow.height = 25;
+        footerRow.eachCell((cell, colNumber) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE699" } }; // สีเหลือง
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+            if (worksheet.columns[colNumber - 1].key !== "no" && worksheet.columns[colNumber - 1].key !== "orders") {
+                cell.numFmt = "#,##0.00";
+            }
+        });
+
+        // 6️⃣ Save
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `รายงานสรุปค่าเที่ยว_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
     };
 
     return (
