@@ -57,10 +57,10 @@ import { useTripData } from "../../server/provider/TripProvider";
 import ReportDetail from "./ReportDetail";
 import { formatThaiFull } from "../../theme/DateTH";
 
-const FuelPaymentReport = ({ openNavbar }) => {
+const ReportTransports = ({ openNavbar }) => {
 
     const [date, setDate] = React.useState(false);
-    const [check, setCheck] = React.useState(3);
+    const [check, setCheck] = React.useState("0:ทั้งหมด");
     const [months, setMonths] = React.useState(dayjs(new Date));
     const [years, setYears] = React.useState(dayjs(new Date));
     const [driverDetail, setDriver] = React.useState([]);
@@ -133,23 +133,21 @@ const FuelPaymentReport = ({ openNavbar }) => {
     };
 
     // const { reportFinancial, drivers } = useData();
-    const { drivers, customertransports, customergasstations, customerbigtruck, customersmalltruck, customertickets } = useBasicData();
-    const { order, transferMoney } = useTripData();
-    // const orders = Object.values(order || {});
-    const orders = Object.values(order || {}).filter(item => {
+    const { drivers, customertransports, reghead } = useBasicData();
+    const { tickets, transferMoney, trip } = useTripData();
+    // const ticket = Object.values(tickets || {});
+    const ticket = Object.values(tickets || {}).filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
         return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
     });
     const driver = Object.values(drivers || {});
     const ticketsT = Object.values(customertransports || {});
-    const ticketsPS = Object.values(customergasstations || {});
-    const ticketsB = Object.values(customerbigtruck || {});
-    const ticketsS = Object.values(customersmalltruck || {});
-    const ticketsA = Object.values(customertickets || {});
+    const trips = Object.values(trip || {});
+    const registration = Object.values(reghead || {});
     const transferMoneyDetail = Object.values(transferMoney || {});
 
-    console.log("1.Orders : ", orders);
-    // const orderDetail = orders
+    console.log("1.Orders : ", ticket);
+    // const orderDetail = ticket
     //     .filter((item) => {
     //         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
     //         const customerId = Number(item.TicketName.split(":")[0]);
@@ -199,93 +197,129 @@ const FuelPaymentReport = ({ openNavbar }) => {
         if (!selectedDateStart || !selectedDateEnd) return [];
 
         // 1. กรอง order เฉพาะที่สถานะถูกต้องและอยู่ในช่วงวันที่
-        const filteredItems = orders.filter((item) => {
+        const filteredItems = ticket.filter((item) => {
             const itemDate = dayjs(item.Date, "DD/MM/YYYY");
             const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined;
             const isInDateRange = itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
-            const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
 
-            const customerId = Number(item.TicketName.split(":")[0]);
+            let isRegistration = false;
 
-            let isInCompany = false;
-            let iscompanyid = false;
-
-            if (check === 1) {
-                // ทั้งหมด ยกเว้นตั๋วรถเล็ก
-                isInCompany = ticketsB.some(customer => customer.id === customerId);
-                // iscompanyid = item.CustomerType !== "ตั๋วรถเล็ก";
-            } else if (check === 2) {
-                // รถใหญ่ต้องอยู่ในเครือ / ตั๋วปั้มไม่ต้องเช็ค
-                const isInCompanyForBigTruck = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "อยู่บริษัทในเครือ");
-
-                isInCompany = (item.CustomerType === "ตั๋วรถใหญ่" && isInCompanyForBigTruck)
-
-                // iscompanyid = item.CustomerType === "ตั๋วรถใหญ่" || item.CustomerType === "ตั๋วปั้ม";
-            } else if (check === 3) {
-                // ไม่อยู่ในเครือ ต้องเป็นรถใหญ่เท่านั้น
-                isInCompany = ticketsB.some(customer => customer.id === customerId && customer.StatusCompany === "ไม่อยู่บริษัทในเครือ");
-                iscompanyid = item.CustomerType === "ตั๋วรถใหญ่";
+            if (check === "0:ทั้งหมด") {
+                isRegistration = true;
+            } else {
+                // รถต้องอยู่ในเครือบริษัทที่เลือก
+                isRegistration = registration.some(
+                    (customer) =>
+                        customer.Company.split(":")[0] === check.split(":")[0] &&
+                        customer.id === Number(item.Registration?.split(":")[0] || 0)
+                );
             }
 
-            return isValidStatus && isInDateRange && matchTickets && isInCompany && iscompanyid && item.CustomerType === "ตั๋วรถใหญ่";
+            // ✅ ไม่เอาตั๋วรถใหญ่และตั๋วรถเล็ก
+            const isValidCustomerType =
+                item.CustomerType !== "ตั๋วรถใหญ่" &&
+                item.CustomerType !== "ตั๋วรถเล็ก";
+
+            return isValidStatus && isInDateRange && isRegistration && isValidCustomerType;
         });
+
+        console.log("filteredItems : ", filteredItems);
 
         filteredItemsRef.current = filteredItems;
 
-        // 2. แตก Product รายการย่อยออกมา
-        const flattened = filteredItems.flatMap((item) => {
-            if (!item.Product) return [];
+        console.log("transferMoneyDetail : ", transferMoneyDetail);
 
-            const totalIncomingMoney = transferMoneyDetail
-                .filter(trans => trans.TicketNo === item.No)
-                .reduce((sum, trans) => {
-                    const value = parseFloat(trans.IncomingMoney) || 0;
-                    return sum + value;
+        // 2. แตก Product รายการย่อยออกมา
+
+        const processedTickets = new Set();
+
+        const flattened = filteredItems.map((item) => {
+            if (!item.Product) return null;
+
+            const company = registration.find(
+                (com) => com.id === Number(item.Registration?.split(":")[0] || 0)
+            );
+
+            const tripdetail = trips.find((trip) => (trip.id - 1) === item.Trip);
+            const depotName = tripdetail?.Depot?.split(":")[1] || "";
+
+            let Rate = 0;
+            if (depotName === "ลำปาง") Rate = parseFloat(item.Rate1) || 0;
+            else if (depotName === "พิจิตร") Rate = parseFloat(item.Rate2) || 0;
+            else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName))
+                Rate = parseFloat(item.Rate3) || 0;
+
+            // ✅ รวม amount จากทุก product
+            const { volumeSum, amountSum } = Object.entries(item.Product)
+                .filter(([productName]) => productName !== "P")
+                .reduce(
+                    (acc, [, productData]) => {
+                        const volumeProduct = parseFloat(productData.Volume) * 1000;
+                        const amount = volumeProduct * parseFloat(Rate);
+                        acc.volumeSum += volumeProduct;
+                        acc.amountSum += amount;
+                        return acc;
+                    },
+                    { volumeSum: 0, amountSum: 0 }
+                );
+
+            // ✅ คำนวณ VAT และ TotalAmount ของบิลนี้
+            const vatOnePercent = amountSum * 0.01;
+            const totalAmount = amountSum - vatOnePercent;
+
+            // ✅ หาเงินเข้ามา
+            // const matchedTrans = transferMoneyDetail.filter((t) =>
+            //     check === "0:ทั้งหมด"
+            //         ? t.TicketName === item.TicketName && t.TicketType === item.CustomerType
+            //         : t.TicketName === item.TicketName &&
+            //         t.TicketType === item.CustomerType &&
+            //         t.Transport === check
+            // );
+
+            // const totalIncomingMoney = matchedTrans.reduce((sum, t) => {
+            //     const money = parseFloat(t.IncomingMoney);
+            //     return sum + (isNaN(money) ? 0 : money);
+            // }, 0);
+
+            // รวม IncomingMoney ของ TicketName นี้แค่ครั้งเดียว
+            let totalIncomingMoney = 0;
+            if (!processedTickets.has(item.TicketName)) {
+                const matchedTrans = transferMoneyDetail.filter((t) =>
+                    check === "0:ทั้งหมด"
+                        ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType)
+                        : (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Transport === check)
+                );
+
+                totalIncomingMoney = matchedTrans.reduce((sum, t) => {
+                    const money = parseFloat((t.IncomingMoney || "0").toString().replace(/,/g, "").trim());
+                    return sum + (isNaN(money) ? 0 : money);
                 }, 0);
 
-            const incomingMoneyDetail = transferMoneyDetail
-                .filter(trans => trans.TicketNo === item.No)
+                processedTickets.add(item.TicketName);
+            }
 
-            console.log("show incoming : ", incomingMoneyDetail);
+            const incomingMoneyDetail = transferMoneyDetail.filter(
+                (trans) => trans.TicketNo === item.No
+            );
 
-            const productEntries = Object.entries(item.Product)
-                .filter(([productName]) => productName !== "P");
-
-            const OverdueTransfer = productEntries.reduce((sum, entry) => {
-                const productData = entry[1];
-                const value = parseFloat(productData.Amount) || 0;
-                return sum + value;
-            }, 0);
-
-            console.log("OverdueTransfer : ", OverdueTransfer);
-
-            return productEntries.map(([productName, productData], index) => ({
+            return {
                 ...item,
-                IncomingMoneyDetail: index === 0 ? incomingMoneyDetail : 0,
-                ProductName: productName,
-                VolumeProduct: productData.Volume * 1000,
-                Amount: productData.Amount || 0,
-                IncomingMoney: index === 0 ? (totalIncomingMoney || 0) : 0,
-                OverdueTransfer: index === 0 ? ((OverdueTransfer || 0) - (totalIncomingMoney || 0)) : 0,
-                RateOil: productData.RateOil || 0,
-            }));
-
-            // return Object.entries(item.Product)
-            //     .filter(([productName]) => productName !== "P")
-            //     .map(([productName, productData]) => ({
-            //         ...item,
-            //         IncomingMoneyDetail: incomingMoneyDetail,
-            //         ProductName: productName,
-            //         VolumeProduct: productData.Volume * 1000,
-            //         Amount: productData.Amount || 0,
-            //         IncomingMoney: totalIncomingMoney || 0,
-            //         OverdueTransfer: (productData.Amount || 0) - (totalIncomingMoney || 0),
-            //         RateOil: productData.RateOil || 0,
-            //     }));
-        });
+                IncomingMoneyDetail: incomingMoneyDetail,
+                VolumeProduct: volumeSum,
+                Amount: amountSum,
+                IncomingMoney: totalIncomingMoney,
+                OverdueTransfer: totalAmount - totalIncomingMoney,
+                VatOnePercent: vatOnePercent,
+                TotalAmount: totalAmount,
+                RateOil: parseFloat(Rate),
+                Company: company?.Company,
+            };
+        }).filter(Boolean);
 
         flattenedRef.current = flattened;
 
+        console.log("registraion : ", registration.filter((row) => row.Company.split(":")[0] === check.split(":")[0]));
+        console.log("flattened : ", ticket.filter((row) => row.TicketName.split(":")[1] === "T...VRP ปิโตรเลียม(PT)ใช้หัวสับ+ส่งรูป"));
         console.log("flattened : ", flattened);
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
@@ -299,6 +333,10 @@ const FuelPaymentReport = ({ openNavbar }) => {
                 acc[key].Amount += curr.Amount;
                 acc[key].IncomingMoney += curr.IncomingMoney;
                 acc[key].OverdueTransfer += curr.OverdueTransfer;
+                acc[key].VatOnePercent += curr.VatOnePercent;
+                acc[key].TotalAmount += curr.TotalAmount;
+                // acc[key].VatOnePercent += ((curr.Amount) * 0.01);
+                // acc[key].TotalAmount += (curr.Amount) - ((curr.Amount) * 0.01);
 
                 // กรณีข้อมูลรวมอ้างอิงวันเดียว: ให้เลือกวันล่าสุดหรือแรกสุดก็ได้ (ตัวอย่างใช้วันล่าสุด)
                 // const dateA = dayjs(acc[key].Date, "DD/MM/YYYY");
@@ -319,12 +357,13 @@ const FuelPaymentReport = ({ openNavbar }) => {
             return (a.driver?.split(":")[1] || '').localeCompare(b.driver?.split(":")[1] || '');
         });
 
-    }, [orders, selectedDateStart, selectedDateEnd, selectTickets, transferMoneyDetail]);
+    }, [ticket, selectedDateStart, selectedDateEnd, selectTickets, transferMoneyDetail, check, registration]);
 
     console.log("orderDetail : ", orderDetail);
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalOverdueTransfer = orderDetail.reduce((sum, item) => sum + Number(item.OverdueTransfer || 0), 0);
+    const totalTotalAmount = orderDetail.reduce((sum, item) => sum + Number(item.TotalAmount || 0), 0);
     const totalIncomingMoney = orderDetail.reduce((sum, item) => sum + Number(item.IncomingMoney || 0), 0);
     const totalVolume = orderDetail.reduce((sum, item) => sum + (Number(item.VolumeProduct || 0)), 0);
 
@@ -364,9 +403,14 @@ const FuelPaymentReport = ({ openNavbar }) => {
         setPage(0);
     };
 
+    const formatNumber = (value) => {
+        if (!value || value === 0) return "0"; // ถ้า 0 หรือ undefined แสดง 0
+        return new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    };
+
     const exportToExcel = async () => {
         const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("รายงานชำระค่าน้ำมัน");
+        const worksheet = workbook.addWorksheet("รายงานชำระค่าขนส่ง");
 
         // 1️⃣ กำหนด columns
         worksheet.columns = [
@@ -374,6 +418,8 @@ const FuelPaymentReport = ({ openNavbar }) => {
             { header: "ตั๋ว", key: "ticket", width: 55 },
             { header: "ยอดลิตร", key: "volume", width: 25 },
             { header: "ยอดเงิน", key: "amount", width: 25 },
+            { header: "หักภาษี1%", key: "vat", width: 25 },
+            { header: "ยอดชำระ", key: "total", width: 25 },
             { header: "ยอดโอน", key: "incoming", width: 25 },
             { header: "ค้างโอน", key: "overdue", width: 25 },
         ];
@@ -381,7 +427,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
         // 2️⃣ Title merge
         worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
         const titleCell = worksheet.getCell("A1");
-        titleCell.value = "รายงานชำระค่าน้ำมัน";
+        titleCell.value = "รายงานชำระค่าขนส่ง";
         titleCell.alignment = { horizontal: "center", vertical: "middle" };
         titleCell.font = { size: 16, bold: true };
         titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
@@ -404,6 +450,8 @@ const FuelPaymentReport = ({ openNavbar }) => {
                 ticket: row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName,
                 volume: Number(row.VolumeProduct),
                 amount: Number(row.Amount),
+                vat: Number(row.VatOnePercent),
+                total: Number(row.TotalAmount),
                 incoming: Number(row.IncomingMoney),
                 overdue: Number(row.OverdueTransfer),
             };
@@ -424,6 +472,8 @@ const FuelPaymentReport = ({ openNavbar }) => {
             ticket: "รวม",
             volume: sortedOrderDetail.reduce((acc, r) => acc + Number(r.VolumeProduct), 0),
             amount: sortedOrderDetail.reduce((acc, r) => acc + Number(r.Amount), 0),
+            vat: sortedOrderDetail.reduce((acc, r) => acc + Number(r.VatOnePercent), 0),
+            total: sortedOrderDetail.reduce((acc, r) => acc + Number(r.TotalAmount), 0),
             incoming: sortedOrderDetail.reduce((acc, r) => acc + Number(r.IncomingMoney), 0),
             overdue: sortedOrderDetail.reduce((acc, r) => acc + Number(r.OverdueTransfer), 0),
         });
@@ -439,7 +489,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
 
         // 6️⃣ Save
         const buffer = await workbook.xlsx.writeBuffer();
-        saveAs(new Blob([buffer]), `รายงานชำระค่าน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+        saveAs(new Blob([buffer]), `รายงานชำระค่าขนส่ง_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
     };
 
     return (
@@ -455,7 +505,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                         textAlign="center"
                         gutterBottom
                     >
-                        รายงานชำระค่าน้ำมัน
+                        รายงานชำระค่าขนส่ง
                     </Typography>
                 </Grid>
                 <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
@@ -545,73 +595,45 @@ const FuelPaymentReport = ({ openNavbar }) => {
                 {
                     windowWidth >= 800 ?
                         <Grid container spacing={2} width="100%" marginBottom={1} >
-                            <Grid item sm={8} lg={9}>
-                                {/* <Paper>
-                            <Paper>
-                                <Autocomplete
-                                    id="autocomplete-tickets"
-                                    options={getCustomers()}
-                                    getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
-                                    isOptionEqualToValue={(option, value) =>
-                                        option.id === value.id && option.Name === value.Name
-                                    }
-                                    value={
-                                        selectTickets
-                                            ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
-                                            : null
-                                    }
-                                    onChange={(event, newValue) => {
-                                        if (newValue) {
-                                            handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
-                                        } else {
-                                            handleChangeTickets({ target: { value: "" } });
-                                        }
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            variant="outlined"
-                                            size="small"
-                                            label=""
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                startAdornment: (
-                                                    <InputAdornment position="start" sx={{ marginRight: 1 }}>
-                                                        กรุณาเลือกตั๋ว :
-                                                    </InputAdornment>
-                                                ),
-                                                sx: {
-                                                    height: "40px",
-                                                    fontSize: "18px",
-                                                    paddingRight: "8px",
-                                                },
-                                            }}
-                                            InputLabelProps={{ shrink: false }}
-                                        />
-                                    )}
-                                    renderOption={(props, option) => (
-                                        <li {...props}>
-                                            <Typography fontSize="16px">
-                                                {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
-                                            </Typography>
-                                        </li>
-                                    )}
-                                    ListboxProps={{
-                                        style: {
-                                            maxHeight: 250,
-                                        },
-                                    }}
-                                />
-                            </Paper>
-                        </Paper> */}
-                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                            <Grid item sm={4} lg={6}>
+                                <Paper>
+                                    <TextField
+                                        select
+                                        value={check}
+                                        onChange={(e) => setCheck(e.target.value)}
+                                        size="small"
+                                        fullWidth
+                                        sx={{
+                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>กรุณาเลือกบริษัท :</b>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    >
+                                        <MenuItem value="0:ทั้งหมด" sx={{ fontSize: "16px" }}>
+                                            ทั้งหมด
+                                        </MenuItem>
+                                        <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        </MenuItem>
+                                        <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        </MenuItem>
+                                    </TextField>
+
+                                </Paper>
+                                {/* <FormGroup row sx={{ marginBottom: -1.5 }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
                                     <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
                                     <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
                                     <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
-                                </FormGroup>
+                                </FormGroup> */}
                             </Grid>
-                            <Grid item sm={1} lg={1} />
+                            <Grid item sm={5} lg={4} />
                             <Grid item sm={3} lg={2}>
                                 <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                             </Grid>
@@ -619,12 +641,41 @@ const FuelPaymentReport = ({ openNavbar }) => {
                         :
                         <Grid container spacing={2} p={1}>
                             <Grid item xs={12}>
-                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                                <Paper>
+                                    <TextField
+                                        select
+                                        value={check}
+                                        onChange={(e) => setCheck(e.target.value)}
+                                        size="small"
+                                        fullWidth
+                                        sx={{
+                                            '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'center' },
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>กรุณาเลือกบริษัท :</b>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    >
+                                        <MenuItem value="0:ทั้งหมด" sx={{ fontSize: "16px" }}>
+                                            ทั้งหมด
+                                        </MenuItem>
+                                        <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        </MenuItem>
+                                        <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        </MenuItem>
+                                    </TextField>
+                                </Paper>
+                                {/* <FormGroup row sx={{ marginBottom: -1.5 }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
                                     <FormControlLabel control={<Checkbox checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
                                     <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
                                     <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
-                                </FormGroup>
+                                </FormGroup> */}
                             </Grid>
                             <Grid item xs={12} sx={{ textAlign: "center" }}>
                                 <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
@@ -669,6 +720,12 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                             ยอดเงิน
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                            หักภาษี1%
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
+                                            ยอดชำระ
+                                        </TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
                                             ยอดโอน
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 70 }}>
@@ -682,13 +739,35 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                         sortedOrderDetail.map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.VolumeProduct)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.IncomingMoney)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.OverdueTransfer)}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>
-                                                    <ReportDetail key={row.id} row={row} dateStart={selectedDateStart} dateEnd={selectedDateEnd} orderDetail={flattenedRef.current} />
+                                                    {`${row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName} (${row.CustomerType})`}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {new Intl.NumberFormat("en-US").format(row.VolumeProduct)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {formatNumber(row.Amount)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {formatNumber(row.VatOnePercent)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {formatNumber(row.TotalAmount)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {formatNumber(row.IncomingMoney)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    {formatNumber(row.OverdueTransfer)}
+                                                </TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>
+                                                    <ReportDetail
+                                                        key={row.id}
+                                                        row={row}
+                                                        dateStart={selectedDateStart}
+                                                        dateEnd={selectedDateEnd}
+                                                        orderDetail={flattenedRef.current}
+                                                    />
                                                 </TableCell>
                                             </TableRow>
                                         ))
@@ -697,7 +776,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                             </Table>
                         </TableContainer>
                         <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.dark }}>
-                            <Grid item xs={3}>
+                            <Grid item xs={2}>
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
@@ -710,7 +789,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                                 alignItems: 'center',
                                             },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '20px',
+                                                fontSize: '18px',
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
@@ -720,14 +799,14 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         รวม :
                                                     </Typography>
                                                 </InputAdornment>
                                             ),
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         ลิตร
                                                     </Typography>
                                                 </InputAdornment>
@@ -737,7 +816,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
 
                                 </Paper>
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item xs={2.5}>
                                 {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>
                                     <Typography variant="h6" sx={{ marginRight: 1, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography> */}
                                 <Paper sx={{ backgroundColor: "white" }}>
@@ -752,7 +831,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                                 alignItems: 'center',
                                             },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '20px',
+                                                fontSize: '18px',
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
@@ -762,14 +841,14 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         ยอดเงิน :
                                                     </Typography>
                                                 </InputAdornment>
                                             ),
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         บาท
                                                     </Typography>
                                                 </InputAdornment>
@@ -780,7 +859,50 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                 </Paper>
                                 {/* </Box> */}
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item xs={2.5}>
+                                {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>
+                                    <Typography variant="h6" sx={{ marginRight: 1, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography> */}
+                                <Paper sx={{ backgroundColor: "white" }}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        value={new Intl.NumberFormat("en-US").format(totalTotalAmount)}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '40px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                                textAlign: 'center',
+                                                paddingLeft: 2,
+                                            },
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                                                        ยอดชำระ :
+                                                    </Typography>
+                                                </InputAdornment>
+                                            ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                                                        บาท
+                                                    </Typography>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+
+                                </Paper>
+                                {/* </Box> */}
+                            </Grid>
+                            <Grid item xs={2.5}>
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
@@ -793,7 +915,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                                 alignItems: 'center',
                                             },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '20px',
+                                                fontSize: '18px',
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
@@ -803,14 +925,14 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         ยอดโอน :
                                                     </Typography>
                                                 </InputAdornment>
                                             ),
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         บาท
                                                     </Typography>
                                                 </InputAdornment>
@@ -826,7 +948,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                     </Paper>
                                 </Box> */}
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item xs={2.5}>
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
@@ -839,7 +961,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                                 alignItems: 'center',
                                             },
                                             '& .MuiInputBase-input': {
-                                                fontSize: '20px',
+                                                fontSize: '18px',
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
@@ -849,14 +971,14 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         ค้างโอน :
                                                     </Typography>
                                                 </InputAdornment>
                                             ),
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <Typography sx={{ fontSize: '20px', fontWeight: 'bold' }}>
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
                                                         บาท
                                                     </Typography>
                                                 </InputAdornment>
@@ -875,4 +997,4 @@ const FuelPaymentReport = ({ openNavbar }) => {
     );
 };
 
-export default FuelPaymentReport;
+export default ReportTransports;

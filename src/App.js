@@ -59,6 +59,7 @@ import Expenses from "./components/financial/Expenses";
 import PrintInvoiceSmallTruck from "./components/invoice-smalltruck/PrintInvoice";
 import DocSalary from "./components/salary/DocSalary";
 import ExpenseDetail from "./components/expense/Expense";
+import ReportTransports from "./components/report/ReportTransport";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -231,6 +232,9 @@ function App() {
                       </Routes>
                       <Routes>
                         <Route path="/report-fuel-payment" element={<FuelPaymentReport openNavbar={open} />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/report-transport-payment" element={<ReportTransports openNavbar={open} />} />
                       </Routes>
                       <Routes>
                         <Route path="/payment-smalltruck" element={<ReportPaymentSmallTruck openNavbar={open} />} />

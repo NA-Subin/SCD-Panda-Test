@@ -39,6 +39,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import ImageIcon from "@mui/icons-material/Image";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
@@ -53,6 +55,7 @@ import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 import { Details } from "@mui/icons-material";
 import { formatThaiFull, formatThaiShort, formatThaiSlash } from "../../theme/DateTH";
+import FileUploadCard from "../../theme/FileUploadCard";
 
 const InsertFinancial = () => {
     // const { reghead, regtail, small, report, reportType } = useData();
@@ -78,6 +81,8 @@ const InsertFinancial = () => {
     const [resultVat, setResultVat] = useState("0.00");
     const [resultTotal, setResultTotal] = useState("0.00");
     const [manualTotal, setManualTotal] = useState(false); // เช็คว่าผู้ใช้แก้ total โดยตรง
+    const [file, setFile] = useState(null);
+    const [fileType, setFileType] = useState(null);
 
     console.log("P : ", price);
     console.log("V : ", vat);
@@ -240,15 +245,34 @@ const InsertFinancial = () => {
         setOpen(false);
     };
 
-    const handlePost = () => {
+    const handlePost = async () => {
         if (!list || list.length === 0) {
             ShowError("ไม่มีข้อมูลที่จะบันทึก");
             return;
         }
 
+        if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
+
+        const formData = new FormData();
+        formData.append("pic", file);
+        let img;
+
+        try {
+            const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            img = data.file_path;
+        } catch (err) {
+            console.error("Upload failed:", err);
+        }
+
+        console.log("Image after try/catch:", img);
+
         const startId = reportDetail.length; // ใช้ต่อจากของเดิม
         const updates = {};
-
         list.forEach((item, index) => {
             const id = startId + index;
 
@@ -269,7 +293,8 @@ const InsertFinancial = () => {
                 Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
                 Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
                 TruckType: item.truckType,
-                Status: "อยู่ในระบบ"
+                Status: "อยู่ในระบบ",
+                Path: img
             };
         });
 
@@ -302,6 +327,7 @@ const InsertFinancial = () => {
     console.log("registrationTruck: ", registrationTruck);
     console.log("Group : ", group);
     console.log("List : ", list);
+    console.log("File : ", file);
 
     return (
         <React.Fragment>
@@ -1285,6 +1311,130 @@ const InsertFinancial = () => {
 
                             </Grid>
                         }
+                        <Grid item md={12} xs={12}>
+                            <Divider>
+                                <Chip label="เพิ่มไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -1, marginBottom: 1 }} />
+                            </Divider>
+                            {
+                                file === null ?
+                                    <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
+                                        <Button
+                                            variant="contained"
+                                            component="label"
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                height: "50px",
+                                                backgroundColor: !fileType ? "#ff5252" : "#eeeeee",
+                                                borderRadius: 2,
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                            }}
+                                            onClick={() => setFileType(false)}
+                                        >
+                                            <Typography
+                                                variant="h6"
+                                                fontWeight="bold"
+                                                color={!fileType ? "white" : "lightgray"}
+                                                gutterBottom
+                                            >
+                                                PDF
+                                            </Typography>
+                                            <PictureAsPdfIcon
+                                                sx={{
+                                                    fontSize: 40,
+                                                    color: !fileType ? "white" : "lightgray",
+                                                    marginLeft: 2,
+                                                }}
+                                            />
+                                            <input
+                                                type="file"
+                                                hidden
+                                                accept="application/pdf"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) setFile(file);
+                                                }}
+                                            />
+                                        </Button>
+                                        {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
+                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                        <Button
+                                            variant="contained"
+                                            component="label"
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                height: "50px",
+                                                backgroundColor: fileType ? "#29b6f6" : "#eeeeee",
+                                                borderRadius: 2,
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                            }}
+                                            onClick={() => setFileType(true)}
+                                        >
+                                            <Typography
+                                                variant="h6"
+                                                fontWeight="bold"
+                                                color={fileType ? "white" : "lightgray"}
+                                                gutterBottom
+                                            >
+                                                รูปภาพ
+                                            </Typography>
+                                            <ImageIcon
+                                                sx={{
+                                                    fontSize: 40,
+                                                    color: fileType ? "white" : "lightgray",
+                                                    marginLeft: 2,
+                                                }}
+                                            />
+                                            <input
+                                                type="file"
+                                                hidden
+                                                accept="image/*"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) setFile(file);
+                                                }}
+                                            />
+                                        </Button>
+                                    </Box>
+                                    :
+                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7.5 }} gutterBottom>File</Typography>
+                                        <Box component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                            <TextField
+                                                size="small"
+                                                type="text"
+                                                fullWidth
+                                                value={file.name}
+                                                sx={{ marginRight: 2 }}
+                                            />
+                                            <Button variant="outlined" color="error" size="small" sx={{ marginRight: 2 }} onClick={() => { setFile(null); setFileType(null); }}>
+                                                ลบไฟล์
+                                            </Button>
+                                        </Box>
+                                    </Box>
+                                // <Box sx={{
+                                //     display: "flex",
+                                //     alignItems: "center",
+                                //     justifyContent: "space-between", // ช่วยแยกซ้ายขวา
+                                //     paddingLeft: 12,
+                                // }}>
+                                //     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                //         File : {file.name}
+                                //     </Typography>
+                                //     {/* <IconButton color="error" onClick={() => { setFile(null); setFileType(null); }}>
+                                //         <DeleteForeverIcon />
+                                //     </IconButton> */}
+                                //     <Button variant="outlined" color="error" size="small" onClick={() => { setFile(null); setFileType(null); }}>
+                                //         ลบไฟล์
+                                //     </Button>
+                                // </Box>
+                            }
+                        </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{ display: "flex", textAlign: "center", alignItems: "center", justifyContent: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
