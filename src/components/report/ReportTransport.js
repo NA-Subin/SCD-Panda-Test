@@ -56,9 +56,13 @@ import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 import ReportDetail from "./ReportDetail";
 import { formatThaiFull } from "../../theme/DateTH";
+import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material";
 
 const ReportTransports = ({ openNavbar }) => {
-
+    const monthNames = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
     const [date, setDate] = React.useState(false);
     const [check, setCheck] = React.useState("0:ทั้งหมด");
     const [months, setMonths] = React.useState(dayjs(new Date));
@@ -68,10 +72,30 @@ const ReportTransports = ({ openNavbar }) => {
     const [selectTickets, setSelectTickets] = React.useState("0:แสดงทั้งหมด");
     const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
     const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
+    const [ticketO, setTicketO] = useState(true);
+    const [ticketG, setTicketG] = useState(true);
+    const [ticketT, setTicketT] = useState(true);
+    const [year, setYear] = useState(Number(dayjs(new Date).format("YYYY")) + 543)
+    const [month, setMonth] = useState(Number(dayjs(new Date).format("M")) - 1); // เก็บเป็น index 0–11
+
+    const handleIncrement = () => {
+        setMonth((prev) => (prev + 1) % 12);
+    };
+
+    const handleDecrement = () => {
+        setMonth((prev) => (prev - 1 + 12) % 12);
+    };
+
     const [sortConfig, setSortConfig] = useState({
-        key: 'Date',
+        key: 'TicketName',
         direction: 'asc',
     });
+
+    const companies = [
+        { value: "0:ทั้งหมด", label: "ทั้งหมด" },
+        { value: "2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", label: "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" },
+        { value: "3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", label: "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" },
+    ];
 
     const flattenedRef = useRef([]);
     const filteredItemsRef = useRef([]);
@@ -197,17 +221,43 @@ const ReportTransports = ({ openNavbar }) => {
         if (!selectedDateStart || !selectedDateEnd) return [];
 
         // 1. กรอง order เฉพาะที่สถานะถูกต้องและอยู่ในช่วงวันที่
+        // const filteredItems = ticket.filter((item) => {
+        //     const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        //     const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined;
+        //     const isInDateRange = itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+
+        //     let isRegistration = false;
+
+        //     if (check === "0:ทั้งหมด") {
+        //         isRegistration = true;
+        //     } else {
+        //         // รถต้องอยู่ในเครือบริษัทที่เลือก
+        //         isRegistration = registration.some(
+        //             (customer) =>
+        //                 customer.Company.split(":")[0] === check.split(":")[0] &&
+        //                 customer.id === Number(item.Registration?.split(":")[0] || 0)
+        //         );
+        //     }
+
+        //     // ✅ ไม่เอาตั๋วรถใหญ่และตั๋วรถเล็ก
+        //     const isValidCustomerType =
+        //         item.CustomerType !== "ตั๋วรถใหญ่" &&
+        //         item.CustomerType !== "ตั๋วรถเล็ก";
+
+        //     return isValidStatus && isInDateRange && isRegistration && isValidCustomerType;
+        // });
+
         const filteredItems = ticket.filter((item) => {
             const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+
+            // ✅ กรองเฉพาะสถานะสำเร็จ
             const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined;
-            const isInDateRange = itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
 
+            // ✅ กรองตามบริษัท/ทะเบียนรถ
             let isRegistration = false;
-
             if (check === "0:ทั้งหมด") {
                 isRegistration = true;
             } else {
-                // รถต้องอยู่ในเครือบริษัทที่เลือก
                 isRegistration = registration.some(
                     (customer) =>
                         customer.Company.split(":")[0] === check.split(":")[0] &&
@@ -220,7 +270,12 @@ const ReportTransports = ({ openNavbar }) => {
                 item.CustomerType !== "ตั๋วรถใหญ่" &&
                 item.CustomerType !== "ตั๋วรถเล็ก";
 
-            return isValidStatus && isInDateRange && isRegistration && isValidCustomerType;
+            // ✅ กรองตามปีและเดือนที่เลือก
+            const itemYear = itemDate.year();
+            const itemMonth = itemDate.month(); // month index 0-11
+            const isInSelectedYearMonth = itemYear === Number(year - 543) && itemMonth === month;
+
+            return isValidStatus && isRegistration && isValidCustomerType && isInSelectedYearMonth;
         });
 
         console.log("filteredItems : ", filteredItems);
@@ -286,8 +341,8 @@ const ReportTransports = ({ openNavbar }) => {
             if (!processedTickets.has(item.TicketName)) {
                 const matchedTrans = transferMoneyDetail.filter((t) =>
                     check === "0:ทั้งหมด"
-                        ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType)
-                        : (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Transport === check)
+                        ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก")
+                        : (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && t.Transport === check)
                 );
 
                 totalIncomingMoney = matchedTrans.reduce((sum, t) => {
@@ -321,6 +376,7 @@ const ReportTransports = ({ openNavbar }) => {
         console.log("registraion : ", registration.filter((row) => row.Company.split(":")[0] === check.split(":")[0]));
         console.log("flattened : ", ticket.filter((row) => row.TicketName.split(":")[1] === "T...VRP ปิโตรเลียม(PT)ใช้หัวสับ+ส่งรูป"));
         console.log("flattened : ", flattened);
+        console.log("transferMoneyDetail.filter((t) => ", transferMoneyDetail.filter((t) => t.Status !== undefined))
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
         const merged = Object.values(flattened.reduce((acc, curr) => {
@@ -348,14 +404,35 @@ const ReportTransports = ({ openNavbar }) => {
         }, {}));
 
         // 4. เรียงตามวันที่ และชื่อคนขับ
-        return merged.sort((a, b) => {
+        const filtered = merged.filter((row) => {
+            if (ticketO && row.CustomerType === "ตั๋วน้ำมัน") return true;
+            if (ticketG && row.CustomerType === "ตั๋วปั้ม") return true;
+            if (ticketT && row.CustomerType === "ตั๋วรับจ้างขนส่ง") return true;
+
+            // ถ้าไม่เลือก checkbox เลย ให้แสดงทั้งหมด
+            if (!ticketO && !ticketG && !ticketT) return true;
+
+            return false;
+        });
+
+        return filtered.sort((a, b) => {
             const dateA = dayjs(a.Date, "DD/MM/YYYY");
             const dateB = dayjs(b.Date, "DD/MM/YYYY");
             if (!dateA.isSame(dateB)) {
                 return dateA - dateB;
             }
-            return (a.driver?.split(":")[1] || '').localeCompare(b.driver?.split(":")[1] || '');
+            return (a.TicketName?.split(":")[1] || "").localeCompare(
+                b.TicketName?.split(":")[1] || ""
+            );
         });
+        // return merged.sort((a, b) => {
+        //     const dateA = dayjs(a.Date, "DD/MM/YYYY");
+        //     const dateB = dayjs(b.Date, "DD/MM/YYYY");
+        //     if (!dateA.isSame(dateB)) {
+        //         return dateA - dateB;
+        //     }
+        //     return (a.driver?.split(":")[1] || '').localeCompare(b.driver?.split(":")[1] || '');
+        // });
 
     }, [ticket, selectedDateStart, selectedDateEnd, selectTickets, transferMoneyDetail, check, registration]);
 
@@ -363,13 +440,14 @@ const ReportTransports = ({ openNavbar }) => {
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalOverdueTransfer = orderDetail.reduce((sum, item) => sum + Number(item.OverdueTransfer || 0), 0);
+    const totalVatOnePercent = orderDetail.reduce((sum, item) => sum + Number(item.VatOnePercent || 0), 0);
     const totalTotalAmount = orderDetail.reduce((sum, item) => sum + Number(item.TotalAmount || 0), 0);
     const totalIncomingMoney = orderDetail.reduce((sum, item) => sum + Number(item.IncomingMoney || 0), 0);
     const totalVolume = orderDetail.reduce((sum, item) => sum + (Number(item.VolumeProduct || 0)), 0);
 
     const sortedOrderDetail = useMemo(() => {
         const sorted = [...orderDetail];
-        const key = sortConfig.key || 'Date';
+        const key = sortConfig.key || 'TicketName';
         const direction = sortConfig.key ? sortConfig.direction : 'asc';
 
         sorted.sort((a, b) => {
@@ -405,8 +483,19 @@ const ReportTransports = ({ openNavbar }) => {
 
     const formatNumber = (value) => {
         if (!value || value === 0) return "0"; // ถ้า 0 หรือ undefined แสดง 0
-        return new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+
+        // แปลงเป็นเลขปัดทศนิยม 2 ตำแหน่ง
+        const rounded = Number(value.toFixed(2));
+
+        // ถ้าได้ -0 ให้เป็น 0
+        if (Object.is(rounded, -0)) return "0";
+
+        return new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(rounded);
     };
+
 
     const exportToExcel = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -494,11 +583,9 @@ const ReportTransports = ({ openNavbar }) => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
-            <Grid container>
-                <Grid item md={4} xs={12}>
-
-                </Grid>
-                <Grid item md={6} xs={12}>
+            <Grid container spacing={2}>
+                <Grid item sm={2} lg={2}></Grid>
+                <Grid item sm={10} lg={10}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -508,12 +595,90 @@ const ReportTransports = ({ openNavbar }) => {
                         รายงานชำระค่าขนส่ง
                     </Typography>
                 </Grid>
-                <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
-                    <Box sx={{ width: "200px" }}>
-                        {/* <InsertDeducetionIncome /> */}
+                <Grid item sm={6} lg={2}>
+                    <Box
+                        sx={{
+                            width: "100%", // กำหนดความกว้างของ Paper
+                            height: "40px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "left",
+                            marginTop: { md: -9, xs: 2 },
+                            marginBottom: 2
+                        }}
+                    >
+                        <TextField
+                            size="small"
+                            type="number"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                        <b>งวดการจ่ายปี :</b>
+                                    </InputAdornment>
+                                ),
+                                sx: {
+                                    fontSize: "16px",
+                                    height: "40px",
+                                    padding: "10px",
+                                    fontWeight: "bold",
+                                },
+                            }}
+                        />
                     </Box>
                 </Grid>
-                <Grid item md={5} xs={12}>
+                <Grid item sm={6} lg={2}>
+                    <Box
+                        sx={{
+                            width: "100%", // กำหนดความกว้างของ Paper
+                            height: "40px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "left",
+                            marginTop: { md: -9, xs: 2 },
+                            marginBottom: 3
+                        }}
+                    >
+                        <TextField
+                            size="small"
+                            value={monthNames[month]}
+                            InputProps={{
+                                readOnly: true,
+                                startAdornment: (
+                                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                        <b>เดือน :</b>
+                                    </InputAdornment>
+                                ),
+                                sx: {
+                                    fontSize: "16px",
+                                    height: "40px",
+                                    padding: "10px",
+                                    fontWeight: "bold",
+                                },
+                                endAdornment: (
+                                    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", ml: 0.5 }}>
+                                        <IconButton
+                                            onClick={handleIncrement}
+                                            size="small"
+                                            sx={{ p: 0, flex: 1, minHeight: 0 }} // ปรับให้เต็มแต่ละครึ่ง
+                                        >
+                                            <ArrowDropUp fontSize="small" />
+                                        </IconButton>
+                                        <IconButton
+                                            onClick={handleDecrement}
+                                            size="small"
+                                            sx={{ p: 0, flex: 1, minHeight: 0 }}
+                                        >
+                                            <ArrowDropDown fontSize="small" />
+                                        </IconButton>
+                                    </Box>
+                                ),
+                            }}
+                        />
+                    </Box>
+                </Grid>
+                {/* <Grid item md={5} xs={12}>
                     <Box
                         sx={{
                             width: "100%", // กำหนดความกว้างของ Paper
@@ -521,7 +686,7 @@ const ReportTransports = ({ openNavbar }) => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            marginTop: { md: -8, xs: 2 },
+                            // marginTop: { md: -8, xs: 2 },
                             marginBottom: 3
                         }}
                     >
@@ -588,16 +753,16 @@ const ReportTransports = ({ openNavbar }) => {
                             />
                         </LocalizationProvider>
                     </Box>
-                </Grid>
+                </Grid> */}
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
             <Box sx={{ width: "100%" }}>
                 {
                     windowWidth >= 800 ?
                         <Grid container spacing={2} width="100%" marginBottom={1} >
-                            <Grid item sm={4} lg={6}>
+                            <Grid item sm={3} lg={5}>
                                 <Paper>
-                                    <TextField
+                                    {/* <TextField
                                         select
                                         value={check}
                                         onChange={(e) => setCheck(e.target.value)}
@@ -623,8 +788,31 @@ const ReportTransports = ({ openNavbar }) => {
                                         <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
                                             หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
                                         </MenuItem>
-                                    </TextField>
-
+                                    </TextField> */}
+                                    <Autocomplete
+                                        options={companies}
+                                        getOptionLabel={(option) => option.label}
+                                        value={companies.find((opt) => opt.value === check) || null}
+                                        onChange={(event, newValue) => setCheck(newValue ? newValue.value : "")}
+                                        size="small"
+                                        fullWidth
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                sx={{
+                                                    "& .MuiInputBase-input": { fontSize: "16px" },
+                                                }}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    startAdornment: (
+                                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                            <b>กรุณาเลือกบริษัท :</b>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        )}
+                                    />
                                 </Paper>
                                 {/* <FormGroup row sx={{ marginBottom: -1.5 }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
@@ -633,7 +821,14 @@ const ReportTransports = ({ openNavbar }) => {
                                     <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
                                 </FormGroup> */}
                             </Grid>
-                            <Grid item sm={5} lg={4} />
+                            <Grid item sm={6} lg={5}>
+                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>เลือกตั๋ว : </Typography>
+                                    <FormControlLabel control={<Checkbox checked={ticketO} />} onChange={() => setTicketO(!ticketO)} label="ตั๋วน้ำมัน" />
+                                    <FormControlLabel control={<Checkbox checked={ticketG} />} onChange={() => setTicketG(!ticketG)} label="ตั๋วปั้ม" />
+                                    <FormControlLabel control={<Checkbox checked={ticketT} />} onChange={() => setTicketT(!ticketT)} label="ตั๋วรับจ้างขนส่ง" />
+                                </FormGroup>
+                            </Grid>
                             <Grid item sm={3} lg={2}>
                                 <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                             </Grid>
@@ -676,6 +871,14 @@ const ReportTransports = ({ openNavbar }) => {
                                     <FormControlLabel control={<Checkbox checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
                                     <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
                                 </FormGroup> */}
+                            </Grid>
+                            <Grid item xs={12}>s
+                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>เลือกตั๋ว : </Typography>
+                                    <FormControlLabel control={<Checkbox checked={ticketO} />} onChange={() => setTicketO(!ticketO)} label="ตั๋วน้ำมัน" />
+                                    <FormControlLabel control={<Checkbox checked={ticketG} />} onChange={() => setTicketG(!ticketG)} label="ตั๋วปั้ม" />
+                                    <FormControlLabel control={<Checkbox checked={ticketT} />} onChange={() => setTicketT(!ticketT)} label="ตั๋วรับจ้างขนส่ง" />
+                                </FormGroup>
                             </Grid>
                             <Grid item xs={12} sx={{ textAlign: "center" }}>
                                 <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
@@ -767,6 +970,8 @@ const ReportTransports = ({ openNavbar }) => {
                                                         dateStart={selectedDateStart}
                                                         dateEnd={selectedDateEnd}
                                                         orderDetail={flattenedRef.current}
+                                                        year={year}
+                                                        month={monthNames[month]}
                                                     />
                                                 </TableCell>
                                             </TableRow>
@@ -776,12 +981,12 @@ const ReportTransports = ({ openNavbar }) => {
                             </Table>
                         </TableContainer>
                         <Grid container spacing={1} marginTop={1} paddingBottom={1} sx={{ backgroundColor: theme.palette.info.dark }}>
-                            <Grid item xs={2}>
+                            <Grid item xs={3}>
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={new Intl.NumberFormat("en-US").format(totalVolume)}
+                                        value={formatNumber(totalVolume)}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '40px',
@@ -793,7 +998,6 @@ const ReportTransports = ({ openNavbar }) => {
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
-                                                paddingLeft: 2,
                                             },
                                         }}
                                         InputProps={{
@@ -816,14 +1020,14 @@ const ReportTransports = ({ openNavbar }) => {
 
                                 </Paper>
                             </Grid>
-                            <Grid item xs={2.5}>
+                            <Grid item xs={3}>
                                 {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>
                                     <Typography variant="h6" sx={{ marginRight: 1, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography> */}
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={new Intl.NumberFormat("en-US").format(totalAmount)}
+                                        value={formatNumber(totalAmount)}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '40px',
@@ -835,7 +1039,6 @@ const ReportTransports = ({ openNavbar }) => {
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
-                                                paddingLeft: 2,
                                             },
                                         }}
                                         InputProps={{
@@ -859,14 +1062,14 @@ const ReportTransports = ({ openNavbar }) => {
                                 </Paper>
                                 {/* </Box> */}
                             </Grid>
-                            <Grid item xs={2.5}>
+                            <Grid item xs={3}>
                                 {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>
                                     <Typography variant="h6" sx={{ marginRight: 1, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography> */}
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={new Intl.NumberFormat("en-US").format(totalTotalAmount)}
+                                        value={formatNumber(totalVatOnePercent)}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '40px',
@@ -878,7 +1081,48 @@ const ReportTransports = ({ openNavbar }) => {
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
-                                                paddingLeft: 2,
+                                            },
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                                                        หักภาษี1% :
+                                                    </Typography>
+                                                </InputAdornment>
+                                            ),
+                                            // endAdornment: (
+                                            //     <InputAdornment position="end">
+                                            //         <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                                            //             บาท
+                                            //         </Typography>
+                                            //     </InputAdornment>
+                                            // ),
+                                        }}
+                                    />
+
+                                </Paper>
+                                {/* </Box> */}
+                            </Grid>
+                            <Grid item xs={3}>
+                                {/* <Box sx={{ display: "flex", alignItems: "center", justifyContent: "right", marginRight: 2 }}>
+                                    <Typography variant="h6" sx={{ marginRight: 1, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography> */}
+                                <Paper sx={{ backgroundColor: "white" }}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        value={formatNumber(totalTotalAmount)}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                height: '40px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontSize: '18px',
+                                                fontWeight: 'bold',
+                                                padding: '2px 6px',
+                                                textAlign: 'center',
                                             },
                                         }}
                                         InputProps={{
@@ -902,12 +1146,14 @@ const ReportTransports = ({ openNavbar }) => {
                                 </Paper>
                                 {/* </Box> */}
                             </Grid>
-                            <Grid item xs={2.5}>
+                            <Grid item xs={3}></Grid>
+                            <Grid item xs={3}></Grid>
+                            <Grid item xs={3}>
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                        value={formatNumber(totalIncomingMoney)}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '40px',
@@ -919,7 +1165,6 @@ const ReportTransports = ({ openNavbar }) => {
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
-                                                paddingLeft: 2,
                                             },
                                         }}
                                         InputProps={{
@@ -948,12 +1193,12 @@ const ReportTransports = ({ openNavbar }) => {
                                     </Paper>
                                 </Box> */}
                             </Grid>
-                            <Grid item xs={2.5}>
+                            <Grid item xs={3}>
                                 <Paper sx={{ backgroundColor: "white" }}>
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={new Intl.NumberFormat("en-US").format(totalOverdueTransfer)}
+                                        value={formatNumber(totalOverdueTransfer)}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 height: '40px',
@@ -965,7 +1210,6 @@ const ReportTransports = ({ openNavbar }) => {
                                                 fontWeight: 'bold',
                                                 padding: '2px 6px',
                                                 textAlign: 'center',
-                                                paddingLeft: 2,
                                             },
                                         }}
                                         InputProps={{

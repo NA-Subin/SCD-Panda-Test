@@ -66,14 +66,14 @@ dayjs.locale('th');
 dayjs.extend(buddhistEra);
 
 const ReportDetail = (props) => {
-    const { row, dateStart, dateEnd, orderDetail } = props;
+    const { row, dateStart, dateEnd, orderDetail, month, year } = props;
     const [open, setOpen] = React.useState(false);
 
     const handleClose = () => {
         setOpen(false);
     };
 
-    console.log("orderDetail : ", orderDetail);
+    console.log("orderDetails : ", orderDetail);
 
     const orders = orderDetail
         .filter(order => order.TicketName === row.TicketName)
@@ -195,12 +195,12 @@ const ReportDetail = (props) => {
                 open={open}
                 keepMounted
                 onClose={handleClose}
-                maxWidth="lg"
+                maxWidth="xl"
             >
                 <DialogTitle sx={{ backgroundColor: theme.palette.panda.dark }}>
                     <Grid container spacing={2}>
                         <Grid item xs={10}>
-                            <Typography variant="h6" fontWeight="bold" color="white" >ตรวจสอบข้อมูลรายงานการชำระค่าน้ำมัน</Typography>
+                            <Typography variant="h6" fontWeight="bold" color="white" >ตรวจสอบข้อมูลรายงานการชำระค่าขนส่ง</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
                             <IconButtonError onClick={handleClose}>
@@ -224,10 +224,13 @@ const ReportDetail = (props) => {
                         }}
                         ref={invoiceRef}>
                         <Grid item xs={12}>
+                            <Typography variant="h6" gutterBottom><b>ชื่อบริษัท :</b> {row.Company.split(":")[1]}</Typography>
+                        </Grid>
+                        <Grid item xs={12} marginTop={-3}>
                             <Typography variant="h6" gutterBottom><b>ชื่อตั๋วลูกค้า :</b> {row.TicketName.split(":")[1]}</Typography>
                         </Grid>
                         <Grid item xs={12} marginTop={-3}>
-                            <Typography variant="h6" gutterBottom><b>ช่วงเวลา :</b> {formatted}</Typography>
+                            <Typography variant="h6" gutterBottom><b>เดือน :</b> {month} {year}</Typography>
                         </Grid>
                         <Grid item xs={12} marginTop={-3}>
                             <TableContainer
@@ -237,13 +240,21 @@ const ReportDetail = (props) => {
                                 <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" } }}>
                                     <TableHead>
                                         <TableRow>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 50, fontSize: "16px" }}>ลำดับ</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>วันที่ส่ง</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>รอบการรับ</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>วันที่รับ</TablecellTickets>
                                             <TablecellTickets sx={{ textAlign: "center", width: 230, fontSize: "16px" }}>พขร.</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>ชนิดน้ำมัน</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 120, fontSize: "16px" }}>จำนวนลิตร</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>ราคาน้ำมัน</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 130, fontSize: "16px" }}>ยอดเงิน</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G95</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B95</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B7</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G91</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>E20</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>E85</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>PWD</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 120, fontSize: "16px" }}>รวมลิตร</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 80, fontSize: "16px" }}>ค่าบรรทุก</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 120, fontSize: "16px" }}>ยอดเงิน</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 90, fontSize: "16px" }}>หัก ณ ที่จ่าย</TablecellTickets>
+                                            <TablecellTickets sx={{ textAlign: "center", width: 150, fontSize: "16px" }}>ยอดชำระ</TablecellTickets>
                                         </TableRow>
                                     </TableHead>
                                     {/* <TableBody>
@@ -262,7 +273,10 @@ const ReportDetail = (props) => {
                                         }
                                     </TableBody> */}
                                     <TableBody>
-                                        {groupedOrders.map(([groupKey, groupOrders], groupIndex) => {
+                                        <TableRow>
+                                            <TableCell sx={{ textAlign: 'center', height: "50vh" }} colSpan={15}><Typography variant="subtitle1" fontWeight="center" color="error" gutterBottom>*กำลังปรับ*</Typography></TableCell>
+                                        </TableRow>
+                                        {/* {groupedOrders.map(([groupKey, groupOrders], groupIndex) => {
                                             const rowSpan = groupOrders.length;
                                             const [date, driver] = groupKey.split("|");
                                             const registration = groupOrders[0].Registration?.split(":")[1] || "";
@@ -285,7 +299,7 @@ const ReportDetail = (props) => {
                                                                         {groupIndex + 1}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
-                                                                        {formatThaiSlash(dayjs(date,"DD/MM/YYYY"))}
+                                                                        {formatThaiSlash(dayjs(date, "DD/MM/YYYY"))}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
                                                                         {`${driver.split(":")[1]}/${registration}`}
@@ -305,7 +319,6 @@ const ReportDetail = (props) => {
                                                         </TableRow>
                                                     ))}
 
-                                                    {/* 🔽 แถวสรุปของกลุ่ม */}
                                                     <TableRow sx={{ backgroundColor: "#dcdcdc", fontWeight: "bold" }}>
                                                         <TableCell colSpan={4} sx={{ textAlign: "right", fontWeight: "bold" }}>
                                                             ยอดรวมของ {driver.split(":")[1]}/{registration}
@@ -321,7 +334,6 @@ const ReportDetail = (props) => {
                                                         </TableCell>
                                                     </TableRow>
 
-                                                    {/* 🔁 แสดงการชำระเงิน (รายกลุ่ม) */}
                                                     {groupOrders[0].IncomingMoneyDetail?.length > 0 && (
                                                         <>
                                                             {groupOrders[0].IncomingMoneyDetail.map((money, idx) => (
@@ -331,8 +343,8 @@ const ReportDetail = (props) => {
                                                                 >
                                                                     <TableCell colSpan={6} sx={{ textAlign: "right", fontWeight: "bold" }}>
                                                                         {groupOrders[0].IncomingMoneyDetail.length > 1
-                                                                            ? `ชำระเงินครั้งที่ ${idx + 1} เมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart,"DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`
-                                                                            : `ชำระเงินเมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart,"DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`}
+                                                                            ? `ชำระเงินครั้งที่ ${idx + 1} เมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart, "DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`
+                                                                            : `ชำระเงินเมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart, "DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`}
                                                                     </TableCell>
                                                                     <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
                                                                         {new Intl.NumberFormat("en-US").format(money.IncomingMoney || 0)}
@@ -342,7 +354,6 @@ const ReportDetail = (props) => {
                                                         </>
                                                     )}
 
-                                                    {/* ✅ แสดงยอดค้างของวัน (แค่ครั้งแรกของวันนั้น) */}
                                                     {(() => {
                                                         // ตรวจสอบว่ากลุ่มนี้เป็นกลุ่มสุดท้ายของวันที่เดียวกันหรือไม่
                                                         const isLastGroupOfDate = (() => {
@@ -357,7 +368,7 @@ const ReportDetail = (props) => {
                                                         return (
                                                             <TableRow sx={{ backgroundColor: "#ffecb3", fontWeight: "bold" }}>
                                                                 <TableCell colSpan={6} sx={{ textAlign: "right", fontWeight: "bold" }}>
-                                                                    ยอดค้างชำระรวมของวันที่ {formatThaiSlash(dayjs(date,"DD/MM/YYYY"))}
+                                                                    ยอดค้างชำระรวมของวันที่ {formatThaiSlash(dayjs(date, "DD/MM/YYYY"))}
                                                                 </TableCell>
                                                                 <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
                                                                     {new Intl.NumberFormat("en-US").format(
@@ -370,10 +381,10 @@ const ReportDetail = (props) => {
 
                                                 </React.Fragment>
                                             );
-                                        })}
-                                        <TableRow sx={{ backgroundColor: theme.palette.success.dark }}>
-                                            <TableCell sx={{ textAlign: "right", fontWeight: "bold", fontSize: "16px", color: "white" }} colSpan={2}>ผลรวมทั้งหมด</TableCell>
-                                            <TableCell sx={{ textAlign: "right", fontSize: "16px", color: "white" }}>
+                                        })} */}
+                                        {/* <TableRow sx={{ backgroundColor: theme.palette.success.dark }}>
+                                            <TableCell sx={{ textAlign: "right", fontWeight: "bold", fontSize: "16px", color: "white" }} colSpan={3}>ผลรวมทั้งหมด</TableCell>
+                                            <TableCell sx={{ textAlign: "right", fontSize: "16px", color: "white" }} colSpan={8}>
                                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 0.5 }} >
                                                     <Typography variant="subtitle1" fontSize="16px" color="white" sx={{ marginRight: 4 }} gutterBottom><b>จำนวนลิตร : {new Intl.NumberFormat("en-US").format(totalVolume)}</b></Typography>
                                                     <Typography variant="subtitle1" fontSize="16px" color="white" gutterBottom><b>ยอดเงิน : {new Intl.NumberFormat("en-US").format(totalAmount)}</b></Typography>
@@ -382,8 +393,8 @@ const ReportDetail = (props) => {
                                             <TableCell sx={{ textAlign: "right", fontWeight: "bold", fontSize: "16px", color: "white" }}>ยอดชำระ :</TableCell>
                                             <TableCell sx={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", color: "white" }}>{new Intl.NumberFormat("en-US").format(totalIncomingMoney)}</TableCell>
                                             <TableCell sx={{ textAlign: "right", fontWeight: "bold", fontSize: "16px", color: "white" }}>ยอดค้างชำระ :</TableCell>
-                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", color: "white" }}>{new Intl.NumberFormat("en-US").format(totalOverdueTransfer)}</TableCell>
-                                        </TableRow>
+                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", color: "white" }} colSpan={2}>{new Intl.NumberFormat("en-US").format(totalOverdueTransfer)}</TableCell>
+                                        </TableRow> */}
                                     </TableBody>
 
                                 </Table>
