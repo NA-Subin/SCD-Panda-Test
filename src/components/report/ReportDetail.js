@@ -47,7 +47,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import theme from "../../theme/theme";
-import { IconButtonError, RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
+import { IconButtonError, RateOils, TableCellB7, TableCellB95, TableCellE20, TablecellFinancial, TablecellFinancialHead, TableCellG91, TableCellG95, TablecellHeader, TableCellPWD, TablecellSelling, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
@@ -68,6 +68,20 @@ dayjs.extend(buddhistEra);
 const ReportDetail = (props) => {
     const { row, dateStart, dateEnd, orderDetail, month, year } = props;
     const [open, setOpen] = React.useState(false);
+    const productColumns = ["G95", "B95", "B7", "G91", "E20", "PWD"];
+
+    const columnComponents = {
+        G95: TableCellG95,
+        B95: TableCellB95,
+        B7: TableCellB7,
+        G91: TableCellG91,
+        E20: TableCellE20,
+        PWD: TableCellPWD,
+    };
+
+
+    const { transferMoney } = useTripData();
+    const transferMoneyDetail = Object.values(transferMoney || {});
 
     const handleClose = () => {
         setOpen(false);
@@ -76,12 +90,11 @@ const ReportDetail = (props) => {
     console.log("orderDetails : ", orderDetail);
 
     const orders = orderDetail
-        .filter(order => order.TicketName === row.TicketName)
+        .filter(order => order.TicketName === row.TicketName && order.Company === row.Company)
         .sort((a, b) => {
             const dateA = dayjs(a.Date, "DD/MM/YYYY");
             const dateB = dayjs(b.Date, "DD/MM/YYYY");
 
-            // เปรียบเทียบวันที่แบบ numeric difference
             const dateDiff = dateA.diff(dateB);
             if (dateDiff !== 0) return dateDiff;
 
@@ -90,11 +103,101 @@ const ReportDetail = (props) => {
             return driverA.localeCompare(driverB);
         });
 
-    // 1. จัดกลุ่มตาม Date + Driver/Registration
+    // ฟังก์ชันช่วยคำนวณช่วงเวลา
+    const getDateRange = (creditTime, period, monthKey) => {
+        let DateStart = "", DateEnd = "";
+
+        if (creditTime === 10) {
+            if (period === "ช่วงที่ 1") {
+                DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+                DateEnd = dayjs(`${monthKey}-10`).format("DD/MM/YYYY");
+            } else if (period === "ช่วงที่ 2") {
+                DateStart = dayjs(`${monthKey}-11`).format("DD/MM/YYYY");
+                DateEnd = dayjs(`${monthKey}-20`).format("DD/MM/YYYY");
+            } else if (period === "ช่วงที่ 3") {
+                DateStart = dayjs(`${monthKey}-21`).format("DD/MM/YYYY");
+                DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+            }
+        } else if (creditTime === 15) {
+            if (period === "ช่วงที่ 1") {
+                DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+                DateEnd = dayjs(`${monthKey}-15`).format("DD/MM/YYYY");
+            } else if (period === "ช่วงที่ 2") {
+                DateStart = dayjs(`${monthKey}-16`).format("DD/MM/YYYY");
+                DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+            }
+        } else if (creditTime === 30 || creditTime === 0) {
+            DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
+            DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+        }
+
+        return { DateStart, DateEnd };
+    };
+
+    // --- ปรับการจัดกลุ่ม ---
+    // ใช้ DateStart/DateEnd ที่ match กับ order.Date แทนที่จะใช้ order.Date ตรงๆ
     const grouped = orders.reduce((acc, order) => {
-        const groupKey = `${order.Date}|${order.Driver}|${row.Registration}`;
-        if (!acc[groupKey]) acc[groupKey] = [];
-        acc[groupKey].push(order);
+        const creditTime =
+            order.CreditTime && order.CreditTime !== "-" ? parseInt(order.CreditTime, 10) : 0;
+        const orderMonth = dayjs(order.Date, "DD/MM/YYYY").format("YYYY-MM");
+
+        let matchedPeriod = null;
+        let dateRange = null;
+
+        if (creditTime === 10) {
+            ["ช่วงที่ 1", "ช่วงที่ 2", "ช่วงที่ 3"].forEach((p) => {
+                const range = getDateRange(creditTime, p, orderMonth);
+                const d = dayjs(order.Date, "DD/MM/YYYY");
+                if (d.isBetween(dayjs(range.DateStart, "DD/MM/YYYY"), dayjs(range.DateEnd, "DD/MM/YYYY"), null, "[]")) {
+                    matchedPeriod = p;
+                    dateRange = range;
+                }
+            });
+        } else if (creditTime === 15) {
+            ["ช่วงที่ 1", "ช่วงที่ 2"].forEach((p) => {
+                const range = getDateRange(creditTime, p, orderMonth);
+                const d = dayjs(order.Date, "DD/MM/YYYY");
+                if (d.isBetween(dayjs(range.DateStart, "DD/MM/YYYY"), dayjs(range.DateEnd, "DD/MM/YYYY"), null, "[]")) {
+                    matchedPeriod = p;
+                    dateRange = range;
+                }
+            });
+        } else {
+            dateRange = getDateRange(creditTime, "ทั้งเดือน", orderMonth);
+            matchedPeriod = "ทั้งเดือน";
+        }
+
+        const groupKey = `${dateRange.DateStart}-${dateRange.DateEnd}`;
+
+        const transfers = transferMoneyDetail.filter((trans) => {
+            if (trans.Status === "ยกเลิก") return false;
+            if (trans.TicketName !== order.TicketName) return false;
+            if (trans.TicketType !== order.CustomerType) return false;
+            if (trans.Transport !== order.Company) return false;
+
+            const transMonth = trans.month || `${orderMonth}_ทั้งเดือน`;
+            return transMonth === `${orderMonth}_${matchedPeriod}`;
+        });
+
+        if (!acc[groupKey]) {
+            acc[groupKey] = {
+                period: matchedPeriod,
+                range: dateRange,
+                items: [],
+                transfers: [],
+                transferIds: new Set() // 👈 ไว้กันซ้ำ
+            };
+        }
+
+        acc[groupKey].items.push(order);
+
+        transfers.forEach((t) => {
+            if (!acc[groupKey].transferIds.has(t.id)) {   // 👈 ใช้ id ของ transfer เช็ค
+                acc[groupKey].transferIds.add(t.id);
+                acc[groupKey].transfers.push(t);
+            }
+        });
+
         return acc;
     }, {});
 
@@ -116,10 +219,10 @@ const ReportDetail = (props) => {
     });
 
     console.log("Orders : ", orders);
-    console.log("Total Amount : ", totalAmount);
-    console.log("totalVolume : ", totalVolume);
-    console.log("totalOverdueTransfer : ", totalOverdueTransfer);
-    console.log("totalIncomingMoney : ", totalIncomingMoney);
+    // console.log("Total Amount : ", totalAmount);
+    // console.log("totalVolume : ", totalVolume);
+    // console.log("totalOverdueTransfer : ", totalOverdueTransfer);
+    // console.log("totalIncomingMoney : ", totalIncomingMoney);
     console.log("grouped : ", grouped);
 
     // 2. แปลงเป็น array สำหรับแสดงผล
@@ -133,57 +236,120 @@ const ReportDetail = (props) => {
     const [isGrayscale, setIsGrayscale] = useState(false);
 
     const handleExportPDF = () => {
-        // เปิดโหมดขาวดำก่อน export
         setIsGrayscale(true);
 
-        // เล็กน้อยหน่วงให้สไตล์ขาวดำ apply ก่อน แล้วค่อยสร้าง pdf
-        setTimeout(() => {
+        setTimeout(async () => {
             const element = invoiceRef.current;
-            const opt = {
-                margin: 1,
-                filename: `R-${row.TicketName?.split(":")[1] || "invoice"}.pdf`,
-                image: { type: "jpeg", quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    onclone: (clonedDoc) => {
-                        const el = clonedDoc.getElementById("invoiceContent");
-                        if (el) {
-                            el.style.filter = "grayscale(100%)";
-                            // เพิ่มปรับสีอื่น ๆ ถ้าต้องการ
-                        }
-                    },
+            if (!element) return;
+
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                onclone: (clonedDoc) => {
+                    const el = clonedDoc.getElementById("invoiceContent");
+                    if (el) el.style.filter = "grayscale(100%)";
                 },
-                jsPDF: { unit: "cm", format: "a4", orientation: "landscape" },
-            };
-            html2pdf().set(opt).from(element).save()
-                .finally(() => {
-                    // หลังบันทึก PDF เสร็จ กลับโหมดปกติ
-                    setIsGrayscale(false);
-                });
-        }, 300);
+            });
+
+            const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+            const pdf = new jsPDF({ unit: "cm", format: "a4", orientation: "landscape" });
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            const imgWidth = canvas.width / 37.795275591; // px -> cm
+            const imgHeight = canvas.height / 37.795275591;
+
+            const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+            const pdfWidth = imgWidth * scale;
+            const pdfHeight = imgHeight * scale;
+
+            const margin = 0.5; // margin ด้านข้าง (cm)
+
+            pdf.addImage(imgData, "JPEG", margin, margin, pdfWidth - margin * 2, pdfHeight - margin * 2);
+            pdf.save(`R-${row.TicketName?.split(":")[1] || "invoice"}.pdf`);
+
+            setIsGrayscale(false);
+        }, 500);
     };
 
     // 1️⃣ เตรียมยอดรวมตามวันที่ล่วงหน้า
     const outstandingByDate = {};
     const shownDateOutstanding = new Set();
 
-    groupedOrders.forEach(([groupKey, groupOrders]) => {
-        const [date] = groupKey.split("|");
+    // groupedOrders.forEach(([groupKey, groupOrders]) => {
+    //     const [date] = groupKey.split("|");
 
-        const totalAmount = groupOrders.reduce((sum, o) => sum + o.Amount, 0);
-        const totalIncomingMoney = groupOrders[0].IncomingMoneyDetail?.reduce(
-            (sum, o) => sum + Number(o.IncomingMoney || 0),
+    //     const totalAmount = groupOrders.reduce((sum, o) => sum + o.Amount, 0);
+    //     const totalIncomingMoney = groupOrders[0].IncomingMoneyDetail?.reduce(
+    //         (sum, o) => sum + Number(o.IncomingMoney || 0),
+    //         0
+    //     ) || 0;
+
+    //     if (!outstandingByDate[date]) {
+    //         outstandingByDate[date] = { amount: 0, incoming: 0 };
+    //     }
+
+    //     // ✅ รวมยอดของทุกคนในวันเดียวกัน
+    //     outstandingByDate[date].amount += totalAmount;
+    //     outstandingByDate[date].incoming += totalIncomingMoney;
+    // });
+
+    const numberFormat = (value) => {
+        if (!value || value === 0) return "0"; // ถ้า 0 หรือ undefined แสดง 0
+
+        // แปลงเป็นเลขปัดทศนิยม 2 ตำแหน่ง
+        const rounded = Number(value.toFixed(2));
+
+        // ถ้าได้ -0 ให้เป็น 0
+        if (Object.is(rounded, -0)) return "0";
+
+        return new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(rounded);
+    };
+
+    // รวม items ทั้งหมดจาก grouped
+    const allItems = Object.values(grouped).flatMap((g) => g.items);
+    // รวม transfers ทั้งหมดจาก grouped
+    const allTransfers = Object.values(grouped).flatMap((g) => g.transfers);
+
+    const totals = {
+        products: {},
+        totalLiters: 0,
+        amount: 0,
+        withholding: 0,
+        payment: 0,
+        incomingMoney: 0, // สำหรับ transfers
+    };
+
+    // รวม items
+    allItems.forEach((item) => {
+        // รวม product แต่ละ column
+        productColumns.forEach((col) => {
+            totals.products[col] =
+                (totals.products[col] || 0) + (Number(item.Product?.[col]?.Volume || 0) * 1000);
+        });
+
+        const totalLiters = Object.values(item.Product || {}).reduce(
+            (sum, p) => sum + (Number(p.Volume || 0) * 1000),
             0
-        ) || 0;
+        );
+        totals.totalLiters += totalLiters;
 
-        if (!outstandingByDate[date]) {
-            outstandingByDate[date] = { amount: 0, incoming: 0 };
-        }
+        const amount = totalLiters * item.RateOil;
+        const withholding = amount * 0.01;
+        const payment = amount - withholding;
 
-        // ✅ รวมยอดของทุกคนในวันเดียวกัน
-        outstandingByDate[date].amount += totalAmount;
-        outstandingByDate[date].incoming += totalIncomingMoney;
+        totals.amount += amount;
+        totals.withholding += withholding;
+        totals.payment += payment;
+    });
+
+    // รวม transfers
+    allTransfers.forEach((trans) => {
+        totals.incomingMoney += Number(trans.IncomingMoney || 0);
     });
 
     return (
@@ -232,173 +398,290 @@ const ReportDetail = (props) => {
                         <Grid item xs={12} marginTop={-3}>
                             <Typography variant="h6" gutterBottom><b>เดือน :</b> {month} {year}</Typography>
                         </Grid>
+                        {/* <Grid item xs={12} marginTop={-3}>
+                            <Typography variant="h6" gutterBottom><b>เครดิต :</b> {row.CreditTime}</Typography>
+                        </Grid> */}
                         <Grid item xs={12} marginTop={-3}>
+
                             <TableContainer
                                 component={Paper}
                                 sx={{ marginBottom: 2, borderRadius: 2, width: "100%" }}
                             >
+                                {Object.entries(grouped).map(([key, value]) => (
+
+                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" }, marginBottom: 3 }} key={key}>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>รอบการรับ</TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>วันที่รับ</TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 230, fontSize: "16px" }}>พขร.</TablecellTickets>
+                                                <TableCellG95 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G95</TableCellG95>
+                                                <TableCellB95 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B95</TableCellB95>
+                                                <TableCellB7 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B7</TableCellB7>
+                                                <TableCellG91 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G91</TableCellG91>
+                                                <TableCellE20 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>E20</TableCellE20>
+                                                <TableCellPWD sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>PWD</TableCellPWD>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 110, fontSize: "16px" }}>รวมลิตร</TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 80, fontSize: "16px" }}>ค่าบรรทุก</TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 120, fontSize: "16px" }}>ยอดเงิน</TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 90, fontSize: "16px" }}>หัก ณ ที่จ่าย</TablecellTickets>
+                                                <TablecellTickets sx={{ textAlign: "center", width: 130, fontSize: "16px" }}>ยอดชำระ</TablecellTickets>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {value.items.map((item, index) => {
+                                                // คำนวณรวมลิตรครั้งเดียว
+                                                const totalLiters =
+                                                    Object.values(item.Product || {}).reduce(
+                                                        (sum, p) => sum + (Number(p.Volume || 0) * 1000),
+                                                        0
+                                                    );
+
+                                                const amount = totalLiters * item.RateOil;
+                                                const withholding = amount * 0.01;
+                                                const payment = amount - withholding;
+                                                const registration = `${item.Registration.split(":")[1]}/${item.RegistrationTail.split(":")[1]}`
+
+                                                return (
+                                                    <TableRow key={`${key}-${index}`}>
+                                                        {/* รอบการรับ */}
+                                                        {index === 0 && (
+                                                            <TableCell
+                                                                sx={{ textAlign: "center", backgroundColor: "#ffcdd2", fontWeight: "bold" }}
+                                                                rowSpan={value.items.length}
+                                                            >
+                                                                {formatThaiSlash(dayjs(value.range.DateStart, "DD/MM/YYYY"))} ถึง {formatThaiSlash(dayjs(value.range.DateEnd, "DD/MM/YYYY"))}
+                                                            </TableCell>
+                                                        )}
+
+                                                        {/* วันที่รับ */}
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {formatThaiSlash(dayjs(item.Date, "DD/MM/YYYY"))}
+                                                        </TableCell>
+
+                                                        {/* พขร./ทะเบียน */}
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {registration}
+                                                        </TableCell>
+
+                                                        {/* Products */}
+                                                        {productColumns.map((col) => {
+                                                            const vol = Number(item.Product?.[col]?.Volume || 0) * 1000;
+                                                            return (
+                                                                <TableCell key={col} sx={{ textAlign: "center" }}>
+                                                                    {vol !== 0 ? new Intl.NumberFormat("en-US",).format(vol) : "-"}
+                                                                </TableCell>
+                                                            );
+                                                        })}
+
+                                                        {/* รวมลิตร */}
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {new Intl.NumberFormat("en-US",).format(totalLiters)}
+                                                        </TableCell>
+
+                                                        {/* ค่าบรรทุก */}
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {item.RateOil}
+                                                        </TableCell>
+
+                                                        {/* ยอดเงิน */}
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {numberFormat(amount)}
+                                                        </TableCell>
+
+                                                        {/* หัก ณ ที่จ่าย */}
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {numberFormat(withholding)}
+                                                        </TableCell>
+
+                                                        {/* ยอดชำระ */}
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            {numberFormat(payment)}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                            {(() => {
+                                                // รวมตาม column
+                                                const totals = value.items.reduce(
+                                                    (acc, item) => {
+                                                        const totalLiters = Object.values(item.Product || {}).reduce(
+                                                            (sum, p) => sum + (Number(p.Volume || 0) * 1000),
+                                                            0
+                                                        );
+                                                        const amount = totalLiters * item.RateOil;
+                                                        const withholding = amount * 0.01;
+                                                        const payment = amount - withholding;
+
+                                                        // รวม product แต่ละ column
+                                                        productColumns.forEach((col) => {
+                                                            acc.products[col] =
+                                                                (acc.products[col] || 0) +
+                                                                Number(item.Product?.[col]?.Volume || 0) * 1000;
+                                                        });
+
+                                                        acc.totalLiters += totalLiters;
+                                                        acc.amount += amount;
+                                                        acc.withholding += withholding;
+                                                        acc.payment += payment;
+                                                        return acc;
+                                                    },
+                                                    { products: {}, totalLiters: 0, amount: 0, withholding: 0, payment: 0 }
+                                                );
+
+                                                return (
+                                                    <TableRow sx={{ backgroundColor: "#c8e6c9" }}>
+                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }} colSpan={3}>
+                                                            รวม
+                                                        </TableCell>
+
+                                                        {/* รวม Products */}
+                                                        {/* {productColumns.map((col) => (
+                                                            <TableCell key={col} sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                                {totals.products[col]
+                                                                    ? new Intl.NumberFormat("en-US").format(totals.products[col])
+                                                                    : "-"}
+                                                            </TableCell>
+                                                        ))} */}
+                                                        {productColumns.map((col) => {
+                                                            const CellComponent = columnComponents[col] || TableCell; // ถ้าไม่เจอ ใช้ TableCell ปกติ
+
+                                                            return (
+                                                                <CellComponent key={col} sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                                    {totals.products[col]
+                                                                        ? new Intl.NumberFormat("en-US").format(totals.products[col])
+                                                                        : "-"}
+                                                                </CellComponent>
+                                                            )
+                                                        }
+                                                        )}
+
+                                                        {/* รวมลิตร */}
+                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                            {new Intl.NumberFormat("en-US").format(totals.totalLiters)}
+                                                        </TableCell>
+
+                                                        {/* ค่าบรรทุก (ถ้าจะรวม หรือไม่แสดง) */}
+                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>-</TableCell>
+
+                                                        {/* ยอดเงิน */}
+                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                            {numberFormat(totals.amount)}
+                                                        </TableCell>
+
+                                                        {/* หัก ณ ที่จ่าย */}
+                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                            {numberFormat(totals.withholding)}
+                                                        </TableCell>
+
+                                                        {/* ยอดชำระ */}
+                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                            {numberFormat(totals.payment)}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })()}
+                                            <TableRow>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }}>วันที่ชำระเงิน</TableCell>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }} colSpan={2} >บัญชี</TableCell>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }} colSpan={2}>ยอดเงิน</TableCell>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }} colSpan={5}>หมายเหตุ</TableCell>
+                                            </TableRow>
+                                            {
+                                                value.transfers.map((trans, index) => (
+                                                    <TableRow>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }}>{formatThaiSlash(dayjs(trans.DateStart, "DD/MM/YYYY"))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }} colSpan={2} >{trans.BankName.split(":")[1]}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }} colSpan={2}>{numberFormat(Number(trans.IncomingMoney))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }} colSpan={5}>{trans.Note}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            }
+                                        </TableBody>
+                                    </Table>
+                                ))}
+
                                 <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" } }}>
                                     <TableHead>
                                         <TableRow>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>รอบการรับ</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>วันที่รับ</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 230, fontSize: "16px" }}>พขร.</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G95</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B95</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B7</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G91</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>E20</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>E85</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>PWD</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 120, fontSize: "16px" }}>รวมลิตร</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 80, fontSize: "16px" }}>ค่าบรรทุก</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 120, fontSize: "16px" }}>ยอดเงิน</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 90, fontSize: "16px" }}>หัก ณ ที่จ่าย</TablecellTickets>
-                                            <TablecellTickets sx={{ textAlign: "center", width: 150, fontSize: "16px" }}>ยอดชำระ</TablecellTickets>
+                                            <TableCell
+                                                sx={{ textAlign: "center", width: 430, fontSize: "16px", backgroundColor: "#b2e2f9ff", fontWeight: "bold" }}
+                                                colSpan={3}
+                                            >
+                                                รวมทั้งหมด
+                                            </TableCell>
+
+                                            {/* {productColumns.map((col) => (
+                                                <TableCell
+                                                    key={col}
+                                                    sx={{ textAlign: "center", width: 70, fontSize: "16px", backgroundColor: "#e1f5fe", fontWeight: "bold" }}
+                                                >
+                                                    {totals.products[col] ? new Intl.NumberFormat("en-US").format(totals.products[col]) : "-"}
+                                                </TableCell>
+                                            ))} */}
+
+                                            {productColumns.map((col) => {
+                                                const CellComponent = columnComponents[col] || TableCell; // ถ้าไม่เจอ ใช้ TableCell ปกติ
+
+                                                return (
+                                                    <CellComponent key={col} sx={{ textAlign: "center", fontWeight: "bold", width: 70 }}>
+                                                        {totals.products[col] ? new Intl.NumberFormat("en-US").format(totals.products[col]) : "-"}
+                                                    </CellComponent>
+                                                )
+                                            }
+                                            )}
+
+                                            {/* รวมลิตร */}
+                                            <TableCell
+                                                sx={{ textAlign: "center", width: 120, fontSize: "16px", backgroundColor: "#e1f5fe", fontWeight: "bold" }}
+                                            >
+                                                {new Intl.NumberFormat("en-US").format(totals.totalLiters)}
+                                            </TableCell>
+
+                                            {/* ค่าบรรทุก */}
+                                            <TableCell
+                                                sx={{ textAlign: "center", width: 80, fontSize: "16px", backgroundColor: "#e1f5fe", fontWeight: "bold" }}
+                                            >
+                                                -
+                                            </TableCell>
+
+                                            {/* ยอดเงิน */}
+                                            <TableCell
+                                                sx={{ textAlign: "center", width: 110, fontSize: "16px", backgroundColor: "#e1f5fe", fontWeight: "bold" }}
+                                            >
+                                                {numberFormat(totals.amount)}
+                                            </TableCell>
+
+                                            {/* หัก ณ ที่จ่าย */}
+                                            <TableCell
+                                                sx={{ textAlign: "center", width: 90, fontSize: "16px", backgroundColor: "#e1f5fe", fontWeight: "bold" }}
+                                            >
+                                                {numberFormat(totals.withholding)}
+                                            </TableCell>
+
+                                            {/* ยอดชำระ */}
+                                            <TableCell
+                                                sx={{ textAlign: "center", width: 130, fontSize: "16px", backgroundColor: "#e1f5fe", fontWeight: "bold" }}
+                                            >
+                                                {numberFormat(totals.payment)}
+                                            </TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    {/* <TableBody>
-                                        {
-                                            orders.map((order, index) => (
-                                                <TableRow>
-                                                    <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{order.Date}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{`${order.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{order.ProductName}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(order.VolumeProduct)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(order.RateOil)}</TableCell>
-                                                    <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(order.Amount)}</TableCell>
-                                                </TableRow>
-                                            ))
-                                        }
-                                    </TableBody> */}
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell sx={{ textAlign: 'center', height: "50vh" }} colSpan={15}><Typography variant="subtitle1" fontWeight="center" color="error" gutterBottom>*กำลังปรับ*</Typography></TableCell>
+                                            <TableCell sx={{ textAlign: "center", }} colSpan={11}></TableCell>
+                                            <TableCell sx={{ textAlign: "center", fontSize: "16px", backgroundColor: "#fff9c4", fontWeight: "bold" }} colSpan={2}>ยอดชำระทั้งหมด</TableCell>
+                                            <TableCell sx={{ textAlign: "center", width: 130, fontSize: "16px", backgroundColor: "#fff9c4", fontWeight: "bold" }} >{numberFormat(totals.incomingMoney)}</TableCell>
                                         </TableRow>
-                                        {/* {groupedOrders.map(([groupKey, groupOrders], groupIndex) => {
-                                            const rowSpan = groupOrders.length;
-                                            const [date, driver] = groupKey.split("|");
-                                            const registration = groupOrders[0].Registration?.split(":")[1] || "";
-
-                                            const totalVolume = groupOrders.reduce((sum, o) => sum + o.VolumeProduct, 0);
-                                            const totalAmount = groupOrders.reduce((sum, o) => sum + o.Amount, 0);
-                                            const totalIncomingMoney = groupOrders[0].IncomingMoneyDetail?.reduce(
-                                                (sum, o) => sum + Number(o.IncomingMoney || 0), 0
-                                            ) || 0;
-
-                                            const avgRateOil = totalAmount && totalVolume ? totalAmount / totalVolume : 0;
-
-                                            return (
-                                                <React.Fragment key={groupKey}>
-                                                    {groupOrders.map((order, index) => (
-                                                        <TableRow key={`${groupKey}-${index}`}>
-                                                            {index === 0 && (
-                                                                <>
-                                                                    <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
-                                                                        {groupIndex + 1}
-                                                                    </TableCell>
-                                                                    <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
-                                                                        {formatThaiSlash(dayjs(date, "DD/MM/YYYY"))}
-                                                                    </TableCell>
-                                                                    <TableCell sx={{ textAlign: "center" }} rowSpan={rowSpan}>
-                                                                        {`${driver.split(":")[1]}/${registration}`}
-                                                                    </TableCell>
-                                                                </>
-                                                            )}
-                                                            <TableCell sx={{ textAlign: "center" }}>{order.ProductName}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                {new Intl.NumberFormat("en-US").format(order.VolumeProduct)}
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(order.RateOil)}
-                                                            </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
-                                                                {new Intl.NumberFormat("en-US").format(order.Amount)}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-
-                                                    <TableRow sx={{ backgroundColor: "#dcdcdc", fontWeight: "bold" }}>
-                                                        <TableCell colSpan={4} sx={{ textAlign: "right", fontWeight: "bold" }}>
-                                                            ยอดรวมของ {driver.split(":")[1]}/{registration}
-                                                        </TableCell>
-                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                                                            {new Intl.NumberFormat("en-US").format(totalVolume)}
-                                                        </TableCell>
-                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                                                            {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(avgRateOil)}
-                                                        </TableCell>
-                                                        <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                                                            {new Intl.NumberFormat("en-US").format(totalAmount)}
-                                                        </TableCell>
-                                                    </TableRow>
-
-                                                    {groupOrders[0].IncomingMoneyDetail?.length > 0 && (
-                                                        <>
-                                                            {groupOrders[0].IncomingMoneyDetail.map((money, idx) => (
-                                                                <TableRow
-                                                                    key={`incoming-${groupKey}-${idx}`}
-                                                                    sx={{ backgroundColor: "#e8f5e9", fontWeight: "bold" }}
-                                                                >
-                                                                    <TableCell colSpan={6} sx={{ textAlign: "right", fontWeight: "bold" }}>
-                                                                        {groupOrders[0].IncomingMoneyDetail.length > 1
-                                                                            ? `ชำระเงินครั้งที่ ${idx + 1} เมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart, "DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`
-                                                                            : `ชำระเงินเมื่อวันที่ ${formatThaiFullYear(dayjs(money.DateStart, "DD/MM/YYYY")) || "-"} ผ่านบัญชี ${money.BankName?.split(":")[1] || "-"} เป็นจำนวนเงินดังนี้`}
-                                                                    </TableCell>
-                                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                                                                        {new Intl.NumberFormat("en-US").format(money.IncomingMoney || 0)}
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            ))}
-                                                        </>
-                                                    )}
-
-                                                    {(() => {
-                                                        // ตรวจสอบว่ากลุ่มนี้เป็นกลุ่มสุดท้ายของวันที่เดียวกันหรือไม่
-                                                        const isLastGroupOfDate = (() => {
-                                                            const nextGroup = groupedOrders[groupIndex + 1];
-                                                            if (!nextGroup) return true; // ไม่มีกลุ่มถัดไป = กลุ่มสุดท้ายแน่นอน
-                                                            const [nextDate] = nextGroup[0].split("|");
-                                                            return nextDate !== date; // ถ้าวันถัดไปไม่เท่ากัน = อันนี้คือกลุ่มสุดท้ายของวันนั้น
-                                                        })();
-
-                                                        if (!isLastGroupOfDate) return null;
-
-                                                        return (
-                                                            <TableRow sx={{ backgroundColor: "#ffecb3", fontWeight: "bold" }}>
-                                                                <TableCell colSpan={6} sx={{ textAlign: "right", fontWeight: "bold" }}>
-                                                                    ยอดค้างชำระรวมของวันที่ {formatThaiSlash(dayjs(date, "DD/MM/YYYY"))}
-                                                                </TableCell>
-                                                                <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                                                                    {new Intl.NumberFormat("en-US").format(
-                                                                        outstandingByDate[date].amount - outstandingByDate[date].incoming
-                                                                    )}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        );
-                                                    })()}
-
-                                                </React.Fragment>
-                                            );
-                                        })} */}
-                                        {/* <TableRow sx={{ backgroundColor: theme.palette.success.dark }}>
-                                            <TableCell sx={{ textAlign: "right", fontWeight: "bold", fontSize: "16px", color: "white" }} colSpan={3}>ผลรวมทั้งหมด</TableCell>
-                                            <TableCell sx={{ textAlign: "right", fontSize: "16px", color: "white" }} colSpan={8}>
-                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 0.5 }} >
-                                                    <Typography variant="subtitle1" fontSize="16px" color="white" sx={{ marginRight: 4 }} gutterBottom><b>จำนวนลิตร : {new Intl.NumberFormat("en-US").format(totalVolume)}</b></Typography>
-                                                    <Typography variant="subtitle1" fontSize="16px" color="white" gutterBottom><b>ยอดเงิน : {new Intl.NumberFormat("en-US").format(totalAmount)}</b></Typography>
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell sx={{ textAlign: "right", fontWeight: "bold", fontSize: "16px", color: "white" }}>ยอดชำระ :</TableCell>
-                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", color: "white" }}>{new Intl.NumberFormat("en-US").format(totalIncomingMoney)}</TableCell>
-                                            <TableCell sx={{ textAlign: "right", fontWeight: "bold", fontSize: "16px", color: "white" }}>ยอดค้างชำระ :</TableCell>
-                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", color: "white" }} colSpan={2}>{new Intl.NumberFormat("en-US").format(totalOverdueTransfer)}</TableCell>
-                                        </TableRow> */}
+                                        <TableRow>
+                                            <TableCell sx={{ textAlign: "center", }} colSpan={11}></TableCell>
+                                            <TableCell sx={{ textAlign: "center", fontSize: "16px", backgroundColor: "#ffcdd2", fontWeight: "bold" }} colSpan={2}>ค้างชำระรวม</TableCell>
+                                            <TableCell sx={{ textAlign: "center", width: 130, fontSize: "16px", backgroundColor: "#ffcdd2", fontWeight: "bold" }} >{numberFormat(totals.payment - totals.incomingMoney)}</TableCell>
+                                        </TableRow>
                                     </TableBody>
-
                                 </Table>
                             </TableContainer>
+
                         </Grid>
                     </Grid>
                 </DialogContent>

@@ -368,15 +368,15 @@ const ReportTransports = ({ openNavbar }) => {
                 TotalAmount: totalAmount,
                 RateOil: parseFloat(Rate),
                 Company: company?.Company,
+                RegistrationTail: company?.RegTail,
             };
         }).filter(Boolean);
 
         flattenedRef.current = flattened;
 
         console.log("registraion : ", registration.filter((row) => row.Company.split(":")[0] === check.split(":")[0]));
-        console.log("flattened : ", ticket.filter((row) => row.TicketName.split(":")[1] === "T...VRP ปิโตรเลียม(PT)ใช้หัวสับ+ส่งรูป"));
         console.log("flattened : ", flattened);
-        console.log("transferMoneyDetail.filter((t) => ", transferMoneyDetail.filter((t) => t.Status !== undefined))
+        console.log("transferMoneyDetail.filter((t) => ", transferMoneyDetail.filter((t) => t.Status !== "ยกเลิก" && t.TicketType === "ตั๋วรับจ้างขนส่ง"))
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
         const merged = Object.values(flattened.reduce((acc, curr) => {
