@@ -79,6 +79,14 @@ const ReportDetail = (props) => {
         PWD: TableCellPWD,
     };
 
+    const columnStyles = {
+        G95: { borderTop: "5px solid #FFC000", backgroundColor: "#ffe0b2" },
+        B95: { borderTop: "5px solid #B7DEE8", backgroundColor: "#e1f5fe" },
+        B7: { borderTop: "5px solid #ffeb3b", backgroundColor: "#fff9c4" },
+        G91: { borderTop: "5px solid #92D050", backgroundColor: "#dcedc8" },
+        E20: { borderTop: "5px solid #C4BD97", backgroundColor: "#eeeeee" },
+        PWD: { borderTop: "5px solid #F141D8", backgroundColor: "#f8bbd0" },
+    };
 
     const { transferMoney } = useTripData();
     const transferMoneyDetail = Object.values(transferMoney || {});
@@ -390,10 +398,10 @@ const ReportDetail = (props) => {
                         }}
                         ref={invoiceRef}>
                         <Grid item xs={12}>
-                            <Typography variant="h6" gutterBottom><b>ชื่อบริษัท :</b> {row.Company.split(":")[1]}</Typography>
+                            <Typography variant="h6" gutterBottom><b>ชื่อบริษัท :</b> {row.Company ? row.Company.split(":")[1] : "-"}</Typography>
                         </Grid>
                         <Grid item xs={12} marginTop={-3}>
-                            <Typography variant="h6" gutterBottom><b>ชื่อตั๋วลูกค้า :</b> {row.TicketName.split(":")[1]}</Typography>
+                            <Typography variant="h6" gutterBottom><b>ชื่อตั๋วลูกค้า :</b> {row.TicketName ? row.TicketName.split(":")[1] : "-"}</Typography>
                         </Grid>
                         <Grid item xs={12} marginTop={-3}>
                             <Typography variant="h6" gutterBottom><b>เดือน :</b> {month} {year}</Typography>
@@ -415,12 +423,12 @@ const ReportDetail = (props) => {
                                                 <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>รอบการรับ</TablecellTickets>
                                                 <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>วันที่รับ</TablecellTickets>
                                                 <TablecellTickets sx={{ textAlign: "center", width: 230, fontSize: "16px" }}>พขร.</TablecellTickets>
-                                                <TableCellG95 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G95</TableCellG95>
-                                                <TableCellB95 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B95</TableCellB95>
-                                                <TableCellB7 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>B7</TableCellB7>
-                                                <TableCellG91 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>G91</TableCellG91>
-                                                <TableCellE20 sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>E20</TableCellE20>
-                                                <TableCellPWD sx={{ textAlign: "center", width: 70, fontSize: "16px" }}>PWD</TableCellPWD>
+                                                <TableCell sx={{ textAlign: "center", width: 70, fontSize: "16px", borderBottom: `5px solid #FFC000`, backgroundColor: "#ffe0b2", fontWeight: "bold" }}>G95</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 70, fontSize: "16px", borderBottom: `5px solid #B7DEE8`, backgroundColor: "#e1f5fe", fontWeight: "bold" }}>B95</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 70, fontSize: "16px", borderBottom: `5px solid #ffeb3b`, backgroundColor: "#fff9c4", fontWeight: "bold" }}>B7</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 70, fontSize: "16px", borderBottom: `5px solid #92D050`, backgroundColor: "#dcedc8", fontWeight: "bold" }}>G91</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 70, fontSize: "16px", borderBottom: `5px solid #C4BD97`, backgroundColor: "#eeeeee", fontWeight: "bold" }}>E20</TableCell>
+                                                <TableCell sx={{ textAlign: "center", width: 70, fontSize: "16px", borderBottom: `5px solid #F141D8`, backgroundColor: "#f8bbd0", fontWeight: "bold" }}>PWD</TableCell>
                                                 <TablecellTickets sx={{ textAlign: "center", width: 110, fontSize: "16px" }}>รวมลิตร</TablecellTickets>
                                                 <TablecellTickets sx={{ textAlign: "center", width: 80, fontSize: "16px" }}>ค่าบรรทุก</TablecellTickets>
                                                 <TablecellTickets sx={{ textAlign: "center", width: 120, fontSize: "16px" }}>ยอดเงิน</TablecellTickets>
@@ -440,7 +448,7 @@ const ReportDetail = (props) => {
                                                 const amount = totalLiters * item.RateOil;
                                                 const withholding = amount * 0.01;
                                                 const payment = amount - withholding;
-                                                const registration = `${item.Registration.split(":")[1]}/${item.RegistrationTail.split(":")[1]}`
+                                                const registration = item.Registration.split(":")[1] === "ไม่มี" ? "รถรับจ้างขนส่ง" : `${item.RegistrationHead}/${item.RegistrationTail.split(":")[1]}`
 
                                                 return (
                                                     <TableRow key={`${key}-${index}`}>
@@ -544,17 +552,22 @@ const ReportDetail = (props) => {
                                                             </TableCell>
                                                         ))} */}
                                                         {productColumns.map((col) => {
-                                                            const CellComponent = columnComponents[col] || TableCell; // ถ้าไม่เจอ ใช้ TableCell ปกติ
-
                                                             return (
-                                                                <CellComponent key={col} sx={{ textAlign: "center", fontWeight: "bold" }}>
+                                                                <TableCell
+                                                                    key={col}
+                                                                    sx={{
+                                                                        textAlign: "center",
+                                                                        width: 70,
+                                                                        fontWeight: "bold",
+                                                                        ...(columnStyles[col] || {}), // ถ้าเจอ col ก็เอาสีมา ถ้าไม่เจอ ปล่อยว่าง
+                                                                    }}
+                                                                >
                                                                     {totals.products[col]
                                                                         ? new Intl.NumberFormat("en-US").format(totals.products[col])
                                                                         : "-"}
-                                                                </CellComponent>
-                                                            )
-                                                        }
-                                                        )}
+                                                                </TableCell>
+                                                            );
+                                                        })}
 
                                                         {/* รวมลิตร */}
                                                         <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>

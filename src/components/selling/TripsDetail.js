@@ -80,16 +80,18 @@ const TripsDetail = (props) => {
         <React.Fragment>
             <TableRow>
                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateReceive,"DD/MM/YYYY"))}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateDelivery,"DD/MM/YYYY"))}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateReceive, "DD/MM/YYYY"))}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(trips.DateDelivery, "DD/MM/YYYY"))}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>{trips.Depot.split(":")[0]}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     {(() => {
                         const driverName = trips.Driver?.split(":")[1] || trips.Driver || "";
+                        const regHead = trips.RegistrationHead || "";
+                        const regTail = trips.RegistrationTail?.split(":")[1] || trips.RegistrationTail || "";
                         const regName = trips.Registration?.split(":")[1] || trips.Registration || "";
 
                         if (trips.TruckType !== "รถรับจ้างขนส่ง") {
-                            return `${driverName}/${regName}`;
+                            return `${driverName}/${regHead} - ${regTail}`;
                         } else {
                             return `${driverName}${regName !== "ไม่มี" ? `/${regName}` : ""}`;
                         }

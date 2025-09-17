@@ -44,19 +44,11 @@ import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { useData } from "../../../server/path";
 import { useBasicData } from "../../../server/provider/BasicDataProvider";
+import TruckRepair from "./TruckRepair";
 
 const UpdateRegHead = (props) => {
-    const { truck } = props;
+    const { truck, open, onClose, type } = props;
     const [update, setUpdate] = React.useState(true);
-    const [open, setOpen] = useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
 
     // const { regtail, company, drivers } = useData();
     const { regtail, company, drivers } = useBasicData();
@@ -153,11 +145,11 @@ const UpdateRegHead = (props) => {
 
     return (
         <React.Fragment>
-            <IconButton size="small" sx={{ marginTop: -0.5, marginRight: 1 }} onClick={() => setOpen(truck.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
+            {/* <IconButton size="small" sx={{ marginTop: -0.5, marginRight: 1 }} onClick={() => setOpen(truck.id)}><InfoIcon color="info" fontSize="12px" /></IconButton> */}
             <Dialog
-                open={open === truck.id ? true : false}
+                open={open && type === "รายละเอียด" ? true : false}   // convert เป็น boolean ให้แน่นอน
                 keepMounted
-                onClose={handleClose}
+                onClose={onClose} // ใช้ตรง ๆ
                 sx={{
                     "& .MuiDialog-paper": {
                         width: "800px", // กำหนดความกว้างแบบ Fixed
@@ -171,15 +163,16 @@ const UpdateRegHead = (props) => {
                             <Typography variant="h6" fontWeight="bold" color="white" >รายละเอียดรถทะเบียน{regHead}</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
-                            <IconButtonError onClick={handleClose}>
+                            <IconButtonError onClick={onClose}>
                                 <CancelIcon />
                             </IconButtonError>
                         </Grid>
                     </Grid>
                 </DialogTitle>
                 <DialogContent>
-                    <Box marginTop={2} marginBottom={-2}>
+                    <Box marginTop={2} marginBottom={-2} sx={{ display: "flex", alignItems: "center", justifyContent: "right" }}>
                         <Typography variant="subtitle1" fontWeight="bold" color={theme.palette.warning.main} textAlign="right" marginRight={2} gutterBottom>{truck.RepairTruck.split(":")[1]}</Typography>
+                        <TruckRepair key={truck.RepairTruck.split(":")[1]} row={truck} type={"ตรวจสอบสภาพรถ"} />
                     </Box>
                     <Paper
                         sx={{ p: 2, border: "1px solid" + theme.palette.grey[600], marginTop: 2, marginBottom: 2 }}
@@ -188,7 +181,7 @@ const UpdateRegHead = (props) => {
                             <Grid item xs={2}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ชื่อพนักงานขับรถ</Typography>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={10}>
                                 {
                                     update ?
                                         <TextField fullWidth variant="standard" value={driver.split(":")[1]} disabled />
@@ -215,15 +208,15 @@ const UpdateRegHead = (props) => {
                                 }
                             </Grid>
                             <Grid item xs={1.5}>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ทะเบียนหัว</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="left" gutterBottom>ทะเบียนหัว</Typography>
                             </Grid>
-                            <Grid item xs={1.5}>
+                            <Grid item xs={4.5}>
                                 <TextField fullWidth variant="standard" value={regHead} disabled={update ? true : false} onChange={(e) => setRegHead(e.target.value)} />
                             </Grid>
                             <Grid item xs={1.5}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ทะเบียนหาง</Typography>
                             </Grid>
-                            <Grid item xs={1.5}>
+                            <Grid item xs={4.5}>
                                 {
                                     update ?
                                         <TextField fullWidth variant="standard" value={regTail.split(":")[1]} disabled />
@@ -263,45 +256,63 @@ const UpdateRegHead = (props) => {
                                 }
                             </Grid>
                             <Grid item xs={1}>
-                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>น้ำหนัก</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="left" gutterBottom>บริษัท</Typography>
+                            </Grid>
+                            <Grid item xs={11}>
+                                {
+                                    update ?
+                                        <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
+                                        :
+                                        // <FormControl variant="standard" fullWidth>
+                                        //     <Select
+                                        //         labelId="demo-simple-select-standard-label"
+                                        //         id="demo-simple-select-standard"
+                                        //         value={companies}
+                                        //         onChange={(e) => setCompanies(e.target.value)}
+                                        //     >
+                                        //         <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
+                                        //         {
+                                        //             dataCompany.map((truck) => (
+                                        //                 (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
+                                        //                 <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
+                                        //             ))
+                                        //         }
+                                        //     </Select>
+                                        // </FormControl>
+                                        <FormControl
+                                            variant="standard"
+                                            fullWidth
+                                            size="small"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'left' },
+                                            }}
+                                        >
+                                            <Select
+                                                value={companies}
+                                                onChange={(e) => setCompanies(e.target.value)}
+                                            >
+                                                <MenuItem value={companies} sx={{ fontSize: "14px", }}>{companies.split(":")[1]}</MenuItem>
+                                                {Number(companies.split(":")[0]) !== 2 && <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
+                                                {Number(companies.split(":")[0]) !== 3 && <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
+                                            </Select>
+                                        </FormControl>
+                                }
                             </Grid>
                             <Grid item xs={1}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>น้ำหนัก</Typography>
+                            </Grid>
+                            <Grid item xs={3}>
                                 <TextField fullWidth variant="standard" value={weight} disabled={update ? true : false} onChange={(e) => setWeight(e.target.value)} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ประกัน</Typography>
                             </Grid>
-                            <Grid item xs={2}>
+                            <Grid item xs={4}>
                                 <TextField fullWidth variant="standard" value={insurance} disabled={update ? true : false} onChange={(e) => setInsurance(e.target.value)} />
                             </Grid>
-                            <Grid item xs={1}>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>บริษัท</Typography>
-                            </Grid>
-                            <Grid item xs={4}>
-                                {
-                                    update ?
-                                        <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
-                                        :
-                                        <FormControl variant="standard" fullWidth>
-                                            <Select
-                                                labelId="demo-simple-select-standard-label"
-                                                id="demo-simple-select-standard"
-                                                value={companies}
-                                                onChange={(e) => setCompanies(e.target.value)}
-                                            >
-                                                <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
-                                                {
-                                                    dataCompany.map((truck) => (
-                                                        (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
-                                                        <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
-                                                    ))
-                                                }
-                                            </Select>
-                                        </FormControl>
-                                }
-                            </Grid>
-                            <Grid item xs={2} display="flex">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" marginRight={0.5} gutterBottom>สถานะ:</Typography>
+                            <Grid item xs={3} display="flex">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" marginRight={1} gutterBottom>สถานะ:</Typography>
                                 <Typography variant="subtitle1" fontWeight="bold" color="green" textAlign="center" gutterBottom>{truck.Status}</Typography>
                             </Grid>
                             <Grid item xs={12} marginTop={2} marginBottom={2}>
@@ -357,8 +368,8 @@ const UpdateRegHead = (props) => {
                                 <Button variant="contained" color="success" onClick={handleUpdate} >บันทึก</Button>
                             </Box>
                     }
-                    {/* <Button onClick={handleClose} variant="contained" color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button> */}
+                    {/* <Button onClick={onClose} variant="contained" color="success">บันทึก</Button>
+                    <Button onClick={onClose} variant="contained" color="error">ยกเลิก</Button> */}
                 </DialogActions>
             </Dialog>
         </React.Fragment>

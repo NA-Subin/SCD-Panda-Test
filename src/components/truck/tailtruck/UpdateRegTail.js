@@ -107,10 +107,10 @@ const UpdateRegTail = (props) => {
     return (
         <React.Fragment>
             <TableCell sx={{ textAlign: "center", position: "sticky", right: 0, backgroundColor: "white" }}>
-                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpen(regTail)}><InfoIcon color="info" fontSize="12px" /></IconButton>
+                <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setOpen(true)}><InfoIcon color="info" fontSize="12px" /></IconButton>
             </TableCell>
             <Dialog
-                open={open === regTail ? true : false}
+                open={open === true ? true : false}
                 keepMounted
                 onClose={handleClose}
                 sx={{
@@ -140,43 +140,61 @@ const UpdateRegTail = (props) => {
                             <Grid item xs={1.5}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ทะเบียนหาง</Typography>
                             </Grid>
-                            <Grid item xs={1.5}>
-                                <TextField fullWidth variant="standard" value={regTail} disabled={update ? true : false} onChange={(e) => setRegTail(e.target.value)} />
+                            <Grid item xs={4.5}>
+                                <TextField fullWidth variant="standard" value={regTail} disabled={!update ? true : false} onChange={(e) => setRegTail(e.target.value)} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ช่อง</Typography>
                             </Grid>
                             <Grid item xs={1}>
-                                <TextField fullWidth variant="standard" value={cap} disabled={update ? true : false} onChange={(e) => setCap(e.target.value)} />
+                                <TextField fullWidth variant="standard" value={cap} disabled={!update ? true : false} onChange={(e) => setCap(e.target.value)} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>น้ำหนัก</Typography>
                             </Grid>
-                            <Grid item xs={1}>
-                                <TextField fullWidth variant="standard" value={weight} disabled={update ? true : false} onChange={(e) => setWeight(e.target.value)} />
+                            <Grid item xs={3}>
+                                <TextField fullWidth variant="standard" value={weight} disabled={!update ? true : false} onChange={(e) => setWeight(e.target.value)} />
                             </Grid>
                             <Grid item xs={1}>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>บริษัท</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="left" gutterBottom>บริษัท</Typography>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={11}>
                                 {
-                                    update ?
+                                    !update ?
                                         <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
                                         :
-                                        <FormControl variant="standard" fullWidth>
+                                        // <FormControl variant="standard" fullWidth>
+                                        //     <Select
+                                        //         labelId="demo-simple-select-standard-label"
+                                        //         id="demo-simple-select-standard"
+                                        //         value={companies}
+                                        //         onChange={(e) => setCompanies(e.target.value)}
+                                        //     >
+                                        //         <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
+                                        //         {
+                                        //             dataCompany.map((truck) => (
+                                        //                 (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
+                                        //                 <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
+                                        //             ))
+                                        //         }
+                                        //     </Select>
+                                        // </FormControl>
+                                        <FormControl
+                                            variant="standard"
+                                            fullWidth
+                                            size="small"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'left' },
+                                            }}
+                                        >
                                             <Select
-                                                labelId="demo-simple-select-standard-label"
-                                                id="demo-simple-select-standard"
                                                 value={companies}
                                                 onChange={(e) => setCompanies(e.target.value)}
                                             >
-                                                <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
-                                                {
-                                                    dataCompany.map((truck) => (
-                                                        (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
-                                                        <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
-                                                    ))
-                                                }
+                                                <MenuItem value={companies} sx={{ fontSize: "14px", }}>{companies.split(":")[1]}</MenuItem>
+                                                {Number(companies.split(":")[0]) !== 2 && <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
+                                                {Number(companies.split(":")[0]) !== 3 && <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
                                             </Select>
                                         </FormControl>
                                 }
@@ -184,11 +202,11 @@ const UpdateRegTail = (props) => {
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ประกัน</Typography>
                             </Grid>
-                            <Grid item xs={3}>
-                                <TextField fullWidth variant="standard" value={insurance} disabled={update ? true : false} onChange={(e) => setInsurance(e.target.value)} />
+                            <Grid item xs={4}>
+                                <TextField fullWidth variant="standard" value={insurance} disabled={!update ? true : false} onChange={(e) => setInsurance(e.target.value)} />
                             </Grid>
-                            <Grid item xs={3} display="flex">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" marginRight={0.5} gutterBottom>สถานะ:</Typography>
+                            <Grid item xs={5} display="flex">
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" marginRight={1} gutterBottom>สถานะ:</Typography>
                                 <Typography variant="subtitle1" fontWeight="bold" color="green" textAlign="center" gutterBottom>{truck.Status}</Typography>
                             </Grid>
                             <Grid item xs={12} marginTop={2} marginBottom={2}>
@@ -200,13 +218,13 @@ const UpdateRegTail = (props) => {
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>เลขจดทะเบียน</Typography>
                             </Grid>
                             <Grid item xs={4}>
-                                <TextField fullWidth variant="standard" value={vehicleRegistration} disabled={update ? true : false} onChange={(e) => setVehicleRegistration(e.target.value)} />
+                                <TextField fullWidth variant="standard" value={vehicleRegistration} disabled={!update ? true : false} onChange={(e) => setVehicleRegistration(e.target.value)} />
                             </Grid>
                             <Grid item xs={2}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>วันหมดอายุ</Typography>
                             </Grid>
                             <Grid item xs={4}>
-                                <TextField variant="standard" fullWidth value={vehExpirationDate} disabled={update ? true : false} onChange={(e) => setVehExpirationDate(e.target.value)} />
+                                <TextField variant="standard" fullWidth value={vehExpirationDate} disabled={!update ? true : false} onChange={(e) => setVehExpirationDate(e.target.value)} />
                             </Grid>
                             <Grid item xs={12}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>รูปภาพใบจดทะเบียน</Typography>
@@ -214,7 +232,7 @@ const UpdateRegTail = (props) => {
                             <Grid item xs={12} textAlign="center">
                                 {
                                     truck.VehPicture === "ไม่มี" ?
-                                        update ?
+                                        !update ?
                                             <>
                                                 <ImageNotSupportedIcon fontSize="small" color="disabled" />
                                                 <Typography variant="subtitle2" fontWeight="bold" textAlign="center" gutterBottom>{truck.VehPicture}</Typography>
@@ -233,14 +251,14 @@ const UpdateRegTail = (props) => {
                 </DialogContent>
                 <DialogActions sx={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
                     {
-                        update ?
+                        !update ?
                             <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="warning" onClick={() => setUpdate(false)} sx={{ marginRight: 2 }}>แก้ไข</Button>
+                                <Button variant="contained" color="warning" onClick={() => setUpdate(true)} sx={{ marginRight: 2 }}>แก้ไข</Button>
                                 <Button variant="contained" color="info">พิมพ์</Button>
                             </Box>
                             :
                             <Box marginBottom={2} textAlign="center">
-                                <Button variant="contained" color="error" onClick={() => setUpdate(true)} sx={{ marginRight: 2 }}>ยกเลิก</Button>
+                                <Button variant="contained" color="error" onClick={() => setUpdate(false)} sx={{ marginRight: 2 }}>ยกเลิก</Button>
                                 <Button variant="contained" color="success" onClick={handleUpdate} >บันทึก</Button>
                             </Box>
                     }

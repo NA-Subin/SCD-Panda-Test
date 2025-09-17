@@ -194,7 +194,7 @@ const UpdateSmallTruck = (props) => {
                                 }
                             </Grid>
                             <Grid item xs={1}>
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>ชื่อย่อ</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="left" gutterBottom>ชื่อย่อ</Typography>
                             </Grid>
                             <Grid item xs={5}>
                                 <TextField fullWidth variant="standard" value={shortName} onChange={(e) => setShortName(e.target.value)} disabled={update ? true : false} />
@@ -214,13 +214,13 @@ const UpdateSmallTruck = (props) => {
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>ประกัน</Typography>
                             </Grid>
-                            <Grid item xs={2}>
+                            <Grid item xs={4}>
                                 <TextField fullWidth variant="standard" value={insurance} onChange={((e) => setInsurance(e.target.value))} disabled={update ? true : false} />
                             </Grid>
                             <Grid item xs={1}>
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" gutterBottom>บริษัท</Typography>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={6}>
                                 {
                                     update ?
                                         <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
@@ -243,7 +243,7 @@ const UpdateSmallTruck = (props) => {
                                         </FormControl>
                                 }
                             </Grid>
-                            <Grid item xs={2} display="flex">
+                            <Grid item xs={12} display="flex" textAlign="right">
                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="center" marginRight={0.5} gutterBottom>สถานะ:</Typography>
                                 <Typography variant="subtitle1" fontWeight="bold" color="green" textAlign="center" gutterBottom>{truck.Status}</Typography>
                             </Grid>

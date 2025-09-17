@@ -57,6 +57,8 @@ import { useTripData } from "../../server/provider/TripProvider";
 import ReportDetail from "./ReportDetail";
 import { formatThaiFull } from "../../theme/DateTH";
 import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 
 const ReportTransports = ({ openNavbar }) => {
     const monthNames = [
@@ -248,12 +250,13 @@ const ReportTransports = ({ openNavbar }) => {
         // });
 
         const filteredItems = ticket.filter((item) => {
-            const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+            const itemDate = dayjs(item.Date, "DD/MM/YYYY", true); // ตัวสุดท้าย true = strict
+            if (!itemDate.isValid()) {
+                console.log("❌ Parse date fail:", item.Date);
+            }
 
-            // ✅ กรองเฉพาะสถานะสำเร็จ
             const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined;
 
-            // ✅ กรองตามบริษัท/ทะเบียนรถ
             let isRegistration = false;
             if (check === "0:ทั้งหมด") {
                 isRegistration = true;
@@ -265,15 +268,16 @@ const ReportTransports = ({ openNavbar }) => {
                 );
             }
 
-            // ✅ ไม่เอาตั๋วรถใหญ่และตั๋วรถเล็ก
             const isValidCustomerType =
                 item.CustomerType !== "ตั๋วรถใหญ่" &&
                 item.CustomerType !== "ตั๋วรถเล็ก";
 
-            // ✅ กรองตามปีและเดือนที่เลือก
-            const itemYear = itemDate.year();
-            const itemMonth = itemDate.month(); // month index 0-11
-            const isInSelectedYearMonth = itemYear === Number(year - 543) && itemMonth === month;
+            const itemYear = itemDate.year(); // ค.ศ.
+            const itemMonth = itemDate.month(); // index 0–11
+
+            const isInSelectedYearMonth =
+                itemYear === year - 543 && // เทียบให้ตรง พ.ศ./ค.ศ.
+                itemMonth === month;
 
             return isValidStatus && isRegistration && isValidCustomerType && isInSelectedYearMonth;
         });
@@ -368,6 +372,7 @@ const ReportTransports = ({ openNavbar }) => {
                 TotalAmount: totalAmount,
                 RateOil: parseFloat(Rate),
                 Company: company?.Company,
+                RegistrationHead: company?.RegHead,
                 RegistrationTail: company?.RegTail,
             };
         }).filter(Boolean);
@@ -584,8 +589,8 @@ const ReportTransports = ({ openNavbar }) => {
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
             <Grid container spacing={2}>
-                <Grid item sm={2} lg={2}></Grid>
-                <Grid item sm={10} lg={10}>
+                <Grid item sm={2} lg={4}></Grid>
+                <Grid item sm={10} lg={8}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -760,7 +765,7 @@ const ReportTransports = ({ openNavbar }) => {
                 {
                     windowWidth >= 800 ?
                         <Grid container spacing={2} width="100%" marginBottom={1} >
-                            <Grid item sm={3} lg={5}>
+                            <Grid item sm={12} lg={4}>
                                 <Paper>
                                     {/* <TextField
                                         select
@@ -821,7 +826,7 @@ const ReportTransports = ({ openNavbar }) => {
                                     <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
                                 </FormGroup> */}
                             </Grid>
-                            <Grid item sm={6} lg={5}>
+                            <Grid item sm={12} lg={6}>
                                 <FormGroup row sx={{ marginBottom: -1.5 }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>เลือกตั๋ว : </Typography>
                                     <FormControlLabel control={<Checkbox checked={ticketO} />} onChange={() => setTicketO(!ticketO)} label="ตั๋วน้ำมัน" />
@@ -829,7 +834,7 @@ const ReportTransports = ({ openNavbar }) => {
                                     <FormControlLabel control={<Checkbox checked={ticketT} />} onChange={() => setTicketT(!ticketT)} label="ตั๋วรับจ้างขนส่ง" />
                                 </FormGroup>
                             </Grid>
-                            <Grid item sm={3} lg={2}>
+                            <Grid item sm={12} lg={2}>
                                 <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                             </Grid>
                         </Grid>

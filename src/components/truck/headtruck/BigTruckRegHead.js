@@ -199,10 +199,10 @@ const BigTruckRegHead = (props) => {
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                       ลำดับ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, position: "sticky", left: 0, zIndex: 3 }}>
                       ทะเบียนหัว
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, position: "sticky", left: 140, zIndex: 3 }}>
                       ทะเบียนหาง
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
@@ -223,7 +223,7 @@ const BigTruckRegHead = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       พนักงานขับรถ
                     </TablecellHeader>
-                    <TablecellHeader colSpan={2} width={50} sx={{ position: "sticky", right: 0 }} />
+                    {/* <TablecellHeader colSpan={2} width={50} sx={{ position: "sticky", right: 0 }} /> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>

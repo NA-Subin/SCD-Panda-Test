@@ -63,7 +63,7 @@ const MenuProps = {
 };
 
 const TruckRepair = (props) => {
-  const { row } = props;
+  const { row, type } = props;
   const [truck, setTruck] = useState("");
 
   const getTruck = async () => {
@@ -83,9 +83,9 @@ const TruckRepair = (props) => {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
-    if(truck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
+    if (truck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ") {
       ShowError("วันนี้ยังไม่ได้ตรวจสภาพรถ");
-    }else{
+    } else {
       setOpen(true);
     }
   };
@@ -107,12 +107,12 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database
-              .ref("/inspection/" + id + "/Brake")
-              .on("value", (snapshot) => {
-                setBrake(snapshot.val());
-              })
+            .ref("/inspection/" + id + "/Brake")
+            .on("value", (snapshot) => {
+              setBrake(snapshot.val());
+            })
         }
       }
     });
@@ -122,12 +122,12 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database
-          .ref("/inspection/" + id + "/Electricity")
-          .on("value", (snapshot) => {
-            setElectricity(snapshot.val());
-          })
+            .ref("/inspection/" + id + "/Electricity")
+            .on("value", (snapshot) => {
+              setElectricity(snapshot.val());
+            })
         }
       }
     });
@@ -137,12 +137,12 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database
-              .ref("/inspection/" + id + "/Water")
-              .on("value", (snapshot) => {
-                setWater(snapshot.val());
-              })
+            .ref("/inspection/" + id + "/Water")
+            .on("value", (snapshot) => {
+              setWater(snapshot.val());
+            })
         }
       }
     });
@@ -152,12 +152,12 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database
-              .ref("/inspection/" + id + "/Air")
-              .on("value", (snapshot) => {
-                setAir(snapshot.val());
-              })
+            .ref("/inspection/" + id + "/Air")
+            .on("value", (snapshot) => {
+              setAir(snapshot.val());
+            })
         }
       }
     });
@@ -167,12 +167,12 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database
-              .ref("/inspection/" + id + "/Gasoline")
-              .on("value", (snapshot) => {
-                setGasoline(snapshot.val());
-              })
+            .ref("/inspection/" + id + "/Gasoline")
+            .on("value", (snapshot) => {
+              setGasoline(snapshot.val());
+            })
         }
       }
     });
@@ -182,12 +182,12 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database
-          .ref("/inspection/" + id + "/Oils")
-          .on("value", (snapshot) => {
-            setOils(snapshot.val());
-          })
+            .ref("/inspection/" + id + "/Oils")
+            .on("value", (snapshot) => {
+              setOils(snapshot.val());
+            })
         }
       }
     });
@@ -197,12 +197,12 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database
-          .ref("/inspection/" + id + "/Noise")
-          .on("value", (snapshot) => {
-            setNoise(snapshot.val());
-          })
+            .ref("/inspection/" + id + "/Noise")
+            .on("value", (snapshot) => {
+              setNoise(snapshot.val());
+            })
         }
       }
     });
@@ -212,7 +212,7 @@ const TruckRepair = (props) => {
     database.ref("/inspection").on("value", (snapshot) => {
       const datas = snapshot.val();
       for (let id in datas) {
-        if(datas[id].RegHead === row.RegHead){
+        if (datas[id].RegHead === row.RegHead) {
           database.ref("/inspection/" + id).on("value", (snapshot) => {
             setInspection(snapshot.val());
           })
@@ -327,11 +327,11 @@ const TruckRepair = (props) => {
 
   return (
     <React.Fragment>
-        <IconButtonWarning color="warning" onClick={handleClickOpen} size="small">
-        <ConstructionIcon fontSize="small" />
+      <IconButtonWarning color="warning" onClick={handleClickOpen} sx={{ marginTop: -1 }} size="small">
+        <ConstructionIcon />
       </IconButtonWarning>
       <Dialog
-        open={open}
+        open={open && type === "ตรวจสอบสภาพรถ" ? true : false}
         TransitionComponent={Transition}
         keepMounted
         onClose={handleClose}
@@ -582,22 +582,22 @@ const TruckRepair = (props) => {
                   label="มีรอยรั่ว"
                 />
                 {
-                brake.Leak_B === undefined ? ""
-                : brake.Leak_B !== "ไม่มี" ? (
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={brake.Leak_B}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  brake.Leak_B === undefined ? ""
+                    : brake.Leak_B !== "ไม่มี" ? (
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={brake.Leak_B}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -767,33 +767,33 @@ const TruckRepair = (props) => {
                 <FormCheckBox
                   checked={
                     electricity.BatteryTerminals === undefined ? false
-                    : electricity.BatteryTerminals !== "แน่นและมีฉนวนหุ่ม" &&
-                    electricity.BatteryTerminals !== "ไม่แน่น"
-                      ? true
-                      : false
+                      : electricity.BatteryTerminals !== "แน่นและมีฉนวนหุ่ม" &&
+                        electricity.BatteryTerminals !== "ไม่แน่น"
+                        ? true
+                        : false
                   }
                   disabled
                   control={<Checkbox />}
                   label="อื่นๆ"
                 />
                 {
-                electricity.BatteryTerminals === undefined ? "" 
-                : electricity.BatteryTerminals !== "แน่นและมีฉนวนหุ่ม" &&
-                electricity.BatteryTerminals !== "ไม่แน่น" ? (
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={electricity.BatteryTerminals}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  electricity.BatteryTerminals === undefined ? ""
+                    : electricity.BatteryTerminals !== "แน่นและมีฉนวนหุ่ม" &&
+                      electricity.BatteryTerminals !== "ไม่แน่น" ? (
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={electricity.BatteryTerminals}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -841,33 +841,33 @@ const TruckRepair = (props) => {
                 <FormCheckBox
                   checked={
                     electricity.BatteryStrap === undefined ? false
-                    : electricity.BatteryStrap !== "แน่นและมีฉนวนหุ่ม" &&
-                    electricity.BatteryStrap !== "ไม่แน่น"
-                      ? true
-                      : false
+                      : electricity.BatteryStrap !== "แน่นและมีฉนวนหุ่ม" &&
+                        electricity.BatteryStrap !== "ไม่แน่น"
+                        ? true
+                        : false
                   }
                   disabled
                   control={<Checkbox />}
                   label="อื่นๆ"
                 />
                 {
-                electricity.BatteryStrap === undefined ? ""
-                : electricity.BatteryStrap !== "แน่นและมีฉนวนหุ่ม" &&
-                electricity.BatteryStrap !== "ไม่แน่น" ? (
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={electricity.BatteryStrap}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  electricity.BatteryStrap === undefined ? ""
+                    : electricity.BatteryStrap !== "แน่นและมีฉนวนหุ่ม" &&
+                      electricity.BatteryStrap !== "ไม่แน่น" ? (
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={electricity.BatteryStrap}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -942,22 +942,22 @@ const TruckRepair = (props) => {
                   label="ใช้ไม่ได้"
                 />
                 {
-                  electricity.Horn === undefined ? "" 
-                : electricity.Horn !== "ใช้ได้หมด" ? (
-                  <TextField
-                    placeholder="ระบุจุด"
-                    size="small"
-                    variant="standard"
-                    value={electricity.Horn}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  electricity.Horn === undefined ? ""
+                    : electricity.Horn !== "ใช้ได้หมด" ? (
+                      <TextField
+                        placeholder="ระบุจุด"
+                        size="small"
+                        variant="standard"
+                        value={electricity.Horn}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={2.5} marginTop={-2}></Grid>
             </Grid>
@@ -1107,7 +1107,7 @@ const TruckRepair = (props) => {
                 item
                 xs={
                   water.RadiatorCap === "ใช้ได้" ||
-                  water.RadiatorCap === "ควรเปลี่ยน"
+                    water.RadiatorCap === "ควรเปลี่ยน"
                     ? 3
                     : 2
                 }
@@ -1124,7 +1124,7 @@ const TruckRepair = (props) => {
                 item
                 xs={
                   water.RadiatorCap === "ใช้ได้" ||
-                  water.RadiatorCap === "ควรเปลี่ยน"
+                    water.RadiatorCap === "ควรเปลี่ยน"
                     ? 4
                     : 5
                 }
@@ -1133,40 +1133,40 @@ const TruckRepair = (props) => {
                 <FormCheckBox
                   checked={
                     water.RadiatorCap === undefined ? false
-                    : water.RadiatorCap !== "ใช้ได้" &&
-                    water.RadiatorCap !== "ควรเปลี่ยน"
-                      ? true
-                      : false
+                      : water.RadiatorCap !== "ใช้ได้" &&
+                        water.RadiatorCap !== "ควรเปลี่ยน"
+                        ? true
+                        : false
                   }
                   disabled
                   control={<Checkbox />}
                   label="ความดันสปริงฝาหม้อน้ำ"
                 />
                 {
-                water.RadiatorCap === undefined ? ""
-                : water.RadiatorCap !== "ใช้ได้" &&
-                water.RadiatorCap !== "ควรเปลี่ยน" ? (
-                  <FormTypography
-                    variant="subtile1"
-                    sx={{ marginTop: 1 }}
-                    gutterBottom
-                  >
-                    <TextField
-                      placeholder="กรอก.."
-                      size="small"
-                      value={water.RadiatorCap}
-                      disabled
-                      variant="standard"
-                      sx={{ maxWidth: "10vw", marginTop: 1 }}
-                      InputLabelProps={{
-                        style: { fontFamily: "Arial, sans-serif" },
-                      }}
-                    />
-                    กก/ชม.2
-                  </FormTypography>
-                ) : (
-                  ""
-                )}
+                  water.RadiatorCap === undefined ? ""
+                    : water.RadiatorCap !== "ใช้ได้" &&
+                      water.RadiatorCap !== "ควรเปลี่ยน" ? (
+                      <FormTypography
+                        variant="subtile1"
+                        sx={{ marginTop: 1 }}
+                        gutterBottom
+                      >
+                        <TextField
+                          placeholder="กรอก.."
+                          size="small"
+                          value={water.RadiatorCap}
+                          disabled
+                          variant="standard"
+                          sx={{ maxWidth: "10vw", marginTop: 1 }}
+                          InputLabelProps={{
+                            style: { fontFamily: "Arial, sans-serif" },
+                          }}
+                        />
+                        กก/ชม.2
+                      </FormTypography>
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -1265,21 +1265,21 @@ const TruckRepair = (props) => {
                 />
                 {
                   water.RadiatorHose === undefined ? ""
-                : water.RadiatorHose !== "ใช้ได้" ? (
-                  <TextField
-                    placeholder="ระบุจุด"
-                    size="small"
-                    value={water.RadiatorHose}
-                    disabled
-                    variant="standard"
-                    sx={{ maxWidth: "10vw", marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                    : water.RadiatorHose !== "ใช้ได้" ? (
+                      <TextField
+                        placeholder="ระบุจุด"
+                        size="small"
+                        value={water.RadiatorHose}
+                        disabled
+                        variant="standard"
+                        sx={{ maxWidth: "10vw", marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={4} marginTop={-2}></Grid>
             </Grid>
@@ -1452,22 +1452,22 @@ const TruckRepair = (props) => {
                   label="ผิดปกติ"
                 />
                 {
-                air.CheekRubber === undefined ? ""
-                : air.CheekRubber !== "ปกติ" ? (
-                  <TextField
-                    placeholder="ระบุล้อ"
-                    size="small"
-                    variant="standard"
-                    value={air.CheekRubber}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  air.CheekRubber === undefined ? ""
+                    : air.CheekRubber !== "ปกติ" ? (
+                      <TextField
+                        placeholder="ระบุล้อ"
+                        size="small"
+                        variant="standard"
+                        value={air.CheekRubber}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -1517,22 +1517,22 @@ const TruckRepair = (props) => {
                   label="สูงไป"
                 />
                 {
-                air.TirePressure === undefined ? ""
-                : air.TirePressure !== "ถูกต้องตามคู่มือรถ" ? (
-                  <TextField
-                    placeholder="ระบุล้อ"
-                    size="small"
-                    variant="standard"
-                    value={air.TirePressure}
-                    disabled
-                    sx={{ maxWidth: "8vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  air.TirePressure === undefined ? ""
+                    : air.TirePressure !== "ถูกต้องตามคู่มือรถ" ? (
+                      <TextField
+                        placeholder="ระบุล้อ"
+                        size="small"
+                        variant="standard"
+                        value={air.TirePressure}
+                        disabled
+                        sx={{ maxWidth: "8vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid
                 item
@@ -1548,22 +1548,22 @@ const TruckRepair = (props) => {
                   label="น้อยไป"
                 />
                 {
-                air.TirePressure === undefined ? ""
-                : air.TirePressure !== "ถูกต้องตามคู่มือรถ" ? (
-                  <TextField
-                    placeholder="ระบุล้อ"
-                    size="small"
-                    variant="standard"
-                    value={air.TirePressure}
-                    disabled
-                    sx={{ maxWidth: "8vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  air.TirePressure === undefined ? ""
+                    : air.TirePressure !== "ถูกต้องตามคู่มือรถ" ? (
+                      <TextField
+                        placeholder="ระบุล้อ"
+                        size="small"
+                        variant="standard"
+                        value={air.TirePressure}
+                        disabled
+                        sx={{ maxWidth: "8vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -1656,22 +1656,22 @@ const TruckRepair = (props) => {
                   label="มีรอยรั่ว"
                 />
                 {
-                gasoline.Leak_G === undefined ? ""
-                : gasoline.Leak_G !== "ไม่มี" ? (
-                  <TextField
-                    placeholder="ระบุจุดที่รั่ว"
-                    size="small"
-                    value={gasoline.Leak_G}
-                    disabled
-                    variant="standard"
-                    sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  gasoline.Leak_G === undefined ? ""
+                    : gasoline.Leak_G !== "ไม่มี" ? (
+                      <TextField
+                        placeholder="ระบุจุดที่รั่ว"
+                        size="small"
+                        value={gasoline.Leak_G}
+                        disabled
+                        variant="standard"
+                        sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -2006,21 +2006,21 @@ const TruckRepair = (props) => {
                 />
                 {
                   oils.Leak_O === undefined ? ""
-                : oils.Leak_O !== "ไม่มี" ? (
-                  <TextField
-                    placeholder="ระบุจุดที่รั่ว"
-                    size="small"
-                    value={oils.Leak_O}
-                    disabled
-                    variant="standard"
-                    sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                    : oils.Leak_O !== "ไม่มี" ? (
+                      <TextField
+                        placeholder="ระบุจุดที่รั่ว"
+                        size="small"
+                        value={oils.Leak_O}
+                        disabled
+                        variant="standard"
+                        sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
             </Grid>
             <Grid
@@ -2076,22 +2076,22 @@ const TruckRepair = (props) => {
                   label="มี"
                 />
                 {
-                noise.UnusualNoise === undefined ? ""
-                : noise.UnusualNoise !== "ไม่มี" ? (
-                  <TextField
-                    placeholder="ระบุจุด"
-                    size="small"
-                    value={noise.UnusualNoise}
-                    disabled
-                    variant="standard"
-                    sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  noise.UnusualNoise === undefined ? ""
+                    : noise.UnusualNoise !== "ไม่มี" ? (
+                      <TextField
+                        placeholder="ระบุจุด"
+                        size="small"
+                        value={noise.UnusualNoise}
+                        disabled
+                        variant="standard"
+                        sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={3.5} marginTop={-2}>
                 <Box
@@ -2129,22 +2129,22 @@ const TruckRepair = (props) => {
                   label="ควรเปลี่ยน"
                 />
                 {
-                noise.MountRubber === undefined ? ""
-                : noise.MountRubber !== "ใช้ได้" ? (
-                  <TextField
-                    placeholder="ระบุจุด"
-                    size="small"
-                    value={noise.MountRubber}
-                    disabled
-                    variant="standard"
-                    sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                  noise.MountRubber === undefined ? ""
+                    : noise.MountRubber !== "ใช้ได้" ? (
+                      <TextField
+                        placeholder="ระบุจุด"
+                        size="small"
+                        value={noise.MountRubber}
+                        disabled
+                        variant="standard"
+                        sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
               <Grid item xs={1.5} marginTop={-2}></Grid>
               <Grid item xs={3.5} marginTop={-2}>
@@ -2184,21 +2184,21 @@ const TruckRepair = (props) => {
                 />
                 {
                   noise.Intake === undefined ? ""
-                : noise.Intake !== "ไม่รั่ว" ? (
-                  <TextField
-                    placeholder="ระบุจุดที่รั่ว"
-                    size="small"
-                    value={noise.Intake}
-                    disabled
-                    variant="standard"
-                    sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
-                    InputLabelProps={{
-                      style: { fontFamily: "Arial, sans-serif" },
-                    }}
-                  />
-                ) : (
-                  ""
-                )}
+                    : noise.Intake !== "ไม่รั่ว" ? (
+                      <TextField
+                        placeholder="ระบุจุดที่รั่ว"
+                        size="small"
+                        value={noise.Intake}
+                        disabled
+                        variant="standard"
+                        sx={{ maxWidth: "10vw", marginLeft: 1, marginTop: 1 }}
+                        InputLabelProps={{
+                          style: { fontFamily: "Arial, sans-serif" },
+                        }}
+                      />
+                    ) : (
+                      ""
+                    )}
               </Grid>
             </Grid>
             <Grid container spacing={2} marginTop={1}>
@@ -2252,4 +2252,4 @@ const TruckRepair = (props) => {
   );
 };
 
-export default TruckRepair ;
+export default TruckRepair;

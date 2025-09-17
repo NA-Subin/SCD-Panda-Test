@@ -45,6 +45,7 @@ import InsertTrips from "./InsertTrips";
 import { useData } from "../../server/path";
 import { useTripData } from "../../server/provider/TripProvider";
 import { formatThaiFull } from "../../theme/DateTH";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const TripsBigTruck = ({ openNavbar }) => {
     const [menu, setMenu] = React.useState(0);
@@ -78,7 +79,8 @@ const TripsBigTruck = ({ openNavbar }) => {
 
     // const { trip } = useData();
     const { trip } = useTripData();
-    //const trips = Object.values(trip || {});
+    const { reghead } = useBasicData();
+    const registrations = Object.values(reghead || {});
 
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
@@ -89,6 +91,8 @@ const TripsBigTruck = ({ openNavbar }) => {
     });
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "desc" });
+
+    console.log("registrations : ", registrations);
 
     const handleSort = (key) => {
         setSortConfig((prev) => {
@@ -136,35 +140,47 @@ const TripsBigTruck = ({ openNavbar }) => {
                         //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
                         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
         );
-    }).sort((a, b) => {
-        if (!sortConfig.key) return 0;
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+    })
+        .map((item) => {
+            const regHeadId = Number(item.Registration?.split(":")[0]); // แยก id ก่อน :
 
-        // ถ้าเป็น number
-        if (typeof aValue === "number" && typeof bValue === "number") {
-            return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
-        }
+            const regHead = registrations.find((row) => row.id === regHeadId);
 
-        // ถ้าเป็นวันที่
-        if (
-            typeof aValue === "string" &&
-            typeof bValue === "string" &&
-            /^\d{2}\/\d{2}\/\d{4}$/.test(aValue) &&
-            /^\d{2}\/\d{2}\/\d{4}$/.test(bValue)
-        ) {
-            const dateA = parseDate(aValue);
-            const dateB = parseDate(bValue);
+            return {
+                ...item,
+                RegistrationHead: regHead ? regHead?.RegHead : null,
+                RegistrationTail: regHead ? regHead?.RegTail : null,
+            };
+        })
+        .sort((a, b) => {
+            if (!sortConfig.key) return 0;
+            const aValue = a[sortConfig.key];
+            const bValue = b[sortConfig.key];
+
+            // ถ้าเป็น number
+            if (typeof aValue === "number" && typeof bValue === "number") {
+                return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+            }
+
+            // ถ้าเป็นวันที่
+            if (
+                typeof aValue === "string" &&
+                typeof bValue === "string" &&
+                /^\d{2}\/\d{2}\/\d{4}$/.test(aValue) &&
+                /^\d{2}\/\d{2}\/\d{4}$/.test(bValue)
+            ) {
+                const dateA = parseDate(aValue);
+                const dateB = parseDate(bValue);
+                return sortConfig.direction === "asc"
+                    ? dateA - dateB
+                    : dateB - dateA;
+            }
+
+            // ถ้าเป็น string (ตัวหนังสือ)
             return sortConfig.direction === "asc"
-                ? dateA - dateB
-                : dateB - dateA;
-        }
-
-        // ถ้าเป็น string (ตัวหนังสือ)
-        return sortConfig.direction === "asc"
-            ? String(aValue).localeCompare(String(bValue), "th")
-            : String(bValue).localeCompare(String(aValue), "th");
-    });
+                ? String(aValue).localeCompare(String(bValue), "th")
+                : String(bValue).localeCompare(String(aValue), "th");
+        });
 
     console.log("Trip Detail : ", tripDetail);
 
