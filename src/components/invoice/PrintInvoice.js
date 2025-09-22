@@ -201,18 +201,48 @@ const PrintInvoice = () => {
   };
 
   const formatAddress = (address) => {
+    let addrObj = null;
+
+    // ✅ ถ้าเป็น string เช่น "261/1 11 หนองหาร สันทราย เชียงใหม่ 50290"
+    if (typeof address === "string") {
+      const parts = address.trim().split(/\s+/);
+      if (parts.length < 6) {
+        return "รูปแบบที่อยู่ไม่ถูกต้อง";
+      }
+      addrObj = {
+        no: parts[0],
+        village: parts[1],
+        subDistrict: parts[2],
+        district: parts[3],
+        province: parts[4],
+        zipCode: parts[5],
+      };
+    }
+
+    // ✅ ถ้าเป็น object อยู่แล้ว
+    else if (typeof address === "object" && address !== null) {
+      addrObj = address;
+    }
+
+    // ถ้าไม่ใช่ string หรือ object → error
+    else {
+      return "รูปแบบที่อยู่ไม่ถูกต้อง";
+    }
+
+    // ตรวจสอบค่าครบไหม
     if (
-      !address.no ||
-      !address.village ||
-      !address.subDistrict ||
-      !address.district ||
-      !address.province ||
-      !address.zipCode
+      !addrObj.no ||
+      !addrObj.village ||
+      !addrObj.subDistrict ||
+      !addrObj.district ||
+      !addrObj.province ||
+      !addrObj.zipCode
     ) {
       return "รูปแบบที่อยู่ไม่ถูกต้อง";
     }
 
-    return `${address.no} หมู่ ${address.village} ต.${address.subDistrict} อ.${address.district} จ.${address.province} ${address.zipCode}`;
+    // ✅ return format สุดท้าย
+    return `${addrObj.no} หมู่ ${addrObj.village} ต.${addrObj.subDistrict} อ.${addrObj.district} จ.${addrObj.province} ${addrObj.zipCode}`;
   };
 
   const formatTaxID = (taxID) => {
@@ -294,10 +324,10 @@ const PrintInvoice = () => {
                 {invoiceData.Company}
               </Typography>
               <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
-                {formatAddress(invoiceData.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData.Phone)}
+                {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}
               </Typography>
               <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
-                เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData.CardID)}
+                เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}
               </Typography>
             </Grid>
             <Grid item xs={4} textAlign="right">
@@ -453,7 +483,7 @@ const PrintInvoice = () => {
                     <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
                       <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมเป็นเงิน</Typography>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }} colSpan={2}>
+                    <TableCell sx={{ textAlign: "center", fontWeight: "bold" }} colSpan={2}>
                       {new Intl.NumberFormat("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2

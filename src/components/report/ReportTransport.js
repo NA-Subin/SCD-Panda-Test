@@ -97,6 +97,7 @@ const ReportTransports = ({ openNavbar }) => {
         { value: "0:ทั้งหมด", label: "ทั้งหมด" },
         { value: "2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", label: "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" },
         { value: "3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", label: "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" },
+        { value: "4:รถรับจ้างขนส่ง", label: "รถรับจ้างขนส่ง" },
     ];
 
     const flattenedRef = useRef([]);
@@ -260,12 +261,14 @@ const ReportTransports = ({ openNavbar }) => {
             let isRegistration = false;
             if (check === "0:ทั้งหมด") {
                 isRegistration = true;
+            } else if (check === "4:รถรับจ้างขนส่ง") {
+                isRegistration = item.Registration === "1:ไม่มี"
             } else {
                 isRegistration = registration.some(
                     (customer) =>
                         customer.Company.split(":")[0] === check.split(":")[0] &&
                         customer.id === Number(item.Registration?.split(":")[0] || 0)
-                );
+                ) && item.Registration !== "1:ไม่มี";
             }
 
             const isValidCustomerType =
@@ -282,7 +285,7 @@ const ReportTransports = ({ openNavbar }) => {
             return isValidStatus && isRegistration && isValidCustomerType && isInSelectedYearMonth;
         });
 
-        console.log("filteredItems : ", filteredItems);
+        console.log("filteredItems : ", filteredItems.filter((row) => row.TicketName.split(":")[1] === "NP..บฮ(นางจาก)...D1"));
 
         filteredItemsRef.current = filteredItems;
 
@@ -346,7 +349,9 @@ const ReportTransports = ({ openNavbar }) => {
                 const matchedTrans = transferMoneyDetail.filter((t) =>
                     check === "0:ทั้งหมด"
                         ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก")
-                        : (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && t.Transport === check)
+                        : check === "4:รถรับจ้างขนส่ง"
+                            ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && item.Registration === "1:ไม่มี")
+                            : (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && t.Transport === check)
                 );
 
                 totalIncomingMoney = matchedTrans.reduce((sum, t) => {
@@ -371,7 +376,7 @@ const ReportTransports = ({ openNavbar }) => {
                 VatOnePercent: vatOnePercent,
                 TotalAmount: totalAmount,
                 RateOil: parseFloat(Rate),
-                Company: company?.Company,
+                Company: item.Registration !== "1:ไม่มี" ? company?.Company : "4:รถรับจ้างขนส่ง",
                 RegistrationHead: company?.RegHead,
                 RegistrationTail: company?.RegTail,
             };
@@ -487,18 +492,21 @@ const ReportTransports = ({ openNavbar }) => {
     };
 
     const formatNumber = (value) => {
-        if (!value || value === 0) return "0"; // ถ้า 0 หรือ undefined แสดง 0
+        // แปลงเป็นเลขก่อน ถ้าแปลงไม่ได้ให้เป็น 0
+        let num = parseFloat(value);
 
-        // แปลงเป็นเลขปัดทศนิยม 2 ตำแหน่ง
-        const rounded = Number(value.toFixed(2));
+        if (isNaN(num)) return "0";
 
-        // ถ้าได้ -0 ให้เป็น 0
-        if (Object.is(rounded, -0)) return "0";
+        // ปัดเป็น 2 ตำแหน่ง
+        num = Number(num.toFixed(2));
+
+        // จัดการกรณี -0, 00.00, -00.00
+        if (num === 0 || Object.is(num, -0)) return "0";
 
         return new Intl.NumberFormat("en-US", {
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(rounded);
+            maximumFractionDigits: 2,
+        }).format(num);
     };
 
 
@@ -867,6 +875,9 @@ const ReportTransports = ({ openNavbar }) => {
                                         </MenuItem>
                                         <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
                                             หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        </MenuItem>
+                                        <MenuItem value="4:รถรับจ้างขนส่ง" sx={{ fontSize: "16px" }}>
+                                            รถรับจ้างขนส่ง
                                         </MenuItem>
                                     </TextField>
                                 </Paper>

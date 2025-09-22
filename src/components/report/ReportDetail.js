@@ -88,8 +88,9 @@ const ReportDetail = (props) => {
         PWD: { borderTop: "5px solid #F141D8", backgroundColor: "#f8bbd0" },
     };
 
-    const { transferMoney } = useTripData();
+    const { transferMoney, banks } = useTripData();
     const transferMoneyDetail = Object.values(transferMoney || {});
+    const banksDetail = Object.values(banks || {});
 
     const handleClose = () => {
         setOpen(false);
@@ -177,15 +178,26 @@ const ReportDetail = (props) => {
 
         const groupKey = `${dateRange.DateStart}-${dateRange.DateEnd}`;
 
-        const transfers = transferMoneyDetail.filter((trans) => {
-            if (trans.Status === "ยกเลิก") return false;
-            if (trans.TicketName !== order.TicketName) return false;
-            if (trans.TicketType !== order.CustomerType) return false;
-            if (trans.Transport !== order.Company) return false;
+        const transfers = transferMoneyDetail
+            .filter((trans) => {
+                if (trans.Status === "ยกเลิก") return false;
+                if (trans.TicketName !== order.TicketName) return false;
+                if (trans.TicketType !== order.CustomerType) return false;
+                if (trans.Transport !== order.Company) return false;
 
-            const transMonth = trans.month || `${orderMonth}_ทั้งเดือน`;
-            return transMonth === `${orderMonth}_${matchedPeriod}`;
-        });
+                const transMonth = trans.month || `${orderMonth}_ทั้งเดือน`;
+                return transMonth === `${orderMonth}_${matchedPeriod}`;
+            })
+            .map((trans) => {
+                // หาธนาคารที่ match กับ BankName
+                const bankId = Number(trans.BankName.split(":")[0]);
+                const matchedBank = banksDetail.find((b) => b.id === bankId);
+
+                return {
+                    ...trans,
+                    BankID: matchedBank ? matchedBank.BankID : null, // เพิ่ม BankID เข้าไป
+                };
+            });
 
         if (!acc[groupKey]) {
             acc[groupKey] = {
@@ -226,7 +238,7 @@ const ReportDetail = (props) => {
         }
     });
 
-    console.log("Orders : ", orders);
+    console.log("Orders : ", row.TicketName, orders);
     // console.log("Total Amount : ", totalAmount);
     // console.log("totalVolume : ", totalVolume);
     // console.log("totalOverdueTransfer : ", totalOverdueTransfer);
@@ -417,7 +429,7 @@ const ReportDetail = (props) => {
                             >
                                 {Object.entries(grouped).map(([key, value]) => (
 
-                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" }, marginBottom: 3 }} key={key}>
+                                    <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" }, marginBottom: 3, }} key={key}>
                                         <TableHead>
                                             <TableRow>
                                                 <TablecellTickets sx={{ textAlign: "center", width: 100, fontSize: "16px" }}>รอบการรับ</TablecellTickets>
@@ -594,19 +606,19 @@ const ReportDetail = (props) => {
                                                     </TableRow>
                                                 );
                                             })()}
-                                            <TableRow>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }}>วันที่ชำระเงิน</TableCell>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }} colSpan={2} >บัญชี</TableCell>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }} colSpan={2}>ยอดเงิน</TableCell>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff59d", fontWeight: "bold" }} colSpan={5}>หมายเหตุ</TableCell>
+                                            <TableRow sx={{ borderTop: "5px solid white" }}>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff27cff", fontWeight: "bold", borderRight: "1px solid white" }}>วันที่ชำระเงิน</TableCell>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff27cff", fontWeight: "bold", borderRight: "1px solid white" }} colSpan={5} >บัญชี</TableCell>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff27cff", fontWeight: "bold", borderRight: "1px solid white" }} colSpan={3}>ยอดเงิน</TableCell>
+                                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fff27cff", fontWeight: "bold", borderRight: "1px solid white" }} colSpan={5}>หมายเหตุ</TableCell>
                                             </TableRow>
                                             {
                                                 value.transfers.map((trans, index) => (
                                                     <TableRow>
-                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }}>{formatThaiSlash(dayjs(trans.DateStart, "DD/MM/YYYY"))}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }} colSpan={2} >{trans.BankName.split(":")[1]}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }} colSpan={2}>{numberFormat(Number(trans.IncomingMoney))}</TableCell>
-                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold" }} colSpan={5}>{trans.Note}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold", borderRight: "1px solid white" }}>{formatThaiSlash(dayjs(trans.DateStart, "DD/MM/YYYY"))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold", borderRight: "1px solid white" }} colSpan={5} >{`${trans.BankName.split(":")[1]} ${trans.BankID}`}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold", borderRight: "1px solid white" }} colSpan={3}>{numberFormat(Number(trans.IncomingMoney))}</TableCell>
+                                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#f5f1ceff", fontWeight: "bold", borderRight: "1px solid white" }} colSpan={5}>{trans.Note}</TableCell>
                                                     </TableRow>
                                                 ))
                                             }
