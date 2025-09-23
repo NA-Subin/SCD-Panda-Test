@@ -3,6 +3,7 @@ import {
     Badge,
     Box,
     Button,
+    Card,
     Container,
     Dialog,
     DialogActions,
@@ -107,7 +108,18 @@ const UpdateInvoice = (props) => {
     } = useTripData();
 
     const { company, small, customersmalltruck } = useBasicData();
-    const customerS = Object.values(customersmalltruck || {});
+    const companies = Object.values(company || {});
+    const customerS = Object.values(customersmalltruck || {}).map((cust) => {
+        const compId = cust.Company?.split(":")[0]; // ตัด id ด้านหน้า
+        const company = companies.find(c => String(c.id) === String(compId));
+
+        return {
+            ...cust,
+            CompanyAddress: company?.Address, // inject Address ของ company เข้าไปใน customer
+            CompanyCardID: company?.CardID,
+            CompanyPhone: company?.Phone
+        };
+    });
 
     // const orders = Object.values(order || {});
     const orders = Object.values(order || {}).filter(item => {
@@ -115,7 +127,6 @@ const UpdateInvoice = (props) => {
         return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
     });
     const smalls = Object.values(small || {})
-    const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {});
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
@@ -136,6 +147,7 @@ const UpdateInvoice = (props) => {
     console.log("totalIncomingMoney : ", totalIncomingMoney);
 
     const companyName = companies.find(item => item.id === 1);
+    console.log("companyName : ", companyName);
     //const orderList = orders.filter(item => item.Date === ticket.Date && item.TicketName.split(":")[0] === ticket.TicketName.split(":")[0] && item.CustomerType === ticket.CustomerType && item.Trip !== "ยกเลิก");
     const orderList = orders
         .filter(item =>
@@ -439,7 +451,7 @@ const UpdateInvoice = (props) => {
                     Code: `lV${currentCode}`,
                     Number: formattedNumberInvoice,
                     DateStart: dayjs(new Date()).format("DD/MM/YYYY"),
-                    Transport: `${companyName.id}:${companyName.Name}`,
+                    Transport: `${companyName?.id}:${companyName?.Name}`,
                     TicketName: ticket.TicketName,
                     TicketNo: ticket.No,
                     TicketType: ticket.CustomerType,
@@ -485,10 +497,12 @@ const UpdateInvoice = (props) => {
                 ticket.Date,
                 Number(ticket.CreditTime) > 0 ? ticket.CreditTime : 0
             ),
-            Company: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Name : customer?.Company.split(":")[1],
-            Address: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Address : customer?.Address,
-            CardID: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.CardID : customer?.CardID,
-            Phone: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Phone : customer?.Phone,
+            Company: (customer?.Company && customer.Company !== "ไม่มี")
+                ? (customer.Company.split(":")[1] ?? companyName?.Name)
+                : companyName?.Name,
+            Address: customer?.Company && customer?.Company !== "ไม่มี" ? customer?.CompanyAddress : companyName?.Address,
+            CardID: customer?.Company && customer?.Company !== "ไม่มี" ? customer?.CompanyCardID : companyName?.CardID,
+            Phone: customer?.Company && customer?.Company !== "ไม่มี" ? customer?.CompanyPhone : companyName?.Phone,
             Code: Code,
             PaperSize: paperSize
         };

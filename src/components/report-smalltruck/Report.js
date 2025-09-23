@@ -104,7 +104,8 @@ const ReportSmallTruck = () => {
 
   // const { company, drivers, typeFinancial, order, reghead, trip } = useData();
   const { company, drivers, small, customerbigtruck } = useBasicData();
-  const { order, trip, typeFinancial } = useTripData();
+  const { order, trip, typeFinancial,reghead } = useTripData();
+  const registrations = Object.values(reghead || {});
   const companies = Object.values(company || {});
   const driver = Object.values(drivers || {});
   const typeF = Object.values(typeFinancial || {});
@@ -137,8 +138,21 @@ const ReportSmallTruck = () => {
 
   const customerDetails = [
     { id: "0", Name: "แสดงทั้งหมด", TicketName: "แสดงทั้งหมด", StatusCompany: "อยู่บริษัทในเครือ" }, // allOption
-    ...customerB.filter((cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.Name.split(".")[0] === "S")
+    ...customerB.filter((cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.Name.split(".")[0] === "S").map((item) => {
+            const regHeadId = Number(item.Registration?.split(":")[0]); // แยก id ก่อน :
+
+            const regHead = registration.find((row) => row.id === regHeadId);
+
+            return {
+                ...item,
+                RegistrationHead: regHead ? regHead?.RegHead : null,
+                ShortName: regHead ? regHead?.ShortName : null,
+            };
+        })
   ];
+
+  console.log("customerB : ", customerB);
+  console.log("customerDetails : ", customerDetails);
   // แยกเฉพาะส่งออก (จาก trips)
   const outboundList = orders
     .filter((trip) => {

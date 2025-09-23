@@ -103,7 +103,18 @@ const UpdateInvoice = (props) => {
     } = useTripData();
 
     const { company, reghead, customerbigtruck } = useBasicData();
-    const customerB = Object.values(customerbigtruck || {});
+    const companies = Object.values(company || {});
+    const customerB = Object.values(customerbigtruck || {}).map((cust) => {
+        const compId = cust.Company?.split(":")[0]; // ตัด id ด้านหน้า
+        const company = companies.find(c => String(c.id) === String(compId));
+
+        return {
+            ...cust,
+            CompanyAddress: company?.Address, // inject Address ของ company เข้าไปใน customer
+            CompanyCardID: company?.CardID,
+            CompanyPhone: company?.Phone
+        };
+    });
     const registrationHead = Object.values(reghead || {});
 
     // const orders = Object.values(order || {});
@@ -111,7 +122,7 @@ const UpdateInvoice = (props) => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
         return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
     });
-    const companies = Object.values(company || {});
+
     const bankDetail = Object.values(banks || {});
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
@@ -379,7 +390,7 @@ const UpdateInvoice = (props) => {
     const generatePDF = () => {
         let Code = ""
         if (invoices.length !== 0) {
-            Code = `${invoices[0].Code}-${invoices[0].Number}`
+            Code = `${invoices[0]?.Code}-${invoices[0]?.Number}`
         } else {
             const lastItemInvoice = invoiceDetail[invoiceDetail.length - 1];
             let newNumberInvoice = 1;
@@ -441,12 +452,14 @@ const UpdateInvoice = (props) => {
             }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
             Volume: ticket.TotalVolume || 0,
             Amount: ticket.TotalAmount || 0,
-            Date: invoices[0].DateStart,
+            Date: invoices[0]?.DateStart,
             DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
-            Company: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Name : customer?.Company.split(":")[1],
-            Address: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Address : customer?.Address,
-            CardID: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.CardID : customer?.CardID,
-            Phone: (customer?.Company === "ไม่มี" || customer?.Company === undefined) ? companyName.Phone : customer?.Phone,
+            Company: (customer?.Company && customer.Company !== "ไม่มี")
+                ? (customer.Company.split(":")[1] ?? companyName.Name)
+                : companyName.Name,
+            Address: customer?.Company && customer?.Company !== "ไม่มี" ? customer?.CompanyAddress : companyName?.Address,
+            CardID: customer?.Company && customer?.Company !== "ไม่มี" ? customer?.CompanyCardID : companyName?.CardID,
+            Phone: customer?.Company && customer?.Company !== "ไม่มี" ? customer?.CompanyPhone : companyName?.Phone,
             Code: Code,
             PaperSize: paperSize
         };
@@ -637,7 +650,7 @@ const UpdateInvoice = (props) => {
     const handleNewInvoice = () => {
         database
             .ref("invoice/")
-            .child(invoices[0].id)
+            .child(invoices[0]?.id)
             .update({
                 TicketNo: "ยกเลิก"
             })

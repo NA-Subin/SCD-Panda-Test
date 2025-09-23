@@ -121,7 +121,7 @@ const PrintInvoice = () => {
   });
 
   const formatAddressS = (address) => {
-    if (!address) return "ที่อยู่ไม่ถูกต้อง";
+    if (!address) return "-";
 
     // แยกข้อมูลโดยใช้ช่องว่าง
     let parts = address.trim().split(/\s+/);
@@ -135,7 +135,7 @@ const PrintInvoice = () => {
       postalCode = parts.pop();
     }
 
-    if (parts.length < 5) return "รูปแบบที่อยู่ไม่ถูกต้อง";
+    if (parts.length < 5) return "-";
 
     const [houseNo, moo, subdistrict, district, province] = parts;
 
@@ -203,46 +203,39 @@ const PrintInvoice = () => {
   const formatAddress = (address) => {
     let addrObj = null;
 
-    // ✅ ถ้าเป็น string เช่น "261/1 11 หนองหาร สันทราย เชียงใหม่ 50290"
+    // ถ้าเป็น string
     if (typeof address === "string") {
       const parts = address.trim().split(/\s+/);
-      if (parts.length < 6) {
-        return "รูปแบบที่อยู่ไม่ถูกต้อง";
-      }
+      if (parts.length < 5) return "-";
+
       addrObj = {
         no: parts[0],
         village: parts[1],
         subDistrict: parts[2],
         district: parts[3],
         province: parts[4],
-        zipCode: parts[5],
+        zipCode: parts[5] || "",
+        road: "",
       };
     }
-
-    // ✅ ถ้าเป็น object อยู่แล้ว
+    // ถ้าเป็น object
     else if (typeof address === "object" && address !== null) {
       addrObj = address;
     }
-
-    // ถ้าไม่ใช่ string หรือ object → error
     else {
-      return "รูปแบบที่อยู่ไม่ถูกต้อง";
+      return "-";
     }
 
-    // ตรวจสอบค่าครบไหม
-    if (
-      !addrObj.no ||
-      !addrObj.village ||
-      !addrObj.subDistrict ||
-      !addrObj.district ||
-      !addrObj.province ||
-      !addrObj.zipCode
-    ) {
-      return "รูปแบบที่อยู่ไม่ถูกต้อง";
+    // ตรวจสอบค่าที่จำเป็น
+    if (!addrObj.no || !addrObj.village || !addrObj.subDistrict || !addrObj.district || !addrObj.province) {
+      return "-";
     }
 
-    // ✅ return format สุดท้าย
-    return `${addrObj.no} หมู่ ${addrObj.village} ต.${addrObj.subDistrict} อ.${addrObj.district} จ.${addrObj.province} ${addrObj.zipCode}`;
+    // ฟอร์แมต address
+    const roadPart = addrObj.road && addrObj.road !== "-" ? ` ถ.${addrObj.road}` : "";
+    const zipPart = addrObj.zipCode ? ` ${addrObj.zipCode}` : "";
+
+    return `${addrObj.no} หมู่ ${addrObj.village}${roadPart} ต.${addrObj.subDistrict} อ.${addrObj.district} จ.${addrObj.province}${zipPart}`;
   };
 
   const formatTaxID = (taxID) => {
