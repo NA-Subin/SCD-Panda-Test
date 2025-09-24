@@ -21,6 +21,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
   TablePagination,
   TableRow,
@@ -35,9 +36,10 @@ import { useData } from "../../server/path";
 import UpdateReport from "./UpdateReport";
 import theme from "../../theme/theme";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -56,13 +58,13 @@ const ReportSmallTruck = () => {
   const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
   const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
   const [checkOverdueTransfer, setCheckOverdueTransfer] = useState(true);
-  const [selectOrder, setSelectOrder] = useState("0:แสดงทั้งหมด");
-  const match = selectOrder.match(/\d{1,3}-\d{3,4}/);
-  const plate = match ? match[0] : "";
-  console.log(plate); // "70-2232"
+  const [selectOrder, setSelectOrder] = useState({ id: "0", RegHead: "แสดงทั้งหมด", ShortName: "" }); // ค่าเริ่มต้นเป็น allOption
+  // const match = selectOrder.match(/\d{1,3}-\d{3,4}/);
+  // const plate = match ? match[0] : "";
+  // console.log(plate); // "70-2232"
 
   const handleChangeOrder = (event) => {
-    setSelectOrder(event.target.value);
+    setSelectOrder(event);
   };
 
   console.log("Selected Order: ", selectOrder);
@@ -104,7 +106,7 @@ const ReportSmallTruck = () => {
 
   // const { company, drivers, typeFinancial, order, reghead, trip } = useData();
   const { company, drivers, small, customerbigtruck } = useBasicData();
-  const { order, trip, typeFinancial,reghead } = useTripData();
+  const { order, trip, typeFinancial, reghead } = useTripData();
   const registrations = Object.values(reghead || {});
   const companies = Object.values(company || {});
   const driver = Object.values(drivers || {});
@@ -137,23 +139,31 @@ const ReportSmallTruck = () => {
   // แยกเฉพาะรับเข้า (จาก customerB)
 
   const customerDetails = [
-    { id: "0", Name: "แสดงทั้งหมด", TicketName: "แสดงทั้งหมด", StatusCompany: "อยู่บริษัทในเครือ" }, // allOption
-    ...customerB.filter((cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.Name.split(".")[0] === "S").map((item) => {
-            const regHeadId = Number(item.Registration?.split(":")[0]); // แยก id ก่อน :
+    { id: "0", RegHead: "แสดงทั้งหมด", ShortName: "" }, // allOption
+    ...registration
+    // ...customerB.filter((cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.Name.split(".")[0] === "S").map((item) => {
+    //         const regHeadId = Number(item.Registration?.split(":")[0]); // แยก id ก่อน :
 
-            const regHead = registration.find((row) => row.id === regHeadId);
+    //         const regHead = registration.find((row) => row.id === regHeadId);
 
-            return {
-                ...item,
-                RegistrationHead: regHead ? regHead?.RegHead : null,
-                ShortName: regHead ? regHead?.ShortName : null,
-            };
-        })
+    //         return {
+    //             ...item,
+    //             RegistrationHead: regHead ? regHead?.RegHead : null,
+    //             ShortName: regHead ? regHead?.ShortName : null,
+    //         };
+    //     })
   ];
 
+  console.log("registration : ", registration.filter(item => item.RegHead === "ยจ.2652 ชม."));
+  console.log("orders : ", orders.filter(item => item.Registration.split(":")[1] === "ยจ.2652 ชม."));
   console.log("customerB : ", customerB);
   console.log("customerDetails : ", customerDetails);
   // แยกเฉพาะส่งออก (จาก trips)
+  const normalizePlate = (text) => {
+    const match = text?.match(/\d{1,2}-\d{3,4}/);
+    return match ? match[0] : null;
+  };
+
   const outboundList = orders
     .filter((trip) => {
       const orderDate = dayjs(trip.Date, "DD/MM/YYYY");
@@ -161,12 +171,22 @@ const ReportSmallTruck = () => {
         orderDate.isValid() &&
         orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
 
-      return (
-        trip.CustomerType === "ตั๋วรถเล็ก" &&
-        trip.Status === "จัดส่งสำเร็จ" &&
-        isInDateRange &&
-        trip.Registration.split(":")[1] === plate
-      );
+      if (
+        trip.CustomerType !== "ตั๋วรถเล็ก" ||
+        trip.Status !== "จัดส่งสำเร็จ" ||
+        !isInDateRange
+      ) {
+        return false;
+      }
+
+      if (Number(selectOrder?.id) === 0) {
+        return true; // ✅ "แสดงทั้งหมด"
+      }
+
+      const tripid = Number(trip.Registration?.split(":")[0] ?? "");
+      const selectedid = Number(selectOrder?.id);
+
+      return tripid && selectedid && tripid === selectedid;
     })
     .map((trip) => ({
       id: trip.id.toString(),
@@ -199,6 +219,11 @@ const ReportSmallTruck = () => {
   console.log("ผลรวม Travel ตาม Driver + Registration:", summarizedList);
 
   const matchedOrders = useMemo(() => {
+    const normalizePlate = (text) => {
+      const match = text?.match(/\d{1,2}-\d{3,4}/);
+      return match ? match[0] : null;
+    };
+
     return orders
       .filter((order) => {
         const orderDate = dayjs(order.Date, "DD/MM/YYYY");
@@ -207,33 +232,39 @@ const ReportSmallTruck = () => {
           orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
 
         if (!isInDateRange) return false;
-        if (order.CustomerType !== "ตั๋วรถใหญ่" || order.Status !== "จัดส่งสำเร็จ") return false;
+        if (order.Status !== "จัดส่งสำเร็จ")
+          return false;
 
-        const selectedId = Number(selectOrder?.split(":")[0]);
-        if (isNaN(selectedId)) return false;
+        const selectedId = selectOrder?.id;
+        if (selectedId === undefined || selectedId === null) return false;
 
-        const orderTicketId = Number(order.TicketName?.split(":")[0]);
-        if (isNaN(orderTicketId)) return false;
+        const orderTicketId = order.TicketName?.split(":")[0];
+        if (!orderTicketId) return false;
 
-        if (selectedId === 0) {
-          // ✅ ถ้าเลือก "แสดงทั้งหมด" แค่ในช่วงวันที่ก็พอ
-          return true;
+        if (Number(selectedId) === 0) {
+          return true; // ✅ "แสดงทั้งหมด"
         }
 
-        // ✅ กรณีเลือกเจาะจง → ต้องตรวจสอบว่าอยู่ในเครือก่อน
-        const isInCompany = customerB.some(
-          (cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.id === orderTicketId
-        );
+        if (order.CustomerType === "ตั๋วรถใหญ่") {
+          const isInCompany = customerB.some(
+            (cust) =>
+              cust.StatusCompany === "อยู่บริษัทในเครือ" &&
+              cust.id.toString() === orderTicketId.toString()
+          );
+          if (!isInCompany) return false;
+        }
 
-        if (!isInCompany) return false;
+        const selectedRegHead = normalizePlate(selectOrder?.RegHead);
+        const orderRegHead = normalizePlate(order.TicketName?.split(":")[1] ?? "");
 
-        // ✅ และต้อง id ตรงกับที่เลือก
-        return selectedId === orderTicketId;
+        if (!selectedRegHead || !orderRegHead) return false;
+
+        return (selectedRegHead === orderRegHead);
       })
       .map((order) => ({
         ...order,
-        type: "รับเข้า", // เพิ่ม type
-      }))
+        type: "รับเข้า",
+      }));
   }, [orders, customerB, selectedDateStart, selectedDateEnd, selectOrder]);
 
   const matchedOrdersWithAll = [...matchedOrders, ...outboundList]
@@ -355,7 +386,7 @@ const ReportSmallTruck = () => {
       summary.balance[key] = 0;
     });
 
-    const selectedId = Number(selectOrder?.split(":")[0]);
+    const selectedId = Number(selectOrder?.id);
 
     const carryOverOrders = orders
       .filter((order) => {
@@ -376,7 +407,8 @@ const ReportSmallTruck = () => {
         // ✅ ถ้าเป็น "ตั๋วรถเล็ก" ต้องเช็คทะเบียนให้ตรงกับ plate
         if (
           order.CustomerType === "ตั๋วรถเล็ก" &&
-          order.Registration.split(":")[1] !== plate
+          order.Registration.split(":")[1] !== selectOrder?.RegHead
+          //order.Registration.split(":")[1] !== plate
         ) {
           return false;
         }
@@ -397,7 +429,19 @@ const ReportSmallTruck = () => {
         );
         if (!isInCompany) return false;
 
-        return selectedId === orderTicketId;
+        const selectedRegHead = selectOrder?.RegHead; // ถ้า selectOrder เป็น object แล้ว
+        if (!selectedRegHead) return false;
+
+        // ดึงข้อมูลจาก TicketName
+        const ticketInfo = order.TicketName?.split(":")[1] ?? "";
+
+        // Regex หาเลขทะเบียน (รูปแบบ: ตัวเลข 1–2 หลัก, ขีด, ตัวเลข 3–4 หลัก)
+        const match = ticketInfo.match(/\d{1,2}-\d{3,4}/);
+        if (!match) return false;
+
+        const orderRegHead = match[0]; // เช่น "71-1639"
+
+        return selectedRegHead === orderRegHead;
       })
       .map((order) => ({
         ...order,
@@ -531,89 +575,143 @@ const ReportSmallTruck = () => {
     );
   };
 
-  const exportToExcel = () => {
-    const exportData = [];
+  const exportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("รายงานสรุปยอดน้ำมัน");
 
-    // ✅ Header (แถวที่ 1)
-    const headers = {
-      ลำดับ: "ลำดับ",
-      วันที่: "วันที่",
-      "รับเข้าโดย": "รับเข้าโดย",
-      G95: "G95",
-      B95: "B95",
-      B7: "B7",
-      G91: "G91",
-      E20: "E20",
-      PWD: "PWD",
-      "ไปส่งที่": "ไปส่งที่",
-    };
+    const getPart = (text, index = 1) => text?.split(":")[index]?.trim() || text || "";
+
+    // 1️⃣ Columns: base + dynamic
+    const baseColumns = [
+      { header: "ลำดับ", key: "no", width: 8 },
+      { header: "วันที่", key: "date", width: 15 },
+      { header: "รับเข้าโดย", key: "receivedBy", width: 25 },
+      ...productTypes.map((p) => ({ header: p, key: p, width: 12 })),
+      { header: "ไปส่งที่", key: "destination", width: 25 },
+    ];
 
     summarizedList.forEach((s) => {
-      const name = `${s.Driver.split(":")[1]}/${s.Registration.split(":")[1]}`;
-      headers[`ค่าเที่ยว ${name}`] = `ค่าเที่ยว ${name}`;
+      const name = `${getPart(s.Driver)}/${getPart(s.Registration)}`;
+      baseColumns.push({ header: `ค่าเที่ยว ${name}`, key: `travel_${name}`, width: 15 });
     });
 
-    exportData.push(headers); // แถวที่ 1
+    worksheet.columns = baseColumns;
 
-    // ✅ เติมข้อมูลตารางหลัก
+    // 2️⃣ Title row
+    worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+    const titleCell = worksheet.getCell("A1");
+    titleCell.value = "รายงานสรุปยอดน้ำมัน";
+    titleCell.font = { size: 16, bold: true };
+    titleCell.alignment = { horizontal: "center", vertical: "middle" };
+    titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
+    worksheet.getRow(1).height = 30;
+
+    // 3️⃣ Header row
+    const headerRow = worksheet.addRow(baseColumns.map((c) => c.header));
+    headerRow.font = { bold: true };
+    headerRow.alignment = { horizontal: "center", vertical: "middle" };
+    headerRow.height = 25;
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+    });
+
+    const pushSummaryHead = (title, summaryData, fillColor) => {
+      // summaryData = carryOverSummary
+      const total = productTypes.reduce((sum, key) => sum + (summaryData?.[key] || 0), 0);
+
+      const rowData = {
+        receivedBy: title,
+        ...productTypes.reduce(
+          (acc, key) => ({ ...acc, [key]: summaryData?.[key] ?? 0 }),
+          {}
+        ),
+        destination: total, // ✅ รวมผลรวมใส่ไปใน column "ไปส่งที่"
+      };
+
+      const row = worksheet.addRow(rowData);
+      row.font = { bold: true };
+      row.alignment = { horizontal: "center", vertical: "middle" };
+      row.height = 20;
+      row.eachCell((cell) => {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: fillColor } };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        if (typeof cell.value === "number") {
+          cell.numFmt = "#,##0.00";
+        }
+      });
+    };
+
+    // ✅ ใช้ carryOverSummary ตรง ๆ
+    pushSummaryHead("ยอดยกมา", carryOverSummary.balance, "FFF1F8E9");
+
+    // 5️⃣ Data rows
     matchedOrdersWithAll.forEach((row, index) => {
       const dataRow = {
-        ลำดับ: index + 1,
-        วันที่: row.Date,
-        "รับเข้าโดย":
-          row.type === "รับเข้า"
-            ? `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`
-            : "",
+        no: index + 1,
+        date: row.Date,
+        receivedBy: row.type === "รับเข้า" ? `${getPart(row.Driver)}/${getPart(row.Registration)}` : "",
+        destination: row.type === "ส่งออก" ? getPart(row.TicketName) : "-",
       };
 
       productTypes.forEach((key) => {
         const volume = row.Product?.[key]?.Volume;
-        if (row.type === "รับเข้า") {
-          dataRow[key] = volume ? Number(volume) * 1000 : "";
-        } else {
-          dataRow[key] = volume ? -Number(volume) : "";
+        dataRow[key] = row.type === "รับเข้า" ? (volume ? Number(volume) * 1000 : "") : (volume ? -Number(volume) : "");
+      });
+
+      summarizedList.forEach((s) => {
+        const name = `${getPart(s.Driver)}/${getPart(s.Registration)}`;
+        dataRow[`travel_${name}`] = s.Driver === row.Driver && s.Registration === row.Registration ? row.Travel : "-";
+      });
+
+      const newRow = worksheet.addRow(dataRow);
+      newRow.height = 20;
+      newRow.alignment = { horizontal: "center", vertical: "middle" };
+      newRow.eachCell((cell, colNumber) => {
+        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        if (!["no", "date", "receivedBy", "destination"].includes(worksheet.columns[colNumber - 1].key)) {
+          cell.numFmt = "#,##0.00";
         }
       });
-
-      if (row.type === "ส่งออก") {
-        dataRow["ไปส่งที่"] = row.TicketName.split(":")[1] || "-";
-      }
-
-      summarizedList.forEach((d) => {
-        const match = d.Driver === row.Driver && d.Registration === row.Registration;
-        const label = `ค่าเที่ยว ${d.Driver.split(":")[1]}/${d.Registration.split(":")[1]}`;
-        dataRow[label] = match ? row.Travel : "-";
-      });
-
-      exportData.push(dataRow);
     });
 
-    // ✅ ฟังก์ชันเพิ่มแถวสรุป
-    const pushSummaryRow = (title, data) => {
-      const row = { ลำดับ: title };
-      productTypes.forEach((key) => {
-        row[key] = data[key] ? Number(data[key]) : "";
+    // 6️⃣ Summary rows
+    const pushSummaryRow = (title, summaryData, fillColor) => {
+      const total = productTypes.reduce((sum, key) => sum + (summaryData[key] || 0), 0);
+
+      const rowData = {
+        receivedBy: title,
+        ...productTypes.reduce((acc, key) => ({ ...acc, [key]: summaryData[key] ?? 0 }), {}),
+        destination: total, // ใส่ total จริงแทนคำว่า "รวม"
+        ...summarizedList.reduce((acc, s) => {
+          const name = `${getPart(s.Driver)}/${getPart(s.Registration)}`;
+          acc[`travel_${name}`] = s.totalTravel ?? 0;
+          return acc;
+        }, {})
+      };
+      const row = worksheet.addRow(rowData);
+      row.font = { bold: true };
+      row.alignment = { horizontal: "center", vertical: "middle" };
+      row.height = 25;
+      row.eachCell((cell) => {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: fillColor } };
+        cell.numFmt = "#,##0.00";
+        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
       });
-      return row;
     };
 
-    // ✅ เพิ่ม "ยอดยกมา" เป็นแถวที่ 2 (หลัง header)
-    const carryOverRow = pushSummaryRow("ยอดยกมา", carryOverSummary);
-    exportData.splice(1, 0, carryOverRow); // แทรกเป็นแถวที่ 2
+    pushSummaryRow("รวมรับเข้า", summary.inbound, "FFE0F7FA");
+    pushSummaryRow("รวมส่งออก", summary.outbound, "FFFFE0B2");
+    pushSummaryRow("คงเหลือ", summary.balance, "FFF1F8E9");
 
-    // ✅ แถวสรุปตอนท้าย
-    exportData.push(pushSummaryRow("รวมรับเข้า", summary.inbound));
-    exportData.push(pushSummaryRow("รวมส่งออก", summary.outbound));
-    exportData.push(pushSummaryRow("คงเหลือ", summary.balance));
-
-    // ✅ Export Excel
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "รายงาน");
-
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+    // 7️⃣ Save
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
   };
 
   return (
@@ -716,21 +814,13 @@ const ReportSmallTruck = () => {
             <Autocomplete
               id="autocomplete-tickets"
               options={customerDetails}
-              getOptionLabel={(option) => selectOrder === "0:แสดงทั้งหมด" ? "ทั้งหมด" : `${option.Name}`}
-              isOptionEqualToValue={(option, value) =>
-                option.id === value.id
+              getOptionLabel={(option) =>
+                `${option.ShortName ?? ""} (${option.RegHead})`
               }
-              value={
-                selectOrder
-                  ? customerDetails.find(item => `${item.id}:${item.Name}` === selectOrder)
-                  : null
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              value={selectOrder || null}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  handleChangeOrder({ target: { value: `${newValue.id}:${newValue.Name}` } });
-                } else {
-                  handleChangeOrder({ target: { value: "" } });
-                }
+                handleChangeOrder(newValue); // ส่งทั้ง object ไปเลย
               }}
               renderInput={(params) => (
                 <TextField
@@ -757,14 +847,12 @@ const ReportSmallTruck = () => {
               renderOption={(props, option) => (
                 <li {...props}>
                   <Typography fontSize="16px">
-                    {`${option.Name}`}
+                    {`${option.ShortName ?? ""} (${option.RegHead})`}
                   </Typography>
                 </li>
               )}
               ListboxProps={{
-                style: {
-                  maxHeight: 250,
-                },
+                style: { maxHeight: 250 },
               }}
             />
           </Paper>
@@ -777,12 +865,12 @@ const ReportSmallTruck = () => {
         <TableContainer
           component={Paper}
           sx={{
-            marginBottom: 2, height: "500px", width: "1270px",
+            marginBottom: 2, height: "80vh", width: "1270px",
             overflowX: "auto"
           }}
         >
-          <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
-            <TableHead sx={{ height: "5vh" }}>
+          <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
+            <TableHead sx={{ height: "5vh", position: "sticky", top: 0, zIndex: 3 }}>
               <TableRow>
                 <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
                   ลำดับ
@@ -823,9 +911,9 @@ const ReportSmallTruck = () => {
                   ))
                 }
               </TableRow>
+              {renderSummaryRow("ยอดยกมา", "balance", "#e0e0f8", carryOverSummary)}
             </TableHead>
             <TableBody>
-              {renderSummaryRow("ยอดยกมา", "balance", "#e0e0f8", carryOverSummary)}
               {
                 matchedOrdersWithAll.map((row, index) => (
                   row.type === "รับเข้า" ? (
@@ -904,16 +992,31 @@ const ReportSmallTruck = () => {
                 ))
               }
             </TableBody>
-
-          </Table>
-
-          <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" }, width: "1280px" }}>
-            <TableHead>
+            <TableFooter
+              sx={{
+                position: "sticky",
+                bottom: 0,
+                zIndex: 5,
+                "& .MuiTableCell-root": {
+                  fontSize: "0.875rem", // ขยายเป็น 14px
+                  fontWeight: "bold",   // ทำให้ตัวหนา
+                  color: "black",       // เปลี่ยนสี
+                },
+              }}
+            >
               {renderSummaryRow("รวมรับเข้า", "inbound", "#e0f7fa")}
               {renderSummaryRow("รวมส่งออก", "outbound", "#ffe0b2")}
               {renderSummaryRow("คงเหลือ", "balance", "#f1f8e9", differenceBalanceSummary)}
-            </TableHead>
+            </TableFooter>
           </Table>
+
+          {/* <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" }, width: "1280px" }}>
+            <TableFooter sx={{ height: "5vh", position: "sticky", bottom: 0, zIndex: 3 }}>
+              {renderSummaryRow("รวมรับเข้า", "inbound", "#e0f7fa")}
+              {renderSummaryRow("รวมส่งออก", "outbound", "#ffe0b2")}
+              {renderSummaryRow("คงเหลือ", "balance", "#f1f8e9", differenceBalanceSummary)}
+            </TableFooter>
+          </Table> */}
 
         </TableContainer>
       </Box>
