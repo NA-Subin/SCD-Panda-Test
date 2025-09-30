@@ -357,30 +357,58 @@ const DocSalary = ({ openNavbar }) => {
         // เงินค้ำประกัน
         const moneyGuarantee = reports.filter(
             (doc) =>
-                doc.Name.split(":")[1] === "เงินค้ำประกัน" &&
+                (doc.Name.split(":")[1] === "เงินค้ำประกัน" || doc.Name.split(":")[1] === "คืนเงินค้ำประกัน") &&
                 doc.Status !== "ยกเลิก" &&
                 Number(doc.Period) <= currentPeriod &&
                 String(doc.Driver).split(":")[0] === String(row.id)
         );
-        const guaranteeTotal = moneyGuarantee.reduce(
-            (acc, doc) => acc + Number(doc.Money),
-            0
-        );
+        // const guaranteeTotal = moneyGuarantee.reduce(
+        //     (acc, doc) => acc + Number(doc.Money),
+        //     0
+        // );
+        const guaranteeTotal = moneyGuarantee.reduce((acc, doc) => {
+            const value = Number(doc.Money) || 0;
+
+            if (doc.Type === "รายได้") {
+                return acc + value; // ✅ ถ้าเป็นรายได้ บวก
+            } else if (doc.Type === "รายหัก") {
+                return acc - value; // ✅ ถ้าเป็นรายหัก ลบ
+            }
+
+            return acc; // ถ้าไม่มี Type หรือไม่ตรงเงื่อนไข ก็ไม่เปลี่ยนค่า
+        }, 0);
         summary.guarantee += guaranteeTotal;
+
+        console.log("moneyGuarantee : ", moneyGuarantee);
+        console.log("guaranteeTotal : ", guaranteeTotal);
 
         // เงินกู้ยืม
         const moneyLoan = reports.filter(
             (doc) =>
-                doc.Name.split(":")[1] === "เบิกเงินกู้ยืม" &&
+                (doc.Name.split(":")[1] === "เบิกเงินกู้ยืม" || doc.Name.split(":")[1] === "คืนเงินกู้ยืม") &&
                 doc.Status !== "ยกเลิก" &&
                 Number(doc.Period) <= currentPeriod &&
                 String(doc.Driver).split(":")[0] === String(row.id)
         );
-        const loanTotal = moneyLoan.reduce(
-            (acc, doc) => acc + Number(doc.Money),
-            0
-        );
+        // const loanTotal = moneyLoan.reduce(
+        //     (acc, doc) => acc + Number(doc.Money),
+        //     0
+        // );
+        const loanTotal = moneyLoan.reduce((acc, doc) => {
+            const value = Number(doc.Money) || 0;
+
+            if (doc.Type === "รายได้") {
+                return acc + value; // ✅ ถ้าเป็นรายได้ บวก
+            } else if (doc.Type === "รายหัก") {
+                return acc - value; // ✅ ถ้าเป็นรายหัก ลบ
+            }
+
+            return acc; // ถ้าไม่มี Type หรือไม่ตรงเงื่อนไข ก็ไม่เปลี่ยนค่า
+        }, 0);
         summary.loan += loanTotal;
+
+        console.log("moneyLoan : ", moneyLoan);
+        console.log("loanTotal : ", loanTotal);
 
         // return object สำหรับ render ทีหลัง
         return {

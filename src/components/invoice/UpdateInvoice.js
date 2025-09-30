@@ -424,25 +424,33 @@ const UpdateInvoice = (props) => {
         }
 
         const invoiceData = {
-            Report: orderList.flatMap((row, rowIndex) =>
-                Object.entries(row.Product)
-                    .filter(([productName]) => productName !== "P")
-                    .map(([productName, Volume], index) => ({
-                        No: row.No,
-                        TicketName: row.TicketName,
-                        RateOil: Volume.RateOil || 0,
-                        Amount: Volume.Amount || 0,
-                        Date: row.Date,
-                        Driver: row.Driver.split(":")[1],
-                        Registration: row.Registration.split(":")[1],
-                        RegTail: row.RegTail.split(":")[1] || "",
-                        ProductName: productName,
-                        Volume: Volume.Volume * 1000,
-                        DateDelivery: row.DateDelivery,
-                        DateReceive: row.DateReceive,
-                        uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
-                    }))
-            ),
+            Report: orderList
+                .flatMap((row, rowIndex) =>
+                    Object.entries(row.Product)
+                        .filter(([productName]) => productName !== "P")
+                        .map(([productName, Volume], index) => ({
+                            No: row.No,
+                            TicketName: row.TicketName,
+                            RateOil: Volume.RateOil || 0,
+                            Amount: Volume.Amount || 0,
+                            Date: row.Date,
+                            Driver: row.Driver.split(":")[1],
+                            Registration: row.Registration.split(":")[1],
+                            RegTail: row.RegTail.split(":")[1] || "",
+                            ProductName: productName,
+                            Volume: Volume.Volume * 1000,
+                            DateDelivery: row.DateDelivery,
+                            DateReceive: row.DateReceive,
+                            uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
+                        }))
+                )
+                .sort((a, b) => {
+                    const orderA = FUEL_ORDER.indexOf(a.ProductName);
+                    const orderB = FUEL_ORDER.indexOf(b.ProductName);
+
+                    // ถ้า product ไม่อยู่ใน list จะให้ไปอยู่ท้าย
+                    return (orderA === -1 ? Infinity : orderA) - (orderB === -1 ? Infinity : orderB);
+                }),
             Order: order.reduce((acc, current) => {
                 // ✅ ตรวจสอบว่าค่า TicketName ซ้ำหรือไม่ และต้องตรงกับ ticket.TicketName
                 if (!acc.some(item => item.TicketName === current.TicketName) && current.TicketName === ticket.TicketName) {

@@ -314,7 +314,9 @@ const PrintReport = () => {
                           }
                         </Typography>
                         <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>
-                          {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}</Typography>
+                          {formatAddress(invoiceData?.Address)}
+                          {/* เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)} */}
+                        </Typography>
                         <Typography variant="subtitle2" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
                       </React.Fragment>
                     )
@@ -358,7 +360,30 @@ const PrintReport = () => {
                         <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
                       </Grid>
                       <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "40px" }}>
-                        <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{formatThai(invoiceData?.Date)}</Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ marginTop: -1, marginLeft: -2 }}
+                          gutterBottom
+                        >
+                          {(() => {
+                            try {
+                              const rawDate = invoiceData?.Date;
+                              const parsed = dayjs(rawDate, "DD/MM/YYYY", true); // true = strict parsing
+
+                              // ✅ ถ้าไม่มีวันที่ หรือ parsing ผิด (invalid)
+                              if (!rawDate || !parsed.isValid()) {
+                                return formatThai(dayjs(new Date()));
+                              }
+
+                              // ✅ ถ้า valid — แปลงตามปกติ
+                              return formatThai(parsed.format("DD/MM/YYYY"));
+                            } catch (err) {
+                              // ✅ fallback กรณีเกิด error
+                              return formatThai(dayjs(new Date()));
+                            }
+                          })()}
+                        </Typography>
+
                       </Grid>
                       <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
@@ -372,42 +397,42 @@ const PrintReport = () => {
                   <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "5px" }, border: "2px solid black", marginTop: 3 }}>
                     <TableHead>
                       <TableRow sx={{ height: "35px" }}>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "80px" }} rowSpan={2} >
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "70px" }} rowSpan={2} >
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>วันที่</Typography>
                         </TableCell>
                         <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", borderBottom: "2px solid black" }} colSpan={7} >
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>รายการ</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} rowSpan={2} >
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "50px" }} rowSpan={2} >
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>รวมลิตร</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} rowSpan={2} >
-                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>ค่าบรรทุก</Typography>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "55px" }} rowSpan={2} >
+                          <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold", whiteSpace: "nowrap" }} gutterBottom>ค่าบรรทุก</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "100px" }} rowSpan={2} >
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "80px" }} rowSpan={2} >
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>ยอดเงิน</Typography>
                         </TableCell>
                       </TableRow>
                       <TableRow sx={{ borderBottom: "2px solid black", height: "35px" }}>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "75px" }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>G95</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }} >
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "75px" }} >
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>B95</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "75px" }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>B7</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "75px" }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>G91</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "75px" }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>E20</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "75px" }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>E85</Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "60px" }}>
+                        <TableCell sx={{ textAlign: "center", borderLeft: "2px solid black", width: "75px" }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0, fontWeight: "bold" }} gutterBottom>PWD</Typography>
                         </TableCell>
                       </TableRow>

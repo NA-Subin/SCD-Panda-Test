@@ -94,7 +94,17 @@ const MoneyGuarantee = ({ money, periods }) => {
                             width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
                         }}
                     >
-                        {new Intl.NumberFormat("en-US").format(money.reduce((acc, doc) => acc + Number(doc.Money), 0))}
+                        {new Intl.NumberFormat("en-US").format(money.reduce((acc, doc) => {
+                            const value = Number(doc.Money) || 0;
+
+                            if (doc.Type === "รายได้") {
+                                return acc + value; // ✅ ถ้าเป็นรายได้ บวก
+                            } else if (doc.Type === "รายหัก") {
+                                return acc - value; // ✅ ถ้าเป็นรายหัก ลบ
+                            }
+
+                            return acc; // ถ้าไม่มี Type หรือไม่ตรงเงื่อนไข ก็ไม่เปลี่ยนค่า
+                        }, 0))}
                     </Typography>
                 </Box>
             </TableCell>
@@ -148,7 +158,7 @@ const MoneyGuarantee = ({ money, periods }) => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 115 }}>
                                         คืนเงินค้ำประกัน
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                         ยอดสะสม
                                     </TablecellSelling>
                                 </TableRow>
@@ -177,8 +187,8 @@ const MoneyGuarantee = ({ money, periods }) => {
                                                         </Typography>
                                                     ))}
                                             </TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Money || 0)}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}></TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}>{row.Type === "รายได้" ? new Intl.NumberFormat("en-US").format(row.Money || 0) : "-"}</TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}>{row.Type === "รายหัก" ? new Intl.NumberFormat("en-US").format(row.Money || 0) : "-"}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(cumulative || 0)}</TableCell>
                                         </TableRow>
                                     );

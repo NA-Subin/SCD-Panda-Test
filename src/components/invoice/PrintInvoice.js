@@ -185,19 +185,42 @@ const PrintInvoice = () => {
     return text;
   };
 
-  const formatThaiDate = (dateString) => {
-    if (!dateString) return "ไม่พบข้อมูลวันที่"; // ถ้า undefined หรือ null ให้คืนค่าเริ่มต้น
+  const formatThaiDate = (inputDate) => {
+    if (!inputDate) return "ไม่พบข้อมูลวันที่";
 
-    const [day, month, year] = dateString.split("/").map(Number);
-    const date = new Date(year, month - 1, day); // month - 1 เพราะ JavaScript นับเดือนจาก 0-11
+    let dateObj;
 
-    const formattedDate = new Intl.DateTimeFormat("th-TH", {
-      month: "long",
-    }).format(date); // ดึงชื่อเดือนภาษาไทย
+    // ✅ ตรวจชนิดของ input
+    if (typeof inputDate === "string") {
+      // รองรับรูปแบบ DD/MM/YYYY หรือ YYYY-MM-DD
+      const parts = inputDate.includes("/") ? inputDate.split("/") : inputDate.split("-");
+      if (parts.length === 3) {
+        // แยกตามรูปแบบ DD/MM/YYYY
+        if (inputDate.includes("/")) {
+          const [day, month, year] = parts.map(Number);
+          dateObj = dayjs(new Date(year, month - 1, day));
+        } else {
+          // รูปแบบ YYYY-MM-DD
+          const [year, month, day] = parts.map(Number);
+          dateObj = dayjs(new Date(year, month - 1, day));
+        }
+      }
+    } else if (dayjs.isDayjs(inputDate)) {
+      // ถ้าเป็น dayjs object อยู่แล้ว
+      dateObj = inputDate;
+    } else {
+      // fallback กรณีไม่รู้ชนิด
+      dateObj = dayjs(inputDate);
+    }
 
-    const buddhistYear = year + 543; // แปลงปี ค.ศ. เป็น พ.ศ.
+    // ถ้าแปลงไม่ได้
+    if (!dateObj || !dateObj.isValid()) return "รูปแบบวันที่ไม่ถูกต้อง";
 
-    return `วันที่ ${day} เดือน ${formattedDate} พ.ศ. ${buddhistYear}`;
+    const day = dateObj.date().toString().padStart(2, "0");
+    const month = (dateObj.month() + 1).toString().padStart(2, "0");
+    const buddhistYear = dateObj.year() + 543;
+
+    return `${day}/${month}/${buddhistYear}`;
   };
 
   const formatAddress = (address) => {
@@ -317,7 +340,8 @@ const PrintInvoice = () => {
                 {invoiceData.Company}
               </Typography>
               <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
-                {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}
+                {formatAddress(invoiceData?.Address)}
+                {/* เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)} */}
               </Typography>
               <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
                 เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}
@@ -359,7 +383,29 @@ const PrintInvoice = () => {
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "35px" }}>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{formatThaiSlash(dayjs(invoiceData?.Date, "DD/MM/YYYY").format("DD/MM/YYYY"))}</Typography>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ marginTop: -1, marginLeft: -2 }}
+                      gutterBottom
+                    >
+                      {(() => {
+                        try {
+                          const rawDate = invoiceData?.Date;
+                          const parsed = dayjs(rawDate, "DD/MM/YYYY", true); // true = strict parsing
+
+                          // ✅ ถ้าไม่มีวันที่ หรือ parsing ผิด (invalid)
+                          if (!rawDate || !parsed.isValid()) {
+                            return formatThaiDate(dayjs(new Date()));
+                          }
+
+                          // ✅ ถ้า valid — แปลงตามปกติ
+                          return formatThaiDate(parsed.format("DD/MM/YYYY"));
+                        } catch (err) {
+                          // ✅ fallback กรณีเกิด error
+                          return formatThaiDate(dayjs(new Date()));
+                        }
+                      })()}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "25px" }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
@@ -410,7 +456,7 @@ const PrintInvoice = () => {
                             sx={{ borderRight: "2px solid black", textAlign: "center" }}
                           >
                             <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                              {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY").format("DD/MM/YYYY"))}
+                              {formatThaiDate(dayjs(row.Date, "DD/MM/YYYY").format("DD/MM/YYYY"))}
                             </Typography>
                           </TableCell>
                         )}
@@ -439,7 +485,10 @@ const PrintInvoice = () => {
                         </TableCell>
                         <TableCell sx={{ borderRight: "2px solid black", textAlign: "center" }}>
                           <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                            {new Intl.NumberFormat("en-US").format(row.RateOil)}
+                            {new Intl.NumberFormat("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            }).format(row.RateOil)}
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ textAlign: "center" }}>
@@ -454,33 +503,69 @@ const PrintInvoice = () => {
                     );
                   })}
                   <TableRow sx={{ height: "30px" }}>
-                    <TableCell colSpan={2} sx={{ borderTop: "2px solid black", textAlign: "left" }}>
-                      <Box sx={{ display: "flex", justifyContent: "left", alignItems: "center" }}>
-                        <Typography variant="subtitle2" fontWeight="bold" fontSize="15px" sx={{ marginRight: 1 }} gutterBottom>กำหนดชำระเงิน : </Typography>
-                        <Typography variant="subtitle2" gutterBottom>{invoiceData?.DateEnd}</Typography>
+                    <TableCell
+                      colSpan={2}
+                      sx={{
+                        borderTop: "2px solid black",
+                        textAlign: "left",
+                        verticalAlign: "middle" // ✅ เพิ่มบรรทัดนี้
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Typography
+                          variant="subtitle2"
+                          fontWeight="bold"
+                          fontSize="15px"
+                          sx={{ marginRight: 1 }}
+                          gutterBottom
+                        >
+                          กำหนดชำระเงิน :
+                        </Typography>
+                        <Typography variant="subtitle2" sx={{ marginTop: -0.5, marginBottom: -0.5 }} gutterBottom>
+                          {invoiceData?.DateEnd}
+                        </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ borderTop: "2px solid black", textAlign: "center", borderRight: "2px solid black" }}>
-                      <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวม</Typography>
+                    <TableCell
+                      sx={{
+                        borderTop: "2px solid black",
+                        textAlign: "center",
+                        borderRight: "2px solid black"
+                      }}
+                    >
+                      <Typography variant="subtitle2" fontWeight="bold">
+                        รวม
+                      </Typography>
                     </TableCell>
-                    <TableCell sx={{ borderTop: "2px solid black", textAlign: "center", borderRight: "2px solid black" }}>
-                      {new Intl.NumberFormat("en-US").format(invoiceData?.Volume)}
+
+                    <TableCell
+                      sx={{
+                        borderTop: "2px solid black",
+                        textAlign: "center",
+                        borderRight: "2px solid black"
+                      }}
+                    >
+                      <Typography variant="subtitle2" fontWeight="bold">
+                        {new Intl.NumberFormat("en-US").format(invoiceData?.Volume)}
+                      </Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }} />
                     <TableCell sx={{ textAlign: "center" }} />
                   </TableRow>
                   <TableRow sx={{ borderTop: "2px solid black", height: "30px" }}>
-                    <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }} colSpan={3}>
-                      <Typography variant="subtitle2" fontWeight="bold" gutterBottom>{`( ${numberToThaiText(invoiceData?.Amount)} )`}</Typography>
+                    <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }} colSpan={4}>
+                      <Typography variant="subtitle2" fontWeight="bold" sx={{ marginTop: 0.5 }} gutterBottom>{`( ${numberToThaiText(invoiceData?.Amount)} )`}</Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "2px solid black" }}>
-                      <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รวมเป็นเงิน</Typography>
+                      <Typography variant="subtitle2" fontWeight="bold" sx={{ marginTop: 0.5 }} gutterBottom>รวมเป็นเงิน</Typography>
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center", fontWeight: "bold" }} colSpan={2}>
-                      {new Intl.NumberFormat("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      }).format(invoiceData?.Amount)}
+                    <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
+                      <Typography variant="subtitle2" fontWeight="bold" sx={{ marginTop: 0.5 }} gutterBottom>
+                        {new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
+                        }).format(invoiceData?.Amount)}
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 </TableBody>

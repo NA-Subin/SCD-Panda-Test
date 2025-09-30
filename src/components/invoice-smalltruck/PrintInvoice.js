@@ -305,7 +305,8 @@ const PrintInvoiceSmallTruck = () => {
                 {invoiceData?.Company}
               </Typography>
               <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
-                {formatAddress(invoiceData?.Address)} เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)}
+                {formatAddress(invoiceData?.Address)}
+                {/* เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)} */}
               </Typography>
               <Typography variant="subtitle1" sx={{ marginTop: -1 }} gutterBottom>
                 เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}
@@ -347,7 +348,30 @@ const PrintInvoiceSmallTruck = () => {
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>วันที่</Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "30px" }}>
-                    <Typography variant="subtitle2" sx={{ marginTop: -1, marginLeft: -2 }} gutterBottom>{formatThai(invoiceData?.Date)}</Typography>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ marginTop: -1, marginLeft: -2 }}
+                      gutterBottom
+                    >
+                      {(() => {
+                        try {
+                          const rawDate = invoiceData?.Date;
+                          const parsed = dayjs(rawDate, "DD/MM/YYYY", true); // true = strict parsing
+
+                          // ✅ ถ้าไม่มีวันที่ หรือ parsing ผิด (invalid)
+                          if (!rawDate || !parsed.isValid()) {
+                            return formatThai(dayjs(new Date()));
+                          }
+
+                          // ✅ ถ้า valid — แปลงตามปกติ
+                          return formatThai(parsed.format("DD/MM/YYYY"));
+                        } catch (err) {
+                          // ✅ fallback กรณีเกิด error
+                          return formatThai(dayjs(new Date()));
+                        }
+                      })()}
+                    </Typography>
+
                   </Grid>
                   <Grid item xs={12} sx={{ borderTop: "2px solid black", borderRight: "2px solid black", textAlign: "center", height: "25px" }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", marginTop: -1.5, marginLeft: -2 }} gutterBottom>เลขที่เอกสาร</Typography>
