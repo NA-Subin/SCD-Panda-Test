@@ -321,7 +321,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                 fullWidth
                 size="small"
                 sx={{
-                    fontSize: "16px",
+                    fontSize: "14px",
                     fontWeight: "bold"
                 }}
                 onClick={handleClickOpen}

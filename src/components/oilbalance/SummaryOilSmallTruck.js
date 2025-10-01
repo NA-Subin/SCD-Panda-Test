@@ -339,11 +339,8 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
-            <Grid container>
-                <Grid item md={4} xs={12}>
-
-                </Grid>
-                <Grid item md={6} xs={12}>
+            <Grid container spacing={2}>
+                <Grid item md={12} xs={12}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -353,93 +350,93 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                         สรุปยอดน้ำมันรถเล็ก
                     </Typography>
                 </Grid>
-                <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
-                    <Box sx={{ width: "200px" }}>
-                        {/* <InsertDeducetionIncome /> */}
-                    </Box>
-                </Grid>
-                <Grid item md={5} xs={12}>
-                    <Box
-                        sx={{
-                            width: "100%", // กำหนดความกว้างของ Paper
-                            height: "40px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginTop: { md: -8, xs: 2 },
-                            marginBottom: 3
-                        }}
-                    >
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
-                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                                onChange={handleDateChangeDateStart}
-                                slotProps={{
-                                    textField: {
-                                        size: "small",
-                                        fullWidth: true,
-                                        inputProps: {
-                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
-                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
-                                        },
-                                        InputProps: {
-                                            startAdornment: (
-                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    <b>วันที่ :</b>
-                                                </InputAdornment>
-                                            ),
-                                            sx: {
-                                                fontSize: "16px",
-                                                height: "40px",
-                                                padding: "10px",
-                                                fontWeight: "bold",
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                            <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
-                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                                onChange={handleDateChangeDateEnd}
-                                slotProps={{
-                                    textField: {
-                                        size: "small",
-                                        fullWidth: true,
-                                        inputProps: {
-                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
-                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
-                                        },
-                                        InputProps: {
-                                            startAdornment: (
-                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    <b>ถึงวันที่ :</b>
-                                                </InputAdornment>
-                                            ),
-                                            sx: {
-                                                fontSize: "16px",
-                                                height: "40px",
-                                                padding: "10px",
-                                                fontWeight: "bold",
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                        </LocalizationProvider>
-                    </Box>
-                </Grid>
             </Grid>
-            <Divider sx={{ marginBottom: 1 }} />
+            <Divider sx={{ marginBottom: 2 }} />
             <Box sx={{ width: "100%" }}>
-                <Grid container spacing={2} width="100%">
-                    <Grid item xs={5}>
-                        {/* <Paper>
+                {
+                    windowWidth >= 800 ?
+                        <Grid container spacing={2} width="100%">
+                            <Grid item sm={12} lg={5}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 3
+                                    }}
+                                >
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Paper sx={{ marginRight: 2 }}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateStart}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>วันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                        <Paper>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateEnd}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>ถึงวันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                    </LocalizationProvider>
+                                </Box>
+                            </Grid>
+                            <Grid item sm={12} lg={5}>
+                                {/* <Paper>
                             <FormControl size="small" fullWidth>
                                 <Select
                                     value={selectDriver}
@@ -480,65 +477,65 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
 
                                 </Select>
                             </FormControl> */}
-                        <Paper>
-                            <Paper>
-                                <Autocomplete
-                                    id="autocomplete-tickets"
-                                    options={getCustomers()}
-                                    getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
-                                    isOptionEqualToValue={(option, value) =>
-                                        option.id === value.id && option.Name === value.Name
-                                    }
-                                    value={
-                                        selectTickets
-                                            ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
-                                            : null
-                                    }
-                                    onChange={(event, newValue) => {
-                                        if (newValue) {
-                                            handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
-                                        } else {
-                                            handleChangeTickets({ target: { value: "" } });
-                                        }
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            variant="outlined"
-                                            size="small"
-                                            label=""
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                startAdornment: (
-                                                    <InputAdornment position="start" sx={{ marginRight: 1 }}>
-                                                        กรุณาเลือกตั๋ว :
-                                                    </InputAdornment>
-                                                ),
-                                                sx: {
-                                                    height: "40px",
-                                                    fontSize: "18px",
-                                                    paddingRight: "8px",
+                                <Paper>
+                                    <Paper>
+                                        <Autocomplete
+                                            id="autocomplete-tickets"
+                                            options={getCustomers()}
+                                            getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                            isOptionEqualToValue={(option, value) =>
+                                                option.id === value.id && option.Name === value.Name
+                                            }
+                                            value={
+                                                selectTickets
+                                                    ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
+                                                    : null
+                                            }
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
+                                                } else {
+                                                    handleChangeTickets({ target: { value: "" } });
+                                                }
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label=""
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                                กรุณาเลือกตั๋ว :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            height: "40px",
+                                                            fontSize: "18px",
+                                                            paddingRight: "8px",
+                                                        },
+                                                    }}
+                                                    InputLabelProps={{ shrink: false }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="16px">
+                                                        {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                                    </Typography>
+                                                </li>
+                                            )}
+                                            ListboxProps={{
+                                                style: {
+                                                    maxHeight: 250,
                                                 },
                                             }}
-                                            InputLabelProps={{ shrink: false }}
                                         />
-                                    )}
-                                    renderOption={(props, option) => (
-                                        <li {...props}>
-                                            <Typography fontSize="16px">
-                                                {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
-                                            </Typography>
-                                        </li>
-                                    )}
-                                    ListboxProps={{
-                                        style: {
-                                            maxHeight: 250,
-                                        },
-                                    }}
-                                />
-                            </Paper>
+                                    </Paper>
 
-                            {/* <FormControl size="small" fullWidth>
+                                    {/* <FormControl size="small" fullWidth>
                                 <Select
                                     value={selectTickets}
                                     onChange={handleChangeTickets}
@@ -569,12 +566,232 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
 
                                 </Select>
                             </FormControl> */}
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={5} />
-                    <Grid item xs={2}>
-                        <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
-                    </Grid>
+                                </Paper>
+                            </Grid>
+                            <Grid item sm={12} lg={2}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 0.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                        :
+                        <Grid container spacing={2} width="100%">
+                            <Grid item xs={12}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 3
+                                    }}
+                                >
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Paper sx={{ marginRight: 2 }}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateStart}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>วันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                        <Paper>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateEnd}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>ถึงวันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                    </LocalizationProvider>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {/* <Paper>
+                            <FormControl size="small" fullWidth>
+                                <Select
+                                    value={selectDriver}
+                                    onChange={handleChangeDriver}
+                                    input={
+                                        <OutlinedInput
+                                            startAdornment={
+                                                <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                    กรุณาเลือกผู้ขับ/ป้ายทะเบียน :
+                                                </InputAdornment>
+                                            }
+                                        />
+                                    }
+                                    MenuProps={{
+                                        PaperProps: {
+                                            style: {
+                                                maxHeight: 250, // ความสูงสูงสุดที่จะแสดงก่อนมี scroll
+                                                width: 300,     // ปรับความกว้างตามต้องการ
+                                            },
+                                        },
+                                    }}
+                                >
+                                    <MenuItem value={0}>แสดงทั้งหมด</MenuItem>
+                                    {[...driver]
+                                        .sort((a, b) => {
+                                            // รถใหญ่ต้องมาก่อน
+                                            if (a.TruckType === "รถใหญ่" && b.TruckType !== "รถใหญ่") return -1;
+                                            if (a.TruckType !== "รถใหญ่" && b.TruckType === "รถใหญ่") return 1;
+
+                                            // ถ้า TruckType เหมือนกัน ให้เรียงตามชื่อ
+                                            return a.Name.localeCompare(b.Name);
+                                        })
+                                        .map((row) => (
+                                            <MenuItem key={row.id} value={row.id}>
+                                                {`${row.Name}/${row.Registration.split(":")[1]} (${row.TruckType})`}
+                                            </MenuItem>
+                                        ))}
+
+                                </Select>
+                            </FormControl> */}
+                                <Paper>
+                                    <Paper>
+                                        <Autocomplete
+                                            id="autocomplete-tickets"
+                                            options={getCustomers()}
+                                            getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                            isOptionEqualToValue={(option, value) =>
+                                                option.id === value.id && option.Name === value.Name
+                                            }
+                                            value={
+                                                selectTickets
+                                                    ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
+                                                    : null
+                                            }
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
+                                                } else {
+                                                    handleChangeTickets({ target: { value: "" } });
+                                                }
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label=""
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        startAdornment: (
+                                                            <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                                กรุณาเลือกตั๋ว :
+                                                            </InputAdornment>
+                                                        ),
+                                                        sx: {
+                                                            height: "40px",
+                                                            fontSize: "18px",
+                                                            paddingRight: "8px",
+                                                        },
+                                                    }}
+                                                    InputLabelProps={{ shrink: false }}
+                                                />
+                                            )}
+                                            renderOption={(props, option) => (
+                                                <li {...props}>
+                                                    <Typography fontSize="16px">
+                                                        {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                                    </Typography>
+                                                </li>
+                                            )}
+                                            ListboxProps={{
+                                                style: {
+                                                    maxHeight: 250,
+                                                },
+                                            }}
+                                        />
+                                    </Paper>
+
+                                    {/* <FormControl size="small" fullWidth>
+                                <Select
+                                    value={selectTickets}
+                                    onChange={handleChangeTickets}
+                                    input={
+                                        <OutlinedInput
+                                            startAdornment={
+                                                <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                    กรุณาเลือกผู้ขับ/ป้ายทะเบียน :
+                                                </InputAdornment>
+                                            }
+                                        />
+                                    }
+                                    MenuProps={{
+                                        PaperProps: {
+                                            style: {
+                                                maxHeight: 250, // ความสูงสูงสุดที่จะแสดงก่อนมี scroll
+                                                width: 300,     // ปรับความกว้างตามต้องการ
+                                            },
+                                        },
+                                    }}
+                                >
+                                    <MenuItem value={0}>แสดงทั้งหมด</MenuItem>
+                                    {getCustomers().map((row) => (
+                                        <MenuItem key={row.id} value={`${row.id}:${row.Name}`}>
+                                            {`${row.Name} (${row.CustomerType})`}
+                                        </MenuItem>
+                                    ))}
+
+                                </Select>
+                            </FormControl> */}
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 0.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            </Grid>
+                        </Grid>
+                }
+                <Grid container spacing={2} width="100%" sx={{ marginTop: -4 }}>
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}

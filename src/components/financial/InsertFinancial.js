@@ -337,7 +337,7 @@ const InsertFinancial = () => {
                 size="small"
                 fullWidth
                 sx={{
-                    fontSize: "16px",
+                    fontSize: "14px",
                     fontWeight: "bold"
                 }}
                 endIcon={<NoteAddIcon />}   // 👈 ใส่ไอคอนด้านหน้า

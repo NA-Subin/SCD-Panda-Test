@@ -333,12 +333,12 @@ const DeductionOfIncome = (props) => {
                 newRow.height = 20;
                 newRow.alignment = { horizontal: "center", vertical: "middle" };
                 newRow.eachCell((cell, colNumber) => {
-                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-                // ยกเว้น column "no"
-                if (worksheet.columns[colNumber - 1].key !== "no") {
-                    cell.numFmt = "#,##0.00";
-                }
-            });
+                    cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                    // ยกเว้น column "no"
+                    if (worksheet.columns[colNumber - 1].key !== "no") {
+                        cell.numFmt = "#,##0.00";
+                    }
+                });
             });
         });
 
@@ -590,12 +590,12 @@ const DeductionOfIncome = (props) => {
         //     <Divider sx={{ marginBottom: 1 }} />
         //     <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
         <Grid container spacing={2} width="100%" sx={{ marginTop: -4 }}>
-            <Grid item xl={7.5} xs={12} />
-            <Grid item xl={4.5} xs={12}>
-                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+            <Grid item xl={9} xs={12} />
+            <Grid item xl={3} xs={12}>
+                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5, fontWeight: "bold" }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
             </Grid>
             <Grid item xl={2.5} md={4} xs={12} >
-                <Paper sx={{ marginLeft: { xl: 0, md: 1, xs: 1 }, }}>
+                <Paper sx={{ marginLeft: { xl: 1, md: 1, xs: 1 }, }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="th">
                         <DatePicker
                             openTo="year"
@@ -681,7 +681,7 @@ const DeductionOfIncome = (props) => {
                         ))
                 }
             </Grid>
-            <Grid item xl={2.5} xs={12}>
+            <Grid item xl={3} xs={12}>
                 <Box display="flex" alignItems="center" justifyContent="center" sx={{ marginLeft: { xl: 0, xs: 1 }, }} >
                     {/* <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 1, marginTop: 0.5 }} gutterBottom>ค้นหา</Typography> */}
                     <Paper sx={{ width: "100%" }} >
@@ -711,7 +711,7 @@ const DeductionOfIncome = (props) => {
                     </Paper>
                 </Box>
             </Grid>
-            <Grid item xl={2} xs={12} display="flex" justifyContent="right" alignItems="center">
+            <Grid item xl={1.5} xs={12} display="flex" justifyContent="right" alignItems="center">
                 <InsertDeducetionIncome year={selectedDate} periods={periods} periodData={period} />
             </Grid>
             <Grid item xl={12} xs={12}>

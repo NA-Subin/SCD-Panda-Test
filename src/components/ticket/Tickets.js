@@ -309,6 +309,7 @@ const Tickets = ({ openNavbar }) => {
             </Box>
             <Divider sx={{ marginBottom: 1, marginTop: 5 }} />
             <Box sx={{ width: "100%" }}>
+                <Typography variant="subtitle2" color="error" fontWeight="bold" sx={{ marginBottom: -2 }} gutterBottom>*ถ้าต้องการดูรายละเอียดทั้งหมดให้คลิ๊กชื่อตั๋ว*</Typography>
                 <TableContainer
                     component={Paper}
                     sx={{ marginTop: 2 }}

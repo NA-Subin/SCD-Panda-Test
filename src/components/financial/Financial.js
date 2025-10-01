@@ -538,9 +538,9 @@ const Financial = () => {
         //     <Divider sx={{ marginBottom: 1 }} />
         //     <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
         <Grid container spacing={2} width="100%" sx={{ marginTop: -4 }}>
-            <Grid item xl={7.5} xs={12} />
-            <Grid item xl={4.5} xs={12}>
-                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+            <Grid item xl={9} xs={12} />
+            <Grid item xl={3} xs={12}>
+                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5, fontWeight: "bold" }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
             </Grid>
             <Grid item xl={5.5} xs={12} >
                 <Box

@@ -296,7 +296,7 @@ const TicketsBigTruck = ({ openNavbar }) => {
             .update({
                 Name: name,
                 Status: ticketChecked === true ? "ลูกค้าประจำ" : "ลูกค้าไม่ประจำ",
-                StatusCompany: companyChecked === true ? "อยู่บริษัทในเครือ" : "ไม่อยู่บริษัทในเครือ",
+                StatusCompany: ticketCheckedC === true ? "อยู่บริษัทในเครือ" : "ไม่อยู่บริษัทในเครือ",
                 Rate1: rate1,
                 Rate2: rate2,
                 Rate3: rate3,
@@ -462,6 +462,7 @@ const TicketsBigTruck = ({ openNavbar }) => {
                     </Grid>
                 </Grid>
                 <Divider sx={{ marginBottom: 1, marginTop: 2 }} />
+                <Typography variant="subtitle2" color="error" fontWeight="bold" sx={{ marginBottom: -2 }} gutterBottom>*ถ้าต้องการดูรายละเอียดทั้งหมดให้คลิ๊กชื่อตั๋ว*</Typography>
                 <TableContainer
                     component={Paper}
                     sx={{ marginTop: 2 }}
@@ -1561,8 +1562,8 @@ const TicketsBigTruck = ({ openNavbar }) => {
                                     <FormControlLabel
                                         control={
                                             <Checkbox
-                                                checked={companyChecked === true ? true : false}
-                                                onChange={() => setCompanyChecked(true)}
+                                                checked={ticketCheckedC === true ? true : false}
+                                                onChange={() => setTicketCheckedC(true)}
                                                 size="small"
                                             />
                                         }
@@ -1572,8 +1573,8 @@ const TicketsBigTruck = ({ openNavbar }) => {
                                     <FormControlLabel
                                         control={
                                             <Checkbox
-                                                checked={companyChecked === false ? true : false}
-                                                onChange={() => setCompanyChecked(false)}
+                                                checked={ticketCheckedC === false ? true : false}
+                                                onChange={() => setTicketCheckedC(false)}
                                                 size="small"
                                             />
                                         }

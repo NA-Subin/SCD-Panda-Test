@@ -350,11 +350,8 @@ const SummaryOilBalance = ({ openNavbar }) => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
-            <Grid container>
-                <Grid item md={4} xs={12}>
-
-                </Grid>
-                <Grid item md={6} xs={12}>
+            <Grid container spacing={2}>
+                <Grid item md={12} xs={12}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -364,94 +361,92 @@ const SummaryOilBalance = ({ openNavbar }) => {
                         สรุปยอดน้ำมัน
                     </Typography>
                 </Grid>
-                <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
-                    <Box sx={{ width: "200px" }}>
-                        {/* <InsertDeducetionIncome /> */}
-                    </Box>
-                </Grid>
-                <Grid item md={5} xs={12}>
-                    <Box
-                        sx={{
-                            width: "100%", // กำหนดความกว้างของ Paper
-                            height: "40px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginTop: { md: -8, xs: 2 },
-                            marginBottom: 3
-                        }}
-                    >
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
-                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                                onChange={handleDateChangeDateStart}
-                                slotProps={{
-                                    textField: {
-                                        size: "small",
-                                        fullWidth: true,
-                                        inputProps: {
-                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
-                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
-                                        },
-                                        InputProps: {
-                                            startAdornment: (
-                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    <b>วันที่ :</b>
-                                                </InputAdornment>
-                                            ),
-                                            sx: {
-                                                fontSize: "16px",
-                                                height: "40px",
-                                                padding: "10px",
-                                                fontWeight: "bold",
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                            <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
-                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                                onChange={handleDateChangeDateEnd}
-                                slotProps={{
-                                    textField: {
-                                        size: "small",
-                                        fullWidth: true,
-                                        inputProps: {
-                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
-                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
-                                        },
-                                        InputProps: {
-                                            startAdornment: (
-                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    <b>ถึงวันที่ :</b>
-                                                </InputAdornment>
-                                            ),
-                                            sx: {
-                                                fontSize: "16px",
-                                                height: "40px",
-                                                padding: "10px",
-                                                fontWeight: "bold",
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                        </LocalizationProvider>
-                    </Box>
-                </Grid>
             </Grid>
-            <Divider sx={{ marginBottom: 1 }} />
+            <Divider sx={{ marginBottom: 2 }} />
             <Box sx={{ width: "100%" }}>
                 {
                     windowWidth >= 800 ?
                         <Grid container spacing={2} width="100%" marginBottom={1} >
-                            <Grid item sm={8} lg={5}>
+                            <Grid item sm={12} lg={5}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 3
+                                    }}
+                                >
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Paper sx={{ marginRight: 2 }}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateStart}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>วันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                        <Paper>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateEnd}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>ถึงวันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                    </LocalizationProvider>
+                                </Box>
+                            </Grid>
+                            <Grid item sm={12} lg={5}>
                                 {/* <Paper>
                             <FormControl size="small" fullWidth>
                                 <Select
@@ -584,13 +579,91 @@ const SummaryOilBalance = ({ openNavbar }) => {
                             </FormControl> */}
                                 </Paper>
                             </Grid>
-                            <Grid item sm={1} lg={5} />
-                            <Grid item sm={3} lg={2}>
-                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                            <Grid item sm={12} lg={2}>
+                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 0.5 }} fullWidth onClick={exportToExcel}>Export Excel</Button>
                             </Grid>
                         </Grid>
                         :
                         <Grid container spacing={2} p={1}>
+                            <Grid item xs={12}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 3
+                                    }}
+                                >
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Paper sx={{ marginRight: 2 }}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateStart}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>วันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                        <Paper>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                                onChange={handleDateChangeDateEnd}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        inputProps: {
+                                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                        },
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    <b>ถึงวันที่ :</b>
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px",
+                                                                height: "40px",
+                                                                padding: "10px",
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                    </LocalizationProvider>
+                                </Box>
+                            </Grid>
                             <Grid item xs={12}>
                                 <Paper>
                                     <Paper>
@@ -656,7 +729,7 @@ const SummaryOilBalance = ({ openNavbar }) => {
                             </Grid>
                         </Grid>
                 }
-                <Grid container spacing={2} width="100%">
+                <Grid container spacing={2} width="100%" sx={{ marginTop: -4 }}>
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}

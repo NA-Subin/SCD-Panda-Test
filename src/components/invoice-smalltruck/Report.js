@@ -438,11 +438,8 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
-            <Grid container>
-                <Grid item md={4} xs={12}>
-
-                </Grid>
-                <Grid item md={6} xs={12}>
+            <Grid container spacing={2} sx={{ marginBottom: -5 }}>
+                <Grid item md={12} xs={12}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -452,86 +449,90 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                         รายงานชำระค่าน้ำมัน
                     </Typography>
                 </Grid>
-                <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
-                    <Box sx={{ width: "200px" }}>
-                        {/* <InsertDeducetionIncome /> */}
-                    </Box>
-                </Grid>
-                <Grid item md={5} xs={12}>
-                    <Box
-                        sx={{
-                            width: "100%", // กำหนดความกว้างของ Paper
-                            height: "40px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginTop: { md: -8, xs: 2 },
-                            marginBottom: 3
-                        }}
-                    >
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
-                                onChange={handleDateChangeDateStart}
-                                sx={{ marginRight: 2, }}
-                                slotProps={{
-                                    textField: {
-                                        size: "small",
-                                        fullWidth: true,
-                                        InputProps: {
-                                            startAdornment: (
-                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    วันที่เริ่มต้น :
-                                                </InputAdornment>
-                                            ),
-                                            sx: {
-                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                height: "40px",  // ความสูงของ Input
-                                                padding: "10px", // Padding ภายใน Input
-                                                fontWeight: "bold",
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                            <DatePicker
-                                openTo="day"
-                                views={["year", "month", "day"]}
-                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
-                                format="DD/MM/YYYY"
-                                onChange={handleDateChangeDateEnd}
-                                slotProps={{
-                                    textField: {
-                                        size: "small",
-                                        fullWidth: true,
-                                        InputProps: {
-                                            startAdornment: (
-                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    วันที่สิ้นสุด :
-                                                </InputAdornment>
-                                            ),
-                                            sx: {
-                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                height: "40px",  // ความสูงของ Input
-                                                padding: "10px", // Padding ภายใน Input
-                                                fontWeight: "bold",
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                        </LocalizationProvider>
-                    </Box>
+                <Grid item sm={12} lg={10}></Grid>
+                <Grid item sm={12} lg={2}>
+                    <Button variant="contained" size="small" color="success" sx={{ marginTop: -17 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                 </Grid>
             </Grid>
-            <Divider sx={{ marginBottom: 1 }} />
+            <Divider sx={{ marginBottom: 2 }} />
             <Box sx={{ width: "100%" }}>
-                <Grid container spacing={2} width="100%">
-                    <Grid item xs={10}>
-                        {/* <Paper>
+                {
+                    windowWidth >= 800 ?
+                        <Grid container spacing={2} width="100%">
+                            <Grid item sm={12} lg={5}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 3
+                                    }}
+                                >
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Paper sx={{ marginRight: 2 }}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                                                format="DD/MM/YYYY"
+                                                onChange={handleDateChangeDateStart}
+                                                sx={{ marginRight: 2, }}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    วันที่เริ่มต้น :
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                                height: "40px",  // ความสูงของ Input
+                                                                padding: "10px", // Padding ภายใน Input
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                        <Paper>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                                                format="DD/MM/YYYY"
+                                                onChange={handleDateChangeDateEnd}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    วันที่สิ้นสุด :
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                                height: "40px",  // ความสูงของ Input
+                                                                padding: "10px", // Padding ภายใน Input
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                    </LocalizationProvider>
+                                </Box>
+                            </Grid>
+                            <Grid item sm={12} lg={7}>
+                                {/* <Paper>
                             <Paper>
                                 <Autocomplete
                                     id="autocomplete-tickets"
@@ -589,16 +590,157 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                                 />
                             </Paper>
                         </Paper> */}
-                        <FormGroup row sx={{ marginBottom: -1.5 }}>
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-                            <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-                            <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
-                            <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
-                        </FormGroup>
-                    </Grid>
-                    <Grid item xs={2}>
-                        <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
-                    </Grid>
+                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+                                    <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                                    <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
+                                    <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
+                                </FormGroup>
+                            </Grid>
+                        </Grid>
+                        :
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 3
+                                    }}
+                                >
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Paper sx={{ marginRight: 2 }}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(selectedDateStart)} // แปลงสตริงกลับเป็น dayjs object
+                                                format="DD/MM/YYYY"
+                                                onChange={handleDateChangeDateStart}
+                                                sx={{ marginRight: 2, }}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    วันที่เริ่มต้น :
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                                height: "40px",  // ความสูงของ Input
+                                                                padding: "10px", // Padding ภายใน Input
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                        <Paper>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(selectedDateEnd)} // แปลงสตริงกลับเป็น dayjs object
+                                                format="DD/MM/YYYY"
+                                                onChange={handleDateChangeDateEnd}
+                                                slotProps={{
+                                                    textField: {
+                                                        size: "small",
+                                                        fullWidth: true,
+                                                        InputProps: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                                    วันที่สิ้นสุด :
+                                                                </InputAdornment>
+                                                            ),
+                                                            sx: {
+                                                                fontSize: "16px", // ขนาดตัวอักษรภายใน Input
+                                                                height: "40px",  // ความสูงของ Input
+                                                                padding: "10px", // Padding ภายใน Input
+                                                                fontWeight: "bold",
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </Paper>
+                                    </LocalizationProvider>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {/* <Paper>
+                            <Paper>
+                                <Autocomplete
+                                    id="autocomplete-tickets"
+                                    options={getCustomers()}
+                                    getOptionLabel={(option) => selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                    isOptionEqualToValue={(option, value) =>
+                                        option.id === value.id && option.Name === value.Name
+                                    }
+                                    value={
+                                        selectTickets
+                                            ? getCustomers().find(item => `${item.id}:${item.Name}` === selectTickets)
+                                            : null
+                                    }
+                                    onChange={(event, newValue) => {
+                                        if (newValue) {
+                                            handleChangeTickets({ target: { value: `${newValue.id}:${newValue.Name}` } });
+                                        } else {
+                                            handleChangeTickets({ target: { value: "" } });
+                                        }
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            size="small"
+                                            label=""
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                startAdornment: (
+                                                    <InputAdornment position="start" sx={{ marginRight: 1 }}>
+                                                        กรุณาเลือกตั๋ว :
+                                                    </InputAdornment>
+                                                ),
+                                                sx: {
+                                                    height: "40px",
+                                                    fontSize: "18px",
+                                                    paddingRight: "8px",
+                                                },
+                                            }}
+                                            InputLabelProps={{ shrink: false }}
+                                        />
+                                    )}
+                                    renderOption={(props, option) => (
+                                        <li {...props}>
+                                            <Typography fontSize="16px">
+                                                {selectTickets === "0:แสดงทั้งหมด" ? option.Name : `${option.Name} (${option.CustomerType})`}
+                                            </Typography>
+                                        </li>
+                                    )}
+                                    ListboxProps={{
+                                        style: {
+                                            maxHeight: 250,
+                                        },
+                                    }}
+                                />
+                            </Paper>
+                        </Paper> */}
+                                <FormGroup row sx={{ marginBottom: -1.5 }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+                                    <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
+                                    <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="อยู่บริษัทในเครือ" />
+                                    <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
+                                </FormGroup>
+                            </Grid>
+                        </Grid>
+                }
+                <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}
@@ -837,7 +979,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                     </Grid>
                 </Grid>
             </Box>
-        </Container>
+        </Container >
 
     );
 };

@@ -36,7 +36,7 @@ import InsertDeductibleIncome from "./InsertDeductibleIncome";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const DeductibleIncomeDetail = ({openNavbar}) => {
+const DeductibleIncomeDetail = ({ openNavbar }) => {
     const [update, setUpdate] = React.useState({});
     const [open, setOpen] = useState(false);
     const [typeIncome, setTypeIncome] = React.useState(true);
@@ -150,7 +150,7 @@ const DeductibleIncomeDetail = ({openNavbar}) => {
             {
                 windowWidth >= 800 ?
                     <Grid container spacing={2} p={1}>
-                        <Grid item sm={8} lg={9}>
+                        <Grid item sm={12} lg={12}>
                             <Typography
                                 variant="h3"
                                 fontWeight="bold"
@@ -164,8 +164,15 @@ const DeductibleIncomeDetail = ({openNavbar}) => {
                                 }
                             </Typography>
                         </Grid>
-                        <Grid item sm={4} lg={3} sx={{ textAlign: "right" }}>
+                        <Grid item sm={12} lg={12} sx={{ textAlign: "right", marginTop: -10 }}>
                             <InsertDeductibleIncome data={deductibleIncome.length} income={income.length + 1} deduction={deduction.length + 1} />
+                        </Grid>
+                        <Grid item xs={12} md={12} sx={{ textAlign: "right", marginTop: -10 }}>
+                            <FormGroup row>
+                                <Typography variant="subtitle1" sx={{ marginRight: 1, marginTop: 1 }} gutterBottom>เลือกเพื่อแสดงข้อมูล</Typography>
+                                <FormControlLabel control={<Checkbox checked={typeIncome} color="info" onChange={() => setTypeIncome(!typeIncome)} />} label="รายได้" />
+                                <FormControlLabel control={<Checkbox checked={typeDeduction} color="info" onChange={() => setTypeDeduction(!typeDeduction)} />} label="รายหัก" />
+                            </FormGroup>
                         </Grid>
                     </Grid>
                     :
@@ -182,6 +189,13 @@ const DeductibleIncomeDetail = ({openNavbar}) => {
                         </Grid>
                         <Grid item xs={12} sx={{ textAlign: "center" }}>
                             <InsertDeductibleIncome data={deductibleIncome.length} income={income.length + 1} deduction={deduction.length + 1} />
+                        </Grid>
+                        <Grid item xs={12} sx={{ textAlign: "center" }}>
+                            <FormGroup row>
+                                <Typography variant="subtitle1" sx={{ marginRight: 1, marginTop: 1 }} gutterBottom>เลือกเพื่อแสดงข้อมูล</Typography>
+                                <FormControlLabel control={<Checkbox checked={typeIncome} color="info" onChange={() => setTypeIncome(!typeIncome)} />} label="รายได้" />
+                                <FormControlLabel control={<Checkbox checked={typeDeduction} color="info" onChange={() => setTypeDeduction(!typeDeduction)} />} label="รายหัก" />
+                            </FormGroup>
                         </Grid>
                     </Grid>
             }
@@ -205,13 +219,6 @@ const DeductibleIncomeDetail = ({openNavbar}) => {
                         </Grid>
                 } */}
                 <Grid container spacing={2}>
-                    <Grid item xs={12} md={12}>
-                        <FormGroup row>
-                            <Typography variant="subtitle1" sx={{ marginRight: 1, marginTop: 1 }} gutterBottom>เลือกเพื่อแสดงข้อมูล</Typography>
-                            <FormControlLabel control={<Checkbox checked={typeIncome} color="info" onChange={() => setTypeIncome(!typeIncome)} />} label="รายได้" />
-                            <FormControlLabel control={<Checkbox checked={typeDeduction} color="info" onChange={() => setTypeDeduction(!typeDeduction)} />} label="รายหัก" />
-                        </FormGroup>
-                    </Grid>
                     {
                         typeIncome &&
                         <Grid item xs={12} md={(typeIncome && typeDeduction) ? 6 : 12} >

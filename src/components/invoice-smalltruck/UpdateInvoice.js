@@ -161,8 +161,14 @@ const UpdateInvoice = (props) => {
             const matchedSmall = smalls.find(
                 (s) => s.id === Number(item.Registration.split(":")[0])
             );
+
+            const company = customerS.find((row) => row.id === Number(item.TicketName.split(":")[0]))
+
             return {
                 ...item,
+                CompanyNameNew: company?.CompanyName,
+                AddressNew: company?.Address,
+                CodeIDNew: company?.CodeID,
                 DateReceive: ticket.DateReceive,
                 DateDelivery: ticket.DateDelivery,
                 ShortName: matchedSmall?.ShortName

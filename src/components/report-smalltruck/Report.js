@@ -522,8 +522,9 @@ const ReportSmallTruck = () => {
 
     return (
       <TableRow sx={{ backgroundColor: bgColor }}>
+        <TableCell sx={{ position: "sticky", left: 0, zIndex: 1, backgroundColor: "#e0e0e0" }}></TableCell>
+        <TableCell sx={{ backgroundColor: "#e0e0e0" }}></TableCell>
         <TableCell
-          colSpan={3}
           sx={{
             fontWeight: "bold",
             textAlign: "center",
@@ -532,6 +533,7 @@ const ReportSmallTruck = () => {
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white"
           }}
         >
           {label}
@@ -717,10 +719,7 @@ const ReportSmallTruck = () => {
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
       <Grid container spacing={2}>
-        <Grid item md={3} xs={12}>
-
-        </Grid>
-        <Grid item md={9} xs={12}>
+        <Grid item md={12} xs={12}>
           <Typography
             variant="h3"
             fontWeight="bold"
@@ -730,6 +729,10 @@ const ReportSmallTruck = () => {
             รายงานรถเล็ก
           </Typography>
         </Grid>
+
+      </Grid>
+      <Divider sx={{ marginBottom: 1 }} />
+      <Grid container spacing={2} sx={{ marginTop: 1, marginBottom: -1 }}>
         <Grid item md={5} xs={12}>
           <Box
             sx={{
@@ -738,78 +741,78 @@ const ReportSmallTruck = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginTop: { md: -10, xs: 2 },
               marginBottom: 3
             }}
           >
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                openTo="day"
-                views={["year", "month", "day"]}
-                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
-                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                onChange={handleDateChangeDateStart}
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                    inputProps: {
-                      value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
-                      readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
-                    },
-                    InputProps: {
-                      startAdornment: (
-                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                          <b>วันที่ :</b>
-                        </InputAdornment>
-                      ),
-                      sx: {
-                        fontSize: "16px",
-                        height: "40px",
-                        padding: "10px",
-                        fontWeight: "bold",
+              <Paper sx={{ marginRight: 2 }}>
+                <DatePicker
+                  openTo="day"
+                  views={["year", "month", "day"]}
+                  value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                  format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                  onChange={handleDateChangeDateStart}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      fullWidth: true,
+                      inputProps: {
+                        value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                        readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                      },
+                      InputProps: {
+                        startAdornment: (
+                          <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                            <b>วันที่ :</b>
+                          </InputAdornment>
+                        ),
+                        sx: {
+                          fontSize: "16px",
+                          height: "40px",
+                          padding: "10px",
+                          fontWeight: "bold",
+                        },
                       },
                     },
-                  },
-                }}
-              />
-              <DatePicker
-                openTo="day"
-                views={["year", "month", "day"]}
-                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
-                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                onChange={handleDateChangeDateEnd}
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                    inputProps: {
-                      value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
-                      readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
-                    },
-                    InputProps: {
-                      startAdornment: (
-                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                          <b>ถึงวันที่ :</b>
-                        </InputAdornment>
-                      ),
-                      sx: {
-                        fontSize: "16px",
-                        height: "40px",
-                        padding: "10px",
-                        fontWeight: "bold",
+                  }}
+                />
+              </Paper>
+              <Paper>
+                <DatePicker
+                  openTo="day"
+                  views={["year", "month", "day"]}
+                  value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                  format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                  onChange={handleDateChangeDateEnd}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      fullWidth: true,
+                      inputProps: {
+                        value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                        readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                      },
+                      InputProps: {
+                        startAdornment: (
+                          <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                            <b>ถึงวันที่ :</b>
+                          </InputAdornment>
+                        ),
+                        sx: {
+                          fontSize: "16px",
+                          height: "40px",
+                          padding: "10px",
+                          fontWeight: "bold",
+                        },
                       },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </Paper>
             </LocalizationProvider>
           </Box>
         </Grid>
-      </Grid>
-      <Divider sx={{ marginBottom: 1 }} />
-      <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-        <Grid item xs={6}>
+        <Grid item md={5} xs={12}>
           <Paper>
             <Autocomplete
               id="autocomplete-tickets"
@@ -857,7 +860,7 @@ const ReportSmallTruck = () => {
             />
           </Paper>
         </Grid>
-        <Grid item xs={6} sx={{ textAlign: "right" }}>
+        <Grid item md={2} xs={12} sx={{ textAlign: "right" }}>
           <Button variant="contained" color="success" onClick={exportToExcel} >Export to excel</Button>
         </Grid>
       </Grid>
@@ -865,7 +868,7 @@ const ReportSmallTruck = () => {
         <TableContainer
           component={Paper}
           sx={{
-            marginBottom: 2, height: "80vh", width: "1270px",
+            marginBottom: 2, height: "80vh", width: "100%",
             overflowX: "auto"
           }}
         >
@@ -960,7 +963,7 @@ const ReportSmallTruck = () => {
                       <TableCell sx={{ textAlign: "center" }}>
                         {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>
+                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
 
                       </TableCell>
                       {/* ✅ ตรงกับ column ที่หัว */}

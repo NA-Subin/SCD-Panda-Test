@@ -596,9 +596,8 @@ const ReportTransports = ({ openNavbar }) => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
-            <Grid container spacing={2}>
-                <Grid item sm={2} lg={4}></Grid>
-                <Grid item sm={10} lg={8}>
+            <Grid container spacing={2} sx={{ marginBottom: -5 }}>
+                <Grid item sm={12} lg={12}>
                     <Typography
                         variant="h3"
                         fontWeight="bold"
@@ -608,88 +607,9 @@ const ReportTransports = ({ openNavbar }) => {
                         รายงานชำระค่าขนส่ง
                     </Typography>
                 </Grid>
-                <Grid item sm={6} lg={2}>
-                    <Box
-                        sx={{
-                            width: "100%", // กำหนดความกว้างของ Paper
-                            height: "40px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "left",
-                            marginTop: { md: -9, xs: 2 },
-                            marginBottom: 2
-                        }}
-                    >
-                        <TextField
-                            size="small"
-                            type="number"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                        <b>งวดการจ่ายปี :</b>
-                                    </InputAdornment>
-                                ),
-                                sx: {
-                                    fontSize: "16px",
-                                    height: "40px",
-                                    padding: "10px",
-                                    fontWeight: "bold",
-                                },
-                            }}
-                        />
-                    </Box>
-                </Grid>
-                <Grid item sm={6} lg={2}>
-                    <Box
-                        sx={{
-                            width: "100%", // กำหนดความกว้างของ Paper
-                            height: "40px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "left",
-                            marginTop: { md: -9, xs: 2 },
-                            marginBottom: 3
-                        }}
-                    >
-                        <TextField
-                            size="small"
-                            value={monthNames[month]}
-                            InputProps={{
-                                readOnly: true,
-                                startAdornment: (
-                                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                        <b>เดือน :</b>
-                                    </InputAdornment>
-                                ),
-                                sx: {
-                                    fontSize: "16px",
-                                    height: "40px",
-                                    padding: "10px",
-                                    fontWeight: "bold",
-                                },
-                                endAdornment: (
-                                    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", ml: 0.5 }}>
-                                        <IconButton
-                                            onClick={handleIncrement}
-                                            size="small"
-                                            sx={{ p: 0, flex: 1, minHeight: 0 }} // ปรับให้เต็มแต่ละครึ่ง
-                                        >
-                                            <ArrowDropUp fontSize="small" />
-                                        </IconButton>
-                                        <IconButton
-                                            onClick={handleDecrement}
-                                            size="small"
-                                            sx={{ p: 0, flex: 1, minHeight: 0 }}
-                                        >
-                                            <ArrowDropDown fontSize="small" />
-                                        </IconButton>
-                                    </Box>
-                                ),
-                            }}
-                        />
-                    </Box>
+                <Grid item sm={12} lg={10}></Grid>
+                <Grid item sm={12} lg={2}>
+                    <Button variant="contained" size="small" color="success" sx={{ marginTop: -17 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                 </Grid>
                 {/* <Grid item md={5} xs={12}>
                     <Box
@@ -768,12 +688,92 @@ const ReportTransports = ({ openNavbar }) => {
                     </Box>
                 </Grid> */}
             </Grid>
-            <Divider sx={{ marginBottom: 1 }} />
+            <Divider sx={{ marginBottom: 2 }} />
             <Box sx={{ width: "100%" }}>
                 {
                     windowWidth >= 800 ?
-                        <Grid container spacing={2} width="100%" marginBottom={1} >
-                            <Grid item sm={12} lg={4}>
+                        <Grid container spacing={2} width="100%">
+                            <Grid item sm={6} lg={2}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "left",
+                                    }}
+                                >
+                                    <TextField
+                                        size="small"
+                                        type="number"
+                                        value={year}
+                                        onChange={(e) => setYear(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>งวดการจ่ายปี :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item sm={6} lg={2}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "left",
+                                        marginBottom: 3
+                                    }}
+                                >
+                                    <TextField
+                                        size="small"
+                                        value={monthNames[month]}
+                                        InputProps={{
+                                            readOnly: true,
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>เดือน :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                            endAdornment: (
+                                                <Box sx={{ display: "flex", flexDirection: "column", height: "100%", ml: 0.5 }}>
+                                                    <IconButton
+                                                        onClick={handleIncrement}
+                                                        size="small"
+                                                        sx={{ p: 0, flex: 1, minHeight: 0 }} // ปรับให้เต็มแต่ละครึ่ง
+                                                    >
+                                                        <ArrowDropUp fontSize="small" />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        onClick={handleDecrement}
+                                                        size="small"
+                                                        sx={{ p: 0, flex: 1, minHeight: 0 }}
+                                                    >
+                                                        <ArrowDropDown fontSize="small" />
+                                                    </IconButton>
+                                                </Box>
+                                            ),
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item sm={12} lg={3.5}>
                                 <Paper>
                                     {/* <TextField
                                         select
@@ -834,7 +834,7 @@ const ReportTransports = ({ openNavbar }) => {
                                     <FormControlLabel control={<Checkbox checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ไม่อยู่บริษัทในเครือ" />
                                 </FormGroup> */}
                             </Grid>
-                            <Grid item sm={12} lg={6}>
+                            <Grid item sm={12} lg={4.5}>
                                 <FormGroup row sx={{ marginBottom: -1.5 }}>
                                     <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>เลือกตั๋ว : </Typography>
                                     <FormControlLabel control={<Checkbox checked={ticketO} />} onChange={() => setTicketO(!ticketO)} label="ตั๋วน้ำมัน" />
@@ -842,12 +842,88 @@ const ReportTransports = ({ openNavbar }) => {
                                     <FormControlLabel control={<Checkbox checked={ticketT} />} onChange={() => setTicketT(!ticketT)} label="ตั๋วรับจ้างขนส่ง" />
                                 </FormGroup>
                             </Grid>
-                            <Grid item sm={12} lg={2}>
-                                <Button variant="contained" size="small" color="success" sx={{ marginTop: 1.5 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
-                            </Grid>
                         </Grid>
                         :
                         <Grid container spacing={2} p={1}>
+                            <Grid item xs={6}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "left",
+                                    }}
+                                >
+                                    <TextField
+                                        size="small"
+                                        type="number"
+                                        value={year}
+                                        onChange={(e) => setYear(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>งวดการจ่ายปี :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Box
+                                    sx={{
+                                        width: "100%", // กำหนดความกว้างของ Paper
+                                        height: "40px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "left",
+                                    }}
+                                >
+                                    <TextField
+                                        size="small"
+                                        value={monthNames[month]}
+                                        InputProps={{
+                                            readOnly: true,
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>เดือน :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                            endAdornment: (
+                                                <Box sx={{ display: "flex", flexDirection: "column", height: "100%", ml: 0.5 }}>
+                                                    <IconButton
+                                                        onClick={handleIncrement}
+                                                        size="small"
+                                                        sx={{ p: 0, flex: 1, minHeight: 0 }} // ปรับให้เต็มแต่ละครึ่ง
+                                                    >
+                                                        <ArrowDropUp fontSize="small" />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        onClick={handleDecrement}
+                                                        size="small"
+                                                        sx={{ p: 0, flex: 1, minHeight: 0 }}
+                                                    >
+                                                        <ArrowDropDown fontSize="small" />
+                                                    </IconButton>
+                                                </Box>
+                                            ),
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
                             <Grid item xs={12}>
                                 <Paper>
                                     <TextField
@@ -901,7 +977,7 @@ const ReportTransports = ({ openNavbar }) => {
                             </Grid>
                         </Grid>
                 }
-                <Grid container spacing={2} width="100%">
+                <Grid container spacing={2} width="100%" sx={{ marginTop: -3 }}>
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}

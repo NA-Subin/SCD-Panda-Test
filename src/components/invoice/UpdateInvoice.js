@@ -164,8 +164,13 @@ const UpdateInvoice = (props) => {
                 reg => reg.id === Number(item.Registration.split(":")[0])
             );
 
+            const company = customerB.find((row) => row.id === Number(item.TicketName.split(":")[0]))
+
             return {
                 ...item,
+                CompanyNameNew: company?.CompanyName,
+                AddressNew: company?.Address,
+                CodeIDNew: company?.CodeID,
                 DateReceive: ticket.DateReceive,
                 DateDelivery: ticket.DateDelivery,
                 RegTail: regMatch ? regMatch.RegTail : null, // เก็บค่า RegTail ถ้าเจอ
@@ -451,7 +456,7 @@ const UpdateInvoice = (props) => {
                     // ถ้า product ไม่อยู่ใน list จะให้ไปอยู่ท้าย
                     return (orderA === -1 ? Infinity : orderA) - (orderB === -1 ? Infinity : orderB);
                 }),
-            Order: order.reduce((acc, current) => {
+            Order: orderList.reduce((acc, current) => {
                 // ✅ ตรวจสอบว่าค่า TicketName ซ้ำหรือไม่ และต้องตรงกับ ticket.TicketName
                 if (!acc.some(item => item.TicketName === current.TicketName) && current.TicketName === ticket.TicketName) {
                     acc.push(current);

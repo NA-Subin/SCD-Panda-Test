@@ -558,7 +558,7 @@ const DocSalary = ({ openNavbar }) => {
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-            <Grid container>
+            <Grid container sx={{ marginBottom: -2 }}>
                 <Grid item md={12} xs={12}>
                     <Typography
                         variant="h3"
@@ -569,9 +569,9 @@ const DocSalary = ({ openNavbar }) => {
                         เงินเดือน
                     </Typography>
                 </Grid>
-                <Grid item xl={9.5} xs={12} />
-                <Grid item xl={2.5} xs={12}>
-                    <Button variant="contained" size="small" color="success" sx={{ marginTop: -10 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                <Grid item xl={10} xs={12} />
+                <Grid item xl={2} xs={12}>
+                    <Button variant="contained" color="success" sx={{ marginTop: -9 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                 </Grid>
             </Grid>
             <Divider sx={{ marginBottom: 1 }} />
@@ -1005,8 +1005,8 @@ const DocSalary = ({ openNavbar }) => {
                                                     <MoneyLoan money={moneyLoan} periods={periods} />
                                                 </Box>
                                             </TableCell> */}
-                                            <MoneyGuarantee money={moneyGuarantee} periods={periods} />
-                                            <MoneyLoan money={moneyLoan} periods={periods} />
+                                            <MoneyGuarantee money={moneyGuarantee} periods={periods} name={`${row.Name} ${row.Registration ? row.Registration : ""}`}/>
+                                            <MoneyLoan money={moneyLoan} periods={periods} name={`${row.Name} ${row.Registration ? row.Registration : ""}`}/>
                                         </TableRow>
                                     )
                                     )}
