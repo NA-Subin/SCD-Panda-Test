@@ -883,9 +883,46 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                                                 <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1]}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(Number(row.VolumeProduct))}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.RateOil}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "30px !important",
+                                                        paddingRight: "30px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}
+                                                >
+                                                    {new Intl.NumberFormat("en-US").format(Number(row.VolumeProduct))}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "30px !important",
+                                                        paddingRight: "30px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}
+                                                >
+                                                    {
+                                                        new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2, // แสดงทศนิยมอย่างน้อย 2 ตำแหน่ง
+                                                            maximumFractionDigits: 2  // แสดงทศนิยมไม่เกิน 2 ตำแหน่ง
+                                                        }).format(Number(row.RateOil))
+                                                    }
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "30px !important",
+                                                        paddingRight: "30px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}
+                                                >
+                                                    {
+                                                        new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2, // แสดงทศนิยมอย่างน้อย 2 ตำแหน่ง
+                                                            maximumFractionDigits: 2  // แสดงทศนิยมไม่เกิน 2 ตำแหน่ง
+                                                        }).format(Number(row.Amount))
+                                                    }
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     }

@@ -792,10 +792,55 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.VolumeProduct)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Amount)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.IncomingMoney)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.OverdueTransfer)}</TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "40px !important",
+                                                        paddingRight: "40px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}
+                                                >
+                                                    {new Intl.NumberFormat("en-US").format(row.VolumeProduct)}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "40px !important",
+                                                        paddingRight: "40px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}
+                                                >
+                                                    {new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2, // แสดงทศนิยมอย่างน้อย 2 ตำแหน่ง
+                                                        maximumFractionDigits: 2  // แสดงทศนิยมไม่เกิน 2 ตำแหน่ง
+                                                    }).format(Number(row.Amount))}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "40px !important",
+                                                        paddingRight: "40px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}
+                                                >
+                                                    {new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2, // แสดงทศนิยมอย่างน้อย 2 ตำแหน่ง
+                                                        maximumFractionDigits: 2  // แสดงทศนิยมไม่เกิน 2 ตำแหน่ง
+                                                    }).format(Number(row.IncomingMoney))}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "40px !important",
+                                                        paddingRight: "40px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}
+                                                >
+                                                    {new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2, // แสดงทศนิยมอย่างน้อย 2 ตำแหน่ง
+                                                        maximumFractionDigits: 2  // แสดงทศนิยมไม่เกิน 2 ตำแหน่ง
+                                                    }).format(Number(row.OverdueTransfer))}
+                                                </TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>
                                                     <ReportDetail key={row.id} row={row} dateStart={selectedDateStart} dateEnd={selectedDateEnd} orderDetail={flattenedRef.current} />
                                                 </TableCell>

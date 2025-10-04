@@ -199,14 +199,18 @@ const ReportSmallTruck = () => {
   const travelSummary = {};
 
   outboundList.forEach((trip) => {
-    const key = `${trip.Driver}_${trip.Registration}`;
     const travel = Number(trip.Travel) || 0;
+
+    const dv = driver.find((item) => item.id === Number(trip.Driver.split(":")[0]))
+    const rg = registration.find((item) => item.id === Number(trip.Registration.split(":")[0]))
+
+    const key = `${dv?.Name}_${rg?.RegHead}`;
 
     if (!travelSummary[key]) {
       travelSummary[key] = {
-        Driver: trip.Driver,
-        Registration: trip.Registration,
-        totalTravel: 0,
+        Driver: `${dv?.id}:${dv?.Name}`,
+        Registration: `${rg?.id}:${rg?.RegHead}`,
+        totalTravel: 0
       };
     }
 
@@ -544,35 +548,68 @@ const ReportSmallTruck = () => {
           return (
             <CellComponent
               key={`${dataKey}-${key}`}
-              sx={{ textAlign: "center", fontWeight: "bold", width: 80 }}
+              sx={{
+                textAlign: "right",
+                fontWeight: "bold",
+                width: 80,
+                paddingLeft: "10px !important",
+                paddingRight: "10px !important",
+                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                opacity: 0.8
+              }}
             >
               {dataSource[dataKey][key]?.toLocaleString() || 0}
             </CellComponent>
           );
         })}
 
+        <TableCell sx={{ textAlign: "right", fontWeight: "bold", backgroundColor: "#e0e0e0" }}>รวมทั้งหมด</TableCell>
         <TableCell
           sx={{
-            textAlign: "center",
-            width: 200,
+            textAlign: "right",
             fontWeight: "bold",
             backgroundColor: "#e0e0e0",
+            paddingLeft: "10px !important",
+            paddingRight: "10px !important",
+            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
           }}
         >
           {total.toLocaleString()}
         </TableCell>
 
         {/* ✅ เงื่อนไขเฉพาะ "รับเข้า" และใช้ rowSpan */}
-        {dataKey === "inbound" &&
+        {dataKey === "inbound" ?
           summarizedList.map((row, idx) => (
             <TableCell
               key={`${dataKey}-summary-${idx}`}
-              sx={{ textAlign: "center", width: 200 }}
+              sx={{
+                textAlign: "right",
+                width: 200,
+                paddingLeft: "10px !important",
+                paddingRight: "10px !important",
+                fontVariantNumeric: "tabular-nums",
+              }}
               rowSpan={3}
             >
               {row.totalTravel.toLocaleString()}
             </TableCell>
-          ))}
+          ))
+          :
+          <TableCell
+            sx={{
+              textAlign: "right",
+              width: 200,
+              paddingLeft: "10px !important",
+              paddingRight: "10px !important",
+              fontVariantNumeric: "tabular-nums",
+              backgroundColor: "#e0e0e0",
+            }}
+            rowSpan={3}
+            colSpan={summarizedList.length}
+          >
+
+          </TableCell>
+        }
       </TableRow>
     );
   };
@@ -744,7 +781,7 @@ const ReportSmallTruck = () => {
               marginBottom: 3
             }}
           >
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={"th"}>
               <Paper sx={{ marginRight: 2 }}>
                 <DatePicker
                   openTo="day"
@@ -884,24 +921,27 @@ const ReportSmallTruck = () => {
                 <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
                   รับเข้าโดย
                 </TablecellPink>
-                <TableCellG95 sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                <TableCellG95 sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   G95
                 </TableCellG95>
-                <TableCellB95 sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                <TableCellB95 sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   B95
                 </TableCellB95>
-                <TableCellB7 sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                <TableCellB7 sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   B7
                 </TableCellB7>
-                <TableCellG91 sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                <TableCellG91 sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   G91
                 </TableCellG91>
-                <TableCellE20 sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                <TableCellE20 sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   E20
                 </TableCellE20>
-                <TableCellPWD sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
+                <TableCellPWD sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                   PWD
                 </TableCellPWD>
+                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+
+                </TablecellPink>
                 <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                   ไปส่งที่
                 </TablecellPink>
@@ -927,25 +967,45 @@ const ReportSmallTruck = () => {
                       <TableCell sx={{ textAlign: "center" }}>
                         {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
-                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
-                        {`${row.Driver.split(":")[1]} / ${row.Registration.split(":")[1]}`}
+                      <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
+                        <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >{`${row.Driver.split(":")[1]} / ${row.Registration.split(":")[1]}`}</Typography>
                       </TableCell>
                       {/* ✅ ตรงกับ column ที่หัว */}
                       {productTypes.map((productKey) => {
                         const volume = row.Product?.[productKey]?.Volume;
+                        const value = Number(volume) * 1000;
+
                         return (
-                          <TableCell key={productKey} sx={{ textAlign: "center" }}>
-                            {(Number(volume) * 1000 || "").toLocaleString()}
+                          <TableCell
+                            key={productKey}
+                            sx={{
+                              textAlign: "right",              // ✅ ชิดขวา
+                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                              paddingLeft: "10px !important",
+                              paddingRight: "10px !important",
+                              color: value ? "#003003ff" : "lightgray",
+                            }}
+                          >
+                            {value ? value.toLocaleString() : "0"}
                           </TableCell>
                         );
                       })}
-                      <TableCell sx={{ textAlign: "center" }}>
 
+                      <TableCell sx={{ textAlign: "center", color: "lightgray" }} colSpan={2}>
+                        -
                       </TableCell>
                       {
                         summarizedList.map((d) => (
-                          <TableCell sx={{ textAlign: "center" }}>
-
+                          <TableCell
+                            sx={{
+                              textAlign: "center",
+                              color: "lightgray",
+                              paddingLeft: "10px !important",
+                              paddingRight: "10px !important",
+                              fontVariantNumeric: "tabular-nums"
+                            }}
+                          >
+                            -
                           </TableCell>
                         ))
                       }
@@ -963,31 +1023,59 @@ const ReportSmallTruck = () => {
                       <TableCell sx={{ textAlign: "center" }}>
                         {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
-                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
-
+                      <TableCell sx={{ textAlign: "center", color: "lightgray", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
+                        -
                       </TableCell>
                       {/* ✅ ตรงกับ column ที่หัว */}
                       {productTypes.map((productKey) => {
                         const volume = row.Product?.[productKey]?.Volume;
                         return (
-                          <TableCell key={productKey} sx={{ textAlign: "center" }}>
-                            {(volume ? (-Number(volume)).toLocaleString() : "")}
+                          <TableCell
+                            key={productKey}
+                            sx={{
+                              textAlign: "right",              // ✅ ชิดขวา
+                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                              paddingLeft: "10px !important",
+                              paddingRight: "10px !important",
+                              color: volume ? "#720000ff" : "lightgray",
+                            }}
+                          >
+                            {(volume ? (-Number(volume)).toLocaleString() : "0")}
                           </TableCell>
                         );
                       })}
 
-                      <TableCell sx={{ textAlign: "center" }}>
-                        {row.TicketName.split(":")[1] || "-"}
+                      <TableCell sx={{ textAlign: "left" }} colSpan={2}>
+                        <Typography variant="subtitle2" sx={{ marginLeft: 2 }}>{row.TicketName.split(":")[1] || "-"}</Typography>
                       </TableCell>
                       {
                         summarizedList.map((d) => (
                           d.Driver === row.Driver && d.Registration === row.Registration ? (
-                            <TableCell sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                            <TableCell
+                              sx={{
+                                textAlign: "right",
+                                fontSize: 16,
+                                width: 200,
+                                paddingLeft: "10px !important",
+                                paddingRight: "10px !important",
+                                fontVariantNumeric: "tabular-nums"
+                              }}
+                            >
                               <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{row.Travel}</Typography>
                             </TableCell>
                           )
                             :
-                            <TableCell sx={{ textAlign: "center" }} >-</TableCell>
+                            <TableCell
+                              sx={{
+                                textAlign: "center",
+                                color: "lightgray",
+                                paddingLeft: "10px !important",
+                                paddingRight: "10px !important",
+                                fontVariantNumeric: "tabular-nums"
+                              }}
+                            >
+                              -
+                            </TableCell>
                         ))
                       }
                     </TableRow>

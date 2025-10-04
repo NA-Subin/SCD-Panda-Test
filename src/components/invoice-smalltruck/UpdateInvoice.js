@@ -1255,9 +1255,12 @@ const UpdateInvoice = (props) => {
                                                             </LocalizationProvider>
                                                     }
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 350 }}>
+                                                <TableCell sx={{ textAlign: "left", height: '30px', width: 350 }}>
                                                     {
-                                                        !updateTranfer || row.id !== tranferID ? row.BankName.split(":")[1]
+                                                        !updateTranfer || row.id !== tranferID ?
+                                                            <Box sx={{ marginLeft: 2, }}>
+                                                                {row.BankName.split(":")[1]}
+                                                            </Box>
                                                             :
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <FormControl

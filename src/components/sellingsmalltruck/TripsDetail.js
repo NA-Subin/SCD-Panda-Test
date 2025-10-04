@@ -112,22 +112,58 @@ const TripsDetail = (props) => {
                         </TableCell>
                     );
                 })}
-                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(trips.CostTrip)}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(parseFloat(trips.WeightOil))}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(trips.WeightTruck)}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(trips.TotalWeight)}</TableCell>
+                <TableCell
+                    sx={{
+                        textAlign: "right",
+                        paddingLeft: "20px !important",
+                        paddingRight: "20px !important",
+                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                    }}
+                >
+                    {new Intl.NumberFormat("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    }).format(trips.CostTrip)}
+                </TableCell>
+                <TableCell
+                    sx={{
+                        textAlign: "right",
+                        paddingLeft: "20px !important",
+                        paddingRight: "20px !important",
+                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                    }}
+                >
+                    {new Intl.NumberFormat("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    }).format(parseFloat(trips.WeightOil))}
+                </TableCell>
+                <TableCell
+                    sx={{
+                        textAlign: "right",
+                        paddingLeft: "20px !important",
+                        paddingRight: "20px !important",
+                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                    }}
+                >
+                    {new Intl.NumberFormat("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    }).format(trips.WeightTruck)}
+                </TableCell>
+                <TableCell
+                    sx={{
+                        textAlign: "right",
+                        paddingLeft: "20px !important",
+                        paddingRight: "20px !important",
+                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                    }}
+                >
+                    {new Intl.NumberFormat("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    }).format(trips.TotalWeight)}
+                </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                     {trips.StatusTrip}
                 </TableCell>

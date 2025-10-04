@@ -530,20 +530,48 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                     )}
                                   </TableCell>
                                   <TableCell sx={{ textAlign: "left", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    <Box sx={{ marginLeft: 4 }}>
+                                    <Box sx={{ marginLeft: 4, }}>
                                       {row.TicketName.split(":")[1]}
                                     </Box>
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  <TableCell
+                                    sx={{
+                                      textAlign: "right",
+                                      fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                      paddingLeft: "30px !important",
+                                      paddingRight: "30px !important",
+                                      fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                    }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  <TableCell
+                                    sx={{
+                                      textAlign: "right",
+                                      fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                      paddingLeft: "30px !important",
+                                      paddingRight: "30px !important",
+                                      fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                    }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  <TableCell
+                                    sx={{
+                                      textAlign: "right",
+                                      fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                      paddingLeft: "30px !important",
+                                      paddingRight: "30px !important",
+                                      fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                    }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
                                   </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  <TableCell
+                                    sx={{
+                                      textAlign: "right",
+                                      fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                      paddingLeft: "30px !important",
+                                      paddingRight: "30px !important",
+                                      fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                    }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
                                   </TableCell>
                                 </TableRow>
@@ -565,20 +593,64 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                     .add(row.CreditTime === "-" ? 0 : row.CreditTime, "day")
                                     .format("DD/MM/YYYY")}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {row.TicketName.split(":")[1]}
+                                <TableCell sx={{ textAlign: "left", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  <Box sx={{ marginLeft: 4, }}>
+                                    {row.TicketName.split(":")[1]}
+                                  </Box>
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                <TableCell
+                                  sx={{
+                                    textAlign: "right",
+                                    fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                    paddingLeft: "30px !important",
+                                    paddingRight: "30px !important",
+                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                  }}>
                                   {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                <TableCell
+                                  sx={{
+                                    textAlign: "right",
+                                    fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                    paddingLeft: "20px !important",
+                                    paddingRight: "20px !important",
+                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                  }}>
+                                  {new Intl.NumberFormat("en-US", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  }).format(row.TotalAmount)}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                <TableCell
+                                  sx={{
+                                    textAlign: "right",
+                                    fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                    paddingLeft: "20px !important",
+                                    paddingRight: "20px !important",
+                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                  }}>
+                                  {new Intl.NumberFormat("en-US", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  }).format(row.TotalOverdue)}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
+                                <TableCell
+                                  sx={{
+                                    textAlign: "right",
+                                    fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
+                                    paddingLeft: "20px !important",
+                                    paddingRight: "20px !important",
+                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                  }}>
+                                  {
+                                    row.TotalAmount - row.TotalOverdue !== 0 ?
+                                      new Intl.NumberFormat("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      }).format(row.TotalOverdue)
+                                      :
+                                      new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)
+                                  }
                                 </TableCell>
                               </TableRow>
                             ))
