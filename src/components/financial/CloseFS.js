@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
+    Autocomplete,
     Badge,
     Box,
     Button,
@@ -48,7 +49,8 @@ import { useTripData } from "../../server/provider/TripProvider";
 const CloseFS = () => {
 
     const [date, setDate] = React.useState(false);
-    const [check, setCheck] = React.useState(1);
+    const [check1, setCheck1] = React.useState(true);
+    const [check2, setCheck2] = React.useState(true);
     const [months, setMonths] = React.useState(dayjs(new Date));
     const [years, setYears] = React.useState(dayjs(new Date));
     const [driverDetail, setDriver] = React.useState([]);
@@ -115,39 +117,111 @@ const CloseFS = () => {
 
     //const getDriver = () => {
     const filtered = orders
-        .filter((row) => row.Trip !== "ยกเลิก")
+        .filter(
+            (row) => row.Trip !== "ยกเลิก" && row.CustomerType !== "ตั๋วรถใหญ่"
+        )
         .reduce((acc, curr) => {
-            const exists = acc.some(
-                (item) =>
-                    item.Driver === curr.Driver && item.Registration === curr.Registration
+            // 🧮 1) รวมค่าจาก Product
+            let totalVolume = 0;
+            let totalAmount = 0;
+
+            Object.entries(curr.Product || {}).forEach(([key, value]) => {
+                if (key !== "P") {
+                    totalVolume += Number(value.Volume || 0) * 1000;
+                    totalAmount += Number(value.Amount || 0);
+                }
+            });
+            
+
+            // 💰 2) รวมค่าจาก Price (IncomingMoney)
+            let totalOverdue = 0;
+            if (curr.Price) {
+                totalOverdue = Object.values(curr.Price).reduce(
+                    (sum, p) => sum + Number(p?.IncomingMoney || 0),
+                    0
+                );
+            }
+
+            // 🚚 3) ดึงข้อมูล Trip + Depot + Rate
+            const tripDetail = trips.find((trip) => trip.id - 1 === curr.Trip);
+            const depotName = tripDetail?.Depot?.split(":")[1] || "-";
+
+            let rate = 0;
+            if (depotName === "ลำปาง") rate = curr.Rate1;
+            else if (depotName === "พิจิตร") rate = curr.Rate2;
+            else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName))
+                rate = curr.Rate3;
+
+            // 🎫 4) ตรวจว่ามี TicketGroup แล้วหรือยัง
+            let ticketGroup = acc.find((t) => t.TicketName === curr.TicketName);
+
+            if (!ticketGroup) {
+                const totalPrice = totalVolume * rate;
+                const vatOnePercent = totalPrice * 0.01;
+
+                ticketGroup = {
+                    TicketName: curr.TicketName,
+                    Rate: rate,
+                    TotalVolume: totalVolume,
+                    TotalPrice: totalPrice,
+                    VatOnePercent: vatOnePercent,
+                    TotalAmount: totalPrice - vatOnePercent,
+                    TotalOverdue: totalOverdue,
+                    Depot: tripDetail?.Depot || "-",
+                    Drivers: [],
+                };
+
+                acc.push(ticketGroup);
+            }
+
+            // 👨‍✈️ 5) ตรวจว่า driver + registration มีอยู่หรือยัง
+            let driverGroup = ticketGroup.Drivers.find(
+                (d) => d.Driver === curr.Driver && d.Registration === curr.Registration
             );
 
-            if (!exists) {
-                acc.push({
-                    Date: curr.Date,
+            if (!driverGroup) {
+                driverGroup = {
                     Driver: curr.Driver,
                     Registration: curr.Registration,
-                });
+                    Volume: 0,
+                    Amount: 0,
+                };
+                ticketGroup.Drivers.push(driverGroup);
             }
+
+            // ⚙️ 6) รวม Volume / Amount สำหรับ driver
+            const driverVolume = Object.values(curr.Product || {}).reduce(
+                (sum, p) => sum + Number(p?.Volume || 0),
+                0
+            );
+
+            const driverAmount = Object.values(curr.Product || {}).reduce(
+                (sum, p) => sum + Number(p?.Amount || 0),
+                0
+            );
+
+            driverGroup.Volume += driverVolume;
+            driverGroup.Amount += driverAmount;
 
             return acc;
         }, []);
 
+    console.log("filtered : ", filtered);
     // const tripdetail = trips.find((row) => orders.find((r) => r.Trip === row.id-1));
 
     // console.log("tripdetail : ", tripdetail.Depot);
 
-    const detail = filtered.map((row) => {
-        const regId = Number(row.Registration.split(":")[0]); // สมมติว่า Registration = "123:1กข1234"
-        const regInfo = registration.find((r) => r.id === regId && (formatmonth(row.Date) === dayjs(months).format("MMMM")));
+    // const detail = filtered.map((row) => {
+    //     const regId = Number(row.Registration.split(":")[0]); // สมมติว่า Registration = "123:1กข1234"
+    //     const regInfo = registration.find((r) => r.id === regId && (formatmonth(row.Date) === dayjs(months).format("MMMM")));
 
-        return {
-            Date: row.Date,
-            Driver: row.Driver,
-            Registration: row.Registration,
-            Company: regInfo ? regInfo.Company : null, // ถ้าไม่เจอให้เป็น null
-        };
-    });
+    //     return {
+    //         Date: row.Date,
+    //         Driver: row.Driver,
+    //         Registration: row.Registration,
+    //         Company: regInfo ? regInfo.Company : null, // ถ้าไม่เจอให้เป็น null
+    //     };
+    // });
 
     const [driverData, setDriverData] = useState([])
     const [driverDataNotCancel, setDriverDataNotCancel] = useState([])
@@ -161,7 +235,6 @@ const CloseFS = () => {
     //    getDriver();
     //}, []);
 
-    console.log("detail  : ", detail);
     console.log("data : ", data);
     console.log("Data Not Cancel : ", dataNotCancel);
 
@@ -347,8 +420,8 @@ const CloseFS = () => {
             </Typography>
             <Divider sx={{ marginBottom: 2 }} />
             <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
-                <Grid container spacing={2}>
-                    <Grid item md={2} xs={6}>
+                <Grid container spacing={2} paddingLeft={4} paddingRight={4} >
+                    <Grid item md={3} xs={12}>
                         <FormGroup row>
                             <FormControlLabel
                                 control={
@@ -358,7 +431,7 @@ const CloseFS = () => {
                                     />
                                 }
                                 label={
-                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
                                         รายปี
                                     </Typography>
                                 }
@@ -371,17 +444,84 @@ const CloseFS = () => {
                                     />
                                 }
                                 label={
-                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
                                         รายเดือน
                                     </Typography>
                                 }
                             />
                         </FormGroup>
                     </Grid>
-                    <Grid item md={3} xs={6}>
+                    <Grid item md={5} xs={12}>
+                        <Paper
+                            component="form"
+                            sx={{ height: "35px", width: "100%" }}
+                        >
+                            {/* <Autocomplete
+                                options={companies} // ✅ ใช้ข้อมูลชุดเดิม
+                                getOptionLabel={(option) => option.Name} // แสดงชื่อบริษัท
+                                value={companies.find((c) => `${c.id}:${c.Name}` === companyName) || null} // ✅ set ค่าที่เลือก
+                                onChange={(event, newValue) => {
+                                    if (newValue) {
+                                        handleCompany(`${newValue.id}:${newValue.Name}`);
+                                    } else {
+                                        handleCompany("");
+                                    }
+                                }}
+                                sx={{
+                                    fontSize: "16px",
+                                    "& .MuiInputBase-root": {
+                                        height: "35px", // ✅ ความสูงของ input
+                                        fontSize: "16px",
+                                    },
+                                    "& .MuiOutlinedInput-input": {
+                                        padding: "6px 10px", // ✅ padding ด้านใน
+                                    },
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="กรุณาเลือกบริษัท"
+                                        variant="outlined"
+                                    />
+                                )}
+                            /> */}
+                            <Autocomplete
+                                options={companies} // ✅ ใช้ข้อมูลชุดเดิม
+                                getOptionLabel={(option) => option.Name} // แสดงชื่อบริษัท
+                                isOptionEqualToValue={(option, value) => option.Name === value.Name} // ตรวจสอบค่าที่เลือก
+                                value={companies.find((c) => `${c.id}:${c.Name}` === companyName) || null} // ✅ set ค่าที่เลือก
+                                onChange={(event, newValue) => {
+                                    if (newValue) {
+                                        handleCompany(`${newValue.id}:${newValue.Name}`);
+                                    } else {
+                                        handleCompany("");
+                                    }
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label={companyName === "" ? "กรุณาเลือกบริษัท" : ""} // เปลี่ยน label กลับหากไม่เลือก
+                                        variant="outlined"
+                                        size="small"
+                                        sx={{
+                                            "& .MuiOutlinedInput-root": { height: "35px" },
+                                            "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                        }}
+                                    />
+                                )}
+                                renderOption={(props, option) => (
+                                    <li {...props}>
+                                        <Typography fontSize="16px">{`${option.Name}`}</Typography>
+                                    </li>
+                                )}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item md={4} xs={12}></Grid>
+                    <Grid item md={3} xs={12}>
                         {
                             date ?
-                                <Paper component="form" sx={{ width: "100%", height: "30px", marginTop: 1 }}>
+                                <Paper component="form" sx={{ width: "100%", height: "35px", marginTop: -2 }}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DatePicker
                                             openTo="year"
@@ -402,7 +542,7 @@ const CloseFS = () => {
                                                         ),
                                                         sx: {
                                                             fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                            height: "30px",  // ความสูงของ Input
+                                                            height: "35px",  // ความสูงของ Input
                                                             padding: "10px", // Padding ภายใน Input
                                                             fontWeight: "bold",
                                                         },
@@ -413,7 +553,7 @@ const CloseFS = () => {
                                     </LocalizationProvider>
                                 </Paper>
                                 :
-                                <Paper component="form" sx={{ width: "100%", height: "30px", marginTop: 1 }}>
+                                <Paper component="form" sx={{ width: "100%", height: "35px", marginTop: -2 }}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DatePicker
                                             openTo="month"
@@ -434,7 +574,7 @@ const CloseFS = () => {
                                                         ),
                                                         sx: {
                                                             fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                            height: "30px",  // ความสูงของ Input
+                                                            height: "35px",  // ความสูงของ Input
                                                             padding: "10px", // Padding ภายใน Input
                                                             fontWeight: "bold",
                                                         },
@@ -446,39 +586,10 @@ const CloseFS = () => {
                                 </Paper>
                         }
                     </Grid>
-                    <Grid item md={7} xs={12}>
-                        <FormControl fullWidth size="small" sx={{ marginTop: 1 }}>
-                            <InputLabel id="demo-simple-select-label" sx={{ fontSize: "16px" }}>กรุณาเลือกบริษัท</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                label="กรุณาเลือกบริษัท"
-                                value={companyName}
-                                onChange={(e) => handleCompany(e.target.value)}
-                                sx={{
-                                    fontSize: "16px",
-                                    fontWeight: "bold",
-                                    height: "30px", // ความสูงโดยรวม
-                                    '.MuiSelect-select': {
-                                        padding: "8px 14px", // padding ข้างใน input
-                                        display: "flex",
-                                        alignItems: "center",
-                                    },
-                                }}
-                            >
-                                {
-                                    companies.map((row) => (
-                                        <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
-                                    ))
-                                }
-                            </Select>
-                        </FormControl>
-
-                    </Grid>
-                    <Grid item md={12} xs={12}>
+                    <Grid item md={9} xs={12}>
                         <FormGroup row sx={{ marginTop: -2 }}>
-                            <Typography variant="subtitle2" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography>
-                            <FormControlLabel
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography>
+                            {/* <FormControlLabel
                                 control={
                                     <Checkbox
                                         checked={check === 1 ? true : false}
@@ -490,30 +601,30 @@ const CloseFS = () => {
                                         ทั้งหมด
                                     </Typography>
                                 }
-                            />
+                            /> */}
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={check === 2 ? true : false}
-                                        onChange={() => setCheck(2)}
+                                        checked={check1}
+                                        onChange={() => setCheck1(!check1)}
                                     />
                                 }
                                 label={
-                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                        รายได้
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                        แสดงค่าขนส่ง
                                     </Typography>
                                 }
                             />
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={check === 3 ? true : false}
-                                        onChange={() => setCheck(3)}
+                                        checked={check2}
+                                        onChange={() => setCheck2(!check2)}
                                     />
                                 }
                                 label={
-                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold" }}>
-                                        ค่าใช้จ่าย
+                                    <Typography sx={{ fontSize: "16px", fontWeight: "bold" }}>
+                                        แสดงจำนวนลิตร
                                     </Typography>
                                 }
                             />
@@ -540,7 +651,7 @@ const CloseFS = () => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box display="flex" justifyContent="center" alignItems="center" width="100%" sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Box display="flex" justifyContent="center" alignItems="center" width="100%" sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
                 <TableContainer
                     component={Paper}
                     sx={{
@@ -551,19 +662,19 @@ const CloseFS = () => {
                     <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
                         <TableHead sx={{ height: "5vh" }}>
                             <TableRow>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
                                     ลำดับ
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
                                     ประเภท
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 75, zIndex: 5, borderRight: "2px solid white" }}>
                                     ชื่อรายการ
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     เฉลี่ยค่าขนส่ง/ลิตร
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white" }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 350, zIndex: 5, borderRight: "2px solid white" }}>
                                     รวม
                                 </TablecellSelling>
                                 {
@@ -578,7 +689,7 @@ const CloseFS = () => {
                         </TableHead>
                         <TableBody>
                             {
-                                dataNotCancel.map((row, index) => (
+                                filtered.map((row, index) => (
                                     <TableRow>
                                         <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>
                                             {index + 1}
@@ -591,10 +702,7 @@ const CloseFS = () => {
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center" }}>
                                             {
-                                                row.Depot.split(":")[1] === "ลำปาง" ? row.Rate1
-                                                    : row.Depot.split(":")[1] === "พิจิตร" ? row.Rate2
-                                                        : ["สระบุรี", "บางปะอิน", "IR"].includes(row.Depot.split(":")[1]) ? row.Rate3
-                                                            : ""
+                                                row.Rate
                                             }
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>

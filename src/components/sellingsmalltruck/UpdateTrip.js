@@ -109,6 +109,15 @@ const UpdateTrip = (props) => {
         };
     }, []);
 
+    const [isFocused1, setIsFocused1] = useState(false);
+    const [isFocused2, setIsFocused2] = useState(false);
+
+    const formatNumber = (value) => {
+        const number = parseInt(value, 10);
+        if (isNaN(number)) return "";
+        return number.toLocaleString(); // => 3000 -> "3,000"
+    };
+
     // const { depots, small } = useData();
     const [driverss, setDriverss] = React.useState(driversdetail);
     const { depots, small, drivers } = useBasicData();
@@ -1947,7 +1956,7 @@ const UpdateTrip = (props) => {
 
                                                                                 //     return row.TicketName;
                                                                                 // })()
-                                                                                row.TicketName.split(":")[1] !== undefined ?
+                                                                                row.TicketName !== undefined ?
                                                                                     row.TicketName.split(":")[1]
                                                                                     :
                                                                                     row.TicketName
@@ -2076,19 +2085,32 @@ const UpdateTrip = (props) => {
                                                             <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 70 }}>
                                                                 {editMode ? (
                                                                     <TextField
-                                                                        value={editableTickets[rowIdx]?.Product[productType]?.Volume || ""}
-                                                                        type="number"
+                                                                        // value={editableTickets[rowIdx]?.Product[productType]?.Volume || ""}
+                                                                        type={isFocused1 ? "number" : "text"} // ✅ เปลี่ยนตามโหมด focus
                                                                         fullWidth
                                                                         InputLabelProps={{ sx: { fontSize: '12px' } }}
                                                                         sx={{
                                                                             '& .MuiOutlinedInput-root': { height: '22px' },
                                                                             '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
                                                                         }}
-                                                                        onChange={(e) => handleEditChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                                                                        // onChange={(e) => handleEditChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                                                                        value={isFocused1 ? (editableTickets[rowIdx]?.Product[productType]?.Volume || "") : formatNumber(editableTickets[rowIdx]?.Product[productType]?.Volume || "")}
+                                                                        onChange={(e) => {
+                                                                            const val = e.target.value.replace(/,/g, ""); // ลบ comma ออกถ้ามี
+                                                                            if (/^\d*$/.test(val)) {
+                                                                                handleEditChange(rowIdx, `Product.${productType}.Volume`, val === "" ? "" : parseInt(val, 10));
+                                                                            }
+                                                                        }}
+                                                                        onFocus={() => setIsFocused1(true)}
+                                                                        onBlur={(e) => {
+                                                                            setIsFocused1(false);
+                                                                            const val = e.target.value.replace(/,/g, "");
+                                                                            handleEditChange(rowIdx, `Product.${productType}.Volume`, val === "" ? 0 : parseInt(val, 10));
+                                                                        }}
                                                                     />
                                                                 ) : (
                                                                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                        {row.Product[productType]?.Volume ?? "-"}
+                                                                        {row.Product[productType]?.Volume ? new Intl.NumberFormat("en-US").format(row.Product[productType]?.Volume) : "-"}
                                                                     </Typography>
                                                                 )}
                                                             </TableCell>
@@ -2132,14 +2154,14 @@ const UpdateTrip = (props) => {
                                                             textAlign: "center", height: "30px", fontSize: "16px", color: "black",
                                                             fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                         }}>
-                                                            {totalVolumesTicket[product]}
+                                                            {new Intl.NumberFormat("en-US").format(totalVolumesTicket[product])}
                                                         </TablecellTickets>
                                                     ))}
                                                     <TablecellTickets width={80} sx={{
                                                         textAlign: "center", height: "30px", fontSize: "16px", color: "black",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
-                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0)}
+                                                        {new Intl.NumberFormat("en-US").format(["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesTicket[product] || 0), 0))}
                                                     </TablecellTickets>
                                                 </TableRow>
                                             </TableFooter>
@@ -2686,7 +2708,7 @@ const UpdateTrip = (props) => {
 
                                                                         //     return row.TicketName;
                                                                         // })()
-                                                                        row.TicketName.split(":")[1] !== undefined ?
+                                                                        row.TicketName !== undefined ?
                                                                             row.TicketName.split(":")[1]
                                                                             :
                                                                             row.TicketName
@@ -2777,18 +2799,31 @@ const UpdateTrip = (props) => {
                                                             <TableCell key={productType} sx={{ textAlign: "center", height: "25px", padding: "1px 4px", width: 70 }}>
                                                                 {editMode ? (
                                                                     <TextField
-                                                                        value={editableOrders[rowIdx]?.Product[productType]?.Volume || ""}
-                                                                        type="number"
+                                                                        // value={editableOrders[rowIdx]?.Product[productType]?.Volume || ""}
+                                                                        type={isFocused2 ? "number" : "text"}
                                                                         fullWidth
                                                                         sx={{
                                                                             '& .MuiOutlinedInput-root': { height: '22px' },
                                                                             '& .MuiInputBase-input': { fontSize: '12px', fontWeight: 'bold', padding: '2px 6px', paddingLeft: 2 }
                                                                         }}
-                                                                        onChange={(e) => handleOrderChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                                                                        // onChange={(e) => handleOrderChange(rowIdx, `Product.${productType}.Volume`, e.target.value)}
+                                                                        value={isFocused2 ? (editableOrders[rowIdx]?.Product[productType]?.Volume || "") : formatNumber(editableOrders[rowIdx]?.Product[productType]?.Volume || "")}
+                                                                        onChange={(e) => {
+                                                                            const val = e.target.value.replace(/,/g, ""); // ลบ comma ออกถ้ามี
+                                                                            if (/^\d*$/.test(val)) {
+                                                                                handleOrderChange(rowIdx, `Product.${productType}.Volume`, val === "" ? "" : parseInt(val, 10));
+                                                                            }
+                                                                        }}
+                                                                        onFocus={() => setIsFocused2(true)}
+                                                                        onBlur={(e) => {
+                                                                            setIsFocused2(false);
+                                                                            const val = e.target.value.replace(/,/g, "");
+                                                                            handleOrderChange(rowIdx, `Product.${productType}.Volume`, val === "" ? 0 : parseInt(val, 10));
+                                                                        }}
                                                                     />
                                                                 ) : (
                                                                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                        {row.Product[productType]?.Volume ?? "-"}
+                                                                        {row.Product[productType]?.Volume ? new Intl.NumberFormat("en-US").format(row.Product[productType]?.Volume) : "-"}
                                                                     </Typography>
                                                                 )}
                                                             </TableCell>
@@ -2807,7 +2842,7 @@ const UpdateTrip = (props) => {
                                                                 />
                                                             ) : (
                                                                 <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                                    {row.Travel}
+                                                                    {new Intl.NumberFormat("en-US").format(row.Travel)}
                                                                 </Typography>
                                                             )}
                                                         </TableCell>
@@ -2870,14 +2905,14 @@ const UpdateTrip = (props) => {
                                                             textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                             fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                         }}>
-                                                            {totalVolumesOrder[product]}
+                                                            {new Intl.NumberFormat("en-US").format(totalVolumesOrder[product])}
                                                         </TablecellCustomers>
                                                     ))}
                                                     <TablecellCustomers width={130} colSpan={2} sx={{
                                                         textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                         fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                     }}>
-                                                        {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesOrder[product] || 0), 0)}
+                                                        {new Intl.NumberFormat("en-US").format(["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + (totalVolumesOrder[product] || 0), 0))}
                                                     </TablecellCustomers>
                                                 </TableRow>
                                             </TableFooter>
@@ -2912,14 +2947,14 @@ const UpdateTrip = (props) => {
                                                                 textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                                 fontWeight: "bold", backgroundColor: (totalVolumesTicket[product] - totalVolumesOrder[product]) < 0 ? "red" : (totalVolumesTicket[product] - totalVolumesOrder[product]) > 0 ? "yellow" : "lightgray", borderLeft: "2px solid white"
                                                             }}>
-                                                                {totalVolumesTicket[product] - totalVolumesOrder[product]}
+                                                                {new Intl.NumberFormat("en-US").format(totalVolumesTicket[product] - totalVolumesOrder[product])}
                                                             </TablecellCustomers>
                                                         ))}
                                                         <TablecellCustomers width={130} colSpan={2} sx={{
                                                             textAlign: "center", height: "25px", color: "black", fontSize: "16px",
                                                             fontWeight: "bold", backgroundColor: "lightgray", borderLeft: "2px solid white"
                                                         }}>
-                                                            {["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + ((totalVolumesTicket[product] - totalVolumesOrder[product]) || 0), 0)}
+                                                            {new Intl.NumberFormat("en-US").format(["G95", "B95", "B7", "G91", "E20", "PWD"].reduce((sum, product) => sum + ((totalVolumesTicket[product] - totalVolumesOrder[product]) || 0), 0))}
                                                         </TablecellCustomers>
                                                     </TableRow>
                                                 </TableFooter>

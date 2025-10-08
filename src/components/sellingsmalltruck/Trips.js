@@ -78,7 +78,7 @@ const TripsSmallTruck = ({ openNavbar }) => {
     };
 
     // const { trip } = useData();
-    const { trip } = useTripData();
+    const { trip, tickets } = useTripData();
     // const trips = Object.values(trip || {});
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
@@ -87,6 +87,9 @@ const TripsSmallTruck = ({ openNavbar }) => {
 
         return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });
+
+    const ticketsdetail = Object.values(tickets || {})
+    console.log("ticketsdetail : ",ticketsdetail.filter((row) => row.CustomerType === "ตั๋วรถเล็ก" ))
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "desc" });
 

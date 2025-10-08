@@ -532,14 +532,33 @@ const InsertTrips = () => {
                 ...prev,
                 [newIndex]: {
                     TicketName: ticketValue,
-                    id: newIndex,
-                    //Travel: ticketData.Travel || 0,
-                    OrderID: "",
-                    CustomerType: "ตั๋วรถเล็ก",
+                    CompanyName: ticketData.CompanyName || "-",
+                    Address: ticketData.Address || "-",
+                    Lat: ticketData.lat || "-",
+                    Lng: ticketData.lng || "-",
+                    CodeID: ticketData.CodeID || "-",
+                    CreditTime: ticketData.CreditTime || "-",
+                    Bill: ticketData.Bill || "-",
+                    Rate: ticketData.Rate || 0,
                     Trip: trip.length,
+                    Date: dayjs(selectedDateReceive).format('DD/MM/YYYY'),
+                    Registration: registration,
+                    CustomerType: "ตั๋วรถเล็ก",
+                    Driver: driverss,
+                    Travel: ticketData.Travel || 0,
+                    id: newIndex,
                     Product: {
                         P: { Volume: 0, Cost: 0, Selling: 0 },
-                    } // เพิ่ม Product ไว้เป็น Object ว่าง
+                    }
+                    // TicketName: ticketValue,
+                    // id: newIndex,
+                    // //Travel: ticketData.Travel || 0,
+                    // OrderID: "",
+                    // CustomerType: "ตั๋วรถเล็ก",
+                    // Trip: trip.length,
+                    // Product: {
+                    //     P: { Volume: 0, Cost: 0, Selling: 0 },
+                    // } // เพิ่ม Product ไว้เป็น Object ว่าง
                 }
             };
         });

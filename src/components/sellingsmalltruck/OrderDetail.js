@@ -246,7 +246,7 @@ const OrderDetail = (props) => {
                                 />
                             </Paper>
                             :
-                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B95?.Volume || "-"}</Typography>
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{new Intl.NumberFormat("en-US").format(detail.Product?.B95?.Volume) || "-"}</Typography>
                     }
                 </TableCellB95>
                 <TableCellB7 sx={{ textAlign: "center", backgroundColor: "#FFFF99", height: "20px", width: 70 }}>
@@ -287,7 +287,7 @@ const OrderDetail = (props) => {
                                 />
                             </Paper>
                             :
-                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.B7?.Volume || "-"}</Typography>
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{new Intl.NumberFormat("en-US").format(detail.Product?.B7?.Volume) || "-"}</Typography>
                     }
                 </TableCellB7>
                 <TableCellG91 sx={{ textAlign: "center", backgroundColor: "#B7DEE8", height: "20px", width: 70 }}>
@@ -328,7 +328,7 @@ const OrderDetail = (props) => {
                                 />
                             </Paper>
                             :
-                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.G91?.Volume || "-"}</Typography>
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{new Intl.NumberFormat("en-US").format(detail.Product?.G91?.Volume) || "-"}</Typography>
                     }
                 </TableCellG91>
                 <TableCellE20 sx={{ textAlign: "center", backgroundColor: "#C4BD97", height: "20px", width: 70 }}>
@@ -369,7 +369,7 @@ const OrderDetail = (props) => {
                                 />
                             </Paper>
                             :
-                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.E20?.Volume || "-"}</Typography>
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{new Intl.NumberFormat("en-US").format(detail.Product?.E20?.Volume) || "-"}</Typography>
                     }
                 </TableCellE20>
                 <TableCellPWD sx={{ textAlign: "center", backgroundColor: "#F141D8", height: "20px", width: 70 }}>
@@ -410,7 +410,7 @@ const OrderDetail = (props) => {
                                 />
                             </Paper>
                             :
-                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{detail.Product?.PWD?.Volume || "-"}</Typography>
+                            <Typography variant="subtitle2" fontSize="12px" color="black" fontWeight="bold" gutterBottom>{new Intl.NumberFormat("en-US").format(detail.Product?.PWD?.Volume) || "-"}</Typography>
                     }
                 </TableCellPWD>
                 <TableCell sx={{ textAlign: "center", height: "20px", width: 80 }} >

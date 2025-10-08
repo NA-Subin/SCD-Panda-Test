@@ -781,13 +781,42 @@ const UpdateInvoice = (props) => {
     return (
         <React.Fragment>
             <Grid container spacing={2}>
-                <Grid item md={12}>
+                {/* <Grid item md={12}>
                     <Typography variant="subtitle1" sx={{ fontSize: "18px", marginBottom: -2 }} fontWeight="bold" gutterBottom>
                         รายละเอียด : วันที่ส่ง : {dayjs(ticket.Date, "DD/MM/YYYY").format("D เดือนMMMM พ.ศ.BBBB")} / ตั๋ว : {ticket.TicketName.split(":")[1]}
                     </Typography>
-                    {/* <Typography variant='subtitle1' fontWeight="bold" sx={{ marginTop: -2.5, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*กรอกราคาน้ำมันและพิมพ์ใบวางบิลตรงนี้*</Typography> */}
+                </Grid> */}
+                <Grid item md={5.5} xs={12}>
+                    <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        gutterBottom
+                        sx={{
+                            fontSize: "18px",
+                            marginBottom: -2,
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 0.2,            // 🔽 ลดช่องว่างระหว่าง block
+                            lineHeight: 1.2,     // 🔽 ลดความสูงบรรทัด
+                        }}
+                    >
+                        รายละเอียด {"=>"} ส่งวันที่ :
+                        <Box component="span" sx={{ ml: 0.3, mb: -0.5 }}> {/* 🔽 ลด margin-left และ bottom */}
+                            {dayjs(ticket.Date, "DD/MM/YYYY").format("D เดือนMMMM พ.ศ.BBBB")}
+                        </Box>
+
+                        <Box
+                            component="span"
+                            sx={{
+                                ml: 0.5,            // 🔽 ลดช่องว่างด้านซ้าย
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            ตั๋ว : {ticket.TicketName.split(":")[1]}
+                        </Box>
+                    </Typography>
+
                 </Grid>
-                <Grid item md={3.5} xs={12}></Grid>
                 <Grid item md={5.5} xs={7} textAlign="right">
                     <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 0.5 }}>
                         <Button variant="contained" color="info" sx={{ height: "25px", marginRight: 1 }} onClick={handleNewInvoice}>
@@ -936,26 +965,6 @@ const UpdateInvoice = (props) => {
                         </TextField>
                     </Box> */}
                 </Grid>
-                <Grid item md={1.5} xs={3.5}>
-                    <Tooltip title="พิมพ์ใบวางบิล" placement="top">
-                        <Button
-                            color="primary"
-                            variant='contained'
-                            fullWidth
-                            sx={{
-                                flexDirection: "row",
-                                gap: 0.5,
-                                borderRadius: 2
-                            }}
-                            onClick={generatePDF}
-                        >
-                            <PrintIcon sx={{ color: "white" }} />
-                            <Typography sx={{ fontSize: "12px", fontWeight: "bold", color: "white", whiteSpace: "nowrap" }}>
-                                พิมพ์ใบวางบิล
-                            </Typography>
-                        </Button>
-                    </Tooltip>
-                </Grid>
                 {/* <Grid item xs={1}>
                     <Tooltip title="บันทึกข้อมูล" placement="top">
                         <Button
@@ -976,21 +985,21 @@ const UpdateInvoice = (props) => {
                         </Button>
                     </Tooltip>
                 </Grid> */}
-                <Grid item md={10} xs={12}>
+                <Grid item md={9.5} xs={12}>
                     <TableContainer
                         component={Paper}
-                        sx={{ borderRadius: 2, marginTop: -1 }}
+                        sx={{ borderRadius: 2 }}
                     >
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1080px" : "1150px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1020px" : "1110px" }}>
                             <TableHead>
                                 <TableRow>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 60, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ลำดับ
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         วันที่รับ
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 400, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ผู้ขับ/ป้ายทะเบียน
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
@@ -999,10 +1008,10 @@ const UpdateInvoice = (props) => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ราคาน้ำมัน
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 140, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 120, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         จำนวนลิตร
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 140, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 130, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ยอดเงิน
                                     </TablecellSelling>
                                 </TableRow>
@@ -1031,17 +1040,17 @@ const UpdateInvoice = (props) => {
                                         )
                                         .map((row, index) => (
                                             <TableRow key={`${row.TicketName}-${row.ProductName}-${index}`}>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{index + 1}</Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(report[row.uniqueRowId]?.Date || row.Date, "DD/MM/YYYY"))}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "left", height: '30px' }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0, marginLeft: 4 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{
-                                                    textAlign: "center", height: '30px', width: 100,
+                                                    textAlign: "center", height: '30px',
                                                     backgroundColor: row.ProductName === "G91" ? "#92D050" :
                                                         row.ProductName === "G95" ? "#FFC000" :
                                                             row.ProductName === "B7" ? "#FFFF99" :
@@ -1055,7 +1064,7 @@ const UpdateInvoice = (props) => {
                                                 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.ProductName || row.ProductName}</Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", width: 100 }}>
+                                                <TableCell sx={{ textAlign: "center", fontSize: "14px", }}>
                                                     <Paper component="form" sx={{ marginTop: -1, marginBottom: -1 }}>
                                                         <Paper component="form" sx={{ width: "100%" }}>
                                                             <TextField
@@ -1125,14 +1134,31 @@ const UpdateInvoice = (props) => {
                                                         </Paper>
                                                     </Paper>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        paddingLeft: "40px !important",
+                                                        paddingRight: "40px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {new Intl.NumberFormat("en-US").format(row.Volume)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        paddingLeft: "10px !important",
+                                                        paddingRight: "10px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US").format(report[row.uniqueRowId]?.Amount || row.Amount)}
+                                                        {new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        }).format(report[row.uniqueRowId]?.Amount || row.Amount)}
                                                     </Typography>
                                                 </TableCell>
                                             </TableRow>
@@ -1140,22 +1166,51 @@ const UpdateInvoice = (props) => {
                                 }
                             </TableBody>
                         </Table>
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1080px" : "1150px" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1020px" : "1110px" }}>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white" }} colSpan={5}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 750 }} colSpan={5}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             รวม
                                         </Typography>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 140, backgroundColor: "#616161", color: "white" }}>
+                                    <TableCell
+                                        sx={{
+                                            textAlign: "right",
+                                            height: '30px',
+                                            fontWeight: "bold",
+                                            borderLeft: "1px solid white",
+                                            width: 120,
+                                            backgroundColor: "#616161",
+                                            color: "white",
+                                            paddingLeft: "40px !important",
+                                            paddingRight: "40px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                        }}
+                                    >
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             {new Intl.NumberFormat("en-US").format(ticket.TotalVolume)}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 140, backgroundColor: "#616161", color: "white" }}>
+                                    <TableCell
+                                        sx={{
+                                            textAlign: "right",
+                                            height: '30px',
+                                            fontWeight: "bold",
+                                            borderLeft: "1px solid white",
+                                            width: 130,
+                                            backgroundColor: "#616161",
+                                            color: "white",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                        }}
+                                    >
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                            {new Intl.NumberFormat("en-US").format(ticket.TotalAmount)}
+                                            {new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            }).format(ticket.TotalAmount)}
                                         </Typography>
                                     </TableCell>
                                 </TableRow>
@@ -1163,14 +1218,32 @@ const UpdateInvoice = (props) => {
                         </Table>
                     </TableContainer>
                 </Grid>
-                <Grid item md={2} xs={12} display="flex" alignItems="center" justifyContent="center">
+                <Grid item md={2.5} xs={12}>
+                    <Tooltip title="พิมพ์ใบวางบิล" placement="top">
+                        <Button
+                            color="primary"
+                            variant='contained'
+                            fullWidth
+                            sx={{
+                                flexDirection: "row",
+                                gap: 0.5,
+                                borderRadius: 2,
+                            }}
+                            onClick={generatePDF}
+                        >
+                            <PrintIcon sx={{ color: "white" }} />
+                            <Typography sx={{ fontSize: "12px", fontWeight: "bold", color: "white", whiteSpace: "nowrap" }}>
+                                พิมพ์ใบวางบิล
+                            </Typography>
+                        </Button>
+                    </Tooltip>
                     <Tooltip title="บันทึกข้อมูล" placement="top">
                         <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main, marginRight: 7, marginTop: 1, width: { md: "100%", xs: "100px" } }}>
                             <Button
                                 color="inherit"
                                 fullWidth
                                 onClick={handleSave}
-                                sx={{ flexDirection: "column", gap: 0.5 }}
+                                sx={{ flexDirection: "row", gap: 0.5 }}
                             >
                                 <SaveIcon fontSize="small" sx={{ color: "white" }} />
                                 <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
@@ -1193,7 +1266,7 @@ const UpdateInvoice = (props) => {
                                 <TableHead>
                                     <TableRow>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 50, height: "30px", backgroundColor: theme.palette.success.main }}>ลำดับ</TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 170, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>Statement</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>วันที่เงินเข้า</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 350, height: "30px", backgroundColor: theme.palette.success.main }}>เลขที่บัญชี</TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 150, height: "30px", backgroundColor: theme.palette.success.main }}>ยอดเงินเข้า</TablecellSelling>
@@ -1217,9 +1290,9 @@ const UpdateInvoice = (props) => {
                                     {
                                         transfer.map((row, index) => (
                                             <TableRow>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50 }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 170 }}>{`${row.Code} - ${row.Number}`}</TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>{index + 1}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>{`${row.Code} - ${row.Number}`}</TableCell>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
                                                     {
                                                         !updateTranfer || row.id !== tranferID ? formatThaiSlash(dayjs(row.DateStart, "DD/MM/YYYY"))
                                                             :
@@ -1255,7 +1328,7 @@ const UpdateInvoice = (props) => {
                                                             </LocalizationProvider>
                                                     }
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "left", height: '30px', width: 350 }}>
+                                                <TableCell sx={{ textAlign: "left", height: '30px' }}>
                                                     {
                                                         !updateTranfer || row.id !== tranferID ?
                                                             <Box sx={{ marginLeft: 2, }}>
@@ -1309,9 +1382,12 @@ const UpdateInvoice = (props) => {
                                                             </Paper>
                                                     }
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
                                                     {
-                                                        !updateTranfer || row.id !== tranferID ? new Intl.NumberFormat("en-US").format(row.IncomingMoney)
+                                                        !updateTranfer || row.id !== tranferID ? new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        }).format(row.IncomingMoney)
                                                             :
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField
@@ -1328,7 +1404,7 @@ const UpdateInvoice = (props) => {
                                                             </Paper>
                                                     }
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px' }}>
                                                     {
                                                         !updateTranfer || row.id !== tranferID ? row.Note
                                                             :
@@ -1347,7 +1423,7 @@ const UpdateInvoice = (props) => {
                                                             </Paper>
                                                     }
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 50, position: 'sticky', right: 0, backgroundColor: "white" }}>
+                                                <TableCell sx={{ textAlign: "center", height: '30px', position: 'sticky', right: 0, backgroundColor: "white" }}>
                                                     {
                                                         !updateTranfer || row.id !== tranferID ?
                                                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -1378,14 +1454,17 @@ const UpdateInvoice = (props) => {
                             <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1330px" : "1440px" }}>
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 720 }} colSpan={4}>
+                                        <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 700 }} colSpan={4}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                 รวม
                                             </Typography>
                                         </TableCell>
                                         <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 350, backgroundColor: "#616161", color: "white" }} colSpan={2}>
                                             <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                {new Intl.NumberFormat("en-US").format(totalIncomingMoney)}
+                                                {new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(totalIncomingMoney)}
                                             </Typography>
                                         </TableCell>
                                         {/* <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", width: 210, backgroundColor: "#616161", color: "white" }}>

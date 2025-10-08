@@ -498,13 +498,13 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                           <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                             จำนวนลิตร
                           </TablecellPink>
-                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             ยอดเงิน
                           </TablecellPink>
-                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             ยอดโอน
                           </TablecellPink>
-                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                          <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                             ค้างโอน
                           </TablecellPink>
                         </TableRow>
@@ -538,8 +538,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                     sx={{
                                       textAlign: "right",
                                       fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
-                                      paddingLeft: "30px !important",
-                                      paddingRight: "30px !important",
+                                      paddingLeft: "10px !important",
+                                      paddingRight: "10px !important",
                                       fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
                                     }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
@@ -548,8 +548,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                     sx={{
                                       textAlign: "right",
                                       fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
-                                      paddingLeft: "30px !important",
-                                      paddingRight: "30px !important",
+                                      paddingLeft: "10px !important",
+                                      paddingRight: "10px !important",
                                       fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                                     }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
@@ -558,8 +558,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                     sx={{
                                       textAlign: "right",
                                       fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
-                                      paddingLeft: "30px !important",
-                                      paddingRight: "30px !important",
+                                      paddingLeft: "10px !important",
+                                      paddingRight: "10px !important",
                                       fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                                     }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
@@ -568,8 +568,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                     sx={{
                                       textAlign: "right",
                                       fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
-                                      paddingLeft: "30px !important",
-                                      paddingRight: "30px !important",
+                                      paddingLeft: "10px !important",
+                                      paddingRight: "10px !important",
                                       fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
                                     }}>
                                     {new Intl.NumberFormat("en-US").format(row.TotalAmount - row.TotalOverdue)}
@@ -612,8 +612,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                   sx={{
                                     textAlign: "right",
                                     fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
-                                    paddingLeft: "20px !important",
-                                    paddingRight: "20px !important",
+                                    paddingLeft: "10px !important",
+                                    paddingRight: "10px !important",
                                     fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                                   }}>
                                   {new Intl.NumberFormat("en-US", {
@@ -625,8 +625,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                   sx={{
                                     textAlign: "right",
                                     fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
-                                    paddingLeft: "20px !important",
-                                    paddingRight: "20px !important",
+                                    paddingLeft: "10px !important",
+                                    paddingRight: "10px !important",
                                     fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
                                   }}>
                                   {new Intl.NumberFormat("en-US", {
@@ -638,8 +638,8 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                                   sx={{
                                     textAlign: "right",
                                     fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold",
-                                    paddingLeft: "20px !important",
-                                    paddingRight: "20px !important",
+                                    paddingLeft: "10px !important",
+                                    paddingRight: "10px !important",
                                     fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                                   }}>
                                   {
