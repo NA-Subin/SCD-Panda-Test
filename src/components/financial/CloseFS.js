@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
     Autocomplete,
     Badge,
@@ -35,8 +35,11 @@ import {
     Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
+
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
 import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
@@ -49,12 +52,33 @@ import { useTripData } from "../../server/provider/TripProvider";
 const CloseFS = () => {
 
     const [date, setDate] = React.useState(false);
-    const [check1, setCheck1] = React.useState(true);
-    const [check2, setCheck2] = React.useState(true);
+    const [check, setCheck] = React.useState(true);
     const [months, setMonths] = React.useState(dayjs(new Date));
     const [years, setYears] = React.useState(dayjs(new Date));
+    const [firstDay, setFirstDay] = React.useState(dayjs(new Date).startOf("month"));
+    const [lastDay, setLastDay] = React.useState(dayjs(new Date).startOf("month"));
     const [driverDetail, setDriver] = React.useState([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [companyName, setCompanyName] = React.useState("0:ทั้งหมด");
+
+    const companyDetail = [
+        {
+            id: 0,
+            Name: "ทั้งหมด"
+        },
+        {
+            id: 1,
+            Name: "บริษัท แพนด้า สตาร์ ออยล์  จำกัด  (สำนักงานใหญ่)"
+        },
+        {
+            id: 2,
+            Name: "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)"
+        },
+        {
+            id: 3,
+            Name: "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)"
+        },
+    ]
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -70,9 +94,59 @@ const CloseFS = () => {
         };
     }, []);
 
+    const handleMonth = (newValue) => {
+        console.log("1.Month : ", dayjs(newValue).format("MMMM"));
+        if (newValue) {
+            const month = driverData.filter((row) => (
+                console.log("2.Month : ", formatmonth(row.Date)),
+                formatmonth(row.Date) === dayjs(newValue).format("MMMM")
+            ))
+            console.log("Date Month : ", month);
+
+            const notCancel = driverDataNotCancel.filter((row) => (
+                console.log("2.Month : ", formatmonth(row.Date)),
+                formatmonth(row.Date) === dayjs(newValue).format("MMMM")
+            ))
+
+            setData(month)
+            setMonths(dayjs(newValue))
+            // สมมติว่า months คือ state ที่เก็บเดือนที่เลือก เช่น dayjs("2025-06-01")
+            setFirstDay(dayjs(newValue).startOf("month"));
+            setLastDay(dayjs(newValue).endOf("month"));
+            setDataNotCancel(notCancel)
+        }
+    };
+
+    const handleYear = (newValue) => {
+        console.log("1.Year : ", dayjs(newValue).format("YYYY"));
+        if (newValue) {
+            const year = driverData.filter((row) => (
+                console.log("2.Year : ", formatyear(row.Date).toString()),
+                formatyear(row.Date).toString() === dayjs(newValue).format("YYYY")
+            ))
+            console.log("Date Year : ", year);
+
+            const notCancel = driverDataNotCancel.filter((row) => (
+                console.log("2.Month : ", formatyear(row.Date).toString()),
+                formatyear(row.Date).toString() === dayjs(newValue).format("YYYY")
+            ))
+            setData(year)
+            setYears(dayjs(newValue))
+            setFirstDay(dayjs(newValue).startOf("year"));
+            setLastDay(dayjs(newValue).endOf("year"));
+            setDataNotCancel(notCancel)
+        }
+    };
+
     // const { company, drivers, typeFinancial, order, reghead, trip } = useData();
-    const { company, drivers, reghead } = useBasicData();
-    const { order, trip, typeFinancial } = useTripData();
+    const { company, drivers, reghead, regtail, small, transport, companypayment, expenseitems } = useBasicData();
+    const { order, trip, typeFinancial, report } = useTripData();
+    const reports = Object.values(report || {});
+    const registrationH = Object.values(reghead);
+    const registrationT = Object.values(transport);
+    const registrationS = Object.values(regtail);
+    const expenseitem = Object.values(expenseitems);
+    const companypaymentDetail = Object.values(companypayment);
     const companies = Object.values(company || {});
     const driver = Object.values(drivers || {});
     const typeF = Object.values(typeFinancial || {});
@@ -113,100 +187,438 @@ const CloseFS = () => {
         return `${year}`;
     };
 
-    //const [driverData, setDriverData] = useState([]);
+    console.log("transport : ", registrationT);
 
-    //const getDriver = () => {
-    const filtered = orders
-        .filter(
-            (row) => row.Trip !== "ยกเลิก" && row.CustomerType !== "ตั๋วรถใหญ่"
-        )
-        .reduce((acc, curr) => {
-            // 🧮 1) รวมค่าจาก Product
-            let totalVolume = 0;
-            let totalAmount = 0;
+    console.log("report : ", reports
+        .filter((ex) => {
+            const regMatch = ex.TruckType === "หัวรถใหญ่" ?
+                registrationH.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                : ex.TruckType === "หางรถใหญ่" ?
+                    registrationS.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                    :
+                    false
 
-            Object.entries(curr.Product || {}).forEach(([key, value]) => {
-                if (key !== "P") {
-                    totalVolume += Number(value.Volume || 0) * 1000;
-                    totalAmount += Number(value.Amount || 0);
+            const rowDate = dayjs(ex.SelectedDateInvoice, "DD/MM/YYYY");
+            const selectedMonth = dayjs(months);
+            const selectedYear = dayjs(years);
+
+            // ✅ ถ้า date = true → กรองตามเดือนและปี
+            // ✅ ถ้า date = false → กรองตามปี
+            const dateMatch = !date
+                ? rowDate.format("MM") === selectedMonth.format("MM") &&
+                rowDate.format("YYYY") === selectedMonth.format("YYYY")
+                : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+            const companyCheck =
+                companyName === "0:ทั้งหมด"
+                    ? true
+                    : companyName === regMatch?.Company;
+
+            return ex.TruckType !== "รถเล็ก" && ex.Status === "อยู่ในระบบ" && regMatch && dateMatch && companyCheck;
+        }))
+
+    // ===============================
+    // 1️⃣ กรอง Orders และเพิ่มข้อมูล Trip + RegistrationTail
+    // ===============================
+    const filteredOrders = useMemo(() => {
+        if (!orders || !trips) return [];
+
+        return orders
+            .filter((row) =>
+                row.Trip !== "ยกเลิก" &&
+                !["ตั๋วรถใหญ่", "ตั๋วรถเล็ก"].includes(row.CustomerType) &&
+                row.Status !== "ยกเลิก"
+            )
+            .map((curr) => {
+                const tripDetail = trips.find((trip) => trip.id - 1 === curr.Trip);
+
+                let registrationTail = "";
+                let truckCompany = "";
+                if (tripDetail?.TruckType === "รถใหญ่") {
+                    const reg = registrationH.find(
+                        (h) => h.id === Number(tripDetail?.Registration.split(":")[0])
+                    );
+                    registrationTail = reg?.RegTail || "";
+                    truckCompany = reg?.Company || "";
+                } else if (tripDetail?.TruckType === "รถรับจ้างขนส่ง") {
+                    const reg = registrationT.find(
+                        (h) => h.id === Number(tripDetail?.Registration.split(":")[0])
+                    );
+                    registrationTail = reg?.RegTail || "";
+                    truckCompany = reg?.Company || "";
                 }
+
+                return {
+                    ...curr,
+                    DateReceive: tripDetail?.DateReceive,
+                    DateDelivery: tripDetail?.DateDelivery,
+                    TruckType: tripDetail?.TruckType,
+                    RegistrationTail: registrationTail,
+                    TruckCompany: truckCompany
+                };
             });
-            
+    }, [orders, trips, registrationH, registrationT, date, months, years]);
 
-            // 💰 2) รวมค่าจาก Price (IncomingMoney)
-            let totalOverdue = 0;
-            if (curr.Price) {
-                totalOverdue = Object.values(curr.Price).reduce(
-                    (sum, p) => sum + Number(p?.IncomingMoney || 0),
-                    0
+    // ===============================
+    // 2️⃣ สร้าง DriverGroups
+    // ===============================
+    const driverGroups = useMemo(() => {
+        if (!registrationH || !filteredOrders) return [];
+
+        return registrationH.filter((reg) => companyName === "0:ทั้งหมด"
+            ? true
+            : reg.Company === companyName)
+            .reduce((acc, curr) => {
+                const key = `${curr.Driver}-${curr.id}:${curr.RegHead}`;
+                let group = acc.find((g) => g.key === key);
+
+                const ticketname = filteredOrders.filter((tk) => {
+                    const regMatch =
+                        Number(tk.Registration.split(":")[0]) === curr.id;
+
+                    const rowDate = dayjs(tk.DateDelivery, "DD/MM/YYYY");
+                    const selectedMonth = dayjs(months);
+                    const selectedYear = dayjs(years);
+
+                    // ✅ ถ้า date = true → กรองตามเดือนและปี
+                    // ✅ ถ้า date = false → กรองตามปี
+                    const dateMatch = !date
+                        ? rowDate.format("MM") === selectedMonth.format("MM") &&
+                        rowDate.format("YYYY") === selectedMonth.format("YYYY")
+                        : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+                    const companyCheck =
+                        companyName === "0:ทั้งหมด"
+                            ? true
+                            : companyName === tk.TruckCompany;
+
+                    return regMatch && dateMatch && companyCheck;
+                });
+
+
+                if (!group) {
+                    group = {
+                        key,
+                        Driver: curr.Driver,
+                        Registration: `${curr.id}:${curr.RegHead}`,
+                        RegistrationTail: curr.RegTail,
+                        TicketName: ticketname,
+                    };
+                    acc.push(group);
+                }
+                return acc;
+            }, [])
+            .sort((a, b) => {
+                const nameA = (a.Driver?.split(":")[1] || "").trim();
+                const nameB = (b.Driver?.split(":")[1] || "").trim();
+                return nameA.localeCompare(nameB, "th");
+            });
+    }, [registrationH, filteredOrders, date, months, years, companyName]);
+
+    // ===============================
+    // 3️⃣ สร้าง ReportDetail จาก expenseitem + reports
+    // ===============================
+    const reportDetail = useMemo(() => {
+        if (!expenseitem || !reports) return [];
+
+        const priorityNames = [
+            "เงินเดือน", "ค่าเที่ยวรถ", "ค่าน้ำมันรถ", "ประกันสังคม", "ภ.ง.ด. 3",
+            "ภ.ง.ด. 53", "ภ.ง.ด. 51", "ค่าโทรศัพท์", "ซื้อยางเส้นใหม่",
+            "คชจ.เกี่ยวกับการซ่อมยาง", "คชจ.เกี่ยวกับเปลี่ยนน้ำมันเครื่อง", "ซ่อมรถ",
+        ];
+
+        // init from expenseitem
+        const reportInit = expenseitem.map(item => ({
+            Bank: `${item.id}:${item.Name}`,
+            Type: "ค่าใช้จ่าย",
+            TotalPrice: 0,
+            TotalAmount: 0,
+            TotalVat: 0,
+            Registrations: [],
+            isFixed: priorityNames.includes(item.Name),
+        }));
+
+        // normalize function
+        const normalizeReg = (reg) => reg?.trim().replace(/:$/, "").toLowerCase() || "";
+
+        // merge reports
+        reports
+            .filter((ex) => {
+                const regMatch = ex.TruckType === "หัวรถใหญ่"
+                    ? registrationH.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                    : ex.TruckType === "หางรถใหญ่"
+                        ? registrationS.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                        : false;
+
+                const rowDate = dayjs(ex.SelectedDateInvoice, "DD/MM/YYYY");
+                const selectedMonth = dayjs(months);
+                const selectedYear = dayjs(years);
+
+                const dateMatch = !date
+                    ? rowDate.format("MM") === selectedMonth.format("MM") &&
+                    rowDate.format("YYYY") === selectedMonth.format("YYYY")
+                    : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+                const companyCheck =
+                    companyName === "0:ทั้งหมด"
+                        ? true
+                        : companyName === regMatch?.Company;
+
+                return ex.TruckType !== "รถเล็ก" && ex.Status === "อยู่ในระบบ" && regMatch && dateMatch && companyCheck;
+            })
+            .forEach((curr) => {
+                const bank = curr?.Bank || "-";
+                const registration = curr?.Registration || "-";
+
+                let bankGroup = reportInit.find(b => b.Bank === bank);
+                if (!bankGroup) {
+                    bankGroup = {
+                        Bank: bank,
+                        Type: "ค่าใช้จ่าย",
+                        Registrations: [],
+                    };
+                    reportInit.push(bankGroup);
+                }
+
+                let regGroup = bankGroup.Registrations.find(
+                    (r) => normalizeReg(r.Registration) === normalizeReg(registration)
                 );
-            }
 
-            // 🚚 3) ดึงข้อมูล Trip + Depot + Rate
+                if (!regGroup) {
+                    regGroup = {
+                        Registration: registration.trim(),
+                        TruckType: curr?.TruckType,
+                        TotalPrice: 0,
+                        TotalAmount: 0,
+                        TotalVat: 0,
+                    };
+                    bankGroup.Registrations.push(regGroup);
+                }
+
+                regGroup.TotalPrice += Number(curr.Total || 0);
+                regGroup.TotalAmount += Number(curr.Price || 0);
+                regGroup.TotalVat += Number(curr.Vat || 0);
+            });
+
+        // ✅ สรุปรวมหลังจาก loop เสร็จ
+        reportInit.forEach((bankGroup) => {
+            bankGroup.TotalPrice = bankGroup.Registrations.reduce((sum, r) => sum + (r.TotalPrice || 0), 0);
+            bankGroup.TotalAmount = bankGroup.Registrations.reduce((sum, r) => sum + (r.TotalAmount || 0), 0);
+            bankGroup.TotalVat = bankGroup.Registrations.reduce((sum, r) => sum + (r.TotalVat || 0), 0);
+        });
+
+        // sort by priorityNames
+        return reportInit
+            .filter(item => item.isFixed || item.TotalPrice + item.TotalAmount + item.TotalVat > 0)
+            .sort((a, b) => {
+                const nameA = a.Bank.includes(":") ? a.Bank.split(":")[1].trim() : a.Bank.trim();
+                const nameB = b.Bank.includes(":") ? b.Bank.split(":")[1].trim() : b.Bank.trim();
+                const indexA = priorityNames.indexOf(nameA);
+                const indexB = priorityNames.indexOf(nameB);
+
+                if (indexA === -1 && indexB === -1) return nameA.localeCompare(nameB, "th");
+                else if (indexA === -1) return 1;
+                else if (indexB === -1) return -1;
+                else return indexA - indexB;
+            });
+
+    }, [expenseitem, reports, date, months, years, companyName]);
+
+    // ===============================
+    // 4️⃣ สร้าง TicketGroups
+    // ===============================
+    const ticketGroups = useMemo(() => {
+        if (!filteredOrders || !trips || !registrationH || !registrationT) return [];
+
+        return filteredOrders.filter((tk) => {
+            const rowDate = dayjs(tk.DateDelivery, "DD/MM/YYYY");
+            const selectedMonth = dayjs(months);
+            const selectedYear = dayjs(years);
+
+            // ✅ ถ้า date = true → กรองตามเดือนและปี
+            // ✅ ถ้า date = false → กรองตามปี
+            const dateMatch = !date
+                ? rowDate.format("MM") === selectedMonth.format("MM") &&
+                rowDate.format("YYYY") === selectedMonth.format("YYYY")
+                : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+            const companyCheck =
+                companyName === "0:ทั้งหมด"
+                    ? true
+                    : companyName === tk.TruckCompany;
+
+            return dateMatch && companyCheck;
+        }).reduce((acc, curr) => {
             const tripDetail = trips.find((trip) => trip.id - 1 === curr.Trip);
             const depotName = tripDetail?.Depot?.split(":")[1] || "-";
 
             let rate = 0;
             if (depotName === "ลำปาง") rate = curr.Rate1;
             else if (depotName === "พิจิตร") rate = curr.Rate2;
-            else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName))
-                rate = curr.Rate3;
+            else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) rate = curr.Rate3;
 
-            // 🎫 4) ตรวจว่ามี TicketGroup แล้วหรือยัง
             let ticketGroup = acc.find((t) => t.TicketName === curr.TicketName);
-
             if (!ticketGroup) {
-                const totalPrice = totalVolume * rate;
-                const vatOnePercent = totalPrice * 0.01;
-
                 ticketGroup = {
                     TicketName: curr.TicketName,
                     Rate: rate,
-                    TotalVolume: totalVolume,
-                    TotalPrice: totalPrice,
-                    VatOnePercent: vatOnePercent,
-                    TotalAmount: totalPrice - vatOnePercent,
-                    TotalOverdue: totalOverdue,
+                    CustomerType: curr.CustomerType,
+                    TruckType: tripDetail?.TruckType,
                     Depot: tripDetail?.Depot || "-",
                     Drivers: [],
                 };
-
                 acc.push(ticketGroup);
             }
 
-            // 👨‍✈️ 5) ตรวจว่า driver + registration มีอยู่หรือยัง
+            let registrationTail = "";
+            if (tripDetail?.TruckType === "รถใหญ่") {
+                registrationTail = registrationH.find(h => h.id === Number(tripDetail?.Registration.split(":")[0]))?.RegTail;
+            } else if (tripDetail?.TruckType === "รถรับจ้างขนส่ง") {
+                registrationTail = registrationT.find(h => h.id === Number(tripDetail?.Registration.split(":")[0]))?.RegTail;
+            }
+
             let driverGroup = ticketGroup.Drivers.find(
-                (d) => d.Driver === curr.Driver && d.Registration === curr.Registration
+                (d) => d.Driver === tripDetail?.Driver && d.Registration === tripDetail?.Registration
             );
 
             if (!driverGroup) {
                 driverGroup = {
-                    Driver: curr.Driver,
-                    Registration: curr.Registration,
+                    CustomerType: curr.CustomerType,
+                    Driver: tripDetail?.Driver,
+                    Registration: tripDetail?.Registration,
+                    RegistrationTail: registrationTail,
                     Volume: 0,
                     Amount: 0,
                 };
                 ticketGroup.Drivers.push(driverGroup);
             }
 
-            // ⚙️ 6) รวม Volume / Amount สำหรับ driver
             const driverVolume = Object.values(curr.Product || {}).reduce(
-                (sum, p) => sum + Number(p?.Volume || 0),
+                (sum, p) => sum + (Number(p?.Volume || 0) * 1000),
                 0
             );
-
-            const driverAmount = Object.values(curr.Product || {}).reduce(
-                (sum, p) => sum + Number(p?.Amount || 0),
-                0
-            );
+            const driverAmount = driverVolume * rate;
 
             driverGroup.Volume += driverVolume;
             driverGroup.Amount += driverAmount;
 
             return acc;
         }, []);
+    }, [filteredOrders, trips, registrationH, registrationT, date, months, years, companyName]);
 
-    console.log("filtered : ", filtered);
+    // ===============================
+    // 5️⃣ คำนวณ Totals
+    // ===============================
+    const grandTotal = useMemo(() => {
+        return ticketGroups.reduce(
+            (sum, ticket) => {
+                ticket.TotalVolume = ticket.Drivers.reduce((v, d) => v + d.Volume, 0);
+                ticket.TotalAmount = ticket.Drivers.reduce((a, d) => a + d.Amount, 0);
+                sum.Volume += ticket.TotalVolume;
+                sum.Amount += ticket.TotalAmount;
+                return sum;
+            },
+            { Volume: 0, Amount: 0 }
+        );
+    }, [ticketGroups]);
+
+    const driverTotals = useMemo(() => {
+        return ticketGroups.reduce((acc, ticket) => {
+            ticket.Drivers.forEach(d => {
+                const driverName = d.Driver.split(":")[1];
+                if (!acc[driverName]) acc[driverName] = { Volume: 0, Amount: 0 };
+                acc[driverName].Volume += d.Volume;
+                acc[driverName].Amount += d.Amount;
+            });
+            return acc;
+        }, {});
+    }, [ticketGroups]);
+
+    const { grandTotalA, driverTotalsA, grandTotalT, driverTotalsT, grandTotalG, driverTotalsG, grandTotalReport, driverReportTotals } = useMemo(() => {
+        // =======================
+        // TicketGroups per type
+        // =======================
+        const calcGrandDriver = (filterType) => {
+            const tickets = ticketGroups.filter(t => t.CustomerType === filterType);
+            const grand = tickets.reduce(
+                (sum, t) => {
+                    t.TotalVolume = t.Drivers.reduce((v, d) => v + d.Volume, 0);
+                    t.TotalAmount = t.Drivers.reduce((a, d) => a + d.Amount, 0);
+                    sum.Volume += t.TotalVolume;
+                    sum.Amount += t.TotalAmount;
+                    return sum;
+                },
+                { Volume: 0, Amount: 0 }
+            );
+
+            const driverTotals = tickets.reduce((acc, t) => {
+                t.Drivers.forEach(d => {
+                    const driverName = d.Driver.split(":")[1];
+                    if (!acc[driverName]) acc[driverName] = { Volume: 0, Amount: 0 };
+                    acc[driverName].Volume += d.Volume;
+                    acc[driverName].Amount += d.Amount;
+                });
+                return acc;
+            }, {});
+
+            return { grand, driverTotals };
+        };
+
+        const { grand: grandTotalA, driverTotals: driverTotalsA } = calcGrandDriver("ตั๋วน้ำมัน");
+        const { grand: grandTotalT, driverTotals: driverTotalsT } = calcGrandDriver("ตั๋วรับจ้างขนส่ง");
+        const { grand: grandTotalG, driverTotals: driverTotalsG } = calcGrandDriver("ตั๋วปั้ม");
+
+        // =======================
+        // Grand total for reportDetail
+        // =======================
+        const grandTotalReport = reportDetail.reduce(
+            (sum, item) => {
+                sum.TotalPrice += item.TotalPrice || 0;
+                sum.TotalAmount += item.TotalAmount || 0;
+                sum.TotalVat += item.TotalVat || 0;
+                return sum;
+            },
+            { TotalPrice: 0, TotalAmount: 0, TotalVat: 0 }
+        );
+
+        const driverReportTotals = reportDetail.reduce((acc, item) => {
+            item.Registrations.forEach(r => {
+                const regId = Number(r.Registration.split(":")[0]);
+                if (!acc[regId]) acc[regId] = { TotalPrice: 0, TotalAmount: 0, TotalVat: 0 };
+                acc[regId].TotalPrice += r.TotalPrice || 0;
+                acc[regId].TotalAmount += r.TotalAmount || 0;
+                acc[regId].TotalVat += r.TotalVat || 0;
+            });
+            return acc;
+        }, {});
+
+        return { grandTotalA, driverTotalsA, grandTotalT, driverTotalsT, grandTotalG, driverTotalsG, grandTotalReport, driverReportTotals };
+    }, [ticketGroups, reportDetail]);
+
+
+    console.log("grandTotal : ", grandTotal);
+    console.log("filteredOrders : ", filteredOrders.filter((tk) => {
+        const rowDate = dayjs(tk.DateDelivery, "DD/MM/YYYY");
+        const selectedMonth = dayjs(months);
+        const selectedYear = dayjs(years);
+
+        // ✅ ถ้า date = true → กรองตามเดือนและปี
+        // ✅ ถ้า date = false → กรองตามปี
+        const dateMatch = !date
+            ? rowDate.format("MM") === selectedMonth.format("MM") &&
+            rowDate.format("YYYY") === selectedMonth.format("YYYY")
+            : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+        const companyCheck =
+            companyName === "0:ทั้งหมด"
+                ? true
+                : companyName === tk.TruckCompany;
+
+        return dateMatch && companyCheck;
+    }));
+    console.log("ticketGroups : ", ticketGroups);
+    console.log("driverGroups : ", driverGroups);
+    console.log("report Detail : ", reportDetail);
     // const tripdetail = trips.find((row) => orders.find((r) => r.Trip === row.id-1));
 
     // console.log("tripdetail : ", tripdetail.Depot);
@@ -237,8 +649,6 @@ const CloseFS = () => {
 
     console.log("data : ", data);
     console.log("Data Not Cancel : ", dataNotCancel);
-
-    const [companyName, setCompanyName] = React.useState("");
 
     const handleCompany = (data) => {
         setCompanyName(data);
@@ -365,43 +775,175 @@ const CloseFS = () => {
         setDataNotCancel(Object.values(grouped))
     }
 
-    const handleMonth = (newValue) => {
-        console.log("1.Month : ", dayjs(newValue).format("MMMM"));
-        if (newValue) {
-            const month = driverData.filter((row) => (
-                console.log("2.Month : ", formatmonth(row.Date)),
-                formatmonth(row.Date) === dayjs(newValue).format("MMMM")
-            ))
-            console.log("Date Month : ", month);
+    const exportTableToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานน้ำมัน");
 
-            const notCancel = driverDataNotCancel.filter((row) => (
-                console.log("2.Month : ", formatmonth(row.Date)),
-                formatmonth(row.Date) === dayjs(newValue).format("MMMM")
-            ))
+        // 1️⃣ Columns
+        const columns = [
+            { header: "ลำดับ", key: "no", width: 7 }, // 50px
+            { header: "ประเภท", key: "type", width: 14 }, // 100px
+            { header: "ชื่อรายการ", key: "ticket", width: 40 }, // 280px
+            { header: "เฉลี่ยค่าขนส่ง/ลิตร", key: "rate", width: 20 }, // 140px
+            { header: "รวม", key: "total", width: 19 }, // 130px
+            ...driverGroups.map(dg => ({
+                header: `${dg.Driver.split(":")[1]}\n${dg.Registration.split(":")[1]}/${dg.RegistrationTail.split(":")[1]}`,
+                key: `driver_${dg.Registration.split(":")[0]}`,
+                width: 32, // 250px
+            })),
+        ];
 
-            setData(month)
-            setMonths(newValue)
-            setDataNotCancel(notCancel)
-        }
-    };
+        worksheet.columns = columns;
 
-    const handleYear = (newValue) => {
-        console.log("1.Year : ", dayjs(newValue).format("YYYY"));
-        if (newValue) {
-            const year = driverData.filter((row) => (
-                console.log("2.Year : ", formatyear(row.Date).toString()),
-                formatyear(row.Date).toString() === dayjs(newValue).format("YYYY")
-            ))
-            console.log("Date Year : ", year);
+        // 2️⃣ Title
+        worksheet.mergeCells(1, 1, 1, columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = `รายงานน้ำมัน ประจำงวด`;
+        titleCell.font = { size: 16, bold: true };
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
+        worksheet.getRow(1).height = 30;
 
-            const notCancel = driverDataNotCancel.filter((row) => (
-                console.log("2.Month : ", formatyear(row.Date).toString()),
-                formatyear(row.Date).toString() === dayjs(newValue).format("YYYY")
-            ))
-            setData(year)
-            setYears(newValue)
-            setDataNotCancel(notCancel)
-        }
+        // 3️⃣ Header
+        const headerRow = worksheet.addRow(columns.map(c => c.header));
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.height = 35;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+            cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+        });
+
+        // 4️⃣ TicketGroups per type
+        const ticketTypes = [
+            { label: "ตั๋วน้ำมัน", totals: driverTotalsA, grandTotal: grandTotalA },
+            { label: "ตั๋วรับจ้างขนส่ง", totals: driverTotalsT, grandTotal: grandTotalT },
+            { label: "ตั๋วปั้ม", totals: driverTotalsG, grandTotal: grandTotalG },
+        ];
+
+        ticketTypes.forEach(({ label, totals, grandTotal }) => {
+            // Header for type
+            const typeRow = worksheet.addRow([label]);
+            typeRow.font = { bold: true };
+            typeRow.eachCell(cell => {
+                cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF90CAF9" } };
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+            });
+
+            // Data rows
+            ticketGroups.filter(t => t.CustomerType === label).forEach((row, idx) => {
+                const dataRow = [
+                    idx + 1,
+                    "รายได้",
+                    row.TicketName?.split(":")[1] || row.TicketName,
+                    row.Rate,
+                    row.Drivers.reduce((sum, dv) => sum + Number(check ? dv.Amount : dv.Volume || 0), 0),
+                    ...driverGroups.map(dg => {
+                        const found = row.Drivers.find(dv => dv.Driver === dg.Driver && dv.Registration === dg.Registration);
+                        return found ? Number(check ? found.Amount : found.Volume) : 0;
+                    }),
+                ];
+                const excelRow = worksheet.addRow(dataRow);
+                excelRow.eachCell((cell, colIndex) => {
+                    cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                    if (colIndex > 1) cell.numFmt = "#,##0.00";
+                    cell.alignment = { horizontal: colIndex === 3 ? "left" : "right", vertical: "middle" };
+                });
+            });
+
+            // Total per type
+            const totalRow = [
+                "",
+                "",
+                `รวมรายได้ของ ${label}`,
+                "",
+                grandTotal ? Number(check ? grandTotal.Amount : grandTotal.Volume) : 0,
+                ...driverGroups.map(dg => {
+                    const totalDriver = totals[dg.Driver.split(":")[1]] || { Amount: 0, Volume: 0 };
+                    return Number(check ? totalDriver.Amount : totalDriver.Volume);
+                }),
+            ];
+            const footerRow = worksheet.addRow(totalRow);
+            footerRow.font = { bold: true };
+            footerRow.eachCell(cell => {
+                cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBBDEFB" } };
+                cell.numFmt = "#,##0.00";
+                cell.alignment = { horizontal: "right", vertical: "middle" };
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+            });
+        });
+
+        // 5️⃣ รวมรายได้ทั้งหมด
+        const grandTotalRow = [
+            "",
+            "",
+            "รวมรายได้ทั้งหมด",
+            "",
+            grandTotal ? Number(check ? grandTotal.Amount : grandTotal.Volume) : 0,
+            ...driverGroups.map(dg => {
+                const driverName = dg.Driver.split(":")[1];
+                const total = driverTotals[driverName] || { Amount: 0, Volume: 0 };
+                return Number(check ? total.Amount : total.Volume);
+            }),
+        ];
+        const gTotalRow = worksheet.addRow(grandTotalRow);
+        gTotalRow.font = { bold: true };
+        gTotalRow.eachCell(cell => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE3F2FD" } };
+            cell.numFmt = "#,##0.00";
+            cell.alignment = { horizontal: "right", vertical: "middle" };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 6️⃣ ReportDetail + รวมค่าใช้จ่าย
+        reportDetail.forEach((row, idx) => {
+            const dataRow = [
+                idx + 1,
+                row.Type,
+                row.Bank ? row.Bank.split(":")[1] : row.Bank,
+                "-",
+                row.TotalPrice || 0,
+                ...driverGroups.map(dg => {
+                    const found = row.Registrations.find(
+                        r => Number(r.Registration.split(":")[0]) === Number(dg.Registration.split(":")[0])
+                    );
+                    return found ? (check ? found.TotalPrice : found.TotalAmount) : 0;
+                }),
+            ];
+            const excelRow = worksheet.addRow(dataRow);
+            excelRow.eachCell((cell, colIndex) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                if (colIndex > 1) cell.numFmt = "#,##0.00";
+                cell.alignment = { horizontal: colIndex === 3 ? "left" : "right", vertical: "middle" };
+            });
+        });
+
+        // 7️⃣ รวมค่าใช้จ่ายทั้งหมด
+        const grandTotalReportRow = [
+            "",
+            "",
+            "รวมค่าใช้จ่าย",
+            "",
+            grandTotalReport?.TotalPrice || 0,
+            ...driverGroups.map(dg => {
+                const regis = Number(dg.Registration.split(":")[0]);
+                const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                return total.TotalPrice;
+            }),
+        ];
+        const gTotalReportRow = worksheet.addRow(grandTotalReportRow);
+        gTotalReportRow.font = { bold: true };
+        gTotalReportRow.eachCell(cell => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE3F2FD" } };
+            cell.numFmt = "#,##0.00";
+            cell.alignment = { horizontal: "right", vertical: "middle" };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 8️⃣ Save
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `รายงานน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
     };
 
     console.log("company : ", companyName);
@@ -451,74 +993,8 @@ const CloseFS = () => {
                             />
                         </FormGroup>
                     </Grid>
-                    <Grid item md={5} xs={12}>
-                        <Paper
-                            component="form"
-                            sx={{ height: "35px", width: "100%" }}
-                        >
-                            {/* <Autocomplete
-                                options={companies} // ✅ ใช้ข้อมูลชุดเดิม
-                                getOptionLabel={(option) => option.Name} // แสดงชื่อบริษัท
-                                value={companies.find((c) => `${c.id}:${c.Name}` === companyName) || null} // ✅ set ค่าที่เลือก
-                                onChange={(event, newValue) => {
-                                    if (newValue) {
-                                        handleCompany(`${newValue.id}:${newValue.Name}`);
-                                    } else {
-                                        handleCompany("");
-                                    }
-                                }}
-                                sx={{
-                                    fontSize: "16px",
-                                    "& .MuiInputBase-root": {
-                                        height: "35px", // ✅ ความสูงของ input
-                                        fontSize: "16px",
-                                    },
-                                    "& .MuiOutlinedInput-input": {
-                                        padding: "6px 10px", // ✅ padding ด้านใน
-                                    },
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="กรุณาเลือกบริษัท"
-                                        variant="outlined"
-                                    />
-                                )}
-                            /> */}
-                            <Autocomplete
-                                options={companies} // ✅ ใช้ข้อมูลชุดเดิม
-                                getOptionLabel={(option) => option.Name} // แสดงชื่อบริษัท
-                                isOptionEqualToValue={(option, value) => option.Name === value.Name} // ตรวจสอบค่าที่เลือก
-                                value={companies.find((c) => `${c.id}:${c.Name}` === companyName) || null} // ✅ set ค่าที่เลือก
-                                onChange={(event, newValue) => {
-                                    if (newValue) {
-                                        handleCompany(`${newValue.id}:${newValue.Name}`);
-                                    } else {
-                                        handleCompany("");
-                                    }
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label={companyName === "" ? "กรุณาเลือกบริษัท" : ""} // เปลี่ยน label กลับหากไม่เลือก
-                                        variant="outlined"
-                                        size="small"
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": { height: "35px" },
-                                            "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
-                                        }}
-                                    />
-                                )}
-                                renderOption={(props, option) => (
-                                    <li {...props}>
-                                        <Typography fontSize="16px">{`${option.Name}`}</Typography>
-                                    </li>
-                                )}
-                            />
-                        </Paper>
-                    </Grid>
-                    <Grid item md={4} xs={12}></Grid>
-                    <Grid item md={3} xs={12}>
+                    <Grid item md={9} xs={12}></Grid>
+                    <Grid item md={4.5} xs={12}>
                         {
                             date ?
                                 <Paper component="form" sx={{ width: "100%", height: "35px", marginTop: -2 }}>
@@ -586,7 +1062,82 @@ const CloseFS = () => {
                                 </Paper>
                         }
                     </Grid>
-                    <Grid item md={9} xs={12}>
+                    <Grid item md={5.5} xs={12}>
+                        <Paper
+                            component="form"
+                            sx={{ height: "35px", width: "100%", marginTop: -2 }}
+                        >
+                            <Autocomplete
+                                options={companyDetail.filter((row) => row.id !== 1)}
+                                getOptionLabel={(option) => option.Name}
+                                isOptionEqualToValue={(option, value) => option.Name === value.Name}
+                                value={
+                                    companyDetail
+                                        .filter((row) => row.id !== 1)
+                                        .find((c) => `${c.id}:${c.Name}` === companyName) || null
+                                }
+                                onChange={(event, newValue) => {
+                                    if (newValue) {
+                                        setCompanyName(`${newValue.id}:${newValue.Name}`);
+                                    } else {
+                                        setCompanyName("");
+                                    }
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        size="small"
+                                        sx={{
+                                            "& .MuiOutlinedInput-root": { height: "35px" },
+                                            "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                        }}
+                                        InputProps={{
+                                            ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    เลือกบริษัท :
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "16px",
+                                                height: "35px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        }}
+                                    />
+                                )}
+                                renderOption={(props, option) => (
+                                    <li {...props}>
+                                        <Typography fontSize="16px">{option.Name}</Typography>
+                                    </li>
+                                )}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item md={2} xs={12} textAlign="right">
+                        <Button
+                            variant="contained"
+                            color="success"
+                            onClick={() =>
+                                exportTableToExcel()
+                            }
+                        >
+                            Export Excel
+                        </Button>
+                    </Grid>
+                    <Grid item md={4.5} xs={12}>
+                        <Typography
+                            variant="body1"
+                            sx={{ fontWeight: "bold", marginTop: -1, color: "gray" }}
+                        >
+                            {!date
+                                ? `( วันที่ ${firstDay.format("D เดือนMMMM พ.ศ.BBBB")} ถึง ${lastDay.format("D เดือนMMMM พ.ศ.BBBB")} )`
+                                : `( ปี ${years.format("BBBB")} )`}
+                        </Typography>
+                    </Grid>
+                    <Grid item md={7.5} xs={12}>
                         <FormGroup row sx={{ marginTop: -2 }}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography>
                             {/* <FormControlLabel
@@ -605,8 +1156,8 @@ const CloseFS = () => {
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={check1}
-                                        onChange={() => setCheck1(!check1)}
+                                        checked={check === true ? true : false}
+                                        onChange={() => setCheck(true)}
                                     />
                                 }
                                 label={
@@ -618,8 +1169,8 @@ const CloseFS = () => {
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={check2}
-                                        onChange={() => setCheck2(!check2)}
+                                        checked={check === false ? true : false}
+                                        onChange={() => setCheck(false)}
                                     />
                                 }
                                 label={
@@ -655,7 +1206,7 @@ const CloseFS = () => {
                 <TableContainer
                     component={Paper}
                     sx={{
-                        marginBottom: 2, height: "250px", width: "1270px",
+                        marginBottom: 2, height: "70vh", width: "1270px",
                         overflowX: "auto"
                     }}
                 >
@@ -665,57 +1216,472 @@ const CloseFS = () => {
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
                                     ลำดับ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, zIndex: 5 }}>
                                     ประเภท
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 75, zIndex: 5, borderRight: "2px solid white" }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 280, position: "sticky", left: 50, zIndex: 5, borderRight: "2px solid white" }}>
                                     ชื่อรายการ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 140 }}>
                                     เฉลี่ยค่าขนส่ง/ลิตร
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200, position: "sticky", left: 350, zIndex: 5, borderRight: "2px solid white" }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130, position: "sticky", left: 320, zIndex: 5, borderRight: "2px solid white" }}>
                                     รวม
                                 </TablecellSelling>
                                 {
-                                    data.map((row) => (
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                    driverGroups.map((row) => (
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
                                             <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1, marginTop: 1 }} gutterBottom>{row.Driver.split(":")[1]}</Typography>
-                                            <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{row.Registration.split(":")[1]}</Typography>
+                                            <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{`${row.Registration.split(":")[1]}/${row.RegistrationTail.split(":")[1]}`}</Typography>
                                         </TablecellSelling>
                                     ))
                                 }
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {
-                                filtered.map((row, index) => (
+                            {[
+                                { label: "ตั๋วน้ำมัน", total: grandTotalA, driverTotals: driverTotalsA },
+                                { label: "ตั๋วรับจ้างขนส่ง", total: grandTotalT, driverTotals: driverTotalsT },
+                                { label: "ตั๋วปั้ม", total: grandTotalG, driverTotals: driverTotalsG },
+                            ].map(({ label, total, driverTotals }) => (
+                                <React.Fragment key={label}>
+                                    {/* Header Row */}
+                                    <TableRow sx={{ borderBottom: "1px solid gray", borderTop: "1px solid gray" }}>
+                                        <TableCell
+                                            sx={{
+                                                textAlign: "center",
+                                                position: "sticky",
+                                                left: 0,
+                                                zIndex: 4,
+                                                borderRight: "2px solid white",
+                                                backgroundColor: "#90caf9",
+                                                fontWeight: "bold",
+                                            }}
+                                            colSpan={2}
+                                        >
+                                            {label}
+                                        </TableCell>
+                                        <TableCell colSpan={3 + driverGroups.length} />
+                                    </TableRow>
+
+                                    {/* รายการแต่ละ ticket */}
+                                    {ticketGroups
+                                        .filter((t) => t.CustomerType === label)
+                                        .map((row, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        position: "sticky",
+                                                        left: 0,
+                                                        zIndex: 4,
+                                                        borderRight: "2px solid white",
+                                                        backgroundColor: "white",
+                                                    }}
+                                                >
+                                                    {index + 1}
+                                                </TableCell>
+
+                                                <TableCell sx={{ textAlign: "center" }}>รายได้</TableCell>
+
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "left",
+                                                        position: "sticky",
+                                                        left: 50,
+                                                        zIndex: 4,
+                                                        borderRight: "2px solid white",
+                                                        backgroundColor: "white",
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{ ml: 2, lineHeight: 1.2, whiteSpace: "nowrap" }}
+                                                        gutterBottom
+                                                    >
+                                                        {row.TicketName?.split(":")[1] || row.TicketName}
+                                                    </Typography>
+                                                </TableCell>
+
+                                                <TableCell sx={{ textAlign: "center" }}>{row.Rate}</TableCell>
+
+                                                {/* ช่องรวมของแต่ละ Ticket */}
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        position: "sticky",
+                                                        left: 320,
+                                                        zIndex: 4,
+                                                        borderRight: "2px solid white",
+                                                        backgroundColor: "white",
+                                                        paddingLeft: "15px !important",
+                                                        paddingRight: "15px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
+                                                    {(() => {
+                                                        const totalAllDrivers = driverGroups.reduce((sum, h) => {
+                                                            const total = row.Drivers
+                                                                .filter((dv) => dv.Driver === h.Driver && dv.Registration === h.Registration)
+                                                                .reduce((s, dv) => s + Number((check ? dv.Amount : dv.Volume) || 0), 0);
+                                                            return sum + total;
+                                                        }, 0);
+                                                        return totalAllDrivers ? new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        }).format(totalAllDrivers) : "-";
+                                                    })()}
+                                                </TableCell>
+
+                                                {/* แสดงค่า per Driver */}
+                                                {driverGroups.map((h, i) => {
+                                                    const found = row.Drivers.find(
+                                                        (dv) => dv.Driver === h.Driver && dv.Registration === h.Registration
+                                                    );
+                                                    return (
+                                                        <TableCell
+                                                            key={i}
+                                                            sx={{
+                                                                textAlign: "right",
+                                                                paddingLeft: "15px !important",
+                                                                paddingRight: "15px !important",
+                                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                                color: !found && "lightgray"
+                                                            }}
+                                                        >
+                                                            {found ? (check ? new Intl.NumberFormat("en-US", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            }).format(found.Amount) : new Intl.NumberFormat("en-US", {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            }).format(found.Volume)) : "0"}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                            </TableRow>
+                                        ))}
+
+                                    {/* แถวรวมรายได้ของประเภทนี้ */}
                                     <TableRow>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>
-                                            {index + 1}
+                                        <TableCell
+                                            sx={{
+                                                textAlign: "center",
+                                                position: "sticky",
+                                                left: 0,
+                                                zIndex: 4,
+                                                borderRight: "2px solid white",
+                                                backgroundColor: "#bbdefb",
+                                            }}
+                                        />
+                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#bbdefb" }}></TableCell>
+                                        <TableCell
+                                            sx={{
+                                                textAlign: "right",
+                                                position: "sticky",
+                                                left: 50,
+                                                zIndex: 4,
+                                                borderRight: "2px solid white",
+                                                backgroundColor: "#bbdefb",
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{ mr: 2, lineHeight: 1.2, whiteSpace: "nowrap", fontWeight: "bold" }}
+                                                gutterBottom
+                                            >
+                                                รวมรายได้ของ{label}
+                                            </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
-                                            รายได้
+                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#bbdefb" }}></TableCell>
+                                        <TableCell
+                                            sx={{
+                                                textAlign: "right",
+                                                position: "sticky",
+                                                fontWeight: "bold",
+                                                left: 320,
+                                                zIndex: 4,
+                                                borderRight: "2px solid white",
+                                                backgroundColor: "#bbdefb",
+                                                paddingLeft: "15px !important",
+                                                paddingRight: "15px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                        >
+                                            {check ? new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            }).format(total?.Amount) : new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            }).format(total?.Volume)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>
-                                            {row.TicketName.split(":")[1]}
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        {driverGroups.map((row) => {
+                                            const driverName = row.Driver.split(":")[1];
+                                            const regis = row.Registration.split(":")[1];
+                                            const total = driverTotals[driverName] || { Volume: 0, Amount: 0 };
+
+                                            return (
+                                                <TableCell
+                                                    key={driverName + regis}
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        backgroundColor: "#bbdefb",
+                                                        paddingLeft: "15px !important",
+                                                        paddingRight: "15px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
+                                                    {
+                                                        check ?
+                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Amount)}
+                                                            </Typography>
+                                                            :
+                                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ mt: 1 }}>
+                                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Volume)}
+                                                            </Typography>
+                                                    }
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                </React.Fragment>
+                            ))}
+
+                            {/* รวมรายได้ทั้งหมด */}
+                            <TableRow>
+                                <TableCell
+                                    sx={{
+                                        textAlign: "center",
+                                        position: "sticky",
+                                        left: 0,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#e3f2fd",
+                                    }}
+                                />
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd" }}></TableCell>
+                                <TableCell
+                                    sx={{
+                                        textAlign: "right",
+                                        position: "sticky",
+                                        left: 50,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#e3f2fd",
+                                    }}
+                                >
+                                    <Typography
+                                        variant="subtitle2"
+                                        sx={{ mr: 2, lineHeight: 1.2, whiteSpace: "nowrap", fontWeight: "bold" }}
+                                        gutterBottom
+                                    >
+                                        รวมรายได้ทั้งหมด
+                                    </Typography>
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd" }}></TableCell>
+                                <TableCell
+                                    sx={{
+                                        textAlign: "right",
+                                        position: "sticky",
+                                        fontWeight: "bold",
+                                        left: 320,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#e3f2fd",
+                                        paddingLeft: "15px !important",
+                                        paddingRight: "15px !important",
+                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                    }}
+                                >
+                                    {check ? new Intl.NumberFormat("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    }).format(grandTotal?.Amount) : new Intl.NumberFormat("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    }).format(grandTotal?.Volume)}
+                                </TableCell>
+                                {driverGroups.map((row) => {
+                                    const driverName = row.Driver.split(":")[1];
+                                    const regis = row.Registration.split(":")[1];
+                                    const total = driverTotals[driverName] || { Volume: 0, Amount: 0 };
+
+                                    return (
+                                        <TableCell
+                                            key={driverName + regis}
+                                            sx={{
+                                                textAlign: "right",
+                                                backgroundColor: "#e3f2fd",
+                                                paddingLeft: "15px !important",
+                                                paddingRight: "15px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                        >
                                             {
-                                                row.Rate
+                                                check ?
+                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Amount)}
+                                                    </Typography>
+                                                    :
+                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Volume)}
+                                                    </Typography>
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 350, zIndex: 4, borderRight: "2px solid white", backgroundColor: "white" }}>
-                                            -
+                                    );
+                                })}
+                            </TableRow>
+                            {
+                                reportDetail.map((row, index) => (
+                                    <TableRow>
+                                        <TableCell
+                                            sx={{
+                                                textAlign: "center",
+                                                position: "sticky",
+                                                left: 0,
+                                                zIndex: 4,
+                                                borderRight: "2px solid white",
+                                                backgroundColor: "white",
+                                            }}
+                                        >
+                                            {index + 1}
                                         </TableCell>
-                                        {data.map((h) => (
-                                            <TableCell key={`${h.Driver}:${h.Registration}`} sx={{ textAlign: "center" }}>
-                                                {row.amounts[`${h.Driver}:${h.Registration}`] || "-"}
-                                            </TableCell>
-                                        ))}
+                                        <TableCell sx={{ textAlign: "center" }}>{row.Type}</TableCell>
+                                        <TableCell
+                                            sx={{
+                                                textAlign: "left",
+                                                position: "sticky",
+                                                left: 50,
+                                                zIndex: 4,
+                                                borderRight: "2px solid white",
+                                                backgroundColor: "white",
+                                            }}
+                                        >
+                                            <Typography variant="subtitle2" sx={{ marginLeft: 2, lineHeight: 1.2, whiteSpace: "nowrap" }} gutterBottom>{row.Bank ? row.Bank.split(":")[1] : row.Bank}</Typography>
+                                        </TableCell>
+                                        <TableCell sx={{ textAlign: "center" }}>-</TableCell>
+                                        <TableCell
+                                            sx={{
+                                                textAlign: "right",
+                                                position: "sticky",
+                                                left: 320,
+                                                zIndex: 4,
+                                                borderRight: "2px solid white",
+                                                backgroundColor: "white",
+                                                paddingLeft: "15px !important",
+                                                paddingRight: "15px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                        >
+                                            {new Intl.NumberFormat("en-US", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                            }).format(row.TotalPrice || 0)}
+                                        </TableCell>
+                                        {driverGroups.map((h, i) => {
+                                            const found = row.Registrations.find(
+                                                (dv) => Number(dv.Registration.split(":")[0]) === Number(h.Registration.split(":")[0])
+                                            );
+
+                                            return (
+                                                <TableCell
+                                                    key={i}
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "15px !important",
+                                                        paddingRight: "15px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                        color: !found && "lightgray"
+                                                    }}
+                                                >
+                                                    {found ? (check ? new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    }).format(found.TotalPrice) : new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    }).format(found.TotalAmount)) : "0"}
+                                                </TableCell>
+                                            );
+                                        })}
                                     </TableRow>
                                 ))
                             }
+                            <TableRow>
+                                <TableCell
+                                    sx={{
+                                        textAlign: "center",
+                                        position: "sticky",
+                                        left: 0,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#e3f2fd",
+                                    }}
+                                >
+
+                                </TableCell>
+
+                                {/* ✅ ประเภท */}
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd", }}></TableCell>
+
+                                <TableCell
+                                    sx={{
+                                        textAlign: "right",
+                                        position: "sticky",
+                                        left: 50,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#e3f2fd",
+                                    }}
+                                >
+                                    <Typography variant="subtitle2" sx={{ marginRight: 2, lineHeight: 1.2, whiteSpace: "nowrap", fontWeight: "bold" }} gutterBottom>
+                                        รวมค่าใช้จ่าย
+                                    </Typography>
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd", }}></TableCell>
+                                <TableCell
+                                    sx={{
+                                        textAlign: "right",
+                                        position: "sticky",
+                                        fontWeight: "bold",
+                                        left: 320,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#e3f2fd",
+                                        paddingLeft: "15px !important",
+                                        paddingRight: "15px !important",
+                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                    }}
+                                >
+                                    {new Intl.NumberFormat("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    }).format(grandTotalReport?.TotalPrice || 0)}
+                                </TableCell>
+                                {driverGroups.map((row) => {
+                                    const regis = Number(row.Registration.split(":")[0]);
+                                    const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+
+                                    return (
+                                        <TableCell
+                                            key={regis}
+                                            sx={{
+                                                textAlign: "right",
+                                                backgroundColor: "#e3f2fd",
+                                                paddingLeft: "15px !important",
+                                                paddingRight: "15px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                        >
+                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.TotalPrice)}
+                                            </Typography>
+                                        </TableCell>
+                                    );
+                                })}
+                            </TableRow>
                         </TableBody>
                     </Table>
                 </TableContainer>

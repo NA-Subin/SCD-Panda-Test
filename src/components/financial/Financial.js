@@ -726,7 +726,7 @@ const Financial = () => {
                                         )}
                                     </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, position: "sticky", left: 0, zIndex: 3, cursor: "pointer" }}
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 3, cursor: "pointer" }}
                                     onClick={() => handleSort("Registration")}
                                 >
                                     <Box display="flex" alignItems="center" justifyContent="center">
@@ -738,7 +738,7 @@ const Financial = () => {
                                         )}
                                     </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 220, cursor: "pointer" }}
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 320, cursor: "pointer" }}
                                     onClick={() => handleSort("Company")}
                                 >
                                     <Box display="flex" alignItems="center" justifyContent="center">
@@ -750,7 +750,7 @@ const Financial = () => {
                                         )}
                                     </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350, cursor: "pointer" }}
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 320, cursor: "pointer" }}
                                     onClick={() => handleSort("Bank")}
                                 >
                                     <Box display="flex" alignItems="center" justifyContent="center">
