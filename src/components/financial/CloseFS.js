@@ -1246,7 +1246,11 @@ const CloseFS = () => {
                             ].map(({ label, total, driverTotals }) => (
                                 <React.Fragment key={label}>
                                     {/* Header Row */}
-                                    <TableRow sx={{ borderBottom: "1px solid gray", borderTop: "1px solid gray" }}>
+                                    <TableRow
+                                        sx={{
+                                            borderBottom: "1px solid gray",
+                                            borderTop: "1px solid gray"
+                                        }}>
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
@@ -1254,7 +1258,7 @@ const CloseFS = () => {
                                                 left: 0,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#90caf9",
+                                                backgroundColor: "#a9c7ecff",
                                                 fontWeight: "bold",
                                             }}
                                             colSpan={2}
@@ -1268,7 +1272,10 @@ const CloseFS = () => {
                                     {ticketGroups
                                         .filter((t) => t.CustomerType === label)
                                         .map((row, index) => (
-                                            <TableRow key={index}>
+                                            <TableRow
+                                                key={index}
+                                                sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}
+                                            >
                                                 <TableCell
                                                     sx={{
                                                         textAlign: "center",
@@ -1276,7 +1283,7 @@ const CloseFS = () => {
                                                         left: 0,
                                                         zIndex: 4,
                                                         borderRight: "2px solid white",
-                                                        backgroundColor: "white",
+                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
                                                     }}
                                                 >
                                                     {index + 1}
@@ -1291,7 +1298,7 @@ const CloseFS = () => {
                                                         left: 50,
                                                         zIndex: 4,
                                                         borderRight: "2px solid white",
-                                                        backgroundColor: "white",
+                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
                                                     }}
                                                 >
                                                     <Typography
@@ -1313,7 +1320,7 @@ const CloseFS = () => {
                                                         left: 320,
                                                         zIndex: 4,
                                                         borderRight: "2px solid white",
-                                                        backgroundColor: "white",
+                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
                                                         paddingLeft: "15px !important",
                                                         paddingRight: "15px !important",
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -1371,10 +1378,10 @@ const CloseFS = () => {
                                                 left: 0,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#bbdefb",
+                                                backgroundColor: "#c9d9efff",
                                             }}
                                         />
-                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#bbdefb" }}></TableCell>
+                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff" }}></TableCell>
                                         <TableCell
                                             sx={{
                                                 textAlign: "right",
@@ -1382,7 +1389,7 @@ const CloseFS = () => {
                                                 left: 50,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#bbdefb",
+                                                backgroundColor: "#c9d9efff",
                                             }}
                                         >
                                             <Typography
@@ -1393,7 +1400,7 @@ const CloseFS = () => {
                                                 รวมรายได้ของ{label}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#bbdefb" }}></TableCell>
+                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff" }}></TableCell>
                                         <TableCell
                                             sx={{
                                                 textAlign: "right",
@@ -1402,7 +1409,7 @@ const CloseFS = () => {
                                                 left: 320,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#bbdefb",
+                                                backgroundColor: "#c9d9efff",
                                                 paddingLeft: "15px !important",
                                                 paddingRight: "15px !important",
                                                 fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -1426,7 +1433,7 @@ const CloseFS = () => {
                                                     key={driverName + regis}
                                                     sx={{
                                                         textAlign: "right",
-                                                        backgroundColor: "#bbdefb",
+                                                        backgroundColor: "#c9d9efff",
                                                         paddingLeft: "15px !important",
                                                         paddingRight: "15px !important",
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -1535,7 +1542,7 @@ const CloseFS = () => {
                             </TableRow>
                             {
                                 reportDetail.map((row, index) => (
-                                    <TableRow>
+                                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
@@ -1543,7 +1550,7 @@ const CloseFS = () => {
                                                 left: 0,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "white",
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
                                             }}
                                         >
                                             {index + 1}
@@ -1556,7 +1563,7 @@ const CloseFS = () => {
                                                 left: 50,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "white",
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
                                             }}
                                         >
                                             <Typography variant="subtitle2" sx={{ marginLeft: 2, lineHeight: 1.2, whiteSpace: "nowrap" }} gutterBottom>{row.Bank ? row.Bank.split(":")[1] : row.Bank}</Typography>
@@ -1569,7 +1576,7 @@ const CloseFS = () => {
                                                 left: 320,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "white",
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
                                                 paddingLeft: "15px !important",
                                                 paddingRight: "15px !important",
                                                 fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 

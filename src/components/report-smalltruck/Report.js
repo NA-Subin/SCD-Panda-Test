@@ -1019,14 +1019,14 @@ const ReportSmallTruck = () => {
               {
                 matchedOrdersWithAll.map((row, index) => (
                   row.type === "รับเข้า" ? (
-                    <TableRow>
-                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
+                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                         {index + 1}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
                         {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
-                      <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
+                      <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                         <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >{`${row.Driver.split(":")[1]} / ${row.Registration.split(":")[1]}`}</Typography>
                       </TableCell>
                       {/* ✅ ตรงกับ column ที่หัว */}
@@ -1075,14 +1075,14 @@ const ReportSmallTruck = () => {
                     ))} */}
                     </TableRow>
                   ) : (
-                    <TableRow>
-                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
+                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                         {index + 1}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
                         {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
-                      <TableCell sx={{ textAlign: "center", color: "lightgray", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: "white" }}>
+                      <TableCell sx={{ textAlign: "center", color: "lightgray", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                         -
                       </TableCell>
                       {/* ✅ ตรงกับ column ที่หัว */}

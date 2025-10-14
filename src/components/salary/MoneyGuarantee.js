@@ -206,6 +206,18 @@ const MoneyGuarantee = ({ money, periods, name }) => {
         );
     };
 
+    const totalMoney = money.reduce((acc, doc) => {
+        const value = Number(doc.Money) || 0;
+
+        if (doc.Type === "รายได้") {
+            return acc + value; // ✅ รายได้ = บวก
+        } else if (doc.Type === "รายหัก") {
+            return acc - value; // ✅ รายหัก = ลบ
+        }
+
+        return acc;
+    }, 0);
+
 
     return (
         <React.Fragment>
@@ -230,21 +242,20 @@ const MoneyGuarantee = ({ money, periods, name }) => {
                             variant="subtitle2"
                             sx={{
                                 lineHeight: 1,
-                                textAlign: "center",
+                                textAlign: "right",
                                 width: "100%",   // กินพื้นที่เต็ม เพื่อให้อยู่กึ่งกลางแนวนอน
+                                paddingLeft: "30px !important",
+                                paddingRight: "30px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                color:
+                                    totalMoney === 0
+                                        ? "lightgray" // ✅ ถ้าเป็นศูนย์ ให้เทา
+                                        : totalMoney < 0
+                                            ? "red" // (ตัวเลือกเสริม) ถ้าติดลบให้แดง
+                                            : "inherit", // ปกติ
                             }}
                         >
-                            {new Intl.NumberFormat("en-US").format(money.reduce((acc, doc) => {
-                                const value = Number(doc.Money) || 0;
-
-                                if (doc.Type === "รายได้") {
-                                    return acc + value; // ✅ ถ้าเป็นรายได้ บวก
-                                } else if (doc.Type === "รายหัก") {
-                                    return acc - value; // ✅ ถ้าเป็นรายหัก ลบ
-                                }
-
-                                return acc; // ถ้าไม่มี Type หรือไม่ตรงเงื่อนไข ก็ไม่เปลี่ยนค่า
-                            }, 0))}
+                            {new Intl.NumberFormat("en-US").format(totalMoney)}
                         </Typography>
                     </Box>
                 </TableCell>

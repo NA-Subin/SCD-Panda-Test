@@ -871,8 +871,7 @@ const DocSalary = ({ openNavbar }) => {
                             </Box> */}
 
                             <Table
-                                size="small"
-                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1600px" }}
+                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "5px" }, width: "1600px" }}
                             >
                                 <TableHead
                                     sx={{
@@ -914,7 +913,7 @@ const DocSalary = ({ openNavbar }) => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                             เลขบัญชี
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             ค่าเที่ยว
                                         </TablecellSelling>
                                         {uniqueNames.map((col) => (
@@ -935,14 +934,24 @@ const DocSalary = ({ openNavbar }) => {
                                 </TableHead>
                                 <TableBody>
                                     {processed.map(({ index, row, costrip, total, moneyGuarantee, moneyLoan }) => (
-                                        <TableRow key={index}>
+                                        <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                                             <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                            <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: "#eeeeee", fontWeight: "bold" }}>
+                                            <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff", fontWeight: "bold" }}>
                                                 {row.Name}
                                             </TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>{row.Registration}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(costrip)}</TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "right",
+                                                    paddingLeft: "30px !important",
+                                                    paddingRight: "30px !important",
+                                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    color: costrip === 0 && "lightgray"
+                                                }}
+                                            >
+                                                {new Intl.NumberFormat("en-US").format(costrip)}
+                                            </TableCell>
 
                                             {uniqueNames.map((col) => {
                                                 const found = row.document.find(
@@ -955,13 +964,37 @@ const DocSalary = ({ openNavbar }) => {
                                                 }
 
                                                 return (
-                                                    <TableCell key={col.id} align="center">
+                                                    <TableCell
+                                                        key={col.id}
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            paddingLeft: "30px !important",
+                                                            paddingRight: "30px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                            color: displayMoney === 0 || displayMoney === ""
+                                                                ? "lightgray"
+                                                                : displayMoney < 0
+                                                                    ? "red"
+                                                                    : "inherit",
+
+                                                        }}
+                                                    >
                                                         {new Intl.NumberFormat("en-US").format(displayMoney || 0)}
                                                     </TableCell>
                                                 );
                                             })}
 
-                                            <TableCell align="center" sx={{ backgroundColor: "#eeeeee", fontWeight: "bold" }}>{new Intl.NumberFormat("en-US").format(total + costrip)}</TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "right",
+                                                    backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                    fontWeight: "bold",
+                                                    paddingLeft: "30px !important",
+                                                    paddingRight: "30px !important",
+                                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                }}>
+                                                {new Intl.NumberFormat("en-US").format(total + costrip)}
+                                            </TableCell>
 
                                             {/* <TableCell>
                                                 <Box
@@ -1005,8 +1038,8 @@ const DocSalary = ({ openNavbar }) => {
                                                     <MoneyLoan money={moneyLoan} periods={periods} />
                                                 </Box>
                                             </TableCell> */}
-                                            <MoneyGuarantee money={moneyGuarantee} periods={periods} name={`${row.Name} ${row.Registration ? row.Registration : ""}`}/>
-                                            <MoneyLoan money={moneyLoan} periods={periods} name={`${row.Name} ${row.Registration ? row.Registration : ""}`}/>
+                                            <MoneyGuarantee money={moneyGuarantee} periods={periods} name={`${row.Name} ${row.Registration ? row.Registration : ""}`} />
+                                            <MoneyLoan money={moneyLoan} periods={periods} name={`${row.Name} ${row.Registration ? row.Registration : ""}`} />
                                         </TableRow>
                                     )
                                     )}
@@ -1022,29 +1055,77 @@ const DocSalary = ({ openNavbar }) => {
                                     }}
                                 >
                                     <TableRow>
-                                        <TablecellSelling colSpan={4} sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellSelling colSpan={4}
+                                            sx={{
+                                                textAlign: "right",
+                                                fontSize: 14,
+                                                paddingLeft: "30px !important",
+                                                paddingRight: "30px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                            }}
+                                        >
                                             รวม
                                         </TablecellSelling>
 
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellSelling
+                                            sx={{
+                                                textAlign: "right",
+                                                fontSize: 14,
+                                                paddingLeft: "30px !important",
+                                                paddingRight: "30px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                            }}
+                                        >
                                             {new Intl.NumberFormat("en-US").format(summary.costrip)}
                                         </TablecellSelling>
 
                                         {uniqueNames.map((col) => (
-                                            <TablecellSelling key={col.id} sx={{ textAlign: "center", fontSize: 16 }}>
+                                            <TablecellSelling key={col.id}
+                                                sx={{
+                                                    textAlign: "right",
+                                                    fontSize: 14,
+                                                    paddingLeft: "30px !important",
+                                                    paddingRight: "30px !important",
+                                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                }}
+                                            >
                                                 {new Intl.NumberFormat("en-US").format(summary.columns[col.id] || 0)}
                                             </TablecellSelling>
                                         ))}
 
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellSelling
+                                            sx={{
+                                                textAlign: "right",
+                                                fontSize: 14,
+                                                paddingLeft: "30px !important",
+                                                paddingRight: "30px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                            }}
+                                        >
                                             {new Intl.NumberFormat("en-US").format(summary.total)}
                                         </TablecellSelling>
 
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellSelling
+                                            sx={{
+                                                textAlign: "right",
+                                                fontSize: 14,
+                                                paddingLeft: "30px !important",
+                                                paddingRight: "30px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                            }}
+                                        >
                                             {new Intl.NumberFormat("en-US").format(summary.guarantee)}
                                         </TablecellSelling>
 
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellSelling
+                                            sx={{
+                                                textAlign: "right",
+                                                fontSize: 14,
+                                                paddingLeft: "30px !important",
+                                                paddingRight: "30px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                            }}
+                                        >
                                             {new Intl.NumberFormat("en-US").format(summary.loan)}
                                         </TablecellSelling>
                                     </TableRow>

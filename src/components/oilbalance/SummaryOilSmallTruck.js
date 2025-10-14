@@ -877,7 +877,7 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                                 <TableBody>
                                     {
                                         sortedOrderDetail.map((row, index) => (
-                                            <TableRow>
+                                            <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f8f0f7fa" }} >
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>

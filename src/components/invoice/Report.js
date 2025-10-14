@@ -757,7 +757,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
                                 <TableBody>
                                     {
                                         sortedOrderDetail.map((row, index) => (
-                                            <TableRow>
+                                            <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.VolumeProduct)}</TableCell>

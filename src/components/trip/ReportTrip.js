@@ -725,7 +725,7 @@ const ReportTrip = ({ openNavbar }) => {
                                 <TableBody>
                                     {
                                         TripDetail.map((row, index) => (
-                                            <TableRow>
+                                            <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.DateReceive, "DD/MM/YYYY"))}</TableCell>
                                                 <TableCell>

@@ -789,7 +789,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                                 <TableBody>
                                     {
                                         sortedOrderDetail.map((row, index) => (
-                                            <TableRow>
+                                            <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f8f0f7fa" }} >
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName}</TableCell>
                                                 <TableCell

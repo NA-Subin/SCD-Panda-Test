@@ -91,6 +91,8 @@ const Financial = () => {
     const companypaymentDetail = Object.values(companypayment);
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
 
+    console.log("Company Detail : ", companypaymentDetail);
+
     const getRegistration = () => {
         const registartion = [
             ...registrationH.map((item) => ({ ...item, Registration: item.RegHead, TruckType: "หัวรถใหญ่" })),
@@ -306,7 +308,9 @@ const Financial = () => {
     const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [registration, setRegistration] = useState("");
+    const [regID, setRegID] = useState(0);
     const [company, setCompany] = useState("");
+    const [companyID, setCompanyID] = useState(0);
     const [bank, setBank] = useState("");
     const [price, setPrice] = useState("");
     const [vat, setVat] = useState("");
@@ -323,8 +327,10 @@ const Financial = () => {
         setInvoiceID(row.InvoiceID);
         setSelectedDateInvoice(row.SelectedDateInvoice);
         setSelectedDateTransfer(row.SelectedDateTransfer);
-        setRegistration(row.Registration);
+        setRegistration(`${row.Registration.split(":")[0]}:${row.Registration.split(":")[1]}`);
+        setRegID(Number(row.Registration.split(":")[0]));
         setCompany(row.Company);
+        setCompanyID(Number(row.Company.split(":")[0]));
         setBank(row.Bank);
         setPrice(row.Price);
         setVat(row.Vat);
@@ -333,6 +339,8 @@ const Financial = () => {
         setTruckType(row.TruckType);
         setPath(row.Path);
     }
+
+    console.log("Registration show : ", registration);
 
     const handleDateChangeDateInvoice = (newValue) => {
         if (newValue) {
@@ -354,7 +362,9 @@ const Financial = () => {
         setSelectedDateInvoice("");
         setSelectedDateTransfer("");
         setRegistration("");
+        setRegID(0);
         setCompany("");
+        setCompanyID(0);
         setBank("");
         setPrice("");
         setVat("");
@@ -408,7 +418,9 @@ const Financial = () => {
                 setSelectedDateInvoice("");
                 setSelectedDateTransfer("");
                 setRegistration("");
+                setRegID(0);
                 setCompany("");
+                setCompanyID(0);
                 setBank("");
                 setPrice("");
                 setVat("");
@@ -687,10 +699,10 @@ const Financial = () => {
                     >
                         <TableHead sx={{ height: "5vh" }}>
                             <TableRow>
-                                <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16, position: "sticky", left: 0, zIndex: 3, cursor: "pointer" }}>
                                     ลำดับ
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150, cursor: "pointer" }}
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180, cursor: "pointer" }}
                                     onClick={() => handleSort("InvoiceID")}
                                 >
                                     <Box display="flex" alignItems="center" justifyContent="center">
@@ -702,7 +714,7 @@ const Financial = () => {
                                         )}
                                     </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180, cursor: "pointer" }}
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130, cursor: "pointer" }}
                                     onClick={() => handleSort("SelectedDateInvoice")}
                                 >
                                     <Box display="flex" alignItems="center" justifyContent="center">
@@ -714,7 +726,7 @@ const Financial = () => {
                                         )}
                                     </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 180, cursor: "pointer" }}
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130, cursor: "pointer" }}
                                     onClick={() => handleSort("SelectedDateTransfer")}
                                 >
                                     <Box display="flex" alignItems="center" justifyContent="center">
@@ -726,7 +738,7 @@ const Financial = () => {
                                         )}
                                     </Box>
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 0, zIndex: 3, cursor: "pointer" }}
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250, position: "sticky", left: 50, zIndex: 3, cursor: "pointer" }}
                                     onClick={() => handleSort("Registration")}
                                 >
                                     <Box display="flex" alignItems="center" justifyContent="center">
@@ -765,10 +777,10 @@ const Financial = () => {
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                                     ยอดก่อน Vat
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                     ยอด VAT
                                 </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
+                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 170 }}>
                                     รวม
                                 </TablecellSelling>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 400 }}>
@@ -783,12 +795,12 @@ const Financial = () => {
                         <TableBody>
                             {
                                 reportDetail.map((row, index) => (
-                                    <TableRow>
-                                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f0f1f8cd" }}>
+                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 2, cursor: "pointer", backgroundColor: "white" }}>{index + 1}</TableCell>
+                                        <TableCell sx={{ textAlign: "left" }}>
                                             {
                                                 billID !== row.id ?
-                                                    row.InvoiceID
+                                                    <Typography variant="subtitle2" sx={{ marginLeft: 2, whiteSpace: "nowrap", lineHeight: 1 }} >{row.InvoiceID}</Typography>
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <TextField
@@ -888,10 +900,10 @@ const Financial = () => {
                                                     </Paper>
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 2, backgroundColor: "#eeeeee" }}>
+                                        <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 2, backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                                             {
                                                 billID !== row.id ?
-                                                    (`${row.Registration.split(":")[1]} (${row.TruckType})`)
+                                                    <Typography variant="subtitle2" sx={{ marginLeft: 2, whiteSpace: "nowrap", lineHeight: 1 }} >{`${row.Registration.split(":")[1]} (${row.TruckType})`}</Typography>
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <Autocomplete
@@ -899,9 +911,9 @@ const Financial = () => {
                                                             }
                                                             getOptionLabel={(option) => { return `${option?.Registration} (${option?.TruckType})`; }}
                                                             value={
-                                                                (getRegistration() || []).find(
-                                                                    (opt) => `${opt.id}:${opt.Registration}` === registration
-                                                                ) || null
+                                                                (getRegistration() || []).filter((row) => row.TruckType === trucktype).find(
+                                                                    //(opt) => `${opt.id}:${opt.Registration}` === registration
+                                                                    (opt) => opt.id === regID) || null
                                                             }
                                                             onChange={(e, newValue) => {
                                                                 if (newValue) {
@@ -930,10 +942,10 @@ const Financial = () => {
                                                     </Paper>
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "left" }}>
                                             {
                                                 billID !== row.id ?
-                                                    row.Company.split(":")[1]
+                                                    <Typography variant="subtitle2" sx={{ marginLeft: 2, whiteSpace: "nowrap", lineHeight: 1 }} >{row.Company.split(":")[1]}</Typography>
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <Autocomplete
@@ -941,8 +953,9 @@ const Financial = () => {
                                                             }
                                                             getOptionLabel={(option) => option?.Name || ""}
                                                             value={
-                                                                companypaymentDetail.find(
-                                                                    (opt) => `${opt.id}:${opt.Name}` === company
+                                                                companypaymentDetail.sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th")).find(
+                                                                    //(opt) => `${opt.id}:${opt.Name}` === company
+                                                                    (opt) => opt.id === companyID
                                                                 ) || null
                                                             }
                                                             onChange={(e, newValue) => {
@@ -972,10 +985,10 @@ const Financial = () => {
                                                     </Paper>
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "left" }}>
                                             {
                                                 billID !== row.id ?
-                                                    row.Bank.split(":")[1]
+                                                    <Typography variant="subtitle2" sx={{ marginLeft: 2, whiteSpace: "nowrap", lineHeight: 1 }} >{row.Bank.split(":")[1]}</Typography>
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <Autocomplete
@@ -1014,13 +1027,23 @@ const Financial = () => {
                                                     </Paper>
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "right" }}>
                                             {
                                                 billID !== row.id ?
-                                                    new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }).format(row.Price)
+                                                    <Typography variant="subtitle2"
+                                                        sx={{
+                                                            whiteSpace: "nowrap",
+                                                            lineHeight: 1,
+                                                            paddingLeft: "30px !important",
+                                                            paddingRight: "30px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                        }}
+                                                    >
+                                                        {new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(row.Price)}
+                                                    </Typography>
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <TextField
@@ -1046,13 +1069,25 @@ const Financial = () => {
                                                     </Paper>
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "right" }}>
                                             {
                                                 billID !== row.id ?
-                                                    new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }).format(row.Vat)
+                                                    <Typography variant="subtitle2"
+                                                        sx={{
+                                                            marginLeft: 2,
+                                                            whiteSpace: "nowrap",
+                                                            lineHeight: 1,
+                                                            paddingLeft: "15px !important",
+                                                            paddingRight: "15px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                        }}
+                                                    >
+                                                        {new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(row.Vat)}
+                                                    </Typography>
+
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <TextField
@@ -1078,41 +1113,51 @@ const Financial = () => {
                                                     </Paper>
                                             }
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#eeeeee", fontWeight: "bold" }}>
-                                            {
-                                                billID !== row.id ?
-                                                    new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }).format(row.Total)
-                                                    :
-                                                    new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }).format(total)
-                                                // <TextField
-                                                //     size="small"
-                                                //     fullWidth
-                                                //     type="number"
-                                                //     value={total}
-                                                //     sx={{
-                                                //         "& .MuiInputBase-root": {
-                                                //             height: 30,
-                                                //         },
-                                                //         "& .MuiInputBase-input": {
-                                                //             padding: "4px 8px",
-                                                //             marginLeft: -0.5,
-                                                //             width: "100%"
-                                                //         },
-                                                //     }}
-                                                //     onChange={(e) => { setTotal(e.target.value); }}
-                                                // />
-                                            }
+                                        <TableCell sx={{ textAlign: "right", backgroundColor: "#eeeeee", fontWeight: "bold" }}>
+                                            <Typography variant="subtitle2"
+                                                sx={{
+                                                    marginLeft: 2,
+                                                    whiteSpace: "nowrap",
+                                                    lineHeight: 1,
+                                                    paddingLeft: "30px !important",
+                                                    paddingRight: "30px !important",
+                                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                }} >
+                                                {
+                                                    billID !== row.id ?
+                                                        new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(row.Total)
+                                                        :
+                                                        new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(total)
+                                                    // <TextField
+                                                    //     size="small"
+                                                    //     fullWidth
+                                                    //     type="number"
+                                                    //     value={total}
+                                                    //     sx={{
+                                                    //         "& .MuiInputBase-root": {
+                                                    //             height: 30,
+                                                    //         },
+                                                    //         "& .MuiInputBase-input": {
+                                                    //             padding: "4px 8px",
+                                                    //             marginLeft: -0.5,
+                                                    //             width: "100%"
+                                                    //         },
+                                                    //     }}
+                                                    //     onChange={(e) => { setTotal(e.target.value); }}
+                                                    // />
+                                                }
+                                            </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>
+                                        <TableCell sx={{ textAlign: "left" }}>
                                             {
                                                 billID !== row.id ?
-                                                    row.Details
+                                                    <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >{row.Details}</Typography>
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <TextField
@@ -1356,6 +1401,7 @@ const Financial = () => {
                                             }).format(summary.total)
                                         }
                                     </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", width: 50 }} />
                                     <TablecellSelling sx={{ textAlign: "center", width: 50, position: "sticky", right: 0 }} />
                                 </TableRow>
                             </TableFooter>

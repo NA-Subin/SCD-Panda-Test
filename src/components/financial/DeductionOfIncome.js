@@ -790,7 +790,7 @@ const DeductionOfIncome = (props) => {
                         <TableBody>
                             {processedGroups.map(({ driverName, sortedRows }) =>
                                 sortedRows.map((row, rowIndex) => (
-                                    <TableRow key={row.id}>
+                                    <TableRow key={row.id} sx={{ backgroundColor: rowIndex % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
                                         {/* ✅ ลำดับแสดงเฉพาะแถวแรกของ driver */}
                                         {rowIndex === 0 && (
                                             <TableCell

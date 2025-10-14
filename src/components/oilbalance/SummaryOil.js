@@ -71,6 +71,8 @@ const SummaryOilBalance = ({ openNavbar }) => {
         direction: 'asc',
     });
 
+    let groupCounter = 0; // ตัวนับลำดับกลุ่ม
+
     console.log("sortConfig : ", sortConfig);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -152,15 +154,14 @@ const SummaryOilBalance = ({ openNavbar }) => {
     const orderDetail = useMemo(() => {
         if (!selectedDateStart || !selectedDateEnd) return [];
 
+        const productOrder = ["G95", "B95", "D", "G91", "E20", "PWD"];
+
         return orders
             .filter((item) => {
                 const itemDate = dayjs(item.Date, "DD/MM/YYYY");
 
-                // ตรวจสอบว่าเป็นสถานะที่ต้องการ และอยู่ในช่วงวัน
                 const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined;
                 const isInDateRange = itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
-
-                // ตรวจสอบเงื่อนไขของ driver ตาม selectDriver
                 const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
 
                 return isValidStatus && isInDateRange && matchTickets && item.CustomerType !== "ตั๋วรถเล็ก";
@@ -168,26 +169,39 @@ const SummaryOilBalance = ({ openNavbar }) => {
             .flatMap((item) => {
                 if (!item.Product) return [];
 
-                return Object.entries(item.Product)
-                    .filter(([productName]) => productName !== "P")
-                    .map(([productName, productData]) => ({
-                        ...item,
-                        ProductName: productName,
-                        VolumeProduct: productData.Volume,
-                        Amount: productData.Amount || 0,
-                        OverdueTransfer: productData.OverdueTransfer || 0,
-                        RateOil: productData.RateOil || 0,
-                    }));
+                return (
+                    Object.entries(item.Product)
+                        // ตัด product "P" ออก
+                        .filter(([productName]) => productName !== "P")
+                        // ✅ เรียง productName ตาม productOrder ที่กำหนด
+                        .sort(([a], [b]) => {
+                            const indexA = productOrder.indexOf(a);
+                            const indexB = productOrder.indexOf(b);
+                            if (indexA === -1 && indexB === -1) return 0;
+                            if (indexA === -1) return 1;
+                            if (indexB === -1) return -1;
+                            return indexA - indexB;
+                        })
+                        // แปลงเป็น object ที่ใช้ในตาราง
+                        .map(([productName, productData]) => ({
+                            ...item,
+                            ProductName: productName,
+                            VolumeProduct: productData.Volume,
+                            Amount: productData.Amount || 0,
+                            OverdueTransfer: productData.OverdueTransfer || 0,
+                            RateOil: productData.RateOil || 0,
+                        }))
+                );
             })
+            // ✅ sort ต่ออีกทีตาม Date และ Driver
             .sort((a, b) => {
                 const dateA = dayjs(a.Date, "DD/MM/YYYY");
                 const dateB = dayjs(b.Date, "DD/MM/YYYY");
-                if (!dateA.isSame(dateB)) {
-                    return dateA - dateB;
-                }
-                return (a.driver?.split(":")[1] || '').localeCompare(b.driver?.split(":")[1] || '');
+
+                if (!dateA.isSame(dateB)) return dateA - dateB;
+                return (a.Driver?.split(":")[1] || "").localeCompare(b.Driver?.split(":")[1] || "");
             });
-    }, [orders, selectedDateStart, selectedDateEnd]);
+    }, [orders, selectedDateStart, selectedDateEnd, selectTickets]);
 
     console.log("Detail : ", orderDetail);
 
@@ -787,7 +801,7 @@ const SummaryOilBalance = ({ openNavbar }) => {
                                                 )}
                                             </Box>
                                         </TablecellInfo>
-                                        <TablecellInfo
+                                        {/* <TablecellInfo
                                             onClick={() => handleSort("ProductName")}
                                             sx={{ textAlign: "center", fontSize: 16, width: 50 }}
                                         >
@@ -799,6 +813,9 @@ const SummaryOilBalance = ({ openNavbar }) => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
+                                        </TablecellInfo> */}
+                                        <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
+                                            ชนิดน้ำมัน
                                         </TablecellInfo>
                                         <TablecellInfo sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                             จำนวนลิตร
@@ -814,18 +831,152 @@ const SummaryOilBalance = ({ openNavbar }) => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        sortedOrderDetail.map((row, index) => (
-                                            <TableRow>
-                                                <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{`${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.TicketName.split(":")[1]}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{Number(row.VolumeProduct) * 1000}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{formatNumber(row.RateOil)}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{formatNumber(row.Amount)}</TableCell>
-                                            </TableRow>
-                                        ))
+                                        sortedOrderDetail.map((row, index) => {
+                                            const dateKey = formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"));
+                                            const driverKey = `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`;
+                                            const ticketKey = row.TicketName.split(":")[1];
+                                            const groupKey = `${dateKey}_${driverKey}`;
+                                            const subGroupKey = `${groupKey}_${ticketKey}`;
+
+                                            // หาจำนวนและขอบเขตของกลุ่ม
+                                            const groupIndexes = sortedOrderDetail
+                                                .map((r, i) => ({
+                                                    i,
+                                                    match:
+                                                        formatThaiSlash(dayjs(r.Date, "DD/MM/YYYY")) === dateKey &&
+                                                        `${r.Driver.split(":")[1]}/${r.Registration.split(":")[1]}` === driverKey,
+                                                }))
+                                                .filter(x => x.match)
+                                                .map(x => x.i);
+
+                                            const subGroupIndexes = sortedOrderDetail
+                                                .map((r, i) => ({
+                                                    i,
+                                                    match:
+                                                        formatThaiSlash(dayjs(r.Date, "DD/MM/YYYY")) === dateKey &&
+                                                        `${r.Driver.split(":")[1]}/${r.Registration.split(":")[1]}` === driverKey &&
+                                                        r.TicketName.split(":")[1] === ticketKey,
+                                                }))
+                                                .filter(x => x.match)
+                                                .map(x => x.i);
+
+                                            const groupCount = groupIndexes.length;
+                                            const subGroupCount = subGroupIndexes.length;
+
+                                            // หาตำแหน่งแรกและสุดท้ายของแต่ละกลุ่ม
+                                            const firstIndexOfGroup = groupIndexes[0];
+                                            const lastIndexOfGroup = groupIndexes[groupIndexes.length - 1];
+                                            const firstIndexOfSubGroup = subGroupIndexes[0];
+                                            const lastIndexOfSubGroup = subGroupIndexes[subGroupIndexes.length - 1];
+
+                                            const isFirstOfGroup = index === firstIndexOfGroup;
+                                            const isLastOfGroup = index === lastIndexOfGroup;
+                                            const isFirstOfSubGroup = index === firstIndexOfSubGroup;
+                                            const isLastOfSubGroup = index === lastIndexOfSubGroup;
+
+                                            // ✅ เพิ่มตัวนับเฉพาะแถวแรกของกลุ่ม
+                                            if (isFirstOfGroup) groupCounter += 1;
+
+                                            // borderBottom เฉพาะแถวสุดท้ายของกลุ่ม
+                                            const borderBottomStyle = isLastOfGroup ? "1.5px solid lightgray" : "1px solid lightgray";
+                                            // กำหนดสีสลับ
+                                            const rowBackgroundColor = groupCounter % 2 === 0 ? "#FFFFFF" : "#f3f6fcff";
+
+                                            return (
+                                                <TableRow
+                                                    key={index}
+                                                    sx={{
+                                                        backgroundColor: rowBackgroundColor,
+                                                    }}
+                                                >
+                                                    {/* <TableCell sx={{ textAlign: "center", borderBottom: borderBottomStyle }}>
+                                                        {index + 1}
+                                                    </TableCell> */}
+
+                                                    {/* Date + Driver/Reg */}
+                                                    {isFirstOfGroup && (
+                                                        <>
+                                                            <TableCell
+                                                                rowSpan={groupCount}
+                                                                sx={{
+                                                                    textAlign: "center",
+                                                                    borderBottom: borderBottomStyle,
+                                                                }}>
+                                                                {groupCounter}
+                                                            </TableCell>
+                                                            <TableCell
+                                                                rowSpan={groupCount}
+                                                                sx={{
+                                                                    textAlign: "center",
+                                                                    verticalAlign: "middle",
+                                                                    borderBottom: "1.5px solid lightgray", // เส้นล่างรวมกลุ่ม
+                                                                }}
+                                                            >
+                                                                {dateKey}
+                                                            </TableCell>
+                                                            <TableCell
+                                                                rowSpan={groupCount}
+                                                                sx={{
+                                                                    textAlign: "center",
+                                                                    verticalAlign: "middle",
+                                                                    borderBottom: "1.5px solid lightgray",
+                                                                }}
+                                                            >
+                                                                {driverKey}
+                                                            </TableCell>
+                                                        </>
+                                                    )}
+
+                                                    {/* TicketName */}
+                                                    {isFirstOfSubGroup && (
+                                                        <TableCell
+                                                            rowSpan={subGroupCount}
+                                                            sx={{
+                                                                textAlign: "center",
+                                                                verticalAlign: "middle",
+                                                                borderBottom:
+                                                                    // ให้แสดงเส้นล่างเฉพาะถ้า ticket นี้เป็นกลุ่มย่อยสุดท้ายในกลุ่มใหญ่
+                                                                    subGroupIndexes[subGroupIndexes.length - 1] === groupIndexes[groupIndexes.length - 1]
+                                                                        ? "1.5px solid lightgray"
+                                                                        : "1px solid lightgray",
+                                                            }}
+                                                        >
+                                                            {ticketKey}
+                                                        </TableCell>
+                                                    )}
+
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "center",
+                                                            borderBottom: isLastOfGroup ? "2px solid white" : "1px solid lightgray",
+                                                            backgroundColor:
+                                                                row.ProductName === "G91" ? "#A3E270" :   // เขียวอ่อนลง 5%
+                                                                    row.ProductName === "G95" ? "#FFD733" :   // เหลืองอ่อนลง 5%
+                                                                        row.ProductName === "B7" ? "#FFFFA3" :   // เหลืองจาง
+                                                                            row.ProductName === "B95" ? "#C2E6ED" :   // ฟ้าอ่อนลง
+                                                                                row.ProductName === "B10" ? "#38D658" :   // เขียวอ่อนลง
+                                                                                    row.ProductName === "B20" ? "#269022" :   // เขียวเข้มจางลง
+                                                                                        row.ProductName === "E20" ? "#D3CBA6" :   // ครีมอ่อนลง
+                                                                                            row.ProductName === "E85" ? "#3333FF" :   // น้ำเงินจางลง
+                                                                                                row.ProductName === "PWD" ? "#F46EDC" :   // ชมพูอ่อนลง
+                                                                                                    "#FFFFFF"
+                                                        }}
+                                                    >
+                                                        {row.ProductName}
+                                                    </TableCell>
+
+                                                    <TableCell sx={{ textAlign: "center", borderBottom: borderBottomStyle }}>
+                                                        {new Intl.NumberFormat("en-US").format(row.VolumeProduct * 1000)}
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", borderBottom: borderBottomStyle }}>
+                                                        {formatNumber(row.RateOil)}
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", borderBottom: borderBottomStyle }}>
+                                                        {formatNumber(row.Amount)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })
                                     }
                                 </TableBody>
                             </Table>
