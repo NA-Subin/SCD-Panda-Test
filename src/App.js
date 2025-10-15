@@ -60,6 +60,7 @@ import PrintInvoiceSmallTruck from "./components/invoice-smalltruck/PrintInvoice
 import DocSalary from "./components/salary/DocSalary";
 import ExpenseDetail from "./components/expense/Expense";
 import ReportTransports from "./components/report/ReportTransport";
+import Profit from "./components/financial/Profit";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -217,6 +218,9 @@ function App() {
                       </Routes>
                       <Routes>
                         <Route path="/close-financial" element={<CloseFS openNavbar={open} />} />
+                      </Routes>
+                      <Routes>
+                        <Route path="/profit-loss" element={<Profit openNavbar={open} />} />
                       </Routes>
                       <Routes>
                         <Route path="/financial-deduction" element={<DeductionOfIncome openNavbar={open} />} />
