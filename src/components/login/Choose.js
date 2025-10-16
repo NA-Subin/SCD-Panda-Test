@@ -30,6 +30,7 @@ import { auth, database, googleProvider } from "../../server/firebase";
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DriveEtaIcon from '@mui/icons-material/DriveEta';
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import Cookies from 'js-cookie';
 import UpdateDatabase from "../dashboard/test";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
@@ -45,6 +46,7 @@ const Choose = () => {
   const [showDriver, setShowDriver] = useState(false);
   const [showGasStation, setShowGasStation] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showQuotation, setShowQuotation] = useState(true);
 
   const [showBasic, setShowBasic] = useState(false);
   const [showOperation, setShowOperation] = useState(false);
@@ -75,6 +77,10 @@ const Choose = () => {
   };
   const handleChooseDriver = () => {
     window.location.href = "/driver";
+  };
+
+  const handleChooseQuotation = () => {
+    window.location.href = "/quotation";
   };
 
   useEffect(() => {
@@ -156,7 +162,6 @@ const Choose = () => {
               </Button>
             </Grid>
           )}
-        <Grid item xs={12} sm={3}></Grid>
         {
           showDriver && (
             <Grid item xs={12} sm={6}>
@@ -177,7 +182,26 @@ const Choose = () => {
               </Button>
             </Grid>
           )}
-        <Grid item xs={12} sm={3}></Grid>
+        {
+          showQuotation &&
+          <Grid item xs={12} sm={6}>
+            <Button variant="contained"
+              color="warning"
+              fullWidth
+              sx={{ height: "20vh", borderRadius: 5, fontSize: 26, fontWeight: "bold" }}
+              onClick={handleChooseQuotation}
+              startIcon={
+                <SummarizeIcon
+                  sx={{
+                    width: 80,  // ความกว้างที่ต้องการ
+                    height: 80, // ความสูงที่ต้องการ
+                  }}
+                />
+              }>
+              ใบเสนอราคาลูกค้า
+            </Button>
+          </Grid>
+        }
       </Grid>
     </Container>
   );

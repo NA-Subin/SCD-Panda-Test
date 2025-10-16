@@ -5,13 +5,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 //import { DataProvider } from './server/path';
 import { BasicDataProvider } from './server/provider/BasicDataProvider';
+import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BasicDataProvider>
-      <App />
-    </BasicDataProvider>
+    <BrowserRouter>
+      <BasicDataProvider>
+        <App />
+      </BasicDataProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

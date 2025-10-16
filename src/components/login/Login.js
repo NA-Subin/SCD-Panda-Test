@@ -304,47 +304,47 @@ const Login = () => {
   //   }
   // }, [navigate]);
 
-  const [isRedirected, setIsRedirected] = useState(false);
+  // const [isRedirected, setIsRedirected] = useState(false);
 
-  useEffect(() => {
-    if (isRedirected) return;
+  // useEffect(() => {
+  //   if (isRedirected) return;
 
-    const user = Cookies.get("user");
-    const encryptedPassword = Cookies.get("password");
-    if (!user || !encryptedPassword) return;
+  //   const user = Cookies.get("user");
+  //   const encryptedPassword = Cookies.get("password");
+  //   if (!user || !encryptedPassword) return;
 
-    const password = decryptPassword(encryptedPassword);
+  //   const password = decryptPassword(encryptedPassword);
 
-    const allUsers = [...officersDetail, ...creditorsDetail, ...driversDetail];
-    const matchedUser = allUsers.find((emp) => emp.User === user && emp.Password === password);
+  //   const allUsers = [...officersDetail, ...creditorsDetail, ...driversDetail];
+  //   const matchedUser = allUsers.find((emp) => emp.User === user && emp.Password === password);
 
-    if (!matchedUser || !matchedUser.Position) return;
+  //   if (!matchedUser || !matchedUser.Position) return;
 
-    const positionId = Number(matchedUser.Position.split(":")[0]);
-    const position = positionsDetail.find((pos) => pos.id === positionId);
-    if (!position) return;
+  //   const positionId = Number(matchedUser.Position.split(":")[0]);
+  //   const position = positionsDetail.find((pos) => pos.id === positionId);
+  //   if (!position) return;
 
-    const accessRights = [
-      "DriverData",
-      "GasStationData",
-      "BasicData",
-      "OprerationData",
-      "FinancialData",
-      "ReportData",
-      "SmallTruckData",
-      "BigTruckData"
-    ].filter(key => position[key] === 1);
+  //   const accessRights = [
+  //     "DriverData",
+  //     "GasStationData",
+  //     "BasicData",
+  //     "OprerationData",
+  //     "FinancialData",
+  //     "ReportData",
+  //     "SmallTruckData",
+  //     "BigTruckData"
+  //   ].filter(key => position[key] === 1);
 
-    setIsRedirected(true); // ✅ ป้องกันการวิ่งซ้ำ
+  //   setIsRedirected(true); // ✅ ป้องกันการวิ่งซ้ำ
 
-    if (accessRights.length === 1 && accessRights[0] === "DriverData") {
-      navigate("/driver-detail", { state: { Employee: matchedUser } });
-    } else if (accessRights.length === 1 && accessRights[0] === "GasStationData") {
-      navigate("/gasstation-attendant", { state: { Employee: matchedUser } });
-    } else {
-      navigate("/choose", { state: { Employee: matchedUser } });
-    }
-  }, [officersDetail, creditorsDetail, driversDetail, positionsDetail, navigate]);
+  //   if (accessRights.length === 1 && accessRights[0] === "DriverData") {
+  //     navigate("/driver-detail", { state: { Employee: matchedUser } });
+  //   } else if (accessRights.length === 1 && accessRights[0] === "GasStationData") {
+  //     navigate("/gasstation-attendant", { state: { Employee: matchedUser } });
+  //   } else {
+  //     navigate("/choose", { state: { Employee: matchedUser } });
+  //   }
+  // }, [officersDetail, creditorsDetail, driversDetail, positionsDetail, navigate]);
 
   return (
     <Container sx={{ p: { xs: 3, sm: 6, md: 9 }, maxWidth: { xs: "lg", sm: "md", md: "sm" } }}>

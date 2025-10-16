@@ -8,24 +8,35 @@ import {
     FormControlLabel,
     FormGroup,
     Grid,
+    IconButton,
     InputAdornment,
     Paper,
     Table,
     TableBody,
     TableCell,
     TableContainer,
+    TableFooter,
     TableHead,
     TableRow,
+    TextField,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { formatThaiFull } from "../../theme/DateTH";
-import { TablecellSelling } from "../../theme/style";
+import { IconButtonError, IconButtonSuccess, TablecellSelling } from "../../theme/style";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
+import theme from "../../theme/theme";
+import { database } from "../../server/firebase";
+import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const Profit = ({ openNavbar }) => {
     const [open, setOpen] = useState(true);
@@ -118,6 +129,15 @@ const Profit = ({ openNavbar }) => {
         };
     }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
+    const [checkCostPrice, setCheckCostPrice] = useState(false);
+    const [costIndex, setCostIndex] = useState(null);
+    const [costNo, setCostNo] = useState(null);
+    const [costProductName, setCostProductName] = useState(null);
+    const [costPrice, setCostPrice] = useState(0);
+    const [isFocused, setIsFocused] = useState(false);
+
+    console.log(`(${costNo})${costProductName} : ${costPrice}`);
+
     const result = useMemo(() => {
         return orders
             .filter(
@@ -158,6 +178,7 @@ const Profit = ({ openNavbar }) => {
                         RateOil: productData?.RateOil ?? 0,
                         Volume: (productData?.Volume ?? 0) * 1000,
                         OverdueTransfer: productData?.OverdueTransfer ?? 0,
+                        CostPrice: productData?.CostPrice ?? 0,
                     }));
             })
             // ✅ ฟิลเตอร์เฉพาะข้อมูลในช่วงวันที่ที่เลือก
@@ -178,6 +199,156 @@ const Profit = ({ openNavbar }) => {
             });
     }, [orders, ticketsB, trips, selectedDateStart, selectedDateEnd]);
 
+    // 💡 คำนวณผลรวมก่อน render
+    const total = result.reduce(
+        (acc, row) => {
+            const rateOil = check ? row.RateOil : row.RateOil * row.Volume;
+            const rate = check ? row.Rate : row.Rate * row.Volume;
+            const costPrice = check ? row.CostPrice : row.CostPrice * row.Volume;
+            const diff = rateOil - costPrice - rate;
+
+            return {
+                volume: acc.volume + (row.Volume ?? 0),
+                rateOil: acc.rateOil + rateOil,
+                rate: acc.rate + rate,
+                costPrice: acc.costPrice + costPrice,
+                diff: acc.diff + diff,
+            };
+        },
+        { volume: 0, rateOil: 0, rate: 0, costPrice: 0, diff: 0 }
+    );
+
+    const handleCheckUpdate = (row, index) => {
+        console.log(`order/${row.No}/Product/${row.ProductName}/`);
+        setCostIndex(index);
+        setCostNo(row.No);
+        setCostProductName(row.ProductName);
+        setCostPrice(row.CostPrice);
+        setCheckCostPrice(true); // ต้องปิดการแสดงผล
+    }
+
+    const handleSave = () => {
+        database
+            .ref(`order/${costNo}/Product/`)
+            .child(costProductName)
+            .update({
+                CostPrice: costPrice,
+            })
+            .then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                setCostIndex(null);
+                setCostNo(null);
+                setCostProductName(null);
+                setCheckCostPrice(false);
+                setCostPrice("");
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    }
+
+    const handleCancel = () => {
+        setCostIndex(null);
+        setCostNo(null);
+        setCostProductName(null);
+        setCheckCostPrice(false);
+        setCostPrice("");
+    }
+
+    const exportResultToExcel = async (result, total, check) => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("รายงานน้ำมัน");
+
+        // 1️⃣ กำหนด columns
+        worksheet.columns = [
+            { header: "ลำดับ", key: "no", width: 8 },
+            { header: "วันที่ส่ง", key: "date", width: 15 },
+            { header: "ชื่อตั๋ว/ลูกค้า", key: "ticketName", width: 40 },
+            { header: "ชนิดน้ำมัน", key: "product", width: 15 },
+            { header: "จำนวนลิตร", key: "volume", width: 20 },
+            { header: check ? "ราคาขาย/ลิตร" : "ยอดขาย", key: "rateOil", width: 15 },
+            { header: check ? "ราคาทุน/ลิตร" : "ราคาทุน", key: "costPrice", width: 15 },
+            { header: check ? "ราคาขนส่ง/ลิตร" : "ค่าขนส่ง", key: "rate", width: 15 },
+            { header: check ? "กำไรขาดทุน/ลิตร" : "กำไรขาดทุน", key: "diff", width: 15 },
+        ];
+
+        // 2️⃣ Title merge
+        worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
+        const titleCell = worksheet.getCell("A1");
+        titleCell.value = "รายงานน้ำมัน";
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        titleCell.font = { size: 16, bold: true };
+        worksheet.getRow(1).height = 30;
+
+        // 3️⃣ Header row
+        const headerRow = worksheet.addRow(worksheet.columns.map(c => c.header));
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" };
+        headerRow.height = 25;
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 4️⃣ Data rows
+        result.forEach((row, index) => {
+            const dataRow = {
+                no: index + 1,
+                date: row.Date,
+                ticketName: row.TicketName ? row.TicketName.split(":")[1] : "",
+                product: row.ProductName,
+                volume: row.Volume,
+                rateOil: check ? row.RateOil : row.RateOil * row.Volume,
+                costPrice: check ? row.CostPrice : row.CostPrice * row.Volume,
+                rate: check ? row.Rate : row.Rate * row.Volume,
+                diff: (check ? row.RateOil : row.RateOil * row.Volume)
+                    - (check ? row.CostPrice : row.CostPrice * row.Volume)
+                    - (check ? row.Rate : row.Rate * row.Volume),
+            };
+            const newRow = worksheet.addRow(dataRow);
+            newRow.alignment = { horizontal: "center", vertical: "middle" };
+            newRow.height = 20;
+            newRow.eachCell((cell, colNumber) => {
+                cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                // ยกเว้น column ลำดับ
+                // กำหนด alignment: ชิดซ้ายเฉพาะ ticketName
+                if (worksheet.columns[colNumber - 1].key === "ticketName") {
+                    cell.alignment = { horizontal: "left", vertical: "middle" };
+                } else {
+                    cell.alignment = { horizontal: "center", vertical: "middle" };
+                }
+
+                // ยกเว้น column ลำดับ ให้ใส่ number format
+                if (worksheet.columns[colNumber - 1].key !== "no" && worksheet.columns[colNumber - 1].key !== "ticketName") {
+                    cell.numFmt = "#,##0.00";
+                }
+            });
+        });
+
+        // 5️⃣ Footer row รวมค่า
+        const footerRow = worksheet.addRow({
+            product: "รวม",
+            volume: total.volume,
+            rateOil: total.rateOil,
+            costPrice: total.costPrice,
+            rate: total.rate,
+            diff: total.diff,
+        });
+        footerRow.font = { bold: true };
+        footerRow.alignment = { horizontal: "center", vertical: "middle" };
+        footerRow.eachCell((cell) => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFE699" } };
+            cell.numFmt = "#,##0.00";
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 6️⃣ Save
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `กำไรขายส่งน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
+    };
+
+    console.log("orders : ", orders);
     console.log("result : ", result);
 
     return (
@@ -198,8 +369,8 @@ const Profit = ({ openNavbar }) => {
             </Grid>
             <Divider sx={{ marginBottom: 1, marginTop: 2 }} />
             <Box sx={{ width: "100%" }}>
-                <Grid container spacing={2} width="100%" marginBottom={1} >
-                    <Grid item sm={6} lg={5}>
+                <Grid container spacing={2} width="100%" marginTop={1} >
+                    <Grid item xs={12} sm={9} lg={5}>
                         <Box
                             sx={{
                                 width: "100%", // กำหนดความกว้างของ Paper
@@ -278,14 +449,15 @@ const Profit = ({ openNavbar }) => {
                             </LocalizationProvider>
                         </Box>
                     </Grid>
-                    <Grid item sm={6} lg={5}>
+                    <Grid item xs={12} sm={9} lg={5} sx={{ marginTop: { xs: -4, sm: -4, lg: 0 }, marginBottom: { xs: -1, sm: -1, lg: 0 } }} >
                         <FormGroup row sx={{ marginBottom: -1.5 }}>
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะ : </Typography>
                             <FormControlLabel control={<Checkbox checked={check ? true : false} />} onChange={() => setCheck(true)} label="ราคา/ลิตร" />
                             <FormControlLabel control={<Checkbox checked={!check ? true : false} />} onChange={() => setCheck(false)} label="จำนวนเงิน" />
                         </FormGroup>
                     </Grid>
-                    <Grid item sm={12} lg={2} display="flex" alignItems="center" justifyContent="right" >
+                    <Grid item xs={12} sm={3} lg={2} textAlign="right" sx={{ marginTop: { xs: 0, sm: -6, lg: -2 }, marginBottom: { xs: -1, sm: -2, lg: -1 } }} >
+                        <Button variant="contained" color="success" size="small" sx={{ marginTop: { xs: -3, sm: -2, lg: 0 }, marginRight: { xs: 2, sm: 0, lg: 0 } }} onClick={() => exportResultToExcel(result, total, check)} gutterBottom>Export Excel</Button>
                         <FormControlLabel
                             sx={{ marginBottom: 3 }}
                             control={
@@ -308,7 +480,7 @@ const Profit = ({ openNavbar }) => {
                         <TableContainer
                             component={Paper}
                             sx={{
-                                height: "55vh",
+                                height: "70vh",
                             }}
                         >
                             <Table
@@ -324,7 +496,7 @@ const Profit = ({ openNavbar }) => {
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             วันที่ส่ง
                                         </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 350 }}>
+                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
                                             ชื่อตั๋ว/ลูกค้า
                                         </TablecellSelling>
                                         <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
@@ -351,37 +523,205 @@ const Profit = ({ openNavbar }) => {
                                 <TableBody>
                                     {
                                         result.map((row, index) =>
-                                            <TableRow key={index}>
+                                            <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }} >
                                                 <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.Date}</TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>{row.TicketName ? row.TicketName.split(":")[1] : ""}</TableCell>
+                                                <TableCell sx={{ textAlign: "left" }}>
+                                                    <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >
+                                                        {row.TicketName ? row.TicketName.split(":")[1] : ""}
+                                                    </Typography>
+                                                </TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>{row.ProductName}</TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>
                                                     {new Intl.NumberFormat("en-US").format(row.Volume)}
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>
-                                                    {new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }).format(check ? row.RateOil : (row.RateOil * row.Volume))}
+                                                    <Typography variant="subtitle2" color={(check ? row.RateOil : (row.RateOil * row.Volume)) === 0 && "lightgray"} gutterBottom>
+                                                        {new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(check ? row.RateOil : (row.RateOil * row.Volume))}
+                                                    </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}> </TableCell>
+                                                {
+                                                    check ?
+                                                        <TableCell
+                                                            sx={{
+                                                                textAlign: "center",
+                                                                cursor: "pointer",
+                                                                ":hover": {
+                                                                    backgroundColor: "#e8eaf6"
+                                                                }
+                                                            }}
+                                                            onClick={() => handleCheckUpdate(row, index)}
+                                                        >
+                                                            {
+                                                                checkCostPrice && costIndex === index ?
+                                                                    <Paper sx={{ width: '100%', height: 25, display: "flex", alignItems: "center" }}>
+                                                                        <TextField
+                                                                            size="small"
+                                                                            type={isFocused ? "number" : "text"} // ✅ เปลี่ยน type ตามโหมด focus
+                                                                            value={
+                                                                                isFocused
+                                                                                    ? costPrice === 0
+                                                                                        ? "" // ✅ ถ้าเป็น 0 และกำลัง focus → แสดงค่าว่าง
+                                                                                        : costPrice
+                                                                                    : new Intl.NumberFormat("en-US", {
+                                                                                        minimumFractionDigits: 2,
+                                                                                        maximumFractionDigits: 2,
+                                                                                    }).format(costPrice || 0) // ✅ แสดงเลขพร้อม format ตอนไม่ได้ focus
+                                                                            }
+                                                                            variant="outlined"
+                                                                            sx={{
+                                                                                width: "100%",
+                                                                                "& .MuiInputBase-root": {
+                                                                                    height: 25,
+                                                                                    fontSize: 13,
+                                                                                    paddingRight: 0, // เอา padding ด้านขวาออกเพื่อให้ icon ชิดพอดี
+                                                                                },
+                                                                                "& .MuiOutlinedInput-input": {
+                                                                                    paddingLeft: 1,
+                                                                                    height: "100%",
+                                                                                    fontSize: "16px"
+                                                                                },
+                                                                            }}
+                                                                            onChange={(e) => {
+                                                                                const val = e.target.value;
+                                                                                if (val === "") {
+                                                                                    setCostPrice(""); // ✅ ถ้าพิมพ์ว่าง ให้เก็บเป็น string ว่าง
+                                                                                } else if (/^\d*\.?\d*$/.test(val)) {
+                                                                                    setCostPrice(val); // ✅ เก็บค่าที่พิมพ์อยู่
+                                                                                }
+                                                                            }}
+                                                                            onFocus={() => setIsFocused(true)} // ✅ เข้าสู่โหมดแก้ไข
+                                                                            onBlur={(e) => {
+                                                                                setIsFocused(false); // ✅ กลับไปโหมดแสดงผล
+                                                                                const val = parseFloat(e.target.value);
+                                                                                setCostPrice(isNaN(val) ? 0 : val); // ✅ ถ้าไม่พิมพ์อะไร ให้กลับเป็น 0
+                                                                            }}
+                                                                            InputProps={{
+                                                                                endAdornment: (
+                                                                                    <Box sx={{ backgroundColor: "#e8eaf6", display: "flex", alignItems: "center", justifyContent: "right" }}>
+                                                                                        <Tooltip title="ยกเลิก">
+                                                                                            <IconButton
+                                                                                                size="small"
+                                                                                                color="error"
+                                                                                                sx={{ p: 0.3 }}
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation(); // 💥 ป้องกันไม่ให้ไป trigger onClick ของ TableCell
+                                                                                                    handleCancel();
+                                                                                                }}
+                                                                                            >
+                                                                                                <CancelIcon fontSize="small" />
+                                                                                            </IconButton>
+                                                                                        </Tooltip>
+                                                                                        <Tooltip title="บันทึก">
+                                                                                            <IconButton
+                                                                                                size="small"
+                                                                                                color="success"
+                                                                                                sx={{ p: 0.3 }}
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation(); // 💥 ป้องกันไม่ให้ไป trigger onClick ของ TableCell
+                                                                                                    handleSave();
+                                                                                                }}
+                                                                                            >
+                                                                                                <SaveIcon fontSize="small" />
+                                                                                            </IconButton>
+                                                                                        </Tooltip>
+                                                                                    </Box>
+                                                                                ),
+                                                                            }}
+                                                                        />
+                                                                    </Paper>
+                                                                    :
+                                                                    <Tooltip title={row.CostPrice === 0 ? "กดเพื่อเพิ่มราคาทุน/ลิตร" : "กดเพื่อแก้ไขราคาทุน/ลิตร"} placement="right" >
+                                                                        <Typography variant="subtitle2" color={row.CostPrice === 0 && "lightgray"} gutterBottom>
+                                                                            {
+                                                                                new Intl.NumberFormat("en-US", {
+                                                                                    minimumFractionDigits: 2,
+                                                                                    maximumFractionDigits: 2
+                                                                                }).format(check ? row.CostPrice : (row.CostPrice * row.Volume))
+                                                                            }
+                                                                        </Typography>
+                                                                    </Tooltip>
+                                                            }
+                                                        </TableCell>
+                                                        :
+                                                        <TableCell sx={{ textAlign: "center" }}>
+                                                            <Typography variant="subtitle2" color={(row.CostPrice * row.Volume) === 0 && "lightgray"} gutterBottom>
+                                                                {new Intl.NumberFormat("en-US", {
+                                                                    minimumFractionDigits: 2,
+                                                                    maximumFractionDigits: 2
+                                                                }).format((row.CostPrice * row.Volume))}
+                                                            </Typography>
+                                                        </TableCell>
+                                                }
                                                 <TableCell sx={{ textAlign: "center" }}>
-                                                    {new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }).format(check ? row.Rate : (row.Rate * row.Volume))}
+                                                    <Typography variant="subtitle2" color={(check ? row.Rate : (row.Rate * row.Volume)) === 0 && "lightgray"} gutterBottom>
+                                                        {new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(check ? row.Rate : (row.Rate * row.Volume))}
+                                                    </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>
-                                                    {new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }).format((check ? row.RateOil : (row.RateOil * row.Volume)) - (check ? row.Rate : (row.Rate * row.Volume)))}
+                                                    <Typography variant="subtitle2"
+                                                        color={((check ? row.RateOil : (row.RateOil * row.Volume)) - (check ? row.CostPrice : (row.CostPrice * row.Volume)) - (check ? row.Rate : (row.Rate * row.Volume))) < 0 && theme.palette.error.dark} gutterBottom>
+                                                        {new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format((check ? row.RateOil : (row.RateOil * row.Volume)) - (check ? row.CostPrice : (row.CostPrice * row.Volume)) - (check ? row.Rate : (row.Rate * row.Volume)))}
+                                                    </Typography>
                                                 </TableCell>
                                             </TableRow>
                                         )
                                     }
                                 </TableBody>
+                                {
+                                    result.length !== 0 &&
+                                    <TableFooter
+                                        sx={{
+                                            position: "sticky",
+                                            height: "5vh",
+                                            bottom: 0,
+                                            zIndex: 2,
+                                            backgroundColor: theme.palette.panda.dark,
+                                        }}
+                                    >
+                                        <TableRow>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }} colSpan={4}>
+                                                รวม
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                {new Intl.NumberFormat("en-US").format(total.volume)}
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                {new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(total.rateOil)}
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                {new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(total.costPrice)}
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                {new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(total.rate)}
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                {new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(total.diff)}
+                                            </TablecellSelling>
+                                        </TableRow>
+                                    </TableFooter>
+                                }
                             </Table>
                         </TableContainer>
                     </Grid>
