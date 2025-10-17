@@ -115,7 +115,7 @@ const Choose = () => {
   // ฟังก์ชันสำหรับเข้าสู่ระบบด้วย Email และ Password
   return (
     <Container sx={{ p: { xs: 2, sm: 3 }, maxWidth: { xs: "lg", sm: "md" } }}>
-      <Grid container spacing={5} sx={{ marginTop: { xs: 2, sm: 4, md: 15 } }}>
+      <Grid container spacing={5} sx={{ marginTop: { xs: 2, sm: 4, md: 10 } }}>
         <Grid item xs={12}>
           <Typography variant="h3" fontWeight="bold" textAlign="center">กรุณาเลือกหน้าที่ต้องการ</Typography>
         </Grid>

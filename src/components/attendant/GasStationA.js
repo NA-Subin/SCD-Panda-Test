@@ -362,25 +362,11 @@ console.log("นามสกุล:", lastName);     // สามสี
 
                         }
                     </Box>
-                    <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        textAlign="center"
-                        color={theme.palette.panda.main}
-                        gutterBottom
-                    >
-                        ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน
-                        {/* {
-                            openOil === true ? "รับน้ำมัน"
-                                : openOil === false ? "ปิดยอดสต็อก"
-                                    : "ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน"
-                        } */}
-                    </Typography>
                     <Box
                         display="flex"
-                        justifyContent="center"
+                        justifyContent="left"
                         alignItems="center"
-                        marginTop={-1}
+                        marginTop={-3}
                     >
                         <img src={Logo} width="150" />
                         <Box
@@ -421,7 +407,18 @@ console.log("นามสกุล:", lastName);     // สามสี
                                 D
                             </Typography>
                         </Box>
+                        <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            textAlign="center"
+                            color={theme.palette.panda.main}
+                            sx={{ marginTop: 5, marginLeft: 1 }}
+                            gutterBottom
+                        >
+                            ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน
+                        </Typography>
                     </Box>
+                    <Divider />
                     <Grid container spacing={2} marginTop={-1} component="form">
                         <Grid item xs={6} md={2} lg={2}>
                             <Box display="flex" justifyContent="center" alignItems="center">

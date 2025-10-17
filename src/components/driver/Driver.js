@@ -350,20 +350,11 @@ const Driver = () => {
 
                         }
                     </Box>
-                    <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        textAlign="center"
-                        color={theme.palette.panda.main}
-                        gutterBottom
-                    >
-                        ยินดีต้อนรับเข้าสู่หน้าพนักงานขับรถ
-                    </Typography>
                     <Box
                         display="flex"
-                        justifyContent="center"
+                        justifyContent="left"
                         alignItems="center"
-                        marginTop={-1}
+                        marginTop={-3}
                     >
                         <img src={Logo} width="150" />
                         <Box
@@ -404,7 +395,18 @@ const Driver = () => {
                                 D
                             </Typography>
                         </Box>
+                        <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            textAlign="center"
+                            color={theme.palette.panda.main}
+                            sx={{ marginTop: 5, marginLeft: 1 }}
+                            gutterBottom
+                        >
+                            ยินดีต้อนรับเข้าสู่หน้าพนักงานขับรถ
+                        </Typography>
                     </Box>
+                    <Divider />
                 </Box>
                 <Grid container spacing={2}>
                     <Grid item xs={0.5} lg={1} />

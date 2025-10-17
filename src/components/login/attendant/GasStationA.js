@@ -55,7 +55,7 @@ const GasStationAdmin = () => {
     const [openOil, setOpenOil] = React.useState(true);
     const [gasStationOil, setGasStationsOil] = useState([]);
     const [stock, setStock] = useState([]);
-    const [statusSave,setStatusSave] = useState(true);
+    const [statusSave, setStatusSave] = useState(true);
     const [newVolume, setNewVolume] = React.useState(0);
     const [gasStation, setGasStation] = React.useState(0);
     const [gasStations, setGasStations] = React.useState([]);
@@ -245,25 +245,11 @@ const GasStationAdmin = () => {
 
                         }
                     </Box>
-                    <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        textAlign="center"
-                        color={theme.palette.panda.main}
-                        gutterBottom
-                    >
-                        ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน
-                        {/* {
-                            openOil === true ? "รับน้ำมัน"
-                                : openOil === false ? "ปิดยอดสต็อก"
-                                    : "ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน"
-                        } */}
-                    </Typography>
                     <Box
                         display="flex"
-                        justifyContent="center"
+                        justifyContent="left"
                         alignItems="center"
-                        marginTop={-1}
+                        marginTop={-3}
                     >
                         <img src={Logo} width="150" />
                         <Box
@@ -304,6 +290,16 @@ const GasStationAdmin = () => {
                                 D
                             </Typography>
                         </Box>
+                        <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            textAlign="center"
+                            color={theme.palette.panda.main}
+                            sx={{ marginTop: 5, marginLeft: 1 }}
+                            gutterBottom
+                        >
+                            ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน
+                        </Typography>
                     </Box>
                     <Grid container spacing={2} marginTop={-1} component="form">
                         <Grid item xs={12} md={3} lg={3} display="flex" justifyContent="center" alignItems="center">
@@ -363,25 +359,25 @@ const GasStationAdmin = () => {
                         const prevIndex = index - 1; // index ก่อนหน้า
                         const prevGas = gasStationOil[prevIndex] || {}; // ✅ ใช้ {} แทน []
                         const latestGas = gasStationOil[index] || {}; // ✅ ใช้ {} แทน []
-                    
+
                         const selectedDateKey = dayjs(selectedDate).format("DD-MM-YYYY");
-                    
+
                         // ตรวจสอบว่ามีค่าเป็นอาร์เรย์ก่อนใช้ spread operator
                         const prevReport = Array.isArray(prevGas.Report?.[selectedDateKey]) ? [...prevGas.Report[selectedDateKey]] : [];
                         const latestReport = Array.isArray(latestGas.Report?.[selectedDateKey]) ? [...latestGas.Report[selectedDateKey]] : [];
-                    
+
                         // ตรวจสอบข้อมูลซ้ำ
                         const reportOilBalance = prevReport.map((prevItem) => {
                             const matchingLatestItem = latestReport.find(
                                 (latestItem) => latestItem.ProductName === prevItem.ProductName
                             );
-                    
+
                             return {
                                 ProductName: prevItem.ProductName,
-                                    Color: prevItem.Color,
-                                    PrevOilBalance: prevItem.OilBalance,
-                                    LatestOilBalance: matchingLatestItem ? matchingLatestItem.OilBalance : 0,
-                                    Difference: Number(prevItem.OilBalance) - Number(matchingLatestItem ? matchingLatestItem.OilBalance : 0) 
+                                Color: prevItem.Color,
+                                PrevOilBalance: prevItem.OilBalance,
+                                LatestOilBalance: matchingLatestItem ? matchingLatestItem.OilBalance : 0,
+                                Difference: Number(prevItem.OilBalance) - Number(matchingLatestItem ? matchingLatestItem.OilBalance : 0)
                             };
                         });
 
@@ -389,27 +385,27 @@ const GasStationAdmin = () => {
                             const matchingLatestItem = latestReport.find(
                                 (latestItem) => latestItem.ProductName === prevItem.ProductName
                             );
-                    
+
                             return {
-                                    ProductName: prevItem.ProductName || "",
-                                    Capacity: prevItem.Capacity || 0,
-                                    Color: prevItem.Color || "",
-                                    Volume: prevItem.Volume || 0,
-                                    Squeeze: prevItem.Squeeze || 0,
-                                    Delivered: prevItem.Delivered || 0,
-                                    Pending1: prevItem.Pending1 || 0,
-                                    Pending2: prevItem.Pending2 || 0,
-                                    Pending3: prevItem.Pending3 || 0,
-                                    Driver1: prevItem.Driver1 || 0,
-                                    Driver2: prevItem.Driver2 || 0,
-                                    EstimateSell: prevItem.EstimateSell || 0,
-                                    Period: prevItem.Period || 0,
-                                    DownHole: prevItem.DownHole || 0,
-                                    YesterDay: prevItem.YesterDay || 0,
-                                    Sell: prevItem.Sell || 0,
-                                    TotalVolume: prevItem.TotalVolume || 0,
-                                    OilBalance: prevItem.OilBalance || 0,
-                                    Difference: Number(prevItem.OilBalance) - Number(matchingLatestItem ? matchingLatestItem.OilBalance : 0) 
+                                ProductName: prevItem.ProductName || "",
+                                Capacity: prevItem.Capacity || 0,
+                                Color: prevItem.Color || "",
+                                Volume: prevItem.Volume || 0,
+                                Squeeze: prevItem.Squeeze || 0,
+                                Delivered: prevItem.Delivered || 0,
+                                Pending1: prevItem.Pending1 || 0,
+                                Pending2: prevItem.Pending2 || 0,
+                                Pending3: prevItem.Pending3 || 0,
+                                Driver1: prevItem.Driver1 || 0,
+                                Driver2: prevItem.Driver2 || 0,
+                                EstimateSell: prevItem.EstimateSell || 0,
+                                Period: prevItem.Period || 0,
+                                DownHole: prevItem.DownHole || 0,
+                                YesterDay: prevItem.YesterDay || 0,
+                                Sell: prevItem.Sell || 0,
+                                TotalVolume: prevItem.TotalVolume || 0,
+                                OilBalance: prevItem.OilBalance || 0,
+                                Difference: Number(prevItem.OilBalance) - Number(matchingLatestItem ? matchingLatestItem.OilBalance : 0)
                             };
                         });
 
@@ -428,7 +424,7 @@ const GasStationAdmin = () => {
                         //             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                         //             console.error("Error pushing data:", error);
                         //         });
-                                
+
                         // }
 
                         return (

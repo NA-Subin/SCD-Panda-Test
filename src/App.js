@@ -38,6 +38,7 @@ import withReactContent from "sweetalert2-react-content";
 import PrintTrips from "./components/selling/PrintTrips";
 import Report from "./components/report/Report";
 import PrintReport from "./components/report/PrintReport";
+import PrintReportQ from "./components/quotation/PrintReport";
 import Driver from "./components/driver/Driver";
 import CloseFS from "./components/financial/CloseFS";
 import DriverDetail from "./components/driver/DriverDetail";
@@ -248,7 +249,8 @@ function App() {
         <Route path="/driver" element={<TripDataProvider><Driver /></TripDataProvider>} />
         <Route path="/trade-payable" element={<TripDataProvider><TradePayable /></TripDataProvider>} />
         <Route path="/choose" element={<Choose />} />
-        <Route path="/quotation" element={<Quotation />} />
+        <Route path="/quotation" element={<TripDataProvider><Quotation /></TripDataProvider>} />
+        <Route path="/print-quotation" element={<TripDataProvider><PrintReportQ /></TripDataProvider>} />
         <Route
           path="/*"
           element={
