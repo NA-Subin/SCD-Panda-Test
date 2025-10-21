@@ -78,7 +78,7 @@ const QuotationDetail = ({ setOpen }) => {
     const [isBangchak, setIsBangchak] = useState("");
     const [note, setNote] = useState("");
     const [check, setCheck] = useState(true);
-    const [selectedDateBid, setSelectedDateBid] = useState(dayjs().startOf('month'));
+    const [selectedDate, setSelectedDate] = useState(dayjs(new Date));
     const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs().endOf('month'));
     const productColors = {
         G91: "#c7f4a3ff",   // เขียวอ่อน
@@ -156,10 +156,10 @@ const QuotationDetail = ({ setOpen }) => {
         alert(JSON.stringify({ Product }, null, 2));
     };
 
-    const handleDateChangeDateStart = (newValue) => {
+    const handleDateChangeDate = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
-            setSelectedDateBid(formattedDate);
+            setSelectedDate(formattedDate);
         }
     };
 
@@ -186,7 +186,7 @@ const QuotationDetail = ({ setOpen }) => {
             return;
         }
 
-        if (!selectedDateBid) {
+        if (!selectedDate) {
             ShowWarning("กรุณาเลือกวันที่เสนอราคา");
             return;
         }
@@ -215,20 +215,22 @@ const QuotationDetail = ({ setOpen }) => {
                 id: quotations.length,
                 Code: newCode,
                 DateStart: dayjs(new Date).format("DD/MM/YYYY"),
-                Date: dayjs(selectedDateBid, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                Date: dayjs(selectedDate, "DD/MM/YYYY").format("DD/MM/YYYY"),
                 Company: `${companies?.id}:${companies?.Name}`,
                 Customer: `${customer?.id}:${customer?.Name}`,
                 Employee: `${employee?.id}:${employee?.Name}`,
                 Product: getFilledFuelData(fuelData),
                 Truck: check ? "รถใหญ่" : "รถเล็ก",
                 Note: note,
+                Status: "อยู่ในระบบ"
             })
             .then(() => {
                 console.log("บันทึกข้อมูลเรียบร้อย ✅");
 
                 // 🔹 เตรียมข้อมูลสำหรับหน้าพิมพ์
                 const invoiceData = {
-                    DateB: dayjs(selectedDateBid, "DD/MM/YYYY"),
+                    Code: newCode,
+                    DateB: dayjs(selectedDate, "DD/MM/YYYY"),
                     DateD: dayjs(selectedDateDelivery, "DD/MM/YYYY"),
                     Company: companies,
                     Customer: customer,
@@ -276,15 +278,15 @@ const QuotationDetail = ({ setOpen }) => {
                             <DatePicker
                                 openTo="day"
                                 views={["year", "month", "day"]}
-                                value={selectedDateBid ? dayjs(selectedDateBid, "DD/MM/YYYY") : null}
+                                value={selectedDate ? dayjs(selectedDate, "DD/MM/YYYY") : null}
                                 format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                                onChange={handleDateChangeDateStart}
+                                onChange={handleDateChangeDate}
                                 slotProps={{
                                     textField: {
                                         size: "small",
                                         fullWidth: true,
                                         inputProps: {
-                                            value: formatThaiFull(selectedDateBid), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            value: formatThaiFull(selectedDate), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
                                             readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
                                         },
                                         InputProps: {
@@ -294,7 +296,7 @@ const QuotationDetail = ({ setOpen }) => {
                                                 </InputAdornment>
                                             ),
                                             sx: {
-                                                fontSize: "16px",
+                                                fontSize: "15px",
                                                 height: "40px",
                                                 padding: "10px",
                                                 fontWeight: "bold",
@@ -330,7 +332,7 @@ const QuotationDetail = ({ setOpen }) => {
                                                         </InputAdornment>
                                                     ),
                                                     sx: {
-                                                        fontSize: "16px",
+                                                        fontSize: "15px",
                                                         height: "40px",
                                                         padding: "10px",
                                                         fontWeight: "bold",
@@ -372,7 +374,7 @@ const QuotationDetail = ({ setOpen }) => {
                                     size="small"
                                     sx={{
                                         "& .MuiOutlinedInput-root": { height: "40px" },
-                                        "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                        "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                     }}
                                     InputProps={{
                                         ...params.InputProps,
@@ -382,16 +384,17 @@ const QuotationDetail = ({ setOpen }) => {
                                             </InputAdornment>
                                         ),
                                         sx: {
-                                            fontSize: "16px",
+                                            fontSize: "15px",
                                             height: "40px",
                                             padding: "10px",
+                                            fontWeight: "bold",
                                         },
                                     }}
                                 />
                             )}
                             renderOption={(props, option) => (
                                 <li {...props}>
-                                    <Typography fontSize="16px">{option.Name}</Typography>
+                                    <Typography fontSize="15px">{option.Name}</Typography>
                                 </li>
                             )}
                         />
@@ -414,7 +417,7 @@ const QuotationDetail = ({ setOpen }) => {
                                             size="small"
                                             sx={{
                                                 "& .MuiOutlinedInput-root": { height: "40px" },
-                                                "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                                "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                             }}
                                             InputProps={{
                                                 ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
@@ -424,16 +427,17 @@ const QuotationDetail = ({ setOpen }) => {
                                                     </InputAdornment>
                                                 ),
                                                 sx: {
-                                                    fontSize: "16px",
+                                                    fontSize: "15px",
                                                     height: "40px",
                                                     padding: "10px",
+                                                    fontWeight: "bold",
                                                 },
                                             }}
                                         />
                                     )}
                                     renderOption={(props, option) => (
                                         <li {...props}>
-                                            <Typography fontSize="16px">{option.Name}</Typography>
+                                            <Typography fontSize="15px">{option.Name}</Typography>
                                         </li>
                                     )}
                                 />
@@ -451,7 +455,7 @@ const QuotationDetail = ({ setOpen }) => {
                                             size="small"
                                             sx={{
                                                 "& .MuiOutlinedInput-root": { height: "40px" },
-                                                "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                                "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                             }}
                                             InputProps={{
                                                 ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
@@ -461,16 +465,17 @@ const QuotationDetail = ({ setOpen }) => {
                                                     </InputAdornment>
                                                 ),
                                                 sx: {
-                                                    fontSize: "16px",
+                                                    fontSize: "15px",
                                                     height: "40px",
                                                     padding: "10px",
+                                                    fontWeight: "bold",
                                                 },
                                             }}
                                         />
                                     )}
                                     renderOption={(props, option) => (
                                         <li {...props}>
-                                            <Typography fontSize="16px">{option.Name}</Typography>
+                                            <Typography fontSize="15px">{option.Name}</Typography>
                                         </li>
                                     )}
                                 />
@@ -528,9 +533,9 @@ const QuotationDetail = ({ setOpen }) => {
                                                                 '& .MuiInputBase-input': {
                                                                     fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                     fontWeight: 'bold',
-                                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                    marginLeft: -1,
-                                                                    marginRight: -2
+                                                                    textAlign: 'left', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                    marginLeft: -0.5,
+                                                                    marginRight: -1.5
                                                                 },
                                                             }}
                                                         />
@@ -554,7 +559,8 @@ const QuotationDetail = ({ setOpen }) => {
                                                                 '& .MuiInputBase-input': {
                                                                     fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                     fontWeight: 'bold',
-                                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                    textAlign: 'left', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                    marginLeft: -0.5,
                                                                 },
                                                             }}
                                                         />
@@ -611,15 +617,15 @@ const QuotationDetail = ({ setOpen }) => {
                         minRows={6}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        InputLabelProps={{ sx: { fontSize: "16px" } }}
+                        InputLabelProps={{ sx: { fontSize: "15px" } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 display: 'flex',
-                                alignItems: 'center',
+                                alignItems: 'flex-start', // <-- แก้จาก 'top' เป็น 'flex-start'
                                 height: 'auto', // ให้ขยายตามเนื้อหา (แทนการ fix 35px)
                             },
                             '& .MuiInputBase-input': {
-                                fontSize: '16px',
+                                fontSize: '15px',
                                 fontWeight: 'bold',
                                 textAlign: 'left', // สำหรับข้อความแบบ textarea
                             },
@@ -647,7 +653,7 @@ const QuotationDetail = ({ setOpen }) => {
                                 size="small"
                                 sx={{
                                     "& .MuiOutlinedInput-root": { height: "40px" },
-                                    "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                    "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                 }}
                                 InputProps={{
                                     ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
@@ -657,7 +663,7 @@ const QuotationDetail = ({ setOpen }) => {
                                         </InputAdornment>
                                     ),
                                     sx: {
-                                        fontSize: "16px",
+                                        fontSize: "15px",
                                         height: "40px",
                                         padding: "10px",
                                         fontWeight: "bold",
@@ -667,13 +673,13 @@ const QuotationDetail = ({ setOpen }) => {
                         )}
                         renderOption={(props, option) => (
                             <li {...props}>
-                                <Typography fontSize="16px">{option.Name}</Typography>
+                                <Typography fontSize="15px">{option.Name}</Typography>
                             </li>
                         )}
                     />
                 </Grid>
                 <Grid item xs={6} textAlign="right">
-                    <Button variant="contained" size="small" onClick={exportToPDF} sx={{ marginTop: 1 }} >พิมพ์ใบเสนอราคาลูกค้า</Button>
+                    <Button variant="contained" onClick={exportToPDF} sx={{ marginTop: 1 }} >พิมพ์ใบเสนอราคาลูกค้า</Button>
                 </Grid>
             </Grid>
         </React.Fragment>

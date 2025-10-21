@@ -190,15 +190,9 @@ const InsertGasStations = (props) => {
                 <TextField size="small" fullWidth value={code} onChange={(e) => setCode(e.target.value)} />
             </Grid>
             <Grid item sm={1} xs={3}>
-                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อปั้ม</Typography>
-            </Grid>
-            <Grid item sm={8} xs={9}>
-                <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
-            </Grid>
-            <Grid item sm={1} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อย่อ</Typography>
             </Grid>
-            <Grid item sm={3.5} xs={9}>
+            <Grid item sm={5} xs={9}>
                 <TextField size="small" fullWidth value={shortName} onChange={(e) => setShortName(e.target.value)} />
             </Grid>
             <Grid item sm={1.5} xs={3}>
@@ -207,10 +201,16 @@ const InsertGasStations = (props) => {
             <Grid item sm={1.5} xs={9}>
                 <TextField size="small" type="number" fullWidth value={oilWell} />
             </Grid>
+            <Grid item sm={1} xs={3}>
+                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>ชื่อปั้ม</Typography>
+            </Grid>
+            <Grid item sm={4.5} xs={9}>
+                <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+            </Grid>
             <Grid item sm={1.5} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>คลังสต็อก</Typography>
             </Grid>
-            <Grid item sm={3} xs={9}>
+            <Grid item sm={5} xs={9}>
                 <Paper
                     component="form">
                     <Select

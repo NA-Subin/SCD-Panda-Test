@@ -87,8 +87,8 @@ const Quotation = () => {
     return (
         <Container
             sx={{
-                paddingLeft: { xs: 2, sm: 3, md: 4 },
-                paddingRight: { xs: 2, sm: 3, md: 4 },
+                paddingLeft: { xs: 1, sm: 2, md: 3 },
+                paddingRight: { xs: 1, sm: 2, md: 3 },
                 marginTop: { xs: 0, sm: 0, md: 1 },
                 maxWidth: { xs: "lg", sm: "lg", md: "lg" }
             }}>

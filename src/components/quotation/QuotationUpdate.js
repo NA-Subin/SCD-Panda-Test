@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Autocomplete,
     Box,
@@ -11,6 +11,7 @@ import {
     FormControlLabel,
     FormGroup,
     Grid,
+    IconButton,
     InputAdornment,
     InputLabel,
     MenuItem,
@@ -23,6 +24,7 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
 } from "@mui/material";
@@ -47,7 +49,12 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import FolderOffIcon from '@mui/icons-material/FolderOff';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ReplyAllIcon from '@mui/icons-material/ReplyAll';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -73,16 +80,34 @@ const QuotationUpdate = ({ setOpen }) => {
     const bankDetail = Object.values(banks || {});
     const quotations = Object.values(quotation || {});
 
+    const [sortConfig, setSortConfig] = useState({
+        key: null,
+        direction: "asc",
+    });
+
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => ({
+            key,
+            direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+        }));
+    };
+
+    const [cancel, setCancel] = useState(false);
     const [edit, setEdit] = useState(true);
     const [companies, setCompanies] = useState(null);
     const [invoice, setInvoice] = useState(false);
     const [employee, setEmployee] = useState(null);
     const [customer, setCustomer] = useState(null);
+    const [ID, setID] = useState("");
+    const [code, setCode] = useState("");
     const [isBangchak, setIsBangchak] = useState("");
     const [note, setNote] = useState("");
     const [check, setCheck] = useState(true);
-    const [selectedDateBid, setSelectedDateBid] = useState(dayjs().startOf('month'));
-    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs().endOf('month'));
+    const [search, setSearch] = useState("");
+    const [selectedDate, setSelectedDate] = useState(dayjs().startOf('month'));
+    const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
+    const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
     const productColors = {
         G91: "#c7f4a3ff",   // เขียวอ่อน
         G95: "#f3de8aff",   // เหลืองอ่อน
@@ -132,7 +157,61 @@ const QuotationUpdate = ({ setOpen }) => {
 
     // แสดงผลเฉพาะข้อมูลที่กรอก
     console.log("fuelData:", getFilledFuelData(fuelData));
-    console.log("company : ", companies);
+    console.log("quotations : ", quotations);
+
+    const filteredQuotations = useMemo(() => {
+        return quotations.filter(q => {
+            // เอาเฉพาะข้อความหลัง ":"
+            const codeText = q.Code.split(":")[1] || q.Code;
+            const companyText = q.Company.split(":")[1] || q.Company;
+            const customerText = q.Customer.split(":")[1] || q.Customer;
+
+            // กรองตาม search
+            const matchesSearch = search
+                ? codeText.toLowerCase().includes(search.toLowerCase()) ||
+                companyText.toLowerCase().includes(search.toLowerCase()) ||
+                customerText.toLowerCase().includes(search.toLowerCase())
+                : true;
+
+            // กรองตามช่วงวันที่ DateStart
+            const dateStart = dayjs(q.Date, "DD/MM/YYYY");
+            const matchesDate = dateStart.isSameOrAfter(selectedDateStart, 'day') &&
+                dateStart.isSameOrBefore(selectedDateEnd, 'day');
+
+            const c = cancel ? q.Status === "ยกเลิก" : q.Status !== "ยกเลิก"
+
+            return matchesSearch && matchesDate && c;
+        }).sort((a, b) => {
+            let aValue, bValue;
+
+            switch (sortConfig.key) {
+                case "Date":
+                    aValue = dayjs(a.Date, "DD/MM/YYYY").toDate();
+                    bValue = dayjs(b.Date, "DD/MM/YYYY").toDate();
+                    break;
+                case "Company":
+                    aValue = a.Company?.split(":")[1] || "";
+                    bValue = b.Company?.split(":")[1] || "";
+                    break;
+                case "Customer":
+                    aValue = a.Customer?.split(":")[1] || "";
+                    bValue = b.Customer?.split(":")[1] || "";
+                    break;
+                case "Employee":
+                    aValue = a.Employee?.split(":")[1] || "";
+                    bValue = b.Employee?.split(":")[1] || "";
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+            return 0;
+        });
+    }, [quotations, search, selectedDateStart, selectedDateEnd, sortConfig]);
+
+    console.log("filteredQuotations : ", filteredQuotations);
 
     const handleChange = (type, field, value) => {
         setFuelData((prev) => ({
@@ -145,6 +224,8 @@ const QuotationUpdate = ({ setOpen }) => {
     };
 
     const handleUpdate = (row) => {
+        setID(row.id);
+        setCode(row.Code);
         // แยก id ของ Company, Customer, Employee จาก string "id:Name"
         const getIdFromString = (str) => (str ? Number(str.split(":")[0]) : null);
 
@@ -169,7 +250,7 @@ const QuotationUpdate = ({ setOpen }) => {
         setInvoice(true);
         // เปลี่ยนหน้า
         setCheck(row.Truck === "รถใหญ่");
-        setSelectedDateBid(dayjs(row.Date, "DD/MM/YYYY"))
+        setSelectedDate(dayjs(row.Date, "DD/MM/YYYY"))
         setNote(row.Note);
 
         // 🔹 merge fuelData: เติม "" ให้สินค้าที่ไม่มีค่าใน row.Product
@@ -182,24 +263,94 @@ const QuotationUpdate = ({ setOpen }) => {
         setFuelData(newFuelData);
     };
 
+    const handleDateChangeDate = (newValue) => {
+        if (newValue) {
+            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            setSelectedDate(formattedDate);
+        }
+    };
+
     const handleDateChangeDateStart = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
-            setSelectedDateBid(formattedDate);
+            setSelectedDateStart(formattedDate);
         }
     };
 
     const handleDateChangeDateEnd = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
-            setSelectedDateDelivery(formattedDate);
+            setSelectedDateEnd(formattedDate);
         }
     };
 
+    const handleSave = () => {
+        database.ref("quotation/").child(ID).update({
+            Date: dayjs(selectedDate, "DD/MM/YYYY").format("DD/MM/YYYY"),
+            Company: `${companies?.id}:${companies?.Name}`,
+            Customer: `${customer?.id}:${customer?.Name}`,
+            Employee: `${employee?.id}:${employee?.Name}`,
+            Product: getFilledFuelData(fuelData),
+            Truck: check ? "รถใหญ่" : "รถเล็ก",
+            Note: note,
+        })
+            .then(() => {
+                console.log("บันทึกข้อมูลเรียบร้อย ✅");
+                ShowSuccess("บันทึกข้อมูลเรียบร้อย ✅");
+                setEdit(true);
+            })
+            .catch((error) => {
+                ShowError("ไม่สำเร็จ");
+                console.error("Error updating data:", error);
+            });
+    }
+
+    const handleCancel = (id) => {
+        ShowConfirm(
+            `ต้องการลบใบวางบิลลำดับที่ ${id + 1} ใช่หรือไม่`,
+            () => {
+                database.ref("quotation/").child(id).update({
+                    Status: "ยกเลิก",
+                })
+                    .then(() => {
+                        ShowSuccess("บันทึกข้อมูลเรียบร้อย ✅");
+                    })
+                    .catch((error) => {
+                        ShowError("ไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
+            },
+            () => {
+                console.log(`ยกเลิกการลบบิลลำดับที่ ${id + 1}`);
+            }
+        );
+    }
+
+    const handleEdit = (id) => {
+        ShowConfirm(
+            `ต้องการให้ใบวางบิลลำดับที่ ${id + 1} ย้อนกลับไปสถานะเดิมใช่หรือไม่`,
+            () => {
+                database.ref("quotation/").child(id).update({
+                    Status: "อยู่ในระบบ",
+                })
+                    .then(() => {
+                        ShowSuccess("บันทึกข้อมูลเรียบร้อย ✅");
+                    })
+                    .catch((error) => {
+                        ShowError("ไม่สำเร็จ");
+                        console.error("Error updating data:", error);
+                    });
+            },
+            () => {
+                console.log(`ยกเลิกการลบบิลลำดับที่ ${id + 1}`);
+            }
+        );
+    }
+
     const exportToPDF = () => {
         const invoiceData = {
-            DateB: dayjs(selectedDateBid, "DD/MM/YYYY"),
-            DateD: dayjs(selectedDateDelivery, "DD/MM/YYYY"),
+            Code: code,
+            DateB: dayjs(selectedDate, "DD/MM/YYYY"),
             Company: companies,
             Customer: customer,
             Employee: employee,
@@ -242,6 +393,107 @@ const QuotationUpdate = ({ setOpen }) => {
                 <Grid item xs={12} textAlign="right">
                     <Button variant="contained" color="error" onClick={() => setOpen(true)} startIcon={<KeyboardDoubleArrowLeftIcon />} >กลับไปยังหน้าสำหรับเพิ่มข้อมูล</Button>
                 </Grid>
+                <Grid item xs={6} sx={{ display: "flex", justifyContent: "left", alignItems: "center" }}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <Paper sx={{ mr: 2 }}>
+                            <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={selectedDateStart ? dayjs(selectedDateStart, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                onChange={handleDateChangeDateStart}
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateStart), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <b>วันที่เริ่มต้น :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "15px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        },
+                                    },
+                                }}
+                            />
+                        </Paper>
+                        <Paper>
+                            <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={selectedDateEnd ? dayjs(selectedDateEnd, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                onChange={handleDateChangeDateEnd}
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateEnd), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <b>วันที่สิ้นสุด :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "15px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        },
+                                    },
+                                }}
+                            />
+                        </Paper>
+                    </LocalizationProvider>
+                </Grid>
+                <Grid item xs={5}>
+                    <Paper>
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            sx={{
+                                "& .MuiOutlinedInput-root": { height: "40px" },
+                                "& .MuiInputBase-input": { fontSize: "15px" },
+                            }}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                        <b>ค้นหา :</b>
+                                    </InputAdornment>
+                                ),
+                                sx: {
+                                    fontSize: "15px",
+                                    height: "40px",
+                                    padding: "10px",
+                                },
+                            }}
+                        />
+                    </Paper>
+                </Grid>
+                <Grid item xs={1}>
+                    <FormGroup row >
+                        {/* <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะ : </Typography> */}
+                        <FormControlLabel control={<Checkbox checked={cancel} />} onChange={() => setCancel(!cancel)} label="ยกเลิก" />
+                    </FormGroup>
+                </Grid>
                 <Grid item xs={12}>
                     <TableContainer
                         component={Paper}
@@ -252,38 +504,201 @@ const QuotationUpdate = ({ setOpen }) => {
                         <Table
                             stickyHeader
                             size="small"
-                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "100%" }}
+                            sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" }, width: "1155px" }}
                         >
                             <TableHead sx={{ height: "5vh" }}>
                                 <TableRow>
                                     <TablecellSelling sx={{ textAlign: "center", width: 50 }}>ลำดับ</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", width: 80 }}>วันที่</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", width: 80 }}>Code</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", width: 200 }}>บริษัท</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", width: 200 }}>ลูกค้า</TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", width: 120 }}>ผู้เสนอราคา</TablecellSelling>
+                                    <TablecellSelling onClick={() => handleSort("Date")} sx={{ textAlign: "center", width: 100 }}>
+                                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}>
+                                            วันที่
+                                            {sortConfig.key === "Date" ? (
+                                                sortConfig.direction === "asc" ? (
+                                                    <ArrowDropDownIcon />
+                                                ) : (
+                                                    <ArrowDropUpIcon />
+                                                )
+                                            ) : (
+                                                <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                            )}
+                                        </Box>
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", width: 100 }}>Code</TablecellSelling>
+                                    <TablecellSelling onClick={() => handleSort("Company")} sx={{ textAlign: "center", width: 300 }}>
+                                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}>
+                                            บริษัท
+                                            {sortConfig.key === "Company" ? (
+                                                sortConfig.direction === "asc" ? (
+                                                    <ArrowDropDownIcon />
+                                                ) : (
+                                                    <ArrowDropUpIcon />
+                                                )
+                                            ) : (
+                                                <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                            )}
+                                        </Box>
+                                    </TablecellSelling>
+                                    <TablecellSelling onClick={() => handleSort("Customer")} sx={{ textAlign: "center", width: 300 }}>
+                                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}>
+                                            ลูกค้า
+                                            {sortConfig.key === "Customer" ? (
+                                                sortConfig.direction === "asc" ? (
+                                                    <ArrowDropDownIcon />
+                                                ) : (
+                                                    <ArrowDropUpIcon />
+                                                )
+                                            ) : (
+                                                <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                            )}
+                                        </Box>
+                                    </TablecellSelling>
+                                    <TablecellSelling onClick={() => handleSort("Employee")} sx={{ textAlign: "center", width: 170 }}>
+                                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'center' }}>
+                                            ผู้เสนอราคา
+                                            {sortConfig.key === "Employee" ? (
+                                                sortConfig.direction === "asc" ? (
+                                                    <ArrowDropDownIcon />
+                                                ) : (
+                                                    <ArrowDropUpIcon />
+                                                )
+                                            ) : (
+                                                <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
+                                            )}
+                                        </Box>
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", width: 100 }} >
+                                        สถานะ
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ width: 30, position: "sticky", right: 0, zIndex: 2 }} />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {quotations.map((row, index) => (
-                                    <TableRow
-                                        key={row.id || index}
-                                        onClick={() => handleUpdate(row)}
-                                        sx={{
-                                            cursor: "pointer",
-                                            ':hover': {
-                                                backgroundColor: "#e8eaf6"
-                                            }
-                                        }}
-                                    >
-                                        <TableCell sx={{ textAlign: "center", fontWeight: invoice && "bold", backgroundColor: invoice && "#e8eaf6" }} >{index + 1}</TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: invoice && "bold", backgroundColor: invoice && "#e8eaf6" }} >{formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}</TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: invoice && "bold", backgroundColor: invoice && "#e8eaf6" }} >{row.Code}</TableCell>
-                                        <TableCell sx={{ textAlign: "left", fontWeight: invoice && "bold", backgroundColor: invoice && "#e8eaf6" }} >{row.Company ? row.Company.split(":")[1] : ""}</TableCell>
-                                        <TableCell sx={{ textAlign: "left", fontWeight: invoice && "bold", backgroundColor: invoice && "#e8eaf6" }} >{row.Customer ? row.Customer.split(":")[1] : ""}</TableCell>
-                                        <TableCell sx={{ textAlign: "left", fontWeight: invoice && "bold", backgroundColor: invoice && "#e8eaf6" }} >{row.Employee ? row.Employee.split(":")[1] : ""}</TableCell>
-                                    </TableRow>
-                                ))}
+                                {
+                                    filteredQuotations.length <= 0 ?
+                                        <TableRow>
+                                            <TableCell colSpan={6}>
+                                                <Box
+                                                    display="flex"
+                                                    flexDirection="column"
+                                                    alignItems="center"
+                                                    justifyContent="center"
+                                                    py={3} // เพิ่ม padding แนวตั้ง
+                                                    height="42vh"
+                                                >
+                                                    <FolderOffIcon color="action" sx={{ fontSize: 20, mb: 1 }} />
+                                                    <Typography variant="subtitle1" color="textSecondary">
+                                                        ไม่มีข้อมูล
+                                                    </Typography>
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                        :
+                                        filteredQuotations.map((row, index) => (
+                                            <TableRow
+                                                key={row.id}
+                                                onClick={() => handleUpdate(row)}
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    ':hover': {
+                                                        backgroundColor: "#e8eaf6"
+                                                    }
+                                                }}
+                                            >
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        fontWeight: (invoice && ID === row.id) && "bold",
+                                                        backgroundColor: (invoice && ID === row.id) && "#e8eaf6"
+                                                    }}
+                                                >
+                                                    {index + 1}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        fontWeight: (invoice && ID === row.id) && "bold",
+                                                        backgroundColor: (invoice && ID === row.id) && "#e8eaf6"
+                                                    }}
+                                                >
+                                                    {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        fontWeight: (invoice && ID === row.id) && "bold",
+                                                        backgroundColor: (invoice && ID === row.id) && "#e8eaf6"
+                                                    }}
+                                                >
+                                                    {row.Code}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "left",
+                                                        fontWeight: (invoice && ID === row.id) && "bold",
+                                                        backgroundColor: (invoice && ID === row.id) && "#e8eaf6"
+                                                    }}
+                                                >
+                                                    <Box sx={{ marginLeft: 1 }}>
+                                                        {row.Company ? row.Company.split(":")[1] : ""}
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "left",
+                                                        fontWeight: (invoice && ID === row.id) && "bold",
+                                                        backgroundColor: (invoice && ID === row.id) && "#e8eaf6"
+                                                    }}
+                                                >
+                                                    <Box sx={{ marginLeft: 1 }}>
+                                                        {row.Customer ? row.Customer.split(":")[1] : ""}
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "left",
+                                                        fontWeight: (invoice && ID === row.id) && "bold",
+                                                        backgroundColor: (invoice && ID === row.id) && "#e8eaf6"
+                                                    }}
+                                                >
+                                                    <Box sx={{ marginLeft: 1 }}>
+                                                        {row.Employee ? row.Employee.split(":")[1] : ""}
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        fontWeight: (invoice && ID === row.id) && "bold",
+                                                        backgroundColor: (invoice && ID === row.id) && "#e8eaf6"
+                                                    }}
+                                                >
+                                                    {row.Status}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        position: "sticky",
+                                                        right: 0,
+                                                        zIndex: 2,
+                                                        backgroundColor: "white"
+                                                    }}
+                                                >
+                                                    {
+                                                        row.Status !== "ยกเลิก" ?
+                                                            <Tooltip title="ยกเลิกใบเสนอราคา" placement="right" >
+                                                                <IconButton color="error" size="small" onClick={() => handleCancel(row.id)} >
+                                                                    <DeleteForeverIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            :
+                                                            <Tooltip title="ย้อนกลับไปสถานะเดิม" placement="right" >
+                                                                <IconButton color="success" size="small" onClick={() => handleEdit(row.id)} >
+                                                                    <ChangeCircleIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                    }
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -302,15 +717,15 @@ const QuotationUpdate = ({ setOpen }) => {
                                     <DatePicker
                                         openTo="day"
                                         views={["year", "month", "day"]}
-                                        value={selectedDateBid ? dayjs(selectedDateBid, "DD/MM/YYYY") : null}
+                                        value={selectedDate ? dayjs(selectedDate, "DD/MM/YYYY") : null}
                                         format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                                        onChange={handleDateChangeDateStart}
+                                        onChange={handleDateChangeDate}
                                         slotProps={{
                                             textField: {
                                                 size: "small",
                                                 fullWidth: true,
                                                 inputProps: {
-                                                    value: formatThaiFull(selectedDateBid), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                    value: formatThaiFull(selectedDate), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
                                                     readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
                                                 },
                                                 InputProps: {
@@ -320,7 +735,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                                         </InputAdornment>
                                                     ),
                                                     sx: {
-                                                        fontSize: "16px",
+                                                        fontSize: "15px",
                                                         height: "40px",
                                                         padding: "10px",
                                                         fontWeight: "bold",
@@ -361,7 +776,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                             size="small"
                                             sx={{
                                                 "& .MuiOutlinedInput-root": { height: "40px" },
-                                                "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                                "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                             }}
                                             InputProps={{
                                                 ...params.InputProps,
@@ -371,16 +786,17 @@ const QuotationUpdate = ({ setOpen }) => {
                                                     </InputAdornment>
                                                 ),
                                                 sx: {
-                                                    fontSize: "16px",
+                                                    fontSize: "15px",
                                                     height: "40px",
                                                     padding: "10px",
+                                                    fontWeight: "bold"
                                                 },
                                             }}
                                         />
                                     )}
                                     renderOption={(props, option) => (
                                         <li {...props}>
-                                            <Typography fontSize="16px">{option.Name}</Typography>
+                                            <Typography fontSize="15px">{option.Name}</Typography>
                                         </li>
                                     )}
                                     disabled={edit ? true : false}
@@ -404,7 +820,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                                     size="small"
                                                     sx={{
                                                         "& .MuiOutlinedInput-root": { height: "40px" },
-                                                        "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                                        "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                                     }}
                                                     InputProps={{
                                                         ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
@@ -414,16 +830,17 @@ const QuotationUpdate = ({ setOpen }) => {
                                                             </InputAdornment>
                                                         ),
                                                         sx: {
-                                                            fontSize: "16px",
+                                                            fontSize: "15px",
                                                             height: "40px",
                                                             padding: "10px",
+                                                            fontWeight: "bold"
                                                         },
                                                     }}
                                                 />
                                             )}
                                             renderOption={(props, option) => (
                                                 <li {...props}>
-                                                    <Typography fontSize="16px">{option.Name}</Typography>
+                                                    <Typography fontSize="15px">{option.Name}</Typography>
                                                 </li>
                                             )}
                                             disabled={edit ? true : false}
@@ -442,7 +859,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                                     size="small"
                                                     sx={{
                                                         "& .MuiOutlinedInput-root": { height: "40px" },
-                                                        "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                                        "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                                     }}
                                                     InputProps={{
                                                         ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
@@ -452,16 +869,17 @@ const QuotationUpdate = ({ setOpen }) => {
                                                             </InputAdornment>
                                                         ),
                                                         sx: {
-                                                            fontSize: "16px",
+                                                            fontSize: "15px",
                                                             height: "40px",
                                                             padding: "10px",
+                                                            fontWeight: "bold"
                                                         },
                                                     }}
                                                 />
                                             )}
                                             renderOption={(props, option) => (
                                                 <li {...props}>
-                                                    <Typography fontSize="16px">{option.Name}</Typography>
+                                                    <Typography fontSize="15px">{option.Name}</Typography>
                                                 </li>
                                             )}
                                             disabled={edit ? true : false}
@@ -521,8 +939,8 @@ const QuotationUpdate = ({ setOpen }) => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                                            marginLeft: -1,
-                                                                            marginRight: -2
+                                                                            marginLeft: -0.5,
+                                                                            marginRight: -1.5
                                                                         },
                                                                     }}
                                                                     disabled={edit ? true : false}
@@ -548,6 +966,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                                                             fontSize: '14px', // ขนาด font เวลาพิมพ์
                                                                             fontWeight: 'bold',
                                                                             textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
+                                                                            marginLeft: -0.5,
                                                                         },
                                                                     }}
                                                                     disabled={edit ? true : false}
@@ -605,15 +1024,15 @@ const QuotationUpdate = ({ setOpen }) => {
                                 minRows={6}
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
-                                InputLabelProps={{ sx: { fontSize: "16px" } }}
+                                InputLabelProps={{ sx: { fontSize: "15px" } }}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         display: 'flex',
-                                        alignItems: 'center',
+                                        alignItems: 'flex-start', // <-- แก้จาก 'top' เป็น 'flex-start'
                                         height: 'auto', // ให้ขยายตามเนื้อหา (แทนการ fix 35px)
                                     },
                                     '& .MuiInputBase-input': {
-                                        fontSize: '16px',
+                                        fontSize: '15px',
                                         fontWeight: 'bold',
                                         textAlign: 'left', // สำหรับข้อความแบบ textarea
                                     },
@@ -642,7 +1061,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                         size="small"
                                         sx={{
                                             "& .MuiOutlinedInput-root": { height: "40px" },
-                                            "& .MuiInputBase-input": { fontSize: "16px", padding: "2px 6px" },
+                                            "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
                                         }}
                                         InputProps={{
                                             ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
@@ -652,7 +1071,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                                 </InputAdornment>
                                             ),
                                             sx: {
-                                                fontSize: "16px",
+                                                fontSize: "15px",
                                                 height: "40px",
                                                 padding: "10px",
                                                 fontWeight: "bold",
@@ -662,7 +1081,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                 )}
                                 renderOption={(props, option) => (
                                     <li {...props}>
-                                        <Typography fontSize="16px">{option.Name}</Typography>
+                                        <Typography fontSize="15px">{option.Name}</Typography>
                                     </li>
                                 )}
                                 disabled={edit ? true : false}
@@ -673,14 +1092,19 @@ const QuotationUpdate = ({ setOpen }) => {
                                 {
                                     edit ?
                                         <React.Fragment>
-                                            <Button variant="contained" size="small" color="warning" onClick={() => setEdit(false)} sx={{ marginRight: 1 }} >แก้ไข</Button>
-                                            <Button variant="contained" size="small" onClick={exportToPDF} >พิมพ์ใบเสนอราคาลูกค้า</Button>
+                                            {
+                                                !cancel &&
+                                                <React.Fragment>
+                                                    <Button variant="contained" color="warning" onClick={() => setEdit(false)} sx={{ marginRight: 1 }} >แก้ไข</Button>
+                                                    <Button variant="contained" onClick={exportToPDF} >พิมพ์ใบเสนอราคาลูกค้า</Button>
+                                                </React.Fragment>
+                                            }
                                         </React.Fragment>
 
                                         :
                                         <React.Fragment>
-                                            <Button variant="contained" size="small" color="error" onClick={() => setEdit(true)} sx={{ marginRight: 1 }} >ยกเลิก</Button>
-                                            <Button variant="contained" size="small" color="success" onClick={() => setEdit(true)} >บันทึก</Button>
+                                            <Button variant="contained" color="error" onClick={() => setEdit(true)} sx={{ marginRight: 1 }} >ยกเลิก</Button>
+                                            <Button variant="contained" color="success" onClick={handleSave} >บันทึก</Button>
                                         </React.Fragment>
                                 }
                             </Box>

@@ -203,7 +203,7 @@ const PrintReport = () => {
           <Box
             sx={{
               width: "21cm",        // แนวนอน
-              minHeight: "14.8cm",  // สูงน้อยกว่า A4
+              height: "14.8cm",  // สูงน้อยกว่า A4
               backgroundColor: "#fff",
               paddingTop: "0.7cm",
               paddingBottom: "0.7cm",
@@ -291,9 +291,8 @@ const PrintReport = () => {
               >
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1, borderBottom: "1px solid gray", mt: -0.5 }}>
                   <Typography variant="subtitle2"><b>เลขที่/No : </b></Typography>
-                  <Typography variant="subtitle2" marginLeft={1}>
-
-
+                  <Typography variant="subtitle2" marginLeft={4}>
+                    {invoiceData?.Code}
                   </Typography>
                 </Box>
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1, borderBottom: "1px solid gray" }}>
@@ -456,7 +455,7 @@ const PrintReport = () => {
               </Grid>
               <Grid
                 item
-                xs={5.5}
+                xs={6}
                 sx={{
                   border: "2px solid rgba(0, 0, 0, 0.7)",
                   pb: 0.5,
@@ -491,7 +490,7 @@ const PrintReport = () => {
               {/* ส่วนวันที่และเลขที่เอกสาร */}
               <Grid
                 item
-                xs={6.5}
+                xs={6}
                 sx={{
                   borderRight: "2px solid rgba(0, 0, 0, 0.7)",
                   borderTop: "2px solid rgba(0, 0, 0, 0.7)",
@@ -502,11 +501,7 @@ const PrintReport = () => {
                 }}
               >
                 <Box display="flex" alignItems="center" justifyContent="center">
-                  <Typography variant="subtitle2">ข้าพเจ้ารับรองว่า จะส่งมอบของดังกล่าวข้างต้นได้ภายในกำหนด</Typography>
-                  <Typography variant="subtitle2" marginLeft={1}>
-
-
-                  </Typography>
+                  <Typography variant="subtitle2">ข้าพเจ้ารับรองว่าจะส่งมอบของดังกล่าวข้างต้นได้ภายในกำหนด</Typography>
                 </Box>
                 <Box display="flex" alignItems="center" justifyContent="center" marginTop={0.5}>
                   <Typography variant="subtitle2"><b>ผู้เสนอราคา : </b></Typography>
