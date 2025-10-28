@@ -63,6 +63,12 @@ import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 const QuotationDetail = ({ setOpen }) => {
     const navigate = useNavigate();
 
+    const items = [
+        `น้ำมัน CALTEX รับตามมาตราฐาน นน 0.80 กก./ลิตรและตามแป้นรถบรรทุกพร้อมเอกสารใบ COA กรณีไม่ได้สินค้าตามกำหนด นน.ทางบริษัทจะรับผิดชอบ`,
+        `น้ำมัน บางจาก รับตามมาตราฐาน นน 0.80 กก./ลิตรและตามแป้นรถบรรทุกพร้อมเอกสารใบ COA กรณีไม่ได้สินค้าตามกำหนด นน.ทางบริษัทจะรับผิดชอบ`,
+        `น้ำมันได้มาตราฐานส่งพร้อมใบ COA`,
+    ];
+
     const { company, customerbigtruck, customersmalltruck, officers, quotation } = useBasicData();
     const { banks } = useTripData();
     const companyDetail = Object.values(company || {});
@@ -79,7 +85,20 @@ const QuotationDetail = ({ setOpen }) => {
     const [note, setNote] = useState("");
     const [check, setCheck] = useState(true);
     const [selectedDate, setSelectedDate] = useState(dayjs(new Date));
-    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs().endOf('month'));
+    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs(new Date));
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+    const handleSelect = (index) => {
+        setSelectedIndex(index === selectedIndex ? null : index); // คลิกอีกครั้งเพื่อล้าง (optional)
+    };
+
+    const handleKeyDown = (e, index) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSelect(index);
+        }
+    };
+
     const productColors = {
         G91: "#c7f4a3ff",   // เขียวอ่อน
         G95: "#f3de8aff",   // เหลืองอ่อน
@@ -163,7 +182,7 @@ const QuotationDetail = ({ setOpen }) => {
         }
     };
 
-    const handleDateChangeDateEnd = (newValue) => {
+    const handleDateChangeDateDelivery = (newValue) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
             setSelectedDateDelivery(formattedDate);
@@ -216,10 +235,12 @@ const QuotationDetail = ({ setOpen }) => {
                 Code: newCode,
                 DateStart: dayjs(new Date).format("DD/MM/YYYY"),
                 Date: dayjs(selectedDate, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                DateDelivery: dayjs(selectedDateDelivery, "DD/MM/YYYY").format("DD/MM/YYYY"),
                 Company: `${companies?.id}:${companies?.Name}`,
                 Customer: `${customer?.id}:${customer?.Name}`,
                 Employee: `${employee?.id}:${employee?.Name}`,
                 Product: getFilledFuelData(fuelData),
+                selectedIndex: selectedIndex,
                 Truck: check ? "รถใหญ่" : "รถเล็ก",
                 Note: note,
                 Status: "อยู่ในระบบ"
@@ -238,6 +259,7 @@ const QuotationDetail = ({ setOpen }) => {
                     Product: getFilledFuelData(fuelData),
                     Products: products,
                     Note: note,
+                    items: items[selectedIndex] || "",
                 };
 
                 sessionStorage.setItem("invoiceData", JSON.stringify(invoiceData));
@@ -272,6 +294,13 @@ const QuotationDetail = ({ setOpen }) => {
                 {/* <Grid item xs={12}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: -2, marginBottom: -1 }} gutterBottom>กรอกข้อมูลใบเสนอราคาลูกค้า</Typography>
                         </Grid> */}
+                <Grid item xs={8} textAlign="left">
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>กรอกข้อมูลใบเสนอราคาลูกค้า</Typography>
+                    <Divider />
+                </Grid>
+                <Grid item xs={4} textAlign="right">
+                    <Button variant="contained" color="warning" onClick={() => setOpen(false)} endIcon={<KeyboardDoubleArrowRightIcon />} >ตรวจสอบใบวางบิลที่เคยกรอกข้อมูล</Button>
+                </Grid>
                 <Grid item xs={4}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <Paper>
@@ -308,42 +337,42 @@ const QuotationDetail = ({ setOpen }) => {
                         </Paper>
                     </LocalizationProvider>
                 </Grid>
-                {/* <Grid item xs={4}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <Paper>
-                                    <DatePicker
-                                        openTo="day"
-                                        views={["year", "month", "day"]}
-                                        value={selectedDateDelivery ? dayjs(selectedDateDelivery, "DD/MM/YYYY") : null}
-                                        format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
-                                        onChange={handleDateChangeDateEnd}
-                                        slotProps={{
-                                            textField: {
-                                                size: "small",
-                                                fullWidth: true,
-                                                inputProps: {
-                                                    value: formatThaiFull(selectedDateDelivery), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
-                                                    readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
-                                                },
-                                                InputProps: {
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <b>วันที่จัดส่ง :</b>
-                                                        </InputAdornment>
-                                                    ),
-                                                    sx: {
-                                                        fontSize: "15px",
-                                                        height: "40px",
-                                                        padding: "10px",
-                                                        fontWeight: "bold",
-                                                    },
-                                                },
+                <Grid item xs={4}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <Paper>
+                            <DatePicker
+                                openTo="day"
+                                views={["year", "month", "day"]}
+                                value={selectedDateDelivery ? dayjs(selectedDateDelivery, "DD/MM/YYYY") : null}
+                                format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                onChange={handleDateChangeDateDelivery}
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        fullWidth: true,
+                                        inputProps: {
+                                            value: formatThaiFull(selectedDateDelivery), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                            readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                        },
+                                        InputProps: {
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <b>วันที่จัดส่ง :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "15px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
                                             },
-                                        }}
-                                    />
-                                </Paper>
-                            </LocalizationProvider>
-                        </Grid> */}
+                                        },
+                                    },
+                                }}
+                            />
+                        </Paper>
+                    </LocalizationProvider>
+                </Grid>
                 <Grid item xs={4}>
                     <FormGroup row >
                         <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะรถ : </Typography>
@@ -351,9 +380,9 @@ const QuotationDetail = ({ setOpen }) => {
                         <FormControlLabel control={<Checkbox checked={!check ? true : false} />} onChange={() => setCheck(false)} label="รถเล็ก" />
                     </FormGroup>
                 </Grid>
-                <Grid item xs={4} textAlign="right">
+                {/* <Grid item xs={4} textAlign="right">
                     <Button variant="contained" color="warning" onClick={() => setOpen(false)} endIcon={<KeyboardDoubleArrowRightIcon />} >ตรวจสอบใบวางบิลที่เคยกรอกข้อมูล</Button>
-                </Grid>
+                </Grid> */}
                 <Grid item xs={6}>
                     <Paper sx={{ width: "100%" }}>
                         <Autocomplete
@@ -574,7 +603,7 @@ const QuotationDetail = ({ setOpen }) => {
                         </Table>
                     </TableContainer>
                 </Grid>
-                <Grid item xs={6}>
+                {/* <Grid item xs={6}>
                     <Box sx={{ marginLeft: 1 }}>
                         <Typography variant="subtitle1" fontWeight="bold" color="error" gutterBottom>
                             หมายเหตุ*
@@ -607,14 +636,53 @@ const QuotationDetail = ({ setOpen }) => {
                             </Typography>
                         </Box>
                     </Box>
+                </Grid> */}
+                <Grid item xs={12} sx={{ mb: -2 }}>
+                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        เลือกหมายเหตุมาตรฐานที่ต้องการเพิ่มในใบเสนอราคา
+                    </Typography>
                 </Grid>
+                {items.map((text, idx) => {
+                    const selected = idx === selectedIndex;
+                    return (
+                        <Grid item xs={12} md={4} key={idx}>
+                            <Box
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => handleSelect(idx)}
+                                onKeyDown={(e) => handleKeyDown(e, idx)}
+                                sx={{
+                                    p: 2,
+                                    borderRadius: 2,
+                                    border: selected ? "2px solid" : "1px solid",
+                                    borderColor: selected ? theme.palette.panda.main : "divider",
+                                    cursor: "pointer",
+                                    transition: "box-shadow 0.15s, transform 0.08s",
+                                    boxShadow: selected ? 3 : 0,
+                                    "&:hover": {
+                                        transform: "translateY(-2px)",
+                                    },
+                                    height: "60px"
+                                }}
+                            >
+                                <Typography variant="subtitle2" gutterBottom component="div"
+                                    sx={{
+                                        fontWeight: selected ? "bold" : "none",
+                                        color: selected ? "black" : "gray"
+                                    }}>
+                                    {text}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                    );
+                })}
                 <Grid item xs={6}>
                     <TextField
                         size="small"
-                        type="number"
+                        type="text"
                         fullWidth
                         multiline
-                        minRows={6}
+                        minRows={3}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         InputLabelProps={{ sx: { fontSize: "15px" } }}
@@ -640,46 +708,50 @@ const QuotationDetail = ({ setOpen }) => {
                     />
                 </Grid>
                 <Grid item xs={6}>
-                    <Autocomplete
-                        options={employees}
-                        getOptionLabel={(option) => option.Name}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        value={employee}
-                        onChange={(event, newValue) => setEmployee(newValue)}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="outlined"
-                                size="small"
-                                sx={{
-                                    "& .MuiOutlinedInput-root": { height: "40px" },
-                                    "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
-                                }}
-                                InputProps={{
-                                    ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
-                                    startAdornment: (
-                                        <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                            <b>เลือกผู้เสนอราคา :</b>
-                                        </InputAdornment>
-                                    ),
-                                    sx: {
-                                        fontSize: "15px",
-                                        height: "40px",
-                                        padding: "10px",
-                                        fontWeight: "bold",
-                                    },
-                                }}
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Autocomplete
+                                options={employees}
+                                getOptionLabel={(option) => option.Name}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                value={employee}
+                                onChange={(event, newValue) => setEmployee(newValue)}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        size="small"
+                                        sx={{
+                                            "& .MuiOutlinedInput-root": { height: "40px" },
+                                            "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
+                                        }}
+                                        InputProps={{
+                                            ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
+                                            startAdornment: (
+                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                    <b>เลือกผู้เสนอราคา :</b>
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                fontSize: "15px",
+                                                height: "40px",
+                                                padding: "10px",
+                                                fontWeight: "bold",
+                                            },
+                                        }}
+                                    />
+                                )}
+                                renderOption={(props, option) => (
+                                    <li {...props}>
+                                        <Typography fontSize="15px">{option.Name}</Typography>
+                                    </li>
+                                )}
                             />
-                        )}
-                        renderOption={(props, option) => (
-                            <li {...props}>
-                                <Typography fontSize="15px">{option.Name}</Typography>
-                            </li>
-                        )}
-                    />
-                </Grid>
-                <Grid item xs={6} textAlign="right">
-                    <Button variant="contained" onClick={exportToPDF} sx={{ marginTop: 1 }} >พิมพ์ใบเสนอราคาลูกค้า</Button>
+                        </Grid>
+                        <Grid item xs={12} textAlign="right">
+                            <Button variant="contained" onClick={exportToPDF} sx={{ marginTop: 1 }} >พิมพ์ใบเสนอราคาลูกค้า</Button>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
         </React.Fragment>

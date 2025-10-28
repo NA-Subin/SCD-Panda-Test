@@ -218,6 +218,40 @@ const Profit = ({ openNavbar }) => {
         { volume: 0, rateOil: 0, rate: 0, costPrice: 0, diff: 0 }
     );
 
+    const totals = result.reduce(
+        (acc, row) => {
+            const rateOil = row.RateOil * row.Volume;
+            const rate = row.Rate * row.Volume;
+            const costPrice = row.CostPrice * row.Volume;
+            const diff = rateOil - costPrice - rate;
+
+            return {
+                volume: acc.volume + (row.Volume ?? 0),
+                rateOil: acc.rateOil + rateOil,
+                rate: acc.rate + rate,
+                costPrice: acc.costPrice + costPrice,
+                diff: acc.diff + diff,
+            };
+        },
+        { volume: 0, rateOil: 0, rate: 0, costPrice: 0, diff: 0 }
+    );
+
+    // ✅ หาค่าเฉลี่ย
+    const avg =
+        result.length > 0
+            ? {
+                volume: totals.volume,
+                rateOil: totals.rateOil / result.length,
+                rate: totals.rate / result.length,
+                costPrice: totals.costPrice / result.length,
+                diff: totals.diff / result.length,
+            }
+            : { volume: 0, rateOil: 0, rate: 0, costPrice: 0, diff: 0 };
+
+    console.log("totals:", totals);
+    console.log("avg:", avg);
+
+
     const handleCheckUpdate = (row, index) => {
         console.log(`order/${row.No}/Product/${row.ProductName}/`);
         setCostIndex(index);
@@ -328,12 +362,12 @@ const Profit = ({ openNavbar }) => {
 
         // 5️⃣ Footer row รวมค่า
         const footerRow = worksheet.addRow({
-            product: "รวม",
-            volume: total.volume,
-            rateOil: total.rateOil,
-            costPrice: total.costPrice,
-            rate: total.rate,
-            diff: total.diff,
+            product: "ค่าเฉลี่ยรวม",
+            volume: avg.volume,
+            rateOil: avg.rateOil,
+            costPrice: avg.costPrice,
+            rate: avg.rate,
+            diff: avg.diff,
         });
         footerRow.font = { bold: true };
         footerRow.alignment = { horizontal: "center", vertical: "middle" };
@@ -689,35 +723,35 @@ const Profit = ({ openNavbar }) => {
                                         }}
                                     >
                                         <TableRow>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }} colSpan={4}>
-                                                รวม
+                                            <TablecellSelling sx={{ textAlign: "right", fontSize: 16 }} colSpan={4}>
+                                                <Box sx={{ pr: 2 }}>ค่าเฉลี่ยรวม</Box>
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
-                                                {new Intl.NumberFormat("en-US").format(total.volume)}
-                                            </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
-                                                {new Intl.NumberFormat("en-US", {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                }).format(total.rateOil)}
+                                                {new Intl.NumberFormat("en-US").format(avg.volume)}
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
-                                                }).format(total.costPrice)}
+                                                }).format(avg.rateOil)}
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
-                                                }).format(total.rate)}
+                                                }).format(avg.costPrice)}
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
-                                                }).format(total.diff)}
+                                                }).format(avg.rate)}
+                                            </TablecellSelling>
+                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                                {new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(avg.diff)}
                                             </TablecellSelling>
                                         </TableRow>
                                     </TableFooter>

@@ -202,8 +202,9 @@ const PrintReport = () => {
         <Box id="invoiceContent">
           <Box
             sx={{
-              width: "21cm",        // แนวนอน
-              height: "14.8cm",  // สูงน้อยกว่า A4
+              width: "21cm",        // ความกว้างของ A4 แนวตั้ง
+              height: "100%",     // ความสูงของ A4 แนวตั้ง
+              //height: "29.7cm",
               backgroundColor: "#fff",
               paddingTop: "0.7cm",
               paddingBottom: "0.7cm",
@@ -261,7 +262,7 @@ const PrintReport = () => {
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1, mt: -0.5 }} >
                   <Typography variant="subtitle2"><b>เรียน/Attention : </b></Typography>
                   <Typography variant="subtitle2" marginLeft={1}>
-                    {invoiceData?.Customer.Name}
+                    {invoiceData?.Customer.CompanyName}
                   </Typography>
                 </Box>
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1 }} >
@@ -304,7 +305,8 @@ const PrintReport = () => {
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1, mb: -0.5 }}>
                   <Typography variant="subtitle2"><b>ส่งวันที่ : </b></Typography>
                   <Typography variant="subtitle2" marginLeft={4}>
-                    {formatThai(deliveryDate)}
+                    {/* {formatThai(deliveryDate)} */}
+                    {formatThai(dayjs(invoiceData?.DateD).format("DD/MM/YYYY"))}
                   </Typography>
                 </Box>
               </Grid>
@@ -403,9 +405,28 @@ const PrintReport = () => {
                         </TableRow>
                       );
                     })}
+                    {/* ✅ เพิ่มแถวว่าง 3 แถว */}
+                    {Array.from({ length: 2 }).map((_, i) => (
+                      <TableRow key={`empty-${i}`} sx={{ borderBottom: "1px solid lightgray" }}>
+                        <TableCell sx={{ border: "none", height: "20px", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}></TableCell>
+                        <TableCell sx={{ border: "none", height: "20px", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}></TableCell>
+                        <TableCell sx={{ border: "none", height: "20px", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}></TableCell>
+                        <TableCell sx={{ border: "none", height: "20px", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}></TableCell>
+                        <TableCell sx={{ border: "none", height: "20px", borderLeft: "2px solid rgba(0, 0, 0, 0.7)", borderRight: "2px solid rgba(0, 0, 0, 0.7)" }}></TableCell>
+                      </TableRow>
+                    ))}
                     <TableRow sx={{ borderTop: "2px solid rgba(0, 0, 0, 0.7)" }}>
-                      <TableCell sx={{ textAlign: "left", border: "none" }} colSpan={3} rowSpan={2}>
-                        <b>หมายเหตุ :</b> {invoiceData?.Note}
+                      <TableCell sx={{ textAlign: "left", border: "none" }} colSpan={3}>
+                        <Grid container sx={{ pl: 0.5, pr: 0.5 }} >
+                          <Grid item xs={1.5}>
+                            <Typography variant="subtitle2" fontSize="13px" sx={{ fontWeight: "bold" }} gutterBottom>หมายเหตุ :</Typography>
+                          </Grid>
+                          <Grid item xs={10.5}>
+                            <Typography variant="subtitle2" fontSize="13px" gutterBottom>
+                              {invoiceData?.items}
+                            </Typography>
+                          </Grid>
+                        </Grid>
                       </TableCell>
                       <TableCell sx={{ textAlign: "center", fontWeight: "bold", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}>
                         รวมเป็นเงิน
@@ -419,8 +440,27 @@ const PrintReport = () => {
                         </Box>
                       </TableCell>
                     </TableRow>
-
                     <TableRow>
+                      <TableCell sx={{ textAlign: "left", border: "none" }} colSpan={3}>
+                        <Grid container sx={{ pl: 0.5, pr: 0.5 }} >
+                          {/* <Grid item xs={1.5}>
+                            <Typography variant="subtitle2" fontSize="13px" sx={{ fontWeight: "bold" }} gutterBottom>หมายเหตุ :</Typography>
+                          </Grid>
+                          <Grid item xs={10.5}>
+                            <Typography variant="subtitle2" fontSize="13px" gutterBottom>
+                              {invoiceData?.items}
+                            </Typography>
+                          </Grid> */}
+                          <Grid item xs={1.5}>
+                            <Typography variant="subtitle2" fontSize="13px" sx={{ fontWeight: "bold" }} gutterBottom>เพิ่มเติม :</Typography>
+                          </Grid>
+                          <Grid item xs={10.5}>
+                            <Typography variant="subtitle2" fontSize="13px" gutterBottom>
+                              {invoiceData?.Note}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </TableCell>
                       <TableCell sx={{ textAlign: "center", fontWeight: "bold", borderTop: "2px solid rgba(0, 0, 0, 0.7)", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}>
                         Vat 7%
                       </TableCell>
@@ -432,7 +472,32 @@ const PrintReport = () => {
                           }).format(vat)}
                         </Box>
                       </TableCell>
+                      {/* <TableCell sx={{ textAlign: "center", fontWeight: "bold", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}>
+                        รวมเป็นเงิน
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", borderLeft: "2px solid rgba(0, 0, 0, 0.7)", borderRight: "2px solid rgba(0, 0, 0, 0.7)" }}>
+                        <Box sx={{ mr: 1 }}>
+                          {new Intl.NumberFormat("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          }).format(beforeVat)}
+                        </Box>
+                      </TableCell> */}
                     </TableRow>
+
+                    {/* <TableRow>
+                      <TableCell sx={{ textAlign: "center", fontWeight: "bold", borderTop: "2px solid rgba(0, 0, 0, 0.7)", borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}>
+                        Vat 7%
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", borderTop: "2px solid rgba(0, 0, 0, 0.7)", borderLeft: "2px solid rgba(0, 0, 0, 0.7)", borderRight: "2px solid rgba(0, 0, 0, 0.7)" }}>
+                        <Box sx={{ mr: 1 }}>
+                          {new Intl.NumberFormat("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          }).format(vat)}
+                        </Box>
+                      </TableCell>
+                    </TableRow> */}
 
                     <TableRow>
                       <TableCell sx={{ textAlign: "center", backgroundColor: "#ffe0b2", fontWeight: "bold" }} colSpan={3}>

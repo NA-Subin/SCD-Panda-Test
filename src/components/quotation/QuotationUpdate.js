@@ -71,6 +71,12 @@ import { formatThaiFull, formatThaiSlash } from "../../theme/DateTH";
 const QuotationUpdate = ({ setOpen }) => {
     const navigate = useNavigate();
 
+    const items = [
+        `น้ำมัน CALTEX รับตามมาตราฐาน นน 0.80 กก./ลิตรและตามแป้นรถบรรทุกพร้อมเอกสารใบ COA กรณีไม่ได้สินค้าตามกำหนด นน.ทางบริษัทจะรับผิดชอบ`,
+        `น้ำมัน บางจาก รับตามมาตราฐาน นน 0.80 กก./ลิตรและตามแป้นรถบรรทุกพร้อมเอกสารใบ COA กรณีไม่ได้สินค้าตามกำหนด นน.ทางบริษัทจะรับผิดชอบ`,
+        `น้ำมันได้มาตราฐานส่งพร้อมใบ COA`,
+    ];
+
     const { company, customerbigtruck, customersmalltruck, officers, quotation } = useBasicData();
     const { banks } = useTripData();
     const companyDetail = Object.values(company || {});
@@ -106,8 +112,22 @@ const QuotationUpdate = ({ setOpen }) => {
     const [check, setCheck] = useState(true);
     const [search, setSearch] = useState("");
     const [selectedDate, setSelectedDate] = useState(dayjs().startOf('month'));
+    const [selectedDateDelivery, setSelectedDateDelivery] = useState(dayjs(new Date));
     const [selectedDateStart, setSelectedDateStart] = useState(dayjs().startOf('month'));
     const [selectedDateEnd, setSelectedDateEnd] = useState(dayjs().endOf('month'));
+    const [selectedIndex, setSelectedIndex] = React.useState(null);
+
+    const handleSelect = (index) => {
+        setSelectedIndex(index === selectedIndex ? null : index); // คลิกอีกครั้งเพื่อล้าง (optional)
+    };
+
+    const handleKeyDown = (e, index) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSelect(index);
+        }
+    };
+
     const productColors = {
         G91: "#c7f4a3ff",   // เขียวอ่อน
         G95: "#f3de8aff",   // เหลืองอ่อน
@@ -251,7 +271,9 @@ const QuotationUpdate = ({ setOpen }) => {
         // เปลี่ยนหน้า
         setCheck(row.Truck === "รถใหญ่");
         setSelectedDate(dayjs(row.Date, "DD/MM/YYYY"))
+        setSelectedDateDelivery(dayjs(row.DateDelivery, "DD/MM/YYYY"))
         setNote(row.Note);
+        setSelectedIndex(row.selectedIndex);
 
         // 🔹 merge fuelData: เติม "" ให้สินค้าที่ไม่มีค่าใน row.Product
         const newFuelData = { ...initialFuelData }; // copy ค่า default
@@ -267,6 +289,13 @@ const QuotationUpdate = ({ setOpen }) => {
         if (newValue) {
             const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
             setSelectedDate(formattedDate);
+        }
+    };
+
+    const handleDateChangeDateDelivery = (newValue) => {
+        if (newValue) {
+            const formattedDate = dayjs(newValue); // แปลงวันที่เป็นฟอร์แมต
+            setSelectedDateDelivery(formattedDate);
         }
     };
 
@@ -287,10 +316,12 @@ const QuotationUpdate = ({ setOpen }) => {
     const handleSave = () => {
         database.ref("quotation/").child(ID).update({
             Date: dayjs(selectedDate, "DD/MM/YYYY").format("DD/MM/YYYY"),
+            DateDelivery: dayjs(selectedDateDelivery, "DD/MM/YYYY").format("DD/MM/YYYY"),
             Company: `${companies?.id}:${companies?.Name}`,
             Customer: `${customer?.id}:${customer?.Name}`,
             Employee: `${employee?.id}:${employee?.Name}`,
             Product: getFilledFuelData(fuelData),
+            selectedIndex: selectedIndex,
             Truck: check ? "รถใหญ่" : "รถเล็ก",
             Note: note,
         })
@@ -351,12 +382,14 @@ const QuotationUpdate = ({ setOpen }) => {
         const invoiceData = {
             Code: code,
             DateB: dayjs(selectedDate, "DD/MM/YYYY"),
+            DateD: dayjs(selectedDateDelivery, "DD/MM/YYYY"),
             Company: companies,
             Customer: customer,
             Employee: employee,
             Product: getFilledFuelData(fuelData),
             Products: products,
-            Note: note
+            Note: note,
+            items: items[selectedIndex] || "",
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -749,13 +782,49 @@ const QuotationUpdate = ({ setOpen }) => {
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={4}>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <Paper>
+                                    <DatePicker
+                                        openTo="day"
+                                        views={["year", "month", "day"]}
+                                        value={selectedDateDelivery ? dayjs(selectedDateDelivery, "DD/MM/YYYY") : null}
+                                        format="DD/MM/YYYY" // <-- ใช้แบบที่ MUI รองรับ
+                                        onChange={handleDateChangeDateDelivery}
+                                        slotProps={{
+                                            textField: {
+                                                size: "small",
+                                                fullWidth: true,
+                                                inputProps: {
+                                                    value: formatThaiFull(selectedDateDelivery), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                    readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
+                                                },
+                                                InputProps: {
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <b>วันที่จัดส่ง :</b>
+                                                        </InputAdornment>
+                                                    ),
+                                                    sx: {
+                                                        fontSize: "15px",
+                                                        height: "40px",
+                                                        padding: "10px",
+                                                        fontWeight: "bold",
+                                                    },
+                                                },
+                                            },
+                                        }}
+                                        disabled={edit ? true : false}
+                                    />
+                                </Paper>
+                            </LocalizationProvider>
+                        </Grid>
+                        <Grid item xs={4}>
                             <FormGroup row >
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะรถ : </Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" color={edit ? "gray" : "black"} sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะรถ : </Typography>
                                 <FormControlLabel disabled={edit ? true : false} control={<Checkbox checked={check ? true : false} />} onChange={() => setCheck(true)} label="รถใหญ่" />
                                 <FormControlLabel disabled={edit ? true : false} control={<Checkbox checked={!check ? true : false} />} onChange={() => setCheck(false)} label="รถเล็ก" />
                             </FormGroup>
                         </Grid>
-                        <Grid item xs={4}></Grid>
                         <Grid item xs={6}>
                             <Paper sx={{ width: "100%" }}>
                                 <Autocomplete
@@ -901,7 +970,8 @@ const QuotationUpdate = ({ setOpen }) => {
                                                         height: "35px",
                                                         borderBottom: "2px solid lightgray",
                                                         fontWeight: "bold",
-                                                        backgroundColor: productColorsHead[product.code]
+                                                        backgroundColor: productColorsHead[product.code],
+                                                        opacity: edit ? 0.7 : 0.9
                                                     }}
                                                 >
                                                     {`${product.code} (${product.name})`}
@@ -915,10 +985,10 @@ const QuotationUpdate = ({ setOpen }) => {
                                                 <TableCell sx={{ backgroundColor: productColors[key] }} >
                                                     <Grid container spacing={1}>
                                                         <Grid item xs={5}>
-                                                            <Typography variant="subtitle2" sx={{ marginBottom: -1, fontSize: "12px", textAlign: "center", fontWeight: "bold" }} gutterBottom>ราคา/ลิตร</Typography>
+                                                            <Typography variant="subtitle2" sx={{ marginBottom: -1, fontSize: "12px", textAlign: "center", fontWeight: "bold", opacity: edit ? 0.7 : 0.9 }} gutterBottom>ราคา/ลิตร</Typography>
                                                         </Grid>
                                                         <Grid item xs={7}>
-                                                            <Typography variant="subtitle2" sx={{ marginBottom: -1, fontSize: "12px", textAlign: "center", fontWeight: "bold" }} gutterBottom>จำนวนลิตร</Typography>
+                                                            <Typography variant="subtitle2" sx={{ marginBottom: -1, fontSize: "12px", textAlign: "center", fontWeight: "bold", opacity: edit ? 0.7 : 0.9 }} gutterBottom>จำนวนลิตร</Typography>
                                                         </Grid>
                                                         <Grid item xs={5}>
                                                             <Paper sx={{ width: "100%" }} >
@@ -981,7 +1051,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                 </Table>
                             </TableContainer>
                         </Grid>
-                        <Grid item xs={6}>
+                        {/* <Grid item xs={6}>
                             <Box sx={{ marginLeft: 1 }}>
                                 <Typography variant="subtitle1" fontWeight="bold" color="error" gutterBottom>
                                     หมายเหตุ*
@@ -1014,14 +1084,78 @@ const QuotationUpdate = ({ setOpen }) => {
                                     </Typography>
                                 </Box>
                             </Box>
+                        </Grid> */}
+                        <Grid item xs={12} sx={{ mb: -2 }}>
+                            <Typography variant="subtitle1" fontWeight="bold" color={edit ? "gray" : "black"} gutterBottom>
+                                เลือกหมายเหตุมาตรฐานที่ต้องการเพิ่มในใบเสนอราคา
+                            </Typography>
                         </Grid>
+                        {items.map((text, idx) => {
+                            const selected = idx === selectedIndex;
+                            return (
+                                <Grid item xs={12} md={4} key={idx}>
+                                    {
+                                        edit ? (
+                                            <Box
+                                                role="button"
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    border: selected ? "2px solid" : "1px solid",
+                                                    borderColor: selected ? "gray" : "divider",
+                                                    height: "60px"
+                                                }}
+                                            >
+                                                <Typography variant="subtitle2" gutterBottom component="div"
+                                                    sx={{
+                                                        fontWeight: selected ? "bold" : "none",
+                                                        color: selected ? "gray" : "lightgray"
+                                                    }}>
+                                                    {text}
+                                                </Typography>
+                                            </Box>
+                                        )
+                                            :
+                                            (
+                                                <Box
+                                                    role="button"
+                                                    tabIndex={0}
+                                                    onClick={() => handleSelect(idx)}
+                                                    onKeyDown={(e) => handleKeyDown(e, idx)}
+                                                    sx={{
+                                                        p: 2,
+                                                        borderRadius: 2,
+                                                        border: selected ? "2px solid" : "1px solid",
+                                                        borderColor: selected ? theme.palette.panda.main : "divider",
+                                                        cursor: "pointer",
+                                                        transition: "box-shadow 0.15s, transform 0.08s",
+                                                        boxShadow: selected ? 3 : 0,
+                                                        "&:hover": {
+                                                            transform: "translateY(-2px)",
+                                                        },
+                                                        height: "60px"
+                                                    }}
+                                                >
+                                                    <Typography variant="subtitle2" gutterBottom component="div"
+                                                        sx={{
+                                                            fontWeight: selected ? "bold" : "none",
+                                                            color: selected ? "black" : "gray"
+                                                        }}>
+                                                        {text}
+                                                    </Typography>
+                                                </Box>
+                                            )
+                                    }
+                                </Grid>
+                            );
+                        })}
                         <Grid item xs={6}>
                             <TextField
                                 size="small"
                                 type="number"
                                 fullWidth
                                 multiline
-                                minRows={6}
+                                minRows={3}
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
                                 InputLabelProps={{ sx: { fontSize: "15px" } }}
@@ -1048,66 +1182,68 @@ const QuotationUpdate = ({ setOpen }) => {
                             />
                         </Grid>
                         <Grid item xs={6}>
-                            <Autocomplete
-                                options={employees}
-                                getOptionLabel={(option) => option.Name}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
-                                value={employee}
-                                onChange={(event, newValue) => setEmployee(newValue)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="outlined"
-                                        size="small"
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": { height: "40px" },
-                                            "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
-                                        }}
-                                        InputProps={{
-                                            ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
-                                            startAdornment: (
-                                                <InputAdornment position="start" sx={{ marginRight: 2 }}>
-                                                    <b>เลือกผู้เสนอราคา :</b>
-                                                </InputAdornment>
-                                            ),
-                                            sx: {
-                                                fontSize: "15px",
-                                                height: "40px",
-                                                padding: "10px",
-                                                fontWeight: "bold",
-                                            },
-                                        }}
-                                    />
-                                )}
-                                renderOption={(props, option) => (
-                                    <li {...props}>
-                                        <Typography fontSize="15px">{option.Name}</Typography>
-                                    </li>
-                                )}
-                                disabled={edit ? true : false}
-                            />
-                        </Grid>
-                        <Grid item xs={6} textAlign="right">
-                            <Box sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "right" }}>
-                                {
-                                    edit ?
-                                        <React.Fragment>
-                                            {
-                                                !cancel &&
-                                                <React.Fragment>
-                                                    <Button variant="contained" color="warning" onClick={() => setEdit(false)} sx={{ marginRight: 1 }} >แก้ไข</Button>
-                                                    <Button variant="contained" onClick={exportToPDF} >พิมพ์ใบเสนอราคาลูกค้า</Button>
-                                                </React.Fragment>
-                                            }
-                                        </React.Fragment>
+                            <Grid item xs={12}>
+                                <Autocomplete
+                                    options={employees}
+                                    getOptionLabel={(option) => option.Name}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                    value={employee}
+                                    onChange={(event, newValue) => setEmployee(newValue)}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            size="small"
+                                            sx={{
+                                                "& .MuiOutlinedInput-root": { height: "40px" },
+                                                "& .MuiInputBase-input": { fontSize: "15px", padding: "2px 6px" },
+                                            }}
+                                            InputProps={{
+                                                ...params.InputProps, // ✅ รวม props เดิมของ Autocomplete
+                                                startAdornment: (
+                                                    <InputAdornment position="start" sx={{ marginRight: 2 }}>
+                                                        <b>เลือกผู้เสนอราคา :</b>
+                                                    </InputAdornment>
+                                                ),
+                                                sx: {
+                                                    fontSize: "15px",
+                                                    height: "40px",
+                                                    padding: "10px",
+                                                    fontWeight: "bold",
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                    renderOption={(props, option) => (
+                                        <li {...props}>
+                                            <Typography fontSize="15px">{option.Name}</Typography>
+                                        </li>
+                                    )}
+                                    disabled={edit ? true : false}
+                                />
+                            </Grid>
+                            <Grid item xs={12} textAlign="right">
+                                <Box sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "right" }}>
+                                    {
+                                        edit ?
+                                            <React.Fragment>
+                                                {
+                                                    !cancel &&
+                                                    <React.Fragment>
+                                                        <Button variant="contained" color="warning" onClick={() => setEdit(false)} sx={{ marginRight: 1 }} >แก้ไข</Button>
+                                                        <Button variant="contained" onClick={exportToPDF} >พิมพ์ใบเสนอราคาลูกค้า</Button>
+                                                    </React.Fragment>
+                                                }
+                                            </React.Fragment>
 
-                                        :
-                                        <React.Fragment>
-                                            <Button variant="contained" color="error" onClick={() => setEdit(true)} sx={{ marginRight: 1 }} >ยกเลิก</Button>
-                                            <Button variant="contained" color="success" onClick={handleSave} >บันทึก</Button>
-                                        </React.Fragment>
-                                }
-                            </Box>
+                                            :
+                                            <React.Fragment>
+                                                <Button variant="contained" color="error" onClick={() => setEdit(true)} sx={{ marginRight: 1 }} >ยกเลิก</Button>
+                                                <Button variant="contained" color="success" onClick={handleSave} >บันทึก</Button>
+                                            </React.Fragment>
+                                    }
+                                </Box>
+                            </Grid>
                         </Grid>
                     </React.Fragment>
                 }
