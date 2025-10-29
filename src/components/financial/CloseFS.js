@@ -39,7 +39,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
-
+import { buildPeriodsForYear, findCurrentPeriod } from "./Paid";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
 import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
@@ -138,17 +138,59 @@ const CloseFS = () => {
         }
     };
 
+    const [periods, setPeriods] = useState([]);
+    const [period, setPeriod] = useState(1);
+
+    useEffect(() => {
+        if (!months || !years) return;
+
+        const year = dayjs(years).year();
+        const list = buildPeriodsForYear(year);
+
+        // ✅ ดึงหมายเลขเดือนจาก dayjs โดยตรง
+        const monthNum = dayjs.isDayjs(months)
+            ? months.month() + 1
+            : Number(months);
+
+        // ✅ กรองเฉพาะ period ที่มีเดือน start หรือ end ตรงกับ monthNum
+        const filtered = list.filter(period => {
+            // const startDate = dayjs(period.start, ['DD/MM/YYYY', 'YYYY-MM-DD']);
+            const endDate = dayjs(period.end, ['DD/MM/YYYY', 'YYYY-MM-DD']);
+
+            // const startMonth = startDate.month() + 1;
+            const endMonth = endDate.month() + 1;
+
+            // return startMonth === monthNum || endMonth === monthNum;
+            return endMonth === monthNum;
+        });
+
+        console.log("Filtered periods:", filtered);
+
+        setPeriods(filtered);
+
+        // ✅ ถ้ามีงวดปัจจุบันในเดือนนี้
+        const currentNo = findCurrentPeriod(filtered);
+        if (currentNo) {
+            setPeriod(currentNo);
+        }
+    }, [years, months]);
+
     // const { company, drivers, typeFinancial, order, reghead, trip } = useData();
     const { company, drivers, reghead, regtail, small, transport, companypayment, expenseitems } = useBasicData();
-    const { order, trip, typeFinancial, report } = useTripData();
+    const { order, tickets, trip, typeFinancial, report, reportFinancial } = useTripData();
     const reports = Object.values(report || {});
     const registrationH = Object.values(reghead);
     const registrationT = Object.values(transport);
     const registrationS = Object.values(regtail);
     const expenseitem = Object.values(expenseitems);
+    const reportFinancials = Object.values(reportFinancial);
     const companypaymentDetail = Object.values(companypayment);
     const companies = Object.values(company || {});
     const driver = Object.values(drivers || {});
+    const ticket = Object.values(tickets || {}).filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    });
     const typeF = Object.values(typeFinancial || {});
     // const orders = Object.values(order || {});
     const orders = Object.values(order || {}).filter(item => {
@@ -221,9 +263,11 @@ const CloseFS = () => {
     // 1️⃣ กรอง Orders และเพิ่มข้อมูล Trip + RegistrationTail
     // ===============================
     const filteredOrders = useMemo(() => {
-        if (!orders || !trips) return [];
+        if (!ticket || !trips) return [];
 
-        return orders
+        const psOrder = ["PSสันทราย", "PS1", "PS2", "NP", "PS3", "PS4"];
+
+        return ticket
             .filter((row) =>
                 row.Trip !== "ยกเลิก" &&
                 !["ตั๋วรถใหญ่", "ตั๋วรถเล็ก"].includes(row.CustomerType) &&
@@ -256,8 +300,43 @@ const CloseFS = () => {
                     RegistrationTail: registrationTail,
                     TruckCompany: truckCompany
                 };
+            })
+            .sort((a, b) => {
+                // 🧩 ขั้นแรก: เรียงตามประเภท CustomerType
+                const typeOrder = ["ตั๋วน้ำมัน", "ตั๋วรับจ้างขนส่ง", "ตั๋วปั้ม"];
+                const aNamePart = (a.TicketName?.split(":")[1] || "").trim();
+                const bNamePart = (b.TicketName?.split(":")[1] || "").trim();
+
+                const typeA = typeOrder.indexOf(a.CustomerType) !== -1 ? typeOrder.indexOf(a.CustomerType) : 999;
+                const typeB = typeOrder.indexOf(b.CustomerType) !== -1 ? typeOrder.indexOf(b.CustomerType) : 999;
+
+                if (typeA !== typeB) return typeA - typeB;
+
+                // 🧩 ขั้นสอง: สำหรับ "ตั๋วปั้ม"
+                if (a.CustomerType === "ตั๋วปั้ม" && b.CustomerType === "ตั๋วปั้ม") {
+                    const getPSKey = (name) => {
+                        // ลบจุดออกก่อน แล้วดึงเฉพาะตัวหน้าชื่อ เช่น PSสันทราย, PS1, NP
+                        const cleanName = name.replace(/\./g, "").replace(/\s+/g, "");
+                        const match = psOrder.find(key => cleanName.startsWith(key));
+                        return match || "ZZ";
+                    };
+
+                    const aKey = getPSKey(aNamePart);
+                    const bKey = getPSKey(bNamePart);
+
+                    const orderA = psOrder.indexOf(aKey);
+                    const orderB = psOrder.indexOf(bKey);
+
+                    if (orderA !== orderB) return orderA - orderB;
+                }
+
+                // 🧩 ขั้นสุดท้าย: เรียงตามชื่อปกติ
+                return aNamePart.localeCompare(bNamePart, "th");
             });
-    }, [orders, trips, registrationH, registrationT, date, months, years]);
+    }, [ticket, trips, registrationH, registrationT, date, months, years]);
+
+    console.log("ticket : ", ticket.filter((tk) => tk.CustomerType === "ตั๋วปั้ม"));
+    console.log("filteredOrders : ", filteredOrders.filter((tk) => tk.CustomerType === "ตั๋วปั้ม"));
 
     // ===============================
     // 2️⃣ สร้าง DriverGroups
@@ -318,8 +397,25 @@ const CloseFS = () => {
     // ===============================
     // 3️⃣ สร้าง ReportDetail จาก expenseitem + reports
     // ===============================
+    console.log("expenseitem : ", expenseitem);
+    console.log("reports : ", reports);
+    console.log("periods : ", periods);
+
+    // กรองเฉพาะรายงานที่ Period อยู่ใน periods
+    const filteredReports = useMemo(() => {
+        if (!periods || periods.length === 0 || !reportFinancials) return [];
+
+        // สร้าง array ของเลขงวดทั้งหมดใน periods เช่น [11, 12]
+        const validNos = periods.map(p => p.no);
+
+        // กรองเฉพาะ reportFinancials ที่ Period อยู่ใน validNos
+        return reportFinancials.filter(r => validNos.includes(r.Period) && r.Status !== "ยกเลิก");
+    }, [reportFinancials, periods]);
+
+    console.log("filteredReports : ", filteredReports);
+
     const reportDetail = useMemo(() => {
-        if (!expenseitem || !reports) return [];
+        if (!expenseitem || !reports || !filteredReports || !trips) return [];
 
         const priorityNames = [
             "เงินเดือน", "ค่าเที่ยวรถ", "ค่าน้ำมันรถ", "ประกันสังคม", "ภ.ง.ด. 3",
@@ -400,6 +496,98 @@ const CloseFS = () => {
                 regGroup.TotalVat += Number(curr.Vat || 0);
             });
 
+        filteredReports
+            .filter(r => {
+                const name = r.Name.split(":")[1]?.trim();
+                return ["เงินเดือน", "ประกันสังคม", "ค่าโทรศัพท์"].includes(name);
+            })
+            .forEach((curr) => {
+                const bankName = curr.Name.split(":")[1]?.trim() || curr.Name;
+                let bankGroup = reportInit.find(b => b.Bank.includes(bankName));
+                if (!bankGroup) {
+                    bankGroup = { Bank: bankName, Type: "ค่าใช้จ่าย", Registrations: [] };
+                    reportInit.push(bankGroup);
+                }
+
+                // สำหรับ filteredReports: สร้าง Registration ชื่อเดียวกับ bankName หรือใช้ "รวม"
+                const registration = curr.RegHead;
+                let regGroup = bankGroup.Registrations.find(
+                    (r) => normalizeReg(r.Registration) === normalizeReg(registration)
+                );
+
+                if (!regGroup) {
+                    regGroup = {
+                        Registration: registration,
+                        TruckType: "รวม",
+                        TotalPrice: 0,
+                        TotalAmount: 0,
+                        TotalVat: 0,
+                    };
+                    bankGroup.Registrations.push(regGroup);
+                }
+
+                regGroup.TotalPrice += Number(curr.Money || curr.Total || 0);
+                regGroup.TotalAmount += Number(curr.Price || 0);
+                regGroup.TotalVat += Number(curr.Vat || 0);
+            });
+
+        // 3️⃣ merge trips
+        trips
+            .filter((tr) => {
+                if (tr.Status === "ยกเลิก") return false;
+
+                if (tr.StatusTrip === "ยกเลิก") return false;
+
+                if (tr.TruckType === "รถเล็ก") return false;
+                // ตรวจสอบเดือนและปีของ DateReceive
+                const tripDate = dayjs(tr.DateReceive, ['DD/MM/YYYY', 'YYYY-MM-DD']); // รองรับหลาย format
+                const selectedMonth = dayjs(months);
+                const selectedYear = dayjs(years);
+
+                // ถ้า date = false ให้กรองตามเดือน+ปี, ถ้า date = true ให้กรองตามปี
+                return !date
+                    ? tripDate.month() === selectedMonth.month() && tripDate.year() === selectedMonth.year()
+                    : tripDate.year() === selectedYear.year();
+            })
+            .forEach((curr) => {
+                const bankName = "2:ค่าเที่ยวรถ"; // กำหนด BankName เป็น "ค่าเที่ยว"
+                let bankGroup = reportInit.find(b => b.Bank === bankName);
+                if (!bankGroup) {
+                    bankGroup = { Bank: bankName, Type: "ค่าใช้จ่าย", Registrations: [] };
+                    reportInit.push(bankGroup);
+                }
+
+                let registration = ""
+                if (curr.TruckType === "รถใหญ่") {
+                    const regHead = registrationH.find((rg) => rg.id === Number(curr.Registration.split(":")[0]));
+                    registration = `${regHead?.id}:${regHead?.RegHead}`;
+
+                } else if (curr.TruckType === "รถรับจ้างขนส่ง") {
+                    const regHead = registrationT.find((rg) => rg.id === Number(curr.Registration.split(":")[0]));
+                    registration = `${regHead?.id}:${regHead?.Name}`;
+                }
+
+                let regGroup = bankGroup.Registrations.find(
+                    (r) => normalizeReg(r.Registration) === normalizeReg(registration)
+                );
+
+                if (!regGroup) {
+                    regGroup = {
+                        Registration: registration,
+                        TruckType: curr.TruckType,
+                        TotalPrice: 0,
+                        TotalAmount: 0,
+                        TotalVat: 0,
+                    };
+                    bankGroup.Registrations.push(regGroup);
+                }
+
+                regGroup.TotalPrice += Number(curr.CostTrip || 0);
+                regGroup.TotalAmount += Number(curr.Price || 0);
+                regGroup.TotalVat += Number(curr.Vat || 0);
+            });
+
+
         // ✅ สรุปรวมหลังจาก loop เสร็จ
         reportInit.forEach((bankGroup) => {
             bankGroup.TotalPrice = bankGroup.Registrations.reduce((sum, r) => sum + (r.TotalPrice || 0), 0);
@@ -422,7 +610,7 @@ const CloseFS = () => {
                 else return indexA - indexB;
             });
 
-    }, [expenseitem, reports, date, months, years, companyName]);
+    }, [expenseitem, reports, date, months, years, companyName, filteredReports, trips]);
 
     // ===============================
     // 4️⃣ สร้าง TicketGroups
@@ -1439,7 +1627,7 @@ const CloseFS = () => {
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                                                     }}
                                                 >
-                                                    {
+                                                    {/* {
                                                         check ?
                                                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
                                                                 {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Amount)}
@@ -1448,7 +1636,10 @@ const CloseFS = () => {
                                                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ mt: 1 }}>
                                                                 {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Volume)}
                                                             </Typography>
-                                                    }
+                                                    } */}
+                                                    <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ mt: 1 }}>
+                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Volume)}
+                                                    </Typography>
                                                 </TableCell>
                                             );
                                         })}
@@ -1603,13 +1794,17 @@ const CloseFS = () => {
                                                         color: !found && "lightgray"
                                                     }}
                                                 >
-                                                    {found ? (check ? new Intl.NumberFormat("en-US", {
+                                                    {/* {found ? (check ? new Intl.NumberFormat("en-US", {
                                                         minimumFractionDigits: 2,
                                                         maximumFractionDigits: 2,
                                                     }).format(found.TotalPrice) : new Intl.NumberFormat("en-US", {
                                                         minimumFractionDigits: 2,
                                                         maximumFractionDigits: 2,
-                                                    }).format(found.TotalAmount)) : "0"}
+                                                    }).format(found.TotalAmount)) : "0"} */}
+                                                    {found ? new Intl.NumberFormat("en-US", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    }).format(found.TotalPrice) : "0"}
                                                 </TableCell>
                                             );
                                         })}
