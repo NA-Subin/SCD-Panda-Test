@@ -240,11 +240,11 @@ const Profit = ({ openNavbar }) => {
     const avg =
         result.length > 0
             ? {
-                volume: totals.volume,
-                rateOil: totals.rateOil / result.length,
-                rate: totals.rate / result.length,
-                costPrice: totals.costPrice / result.length,
-                diff: totals.diff / result.length,
+                volume: check ? totals.volume : totals.volume,
+                rateOil: check ? totals.rateOil / totals.volume : totals.rateOil,
+                rate: check ? totals.rate / totals.volume : totals.rate,
+                costPrice: check ? totals.costPrice / totals.volume : totals.costPrice,
+                diff: check ? totals.diff / totals.volume : totals.diff,
             }
             : { volume: 0, rateOil: 0, rate: 0, costPrice: 0, diff: 0 };
 
@@ -362,7 +362,7 @@ const Profit = ({ openNavbar }) => {
 
         // 5️⃣ Footer row รวมค่า
         const footerRow = worksheet.addRow({
-            product: "ค่าเฉลี่ยรวม",
+            product: check ? "ค่าเฉลี่ยราคา/ลิตร" : "จำนวนเงินรวม",
             volume: avg.volume,
             rateOil: avg.rateOil,
             costPrice: avg.costPrice,
@@ -724,7 +724,7 @@ const Profit = ({ openNavbar }) => {
                                     >
                                         <TableRow>
                                             <TablecellSelling sx={{ textAlign: "right", fontSize: 16 }} colSpan={4}>
-                                                <Box sx={{ pr: 2 }}>ค่าเฉลี่ยรวม</Box>
+                                                <Box sx={{ pr: 2 }}>{check ? "ค่าเฉลี่ยราคา/ลิตร" : "จำนวนเงินรวม"}</Box>
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US").format(avg.volume)}

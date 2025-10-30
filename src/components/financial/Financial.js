@@ -42,6 +42,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ImageIcon from "@mui/icons-material/Image";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import FolderOffIcon from '@mui/icons-material/FolderOff';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
@@ -305,8 +306,8 @@ const Financial = () => {
 
     const [billID, setBillID] = useState("");
     const [invoiceID, setInvoiceID] = useState("");
-    const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date).format("DD/MM/YYYY"));
-    const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
+    const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date));
+    const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date));
     const [registration, setRegistration] = useState("");
     const [regID, setRegID] = useState(0);
     const [company, setCompany] = useState("");
@@ -338,6 +339,25 @@ const Financial = () => {
         setDetails(row.Details)
         setTruckType(row.TruckType);
         setPath(row.Path);
+        setFile(
+            row.Path === "ไม่แนบไฟล์" || row.Path === undefined || row.Path === ""
+                ? "ไม่แนบไฟล์"
+                : null
+        );
+
+        let fileType = 1; // ค่าเริ่มต้น = ไม่มีไฟล์
+
+        if (row.Path && row.Path !== "ไม่แนบไฟล์") {
+            const ext = row.Path.split(".").pop().toLowerCase(); // หานามสกุลไฟล์
+
+            if (ext === "pdf") {
+                fileType = 2;
+            } else if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
+                fileType = 3;
+            }
+        }
+
+        setFileType(fileType);
     }
 
     console.log("Registration show : ", registration);
@@ -371,13 +391,18 @@ const Financial = () => {
         setTotal("");
         setDetails("");
         setTruckType("");
+        setPath("");
         setFile(null);
         setFileType(null);
     }
 
     const handleSaveBill = async () => {
-        let img;
-        if (file) {
+        if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
+
+        let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
+
+        // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
+        if (file !== "ไม่แนบไฟล์") {
             const formData = new FormData();
             formData.append("pic", file);
 
@@ -1183,20 +1208,23 @@ const Financial = () => {
                                             {
                                                 billID !== row.id ?
                                                     (row.Path ? (
-                                                        <a
-                                                            href={row.Path.startsWith("http") ? row.Path : `https://${row.Path}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            style={{ color: "#1976d2", textDecoration: "underline" }}
-                                                        >
-                                                            {row.Path}
-                                                        </a>
+                                                        row.Path === "ไม่แนบไฟล์" ?
+                                                            row.Path
+                                                            :
+                                                            <a
+                                                                href={row.Path.startsWith("http") ? row.Path : `https://${row.Path}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                style={{ color: "#1976d2", textDecoration: "underline" }}
+                                                            >
+                                                                {row.Path}
+                                                            </a>
                                                     ) : (
                                                         "-"
                                                     ))
                                                     :
                                                     (
-                                                        file === null ?
+                                                        file === null || file === "ไม่แนบไฟล์" ?
                                                             <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
                                                                 <Button
                                                                     variant="contained"
@@ -1205,18 +1233,52 @@ const Financial = () => {
                                                                     fullWidth
                                                                     sx={{
                                                                         height: "30px",
-                                                                        backgroundColor: !fileType ? "#ff5252" : "#eeeeee",
+                                                                        backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
                                                                         borderRadius: 2,
                                                                         display: "flex",
                                                                         justifyContent: "center",
                                                                         alignItems: "center",
                                                                     }}
-                                                                    onClick={() => setFileType(false)}
+                                                                    onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
                                                                 >
                                                                     <Typography
                                                                         variant="subtitle2"
                                                                         fontWeight="bold"
-                                                                        color={!fileType ? "white" : "lightgray"}
+                                                                        color={fileType === 1 ? "white" : "lightgray"}
+                                                                        sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
+                                                                        gutterBottom
+                                                                    >
+                                                                        ไม่แนบไฟล์
+                                                                    </Typography>
+                                                                    {/* <FolderOffIcon
+                                                                        sx={{
+                                                                            fontSize: 20,
+                                                                            color: fileType === 1 ? "white" : "lightgray",
+                                                                            marginLeft: 2,
+                                                                        }}
+                                                                    /> */}
+                                                                </Button>
+                                                                {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
+                                                                <Typography variant="subtitle2" fontWeight="bold" sx={{ marginLeft: 1, marginRight: 1, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    component="label"
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    sx={{
+                                                                        height: "30px",
+                                                                        backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
+                                                                        borderRadius: 2,
+                                                                        display: "flex",
+                                                                        justifyContent: "center",
+                                                                        alignItems: "center",
+                                                                    }}
+                                                                    onClick={() => setFileType(2)}
+                                                                >
+                                                                    <Typography
+                                                                        variant="subtitle2"
+                                                                        fontWeight="bold"
+                                                                        color={fileType === 2 ? "white" : "lightgray"}
                                                                         gutterBottom
                                                                     >
                                                                         PDF
@@ -1224,8 +1286,8 @@ const Financial = () => {
                                                                     <PictureAsPdfIcon
                                                                         sx={{
                                                                             fontSize: 20,
-                                                                            color: !fileType ? "white" : "lightgray",
-                                                                            marginLeft: 2,
+                                                                            color: fileType === 2 ? "white" : "lightgray",
+                                                                            marginLeft: 0.5,
                                                                         }}
                                                                     />
                                                                     <input
@@ -1238,8 +1300,7 @@ const Financial = () => {
                                                                         }}
                                                                     />
                                                                 </Button>
-                                                                {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
-                                                                <Typography variant="subtitle2" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                <Typography variant="subtitle2" fontWeight="bold" sx={{ marginLeft: 1, marginRight: 1, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
                                                                 <Button
                                                                     variant="contained"
                                                                     component="label"
@@ -1247,18 +1308,18 @@ const Financial = () => {
                                                                     fullWidth
                                                                     sx={{
                                                                         height: "30px",
-                                                                        backgroundColor: fileType ? "#29b6f6" : "#eeeeee",
+                                                                        backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
                                                                         borderRadius: 2,
                                                                         display: "flex",
                                                                         justifyContent: "center",
                                                                         alignItems: "center",
                                                                     }}
-                                                                    onClick={() => setFileType(true)}
+                                                                    onClick={() => setFileType(3)}
                                                                 >
                                                                     <Typography
                                                                         variant="subtitle2"
                                                                         fontWeight="bold"
-                                                                        color={fileType ? "white" : "lightgray"}
+                                                                        color={fileType === 3 ? "white" : "lightgray"}
                                                                         gutterBottom
                                                                     >
                                                                         รูปภาพ
@@ -1266,8 +1327,8 @@ const Financial = () => {
                                                                     <ImageIcon
                                                                         sx={{
                                                                             fontSize: 20,
-                                                                            color: fileType ? "white" : "lightgray",
-                                                                            marginLeft: 2,
+                                                                            color: fileType === 3 ? "white" : "lightgray",
+                                                                            marginLeft: 0.5,
                                                                         }}
                                                                     />
                                                                     <input

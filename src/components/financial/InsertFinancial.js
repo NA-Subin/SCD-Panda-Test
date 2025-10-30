@@ -39,6 +39,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import FolderOffIcon from '@mui/icons-material/FolderOff';
 import ImageIcon from "@mui/icons-material/Image";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
@@ -81,8 +82,8 @@ const InsertFinancial = () => {
     const [resultVat, setResultVat] = useState("0.00");
     const [resultTotal, setResultTotal] = useState("0.00");
     const [manualTotal, setManualTotal] = useState(false); // เช็คว่าผู้ใช้แก้ total โดยตรง
-    const [file, setFile] = useState(null);
-    const [fileType, setFileType] = useState(null);
+    const [file, setFile] = useState("ไม่แนบไฟล์");
+    const [fileType, setFileType] = useState(1);
 
     console.log("P : ", price);
     console.log("V : ", vat);
@@ -113,8 +114,8 @@ const InsertFinancial = () => {
         }
     }, [price, vat]);
 
-    const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date).format("DD/MM/YYYY"));
-    const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date).format("DD/MM/YYYY"));
+    const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date));
+    const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date));
     const [result, setResult] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [type, setType] = useState("หัวรถ");
@@ -253,26 +254,31 @@ const InsertFinancial = () => {
 
         if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
 
-        const formData = new FormData();
-        formData.append("pic", file);
-        let img;
+        let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
 
-        try {
-            const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
-                method: "POST",
-                body: formData,
-            });
+        // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
+        if (file !== "ไม่แนบไฟล์") {
+            const formData = new FormData();
+            formData.append("pic", file);
 
-            const data = await response.json();
-            img = data.file_path;
-        } catch (err) {
-            console.error("Upload failed:", err);
+            try {
+                const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+                img = data.file_path;
+            } catch (err) {
+                console.error("Upload failed:", err);
+            }
         }
 
         console.log("Image after try/catch:", img);
 
         const startId = reportDetail.length; // ใช้ต่อจากของเดิม
         const updates = {};
+
         list.forEach((item, index) => {
             const id = startId + index;
 
@@ -281,9 +287,6 @@ const InsertFinancial = () => {
                 InvoiceID: invoiceID,
                 SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
                 SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
-                // Registration: item.truckType === "หัวรถ" || item.truckType === "รถเล็ก"
-                //     ? `${item.registration}:${item?.RegHead || ""}`
-                //     : `${item.registration}:${item?.RegTail || ""}`,
                 Registration: item.registration,
                 Company: `${company?.id}:${company?.Name}`,
                 Details: details,
@@ -294,7 +297,7 @@ const InsertFinancial = () => {
                 Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
                 TruckType: item.truckType,
                 Status: "อยู่ในระบบ",
-                Path: img
+                Path: img, // ✅ ถ้าไม่แนบไฟล์ก็จะได้ "ไม่แนบไฟล์"
             };
         });
 
@@ -306,10 +309,10 @@ const InsertFinancial = () => {
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("All data pushed successfully");
-                setList([]); // ล้าง list
+                setList([]);
                 setInvoiceID("");
-                setSelectedDateInvoice(dayjs(new Date).format("DD/MM/YYYY"));
-                setSelectedDateTransfer(dayjs(new Date).format("DD/MM/YYYY"));
+                setSelectedDateInvoice(dayjs(new Date()).format("DD/MM/YYYY"));
+                setSelectedDateTransfer(dayjs(new Date()).format("DD/MM/YYYY"));
                 setCompany("");
                 setDetails("");
                 setBank("");
@@ -317,6 +320,8 @@ const InsertFinancial = () => {
                 setPrice("");
                 setVat("");
                 setOpen(false);
+                setFile("ไม่แนบไฟล์");
+                setFileType(1);
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -1316,7 +1321,7 @@ const InsertFinancial = () => {
                                 <Chip label="เพิ่มไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -1, marginBottom: 1 }} />
                             </Divider>
                             {
-                                file === null ?
+                                file === "ไม่แนบไฟล์" ?
                                     <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
                                         <Button
                                             variant="contained"
@@ -1325,36 +1330,25 @@ const InsertFinancial = () => {
                                             fullWidth
                                             sx={{
                                                 height: "50px",
-                                                backgroundColor: !fileType ? "#ff5252" : "#eeeeee",
+                                                backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
                                                 borderRadius: 2,
-                                                display: "flex",
-                                                justifyContent: "center",
-                                                alignItems: "center",
                                             }}
-                                            onClick={() => setFileType(false)}
+                                            onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
                                         >
                                             <Typography
-                                                variant="h6"
+                                                variant="subtitle2"
                                                 fontWeight="bold"
-                                                color={!fileType ? "white" : "lightgray"}
+                                                color={fileType === 1 ? "white" : "lightgray"}
+                                                sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
                                                 gutterBottom
                                             >
-                                                PDF
+                                                ไม่แนบไฟล์
                                             </Typography>
-                                            <PictureAsPdfIcon
+                                            <FolderOffIcon
                                                 sx={{
-                                                    fontSize: 40,
-                                                    color: !fileType ? "white" : "lightgray",
-                                                    marginLeft: 2,
-                                                }}
-                                            />
-                                            <input
-                                                type="file"
-                                                hidden
-                                                accept="application/pdf"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) setFile(file);
+                                                    fontSize: 30,
+                                                    color: fileType === 1 ? "white" : "lightgray",
+                                                    marginLeft: 0.5,
                                                 }}
                                             />
                                         </Button>
@@ -1367,18 +1361,59 @@ const InsertFinancial = () => {
                                             fullWidth
                                             sx={{
                                                 height: "50px",
-                                                backgroundColor: fileType ? "#29b6f6" : "#eeeeee",
+                                                backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
                                                 borderRadius: 2,
                                                 display: "flex",
                                                 justifyContent: "center",
                                                 alignItems: "center",
                                             }}
-                                            onClick={() => setFileType(true)}
+                                            onClick={() => setFileType(2)}
                                         >
                                             <Typography
                                                 variant="h6"
                                                 fontWeight="bold"
-                                                color={fileType ? "white" : "lightgray"}
+                                                color={fileType === 2 ? "white" : "lightgray"}
+                                                gutterBottom
+                                            >
+                                                PDF
+                                            </Typography>
+                                            <PictureAsPdfIcon
+                                                sx={{
+                                                    fontSize: 40,
+                                                    color: fileType === 2 ? "white" : "lightgray",
+                                                    marginLeft: 0.5,
+                                                }}
+                                            />
+                                            <input
+                                                type="file"
+                                                hidden
+                                                accept="application/pdf"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) setFile(file);
+                                                }}
+                                            />
+                                        </Button>
+                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                        <Button
+                                            variant="contained"
+                                            component="label"
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                height: "50px",
+                                                backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
+                                                borderRadius: 2,
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                            }}
+                                            onClick={() => setFileType(3)}
+                                        >
+                                            <Typography
+                                                variant="h6"
+                                                fontWeight="bold"
+                                                color={fileType === 3 ? "white" : "lightgray"}
                                                 gutterBottom
                                             >
                                                 รูปภาพ
@@ -1386,8 +1421,8 @@ const InsertFinancial = () => {
                                             <ImageIcon
                                                 sx={{
                                                     fontSize: 40,
-                                                    color: fileType ? "white" : "lightgray",
-                                                    marginLeft: 2,
+                                                    color: fileType === 3 ? "white" : "lightgray",
+                                                    marginLeft: 0.5,
                                                 }}
                                             />
                                             <input
