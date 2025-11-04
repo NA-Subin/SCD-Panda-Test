@@ -33,14 +33,14 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { formatThaiFull } from "../../theme/DateTH";
-import { IconButtonError, IconButtonSuccess, TablecellSelling } from "../../theme/style";
+import { IconButtonError, IconButtonSuccess, TablecellPink, TablecellSelling } from "../../theme/style";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 import theme from "../../theme/theme";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
-const Profit = ({ openNavbar }) => {
+const ProfitSmallTruck = ({ openNavbar }) => {
     const [open, setOpen] = useState(true);
     const [check, setCheck] = React.useState(true);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -158,22 +158,22 @@ const Profit = ({ openNavbar }) => {
         return orders
             .filter(
                 (tk) =>
-                    tk.CustomerType === "ตั๋วรถใหญ่" &&
+                    tk.CustomerType === "ตั๋วรถเล็ก" &&
                     tk.Status !== "ยกเลิก" &&
                     tk.Trip !== "ยกเลิก"
             )
             .flatMap((tk) => {
-                const customer = ticketsB.find(
+                const customer = ticketsS.find(
                     (c) => c.id === Number(tk.TicketName.split(":")[0])
                 );
 
                 const trip = trips.find((t) => t.id === tk.Trip + 1);
-                let Rate = "";
+                let Rate = tk.Rate;
 
-                if (trip?.Depot.split(":")[1] === "ลำปาง") Rate = tk.Rate1;
-                else if (trip?.Depot.split(":")[1] === "พิจิตร") Rate = tk.Rate2;
-                else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip?.Depot.split(":")[1]))
-                    Rate = tk.Rate3;
+                // if (trip?.Depot.split(":")[1] === "ลำปาง") Rate = tk.Rate1;
+                // else if (trip?.Depot.split(":")[1] === "พิจิตร") Rate = tk.Rate2;
+                // else if (["สระบุรี", "บางปะอิน", "IR"].includes(trip?.Depot.split(":")[1]))
+                //     Rate = tk.Rate3;
 
                 return Object.entries(tk.Product)
                     .filter(([key]) => key !== "P")
@@ -189,10 +189,10 @@ const Profit = ({ openNavbar }) => {
                         Status: tk.Status,
                         StatusCompany: customer?.StatusCompany,
                         ProductName,
-                        Rate: parseFloat(Rate),
+                        Rate: parseFloat(Rate) ?? 0,
                         Amount: productData?.Amount ?? 0,
                         RateOil: productData?.RateOil ?? 0,
-                        Volume: (productData?.Volume ?? 0) * 1000,
+                        Volume: (Number(productData?.Volume) ?? 0),
                         OverdueTransfer: productData?.OverdueTransfer ?? 0,
                         CostPrice: productData?.CostPrice ?? 0,
                     }));
@@ -229,7 +229,17 @@ const Profit = ({ openNavbar }) => {
                 if (aValue > bValue) return direction === 'asc' ? 1 : -1;
                 return 0;
             });
-    }, [orders, ticketsB, trips, selectedDateStart, selectedDateEnd]);
+    }, [sortConfig, orders, ticketsS, trips, selectedDateStart, selectedDateEnd]);
+
+    console.log("Orders : ", orders
+        .filter(
+            (tk) =>
+                tk.CustomerType === "ตั๋วรถเล็ก" &&
+                tk.Status !== "ยกเลิก" &&
+                tk.Trip !== "ยกเลิก"
+        ))
+    console.log("trips : ", trips.filter((row) => row.TruckType === "รถเล็ก"));
+    console.log("result : ", result);
 
     // 💡 คำนวณผลรวมก่อน render
     const total = result.reduce(
@@ -243,7 +253,7 @@ const Profit = ({ openNavbar }) => {
                 volume: acc.volume + (row.Volume ?? 0),
                 rateOil: acc.rateOil + rateOil,
                 rate: acc.rate + rate,
-                costPrice: acc.costPrice + costPrice,
+                costPrice: parseFloat(acc.costPrice) + costPrice,
                 diff: acc.diff + diff,
             };
         },
@@ -518,8 +528,8 @@ const Profit = ({ openNavbar }) => {
                     <Grid item xs={12} sm={9} lg={5} sx={{ marginTop: { xs: -4, sm: -4, lg: 0 }, marginBottom: { xs: -1, sm: -1, lg: 0 } }} >
                         <FormGroup row sx={{ marginBottom: -1.5 }}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะ : </Typography>
-                            <FormControlLabel control={<Checkbox checked={check ? true : false} />} onChange={() => setCheck(true)} label="ราคา/ลิตร" />
-                            <FormControlLabel control={<Checkbox checked={!check ? true : false} />} onChange={() => setCheck(false)} label="จำนวนเงิน" />
+                            <FormControlLabel control={<Checkbox checked={check ? true : false} color="pink" />} onChange={() => setCheck(true)} label="ราคา/ลิตร" />
+                            <FormControlLabel control={<Checkbox checked={!check ? true : false} color="pink" />} onChange={() => setCheck(false)} label="จำนวนเงิน" />
                         </FormGroup>
                     </Grid>
                     <Grid item xs={12} sm={3} lg={2} textAlign="right" sx={{ marginTop: { xs: 0, sm: -6, lg: -2 }, marginBottom: { xs: -1, sm: -2, lg: -1 } }} >
@@ -528,7 +538,7 @@ const Profit = ({ openNavbar }) => {
                             sx={{ marginBottom: 3 }}
                             control={
                                 <Checkbox
-                                    color="info"
+                                    color="pink"
                                     value={checkStatusCompany}
                                     //onChange={() => setCheckStatusCompany(!checkStatusCompany)}
                                     onChange={handleChangeCheck}
@@ -556,10 +566,10 @@ const Profit = ({ openNavbar }) => {
                             >
                                 <TableHead sx={{ height: "5vh" }}>
                                     <TableRow>
-                                        <TablecellSelling width={50} sx={{ textAlign: "center", fontSize: 16 }}>
+                                        <TablecellPink width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                                             ลำดับ
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, cursor: "pointer" }}
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100, cursor: "pointer" }}
                                             onClick={() => handleSort("Date")}
                                         >
                                             <Box display="flex" alignItems="center" justifyContent="center">
@@ -570,8 +580,8 @@ const Profit = ({ openNavbar }) => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 300, cursor: "pointer" }}
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 300, cursor: "pointer" }}
                                             onClick={() => handleSort("Customer")}
                                         >
                                             <Box display="flex" alignItems="center" justifyContent="center">
@@ -582,26 +592,26 @@ const Profit = ({ openNavbar }) => {
                                                     <ArrowDropDownIcon sx={{ opacity: 0.3 }} />
                                                 )}
                                             </Box>
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ชนิดน้ำมัน
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             จำนวนลิตร
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             {check ? "ราคาขาย/ลิตร" : "ยอดขาย"}
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             {check ? "ราคาทุน/ลิตร" : "ราคาทุน"}
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             {check ? "ราคาขนส่ง/ลิตร" : "ค่าขนส่ง"}
-                                        </TablecellSelling>
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
+                                        </TablecellPink>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             {check ? "กำไรขาดทุน/ลิตร" : "กำไรขาดทุน"}
-                                        </TablecellSelling>
-                                        {/* <TablecellSelling sx={{ textAlign: "center", width: 50 }} /> */}
+                                        </TablecellPink>
+                                        {/* <TablecellPink sx={{ textAlign: "center", width: 50 }} /> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -773,36 +783,36 @@ const Profit = ({ openNavbar }) => {
                                         }}
                                     >
                                         <TableRow>
-                                            <TablecellSelling sx={{ textAlign: "right", fontSize: 16 }} colSpan={4}>
+                                            <TablecellPink sx={{ textAlign: "right", fontSize: 16 }} colSpan={4}>
                                                 <Box sx={{ pr: 2 }}>{check ? "ค่าเฉลี่ยราคา/ลิตร" : "จำนวนเงินรวม"}</Box>
-                                            </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            </TablecellPink>
+                                            <TablecellPink sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US").format(avg.volume)}
-                                            </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            </TablecellPink>
+                                            <TablecellPink sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 }).format(avg.rateOil)}
-                                            </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            </TablecellPink>
+                                            <TablecellPink sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 }).format(avg.costPrice)}
-                                            </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            </TablecellPink>
+                                            <TablecellPink sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 }).format(avg.rate)}
-                                            </TablecellSelling>
-                                            <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
+                                            </TablecellPink>
+                                            <TablecellPink sx={{ textAlign: "center", fontSize: 16 }}>
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 }).format(avg.diff)}
-                                            </TablecellSelling>
+                                            </TablecellPink>
                                         </TableRow>
                                     </TableFooter>
                                 }
@@ -816,4 +826,4 @@ const Profit = ({ openNavbar }) => {
     );
 };
 
-export default Profit;
+export default ProfitSmallTruck;
