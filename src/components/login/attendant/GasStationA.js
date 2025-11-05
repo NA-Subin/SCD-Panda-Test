@@ -47,6 +47,7 @@ import 'dayjs/locale/th';
 import ReceiveOil from "./ReceiveOil";
 import OilBalance from "./OilBalance";
 import GasStationDetail from "./GasStationDetail";
+import { formatThaiSlash } from "../../../theme/DateTH";
 
 const GasStationAdmin = () => {
 
@@ -301,14 +302,14 @@ const GasStationAdmin = () => {
                             ยินดีต้อนรับเข้าสู่หน้าลงข้อมูลน้ำมัน
                         </Typography>
                     </Box>
-                    <Grid container spacing={2} marginTop={-1} component="form">
+                    <Grid container spacing={5} marginTop={-5} component="form">
                         <Grid item xs={12} md={3} lg={3} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: 'nowrap' }} gutterBottom>วันที่</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: 'nowrap', mt: 1 }} gutterBottom>วันที่</Typography>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
                                     openTo="day"
                                     views={["year", "month", "day"]}
-                                    value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                    value={selectedDate ? dayjs(selectedDate, "DD/MM/YYYY") : null}
                                     format="DD/MM/YYYY"
                                     onChange={handleDateChange}
                                     slotProps={{
@@ -316,27 +317,52 @@ const GasStationAdmin = () => {
                                             size: "small",
                                             fullWidth: true,
                                             variant: "standard",
-                                            "& .MuiInput-underline:before": {
-                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            inputProps: {
+                                                value: formatThaiSlash(selectedDate), // ✅ แสดงเป็น 05/11/2568
+                                                readOnly: true, // ปิดการพิมพ์เอง
                                             },
-                                            "& .MuiInput-underline:after": {
-                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            InputProps: {
+                                                disableUnderline: false, // ยังมีเส้นอยู่
+                                                sx: {
+                                                    '& .MuiOutlinedInput-root': {
+                                                        height: '25px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        fontSize: '16px',
+                                                        fontWeight: 'bold',
+                                                        padding: '2px 6px',
+                                                        textAlign: 'center',
+                                                        // color: "#616161",
+                                                    },
+                                                },
                                             },
-                                            marginLeft: 2
-                                        }
+                                            // ✅ เพิ่มเส้นประที่ด้านล่าง
+                                            sx: {
+                                                "& .MuiInput-underline:before": {
+                                                    borderBottom: "1px solid gray",
+                                                },
+                                                "& .MuiInput-underline:after": {
+                                                    borderBottom: "1px solid gray",
+                                                },
+                                                marginLeft: 2,
+                                            },
+                                        },
                                     }}
                                     sx={{ marginLeft: 2 }}
                                 />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={12} md={9} lg={9} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ชื่อปั้ม</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: 'nowrap', mt: 1 }} gutterBottom>ชื่อปั้ม</Typography>
                             <FormControl variant="standard" sx={{ m: 1, width: "100%" }}>
                                 <Select
                                     labelId="demo-simple-select-standard-label"
                                     id="demo-simple-select-standard"
                                     value={gasStation}
                                     onChange={handleGasStationChange}
+                                    sx={{ fontWeight: "bold" }}
                                     fullWidth
                                 >
                                     <MenuItem value={0}>กรุณาเลือกปั้ม</MenuItem>

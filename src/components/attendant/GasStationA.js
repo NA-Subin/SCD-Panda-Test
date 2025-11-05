@@ -43,6 +43,7 @@ import { useData } from "../../server/path";
 import withReactContent from "sweetalert2-react-content";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useGasStationData } from "../../server/provider/GasStationProvider";
+import { formatThaiSlash } from "../../theme/DateTH";
 
 const GasStationA = () => {
     const userId = Cookies.get("sessionToken");
@@ -86,29 +87,29 @@ const GasStationA = () => {
 
     const PREFIXES = ["นาย", "นาง", "นางสาว", "เด็กชาย", "เด็กหญิง", "ด.ช.", "ด.ญ."];
 
-const splitThaiName = (fullName) => {
-  if (!fullName) return { prefix: "", firstName: "", lastName: "" };
+    const splitThaiName = (fullName) => {
+        if (!fullName) return { prefix: "", firstName: "", lastName: "" };
 
-  const prefix = PREFIXES.find(p => fullName.startsWith(p));
-  if (!prefix) return { prefix: "", firstName: "", lastName: "" };
+        const prefix = PREFIXES.find(p => fullName.startsWith(p));
+        if (!prefix) return { prefix: "", firstName: "", lastName: "" };
 
-  // ตัดคำนำหน้าออกจากชื่อเต็ม
-  const rest = fullName.slice(prefix.length).trim();
-  const nameParts = rest.split(" ");
+        // ตัดคำนำหน้าออกจากชื่อเต็ม
+        const rest = fullName.slice(prefix.length).trim();
+        const nameParts = rest.split(" ");
 
-  return {
-    prefix,
-    firstName: nameParts[0] || "",
-    lastName: nameParts[1] || "",
-  };
-};
+        return {
+            prefix,
+            firstName: nameParts[0] || "",
+            lastName: nameParts[1] || "",
+        };
+    };
 
-// ตัวอย่างการใช้งาน
-const { prefix, firstName, lastName } = splitThaiName(employeeDetail?.Name);
+    // ตัวอย่างการใช้งาน
+    const { prefix, firstName, lastName } = splitThaiName(employeeDetail?.Name);
 
-console.log("คำนำหน้า:", prefix);     // นางสาว
-console.log("ชื่อ:", firstName);       // สมส่วน
-console.log("นามสกุล:", lastName);     // สามสี
+    console.log("คำนำหน้า:", prefix);     // นางสาว
+    console.log("ชื่อ:", firstName);       // สมส่วน
+    console.log("นามสกุล:", lastName);     // สามสี
 
 
     console.log("GasStation : ", gasStationsDetail);
@@ -183,32 +184,32 @@ console.log("นามสกุล:", lastName);     // สามสี
     }, []);
 
     const handleBack = () => {
-            withReactContent(Swal)
-                .fire({
-                    title: "ต้องการออกจากระบบใช่หรือไม่",
-                    icon: "error",
-                    confirmButtonText: "ตกลง",
-                    cancelButtonText: "ยกเลิก",
-                    showCancelButton: true,
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        signOut(auth)
-                            .then(() => {
-                                Cookies.remove('user');
-                                Cookies.remove('sessionToken');
-                                Cookies.remove('password');
-                                navigate("/");
-                                Swal.fire("ออกจากระบบเรียบร้อย", "", "success");
-                            })
-                            .catch((error) => {
-                                Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");
-                            });
-                    } else if (result.isDenied) {
-                        Swal.fire("ออกจากระบบล้มเหลว", "", "error");
-                    }
-                });
-        }
+        withReactContent(Swal)
+            .fire({
+                title: "ต้องการออกจากระบบใช่หรือไม่",
+                icon: "error",
+                confirmButtonText: "ตกลง",
+                cancelButtonText: "ยกเลิก",
+                showCancelButton: true,
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    signOut(auth)
+                        .then(() => {
+                            Cookies.remove('user');
+                            Cookies.remove('sessionToken');
+                            Cookies.remove('password');
+                            navigate("/");
+                            Swal.fire("ออกจากระบบเรียบร้อย", "", "success");
+                        })
+                        .catch((error) => {
+                            Swal.fire("ไม่สามารถออกจากระบบได้", "", "error");
+                        });
+                } else if (result.isDenied) {
+                    Swal.fire("ออกจากระบบล้มเหลว", "", "error");
+                }
+            });
+    }
 
     useEffect(() => {
         database.ref("/depot/gasStations").on("value", (snapshot) => {
@@ -348,7 +349,7 @@ console.log("นามสกุล:", lastName);     // สามสี
                     marginBottom: { xs: -1, sm: -2, md: -3 },
                 }}>
                     <Box textAlign="right" marginTop={-6.5} marginBottom={4} sx={{ marginRight: { xs: -2, sm: -3, md: -4 } }}>
-                    <Button variant="contained" color="warning" sx={{ border: "3px solid white" }} endIcon={<SettingsIcon fontSize="small" />} onClick={handleBack}>ตั้งค่า</Button>
+                        <Button variant="contained" color="warning" sx={{ border: "3px solid white" }} endIcon={<SettingsIcon fontSize="small" />} onClick={handleBack}>ตั้งค่า</Button>
                         {
                             isMobile ?
                                 <>
@@ -514,7 +515,7 @@ console.log("นามสกุล:", lastName);     // สามสี
                             </Box>
                         </Grid>
                         <Grid item xs={12} md={4} lg={4}>
-                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ตำแหน่ง : </Typography>
                                 <TextField
                                     size="small"
@@ -550,7 +551,7 @@ console.log("นามสกุล:", lastName);     // สามสี
                                 <DatePicker
                                     openTo="day"
                                     views={["year", "month", "day"]}
-                                    value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                    value={selectedDate ? dayjs(selectedDate, "DD/MM/YYYY") : null}
                                     format="DD/MM/YYYY"
                                     onChange={handleDateChange}
                                     slotProps={{
@@ -558,36 +559,45 @@ console.log("นามสกุล:", lastName);     // สามสี
                                             size: "small",
                                             fullWidth: true,
                                             variant: "standard",
-                                            "& .MuiInput-underline:before": {
-                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่าง
+                                            inputProps: {
+                                                value: formatThaiSlash(selectedDate), // ✅ แสดงเป็น 05/11/2568
+                                                readOnly: true, // ปิดการพิมพ์เอง
                                             },
-                                            "& .MuiInput-underline:after": {
-                                                borderBottom: "1px dashed gray", // เส้นประที่ด้านล่างหลังจากการโฟกัส
+                                            InputProps: {
+                                                disableUnderline: false, // ยังมีเส้นอยู่
+                                                sx: {
+                                                    '& .MuiOutlinedInput-root': {
+                                                        height: '25px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    },
+                                                    '& .MuiInputBase-input': {
+                                                        fontSize: '16px',
+                                                        fontWeight: 'bold',
+                                                        padding: '2px 6px',
+                                                        textAlign: 'center',
+                                                        color: "#616161",
+                                                    },
+                                                },
                                             },
-                                            marginLeft: 2,
+                                            // ✅ เพิ่มเส้นประที่ด้านล่าง
                                             sx: {
-                                                '& .MuiOutlinedInput-root': {
-                                                    height: '25px', // ปรับความสูงของ TextField
-                                                    display: 'flex', // ใช้ flexbox
-                                                    alignItems: 'center', // จัดให้ข้อความอยู่กึ่งกลางแนวตั้ง
+                                                "& .MuiInput-underline:before": {
+                                                    borderBottom: "1px dashed gray",
                                                 },
-                                                '& .MuiInputBase-input': {
-                                                    fontSize: '16px', // ขนาด font เวลาพิมพ์
-                                                    fontWeight: 'bold',
-                                                    padding: '2px 6px', // ปรับ padding ภายใน input
-                                                    textAlign: 'center', // จัดให้ตัวเลขอยู่กึ่งกลางแนวนอน (ถ้าต้องการ)
-                                                    paddingLeft: 2,
-                                                    color: "#616161"
+                                                "& .MuiInput-underline:after": {
+                                                    borderBottom: "1px dashed gray",
                                                 },
-                                            }
-                                        }
+                                                marginLeft: 2,
+                                            },
+                                        },
                                     }}
                                     sx={{ marginLeft: 2 }}
                                 />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={12} md={8} lg={8}>
-                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <Box display="flex" justifyContent="center" alignItems="center">
                                 <Typography variant="h6" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>ชื่อปั้ม : </Typography>
                                 <TextField
                                     size="small"

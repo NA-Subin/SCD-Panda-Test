@@ -276,7 +276,7 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
             textAlign="center"
             gutterBottom
           >
-            ชำระค่าน้ำมันรถเล็ก
+            ชำระค่าน้ำมัน / รถเล็ก
           </Typography>
         </Grid>
         <Grid item md={5} xs={12}>

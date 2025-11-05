@@ -347,7 +347,7 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                         textAlign="center"
                         gutterBottom
                     >
-                        สรุปยอดน้ำมันรถเล็ก
+                        สรุปยอดน้ำมัน / รถเล็ก
                     </Typography>
                 </Grid>
             </Grid>
@@ -791,7 +791,7 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                             </Grid>
                         </Grid>
                 }
-                <Grid container spacing={2} width="100%" sx={{ marginTop: -4 }}>
+                <Grid container spacing={2} width="100%" sx={{ marginTop: { lg: -4, xs: -1} }}>
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}

@@ -238,7 +238,7 @@ const TripsSmallTruck = ({ openNavbar }) => {
                         textAlign="center"
                         gutterBottom
                     >
-                        เที่ยววิ่งรถเล็ก
+                        จัดเที่ยววิ่ง / รถเล็ก
                     </Typography>
                 </Grid>
                 <Grid item md={2} xs={12}>

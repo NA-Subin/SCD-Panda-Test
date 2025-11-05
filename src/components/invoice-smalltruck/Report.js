@@ -446,12 +446,12 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                         textAlign="center"
                         gutterBottom
                     >
-                        รายงานชำระค่าน้ำมัน
+                        รายงานชำระค่าน้ำมัน / รถเล็ก
                     </Typography>
                 </Grid>
                 <Grid item sm={12} lg={10}></Grid>
                 <Grid item sm={12} lg={2}>
-                    <Button variant="contained" size="small" color="success" sx={{ marginTop: -17 }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
+                    <Button variant="contained" size="small" color="success" sx={{ marginTop: { lg: -17, xs: -10 } }} fullWidth onClick={exportToExcel}>Export to Excel</Button>
                 </Grid>
             </Grid>
             <Divider sx={{ marginBottom: 2 }} />
@@ -467,7 +467,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        marginBottom: 3
+                                        marginBottom: { lg: 3 , xs: -1}
                                     }}
                                 >
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -608,7 +608,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        marginBottom: 3
+                                        marginBottom: { lg: 3 , xs: -1}
                                     }}
                                 >
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -746,6 +746,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                             component={Paper}
                             sx={{
                                 height: "55vh",
+                                mt: 1
                             }}
                         >
                             <Table

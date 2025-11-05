@@ -42,6 +42,7 @@ import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { useGasStationData } from "../../../server/provider/GasStationProvider";
 import { useBasicData } from "../../../server/provider/BasicDataProvider";
+import { formatThaiSlash } from "../../../theme/DateTH";
 
 const UpdateGasStations = (props) => {
     const { gasStation, gasStationOil, onSendBack, selectedDate, Squeeze, currentReport, count, valueDownHole, checkStock } = props;
@@ -815,7 +816,7 @@ const UpdateGasStations = (props) => {
                                         height: "25px"
                                     }}
                                 >
-                                    <Typography fontSize="14px" fontWeight="bold" gutterBottom paddingTop={0.5}>วันที่ {dayjs(selectedDate).format("DD/MM/YYYY")}</Typography>
+                                    <Typography fontSize="14px" fontWeight="bold" gutterBottom paddingTop={0.5}>วันที่ {formatThaiSlash(dayjs(selectedDate))}</Typography>
                                 </Paper>
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main }}>

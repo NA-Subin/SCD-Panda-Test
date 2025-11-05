@@ -39,6 +39,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { database } from "../../../server/firebase";
 import UpdateGasStations from "./UpdateGasStations";
 import { useGasStationData } from "../../../server/provider/GasStationProvider";
+import { formatThaiSlash } from "../../../theme/DateTH";
 
 const GasStationsDetail = (props) => {
     const { gasStation } = props;
@@ -456,18 +457,23 @@ const GasStationsDetail = (props) => {
                                 justifyContent: "center"
                             }}
                         >
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <LocalizationProvider dateAdapter={AdapterDayjs} >
                                 <DatePicker
                                     openTo="day"
                                     views={["year", "month", "day"]}
-                                    value={dayjs(selectedDate)} // แปลงสตริงกลับเป็น dayjs object
+                                    value={selectedDate ? dayjs(selectedDate, "DD/MM/YYYY") : null}
                                     format="DD/MM/YYYY"
                                     onChange={handleDateChange}
-                                    //disabled={isDataUpdated} // 🔹 ปิดการเลือกถ้ามีการเปลี่ยนแปลง
                                     slotProps={{
                                         textField: {
                                             size: "small",
                                             fullWidth: true,
+                                            inputProps: {
+                                                value: selectedDate
+                                                    ? formatThaiSlash(selectedDate) // ✅ แสดงเป็น 05/11/2568
+                                                    : "",
+                                                readOnly: true,
+                                            },
                                             InputProps: {
                                                 startAdornment: (
                                                     <InputAdornment position="start" sx={{ marginRight: 2 }}>
@@ -475,9 +481,9 @@ const GasStationsDetail = (props) => {
                                                     </InputAdornment>
                                                 ),
                                                 sx: {
-                                                    fontSize: "16px", // ขนาดตัวอักษรภายใน Input
-                                                    height: "40px",  // ความสูงของ Input
-                                                    padding: "10px", // Padding ภายใน Input
+                                                    fontSize: "16px",
+                                                    height: "40px",
+                                                    padding: "10px",
                                                     fontWeight: "bold",
                                                 },
                                             },

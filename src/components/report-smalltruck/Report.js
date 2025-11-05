@@ -241,30 +241,30 @@ const ReportSmallTruck = () => {
 
     // ✅ กรองเฉพาะ ticketsdetail
     const filteredTickets = ticketsdetail
-    .map((ticket) => {
-      const trip = trips.find((tp) => (tp.id - 1) === ticket.Trip && tp.TruckType === "รถเล็ก" );
-      if (!trip) return null;
+      .map((ticket) => {
+        const trip = trips.find((tp) => (tp.id - 1) === ticket.Trip && tp.TruckType === "รถเล็ก");
+        if (!trip) return null;
 
-      const orderDate = dayjs(trip?.DateReceive, "DD/MM/YYYY");
-      const isInDateRange =
-        orderDate.isValid() &&
-        orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+        const orderDate = dayjs(trip?.DateReceive, "DD/MM/YYYY");
+        const isInDateRange =
+          orderDate.isValid() &&
+          orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
 
-      if (!isInDateRange) return null;
-      if (ticket.Status !== "จัดส่งสำเร็จ") return null;
+        if (!isInDateRange) return null;
+        if (ticket.Status !== "จัดส่งสำเร็จ") return null;
 
-      const tripIdFromReg = Number(trip?.Registration?.split(":")[0]);
-      if (selectedId !== tripIdFromReg) return null;
+        const tripIdFromReg = Number(trip?.Registration?.split(":")[0]);
+        if (selectedId !== tripIdFromReg) return null;
 
-      return {
-        ...ticket,
-        Registration: trip?.Registration,  // ✅ เพิ่มข้อมูลจาก trip
-        Date: trip?.DateReceive,
-        TripDriver: trip.Driver,
-        sourceType: "ticket",
-        type: "รับเข้า",
-      };
-    })
+        return {
+          ...ticket,
+          Registration: trip?.Registration,  // ✅ เพิ่มข้อมูลจาก trip
+          Date: trip?.DateReceive,
+          TripDriver: trip.Driver,
+          sourceType: "ticket",
+          type: "รับเข้า",
+        };
+      })
       .filter(Boolean); // ✅ ตัด null ออก
 
     // ✅ กรองเฉพาะ orders
@@ -819,7 +819,7 @@ const ReportSmallTruck = () => {
             textAlign="center"
             gutterBottom
           >
-            รายงานรถเล็ก
+            รายงานเที่ยววิ่ง / รถเล็ก
           </Typography>
         </Grid>
 
@@ -906,7 +906,7 @@ const ReportSmallTruck = () => {
           </Box>
         </Grid>
         <Grid item md={5} xs={12}>
-          <Paper>
+          <Paper sx={{ mt: { lg: 0 } }}>
             <Autocomplete
               id="autocomplete-tickets"
               options={customerDetails}
@@ -954,14 +954,16 @@ const ReportSmallTruck = () => {
           </Paper>
         </Grid>
         <Grid item md={2} xs={12} sx={{ textAlign: "right" }}>
-          <Button variant="contained" color="success" onClick={exportToExcel} >Export to excel</Button>
+          <Button variant="contained" color="success" fullWidth onClick={exportToExcel} >Export to excel</Button>
         </Grid>
       </Grid>
       <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
         <TableContainer
           component={Paper}
           sx={{
-            marginBottom: 2, height: "80vh", width: "100%",
+            marginBottom: 2,
+            mt: { lg: 0, xs: 2 },
+            height: "80vh", width: "100%",
             overflowX: "auto"
           }}
         >
@@ -1027,7 +1029,7 @@ const ReportSmallTruck = () => {
                         {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
                       </TableCell>
                       <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
-                        <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >{`${row.Driver.split(":")[1]} / ${row.Registration.split(":")[1]}`}</Typography>
+                        <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >{`${row.Driver ? row.Driver.split(":")[1] : row.Driver} / ${row.Registration ? row.Registration.split(":")[1] : row.Registration}`}</Typography>
                       </TableCell>
                       {/* ✅ ตรงกับ column ที่หัว */}
                       {productTypes.map((productKey) => {

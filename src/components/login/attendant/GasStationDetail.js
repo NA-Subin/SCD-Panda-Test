@@ -601,6 +601,15 @@ const GasStationDetail = (props) => {
                         ))
                 }
                 <Grid item xs={12}>
+                    {/* <Divider sx={{
+                        border: gas.Stock === "แม่โจ้" ? "1px solid #92D050"
+                            : gas.Stock === "สันกลาง" ? "1px solid #B1A0C7"
+                                : gas.Stock === "สันทราย" ? "1px solid #B7DEE8"
+                                    : gas.Stock === "บ้านโฮ่ง" ? "1px solid #FABF8F"
+                                        : gas.Stock === "ป่าแดด" ? "1px solid #B1A0C7"
+                                            : ""
+                    }} /> */}
+                    <Divider sx={{ border: "1px solid lightgray"}} />
                     <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
                         {/* <Button variant="contained" color="success" onClick={saveProduct}>
                                         บันทึก
@@ -671,7 +680,7 @@ const GasStationDetail = (props) => {
                                             paddingTop: 2,
                                             paddingBottom: 1
                                         }}
-                                        //disabled
+                                    //disabled
                                     >
                                         <Typography variant="h5" fontWeight="bold" gutterBottom>
                                             {item.ProductName}
@@ -679,7 +688,7 @@ const GasStationDetail = (props) => {
                                     </Box>
                                 </Grid>
                                 <Grid item xs={3} md={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold"  gutterBottom>
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                                         {first.ShortName || "N/A"}
                                     </Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
@@ -688,12 +697,12 @@ const GasStationDetail = (props) => {
                                             type="text"
                                             fullWidth
                                             value={new Intl.NumberFormat("en-US").format(item.PrevOilBalance)}
-                                            //disabled={save ? false : true}
+                                        //disabled={save ? false : true}
                                         />
                                     </Paper>
                                 </Grid>
                                 <Grid item xs={3} md={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold"  gutterBottom>
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                                         {last.ShortName || "N/A"}
                                     </Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
@@ -702,12 +711,12 @@ const GasStationDetail = (props) => {
                                             type="text"
                                             fullWidth
                                             value={new Intl.NumberFormat("en-US").format(item.LatestOilBalance)}
-                                            //disabled={save ? false : true}
+                                        //disabled={save ? false : true}
                                         />
                                     </Paper>
                                 </Grid>
                                 <Grid item xs={3} md={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold"  gutterBottom>
+                                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                                         ผลลัพธ์
                                     </Typography>
                                     <Paper component="form" sx={{ marginTop: -1 }}>
@@ -716,17 +725,18 @@ const GasStationDetail = (props) => {
                                             type="text"
                                             fullWidth
                                             value={new Intl.NumberFormat("en-US").format(item.Difference)}
-                                            //disabled={save ? false : true}
+                                        //disabled={save ? false : true}
                                         />
                                     </Paper>
                                 </Grid>
                             </React.Fragment>
                         ))}
-                            <Grid item xs={12} textAlign="center">
-                                <Button variant="contained" color="success" onClick={handleSave}>
-                                    บันทึก
-                                </Button>
-                            </Grid>
+                        <Grid item xs={12} textAlign="center">
+                            <Divider sx={{ border: "1px solid lightgray" , mb: 2 }} />
+                            <Button variant="contained" color="success" onClick={handleSave}>
+                                บันทึก
+                            </Button>
+                        </Grid>
                     </Grid>
                     <Box sx={{
                         backgroundColor:

@@ -439,7 +439,7 @@ const ProfitSmallTruck = ({ openNavbar }) => {
                         }}
                         gutterBottom
                     >
-                        กำไรขายส่งน้ำมัน
+                        กำไรขายส่งน้ำมัน / รถเล็ก
                     </Typography>
                 </Grid>
             </Grid>
