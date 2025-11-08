@@ -387,6 +387,8 @@ const GasStationDetail = (props) => {
         return customOrder.indexOf(a.ProductName) - customOrder.indexOf(b.ProductName);
     });
 
+    const allOilBalanceZero = reports.length > 0 && reports.every(r => r.OilBalance === 0);
+
     console.log("reports : ", reports);
     console.log("sortReport : ", sortedReport);
     console.log("not report : ", notReport);
@@ -422,7 +424,7 @@ const GasStationDetail = (props) => {
                     <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ผลิตภัณฑ์</Typography>
                 </Grid>
                 {
-                    reports.length === 0 ?
+                    (reports.length === 0) ?
                         notReport.map((row, index) => (
                             <React.Fragment key={index}>
                                 <Grid item xs={5} md={2} lg={1}>
@@ -510,95 +512,183 @@ const GasStationDetail = (props) => {
                             </React.Fragment>
                         ))
                         :
-                        sortedReport.map((row) => (
-                            <React.Fragment>
-                                {/* {row.Difference === 0 || row.Difference === undefined && setSave(false)} */}
-                                <Grid item xs={5} md={2} lg={1}>
-                                    <Box
-                                        sx={{
-                                            backgroundColor: row.Color,
-                                            borderRadius: 3,
-                                            textAlign: "center",
-                                            paddingTop: 2,
-                                            paddingBottom: 1
-                                        }}
-                                        disabled
-                                    >
-                                        <Typography variant="h5" fontWeight="bold" gutterBottom>{row.ProductName}</Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={3.5} md={2} lg={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold" color={setting && "textDisabled"} gutterBottom>รับเข้า</Typography>
-                                    <Paper component="form" sx={{ marginTop: -1 }}>
-                                        <TextField
-                                            size="small"
-                                            type="number"
-                                            fullWidth
-                                            value={updateVolumes[row.ProductName] ?? row.Delivered} // ใช้ ?? ป้องกัน undefined
-                                            onChange={(e) => {
-                                                let newValue = e.target.value;
+                        allOilBalanceZero ?
+                            sortedReport.map((row) => (
+                                <React.Fragment>
+                                    {/* {row.Difference === 0 || row.Difference === undefined && setSave(false)} */}
+                                    <Grid item xs={5} md={2} lg={1}>
+                                        <Box
+                                            sx={{
+                                                backgroundColor: row.Color,
+                                                borderRadius: 3,
+                                                textAlign: "center",
+                                                paddingTop: 2,
+                                                paddingBottom: 1
+                                            }}
+                                        >
+                                            <Typography variant="h5" fontWeight="bold" gutterBottom>{row.ProductName}</Typography>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={3.5} md={2} lg={1.5}>
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>รับเข้า</Typography>
+                                        <Paper component="form" sx={{ marginTop: -1 }}>
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                fullWidth
+                                                value={updateVolumes[row.ProductName] ?? row.Delivered} // ใช้ ?? ป้องกัน undefined
+                                                onChange={(e) => {
+                                                    let newValue = e.target.value;
 
-                                                // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
-                                                newValue = newValue.replace(/^0+(?=\d)/, "");
+                                                    // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
+                                                    newValue = newValue.replace(/^0+(?=\d)/, "");
 
-                                                // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
-                                                if (newValue === "" || newValue === "0") {
-                                                    handleUpdateVolumeChange(row.ProductName, "");
-                                                } else {
-                                                    handleUpdateVolumeChange(row.ProductName, newValue);
-                                                }
-                                            }}
-                                            onFocus={(e) => {
-                                                if (e.target.value === "0") {
-                                                    handleUpdateVolumeChange(row.ProductName, ""); // ล้างค่า 0 ออก
-                                                }
-                                            }}
-                                            onBlur={(e) => {
-                                                if (e.target.value === "") {
-                                                    handleUpdateVolumeChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
-                                                }
-                                            }}
-                                            disabled={setting ? true : false}
-                                        />
-                                    </Paper>
-                                </Grid>
-                                <Grid item xs={3.5} md={2} lg={1.5}>
-                                    <Typography variant="subtitle2" fontWeight="bold" color={setting && "textDisabled"} gutterBottom>ปิดยอดสต็อก</Typography>
-                                    <Paper component="form" sx={{ marginTop: -1 }}>
-                                        <TextField
-                                            size="small"
-                                            type="number"
-                                            fullWidth
-                                            value={updateStocks[row.ProductName] ?? row.OilBalance} // ใช้ ?? ป้องกัน undefined
-                                            onChange={(e) => {
-                                                let newValue = e.target.value;
+                                                    // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
+                                                    if (newValue === "" || newValue === "0") {
+                                                        handleUpdateVolumeChange(row.ProductName, "");
+                                                    } else {
+                                                        handleUpdateVolumeChange(row.ProductName, newValue);
+                                                    }
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") {
+                                                        handleUpdateVolumeChange(row.ProductName, ""); // ล้างค่า 0 ออก
+                                                    }
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") {
+                                                        handleUpdateVolumeChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
+                                                    }
+                                                }}
+                                            />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item xs={3.5} md={2} lg={1.5}>
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ปิดยอดสต็อก</Typography>
+                                        <Paper component="form" sx={{ marginTop: -1 }}>
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                fullWidth
+                                                value={updateStocks[row.ProductName] ?? row.OilBalance} // ใช้ ?? ป้องกัน undefined
+                                                onChange={(e) => {
+                                                    let newValue = e.target.value;
 
-                                                // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
-                                                newValue = newValue.replace(/^0+(?=\d)/, "");
+                                                    // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
+                                                    newValue = newValue.replace(/^0+(?=\d)/, "");
 
-                                                // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
-                                                if (newValue === "" || newValue === "0") {
-                                                    handleUpdateStockChange(row.ProductName, "");
-                                                } else {
-                                                    handleUpdateStockChange(row.ProductName, newValue);
-                                                }
+                                                    // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
+                                                    if (newValue === "" || newValue === "0") {
+                                                        handleUpdateStockChange(row.ProductName, "");
+                                                    } else {
+                                                        handleUpdateStockChange(row.ProductName, newValue);
+                                                    }
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") {
+                                                        handleUpdateStockChange(row.ProductName, ""); // ล้างค่า 0 ออก
+                                                    }
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") {
+                                                        handleUpdateStockChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
+                                                    }
+                                                }}
+                                            />
+                                        </Paper>
+                                    </Grid>
+                                </React.Fragment>
+                            ))
+                            :
+                            sortedReport.map((row) => (
+                                <React.Fragment>
+                                    {/* {row.Difference === 0 || row.Difference === undefined && setSave(false)} */}
+                                    <Grid item xs={5} md={2} lg={1}>
+                                        <Box
+                                            sx={{
+                                                backgroundColor: row.Color,
+                                                borderRadius: 3,
+                                                textAlign: "center",
+                                                paddingTop: 2,
+                                                paddingBottom: 1
                                             }}
-                                            onFocus={(e) => {
-                                                if (e.target.value === "0") {
-                                                    handleUpdateStockChange(row.ProductName, ""); // ล้างค่า 0 ออก
-                                                }
-                                            }}
-                                            onBlur={(e) => {
-                                                if (e.target.value === "") {
-                                                    handleUpdateStockChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
-                                                }
-                                            }}
-                                            disabled={setting ? true : false}
-                                        />
-                                    </Paper>
-                                </Grid>
-                            </React.Fragment>
-                        ))
+                                            disabled
+                                        >
+                                            <Typography variant="h5" fontWeight="bold" gutterBottom>{row.ProductName}</Typography>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={3.5} md={2} lg={1.5}>
+                                        <Typography variant="subtitle2" fontWeight="bold" color={setting && "textDisabled"} gutterBottom>รับเข้า</Typography>
+                                        <Paper component="form" sx={{ marginTop: -1 }}>
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                fullWidth
+                                                value={updateVolumes[row.ProductName] ?? row.Delivered} // ใช้ ?? ป้องกัน undefined
+                                                onChange={(e) => {
+                                                    let newValue = e.target.value;
+
+                                                    // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
+                                                    newValue = newValue.replace(/^0+(?=\d)/, "");
+
+                                                    // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
+                                                    if (newValue === "" || newValue === "0") {
+                                                        handleUpdateVolumeChange(row.ProductName, "");
+                                                    } else {
+                                                        handleUpdateVolumeChange(row.ProductName, newValue);
+                                                    }
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") {
+                                                        handleUpdateVolumeChange(row.ProductName, ""); // ล้างค่า 0 ออก
+                                                    }
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") {
+                                                        handleUpdateVolumeChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
+                                                    }
+                                                }}
+                                                disabled={setting ? true : false}
+                                            />
+                                        </Paper>
+                                    </Grid>
+                                    <Grid item xs={3.5} md={2} lg={1.5}>
+                                        <Typography variant="subtitle2" fontWeight="bold" color={setting && "textDisabled"} gutterBottom>ปิดยอดสต็อก</Typography>
+                                        <Paper component="form" sx={{ marginTop: -1 }}>
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                fullWidth
+                                                value={updateStocks[row.ProductName] ?? row.OilBalance} // ใช้ ?? ป้องกัน undefined
+                                                onChange={(e) => {
+                                                    let newValue = e.target.value;
+
+                                                    // ลบ 0 ที่นำหน้าทันที และป้องกันการกรอก "0" ต่อท้าย
+                                                    newValue = newValue.replace(/^0+(?=\d)/, "");
+
+                                                    // ถ้าค่าเป็น "" หรือ "0" ให้แสดงเป็น ""
+                                                    if (newValue === "" || newValue === "0") {
+                                                        handleUpdateStockChange(row.ProductName, "");
+                                                    } else {
+                                                        handleUpdateStockChange(row.ProductName, newValue);
+                                                    }
+                                                }}
+                                                onFocus={(e) => {
+                                                    if (e.target.value === "0") {
+                                                        handleUpdateStockChange(row.ProductName, ""); // ล้างค่า 0 ออก
+                                                    }
+                                                }}
+                                                onBlur={(e) => {
+                                                    if (e.target.value === "") {
+                                                        handleUpdateStockChange(row.ProductName, 0); // ถ้าค่าว่างให้เป็น 0
+                                                    }
+                                                }}
+                                                disabled={setting ? true : false}
+                                            />
+                                        </Paper>
+                                    </Grid>
+                                </React.Fragment>
+                            ))
                 }
                 <Grid item xs={12}>
                     {/* <Divider sx={{
@@ -609,7 +699,7 @@ const GasStationDetail = (props) => {
                                         : gas.Stock === "ป่าแดด" ? "1px solid #B1A0C7"
                                             : ""
                     }} /> */}
-                    <Divider sx={{ border: "1px solid lightgray"}} />
+                    <Divider sx={{ border: "1px solid lightgray" }} />
                     <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
                         {/* <Button variant="contained" color="success" onClick={saveProduct}>
                                         บันทึก
@@ -621,26 +711,31 @@ const GasStationDetail = (props) => {
                                         บันทึก
                                     </Button>
                 */}{
-                            reports.length === 0 ?
+                            (reports.length === 0) ?
                                 <Button variant="contained" color="success" onClick={saveProduct}>
                                     บันทึก
                                 </Button>
                                 :
-                                (
-                                    setting ?
-                                        <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
-                                            แก้ไข
-                                        </Button>
-                                        :
-                                        <>
-                                            <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>
-                                                ยกเลิก
+                                allOilBalanceZero ?
+                                    <Button variant="contained" color="success" onClick={updateProduct}>
+                                        บันทึก
+                                    </Button>
+                                    :
+                                    (
+                                        setting ?
+                                            <Button variant="contained" color="warning" sx={{ marginRight: 3 }} onClick={() => setSetting(false)}>
+                                                แก้ไข
                                             </Button>
-                                            <Button variant="contained" color="success" onClick={updateProduct}>
-                                                บันทึก
-                                            </Button>
-                                        </>
-                                )
+                                            :
+                                            <>
+                                                <Button variant="contained" color="error" sx={{ marginRight: 3 }} onClick={() => setSetting(true)}>
+                                                    ยกเลิก
+                                                </Button>
+                                                <Button variant="contained" color="success" onClick={updateProduct}>
+                                                    บันทึก
+                                                </Button>
+                                            </>
+                                    )
                             //)
                         }
                     </Box>
@@ -732,7 +827,7 @@ const GasStationDetail = (props) => {
                             </React.Fragment>
                         ))}
                         <Grid item xs={12} textAlign="center">
-                            <Divider sx={{ border: "1px solid lightgray" , mb: 2 }} />
+                            <Divider sx={{ border: "1px solid lightgray", mb: 2 }} />
                             <Button variant="contained" color="success" onClick={handleSave}>
                                 บันทึก
                             </Button>

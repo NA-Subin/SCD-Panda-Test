@@ -30,7 +30,7 @@ import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import OilBarrelIcon from "@mui/icons-material/OilBarrel";
 import theme from "../../theme/theme";
 import { database } from "../../server/firebase";
-import GasStationsDetail from "./gasstations/GasStationsDetail";
+import GasStationsDetail from "./gasstation/GasStationsDetail";
 import StockDetail from "./stock/StockDetail";
 import InsertGasStation from "./InsertGasStation";
 import { useGasStationData } from "../../server/provider/GasStationProvider";
