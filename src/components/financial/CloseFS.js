@@ -1096,7 +1096,7 @@ const CloseFS = () => {
                     const found = row.Registrations.find(
                         r => Number(r.Registration.split(":")[0]) === Number(dg.Registration.split(":")[0])
                     );
-                    return found ? (check ? found.TotalPrice : found.TotalAmount) : 0;
+                    return found ? (found.TotalPrice) : 0;
                 }),
             ];
             const excelRow = worksheet.addRow(dataRow);
@@ -1123,6 +1123,30 @@ const CloseFS = () => {
         const gTotalReportRow = worksheet.addRow(grandTotalReportRow);
         gTotalReportRow.font = { bold: true };
         gTotalReportRow.eachCell(cell => {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBBDEFB" } };
+            cell.numFmt = "#,##0.00";
+            cell.alignment = { horizontal: "right", vertical: "middle" };
+            cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+
+        // 7️⃣ รวมค่าใช้จ่ายทั้งหมด
+        const netIncomeReportRow = [
+            "",
+            "",
+            "ยอดกำไรสุทธิ",
+            "",
+            ((check ? grandTotal?.Amount : grandTotal?.Volume) - grandTotalReport?.TotalPrice || 0),
+            ...driverGroups.map(dg => {
+                const driverName = dg.Driver.split(":")[1];
+                const regis = Number(dg.Registration.split(":")[0]);
+                const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                const total2 = driverTotals[driverName] || { Volume: 0, Amount: 0 };
+                return (check ? total2.Amount : total2.Volume) - total1.TotalPrice;
+            }),
+        ];
+        const gTotalnetIncomeRow = worksheet.addRow(netIncomeReportRow);
+        gTotalnetIncomeRow.font = { bold: true };
+        gTotalnetIncomeRow.eachCell(cell => {
             cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE3F2FD" } };
             cell.numFmt = "#,##0.00";
             cell.alignment = { horizontal: "right", vertical: "middle" };
@@ -1638,7 +1662,9 @@ const CloseFS = () => {
                                                             </Typography>
                                                     } */}
                                                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ mt: 1 }}>
-                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.Volume)}
+                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+                                                            (check ? total.Amount : total.Volume)
+                                                        )}
                                                     </Typography>
                                                 </TableCell>
                                             );
@@ -1819,6 +1845,79 @@ const CloseFS = () => {
                                         left: 0,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
+                                        backgroundColor: "#c9d9efff",
+                                    }}
+                                >
+
+                                </TableCell>
+
+                                {/* ✅ ประเภท */}
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff", }}></TableCell>
+
+                                <TableCell
+                                    sx={{
+                                        textAlign: "right",
+                                        position: "sticky",
+                                        left: 50,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#c9d9efff",
+                                    }}
+                                >
+                                    <Typography variant="subtitle2" sx={{ marginRight: 2, lineHeight: 1.2, whiteSpace: "nowrap", fontWeight: "bold" }} gutterBottom>
+                                        รวมค่าใช้จ่าย
+                                    </Typography>
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff", }}></TableCell>
+                                <TableCell
+                                    sx={{
+                                        textAlign: "right",
+                                        position: "sticky",
+                                        fontWeight: "bold",
+                                        left: 320,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
+                                        backgroundColor: "#c9d9efff",
+                                        paddingLeft: "15px !important",
+                                        paddingRight: "15px !important",
+                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                    }}
+                                >
+                                    {new Intl.NumberFormat("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    }).format((grandTotalReport?.TotalPrice) || 0)}
+                                </TableCell>
+                                {driverGroups.map((row) => {
+                                    const regis = Number(row.Registration.split(":")[0]);
+                                    const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+
+                                    return (
+                                        <TableCell
+                                            key={regis}
+                                            sx={{
+                                                textAlign: "right",
+                                                backgroundColor: "#c9d9efff",
+                                                paddingLeft: "15px !important",
+                                                paddingRight: "15px !important",
+                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                        >
+                                            <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
+                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.TotalPrice)}
+                                            </Typography>
+                                        </TableCell>
+                                    );
+                                })}
+                            </TableRow>
+                            <TableRow>
+                                <TableCell
+                                    sx={{
+                                        textAlign: "center",
+                                        position: "sticky",
+                                        left: 0,
+                                        zIndex: 4,
+                                        borderRight: "2px solid white",
                                         backgroundColor: "#e3f2fd",
                                     }}
                                 >
@@ -1839,7 +1938,7 @@ const CloseFS = () => {
                                     }}
                                 >
                                     <Typography variant="subtitle2" sx={{ marginRight: 2, lineHeight: 1.2, whiteSpace: "nowrap", fontWeight: "bold" }} gutterBottom>
-                                        รวมค่าใช้จ่าย
+                                        ยอดกำไรสุทธิ
                                     </Typography>
                                 </TableCell>
                                 <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd", }}></TableCell>
@@ -1860,11 +1959,13 @@ const CloseFS = () => {
                                     {new Intl.NumberFormat("en-US", {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
-                                    }).format(grandTotalReport?.TotalPrice || 0)}
+                                    }).format((check ? grandTotal?.Amount : grandTotal?.Volume) - (grandTotalReport?.TotalPrice))}
                                 </TableCell>
                                 {driverGroups.map((row) => {
+                                    const driverName = row.Driver.split(":")[1];
                                     const regis = Number(row.Registration.split(":")[0]);
-                                    const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                                    const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                                    const total2 = driverTotals[driverName] || { Volume: 0, Amount: 0 };
 
                                     return (
                                         <TableCell
@@ -1878,7 +1979,7 @@ const CloseFS = () => {
                                             }}
                                         >
                                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total.TotalPrice)}
+                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((check ? total2.Amount : total2.Volume) - (total1.TotalPrice))}
                                             </Typography>
                                         </TableCell>
                                     );

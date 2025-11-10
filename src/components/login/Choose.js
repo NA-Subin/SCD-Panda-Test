@@ -119,7 +119,7 @@ const Choose = () => {
         <Grid item xs={12}>
           <Typography variant="h3" fontWeight="bold" textAlign="center">กรุณาเลือกหน้าที่ต้องการ</Typography>
         </Grid>
-        {
+        {/* {
           showGasStation && (
             <Grid item xs={12} sm={6}>
               <Button variant="contained"
@@ -140,7 +140,7 @@ const Choose = () => {
               </Button>
             </Grid>
           )
-        }
+        } */}
 
         {
           showDashboard && (
@@ -182,6 +182,7 @@ const Choose = () => {
               </Button>
             </Grid>
           )}
+        <Grid item xs={12} sm={3}></Grid>
         {
           showQuotation &&
           <Grid item xs={12} sm={6}>
@@ -202,6 +203,7 @@ const Choose = () => {
             </Button>
           </Grid>
         }
+        <Grid item xs={12} sm={3}></Grid>
       </Grid>
     </Container>
   );

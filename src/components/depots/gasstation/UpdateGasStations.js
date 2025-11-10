@@ -50,7 +50,11 @@ const UpdateGasStations = (props) => {
         selectedDate,
         isFirst,                // แถวแรกของ stock
         downHoleByProduct,      // มาจากหน้าหลัก
-        onProductChange } = props;
+        onProductChange,
+        handleSave,
+        stationId,
+        check
+    } = props;
     const [name, setName] = useState(gasStation.Name);
     const [shortName, setShortName] = useState(gasStation.ShortName);
     const [number, setNumber] = useState(gasStation.OilWellNumber);
@@ -162,10 +166,10 @@ const UpdateGasStations = (props) => {
             updated[index].PeriodDisplay = parseFloat(updated[index].Period) || (parseFloat(updated[index].Volume) - parseFloat(updated[index].Squeeze));
 
             // ส่งกลับไปยัง parent
-            onProductChange(gasStation.id, updated);
+            onProductChange(gasStation.id, updated, "Products"); // ✅ เพิ่ม type
         } else {
             // อัปเดต Driver1 / Driver2 ของ station
-            onProductChange(gasStation.id, { ...products, [field]: value }); // field = "Driver1" หรือ "Driver2"
+            onProductChange(gasStation.id, value, field); // ส่ง value + field name
         }
     };
 
@@ -179,6 +183,7 @@ const UpdateGasStations = (props) => {
             .child(day)
             .update(products)
             .then(() => {
+                ShowSuccess("บันทึกข้อมูลสำเร็จ");
                 console.log("✅ Updated success");
             })
             .catch((error) => {
@@ -246,12 +251,17 @@ const UpdateGasStations = (props) => {
                                                 marginLeft: 0.5,
                                             }}>
                                             <Autocomplete
-                                                freeSolo // อนุญาตให้พิมพ์เองได้
-                                                options={truckDriver.map((row) => row.Driver.split(":")[1]?.split(" ")[0])}
-                                                filterOptions={filterOptions} // ใช้ฟังก์ชันกรองตัวเลือก
-                                                value={products?.Driver1 || ""}
-                                                // onChange={(event, newValue) => setDriver1(newValue)}
-                                                // onChange={(event, newValue) => handleProductChange(null, "Driver1", newValue)}
+                                                freeSolo
+                                                options={truckDriver.map(row => row.Driver)} // เก็บเต็ม: "1:สมส่วน สุขสม"
+                                                getOptionLabel={(option) => {
+                                                    // แสดงเฉพาะชื่อแรก (สมส่วน)
+                                                    return option?.split(":")[1]?.split(" ")[0] || "";
+                                                }}
+                                                isOptionEqualToValue={(option, value) => option === value} // เทียบค่าที่เก็บเต็ม
+                                                value={products?.Driver1 || ""} // value เก็บเต็ม: "1:สมส่วน สุขสม"
+                                                onChange={(event, newValue) => {
+                                                    handleProductChange(null, "Driver1", newValue || ""); // เก็บเต็ม
+                                                }}
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
@@ -271,7 +281,6 @@ const UpdateGasStations = (props) => {
                                                 ListboxProps={{
                                                     sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px", marginLeft: -1.5 },
                                                 }}
-                                                getOptionLabel={(option) => option || ""} // ✅ ปรับตรงนี้
                                             />
                                         </Paper>
                                     </Grid>
@@ -284,12 +293,17 @@ const UpdateGasStations = (props) => {
                                                 marginLeft: 0.5
                                             }}>
                                             <Autocomplete
-                                                freeSolo // อนุญาตให้พิมพ์เองได้
-                                                options={truckDriver.map((row) => row.Driver.split(":")[1]?.split(" ")[0])} // เอาเฉพาะชื่อ
-                                                filterOptions={filterOptions} // ใช้ฟังก์ชันกรองตัวเลือก
-                                                value={products?.Driver2 || ""}
-                                                // onChange={(event, newValue) => setDriver2(newValue)}
-                                                // onChange={(event, newValue) => handleProductChange(null, "Driver2", newValue)}
+                                                freeSolo
+                                                options={truckDriver.map(row => row.Driver)} // เก็บเต็ม: "1:สมส่วน สุขสม"
+                                                getOptionLabel={(option) => {
+                                                    // แสดงเฉพาะชื่อแรก (สมส่วน)
+                                                    return option?.split(":")[1]?.split(" ")[0] || "";
+                                                }}
+                                                isOptionEqualToValue={(option, value) => option === value} // เทียบค่าที่เก็บเต็ม
+                                                value={products?.Driver2 || ""} // value เก็บเต็ม: "1:สมส่วน สุขสม"
+                                                onChange={(event, newValue) => {
+                                                    handleProductChange(null, "Driver2", newValue || ""); // เก็บเต็ม
+                                                }}
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
@@ -309,7 +323,6 @@ const UpdateGasStations = (props) => {
                                                 ListboxProps={{
                                                     sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px", marginLeft: -1.5 },
                                                 }}
-                                                getOptionLabel={(option) => option || ""} // ✅ ปรับตรงนี้
                                             />
                                         </Paper>
                                     </Grid>
@@ -560,7 +573,7 @@ const UpdateGasStations = (props) => {
                                             <TextField
                                                 size="small"
                                                 type={isFieldFocused(index, "Pending1") ? "number" : "text"}
-                                                label={products.Driver1}
+                                                label={products.Driver1 ? products.Driver1.split(":")[1]?.split(" ")[0] : ""}
                                                 InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
                                                 value={isFieldFocused(index, "Pending1")
                                                     ? s.Pending1 || 0
@@ -611,7 +624,7 @@ const UpdateGasStations = (props) => {
                                             <TextField
                                                 size="small"
                                                 type={isFieldFocused(index, "Pending2") ? "number" : "text"}
-                                                label={driver2}
+                                                label={products.Driver2 ? products.Driver2.split(":")[1]?.split(" ")[0] : ""}
                                                 InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
                                                 value={isFieldFocused(index, "Pending2")
                                                     ? s.Pending2 || 0
@@ -775,19 +788,22 @@ const UpdateGasStations = (props) => {
                                     {/* ถ้าเป็นแถวแรก (index === 0) ให้เพิ่ม rowSpan, แถวอื่นไม่ต้องแสดง cell นี้ */}
                                     {index === 0 ? (
                                         <TableCell rowSpan={products?.Products.length}>
-                                            <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main }}>
-                                                <Button
-                                                    color="inherit"
-                                                    fullWidth
-                                                    onClick={handleUpdate}
-                                                    sx={{ flexDirection: "column", gap: 0.5 }}
-                                                >
-                                                    <SaveIcon fontSize="large" sx={{ color: "white" }} />
-                                                    <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
-                                                        บันทึก
-                                                    </Typography>
-                                                </Button>
-                                            </Paper>
+                                            {
+                                                check && (<Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main }}>
+                                                    <Button
+                                                        color="inherit"
+                                                        fullWidth
+                                                        onClick={() => handleSave(stationId, gasStation, products)}
+                                                        sx={{ flexDirection: "column", gap: 0.5 }}
+                                                    >
+                                                        <SaveIcon fontSize="large" sx={{ color: "white" }} />
+                                                        <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                                            บันทึก
+                                                        </Typography>
+                                                    </Button>
+                                                </Paper>
+                                                )
+                                            }
                                         </TableCell>
                                     ) : ""}
                                 </TableRow>

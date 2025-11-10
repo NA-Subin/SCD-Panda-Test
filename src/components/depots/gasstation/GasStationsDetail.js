@@ -40,6 +40,7 @@ import { database } from "../../../server/firebase";
 import UpdateGasStations from "./UpdateGasStations";
 import { useGasStationData } from "../../../server/provider/GasStationProvider";
 import { formatThaiSlash } from "../../../theme/DateTH";
+import { ShowError, ShowSuccess, ShowWarning } from "../../sweetalert/sweetalert";
 
 const GasStationsDetail = (props) => {
     const { gasStation } = props;
@@ -174,59 +175,92 @@ const GasStationsDetail = (props) => {
     };
 
     const getStationReportsArray = (stocks, gasStationOil, selectedDate, Squeeze = 800) => {
-        console.log("getStationReportsArray start", { stocksLen: stocks?.length, gasStationOilLen: gasStationOil?.length, selectedDate });
+        console.log("getStationReportsArray start", {
+            stocksLen: stocks?.length,
+            gasStationOilLen: gasStationOil?.length,
+            selectedDate,
+        });
 
         if (!Array.isArray(gasStationOil) || !gasStationOil.length) {
             console.warn("gasStationOil empty or not array");
             return [];
         }
 
-        // ✅ ใช้เก็บ stockId ที่เจอไปแล้ว (เพื่อระบุปั๊มแรกของแต่ละ Stock)
+        const selected = dayjs(selectedDate);
+
+        // ✅ Function หา last report date ของ station
+        const getLastReportDate = (reportObj) => {
+            if (!reportObj) return null;
+            const dates = [];
+
+            Object.keys(reportObj).forEach((y) =>
+                Object.keys(reportObj[y]).forEach((m) =>
+                    Object.keys(reportObj[y][m]).forEach((d) =>
+                        dates.push(dayjs(`${y}-${m}-${d}`, "YYYY-M-D"))
+                    )
+                )
+            );
+
+            // ✅ fix no plugin error
+            return dates.length ? dayjs(Math.max(...dates.map(d => d.valueOf()))) : null;
+        };
+
+        // ✅ Pre-compute lastDate ของทุก station
+        const lastDateMap = new Map();
+        gasStationOil.forEach((st) => {
+            lastDateMap.set(st.id, getLastReportDate(st.Report));
+        });
+
         const firstStationOfStock = new Set();
 
         return gasStationOil.map((station, stationIndex) => {
-            // debug เบื้องต้น
-            console.log(`--- stationIndex ${stationIndex} id:${station?.id} Stock:${station?.Stock} Name:`, station?.Name);
+            console.log(`--- stationIndex ${stationIndex} id:${station?.id} Stock:${station?.Stock}`);
 
-            // หา stock ที่เกี่ยวข้อง (safety)
             const stockId = Number((station?.Stock || "").toString().split(":")[0]);
-            const stock = stocks.find(s => s.id === stockId);
-            console.log("linked stockId, stock:", stockId, stock?.Name);
+            const stock = stocks.find((s) => s.id === stockId);
 
-            // ✅ ตรวจสอบว่าเป็นปั๊มแรกของ Stock นี้หรือไม่
             const isFirst = !firstStationOfStock.has(stockId);
-            if (isFirst) {
-                firstStationOfStock.add(stockId);
-            }
-            console.log("firstStationOfStock : ", firstStationOfStock, "isFirst : ", isFirst);
+            if (isFirst) firstStationOfStock.add(stockId);
 
-            const y = dayjs(selectedDate).format("YYYY")
-            const m = dayjs(selectedDate).format("M")
-            const d = dayjs(selectedDate).format("D")
+            // ✅ LastDate ของ station นี้
+            const lastDate = lastDateMap.get(station.id);
 
-            const reportForDate = station?.Report?.[y]?.[m]?.[d]
+            // ✅ RefDate สำหรับ Squeeze/EstimateSell
+            // ถ้า selected > lastDate → ใช้ lastDate
+            // else → ใช้เมื่อวาน
+            const squeezeRefDate =
+                lastDate && selected.isAfter(lastDate)
+                    ? lastDate
+                    : selected.subtract(1, "day");
 
-            // หาวันก่อนหน้า
-            const prev = dayjs(selectedDate).subtract(1, "day")
-            const py = prev.format("YYYY")
-            const pm = prev.format("M")
-            const pd = prev.format("D")
+            // ✅ Volume ต้องใช้ "เมื่อวาน" เสมอ
+            const volumeRefDate = selected.subtract(1, "day");
 
-            const reportForPrevDate = station?.Report?.[py]?.[pm]?.[pd]
+            const vY = volumeRefDate.format("YYYY");
+            const vM = volumeRefDate.format("M");
+            const vD = volumeRefDate.format("D");
+            const reportForVolume = station?.Report?.[vY]?.[vM]?.[vD];
 
+            const rY = squeezeRefDate.format("YYYY");
+            const rM = squeezeRefDate.format("M");
+            const rD = squeezeRefDate.format("D");
+            const reportForRef = station?.Report?.[rY]?.[rM]?.[rD];
+
+            const y = selected.format("YYYY");
+            const m = selected.format("M");
+            const d = selected.format("D");
+            const reportForDate = station?.Report?.[y]?.[m]?.[d];
+
+            // ✅ ถ้ามี report ของวันที่เลือก
             if (reportForDate) {
-                console.log(`station ${station.id} has existing report for ${selectedDate}`);
+                if (reportForVolume && Array.isArray(reportForDate.Products)) {
+                    reportForDate.Products = reportForDate.Products.map((todayItem) => {
+                        const yesterdayItem = reportForVolume.Products?.find(
+                            (p) => p.ProductName === todayItem.ProductName
+                        );
 
-                // ถ้ามี report เมื่อวาน → ตรวจค่า Volume vs YesterDay
-                if (reportForPrevDate && Array.isArray(reportForDate.Products)) {
-                    reportForDate.Products = reportForDate.Products.map(todayItem => {
-
-                        const yesterdayItem = reportForPrevDate.Products?.find(
-                            p => p.ProductName === todayItem.ProductName
-                        )
-
-                        // ✅ ถ้ามีข้อมูลเมื่อวาน
-                        const parseNum = (val) => Number(String(val || 0).replace(/,/g, "").trim()) || 0;
+                        const parseNum = (val) =>
+                            Number(String(val || 0).replace(/,/g, "").trim()) || 0;
 
                         if (yesterdayItem) {
                             const prevVol = parseNum(yesterdayItem.Volume);
@@ -234,119 +268,116 @@ const GasStationsDetail = (props) => {
                             const todayYsd = parseNum(todayItem.YesterDay);
 
                             let newYesterDay = todayYsd;
-                            let newSell = parseNum(todayItem.Sell); // default ใช้ค่าเก่า
+                            let newSell = parseNum(todayItem.Sell);
 
                             if (todayYsd !== prevVol) {
                                 newYesterDay = prevVol;
-                                newSell = prevVol - todayVol; // คำนวณใหม่
+                                newSell = prevVol - todayVol;
                             }
 
                             return {
                                 ...todayItem,
                                 YesterDay: newYesterDay,
-                                Sell: newSell
+                                Sell: newSell,
                             };
                         }
-
-                        return todayItem
-                    })
+                        return todayItem;
+                    });
                 }
-                return reportForDate
+                return reportForDate;
             }
 
-            // เตรียม fallbackProducts ให้เป็น Array จริง
+            // ✅ fallback products
             let fallbackProducts = [];
-            if (Array.isArray(station?.Products) && station.Products.length) {
+            if (Array.isArray(station?.Products) && station.Products.length)
                 fallbackProducts = station.Products;
-                console.log("using station.Products", fallbackProducts.length);
-            } else if (Array.isArray(stock?.Products) && stock.Products.length) {
+            else if (Array.isArray(stock?.Products) && stock.Products.length)
                 fallbackProducts = stock.Products;
-                console.log("using stock.Products", fallbackProducts.length);
-            } else if (station?.Products && typeof station.Products === "object") {
-                // array-like/object -> convert
+            else if (station?.Products && typeof station.Products === "object")
                 fallbackProducts = Object.values(station.Products);
-                console.log("converted station.Products (object->array)", fallbackProducts.length);
-            } else if (stock?.Products && typeof stock.Products === "object") {
+            else if (stock?.Products && typeof stock.Products === "object")
                 fallbackProducts = Object.values(stock.Products);
-                console.log("converted stock.Products (object->array)", fallbackProducts.length);
-            } else {
-                console.warn("no fallbackProducts for station", station.id);
-            }
 
-            // Final safety: ensure array
-            if (!Array.isArray(fallbackProducts)) {
+            if (!Array.isArray(fallbackProducts))
                 fallbackProducts = Array.from(fallbackProducts || []);
-            }
 
-            // ถ้าว่างเปล่า ให้คืน Products: []
             if (!fallbackProducts.length) {
-                console.warn("fallbackProducts empty for station", station.id);
                 return {
-                    Date: dayjs(selectedDate).format("DD/MM/YYYY"),
+                    Date: selected.format("DD/MM/YYYY"),
                     Products: [],
                     Driver1: "",
-                    Driver2: ""
+                    Driver2: "",
+                    stationId: station.id,
                 };
             }
 
-            const defaultProducts = fallbackProducts.map((p, idx) => {
+            const defaultProducts = fallbackProducts
+                .map((p) => {
+                    let volYesterday = 0;
+                    let prevSqueeze = 0;
+                    let prevEstimateSell = 0;
 
-                // 3️⃣ หา Volume จากวันก่อนหน้า (match ด้วย ProductName)
-                let prevVolume = 0;
-                let prevSqueeze = 0;
-                let prevEstimateSell = 0;
+                    // ✅ ดึง Volume จากเมื่อวานเสมอ
+                    if (reportForVolume?.Products) {
+                        const v = reportForVolume.Products.find(
+                            (item) => item.ProductName === p?.Name
+                        );
+                        volYesterday = Number(v?.Volume ?? 0);
+                    }
 
-                if (reportForPrevDate?.Products) {
-                    const prevProduct = reportForPrevDate.Products.find(
-                        item => item?.ProductName === p?.Name
-                    );
-                    prevVolume = prevProduct?.Volume != null ? Number(prevProduct.Volume) : 0;
-                    prevSqueeze = prevProduct?.Squeeze != null ? Number(prevProduct.Squeeze) : 0;
-                    prevEstimateSell = prevProduct?.EstimateSell != null ? Number(prevProduct.EstimateSell) : 0;
-                }
+                    // ✅ ดึง Squeeze, EstimateSell จาก ref (ล่าสุด หรือ เมื่อวาน)
+                    if (reportForRef?.Products) {
+                        const r = reportForRef.Products.find(
+                            (item) => item.ProductName === p?.Name
+                        );
+                        prevSqueeze = Number(r?.Squeeze ?? 0);
+                        prevEstimateSell = Number(r?.EstimateSell ?? 0);
+                    }
 
+                    const row = {
+                        ProductName: (p?.Name ?? "").toString(),
+                        Capacity: Number(p?.Capacity) || 0,
+                        Color: p?.Color ?? "",
+                        Volume: Number(p?.Volume) || 0,
 
-                const row = {
-                    ProductName: (p?.Name ?? "").toString(),
-                    Capacity: Number(p?.Capacity) || 0,
-                    Color: p?.Color ?? "",
-                    Volume: Number(p?.Volume) || 0,
-                    Squeeze: isFirst ? (Number(prevSqueeze ?? Squeeze) || Squeeze || 0) : 0,
-                    Delivered: Number(p?.Delivered) || 0,
-                    Pending1: Number(p?.Pending1) || 0,
-                    Pending2: Number(p?.Pending2) || 0,
-                    Pending3: Number(p?.Pending3) || 0,
-                    EstimateSell: Number(prevEstimateSell) || 0,
-                    Period: 0,
-                    DownHole: Number(p?.DownHole) || 0,
-                    YesterDay: Number(prevVolume) || 0,
-                    Sell: Number(prevVolume) - Number(p?.Volume),
-                    TotalVolume: 0,
-                    OilBalance: 0,
-                    Difference: 0
-                };
+                        // ✅ Logic ใหม่
+                        Squeeze: isFirst ? (prevSqueeze || Squeeze || 0) : 0,
+                        EstimateSell: prevEstimateSell || 0,
 
-                const Period = safeCall(calculatePeriod, row, "calculatePeriod");
-                const TotalVolume = safeCall(calculateTotalVolume, row, "calculateTotalVolume");
+                        Delivered: Number(p?.Delivered) || 0,
+                        Pending1: Number(p?.Pending1) || 0,
+                        Pending2: Number(p?.Pending2) || 0,
+                        Pending3: Number(p?.Pending3) || 0,
+                        Period: 0,
+                        DownHole: Number(p?.DownHole) || 0,
 
-                return {
-                    ...row,
-                    Period,
-                    TotalVolume,
-                    PeriodDisplay: (Number(Period) || (row.Volume - row.Squeeze)),
-                    DownHoleDisplay: row.Capacity - Math.round(Number(row.DownHole) || 0)
-                };
+                        // ✅ Volume ของเมื่อวาน
+                        YesterDay: volYesterday,
+                        Sell: volYesterday - Number(p?.Volume),
+                        TotalVolume: 0,
+                        OilBalance: 0,
+                        Difference: 0,
+                    };
 
-            }).sort((a, b) => {
-                const ai = customOrder.indexOf(a.ProductName);
-                const bi = customOrder.indexOf(b.ProductName);
-                return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-            });
+                    const Period = safeCall(calculatePeriod, row, "calculatePeriod");
+                    const TotalVolume = safeCall(calculateTotalVolume, row, "calculateTotalVolume");
 
-            console.log(`station ${station.id} defaultProducts length`, defaultProducts.length);
-            // return report object
+                    return {
+                        ...row,
+                        Period,
+                        TotalVolume,
+                        PeriodDisplay: Period || row.Volume - row.Squeeze,
+                        DownHoleDisplay: row.Capacity - Math.round(row.DownHole || 0),
+                    };
+                })
+                .sort((a, b) => {
+                    const ai = customOrder.indexOf(a.ProductName);
+                    const bi = customOrder.indexOf(b.ProductName);
+                    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                });
+
             return {
-                Date: dayjs(selectedDate).format("DD/MM/YYYY"),
+                Date: selected.format("DD/MM/YYYY"),
                 Products: defaultProducts,
                 Driver1: "",
                 Driver2: "",
@@ -357,15 +388,24 @@ const GasStationsDetail = (props) => {
 
     const STORAGE_KEY = "stationReports";
 
+    const prepareData = (data) => {
+        // ✅ เพิ่ม originalProducts / hasChanged เข้าไปทุก station
+        return data.map(st => ({
+            ...st,
+            originalProducts: JSON.parse(JSON.stringify(st.Products)), // clone ไว้เทียบ
+            hasChanged: false,
+        }));
+    };
+
     const [stationReports, setStationReports] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             const parsed = JSON.parse(saved);
             if (parsed.date === selectedDate) {
-                return parsed.data;
+                return prepareData(parsed.data);
             }
         }
-        return getStationReportsArray(stocks, gasStationOil, selectedDate, 800);
+        return prepareData(getStationReportsArray(stocks, gasStationOil, selectedDate, 800));
     });
 
     useEffect(() => {
@@ -373,32 +413,75 @@ const GasStationsDetail = (props) => {
         if (saved) {
             const parsed = JSON.parse(saved);
             if (parsed.date === selectedDate) {
-                // ✅ วันที่ยังเหมือนเดิม → ไม่ต้องคำนวณ ไม่ต้อง setState
-                return;
+                return; // ไม่ต้องโหลดใหม่
             }
         }
 
-        // ✅ คำนวณใหม่เฉพาะเมื่อวันที่เปลี่ยน
-        const newData = getStationReportsArray(stocks, gasStationOil, selectedDate, 800);
+        const newData = prepareData(getStationReportsArray(stocks, gasStationOil, selectedDate, 800));
         setStationReports(newData);
 
-        // ✅ Save cache
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
             date: selectedDate,
             data: newData
         }));
 
-    }, [selectedDate]);  // 👈 เหลือ dependency แค่ selectedDate เท่านั้น
+    }, [selectedDate]);
 
     // ฟังก์ชันอัปเดตจาก UpdateGasStations
-    const handleProductChange = (stationId, updatedProducts) => {
+    const handleProductChange = (stationId, valueOrProducts, fieldOrType) => {
         setStationReports(prev =>
-            prev.map(s =>
-                s.stationId === stationId
-                    ? { ...s, Products: updatedProducts }
-                    : s
-            )
+            prev.map(s => {
+                if (s.stationId !== stationId) return s;
+
+                // ถ้า fieldOrType = "Products" → อัปเดต Products
+                if (fieldOrType === "Products") {
+                    const original = s.original ?? JSON.parse(JSON.stringify(s.Products));
+                    const fields = ["Volume", "Squeeze", "Pending1", "Pending2", "Pending3", "EstimateSell"];
+                    const changed = valueOrProducts.some((p, i) =>
+                        fields.some(f => String(original[i]?.[f] ?? "") !== String(p[f] ?? ""))
+                    );
+
+                    return { ...s, Products: valueOrProducts, hasChanged: changed, original };
+                }
+
+                // ถ้า fieldOrType = "Driver1" หรือ "Driver2"
+                return { ...s, [fieldOrType]: valueOrProducts, hasChanged: true };
+            })
         );
+    };
+
+    // ✅ เมื่อกด Save
+    const handleSave = async (stationId, gasStation, products) => {
+        const year = dayjs(selectedDate).format("YYYY");
+        const month = dayjs(selectedDate).format("M");
+        const day = dayjs(selectedDate).format("D");
+
+        try {
+            // 1️⃣ อัปเดตไป Firebase
+            await database
+                .ref(`/depot/gasStations/${gasStation.id - 1}/Report/${year}/${month}`)
+                .child(day)
+                .update(products);
+
+            ShowSuccess("บันทึกข้อมูลสำเร็จ");
+            console.log("✅ Updated success");
+
+            // 2️⃣ รีเซ็ต hasChanged + original ให้ UI update
+            setStationReports(prev =>
+                prev.map(s =>
+                    s.stationId === stationId
+                        ? {
+                            ...s,
+                            hasChanged: false,
+                            original: JSON.parse(JSON.stringify(s.Products)),
+                        }
+                        : s
+                )
+            );
+        } catch (error) {
+            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+            console.error("Error updating data:", error);
+        }
     };
 
     console.log("stocks : ", stocks);
@@ -479,7 +562,16 @@ const GasStationsDetail = (props) => {
                                     control={
                                         <Checkbox
                                             checked={checkStock === row.Name}
-                                            onChange={() => setCheckStock(row.Name)}
+                                            onChange={() => {
+                                                // ✅ เช็คว่ามี station ไหนถูกแก้
+                                                const hasUnsaved = stationReports.some(st => st.hasChanged);
+                                                if (hasUnsaved) {
+                                                    ShowWarning("กรุณาบันทึกการแก้ไขข้อมูลก่อนเปลี่ยน Stock!");
+                                                    return; // ❌ หยุดไม่ให้เปลี่ยนค่า
+                                                }
+
+                                                setCheckStock(row.Name); // ✅ ถ้าไม่มี unsaved จะเปลี่ยนค่าได้
+                                            }}
                                         //disabled={isDataUpdated} // 🔹 ปิดการเลือกถ้ามีการเปลี่ยนแปลง
                                         />
                                     }
@@ -525,6 +617,9 @@ const GasStationsDetail = (props) => {
                                                     onProductChange={handleProductChange}
                                                     downHoleByProduct={downHoleByProduct}
                                                     isFirst={matchCount === 1}
+                                                    handleSave={handleSave}           // 👈 เพิ่มตรงนี้
+                                                    check={stationReports[index]?.hasChanged}  // ✅ ใช้ optional chaining
+                                                    stationId={stationReports[index]?.stationId}   // ✅ ส่ง stationId มาด้วย
                                                 />
                                             );
                                         }
