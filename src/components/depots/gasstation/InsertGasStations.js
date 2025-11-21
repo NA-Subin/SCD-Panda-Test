@@ -166,11 +166,11 @@ const InsertGasStations = (props) => {
                 Stock: `${stocks?.id}:${stocks?.Name}`,
                 Address:
                     (no === "-" ? "-" : no) +
-                    (village === "-" ? "" : "," + village) +
-                    (subDistrict === "-" ? "" : "," + subDistrict) +
-                    (district === "-" ? "" : "," + district) +
-                    (province === "-" ? "" : "," + province) +
-                    (zipCode === "-" ? "" : "," + zipCode)
+                    (village === "-" ? "" : ` ${village}`) +
+                    (subDistrict === "-" ? "" : ` ${subDistrict}`) +
+                    (district === "-" ? "" : ` ${district}`) +
+                    (province === "-" ? "" : ` ${province}`) +
+                    (zipCode === "-" ? "" : ` ${zipCode}`)
                 ,
                 lat: lat,
                 lng: lng

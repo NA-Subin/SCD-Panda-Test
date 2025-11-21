@@ -125,11 +125,11 @@ const InsertStock = (props) => {
                 Volume: totalVolume,
                 Address:
                     (no === "-" ? "-" : no) +
-                    (village === "-" ? "" : "," + village) +
-                    (subDistrict === "-" ? "" : "," + subDistrict) +
-                    (district === "-" ? "" : "," + district) +
-                    (province === "-" ? "" : "," + province) +
-                    (zipCode === "-" ? "" : "," + zipCode)
+                    (village === "-" ? "" : ` ${village}`) +
+                    (subDistrict === "-" ? "" : ` ${subDistrict}`) +
+                    (district === "-" ? "" : ` ${district}`) +
+                    (province === "-" ? "" : ` ${province}`) +
+                    (zipCode === "-" ? "" : ` ${zipCode}`)
                 ,
                 lat: lat,
                 lng: lng
@@ -199,19 +199,19 @@ const InsertStock = (props) => {
                             fullWidth
                             value={item.Product}
                             error={(products.filter((p) => p.Product === item.Product).length > 1) && item.Product !== ""} // แสดง error เมื่อมีค่าซ้ำและไม่ใช่ค่าว่าง
-                    helperText={
-                        (products.filter((p) => p.Product === item.Product).length > 1) && item.Product !== ""
-                            ? "*ชื่อสินค้านี้ซ้ำกัน* --กรณีต้องการเพิ่มสินค้าให้ทำตามนี้ " + item.Product + "("+(products.filter((p) => p.Product === item.Product && p.Product !== "").indexOf(item) + 1)+")"
-                            : ""
-                    } // แสดงข้อความเตือนเมื่อค่าซ้ำ
-                    onChange={(e) =>
-                        handleProductChange(index, "Product", e.target.value)
-                    }
-                    sx={{
-                        '& .MuiFormHelperText-root': {
-                            color: 'orange', // สีตัวอักษรของข้อความเตือน
-                        },
-                    }}
+                            helperText={
+                                (products.filter((p) => p.Product === item.Product).length > 1) && item.Product !== ""
+                                    ? "*ชื่อสินค้านี้ซ้ำกัน* --กรณีต้องการเพิ่มสินค้าให้ทำตามนี้ " + item.Product + "(" + (products.filter((p) => p.Product === item.Product && p.Product !== "").indexOf(item) + 1) + ")"
+                                    : ""
+                            } // แสดงข้อความเตือนเมื่อค่าซ้ำ
+                            onChange={(e) =>
+                                handleProductChange(index, "Product", e.target.value)
+                            }
+                            sx={{
+                                '& .MuiFormHelperText-root': {
+                                    color: 'orange', // สีตัวอักษรของข้อความเตือน
+                                },
+                            }}
                         />
                     </Grid>
                     <Grid item sm={1} xs={3}>
@@ -225,7 +225,7 @@ const InsertStock = (props) => {
                             ความจุ
                         </Typography>
                     </Grid>
-                    <Grid item sm={numberAdd === 1 ? 3 : 2.5}  xs={numberAdd === 1 ? 7 : 6.5}>
+                    <Grid item sm={numberAdd === 1 ? 3 : 2.5} xs={numberAdd === 1 ? 7 : 6.5}>
                         <TextField
                             size="small"
                             fullWidth
@@ -240,15 +240,15 @@ const InsertStock = (props) => {
                             value={item.Color = (() => {
                                 const baseProduct = item.Product.replace(/\(\d+\)$/, ""); // ตัดตัวเลขในวงเล็บออก
                                 return baseProduct === "G91" ? "#92D050" :
-                                       baseProduct === "G95" ? "#FFC000" :
-                                       baseProduct === "B7" ? "#FFFF99" :
-                                       baseProduct === "B95" ? "#B7DEE8" :
-                                       baseProduct === "B10" ? "#32CD32" :
-                                       baseProduct === "B20" ? "#228B22" :
-                                       baseProduct === "E20" ? "#C4BD97" :
-                                       baseProduct === "E85" ? "#0000FF" :
-                                       baseProduct === "PWD" ? "#F141D8" :
-                                       "#FFD700";
+                                    baseProduct === "G95" ? "#FFC000" :
+                                        baseProduct === "B7" ? "#FFFF99" :
+                                            baseProduct === "B95" ? "#B7DEE8" :
+                                                baseProduct === "B10" ? "#32CD32" :
+                                                    baseProduct === "B20" ? "#228B22" :
+                                                        baseProduct === "E20" ? "#C4BD97" :
+                                                            baseProduct === "E85" ? "#0000FF" :
+                                                                baseProduct === "PWD" ? "#F141D8" :
+                                                                    "#FFD700";
                             })()}
                             onChange={(e) =>
                                 handleProductChange(index, "Color", e.target.value)
