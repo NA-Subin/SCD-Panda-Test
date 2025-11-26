@@ -1804,10 +1804,17 @@ const CloseFS = () => {
                                                 maximumFractionDigits: 2,
                                             }).format(row.TotalPrice || 0)}
                                         </TableCell>
-                                        {driverGroups.map((h, i) => {
-                                            const found = row.Registrations.find(
-                                                (dv) => Number(dv.Registration.split(":")[0]) === Number(h.Registration.split(":")[0])
-                                            );
+                                        {driverGroups.map((driver, i) => {
+                                            // หา registrations ที่ตรงกับ Registration หรือ RegistrationTail
+                                            const matchedRegs = row.Registrations.filter((reg) => {
+                                                const regNum = reg.Registration.split(":")[0];
+                                                const driverReg = driver.Registration.split(":")[0];
+                                                const driverTail = driver.RegistrationTail.split(":")[0];
+                                                return Number(regNum) === Number(driverReg) || Number(regNum) === Number(driverTail);
+                                            });
+
+                                            // รวม TotalPrice ของ registrations ที่ตรงกัน
+                                            const totalPrice = matchedRegs.reduce((sum, reg) => sum + reg.TotalPrice, 0);
 
                                             return (
                                                 <TableCell
@@ -1816,21 +1823,16 @@ const CloseFS = () => {
                                                         textAlign: "right",
                                                         paddingLeft: "15px !important",
                                                         paddingRight: "15px !important",
-                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
-                                                        color: !found && "lightgray"
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                        color: matchedRegs.length === 0 ? "lightgray" : "inherit"
                                                     }}
                                                 >
-                                                    {/* {found ? (check ? new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2,
-                                                    }).format(found.TotalPrice) : new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2,
-                                                    }).format(found.TotalAmount)) : "0"} */}
-                                                    {found ? new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2,
-                                                    }).format(found.TotalPrice) : "0"}
+                                                    {totalPrice > 0
+                                                        ? new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        }).format(totalPrice)
+                                                        : "0"}
                                                 </TableCell>
                                             );
                                         })}

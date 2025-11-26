@@ -99,31 +99,31 @@ const UpdateGasStations = (props) => {
                 const pump1Product = pump1.find(p => p.ProductName === updated[index].ProductName);
                 const pump2Product = pump2.find(p => p.ProductName === updated[index].ProductName);
 
-                // กรณี Volume
-                if (field === "Volume" && pump1Product) {
-                    if (pump2Product) {
-                        // ปั้ม 2 มี product → คำนวณตามปกติ
-                        pump2Product.Volume = Number(pump1Product.Volume || 0) > 0
-                            ? (Number(pump1Product.FullVolume || pump2Product.FullVolume || 0) - Number(pump1Product.Volume))
-                            : 0;
-                    } else {
-                        // ปั้ม 2 ไม่มี product → ให้ FullVolume = Volume ของ pump1
+                const fullVolume = Number(pump1Product?.FullVolume || pump2Product?.FullVolume || 0);
+
+                if (field === "Volume") {
+                    if (updated[index] === pump1Product && pump2Product) {
+                        pump2Product.Volume = fullVolume - Number(pump1Product.Volume || 0);
+                    } else if (updated[index] === pump2Product && pump1Product) {
+                        pump1Product.Volume = fullVolume - Number(pump2Product.Volume || 0);
+                    } else if (!pump2Product) {
                         pump1Product.FullVolume = Number(pump1Product.Volume || 0);
                     }
                 }
 
-                // กรณี FullVolume
-                if (field === "FullVolume" && pump1Product) {
-                    if (pump2Product) {
+                if (field === "FullVolume") {
+                    if (updated[index] === pump1Product && pump2Product) {
                         pump1Product.Volume = Number(value) - Number(pump2Product.Volume || 0);
-                    } else {
-                        pump1Product.Volume = Number(value); // pump2 ไม่มี → Volume = FullVolume
+                    } else if (updated[index] === pump2Product && pump1Product) {
+                        pump2Product.Volume = Number(value) - Number(pump1Product.Volume || 0);
+                    } else if (!pump2Product) {
+                        pump1Product.Volume = Number(value);
                     }
                 }
             }
         }
 
-        // กรณีปั้มเดียว
+        // ปั้มเดียว
         if (stockCount === 1 && field === "FullVolume") {
             updated[index].Volume = Number(value);
         }
@@ -133,8 +133,7 @@ const UpdateGasStations = (props) => {
         updated[index].Sell = calculateSell(updated[index]);
         updated[index].TotalVolume = calculateTotalVolume(updated[index]);
         updated[index].PeriodDisplay =
-            parseFloat(updated[index].Period) ||
-            (parseFloat(updated[index].Volume) - parseFloat(updated[index].Squeeze));
+            parseFloat(updated[index].Period) || (parseFloat(updated[index].Volume) - parseFloat(updated[index].Squeeze));
 
         setLocalProducts(updated);
     };
