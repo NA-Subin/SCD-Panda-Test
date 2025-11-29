@@ -32,6 +32,7 @@ import "dayjs/locale/th";
 import { IconButtonError, IconButtonSuccess, IconButtonWarning, RateOils, TablecellHeader } from "../../../theme/style";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -44,10 +45,14 @@ const StockDetail = (props) => {
 
     const [update, setUpdate] = React.useState(true);
     const [edit, setEdit] = React.useState(true);
-    const [show, setShow] = React.useState(true);
+    const [show, setShow] = React.useState(false);
     const [name, setName] = React.useState("");
     const [volume, setVolume] = React.useState(0);
     const [editStates, setEditStates] = React.useState({});
+    const [volumes, addVolumes] = React.useState(0);
+    const [productnanme, addProductname] = React.useState("");
+
+    console.log("editStates before useEffect: ", editStates);
 
     React.useEffect(() => {
         if (stock) {
@@ -114,6 +119,41 @@ const StockDetail = (props) => {
             });
     };
 
+    const handlesave = () => {
+        database
+            .ref(`/depot/stock/${Number(stock.id) - 1}/Products`)
+            .child(editStates.length)
+            .update({
+                id: editStates.length,
+                ProductName: productnanme,
+                Capacity: Number(volumes),
+                Color: productnanme === "G91" ? "#92D050" :
+                    productnanme === "G95" ? "#FFC000" :
+                        productnanme === "B7" ? "#FFFF99" :
+                            productnanme === "B95" ? "#B7DEE8" :
+                                productnanme === "B10" ? "#32CD32" :
+                                    productnanme === "B20" ? "#228B22" :
+                                        productnanme === "E20" ? "#C4BD97" :
+                                            productnanme === "E85" ? "#0000FF" :
+                                                productnanme === "PWD" ? "#F141D8" :
+                                                    "#FFD700",
+            })
+            .then(() => {
+
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("Data pushed successfully");
+                setShow(false);
+                // รีเซ็ตฟิลด์หลังบันทึก
+                addProductname("");
+                addVolumes(0);
+
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
+    }
+
     return (
         <React.Fragment>
             <Paper sx={{
@@ -127,13 +167,13 @@ const StockDetail = (props) => {
                                             : stock.Name === "สันทราย" ? "#B7DEE8"
                                                 : stock.Name === "บ้านโฮ่ง" ? "#FABF8F"
                                                     : stock.Name === "ป่าแดด" ? "#B1A0C7"
-                                                        : ""}`, borderRadius: 3, marginTop: 4,
+                                                        : "lightgray"}`, borderRadius: 3, marginTop: 4,
                 boxShadow: `2px 2px 5px ${stock.Name === "แม่โจ้" ? "#92d050be"
                     : stock.Name === "สันกลาง" ? "#b1a0c7bf"
                         : stock.Name === "สันทราย" ? "#b7dee8c7"
                             : stock.Name === "บ้านโฮ่ง" ? "#fabf8fc7"
                                 : stock.Name === "ป่าแดด" ? "#b1a0c7cd"
-                                    : ""}`,
+                                    : "lightgray"}`,
             }}>
                 <Grid container>
                     <Grid item lg={2} md={3} xs={4}
@@ -148,13 +188,13 @@ const StockDetail = (props) => {
                                     : stock.Name === "สันทราย" ? "#B7DEE8"
                                         : stock.Name === "บ้านโฮ่ง" ? "#FABF8F"
                                             : stock.Name === "ป่าแดด" ? "#B1A0C7"
-                                                : ""}`,
+                                                : "lightgray"}`,
                             backgroundColor: stock.Name === "แม่โจ้" ? "#92D050"
                                 : stock.Name === "สันกลาง" ? "#B1A0C7"
                                     : stock.Name === "สันทราย" ? "#B7DEE8"
                                         : stock.Name === "บ้านโฮ่ง" ? "#FABF8F"
                                             : stock.Name === "ป่าแดด" ? "#B1A0C7"
-                                                : ""
+                                                : "lightgray"
                         }}
                     >
                         <Box>
@@ -216,11 +256,33 @@ const StockDetail = (props) => {
                                                             backgroundColor: product.Color,
                                                             borderRadius: 3,
                                                             borderRight: `4px solid gray`,
+                                                            p: 0.5,
                                                         }}
                                                     >
-                                                        <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ marginTop: 1 }}>
+                                                        {/* <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ marginTop: 1 }}>
                                                             {product.ProductName}
-                                                        </Typography>
+                                                        </Typography> */}
+                                                        <Paper sx={{ width: "100%", ml: 0.5, mr: 0.5, borderRadius: 2 }}>
+                                                            <TextField
+                                                                size="small"
+                                                                fullWidth
+                                                                value={editingProduct?.ProductName ?? ""}
+                                                                onChange={(e) => handleEditChange(product.id, "ProductName", e.target.value)}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '40px',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        borderRadius: 2,
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '18px',
+                                                                        fontWeight: 'bold',
+                                                                        textAlign: 'left',
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </Paper>
                                                     </Grid>
 
                                                     <Grid item xs={5} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -291,7 +353,136 @@ const StockDetail = (props) => {
                                     </Grid>
                                 );
                             })}
+                            {
+                                show ? (
+                                    <React.Fragment>
+                                        <Grid
+                                            item
+                                            xs={12}
+                                            sm={6}
+                                            md={4}
+                                            lg={3}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    backgroundColor: "lightgray",
+                                                    borderRadius: 3,
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    width: "100%",
+                                                    boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.53)",
+                                                }}
+                                            >
+                                                <Grid container>
+                                                    <Grid
+                                                        item
+                                                        xs={4}
+                                                        sx={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                            backgroundColor: "lightgray",
+                                                            borderRadius: 3,
+                                                            borderRight: `4px solid gray`,
+                                                            p: 0.5,
+                                                        }}
+                                                    >
+                                                        {/* <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ marginTop: 1 }}>
+                                                            {product.ProductName}
+                                                        </Typography> */}
+                                                        <Paper sx={{ width: "100%", ml: 0.5, mr: 0.5, borderRadius: 2 }}>
+                                                            <TextField
+                                                                size="small"
+                                                                fullWidth
+                                                                value={productnanme}
+                                                                onChange={(e) => addProductname(e.target.value)}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '40px',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        borderRadius: 2,
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '18px',
+                                                                        fontWeight: 'bold',
+                                                                        textAlign: 'left',
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </Paper>
+                                                    </Grid>
 
+                                                    <Grid item xs={5} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                        <Paper sx={{ width: "100%", ml: 0.5, mr: 0.5, borderRadius: 2 }}>
+                                                            <TextField
+                                                                size="small"
+                                                                type="number"
+                                                                fullWidth
+                                                                value={volumes}
+                                                                onChange={(e) => addVolumes(e.target.value)}
+                                                                sx={{
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        height: '40px',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        borderRadius: 2,
+                                                                    },
+                                                                    '& .MuiInputBase-input': {
+                                                                        fontSize: '18px',
+                                                                        fontWeight: 'bold',
+                                                                        textAlign: 'left',
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </Paper>
+                                                    </Grid>
+
+                                                    <Grid item xs={3} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                        <IconButtonError size="small" sx={{ mr: 0.5 }} onClick={() => setShow(false)}>
+                                                            <CloseIcon fontSize="small" />
+                                                        </IconButtonError>
+                                                        <IconButtonSuccess size="small" sx={{ mr: 0.5 }} onClick={() => handlesave()}>
+                                                            <SaveIcon fontSize="small" />
+                                                        </IconButtonSuccess>
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        </Grid>
+                                    </React.Fragment>
+                                )
+                                    :
+                                    (
+                                        <Grid
+                                            item
+                                            xs={12}
+                                            sm={6}
+                                            md={4}
+                                            lg={3}
+                                        >
+                                            <Box sx={{ pl: 5, pr: 5 }}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                    fullWidth
+                                                    sx={{ height: 50, borderRadius: 3 }}
+                                                    onClick={() => setShow(true)}
+                                                    endIcon={
+                                                        <BloodtypeIcon
+                                                            sx={{
+                                                                '&.MuiSvgIcon-root': { fontSize: 30, mr: -2 }
+                                                            }}
+                                                            color="error"
+                                                        />
+                                                    }
+                                                >
+                                                    <Typography variant="h6" fontSize="16px" fontWeight="bold">เพิ่มผลิตภัณฑ์</Typography>
+                                                </Button>
+                                            </Box>
+                                        </Grid>
+                                    )
+                            }
                         </Grid>
                     </Grid>
                 </Grid>

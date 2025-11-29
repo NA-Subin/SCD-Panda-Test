@@ -402,54 +402,54 @@ const GasStationVolume = (props) => {
                                                             marginRight: -0.5
                                                         }
                                                     },
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <IconButton
-                                                                size="small"
-                                                                sx={{
-                                                                    p: '0px',        // 🔹 ตัด padding IconButton
-                                                                    width: 5,
-                                                                    height: 18,
-                                                                    ml: -1,
-                                                                    opacity: 0.6      // 🔹 ลดระยะชิดซ้าย
-                                                                }}
-                                                                onClick={() => {
-                                                                    let raw = String(s.FullVolume).replace(/,/g, "");
-                                                                    if (raw === "" || raw === "-") raw = "0";
+                                                    // startAdornment: (
+                                                    //     <InputAdornment position="start">
+                                                    //         <IconButton
+                                                    //             size="small"
+                                                    //             sx={{
+                                                    //                 p: '0px',        // 🔹 ตัด padding IconButton
+                                                    //                 width: 5,
+                                                    //                 height: 18,
+                                                    //                 ml: -1,
+                                                    //                 opacity: 0.6      // 🔹 ลดระยะชิดซ้าย
+                                                    //             }}
+                                                    //             onClick={() => {
+                                                    //                 let raw = String(s.FullVolume).replace(/,/g, "");
+                                                    //                 if (raw === "" || raw === "-") raw = "0";
 
-                                                                    const newValue = Number(raw) - 1000;
+                                                    //                 const newValue = Number(raw) - 1000;
 
-                                                                    handleChangeWithCheck(index, "FullVolume", newValue); // ✅ ใช้ฟังก์ชันใหม่
-                                                                }}
-                                                            >
-                                                                <ArrowLeftIcon sx={{ fontSize: "25px" }} />
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    ),
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <IconButton
-                                                                size="small"
-                                                                sx={{
-                                                                    p: '0px',        // 🔹 ตัด padding IconButton
-                                                                    width: 5,
-                                                                    height: 18,
-                                                                    mr: -1.5,
-                                                                    opacity: 0.6       // 🔹 ลดระยะชิดซ้าย
-                                                                }}
-                                                                onClick={() => {
-                                                                    let raw = String(s.FullVolume).replace(/,/g, "");
-                                                                    if (raw === "" || raw === "-") raw = "0";
+                                                    //                 handleChangeWithCheck(index, "FullVolume", newValue); // ✅ ใช้ฟังก์ชันใหม่
+                                                    //             }}
+                                                    //         >
+                                                    //             <ArrowLeftIcon sx={{ fontSize: "25px" }} />
+                                                    //         </IconButton>
+                                                    //     </InputAdornment>
+                                                    // ),
+                                                    // endAdornment: (
+                                                    //     <InputAdornment position="end">
+                                                    //         <IconButton
+                                                    //             size="small"
+                                                    //             sx={{
+                                                    //                 p: '0px',        // 🔹 ตัด padding IconButton
+                                                    //                 width: 5,
+                                                    //                 height: 18,
+                                                    //                 mr: -1.5,
+                                                    //                 opacity: 0.6       // 🔹 ลดระยะชิดซ้าย
+                                                    //             }}
+                                                    //             onClick={() => {
+                                                    //                 let raw = String(s.FullVolume).replace(/,/g, "");
+                                                    //                 if (raw === "" || raw === "-") raw = "0";
 
-                                                                    const newValue = Number(raw) + 1000;
+                                                    //                 const newValue = Number(raw) + 1000;
 
-                                                                    handleChangeWithCheck(index, "FullVolume", newValue); // ✅ ใช้ฟังก์ชันใหม่
-                                                                }}
-                                                            >
-                                                                <ArrowRightIcon sx={{ fontSize: "25px" }} />
-                                                            </IconButton>
-                                                        </InputAdornment>
-                                                    ),
+                                                    //                 handleChangeWithCheck(index, "FullVolume", newValue); // ✅ ใช้ฟังก์ชันใหม่
+                                                    //             }}
+                                                    //         >
+                                                    //             <ArrowRightIcon sx={{ fontSize: "25px" }} />
+                                                    //         </IconButton>
+                                                    //     </InputAdornment>
+                                                    // ),
                                                 }}
                                                 sx={{
                                                     "& .MuiOutlinedInput-root": { height: 30 },
@@ -461,7 +461,7 @@ const GasStationVolume = (props) => {
                                                         ml: -0.5,
                                                         pr: 0.5,
                                                         paddingLeft: -3, // เพิ่มพื้นที่ให้ endAdornment
-                                                        paddingRight: 1, // เพิ่มพื้นที่ให้ endAdornment
+                                                        paddingRight: 1.5, // เพิ่มพื้นที่ให้ endAdornment
                                                     },
                                                 }}
                                             />

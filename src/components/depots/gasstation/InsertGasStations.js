@@ -447,12 +447,19 @@ const InsertGasStations = (props) => {
             <Grid item sm={5} xs={9}>
                 <TextField size="small" fullWidth value={lng} onChange={(e) => setLng(e.target.value)} />
             </Grid>
-            <Grid item sm={12} xs={12} marginTop={1} marginBottom={1}>
+            {/* <Grid item sm={12} xs={12} marginTop={1} marginBottom={1}>
                 <Divider sx={{ border: "1px solid " + theme.palette.panda.dark }} />
             </Grid>
             <Grid item sm={12} xs={12} display="flex" justifyContent="center" alignItems="center">
                 <Button onClick={handlePost} variant="contained" color="success" sx={{ marginRight: 1 }}>บันทึก</Button>
                 <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
+            </Grid> */}
+            <Grid item sm={12} xs={12} sx={{ position: "sticky", bottom: -20, backgroundColor: "white" }}>
+                <Divider sx={{ border: "1px solid " + theme.palette.panda.dark, marginBottom: 1 }} />
+                <Box display="flex" justifyContent="center" alignItems="center" marginTop={2} marginBottom={2}>
+                    <Button onClick={handlePost} variant="contained" color="success" sx={{ marginRight: 1 }}>บันทึก</Button>
+                    <Button onClick={handleClose} variant="contained" color="error">ยกเลิก</Button>
+                </Box>
             </Grid>
         </React.Fragment>
 
