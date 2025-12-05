@@ -32,6 +32,8 @@ import {
     Typography,
 } from "@mui/material";
 import "dayjs/locale/th";
+import CancelIcon from '@mui/icons-material/Cancel';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import theme from "../../../theme/theme";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { database } from "../../../server/firebase";
@@ -49,6 +51,8 @@ const InsertGasStations = (props) => {
         setOpen(false);
     };
 
+    const [checkGasStation, setCheckGasStation] = React.useState(false);
+    const [checkTruck, setCheckTruck] = React.useState(false);
     const [name, setName] = React.useState("");
     const [code, setCode] = React.useState("");
     const [shortName, setShortName] = React.useState("");
@@ -63,6 +67,37 @@ const InsertGasStations = (props) => {
     const [lng, setLng] = React.useState("");
     const [products, setProducts] = React.useState([{ Product: "", Capacity: "", Volume: "" }]);
     const [number, setNumber] = React.useState(0);
+    const [smallTrucks, setSmallTrucks] = useState([
+        { id: 0, Truck: "", Price: "", Volume: "" }
+    ]);
+
+    const reorderIds = (arr) => {
+        return arr.map((item, index) => ({
+            ...item,
+            id: index
+        }));
+    };
+
+    const handleChange = (index, field, value) => {
+        const updated = [...smallTrucks];
+        updated[index][field] = value;
+        setSmallTrucks(reorderIds(updated));   // 🔥 เรียง id ใหม่หลังอัปเดต
+    };
+
+    // console.log("smallTrucks : ", smallTrucks);
+
+    const handleAdd = () => {
+        const updated = [
+            ...smallTrucks,
+            { id: 0, Truck: "", Price: "", Volume: "" } // id จะถูกจัดใหม่ทีหลัง
+        ];
+        setSmallTrucks(reorderIds(updated));
+    };
+
+    const handleDelete = (index) => {
+        const updated = smallTrucks.filter((_, i) => i !== index);
+        setSmallTrucks(reorderIds(updated));  // 🔥 จัด id ใหม่เสมอหลังลบ
+    };
 
     const handleAddProduct = () => {
         if (number < oilWell) {
@@ -89,7 +124,7 @@ const InsertGasStations = (props) => {
     const [stocks, setStocks] = React.useState({});
     const [volumeData, setVolumeData] = useState([]);
 
-    console.log("volumeData : ", volumeData);
+    // console.log("volumeData : ", volumeData);
 
     const handleVolumeChange = (product, volume, isChecked) => {
         setVolumeData((prevData) => {
@@ -144,9 +179,24 @@ const InsertGasStations = (props) => {
         getStock();
     }, []);
 
-    console.log(volumeData);
+    // console.log(volumeData);
+
+    const isSmallTrucksEmpty = (arr) => {
+        return (
+            arr.length === 1 &&
+            arr[0].Truck.trim() === "" &&
+            arr[0].Price.trim() === "" &&
+            arr[0].Volume.trim() === ""
+        );
+    };
 
     const handlePost = () => {
+        let truckData = "";
+
+        if (!isSmallTrucksEmpty(smallTrucks)) {
+            truckData = smallTrucks;  // บันทึกตามจริง
+        }
+
         database
             .ref("depot/gasStations/")
             .child(gasStation)
@@ -157,6 +207,8 @@ const InsertGasStations = (props) => {
                 Code: code,
                 OilWellNumber: oilWell,
                 Products: volumeData,
+                Truck: truckData,
+                Gasstation: checkGasStation,
                 // Products: volumeData.reduce((acc, row) => {
                 //     if (row.CheckBox === true || row.CheckBox === "true") {
                 //         acc[row.Name] = row.Volume; // เพิ่ม key-value ในออบเจ็กต์
@@ -229,7 +281,7 @@ const InsertGasStations = (props) => {
             <Grid item sm={1.5} xs={3}>
                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>คลังสต็อก</Typography>
             </Grid>
-            <Grid item sm={5} xs={9}>
+            <Grid item sm={3} xs={9}>
                 <Paper
                     component="form">
                     <Select
@@ -253,6 +305,22 @@ const InsertGasStations = (props) => {
                         }
                     </Select>
                 </Paper>
+            </Grid>
+            <Grid item sm={2} xs={12} textAlign="right" >
+                <FormControlLabel control={<Checkbox onClick={() => setCheckGasStation(!checkGasStation)} checked={checkGasStation}
+                    sx={{
+                        "& .MuiSvgIcon-root": {
+                            fontSize: 20, // ปรับขนาด Checkbox
+                        },
+                    }} />}
+                    label="ตู้หลังบ้าน"
+                    sx={{
+                        "& .MuiFormControlLabel-label": {
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                            color: !check && "gray"
+                        },
+                    }} />
             </Grid>
             {
                 stocks?.id !== undefined ?
@@ -389,6 +457,7 @@ const InsertGasStations = (props) => {
                     </>
                     : ""
             }
+
             <Grid item sm={12} xs={12}>
                 <Divider>
                     <Chip label="ที่อยู่" size="small" />

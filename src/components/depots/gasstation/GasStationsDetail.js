@@ -49,6 +49,7 @@ import { ShowError, ShowSuccess, ShowWarning } from "../../sweetalert/sweetalert
 import FullPageLoading from "../../navbar/Loading";
 import GasStationVolume from "./GasStationVolume";
 import theme from "../../../theme/theme";
+import { TablecellHeader } from "../../../theme/style";
 
 const GasStationsDetail = (props) => {
     const { gasStation } = props;
@@ -61,22 +62,6 @@ const GasStationsDetail = (props) => {
     const onCheck = (newvalue) => {
         setCheck(newvalue);
     }
-
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
-    useEffect(() => {
-        const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
-        };
-
-        window.addEventListener('resize', handleResize); // เพิ่ม event listener
-
-        // ลบ event listener เมื่อ component ถูกทำลาย
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
 
     const [selectedDate, setSelectedDate] = useState(dayjs()); // ใช้วันปัจจุบัน
 
@@ -178,6 +163,77 @@ const GasStationsDetail = (props) => {
         return result;
     };
 
+    const calculateTotalDownHole = (stockId) => {
+        const stations = gasStationOil.filter(r => Number(r.Stock.split(":")[0]) === stockId);
+
+        const grouped = {};
+
+        stations.forEach((station, stationIndex) => {
+            const data = stationReports.find(r => r.stationId === station.id);
+
+            let products = [];
+
+            if (Array.isArray(data)) {
+                products = data;
+            } else if (data?.Products) {
+                products = Array.isArray(data.Products)
+                    ? data.Products
+                    : Object.values(data.Products);
+            } else if (typeof data === "object" && data !== null) {
+                products = Object.values(data);
+            }
+
+            if (!Array.isArray(products)) return;
+
+            products.forEach(p => {
+                const name = p.ProductName;
+
+                const volume = parseFloat(p.Volume) || 0;
+                const pending = (parseFloat(p.Pending1) || 0) +
+                    (parseFloat(p.Pending2) || 0) +
+                    (parseFloat(p.Pending3) || 0);
+                const estimateSell = parseFloat(p.EstimateSell) || 0;
+                const squeeze = parseFloat(p.Squeeze) || 0;
+
+                // เตรียมช่องเก็บข้อมูลของ Product นั้นๆ
+                if (!grouped[name]) {
+                    grouped[name] = {
+                        totalVolume: 0,
+                        totalPending: 0,
+                        totalEstimateSell: 0,
+                        squeeze: 0, // squeeze ใช้เฉพาะของปั๊มแรก
+                        squeezeSet: false
+                    };
+                }
+
+                grouped[name].totalVolume += volume;
+                grouped[name].totalPending += pending;
+                grouped[name].totalEstimateSell += estimateSell;
+
+                // ใส่ squeeze จากปั๊มแรกเท่านั้น
+                if (!grouped[name].squeezeSet && stationIndex === 0) {
+                    grouped[name].squeeze = squeeze;
+                    grouped[name].squeezeSet = true;
+                }
+            });
+        });
+
+        // สร้างผลลัพธ์ตาม ProductName
+        const result = {};
+
+        Object.keys(grouped).forEach(name => {
+            const g = grouped[name];
+
+            if (g.totalEstimateSell === 0) {
+                result[name] = 0; // กันหาร 0
+            } else {
+                result[name] = ((g.totalVolume - g.squeeze) + g.totalPending) / g.totalEstimateSell;
+            }
+        });
+
+        return result;
+    };
+
     // ปลอดภัย: wrapper สำหรับเรียกฟังก์ชันคำนวณ ไม่ให้ throw
     const safeCall = (fn, arg, name) => {
         try {
@@ -189,11 +245,11 @@ const GasStationsDetail = (props) => {
     };
 
     const getStationReportsArray = (stocks, gasStationOil, selectedDate, Squeeze = 800) => {
-        console.log("getStationReportsArray start", {
-            stocksLen: stocks?.length,
-            gasStationOilLen: gasStationOil?.length,
-            selectedDate,
-        });
+        // console.log("getStationReportsArray start", {
+        //     stocksLen: stocks?.length,
+        //     gasStationOilLen: gasStationOil?.length,
+        //     selectedDate,
+        // });
 
         if (!Array.isArray(gasStationOil) || !gasStationOil.length) {
             console.warn("gasStationOil empty or not array");
@@ -228,7 +284,7 @@ const GasStationsDetail = (props) => {
         const firstStationOfStock = new Set();
 
         return gasStationOil.map((station, stationIndex) => {
-            console.log(`--- stationIndex ${stationIndex} id:${station?.id} Stock:${station?.Stock}`);
+            // console.log(`--- stationIndex ${stationIndex} id:${station?.id} Stock:${station?.Stock}`);
 
             const stockId = Number((station?.Stock || "").toString().split(":")[0]);
             const stock = stocks.find((s) => s.id === stockId);
@@ -412,11 +468,33 @@ const GasStationsDetail = (props) => {
     const memoGasStationOil = useMemo(() => gasStationOil, [JSON.stringify(gasStationOil)]);
 
     // --- ฟังก์ชันเตรียมข้อมูล ---
+    const DEFAULT_TRUCK = [{ id: 0, Truck: "", Price: "", Volume: "" }];
+
     const prepareData = (data) => {
         return data.map(st => ({
             ...st,
-            originalProducts: JSON.parse(JSON.stringify(st.Products)),
-            hasChanged: false, // default ให้แก้ไขได้
+            Products: st.Products || [],
+            Truck: st.Truck && st.Truck.length > 0
+                ? st.Truck.map(t => ({
+                    id: t.id ?? 0,
+                    Truck: t.Truck ?? "",
+                    Price: t.Price ?? "",
+                    Volume: t.Volume ?? "",
+                }))
+                : DEFAULT_TRUCK,
+            // ⭐ ให้ค่าเริ่มต้นตรงนี้
+            originalProducts: JSON.parse(JSON.stringify(st.Products || [])),
+            originalTruck: JSON.parse(JSON.stringify(
+                st.Truck && st.Truck.length > 0
+                    ? st.Truck.map(t => ({
+                        id: t.id ?? 0,
+                        Truck: t.Truck ?? "",
+                        Price: t.Price ?? "",
+                        Volume: t.Volume ?? "",
+                    }))
+                    : DEFAULT_TRUCK
+            )),
+            hasChanged: false,
         }));
     };
 
@@ -521,6 +599,26 @@ const GasStationsDetail = (props) => {
                         hasChanged: changed,
                         originalProducts: original
                     };
+                } else if (fieldOrType === "Truck") {
+
+                    const original = s.originalTruck ?? JSON.parse(JSON.stringify(s.Truck ?? []));
+
+                    // ใช้ฟิลด์ตัวใหญ่ตามข้อมูลจริง
+                    const fields = ["Truck", "Price", "Volume"];
+
+                    const changed = valueOrProducts.length === 0 ||  // ⭐ ถ้า [] = มีการเปลี่ยนแปลง
+                        valueOrProducts.some((p, i) =>
+                            fields.some(f =>
+                                String(original[i]?.[f] ?? "") !== String(p[f] ?? "")
+                            )
+                        );
+
+                    return {
+                        ...s,
+                        Truck: valueOrProducts,
+                        originalTruck: original,
+                        hasChanged: changed
+                    };
                 }
 
                 // ⭐ ถ้าแก้ไข Driver1 / Driver2
@@ -623,9 +721,11 @@ const GasStationsDetail = (props) => {
         }
     };
 
-    console.log("stocks : ", stocks);
-    console.log("gasStationOil : ", gasStationOil);
-    console.log("stationReports : ", stationReports);
+    // console.log("stocks : ", stocks);
+    // console.log("gasStationOil : ", gasStationOil);
+    // console.log("stationReports : ", stationReports);
+
+    // console.log("TotaldownHoleByProduct :", calculateTotalDownHole(stocks[0]?.id));
 
     return (
         <React.Fragment>
@@ -669,6 +769,7 @@ const GasStationsDetail = (props) => {
             <Box
                 sx={{
                     p: 1,
+                    width: "100%"
                     // height: "70vh"
                 }}
             >
@@ -677,7 +778,7 @@ const GasStationsDetail = (props) => {
                         <Paper
                             component="form"
                             sx={{
-                                width: "100%", // กำหนดความกว้างของ Paper
+                                //width: "100%", // กำหนดความกว้างของ Paper
                                 height: "40px",
                                 display: "flex",
                                 alignItems: "center",
@@ -776,6 +877,7 @@ const GasStationsDetail = (props) => {
                     <Grid item xs={12}>
                         {(checkStock === "ทั้งหมด" ? stocks : [stocks.find(s => s.Name === checkStock)]).map((stock, idx) => {
                             const downHoleByProduct = calculateStockDownHole(stock.id);
+                            const totalDownHoleByProduct = calculateTotalDownHole(stock.id);
                             let matchCount = 0;
 
                             return (
@@ -786,9 +888,7 @@ const GasStationsDetail = (props) => {
                                         border: '2px solid lightgray',
                                         borderRadius: 3,
                                         boxShadow: 1,
-                                        width:
-                                            windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 125) :
-                                                windowWidth <= 600 ? (windowWidth - 65) : (windowWidth - 275),
+                                        //width: "100%",
                                         overflowY: 'auto',
                                     }}
                                     key={stock.id || idx}
@@ -962,6 +1062,7 @@ const GasStationsDetail = (props) => {
                                                         selectedDate={selectedDate}
                                                         onProductChange={handleProductChange}
                                                         downHoleByProduct={downHoleByProduct}
+                                                        totaldownHoleByProduct={totalDownHoleByProduct}
                                                         isFirst={matchCount === 1}
                                                         isFirstPump={pumpOrder === 0}
                                                         stockCount={stockCount}

@@ -36,7 +36,7 @@ import InsertGasStation from "./InsertGasStation";
 import { useGasStationData } from "../../server/provider/GasStationProvider";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 
-const GasStations = () => {
+const GasStations = ({ openNavbar }) => {
   const [openMenu, setOpenMenu] = React.useState(1);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
@@ -46,6 +46,27 @@ const GasStations = () => {
   const depot = Object.values(depots || {});
   const gasStation = Object.values(gasstationDetail || {});
   const stock = Object.values(stockDetail || {});
+
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      let width = window.innerWidth;
+      if (!openNavbar) {
+        width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+      }
+      setWindowWidth(width);
+    };
+
+    // เรียกครั้งแรกตอน mount
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
   // const [depot, setDepot] = useState(0);
   // const [gasStation, setGasStation] = useState(0);
@@ -77,7 +98,7 @@ const GasStations = () => {
   // }, []);
 
   return (
-    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
       <Typography
         variant="h3"
         fontWeight="bold"
@@ -224,14 +245,16 @@ const GasStations = () => {
           </Tooltip>
         </Grid>
       </Grid>
-      {
-        openMenu === 1 ?
-          <GasStationsDetail gasStation={gasStation.length} />
-          :
-          stock.map((st) => (
-            <StockDetail key={st.id} stock={st} />
-          ))
-      }
+      <Box sx={{ ml: -3, width: "100%" }}>
+        {
+          openMenu === 1 ?
+            <GasStationsDetail gasStation={gasStation.length} />
+            :
+            stock.map((st) => (
+              <StockDetail key={st.id} stock={st} />
+            ))
+        }
+      </Box>
     </Container>
   );
 };

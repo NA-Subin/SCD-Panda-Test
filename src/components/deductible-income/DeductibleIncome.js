@@ -146,7 +146,7 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
     };
 
     return (
-        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
             {
                 windowWidth >= 800 ?
                     <Grid container spacing={2} p={1}>
@@ -200,7 +200,7 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                     </Grid>
             }
             <Divider sx={{ marginBottom: 1 }} />
-            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Box sx={{ width: "100%" }}>
                 {/* {
                     windowWidth >= 800 ?
                         <Grid container spacing={2} p={1}>

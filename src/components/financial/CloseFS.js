@@ -49,8 +49,7 @@ import InsertType from "./InsertType";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 
-const CloseFS = () => {
-
+const CloseFS = ({ openNavbar }) => {
     const [date, setDate] = React.useState(false);
     const [check, setCheck] = React.useState(true);
     const [months, setMonths] = React.useState(dayjs(new Date));
@@ -58,7 +57,6 @@ const CloseFS = () => {
     const [firstDay, setFirstDay] = React.useState(dayjs(new Date).startOf("month"));
     const [lastDay, setLastDay] = React.useState(dayjs(new Date).startOf("month"));
     const [driverDetail, setDriver] = React.useState([]);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [companyName, setCompanyName] = React.useState("0:ทั้งหมด");
 
     const companyDetail = [
@@ -80,19 +78,26 @@ const CloseFS = () => {
         },
     ]
 
-    // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
     useEffect(() => {
         const handleResize = () => {
-            setWindowWidth(window.innerWidth); // อัพเดตค่าขนาดหน้าจอ
+            let width = window.innerWidth;
+            if (!openNavbar) {
+                width += 120; // ✅ เพิ่ม 200 ถ้า openNavbar = false
+            }
+            setWindowWidth(width);
         };
 
-        window.addEventListener('resize', handleResize); // เพิ่ม event listener
+        // เรียกครั้งแรกตอน mount
+        handleResize();
 
-        // ลบ event listener เมื่อ component ถูกทำลาย
+        window.addEventListener('resize', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
     const handleMonth = (newValue) => {
         console.log("1.Month : ", dayjs(newValue).format("MMMM"));
@@ -1163,7 +1168,7 @@ const CloseFS = () => {
     console.log("years : ", years);
 
     return (
-        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+        <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
             <Typography
                 variant="h3"
                 fontWeight="bold"
@@ -1173,7 +1178,7 @@ const CloseFS = () => {
                 ปิดงบการเงิน
             </Typography>
             <Divider sx={{ marginBottom: 2 }} />
-            <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Box>
                 <Grid container spacing={2} paddingLeft={4} paddingRight={4} >
                     <Grid item md={3} xs={12}>
                         <FormGroup row>
@@ -1414,15 +1419,15 @@ const CloseFS = () => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box display="flex" justifyContent="center" alignItems="center" width="100%" sx={{ marginTop: 1, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+            <Box display="flex" justifyContent="center" alignItems="center" width="100%" sx={{ marginTop: 1, }}>
                 <TableContainer
                     component={Paper}
                     sx={{
-                        marginBottom: 2, height: "70vh", width: "1270px",
+                        marginBottom: 2, height: "70vh", width: "100%",
                         overflowX: "auto"
                     }}
                 >
-                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
+                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "100%" }}>
                         <TableHead sx={{ height: "5vh" }}>
                             <TableRow>
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>

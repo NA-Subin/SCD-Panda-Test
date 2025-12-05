@@ -52,7 +52,7 @@ const StockDetail = (props) => {
     const [volumes, addVolumes] = React.useState(0);
     const [productnanme, addProductname] = React.useState("");
 
-    console.log("editStates before useEffect: ", editStates);
+    // console.log("editStates before useEffect: ", editStates);
 
     React.useEffect(() => {
         if (stock) {
@@ -81,14 +81,14 @@ const StockDetail = (props) => {
         }));
     };
 
-    console.log("editStates : ", editStates);
+    // console.log("editStates : ", editStates);
 
     const formatNumber = (value) =>
         value === 0 || value === '0'
             ? '0'
             : new Intl.NumberFormat("en-US").format(value);
 
-    console.log("stock : ", stock);
+    // console.log("stock : ", stock);
 
     const handleUpdate = () => {
         // 1️⃣ กรองเอาเฉพาะ product จริง ๆ ไม่เอา isEditingId

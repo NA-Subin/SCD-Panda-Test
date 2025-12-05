@@ -67,8 +67,8 @@ const InsertGasStation = (props) => {
         setOpen(false);
     };
 
-    console.log("openMenu", openMenu);
-    console.log("check", check);
+    // console.log("openMenu", openMenu);
+    // console.log("check", check);
     // console.log("จำนวนปั้ม "+gasStation);
     // console.log("จำนวนคลังสต็อกน้ำมัน "+stock);
     // console.log("จำนวนคลังรับน้ำมัน "+depot);

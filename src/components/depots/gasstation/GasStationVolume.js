@@ -71,7 +71,7 @@ const GasStationVolume = (props) => {
         setLocalProducts(products?.Products || []);
     }, [products]);
 
-    console.log("products : ", products);
+    // console.log("products : ", products);
 
     const updateVolumeBoth = (index, value) => {
         handleProductChange(index, "FullVolume", value);
@@ -233,8 +233,8 @@ const GasStationVolume = (props) => {
     };
 
     const truckDriver = registration.filter((item => item.RegTail !== "0:ไม่มี" && item.Driver !== "0:ไม่มี"));
-    console.log("1.truckDriver : ", truckDriver);
-    console.log("2.truckDriver : ", truckDriver.map((row) => row.Driver.split(":")[1]?.split(" ")[0]));
+    // console.log("1.truckDriver : ", truckDriver);
+    // console.log("2.truckDriver : ", truckDriver.map((row) => row.Driver.split(":")[1]?.split(" ")[0]));
 
     const calculatePeriod = (row) => {
         const estimateSell = parseFloat(row.EstimateSell) || 0;
@@ -329,7 +329,7 @@ const GasStationVolume = (props) => {
             });
     };
 
-    console.log("products length : ", products?.Products.length);
+    // console.log("products length : ", products?.Products.length);
     return (
         <React.Fragment>
             {

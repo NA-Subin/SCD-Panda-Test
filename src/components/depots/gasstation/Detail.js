@@ -55,6 +55,7 @@ const Detail = (props) => {
     const [code, setCode] = React.useState(gasStation?.Code);
     const [shortName, setShortName] = React.useState(gasStation?.ShortName);
     const [oilWell, setOilWell] = React.useState(Number(gasStation?.OilWellNumber));
+    const [checkGasStation, setCheckGasStation] = React.useState(gasStation?.Gasstation === undefined || gasStation?.Gasstation === false ? false : true);
     const addressText = gasStation?.Address?.trim() || "";
 
     // ใช้ regex แยกค่าแต่ละส่วน (รองรับกรณีบางส่วนหายไป)
@@ -79,7 +80,7 @@ const Detail = (props) => {
     const [number, setNumber] = React.useState(0);
     const [check, setCheck] = React.useState(false);
 
-    console.log("stock : ", stock);
+    // console.log("stock : ", stock);
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -97,8 +98,8 @@ const Detail = (props) => {
 
     const [volumeData, setVolumeData] = useState(gasStation?.Products);
 
-    console.log("stocks : ", stocks);
-    console.log("volumeData : ", volumeData);
+    // console.log("stocks : ", stocks);
+    // console.log("volumeData : ", volumeData);
 
     const handleVolumeChange = (product, volume, isChecked) => {
         setVolumeData((prevData) => {
@@ -138,7 +139,7 @@ const Detail = (props) => {
         });
     };
 
-    console.log("Volume Data : ", volumeData);
+    // console.log("Volume Data : ", volumeData);
 
     const handlePost = () => {
         database
@@ -151,6 +152,7 @@ const Detail = (props) => {
                 OilWellNumber: oilWell,
                 Products: volumeData,
                 Stock: `${stocks?.id}:${stocks?.Name}`,
+                Gasstation: checkGasStation,
                 Address:
                     (no === "-" ? "-" : no) +
                     (village === "-" ? "" : ` ${village}`) +
@@ -230,7 +232,7 @@ const Detail = (props) => {
                         <Grid item sm={1.5} xs={3}>
                             <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ color: !check && "gray" }} gutterBottom>คลังสต็อก</Typography>
                         </Grid>
-                        <Grid item sm={5} xs={9}>
+                        <Grid item sm={3} xs={9}>
                             <Paper
                                 component="form">
                                 <Select
@@ -255,6 +257,23 @@ const Detail = (props) => {
                                     }
                                 </Select>
                             </Paper>
+                        </Grid>
+                        <Grid item sm={2} xs={12} textAlign="right" >
+                            <FormControlLabel control={<Checkbox onClick={() => setCheckGasStation(!checkGasStation)} checked={checkGasStation}
+                                sx={{
+                                    "& .MuiSvgIcon-root": {
+                                        fontSize: 20, // ปรับขนาด Checkbox
+                                    },
+                                }} />}
+                                label="ตู้หลังบ้าน"
+                                disabled={!check}
+                                sx={{
+                                    "& .MuiFormControlLabel-label": {
+                                        fontSize: "14px",
+                                        fontWeight: "bold",
+                                        color: !check && "gray"
+                                    },
+                                }} />
                         </Grid>
                         {
                             stocks?.id !== undefined ?

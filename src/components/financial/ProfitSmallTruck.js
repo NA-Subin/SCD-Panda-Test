@@ -562,7 +562,7 @@ const ProfitSmallTruck = ({ openNavbar }) => {
                             <Table
                                 stickyHeader
                                 size="small"
-                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}
+                                sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "100%" }}
                             >
                                 <TableHead sx={{ height: "5vh" }}>
                                     <TableRow>

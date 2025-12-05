@@ -810,7 +810,7 @@ const ReportSmallTruck = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5 }}>
+    <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
       <Grid container spacing={2}>
         <Grid item md={12} xs={12}>
           <Typography
@@ -957,7 +957,7 @@ const ReportSmallTruck = () => {
           <Button variant="contained" color="success" fullWidth onClick={exportToExcel} >Export to excel</Button>
         </Grid>
       </Grid>
-      <Box sx={{ width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
+      <Box sx={{ width: "100%" }}>
         <TableContainer
           component={Paper}
           sx={{
@@ -967,7 +967,7 @@ const ReportSmallTruck = () => {
             overflowX: "auto"
           }}
         >
-          <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "1280px" }}>
+          <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "100%" }}>
             <TableHead sx={{ height: "5vh", position: "sticky", top: 0, zIndex: 3 }}>
               <TableRow>
                 <TablecellPink sx={{ textAlign: "center", height: "40px", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>

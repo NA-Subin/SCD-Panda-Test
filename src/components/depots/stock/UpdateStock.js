@@ -69,7 +69,7 @@ const UpdateStock = (props) => {
             getStock();
         }, []);
 
-        console.log(stocks);
+        // console.log(stocks);
 
     const handleUpdate = () => {
         database

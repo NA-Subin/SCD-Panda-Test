@@ -4,6 +4,7 @@ import {
     Badge,
     Box,
     Button,
+    Checkbox,
     Chip,
     Container,
     Dialog,
@@ -12,6 +13,7 @@ import {
     DialogTitle,
     Divider,
     FormControl,
+    FormControlLabel,
     Grid,
     IconButton,
     InputAdornment,
@@ -40,6 +42,8 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import SaveIcon from '@mui/icons-material/Save';
 import DisabledByDefaultIcon from '@mui/icons-material/DisabledByDefault';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+import CancelIcon from '@mui/icons-material/Cancel';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { database } from "../../../server/firebase";
 import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { useGasStationData } from "../../../server/provider/GasStationProvider";
@@ -56,6 +60,7 @@ const UpdateGasStations = (props) => {
         isFirstPump,            // ปั้มแรกของ stock
         stockCount,            // จำนวนปั้มที่ตรงกัน
         downHoleByProduct,      // มาจากหน้าหลัก
+        totaldownHoleByProduct, // มาจากหน้าหลัก
         onProductChange,
         handleSave,
         stationId,
@@ -69,14 +74,109 @@ const UpdateGasStations = (props) => {
     const [driver1, setDriver1] = useState("");
     const [driver2, setDriver2] = useState("");
     const [focused, setFocused] = useState({}); // { [index]: { [column]: true/false } }
+
+    // --- State เริ่มต้น ---
     const [localProducts, setLocalProducts] = useState(products?.Products || []);
     const [originalProducts, setOriginalProducts] = useState(products?.Products || []);
 
-    // 2️⃣ Sync ค่าเริ่มต้นเมื่อ parent เปลี่ยน
+    const isSmallTrucksEmpty = (arr) => {
+        // กรณี array ว่างหรือ undefined → ไม่มีข้อมูล
+        if (!Array.isArray(arr) || arr.length === 0) return true;
+
+        // กรณีมีมากกว่า 1 แถว → มีข้อมูลแน่นอน
+        if (arr.length > 1) return false;
+
+        // กรณีมี 1 แถว → ตรวจสอบค่าภายใน
+        const t = arr[0];
+
+        const noValue =
+            (t.Truck ?? "").trim() === "" &&
+            (t.Price ?? "").trim() === "" &&
+            (t.Volume ?? "").trim() === "";
+
+        return noValue; // true = ว่าง, false = มี
+    };
+
+    const [checkTruck, setCheckTruck] = useState(gasStation.id);
+    const [showTruckFromClick, setShowTruckFromClick] = useState(false); // กดจาก onclick
+
+    // console.log("product truck : ", products?.Truck);
+    // console.log("gasstation ID : ", gasStation.id);
+    // const [checkTruck, setCheckTruck] = useState(isSmallTrucksEmpty(products?.Truck) ? gasStation.id : false);
+
+    const DEFAULT_TRUCK = [{ id: 0, Truck: "", Price: "", Volume: "" }];
+
+    const [localTruck, setLocalTruck] = useState(products?.Truck || DEFAULT_TRUCK);
+    const [originalTruck, setOriginalTruck] = useState(products?.Truck || DEFAULT_TRUCK);
+
+    // console.log("localTruck : ", localTruck);
+    // console.log("localProducts : ", localProducts);
+    // --- โหลดใหม่เมื่อ products เปลี่ยน ---
     useEffect(() => {
         setOriginalProducts(products?.Products || []);
         setLocalProducts(products?.Products || []);
-    }, [products]);
+
+        if (products?.Truck) {
+            setOriginalTruck(products.Truck);
+            setLocalTruck(products.Truck);
+
+            if (!showTruckFromClick) {
+                // ถ้าเป็นค่าเริ่มต้น ให้ตรวจสอบ row ว่างหรือไม่
+                setCheckTruck(isSmallTrucksEmpty(products.Truck) ? false : gasStation.id);
+            }
+        }
+    }, [products, showTruckFromClick, gasStation.id]);
+
+    // ---- ฟังก์ชันจัดเรียง id ใหม่ ----
+    const reorderIds = (arr) => {
+        return arr.map((item, index) => ({
+            ...item,
+            id: index
+        }));
+    };
+
+
+    // --- handleChange (แก้ไขข้อมูลในตาราง Truck) ---
+    const handleChange = (index, field, value) => {
+        const updated = [...localTruck];
+        updated[index][field] = value;
+
+        const reordered = reorderIds(updated);
+
+        setLocalTruck(reordered);
+
+        // ส่งกลับให้ parent เก็บลง Firebase (หรือ state ด้านบน)
+        onProductChange(gasStation.id, reordered, "Truck");
+    };
+
+    // --- handleAdd (เพิ่ม row Truck ใหม่) ---
+    const handleAdd = () => {
+        const updated = [
+            ...localTruck,
+            { id: 0, Truck: "", Price: "", Volume: "" }
+        ];
+
+        const reordered = reorderIds(updated);
+
+        setLocalTruck(reordered);
+
+        // ⭐ ส่งไป parent
+        onProductChange(gasStation.id, reordered, "Truck");
+    };
+
+
+    // --- handleDelete (ลบ row Truck) ---
+    const handleDelete = (index) => {
+        const updated = localTruck.filter((_, i) => i !== index);
+
+        const reordered = reorderIds(updated);
+
+        setLocalTruck(reordered);
+
+        // ⭐ ส่งไป parent
+        onProductChange(gasStation.id, reordered, "Truck");
+    };
+    // 2️⃣ Sync ค่าเริ่มต้นเมื่อ parent เปลี่ยน
 
     console.log("products : ", products);
 
@@ -275,8 +375,8 @@ const UpdateGasStations = (props) => {
     };
 
     const truckDriver = registration.filter((item => item.RegTail !== "0:ไม่มี" && item.Driver !== "0:ไม่มี"));
-    console.log("1.truckDriver : ", truckDriver);
-    console.log("2.truckDriver : ", truckDriver.map((row) => row.Driver.split(":")[1]?.split(" ")[0]));
+    // console.log("1.truckDriver : ", truckDriver);
+    // console.log("2.truckDriver : ", truckDriver.map((row) => row.Driver.split(":")[1]?.split(" ")[0]));
 
     const calculatePeriod = (row) => {
         const estimateSell = parseFloat(row.EstimateSell) || 0;
@@ -371,9 +471,9 @@ const UpdateGasStations = (props) => {
             });
     };
 
-    console.log("products length : ", products?.Products.length);
+    // console.log("products length : ", products?.Products.length);
     const stockProducts = volumeData.filter(v => v.stockID === products?.stockID);
-    console.log("stockProducts : ", stockProducts);
+    // console.log("stockProducts : ", stockProducts);
     return (
         <React.Fragment>
             <Box textAlign="center"
@@ -414,7 +514,7 @@ const UpdateGasStations = (props) => {
                 style={{ maxHeight: "70vh" }}
                 sx={{ marginBottom: 2 }}
             >
-                <Table stickyHeader size="small" sx={{ width: 1280 }}>
+                <Table stickyHeader size="small" sx={{ width: gasStation?.Gasstation === true ? 1480 : "100%" }}>
                     <TableHead>
                         <TableRow>
                             <TablecellHeader colSpan={2} width={130} sx={{ textAlign: "center", backgroundColor: theme.palette.panda.main }}>
@@ -434,7 +534,7 @@ const UpdateGasStations = (props) => {
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 80, whiteSpace: "nowrap" }}>
                                 หักบีบไม่ขึ้น
                             </TablecellHeader>
-                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 300, whiteSpace: "nowrap", padding: 0.5 }}>
+                            {/* <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 300, whiteSpace: "nowrap", padding: 0.5 }}>
                                 <Grid container>
                                     <Grid item xs={4}>
                                         ลงจริงไปแล้ว
@@ -524,6 +624,105 @@ const UpdateGasStations = (props) => {
                                         </Paper>
                                     </Grid>
                                 </Grid>
+                            </TablecellHeader> */}
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 110, whiteSpace: "nowrap" }}>
+                                ลงจริงไปแล้ว
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 110, whiteSpace: "nowrap", padding: 0.5 }}>
+                                <Paper
+                                    component="form"
+                                    sx={{
+                                        width: 100, // กำหนดความกว้างของ Paper
+                                        height: "25px",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignContent: "center",
+                                        marginLeft: gasStation?.Gasstation === true ? 0 : 0.5,
+                                        marginRight: gasStation?.Gasstation === true ? 0 : -1,
+                                    }}>
+                                    <Autocomplete
+                                        freeSolo
+                                        fullWidth
+                                        options={truckDriver.map(row => row.Driver)} // เก็บเต็ม: "1:สมส่วน สุขสม"
+                                        getOptionLabel={(option) => {
+                                            // แสดงเฉพาะชื่อแรก (สมส่วน)
+                                            return option?.split(":")[1]?.split(" ")[0] || "";
+                                        }}
+                                        isOptionEqualToValue={(option, value) => option === value} // เทียบค่าที่เก็บเต็ม
+                                        value={products?.Driver1 || ""} // value เก็บเต็ม: "1:สมส่วน สุขสม"
+                                        onChange={(event, newValue) => {
+                                            handleProductChange(null, "Driver1", newValue || ""); // เก็บเต็ม
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                fullWidth
+                                                variant="standard"
+                                                placeholder="กรอกชื่อ"
+                                                sx={{ fontSize: "12px", fontWeight: "bold", paddingLeft: 0.5 }}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    sx: { fontSize: "12px", fontWeight: "bold" },
+                                                }}
+                                                inputProps={{
+                                                    ...params.inputProps,
+                                                    sx: { fontSize: "12px", fontWeight: "bold" },
+                                                }}
+                                            />
+                                        )}
+                                        ListboxProps={{
+                                            sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px", marginLeft: -1.5 },
+                                        }}
+                                    />
+                                </Paper>
+                            </TablecellHeader>
+                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 110, whiteSpace: "nowrap", padding: 0.5 }}>
+                                <Paper
+                                    component="form"
+                                    sx={{
+                                        width: 100, // กำหนดความกว้างของ Paper
+                                        height: "25px",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignContent: "center",
+                                        marginLeft: gasStation?.Gasstation === true ? 0 : 0.5,
+                                        marginRight: gasStation?.Gasstation === true ? 0 : -1,
+                                    }}>
+                                    <Autocomplete
+                                        freeSolo
+                                        fullWidth
+                                        options={truckDriver.map(row => row.Driver)} // เก็บเต็ม: "1:สมส่วน สุขสม"
+                                        getOptionLabel={(option) => {
+                                            // แสดงเฉพาะชื่อแรก (สมส่วน)
+                                            return option?.split(":")[1]?.split(" ")[0] || "";
+                                        }}
+                                        isOptionEqualToValue={(option, value) => option === value} // เทียบค่าที่เก็บเต็ม
+                                        value={products?.Driver2 || ""} // value เก็บเต็ม: "1:สมส่วน สุขสม"
+                                        onChange={(event, newValue) => {
+                                            handleProductChange(null, "Driver2", newValue || ""); // เก็บเต็ม
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                fullWidth
+                                                variant="standard"
+                                                placeholder="กรอกชื่อ"
+                                                sx={{ fontSize: "12px", fontWeight: "bold", paddingLeft: 0.5 }}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    sx: { fontSize: "12px", fontWeight: "bold" },
+                                                }}
+                                                inputProps={{
+                                                    ...params.inputProps,
+                                                    sx: { fontSize: "12px", fontWeight: "bold" },
+                                                }}
+                                            />
+                                        )}
+                                        ListboxProps={{
+                                            sx: { fontSize: "12px", fontWeight: "bold", maxHeight: "150px", marginLeft: -1.5 },
+                                        }}
+                                    />
+                                </Paper>
                             </TablecellHeader>
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 110, whiteSpace: "nowrap" }}>
                                 ขาย/วัน
@@ -540,9 +739,45 @@ const UpdateGasStations = (props) => {
                             <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 110, whiteSpace: "nowrap" }}>
                                 ขายได้
                             </TablecellHeader>
-                            <TablecellHeader sx={{ backgroundColor: theme.palette.panda.main, width: 100 }} rowSpan={products?.Products.length}>
+                            {
+                                isFirstPump ?
+                                    (
+                                        stockCount === 2 ? (
+                                            <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 100, whiteSpace: "nowrap" }}>
+                                                หมดรวม
+                                            </TablecellHeader>
+                                        )
+                                            :
+                                            (
+                                                gasStation?.Gasstation !== true &&
+                                                <TablecellHeader sx={{ backgroundColor: theme.palette.panda.main, width: 100 }} rowSpan={products?.Products.length}>
 
-                            </TablecellHeader>
+                                                </TablecellHeader>
+                                            )
+                                    )
+                                    :
+                                    (
+                                        gasStation?.Gasstation !== true &&
+                                        <TablecellHeader sx={{ backgroundColor: theme.palette.panda.main, width: 100 }} rowSpan={products?.Products.length}>
+
+                                        </TablecellHeader>
+                                    )
+                            }
+                            {
+                                gasStation?.Gasstation === true && (
+                                    <React.Fragment>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 100, whiteSpace: "nowrap" }}>
+                                            ยอดขายหลังบ้าน
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ textAlign: "center", fontSize: 14, backgroundColor: theme.palette.panda.main, width: 100, whiteSpace: "nowrap" }}>
+                                            สรุปยอดหน้าบ้าน
+                                        </TablecellHeader>
+                                        <TablecellHeader sx={{ backgroundColor: theme.palette.panda.main, width: 100 }} rowSpan={products?.Products.length}>
+
+                                        </TablecellHeader>
+                                    </React.Fragment>
+                                )
+                            }
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -845,20 +1080,13 @@ const UpdateGasStations = (props) => {
                                             />
                                         </Paper>
                                     </TableCell>
-                                    <TableCell
-                                        sx={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            gap: 1, // เพิ่มระยะห่างระหว่าง TextField
-                                            backgroundColor: s.Color
-                                                ? `${s.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
-                                                : `${s.Color}4A`,
-                                            borderBottom: "2px solid white",
-                                            padding: 0.5,
-                                            pt: 0.8,
-                                        }}
-                                    >
+                                    <TableCell sx={{
+                                        textAlign: "center", backgroundColor: s.Color
+                                            ? `${s.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                            : `${s.Color}4A`,
+                                        borderBottom: "2px solid white",
+                                        padding: 0.5
+                                    }}>
                                         <Paper sx={{ width: "100%" }}>
                                             <TextField
                                                 size="small"
@@ -981,6 +1209,14 @@ const UpdateGasStations = (props) => {
                                                 }}
                                             />
                                         </Paper>
+                                    </TableCell>
+                                    <TableCell sx={{
+                                        textAlign: "center", backgroundColor: s.Color
+                                            ? `${s.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                            : `${s.Color}4A`,
+                                        borderBottom: "2px solid white",
+                                        padding: 0.5
+                                    }}>
                                         <Paper sx={{ width: "100%" }}>
                                             <TextField
                                                 size="small"
@@ -1103,6 +1339,14 @@ const UpdateGasStations = (props) => {
                                                 }}
                                             />
                                         </Paper>
+                                    </TableCell>
+                                    <TableCell sx={{
+                                        textAlign: "center", backgroundColor: s.Color
+                                            ? `${s.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                            : `${s.Color}4A`,
+                                        borderBottom: "2px solid white",
+                                        padding: 0.5
+                                    }}>
                                         <Paper sx={{ width: "100%" }}>
                                             <TextField
                                                 size="small"
@@ -1411,30 +1655,227 @@ const UpdateGasStations = (props) => {
                                     }}>
                                         {new Intl.NumberFormat("en-US").format(Math.round(s.Sell || 0))}
                                     </TableCell>
-                                    {isFirstPump && index === 0 ? (
-                                        <TableCell rowSpan={products?.Products.length}>
-                                            {
-                                                check || volumeData?.some(v => v.stockID === products?.stockID && v.Products.some(p => p.hasChanged)) ? (
-                                                    <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main }}>
-                                                        <Button
-                                                            color="inherit"
-                                                            fullWidth
-                                                            onClick={() => {
-                                                                const stockProducts = volumeData.filter(v => v.stockID === products?.stockID);
-                                                                handleSave(stockProducts); // ❗ ไม่ส่ง stationId
-                                                            }}
-                                                            sx={{ flexDirection: "column", gap: 0.5 }}
-                                                        >
-                                                            <SaveIcon fontSize="large" sx={{ color: "white" }} />
-                                                            <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
-                                                                บันทึก
-                                                            </Typography>
-                                                        </Button>
-                                                    </Paper>
-                                                ) : null
-                                            }
-                                        </TableCell>
-                                    ) : null}
+                                    {
+                                        gasStation?.Gasstation === true &&
+                                        <React.Fragment>
+                                            <TableCell sx={{
+                                                textAlign: "center", backgroundColor: s.Color
+                                                    ? `${s.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                    : `${s.Color}4A`,
+                                                borderBottom: "2px solid white",
+                                                padding: 0.5,
+                                            }}>
+                                                <Paper sx={{ width: "100%" }}>
+                                                    <TextField
+                                                        size="small"
+                                                        type={isFieldFocused(index, "BackyardSales") ? "text" : "text"}
+                                                        // แนะนำใช้ text ตลอด เพราะจัดการ input เอง
+                                                        InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
+                                                        style={{ display: isFirst ? "" : "none" }}
+                                                        value={
+                                                            isFieldFocused(index, "BackyardSales")
+                                                                ? ((s.BackyardSales === 0 || s.BackyardSales === undefined) ? "" : s.BackyardSales)
+                                                                : Number(s.BackyardSales || 0).toLocaleString()
+                                                        }
+                                                        onFocus={() => handleFocus(index, "BackyardSales")}
+                                                        onBlur={(e) => handleBlur(index, "BackyardSales", e)} // ส่ง event
+                                                        onChange={(e) => {
+                                                            let raw = e.target.value.replace(/,/g, "");
+
+                                                            // ⭐ อนุญาตให้เริ่มด้วย "-"
+                                                            if (raw === "-" || raw === "") {
+                                                                handleProductChange(index, "BackyardSales", raw);
+                                                                return;
+                                                            }
+
+                                                            // ⭐ อนุญาตเลขติดลบ เช่น "-1000"
+                                                            if (/^-?\d+$/.test(raw)) {
+                                                                handleProductChange(index, "BackyardSales", Number(raw));
+                                                            }
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            let raw = String(s.BackyardSales).replace(/,/g, "");
+
+                                                            // รองรับค่าที่เป็น "-" หรือค่าว่าง
+                                                            if (raw === "" || raw === "-") raw = "0";
+
+                                                            let current = Number(raw);
+
+                                                            if (e.key === "ArrowUp") {
+                                                                e.preventDefault();
+                                                                handleProductChange(index, "BackyardSales", current + 1000);
+                                                            }
+
+                                                            if (e.key === "ArrowDown") {
+                                                                e.preventDefault();
+                                                                handleProductChange(index, "BackyardSales", current - 1000);
+                                                            }
+                                                        }}
+                                                        fullWidth
+                                                        InputProps={{
+                                                            inputProps: {
+                                                                min: undefined, // ❗ เอาออกเพื่อรองรับค่าติดลบ
+                                                                step: 1000,
+                                                            },
+                                                            sx: {
+                                                                "& input::-webkit-inner-spin-button": {
+                                                                    marginLeft: isFieldFocused(index, "BackyardSales") ? 1 : 0,
+                                                                    marginRight: -0.5
+                                                                }
+                                                            },
+                                                            // startAdornment: (
+                                                            //     <InputAdornment position="start">
+                                                            //         <IconButton
+                                                            //             size="small"
+                                                            //             sx={{
+                                                            //                 p: '0px',        // 🔹 ตัด padding IconButton
+                                                            //                 width: 5,
+                                                            //                 height: 18,
+                                                            //                 ml: -1,
+                                                            //                 opacity: 0.6      // 🔹 ลดระยะชิดซ้าย
+                                                            //             }}
+                                                            //             onClick={() => {
+                                                            //                 let raw = String(s.BackyardSales).replace(/,/g, "");
+                                                            //                 if (raw === "" || raw === "-") raw = "0";
+
+                                                            //                 const newValue = Number(raw) - 1000;
+
+                                                            //                 handleChangeWithCheck(index, "BackyardSales", newValue); // ✅ ใช้ฟังก์ชันใหม่
+                                                            //             }}
+                                                            //         >
+                                                            //             <ArrowLeftIcon sx={{ fontSize: "25px" }} />
+                                                            //         </IconButton>
+                                                            //     </InputAdornment>
+                                                            // ),
+                                                            // endAdornment: (
+                                                            //     <InputAdornment position="end">
+                                                            //         <IconButton
+                                                            //             size="small"
+                                                            //             sx={{
+                                                            //                 p: '0px',        // 🔹 ตัด padding IconButton
+                                                            //                 width: 5,
+                                                            //                 height: 18,
+                                                            //                 mr: -1.5,
+                                                            //                 opacity: 0.6       // 🔹 ลดระยะชิดซ้าย
+                                                            //             }}
+                                                            //             onClick={() => {
+                                                            //                 let raw = String(s.BackyardSales).replace(/,/g, "");
+                                                            //                 if (raw === "" || raw === "-") raw = "0";
+
+                                                            //                 const newValue = Number(raw) + 1000;
+
+                                                            //                 handleChangeWithCheck(index, "BackyardSales", newValue); // ✅ ใช้ฟังก์ชันใหม่
+                                                            //             }}
+                                                            //         >
+                                                            //             <ArrowRightIcon sx={{ fontSize: "25px" }} />
+                                                            //         </IconButton>
+                                                            //     </InputAdornment>
+                                                            // ),
+                                                        }}
+                                                        sx={{
+                                                            "& .MuiOutlinedInput-root": { height: 25 },
+                                                            "& .MuiInputBase-input": {
+                                                                fontSize: 12,
+                                                                fontWeight: "bold",
+                                                                textAlign: "right",
+                                                                mr: -0.5,
+                                                                ml: -0.5,
+                                                                pr: 0.5,
+                                                                paddingLeft: -3, // เพิ่มพื้นที่ให้ endAdornment
+                                                                paddingRight: 2, // เพิ่มพื้นที่ให้ endAdornment
+                                                            },
+                                                        }}
+                                                    />
+                                                </Paper>
+                                            </TableCell>
+                                            <TableCell sx={{
+                                                textAlign: "right",
+                                                backgroundColor: s.Color
+                                                    ? `${s.Color}4A` // ลดความเข้มของสีด้วย Transparency (B3 = 70% opacity)
+                                                    : `${s.Color}4A`, color: s.Sell < 0 ? "#d50000" : "black",
+                                                fontWeight: "bold",
+                                                borderBottom: "2px solid white",
+                                                paddingLeft: "30px !important",
+                                                paddingRight: "30px !important",
+                                                fontVariantNumeric: "tabular-nums"
+                                            }}>
+                                                {new Intl.NumberFormat("en-US").format(
+                                                    (Number(s.Sell ?? 0) - Number(s.BackyardSales ?? 0))
+                                                )}
+                                            </TableCell>
+                                        </React.Fragment>
+                                    }
+                                    {
+                                        stockCount === 2 ? (
+                                            !isFirstPump && index === 1 ? (
+                                                <TableCell rowSpan={products?.Products.length}>
+                                                    {
+                                                        check || volumeData?.some(v => v.stockID === products?.stockID && v.Products.some(p => p.hasChanged)) ? (
+                                                            <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main }}>
+                                                                <Button
+                                                                    color="inherit"
+                                                                    fullWidth
+                                                                    onClick={() => {
+                                                                        const stockProducts = volumeData.filter(v => v.stockID === products?.stockID);
+                                                                        handleSave(stockProducts); // ❗ ไม่ส่ง stationId
+                                                                    }}
+                                                                    sx={{ flexDirection: "column", gap: 0.5 }}
+                                                                >
+                                                                    <SaveIcon fontSize="large" sx={{ color: "white" }} />
+                                                                    <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                                                        บันทึก
+                                                                    </Typography>
+                                                                </Button>
+                                                            </Paper>
+                                                        ) : null
+                                                    }
+                                                </TableCell>
+                                            ) : (
+                                                isFirstPump ? (
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            borderBottom: "2px solid white",
+                                                            backgroundColor: "#e1eaf0ff",
+                                                            color: totaldownHoleByProduct[s.ProductName] < 0 ? "#d50000" : "black",
+                                                            fontWeight: "bold",
+                                                            paddingLeft: "30px !important",
+                                                            paddingRight: "30px !important",
+                                                            fontVariantNumeric: "tabular-nums"
+                                                        }}
+                                                    >
+                                                        {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totaldownHoleByProduct[s.ProductName]) ?? ""}
+                                                    </TableCell>
+                                                )
+                                                    : null
+                                            )
+                                        ) : (
+                                            isFirstPump && index === 0 ? (
+                                                <TableCell rowSpan={products?.Products.length}>
+                                                    {
+                                                        check || volumeData?.some(v => v.stockID === products?.stockID && v.Products.some(p => p.hasChanged)) ? (
+                                                            <Paper sx={{ display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 2, backgroundColor: theme.palette.success.main }}>
+                                                                <Button
+                                                                    color="inherit"
+                                                                    fullWidth
+                                                                    onClick={() => {
+                                                                        const stockProducts = volumeData.filter(v => v.stockID === products?.stockID);
+                                                                        handleSave(stockProducts); // ❗ ไม่ส่ง stationId
+                                                                    }}
+                                                                    sx={{ flexDirection: "column", gap: 0.5 }}
+                                                                >
+                                                                    <SaveIcon fontSize="large" sx={{ color: "white" }} />
+                                                                    <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                                                        บันทึก
+                                                                    </Typography>
+                                                                </Button>
+                                                            </Paper>
+                                                        ) : null
+                                                    }
+                                                </TableCell>
+                                            ) : null
+                                        )
+                                    }
                                     {/* ถ้าเป็นแถวแรก (index === 0) ให้เพิ่ม rowSpan, แถวอื่นไม่ต้องแสดง cell นี้ */}
                                     {/* {index === 0 ? (
                                         <TableCell rowSpan={products?.Products.length}>
@@ -1468,6 +1909,227 @@ const UpdateGasStations = (props) => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Box sx={{ display: "flex", justifyContent: "left", alignItems: "start", marginTop: -2, marginBottom: 2 }}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            onClick={() => {
+                                const trucksAtDate = [{ id: 0, Truck: "", Price: "", Volume: "" }];
+
+                                if (checkTruck === gasStation?.id) {
+                                    // ❌ ปิด toggle
+                                    setCheckTruck(false);
+                                    setShowTruckFromClick(false); // กลับไปเป็นค่าเริ่มต้น
+                                    setLocalTruck([]);
+                                    onProductChange(gasStation.id, [], "Truck");
+                                } else {
+                                    // ✅ เปิด toggle
+                                    setCheckTruck(gasStation?.id);
+                                    setShowTruckFromClick(true); // บอกว่า toggle จาก onclick
+                                    setLocalTruck(trucksAtDate);
+                                    onProductChange(gasStation.id, trucksAtDate, "Truck");
+                                }
+                            }}
+                            checked={checkTruck === gasStation?.id}
+                        />
+                    }
+                    label="เพิ่มทะเบียนรถ"
+                />
+
+                {checkTruck === gasStation?.id && (
+                    <TableContainer
+                        component={Paper}
+                        style={{ maxHeight: "30vh" }}
+                        sx={{ width: "70%", marginTop: 1.5 }}
+                    >
+                        <Table stickyHeader size="small" sx={{ width: "100%" }}>
+                            <TableHead>
+                                <TableRow>
+                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 14, width: 60, backgroundColor: theme.palette.panda.main, whiteSpace: "nowrap" }}>
+                                        ลำดับ
+                                    </TablecellHeader>
+                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 14, width: 350, backgroundColor: theme.palette.panda.main, whiteSpace: "nowrap" }}>
+                                        รถเล็ก
+                                    </TablecellHeader>
+                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 14, width: 150, backgroundColor: theme.palette.panda.main, whiteSpace: "nowrap" }}>
+                                        คงเหลือบนรถ
+                                    </TablecellHeader>
+                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 14, width: 150, backgroundColor: theme.palette.panda.main, whiteSpace: "nowrap" }}>
+                                        รับเพิ่ม
+                                    </TablecellHeader>
+                                    <TablecellHeader sx={{ textAlign: "center", fontSize: 14, width: 150, backgroundColor: theme.palette.panda.main, whiteSpace: "nowrap" }}>
+                                        รวม
+                                    </TablecellHeader>
+                                    <TableCell sx={{ textAlign: "center", fontSize: 14, width: 80, whiteSpace: "nowrap" }}>
+
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {products?.Truck &&
+                                    products?.Truck.map((tr, index) => (
+                                        <TableRow key={tr.id} sx={{ height: "20px" }}>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "center",
+                                                    fontWeight: "bold",
+                                                    borderBottom: "2px solid white",
+                                                }}
+                                            >
+                                                {index + 1}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "center",
+                                                    fontWeight: "bold",
+                                                    borderBottom: "2px solid white",
+                                                    paddingLeft: 0.5,
+                                                    paddingRight: 0.5,
+                                                }}
+                                            >
+                                                <Paper sx={{ width: "100%" }}>
+                                                    <TextField
+                                                        size="small"
+                                                        type={"text"}
+                                                        value={tr.Truck}
+                                                        // แนะนำใช้ text ตลอด เพราะจัดการ input เอง
+                                                        InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
+                                                        onChange={(e) => handleChange(index, "Truck", e.target.value)}
+                                                        fullWidth
+                                                        sx={{
+                                                            "& .MuiOutlinedInput-root": { height: 25 },
+                                                            "& .MuiInputBase-input": {
+                                                                fontSize: 12,
+                                                                fontWeight: "bold",
+                                                                textAlign: "center",
+                                                                mr: -0.5,
+                                                                ml: -0.5,
+                                                                pr: 0.5,
+                                                                paddingLeft: -3, // เพิ่มพื้นที่ให้ endAdornment
+                                                                paddingRight: 1, // เพิ่มพื้นที่ให้ endAdornment
+                                                            },
+                                                        }}
+                                                    />
+                                                </Paper>
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "center",
+                                                    fontWeight: "bold",
+                                                    borderBottom: "2px solid white",
+                                                    paddingLeft: 0.5,
+                                                    paddingRight: 0.5,
+                                                }}
+                                            >
+                                                <Paper sx={{ width: "100%" }}>
+                                                    <TextField
+                                                        size="small"
+                                                        type={"number"}
+                                                        value={tr.Price}
+                                                        onChange={(e) => handleChange(index, "Price", e.target.value)}
+                                                        // แนะนำใช้ text ตลอด เพราะจัดการ input เอง
+                                                        InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
+                                                        fullWidth
+                                                        InputProps={{
+                                                            inputProps: {
+                                                                min: undefined, // ❗ เอาออกเพื่อรองรับค่าติดลบ
+                                                                step: 1000,
+                                                            },
+                                                        }}
+                                                        sx={{
+                                                            "& .MuiOutlinedInput-root": { height: 25 },
+                                                            "& .MuiInputBase-input": {
+                                                                fontSize: 12,
+                                                                fontWeight: "bold",
+                                                                textAlign: "right",
+                                                                mr: -0.5,
+                                                                ml: -0.5,
+                                                                pr: 0.5,
+                                                                paddingLeft: -3, // เพิ่มพื้นที่ให้ endAdornment
+                                                                paddingRight: 1, // เพิ่มพื้นที่ให้ endAdornment
+                                                            },
+                                                        }}
+                                                    />
+                                                </Paper>
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "center",
+                                                    fontWeight: "bold",
+                                                    borderBottom: "2px solid white",
+                                                    paddingLeft: 0.5,
+                                                    paddingRight: 0.5,
+                                                }}
+                                            >
+                                                <Paper sx={{ width: "100%" }}>
+                                                    <TextField
+                                                        size="small"
+                                                        type={"number"}
+                                                        value={tr.Volume}
+                                                        onChange={(e) => handleChange(index, "Volume", e.target.value)}
+                                                        // แนะนำใช้ text ตลอด เพราะจัดการ input เอง
+                                                        InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
+                                                        fullWidth
+                                                        InputProps={{
+                                                            inputProps: {
+                                                                min: undefined, // ❗ เอาออกเพื่อรองรับค่าติดลบ
+                                                                step: 1000,
+                                                            },
+                                                        }}
+                                                        sx={{
+                                                            "& .MuiOutlinedInput-root": { height: 25 },
+                                                            "& .MuiInputBase-input": {
+                                                                fontSize: 12,
+                                                                fontWeight: "bold",
+                                                                textAlign: "right",
+                                                                mr: -0.5,
+                                                                ml: -0.5,
+                                                                pr: 0.5,
+                                                                paddingLeft: -3, // เพิ่มพื้นที่ให้ endAdornment
+                                                                paddingRight: 1, // เพิ่มพื้นที่ให้ endAdornment
+                                                            },
+                                                        }}
+                                                    />
+                                                </Paper>
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "center",
+                                                    fontWeight: "bold",
+                                                    borderBottom: "2px solid white",
+                                                }}
+                                            >
+                                                {Number(tr.Price) + Number(tr.Volume)}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "center",
+                                                    fontWeight: "bold",
+                                                    borderBottom: "2px solid white",
+                                                }}
+                                            >
+                                                <Box display="flex" justifyContent="right" alignItems="center" marginTop={-1} marginBottom={-1}>
+                                                    {
+                                                        products?.Truck.length === (index + 1) && (
+                                                            <IconButton color="success" onClick={handleAdd}>
+                                                                <AddCircleIcon fontSize="small" />
+                                                            </IconButton>
+                                                        )
+                                                    }
+                                                    {products?.Truck.length > 1 && (
+                                                        <IconButton color="error" onClick={() => handleDelete(index)}>
+                                                            <CancelIcon fontSize="small" />
+                                                        </IconButton>
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
+            </Box>
         </React.Fragment>
 
     );
