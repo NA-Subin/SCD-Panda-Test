@@ -1348,7 +1348,7 @@ export default function Navbar({ open, onOpenChange }) {
                       }
                     </Collapse>
                     <Collapse in={!operation} unmountOnExit={false}>
-                      {["สต็อกหน้าลาน", "เที่ยววิ่งรถใหญ่"].map((text, index) => (
+                      {["สต็อกหน้าลาน", "รายงานสต๊อก", "เที่ยววิ่งรถใหญ่"].map((text, index) => (
                         <ListItem
                           key={text}
                           disablePadding
@@ -1361,7 +1361,7 @@ export default function Navbar({ open, onOpenChange }) {
                           <ListItemButton
                             component={Link}
                             to={
-                              index === 0 ? "/gasstations" : "/trips-bigtruck"
+                              index === 0 ? "/gasstations" : index === 1 ? "/report-gasstations" : "/trips-bigtruck"
                             }
                             sx={{
                               height: 35, // กำหนดความสูงให้ ListItem
@@ -1381,9 +1381,14 @@ export default function Navbar({ open, onOpenChange }) {
                                 >
                                   {index === 0 ? (
                                     <LocalGasStationIcon />
-                                  ) : (
-                                    <ModeOfTravelIcon />
-                                  )}
+                                  ) :
+                                    index === 1 ? (
+                                      <LocalGasStationIcon />
+                                    )
+                                      :
+                                      (
+                                        <ModeOfTravelIcon />
+                                      )}
                                 </ListItemIcon>
                                 :
                                 <Tooltip

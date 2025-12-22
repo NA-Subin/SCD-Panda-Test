@@ -39,7 +39,7 @@ import { ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
 import { database } from "../../../server/firebase";
 
 const InsertGasStations = (props) => {
-    const { gasStation } = props;
+    const { gasStation, handleClose } = props;
     const [check, setCheck] = React.useState(true);
     const [open, setOpen] = React.useState(false);
 
@@ -47,11 +47,11 @@ const InsertGasStations = (props) => {
         setOpen(true);
     };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    // const handleClose = () => {
+    //     setOpen(false);
+    // };
 
-    const [checkGasStation, setCheckGasStation] = React.useState(false);
+    // const [checkTruck, setCheckTruck] = React.useState(false);
     const [checkTruck, setCheckTruck] = React.useState(false);
     const [name, setName] = React.useState("");
     const [code, setCode] = React.useState("");
@@ -126,42 +126,126 @@ const InsertGasStations = (props) => {
 
     // console.log("volumeData : ", volumeData);
 
-    const handleVolumeChange = (product, volume, isChecked) => {
-        setVolumeData((prevData) => {
-            const exists = prevData.some(
-                (item) => item.Name === product.ProductName
-            );
+    // const handleVolumeChange = (product, volume, isChecked) => {
+    //     setVolumeData((prevData) => {
+    //         const exists = prevData.some(
+    //             (item) => item.Name === product.ProductName
+    //         );
 
-            let updatedData;
+    //         let updatedData;
 
-            if (exists) {
-                // ✅ ถ้ามีอยู่แล้ว → ลบออก (Toggle Off)
-                updatedData = prevData.filter(
-                    (item) => item.Name !== product.ProductName
-                );
-            } else {
-                // ✅ ถ้ายังไม่มี → เพิ่มเข้าไป (Toggle On)
-                updatedData = [
-                    ...prevData,
+    //         if (exists) {
+    //             // ✅ ถ้ามีอยู่แล้ว → ลบออก (Toggle Off)
+    //             updatedData = prevData.filter(
+    //                 (item) => item.Name !== product.ProductName
+    //             );
+    //         } else {
+    //             // ✅ ถ้ายังไม่มี → เพิ่มเข้าไป (Toggle On)
+    //             updatedData = [
+    //                 ...prevData,
+    //                 {
+    //                     Name: product.ProductName,
+    //                     Capacity: product.Capacity,
+    //                     Color: product.Color,
+    //                     Volume: volume,
+    //                     CheckBox: isChecked,
+    //                 },
+    //             ];
+    //         }
+
+    //         // ✅ เรียงลำดับใหม่ (เช่น เรียงตาม Name A→Z)
+    //         updatedData.sort((a, b) => a.Name.localeCompare(b.Name));
+
+    //         // ✅ นับจำนวน CheckBox ที่เป็น true
+    //         const selectedCount = updatedData.filter((item) => item.CheckBox).length;
+    //         setOilWell(selectedCount);
+
+    //         return updatedData;
+    //     });
+    // };
+
+    const handleVolumeUpdate = (product, volume) => {
+        setVolumeData(prev => {
+            const exists = prev.find(item => item.Name === product.ProductName);
+
+            if (!exists) {
+                // ถ้ายังไม่มี → สร้างใหม่พร้อม Volume
+                return [
+                    ...prev,
                     {
                         Name: product.ProductName,
                         Capacity: product.Capacity,
                         Color: product.Color,
                         Volume: volume,
-                        CheckBox: isChecked,
+                        CheckBox: false,
+                        Backyard: false
                     },
                 ];
             }
 
-            // ✅ เรียงลำดับใหม่ (เช่น เรียงตาม Name A→Z)
+            // ถ้ามี → update Volume
+            return prev.map(item =>
+                item.Name === product.ProductName
+                    ? { ...item, Volume: volume }
+                    : item
+            );
+        });
+    };
+
+    const handleVolumeChange = (product, volume, isChecked) => {
+        setVolumeData((prevData) => {
+            let updatedData;
+
+            if (isChecked) {
+                // ✅ เพิ่มข้อมูลเมื่อ Checkbox = true
+                // ถ้ามีอยู่แล้ว → update Volume
+                const exists = prevData.find(item => item.Name === product.ProductName);
+
+                if (exists) {
+                    updatedData = prevData.map(item =>
+                        item.Name === product.ProductName
+                            ? { ...item, Volume: volume, CheckBox: true }
+                            : item
+                    );
+                } else {
+                    updatedData = [
+                        ...prevData,
+                        {
+                            Name: product.ProductName,
+                            Capacity: product.Capacity,
+                            Color: product.Color,
+                            Volume: volume,
+                            CheckBox: true,
+                            Backyard: false
+                        },
+                    ];
+                }
+            } else {
+                // ❌ ถ้า Checkbox = false → ลบข้อมูลออก
+                updatedData = prevData.filter(
+                    (item) => item.Name !== product.ProductName
+                );
+            }
+
+            // 🔄 เรียงลำดับใหม่
             updatedData.sort((a, b) => a.Name.localeCompare(b.Name));
 
-            // ✅ นับจำนวน CheckBox ที่เป็น true
+            // 🔢 อัปเดตจำนวน Checkbox ที่เลือกอยู่
             const selectedCount = updatedData.filter((item) => item.CheckBox).length;
             setOilWell(selectedCount);
 
             return updatedData;
         });
+    };
+
+    const handleBackyardToggle = (product, value) => {
+        setVolumeData(prev =>
+            prev.map(item =>
+                item.Name === product.ProductName
+                    ? { ...item, Backyard: value }
+                    : item
+            )
+        );
     };
 
     const getStock = async () => {
@@ -208,7 +292,7 @@ const InsertGasStations = (props) => {
                 OilWellNumber: oilWell,
                 Products: volumeData,
                 Truck: truckData,
-                Gasstation: checkGasStation,
+                CheckTruck: checkTruck,
                 // Products: volumeData.reduce((acc, row) => {
                 //     if (row.CheckBox === true || row.CheckBox === "true") {
                 //         acc[row.Name] = row.Volume; // เพิ่ม key-value ในออบเจ็กต์
@@ -307,13 +391,13 @@ const InsertGasStations = (props) => {
                 </Paper>
             </Grid>
             <Grid item sm={2} xs={12} textAlign="right" >
-                <FormControlLabel control={<Checkbox onClick={() => setCheckGasStation(!checkGasStation)} checked={checkGasStation}
+                <FormControlLabel control={<Checkbox onClick={() => setCheckTruck(!checkTruck)} checked={checkTruck}
                     sx={{
                         "& .MuiSvgIcon-root": {
                             fontSize: 20, // ปรับขนาด Checkbox
                         },
                     }} />}
-                    label="ตู้หลังบ้าน"
+                    label="เพิ่มทะเบียนรถ"
                     sx={{
                         "& .MuiFormControlLabel-label": {
                             fontSize: "14px",
@@ -336,9 +420,20 @@ const InsertGasStations = (props) => {
                                 <React.Fragment key={row.Name}>
                                     {row.Products.map((product, index) => (
                                         <React.Fragment key={index}>
-                                            <Grid item sm={1} xs={12}></Grid>
+                                            <Grid item sm={0.5} xs={12}></Grid>
                                             <Grid item sm={0.5} xs={2}>
                                                 <Checkbox
+                                                    checked={!!volumeData.find(item => item.Name === product.ProductName)}
+                                                    onChange={(e) =>
+                                                        handleVolumeChange(
+                                                            product,
+                                                            volumeData.find(item => item.Name === product.ProductName)?.Volume || 0,
+                                                            e.target.checked
+                                                        )
+                                                    }
+                                                />
+
+                                                {/* <Checkbox
                                                     checked={
                                                         Array.isArray(volumeData) &&
                                                         volumeData.find((item) => item.Name === product.ProductName)?.CheckBox === true
@@ -350,7 +445,7 @@ const InsertGasStations = (props) => {
                                                             e.target.checked
                                                         )
                                                     }
-                                                />
+                                                /> */}
                                             </Grid>
                                             <Grid item sm={1.5} xs={10}>
                                                 <Box sx={{ borderRadius: 3, backgroundColor: product.Color, width: "100%", height: 40, display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -368,7 +463,7 @@ const InsertGasStations = (props) => {
                                                     ความจุ
                                                 </Typography>
                                             </Grid>
-                                            <Grid item sm={3} xs={4}>
+                                            <Grid item sm={2.5} xs={4}>
                                                 <TextField
                                                     size="small"
                                                     fullWidth
@@ -390,7 +485,7 @@ const InsertGasStations = (props) => {
                                                     ปริมาณ
                                                 </Typography>
                                             </Grid>
-                                            <Grid item sm={3} xs={4}>
+                                            <Grid item sm={2.5} xs={4}>
                                                 <TextField
                                                     size="small"
                                                     type="number"
@@ -408,14 +503,21 @@ const InsertGasStations = (props) => {
                                                                 : "primary" // ใช้ 'primary' color หาก Volume น้อยกว่าหรือเท่ากับ Capacity
                                                     }
                                                     value={
-                                                        Array.isArray(volumeData)
-                                                            ? volumeData.find(
-                                                                (item) => item.Name === product.ProductName
-                                                            )?.Volume || ""
-                                                            : ""
+                                                        volumeData.find(i => i.Name === product.ProductName)?.Volume || ""
                                                     }
-                                                    onChange={(e) =>
-                                                        handleVolumeChange(product, e.target.value)
+                                                    onChange={(e) => handleVolumeUpdate(product, e.target.value)}
+                                                    // value={
+                                                    //     Array.isArray(volumeData)
+                                                    //         ? volumeData.find(
+                                                    //             (item) => item.Name === product.ProductName
+                                                    //         )?.Volume || ""
+                                                    //         : ""
+                                                    // }
+                                                    // onChange={(e) =>
+                                                    //     handleVolumeChange(product, e.target.value)
+                                                    // }
+                                                    disabled={
+                                                        volumeData.find(i => i.Name === product.ProductName)?.Name !== product.ProductName
                                                     }
                                                     InputProps={{
                                                         style: {
@@ -434,7 +536,42 @@ const InsertGasStations = (props) => {
                                                     }}
                                                 />
                                             </Grid>
-                                            <Grid item sm={1.5} xs={12}></Grid>
+                                            <Grid item sm={2} xs={12} textAlign="right">
+                                                {Array.isArray(volumeData) && (() => {
+                                                    const matched = volumeData.find(
+                                                        (item) => item.Name === product.ProductName
+                                                    );
+
+                                                    if (!matched) return null;
+
+                                                    return (
+                                                        <FormControlLabel
+                                                            control={
+                                                                <Checkbox
+                                                                    checked={matched.Backyard || false}
+                                                                    onChange={(e) =>
+                                                                        handleBackyardToggle(product, e.target.checked)
+                                                                    }
+                                                                    sx={{
+                                                                        "& .MuiSvgIcon-root": {
+                                                                            fontSize: 20,
+                                                                        },
+                                                                    }}
+                                                                />
+                                                            }
+                                                            label="ตู้หลังบ้าน"
+                                                            sx={{
+                                                                "& .MuiFormControlLabel-label": {
+                                                                    fontSize: "14px",
+                                                                    fontWeight: "bold",
+                                                                    color: !check ? "gray" : undefined,
+                                                                },
+                                                            }}
+                                                        />
+                                                    );
+                                                })()}
+                                            </Grid>
+                                            <Grid item sm={0.5} xs={12}></Grid>
                                             <Grid item sm={12} textAlign="right" marginTop={-11} marginRight={7}>
                                                 {
                                                     Array.isArray(volumeData) &&

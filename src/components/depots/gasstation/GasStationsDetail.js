@@ -77,6 +77,7 @@ const GasStationsDetail = (props) => {
     const { gasstationDetail, stockDetail } = useGasStationData();
     const gasStationOil = Object.values(gasstationDetail || {});
     const stocks = Object.values(stockDetail || {});
+    console.log("gasstation Oil : ", gasStationOil);
 
     const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
 
@@ -94,6 +95,22 @@ const GasStationsDetail = (props) => {
             return (((volume + Pending3 + Pending1 + Pending2) - squeezeoil) / estimateSell).toFixed(2);
         }
     };
+
+    // const recomputeProduct = (p) => {
+    //     const Period = calculatePeriod(p);
+    //     const Sell = calculateSell(p);
+    //     const TotalVolume = calculateTotalVolume(p);
+
+    //     return {
+    //         ...p,
+    //         Period,
+    //         Sell,
+    //         TotalVolume,
+    //         PeriodDisplay:
+    //             parseFloat(Period) ||
+    //             (parseFloat(p.Volume) - parseFloat(p.Squeeze)),
+    //     };
+    // };
 
     const calculateSell = (row) => {
         const yesterDay = parseFloat(row.YesterDay) || 0;
@@ -354,6 +371,19 @@ const GasStationsDetail = (props) => {
                         return todayItem;
                     });
                 }
+
+                // ✅ เพิ่ม Backyard ให้ทุก Product จาก station.Products
+                reportForDate.Products = reportForDate.Products.map((prod) => {
+                    const base = station?.Products?.find(
+                        (p) => p.Name === prod.ProductName
+                    );
+
+                    return {
+                        ...prod,
+                        Backyard: base?.Backyard ?? false, // 👈 เพิ่มที่นี่
+                    };
+                });
+
                 return reportForDate;
             }
 
@@ -380,6 +410,10 @@ const GasStationsDetail = (props) => {
                     stationId: station.id,
                 };
             }
+
+            console.log("stock.Products : ", stock.Products);
+            console.log("station.Products : ", station.Products);
+            console.log("fallbackProducts : ", fallbackProducts);
 
             const defaultProducts = fallbackProducts
                 .map((p) => {
@@ -421,6 +455,8 @@ const GasStationsDetail = (props) => {
                         Pending3: Number(p?.Pending3) || 0,
                         Period: 0,
                         DownHole: Number(p?.DownHole) || 0,
+
+                        Backyard: p?.Backyard ?? false,   // 👈 เพิ่มตรงนี้
 
                         // ✅ Volume ของเมื่อวาน
                         YesterDay: volYesterday,
@@ -507,17 +543,14 @@ const GasStationsDetail = (props) => {
 
         const formattedDate = selectedDate.format("DD/MM/YYYY");
 
-        // --- ดึงข้อมูลจาก localStorage ---
+        // ดึงข้อมูลเก่าจาก localStorage
         const saved = localStorage.getItem(STORAGE_KEY);
         let oldData = null;
         if (saved) {
             const parsed = JSON.parse(saved);
-            if (parsed.date === formattedDate) {
-                oldData = parsed.data;
-            }
+            if (parsed.date === formattedDate) oldData = parsed.data;
         }
 
-        // --- ดึงข้อมูลดิบ ---
         const rawData = getStationReportsArray(
             memoStocks,
             memoGasStationOil,
@@ -531,21 +564,77 @@ const GasStationsDetail = (props) => {
         const m = selectedDate.month() + 1;
         const d = selectedDate.date();
 
-        // --- รวมข้อมูลพร้อม hasChanged ---
+        const hasValidTruck = (truckArray) => {
+            if (!Array.isArray(truckArray) || truckArray.length === 0) return false;
+            return truckArray.some(t => t.Truck && t.Truck.trim() !== "");
+        };
+
+        // หาค่า Truck ล่าสุดที่มีข้อมูลจริงก่อน selectedDate
+        const findLatestValidTruck = (report, selectedDate) => {
+            if (!report) return null;
+
+            let latestTruck = null;
+
+            for (const yr of Object.keys(report).sort((a, b) => b - a)) {
+                for (const mon of Object.keys(report[yr]).sort((a, b) => b - a)) {
+                    for (const day of Object.keys(report[yr][mon]).sort((a, b) => b - a)) {
+                        const currDate = dayjs(`${day}/${mon}/${yr}`, "D/M/YYYY");
+                        if (currDate.isAfter(selectedDate, "day")) continue;
+
+                        const truckArray = report[yr][mon][day]?.Truck ?? [];
+                        if (hasValidTruck(truckArray)) {
+                            latestTruck = truckArray.map((t, idx) => ({
+                                id: idx,
+                                Truck: t.Truck ?? "",
+                                Price: "",
+                                Volume: ""
+                            }));
+                            return latestTruck; // เจอแล้ว return เลย
+                        }
+                    }
+                }
+            }
+
+            return null;
+        };
+
         const merged = prepared.map((station, index) => {
             const st = memoGasStationOil[index];
-            const reportForDate = st?.Report?.[y]?.[m]?.[d];
 
-            // ใช้ค่า hasChanged จาก state ปัจจุบันถ้ามี
-            const current = stationReports[index];
+            const reportToday = st?.Report?.[y]?.[m]?.[d];
+            const todayTruck = reportToday?.Truck ?? [];
+
+            let finalTruck = [];
+
+            if (hasValidTruck(todayTruck)) {
+                finalTruck = todayTruck.map((t, idx) => ({
+                    id: idx,
+                    Truck: t.Truck ?? "",
+                    Price: t.Price ?? "",
+                    Volume: t.Volume ?? ""
+                }));
+            } else {
+                const latestTruck = findLatestValidTruck(st?.Report, selectedDate);
+                finalTruck = latestTruck ?? DEFAULT_TRUCK;
+            }
+
+            // 🔥 สำคัญที่สุดตรงนี้
+            const cleanProducts = structuredClone(station.Products ?? []);
+            const cleanTruck = structuredClone(finalTruck);
 
             return {
                 ...station,
-                hasChanged: reportForDate
-                    ? current?.hasChanged ?? oldData?.[index]?.hasChanged ?? false
-                    : false
+
+                Products: cleanProducts,
+                originalProducts: structuredClone(cleanProducts),
+
+                Truck: cleanTruck,
+                originalTruck: structuredClone(cleanTruck),
+
+                hasChanged: false
             };
         });
+
 
         setStationReports(merged);
 
@@ -558,80 +647,176 @@ const GasStationsDetail = (props) => {
 
     }, [selectedDate, memoStocks, memoGasStationOil]);
 
+    console.log("station report : ", stationReports);
+
+    // field ที่ถือว่ามีผลต่อการเปลี่ยนแปลง
+    // เทียบ product ทุก field ที่สำคัญ
+
+    // เทียบ Truck แบบไม่ใช้ JSON.stringify
+
+    const PRODUCT_FIELDS = [
+        "FullVolume",
+        "Volume",
+        "Squeeze",
+        "Pending1",
+        "Pending2",
+        "Pending3",
+        "EstimateSell",
+        "BackyardSales"
+    ];
+
+    // ตรวจว่า product เปลี่ยนจริงไหม (เทียบกับ original)
+    const isProductChanged = (original, current) => {
+        return PRODUCT_FIELDS.some(f =>
+            String(original?.[f] ?? "") !== String(current?.[f] ?? "")
+        );
+    };
+
+    const isTruckChanged = (orig = [], curr = []) => {
+        if (orig.length !== curr.length) return true;
+
+        return curr.some((t, i) =>
+            ["Truck", "Price", "Volume"].some(
+                f => String(orig[i]?.[f] ?? "") !== String(t[f] ?? "")
+            )
+        );
+    };
+
+    // recompute ทุกค่าที่คำนวณ
+    const recomputeProduct = (p) => {
+        const cloned = structuredClone(p);
+
+        cloned.Period = calculatePeriod(cloned);
+        cloned.Sell = calculateSell(cloned);
+        cloned.TotalVolume = calculateTotalVolume(cloned);
+        cloned.PeriodDisplay =
+            parseFloat(cloned.Period) ||
+            (parseFloat(cloned.Volume) - parseFloat(cloned.Squeeze));
+
+        return cloned;
+    };
+
     // --- ฟังก์ชันแก้ไขข้อมูลแต่ละ station ---
-    const handleProductChange = (stationId, valueOrProducts, fieldOrType) => {
+    const handleProductChange = (stationId, products, fieldOrType) => {
         setStationReports(prev => {
-            // 1) หา station นี้ก่อน
-            const targetStation = prev.find(s => s.stationId === stationId);
-            if (!targetStation) return prev;
+            const target = prev.find(s => s.stationId === stationId);
+            if (!target) return prev;
 
-            const stockID = targetStation.stockID;
+            const stockID = target.stockID;
 
-            let stationWasChanged = false;
-
-            // 2) อัปเดต station นี้ก่อน
+            // ---------------------------------------------------
+            // 1️⃣ update station ที่ถูกแก้
+            // ---------------------------------------------------
             let updated = prev.map(s => {
                 if (s.stationId !== stationId) return s;
 
-                // ⭐ ถ้าแก้ไข Products
                 if (fieldOrType === "Products") {
-                    const original = s.originalProducts ?? JSON.parse(JSON.stringify(s.Products));
-
-                    const fields = [
-                        "FullVolume",
-                        "Volume",
-                        "Squeeze",
-                        "Pending1",
-                        "Pending2",
-                        "Pending3",
-                        "EstimateSell",
-                    ];
-
-                    const changed = valueOrProducts.some((p, i) =>
-                        fields.some(f => String(original[i]?.[f] ?? "") !== String(p[f] ?? ""))
-                    );
-
-                    if (changed) stationWasChanged = true;
-
-                    return {
-                        ...s,
-                        Products: valueOrProducts,
-                        hasChanged: changed,
-                        originalProducts: original
-                    };
-                } else if (fieldOrType === "Truck") {
-
-                    const original = s.originalTruck ?? JSON.parse(JSON.stringify(s.Truck ?? []));
-
-                    // ใช้ฟิลด์ตัวใหญ่ตามข้อมูลจริง
-                    const fields = ["Truck", "Price", "Volume"];
-
-                    const changed = valueOrProducts.length === 0 ||  // ⭐ ถ้า [] = มีการเปลี่ยนแปลง
-                        valueOrProducts.some((p, i) =>
-                            fields.some(f =>
-                                String(original[i]?.[f] ?? "") !== String(p[f] ?? "")
-                            )
-                        );
-
-                    return {
-                        ...s,
-                        Truck: valueOrProducts,
-                        originalTruck: original,
-                        hasChanged: changed
-                    };
+                    return { ...s, Products: products };
                 }
 
-                // ⭐ ถ้าแก้ไข Driver1 / Driver2
-                stationWasChanged = true;
-                return { ...s, [fieldOrType]: valueOrProducts, hasChanged: true };
+                if (fieldOrType === "Truck") {
+                    return { ...s, Truck: products };
+                }
+
+                return s;
             });
 
-            // 3) ถ้ามีการแก้ไขและใน stock นี้มีมากกว่า 1 station → mark ให้ทุก station ใน stock นี้เป็น hasChanged = true
-            const sameStockStations = prev.filter(s => s.stockID === stockID);
+            // ---------------------------------------------------
+            // 2️⃣ sync Volume + recompute (เฉพาะ stock ที่มี 2 ปั้ม)
+            // ---------------------------------------------------
+            const sameStock = updated.filter(s => s.stockID === stockID);
 
-            if (stationWasChanged && sameStockStations.length > 1) {
+            if (sameStock.length === 2) {
+                const [a, b] = sameStock;
+
+                const editedIsA = a.stationId === stationId;
+                const editedIsB = b.stationId === stationId;
+
+                const syncedA = structuredClone(a.Products);
+                const syncedB = structuredClone(b.Products);
+
+                syncedA.forEach((pA, idx) => {
+                    const bIdx = syncedB.findIndex(
+                        p => p.ProductName === pA.ProductName
+                    );
+                    if (bIdx === -1) return;
+
+                    const pB = syncedB[bIdx];
+
+                    const full = Number(pA.FullVolume ?? pB.FullVolume ?? 0);
+
+                    // ✅ ถ้าแก้ปั้ม A → คำนวณ B
+                    if (editedIsA) {
+                        pB.Volume = full - Number(pA.Volume || 0);
+                    }
+
+                    // ✅ ถ้าแก้ปั้ม B → คำนวณ A
+                    if (editedIsB) {
+                        pA.Volume = full - Number(pB.Volume || 0);
+                    }
+
+                    // 🔄 recompute หลัง Volume ถูก sync
+                    syncedA[idx] = recomputeProduct(pA);
+                    syncedB[bIdx] = recomputeProduct(pB);
+                });
+
+                updated = updated.map(s => {
+                    if (s.stationId === a.stationId) {
+                        return { ...s, Products: syncedA };
+                    }
+                    if (s.stationId === b.stationId) {
+                        return { ...s, Products: syncedB };
+                    }
+                    return s;
+                });
+            }
+
+            // ---------------------------------------------------
+            // 3️⃣ ⭐ คำนวณ hasChanged (รองรับทั้ง 1 และ 2 ปั้ม)
+            // ---------------------------------------------------
+            const stationsInStock = updated.filter(s => s.stockID === stockID);
+
+            // ====== stock มี 1 ปั้ม ======
+            if (stationsInStock.length === 1) {
+                const s = stationsInStock[0];
+                const original = prev.find(p => p.stationId === s.stationId);
+                if (!original) return updated;
+
+                const changed =
+                    s.Products.some((p, i) =>
+                        isProductChanged(original.originalProducts?.[i], p)
+                    ) ||
+                    isTruckChanged(original.originalTruck, s.Truck);
+
+                updated = updated.map(st =>
+                    st.stationId === s.stationId
+                        ? { ...st, hasChanged: changed }
+                        : st
+                );
+            }
+
+            // ====== stock มี 2 ปั้ม ======
+            if (stationsInStock.length === 2) {
+                const [sa, sb] = stationsInStock;
+
+                const originalA = prev.find(p => p.stationId === sa.stationId);
+                const originalB = prev.find(p => p.stationId === sb.stationId);
+                if (!originalA || !originalB) return updated;
+
+                const changed =
+                    sa.Products.some((p, i) =>
+                        isProductChanged(originalA.originalProducts?.[i], p)
+                    ) ||
+                    sb.Products.some((p, i) =>
+                        isProductChanged(originalB.originalProducts?.[i], p)
+                    ) ||
+                    isTruckChanged(originalA.originalTruck, sa.Truck) ||
+                    isTruckChanged(originalB.originalTruck, sb.Truck);
+
                 updated = updated.map(s =>
-                    s.stockID === stockID ? { ...s, hasChanged: true } : s
+                    s.stockID === stockID
+                        ? { ...s, hasChanged: changed }
+                        : s
                 );
             }
 
@@ -680,44 +865,60 @@ const GasStationsDetail = (props) => {
         const month = dayjs(selectedDate).format("M");
         const day = dayjs(selectedDate).format("D");
 
-        // ⭐ เปิด popup loading
         setSaving(true);
 
         try {
             for (const sp of stockProducts) {
-
-                if (!sp.stationId) {
-                    console.error("❌ stationId is missing:", sp);
-                    continue;
-                }
+                if (!sp.stationId) continue;
 
                 await database
                     .ref(`/depot/gasStations/${Number(sp.stationId) - 1}/Report/${year}/${month}/${day}`)
                     .set(sp);
-
-                console.log(`✅ Saved for station ${sp.stationId}`);
             }
 
-            // ⭐ ปิด loading และแจ้งสำเร็จ
-            setSaving(false);
             ShowSuccess("บันทึกข้อมูลสำเร็จ");
 
-            setStationReports(prev =>
-                prev.map(s =>
-                    stockProducts.some(sp => sp.stationId === s.stationId)
-                        ? {
-                            ...s,
-                            hasChanged: false,
-                            originalProducts: JSON.parse(JSON.stringify(s.Products)),
-                        }
-                        : s
-                )
-            );
+            // ---------------------------------------------------
+            // ⭐ reset state หลัง save (สำคัญมาก)
+            // ---------------------------------------------------
+            setStationReports(prev => {
+                const savedStocks = new Set(stockProducts.map(sp => sp.stockID));
+
+                return prev.map(s => {
+                    if (!savedStocks.has(s.stockID)) return s;
+
+                    const saved = stockProducts.find(
+                        sp => sp.stationId === s.stationId
+                    );
+
+                    if (!saved) {
+                        return { ...s, hasChanged: false };
+                    }
+
+                    const cleanProducts = structuredClone(saved.Products).map(p => {
+                        const cp = { ...p };
+                        delete cp.hasChanged;
+                        return cp;
+                    });
+
+                    return {
+                        ...s,
+                        hasChanged: false,
+
+                        Products: cleanProducts,
+                        originalProducts: structuredClone(cleanProducts),
+
+                        Truck: structuredClone(saved.Truck ?? []),
+                        originalTruck: structuredClone(saved.Truck ?? []),
+                    };
+                });
+            });
 
         } catch (error) {
-            setSaving(false); // ⭐ ปิด loading แม้เกิด error
             ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-            console.error("Error updating data:", error);
+            console.error(error);
+        } finally {
+            setSaving(false);
         }
     };
 

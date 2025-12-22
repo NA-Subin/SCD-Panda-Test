@@ -55,7 +55,7 @@ const Detail = (props) => {
     const [code, setCode] = React.useState(gasStation?.Code);
     const [shortName, setShortName] = React.useState(gasStation?.ShortName);
     const [oilWell, setOilWell] = React.useState(Number(gasStation?.OilWellNumber));
-    const [checkGasStation, setCheckGasStation] = React.useState(gasStation?.Gasstation === undefined || gasStation?.Gasstation === false ? false : true);
+    const [checkTruck, setCheckTruck] = React.useState(gasStation?.Gasstation === undefined || gasStation?.Gasstation === false ? false : true);
     const addressText = gasStation?.Address?.trim() || "";
 
     // ใช้ regex แยกค่าแต่ละส่วน (รองรับกรณีบางส่วนหายไป)
@@ -124,6 +124,7 @@ const Detail = (props) => {
                         Color: product.Color,
                         Volume: volume,
                         CheckBox: isChecked,
+                        Backyard: product.Backyard === true ? true : false
                     },
                 ];
             }
@@ -139,7 +140,17 @@ const Detail = (props) => {
         });
     };
 
-    // console.log("Volume Data : ", volumeData);
+    const handleBackyardToggle = (product, value) => {
+        setVolumeData(prev =>
+            prev.map(item =>
+                item.Name === product.ProductName
+                    ? { ...item, Backyard: value }
+                    : item
+            )
+        );
+    };
+
+    console.log("Volume Data : ", volumeData);
 
     const handlePost = () => {
         database
@@ -152,7 +163,7 @@ const Detail = (props) => {
                 OilWellNumber: oilWell,
                 Products: volumeData,
                 Stock: `${stocks?.id}:${stocks?.Name}`,
-                Gasstation: checkGasStation,
+                CheckTruck: checkTruck,
                 Address:
                     (no === "-" ? "-" : no) +
                     (village === "-" ? "" : ` ${village}`) +
@@ -259,13 +270,13 @@ const Detail = (props) => {
                             </Paper>
                         </Grid>
                         <Grid item sm={2} xs={12} textAlign="right" >
-                            <FormControlLabel control={<Checkbox onClick={() => setCheckGasStation(!checkGasStation)} checked={checkGasStation}
+                            <FormControlLabel control={<Checkbox onClick={() => setCheckTruck(!checkTruck)} checked={checkTruck}
                                 sx={{
                                     "& .MuiSvgIcon-root": {
                                         fontSize: 20, // ปรับขนาด Checkbox
                                     },
                                 }} />}
-                                label="ตู้หลังบ้าน"
+                                label="เพิ่มทะเบียนรถ"
                                 disabled={!check}
                                 sx={{
                                     "& .MuiFormControlLabel-label": {
@@ -300,53 +311,128 @@ const Detail = (props) => {
                                                             <Grid item sm={3} xs={12}>
                                                                 {
                                                                     check ?
-                                                                        <Box
-                                                                            onClick={() => handleVolumeChange(product, currentVolume, !isChecked)} // คลิกแทน checkbox
-                                                                            sx={{
-                                                                                borderRadius: 2,
-                                                                                backgroundColor: isChecked ? product.Color : "#e0e0e0",
-                                                                                width: "100%",
-                                                                                height: 40,
-                                                                                display: "flex",
-                                                                                justifyContent: "center",
-                                                                                alignItems: "center",
-                                                                                cursor: "pointer",
-                                                                                transition: "all 0.2s ease-in-out",
-                                                                                "&:hover": {
-                                                                                    transform: "scale(1.03)",
-                                                                                    boxShadow: "1px 1px 2px 1px rgba(0,0,0,0.2)",
-                                                                                },
-                                                                            }}
-                                                                        >
-                                                                            <Typography
-                                                                                variant="h5"
-                                                                                fontWeight="bold"
-                                                                                color={isChecked ? "black" : "#9e9e9e"}
+                                                                        <React.Fragment>
+                                                                            <Box
+                                                                                onClick={() => handleVolumeChange(product, currentVolume, !isChecked)} // คลิกแทน checkbox
+                                                                                sx={{
+                                                                                    borderRadius: 2,
+                                                                                    backgroundColor: isChecked ? product.Color : "#e0e0e0",
+                                                                                    width: "100%",
+                                                                                    height: 40,
+                                                                                    display: "flex",
+                                                                                    justifyContent: "center",
+                                                                                    alignItems: "center",
+                                                                                    cursor: "pointer",
+                                                                                    transition: "all 0.2s ease-in-out",
+                                                                                    "&:hover": {
+                                                                                        transform: "scale(1.03)",
+                                                                                        boxShadow: "1px 1px 2px 1px rgba(0,0,0,0.2)",
+                                                                                    },
+                                                                                }}
                                                                             >
-                                                                                {product.ProductName}
-                                                                            </Typography>
-                                                                        </Box>
+                                                                                <Typography
+                                                                                    variant="h5"
+                                                                                    fontWeight="bold"
+                                                                                    color={isChecked ? "black" : "#9e9e9e"}
+                                                                                >
+                                                                                    {product.ProductName}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                            <Box sx={{ textAlign: "center" }}>
+                                                                                {Array.isArray(volumeData) && (() => {
+                                                                                    const matched = volumeData.find(
+                                                                                        (item) => item.Name === product.ProductName
+                                                                                    );
+
+                                                                                    if (!matched) return null;
+
+                                                                                    return (
+                                                                                        <FormControlLabel
+                                                                                            control={
+                                                                                                <Checkbox
+                                                                                                    checked={matched.Backyard || false}
+                                                                                                    onChange={(e) =>
+                                                                                                        handleBackyardToggle(product, e.target.checked)
+                                                                                                    }
+                                                                                                    sx={{
+                                                                                                        "& .MuiSvgIcon-root": {
+                                                                                                            fontSize: 20,
+                                                                                                        },
+                                                                                                    }}
+                                                                                                />
+                                                                                            }
+                                                                                            label="ตู้หลังบ้าน"
+                                                                                            sx={{
+                                                                                                "& .MuiFormControlLabel-label": {
+                                                                                                    fontSize: "14px",
+                                                                                                    fontWeight: "bold",
+                                                                                                    color: !check ? "gray" : undefined,
+                                                                                                },
+                                                                                            }}
+                                                                                        />
+                                                                                    );
+                                                                                })()}
+                                                                            </Box>
+                                                                        </React.Fragment>
                                                                         :
-                                                                        <Box
-                                                                            sx={{
-                                                                                borderRadius: 2,
-                                                                                backgroundColor: isChecked ? product.Color : "#e0e0e0",
-                                                                                opacity: 0.8,
-                                                                                width: "100%",
-                                                                                height: 40,
-                                                                                display: "flex",
-                                                                                justifyContent: "center",
-                                                                                alignItems: "center",
-                                                                            }}
-                                                                        >
-                                                                            <Typography
-                                                                                variant="h5"
-                                                                                fontWeight="bold"
-                                                                                color={isChecked ? "black" : "#9e9e9e"}
+                                                                        <React.Fragment>
+                                                                            <Box
+                                                                                sx={{
+                                                                                    borderRadius: 2,
+                                                                                    backgroundColor: isChecked ? product.Color : "#e0e0e0",
+                                                                                    opacity: 0.8,
+                                                                                    width: "100%",
+                                                                                    height: 40,
+                                                                                    display: "flex",
+                                                                                    justifyContent: "center",
+                                                                                    alignItems: "center",
+                                                                                }}
                                                                             >
-                                                                                {product.ProductName}
-                                                                            </Typography>
-                                                                        </Box>
+                                                                                <Typography
+                                                                                    variant="h5"
+                                                                                    fontWeight="bold"
+                                                                                    color={isChecked ? "black" : "#9e9e9e"}
+                                                                                >
+                                                                                    {product.ProductName}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                            <Box sx={{ textAlign: "center" }}>
+                                                                                {Array.isArray(volumeData) && (() => {
+                                                                                    const matched = volumeData.find(
+                                                                                        (item) => item.Name === product.ProductName
+                                                                                    );
+
+                                                                                    if (!matched) return null;
+
+                                                                                    return (
+                                                                                        <FormControlLabel
+                                                                                            control={
+                                                                                                <Checkbox
+                                                                                                    checked={matched.Backyard || false}
+                                                                                                    onChange={(e) =>
+                                                                                                        handleBackyardToggle(product, e.target.checked)
+                                                                                                    }
+                                                                                                    sx={{
+                                                                                                        "& .MuiSvgIcon-root": {
+                                                                                                            fontSize: 20,
+                                                                                                        },
+                                                                                                    }}
+                                                                                                    disabled={true}
+                                                                                                />
+                                                                                            }
+                                                                                            label="ตู้หลังบ้าน"
+                                                                                            sx={{
+                                                                                                "& .MuiFormControlLabel-label": {
+                                                                                                    fontSize: "14px",
+                                                                                                    fontWeight: "bold",
+                                                                                                    color: !check ? "gray" : undefined,
+                                                                                                },
+                                                                                            }}
+                                                                                        />
+                                                                                    );
+                                                                                })()}
+                                                                            </Box>
+                                                                        </React.Fragment>
                                                                 }
                                                             </Grid>
                                                         </React.Fragment>

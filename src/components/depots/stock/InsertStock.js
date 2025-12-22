@@ -39,7 +39,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { database } from "../../../server/firebase";
 
 const InsertStock = (props) => {
-    const { stock } = props;
+    const { stock, handleClose } = props;
     const [check, setCheck] = React.useState(true);
     const [open, setOpen] = React.useState(false);
     const [numberAdd, setNumberAdd] = React.useState(1);
@@ -69,9 +69,9 @@ const InsertStock = (props) => {
         setOpen(true);
     };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    // const handleClose = () => {
+    //     setOpen(false);
+    // };
 
     const [name, setName] = React.useState("");
     const [no, setNo] = React.useState("");

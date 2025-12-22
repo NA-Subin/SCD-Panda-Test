@@ -107,8 +107,8 @@ const InsertGasStation = (props) => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sx={{ position: "sticky", top: 0, backgroundColor: "white", zIndex: 1 }}>
-                            <Box sx={{ display: 'flex', alignItems: "center", justifyContent: "center", marginBottom: 2 }}>
+                        <Grid item xs={12} sx={{ position: "sticky", top: 0, backgroundColor: "white", zIndex: 1, marginBottom: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: "center", justifyContent: "center", marginBottom: 1 }}>
                                 <FormGroup row >
                                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom marginRight={2} marginTop={1}>เลือกข้อมูลที่ต้องการเพิ่ม</Typography>
                                     <FormControlLabel control={<Checkbox onClick={() => setCheck(1)} checked={check === 1 ? true : false}
@@ -143,8 +143,8 @@ const InsertGasStation = (props) => {
                         </Grid>
                         {
                             check === 1 ?
-                                <InsertGasStations gasStation={gasStation} />
-                                : <InsertStock stock={stock} />
+                                <InsertGasStations gasStation={gasStation} handleClose={handleClose} />
+                                : <InsertStock stock={stock} handleClose={handleClose} />
                         }
                     </Grid>
                 </DialogContent>

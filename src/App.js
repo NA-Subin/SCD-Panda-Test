@@ -66,6 +66,7 @@ import ReportTransports from "./components/report/ReportTransport";
 import Profit from "./components/financial/Profit";
 import Quotation from "./components/quotation/Quotation";
 import ProfitSmallTruck from "./components/financial/ProfitSmallTruck";
+import ReportGasStation from "./components/depots/report/ReportGasStation";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -378,6 +379,9 @@ function App() {
                 <GasStationDataProvider>
                   <Routes>
                     <Route path="/gasstations" element={<GasStations openNavbar={open} />} />
+                  </Routes>
+                  <Routes>
+                    <Route path="/report-gasstations" element={<ReportGasStation openNavbar={open} />} />
                   </Routes>
                 </GasStationDataProvider>
               </Box>

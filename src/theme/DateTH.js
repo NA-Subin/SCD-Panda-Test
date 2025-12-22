@@ -40,6 +40,12 @@ export function formatThaiFull(date) {
     : "";
 }
 
+export function formatThaiMonth(date) {
+  return date && dayjs(date).isValid()
+    ? dayjs(date).locale("th").format("MMMM")
+    : "";
+}
+
 // ✅ รูปแบบย่อ เช่น: 8 ก.ค. พ.ศ.2568
 export function formatThaiShort(date) {
   return date && dayjs(date).isValid()
