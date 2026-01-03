@@ -44,6 +44,8 @@ import { formatThaiMonth, formatThaiSlash } from "../../../theme/DateTH";
 import { TablecellHeader } from "../../../theme/style";
 import FullPageLoading from "../../navbar/Loading";
 import { database } from "../../../server/firebase";
+import ReportDetail from "./ReportDetail";
+import ReportBackyard from "./ReportBackyard";
 
 const ReportGasStation = ({ openNavbar }) => {
     const [openMenu, setOpenMenu] = React.useState(1);
@@ -56,6 +58,7 @@ const ReportGasStation = ({ openNavbar }) => {
     const stocks = Object.values(stockDetail || {});
     const depot = Object.values(depots || {});
     const [cbpData, setCbpData] = useState({});
+    const [backyardData, setBackyardData] = useState({});
 
     const [selectedDate, setSelectedDate] = useState(dayjs()); // ใช้วันปัจจุบัน
     const [checkStock, setCheckStock] = useState("ทั้งหมด");
@@ -97,23 +100,28 @@ const ReportGasStation = ({ openNavbar }) => {
         return isNaN(n) ? 0 : n;
     };
 
-    const calculateMonthlyTotal = (
-        report,
-        productName,
-        y,
-        m,
-        daysInMonth
-    ) => {
-        return daysInMonth.reduce((sum, d) => {
-            const product =
-                report?.[y]?.[m]?.[d]?.Products?.find(
-                    p => p.ProductName === productName
-                );
+    const getSourceDate = (year, month, day, daysInMonthLength) => {
+        // วันที่ 2 → 30
+        if (day > 1) {
+            return { y: year, m: month, d: day - 1 };
+        }
 
-            if (!product?.Sell) return sum;
+        // วันที่ 1 → ไม่มีวันก่อนหน้า (จะ return null)
+        return null;
+    };
 
-            return sum + toNumber(product.Sell);
-        }, 0);
+    const getNextDate = (year, month, day, daysInMonthLength) => {
+        // ถ้าไม่ใช่วันสุดท้าย → วันถัดไปในเดือนเดียวกัน
+        if (day < daysInMonthLength) {
+            return { y: year, m: month, d: day + 1 };
+        }
+
+        // ถ้าเป็นวันสุดท้าย → วันที่ 1 ของเดือนถัดไป
+        if (month === 12) {
+            return { y: year + 1, m: 1, d: 1 };
+        }
+
+        return { y: year, m: month + 1, d: 1 };
     };
 
     const getOrCreateCBP = (
@@ -145,6 +153,7 @@ const ReportGasStation = ({ openNavbar }) => {
 
     const customOrder = ["G95", "B95", "B7", "B7(1)", "B7(2)", "G91", "E20", "PWD"];
     const stationSummary = {};
+    const stationSummaryBackyard = {};
 
     const y = selectedDate ? selectedDate.year() : null;
     const m = selectedDate ? selectedDate.month() + 1 : null; // month เริ่มต้นที่ 0
@@ -182,10 +191,129 @@ const ReportGasStation = ({ openNavbar }) => {
         diff: 0
     };
 
-    const dailySummary = {};
-    daysInMonth.forEach(d => {
-        dailySummary[d] = 0;
-    });
+    // const dailySummary = {};
+    // daysInMonth.forEach(d => {
+    //     dailySummary[d] = 0;
+    // });
+
+    const calculateDailyByProduct = (
+        report,
+        productName,
+        y,
+        m,
+        daysInMonth,
+        field,
+        isBackyard
+    ) => {
+        const result = {};
+        daysInMonth.forEach(d => (result[d] = 0));
+
+        daysInMonth.forEach(d => {
+            const source = getNextDate(y, m, d, daysInMonth.length);
+
+            const p =
+                report?.[source.y]?.[source.m]?.[source.d]?.Products?.find(
+                    x => x.ProductName === productName
+                );
+
+            if (p?.[field]) {
+                if (isBackyard) {
+                    result[d] += (toNumber(p["Sell"]) - toNumber(p["BackyardSales"]));
+                } else {
+                    result[d] += toNumber(p[field]);
+                }
+            }
+        });
+
+        return result;
+    };
+
+    const dailySummaryBackyard = useMemo(() => {
+        const summary = {};
+        daysInMonth.forEach(d => (summary[d] = 0));
+
+        gasStationOil.forEach(row => {
+            row.Products.forEach(product => {
+                daysInMonth.forEach(d => {
+                    const source = getNextDate(y, m, d, daysInMonth.length);
+
+                    const p =
+                        row.Report?.[source.y]?.[source.m]?.[source.d]?.Products?.find(
+                            x => x.ProductName === product.Name
+                        );
+
+                    if (p?.BackyardSales) {
+                        summary[d] += toNumber(p.BackyardSales);
+                    }
+                });
+            });
+        });
+
+        return summary;
+    }, [gasStationOil, daysInMonth, y, m]);
+
+    const calculateMonthlyTotal = (
+        report,
+        productName,
+        y,
+        m,
+        daysInMonth,
+        isBackyard
+    ) => {
+        return daysInMonth.reduce((sum, d) => {
+            const source = getNextDate(y, m, d, daysInMonth.length);
+
+            const product =
+                report?.[source.y]?.[source.m]?.[source.d]?.Products?.find(
+                    x => x.ProductName === productName
+                );
+
+            if (!product?.Sell) return sum;
+
+            return sum + toNumber(isBackyard ? (product.Sell - product.BackyardSales) : product.Sell);
+        }, 0);
+    };
+
+    const calculateBackyardMonthlyTotal = (
+        report,
+        productName,
+        y,
+        m,
+        daysInMonthBackyard
+    ) => {
+        return daysInMonthBackyard.reduce((sum, d) => {
+            const source = getNextDate(y, m, d, daysInMonth.length);
+
+            const product =
+                report?.[source.y]?.[source.m]?.[source.d]?.Products?.find(
+                    x => x.ProductName === productName
+                );
+
+            if (!product?.BackyardSales) return sum;
+
+            return sum + toNumber(product.BackyardSales);
+        }, 0);
+    };
+
+    const getCarryFromHistory = (
+        stationId,
+        productIndex,
+        year,
+        month,
+        cbpData
+    ) => {
+        const { py, pm } = getPrevYearMonth(year, month);
+
+        return (
+            cbpData?.[stationId]?.[py]?.[pm]?.[productIndex]?.Accumulate ??
+            0
+        );
+    };
+
+    const getPrevYearMonth = (y, m) => {
+        if (m === 1) return { py: y - 1, pm: 12 };
+        return { py: y, pm: m - 1 };
+    };
 
     useEffect(() => {
         if (!selectedDate) return;
@@ -196,18 +324,120 @@ const ReportGasStation = ({ openNavbar }) => {
         setCbpData(prev => {
             const updated = { ...prev };
 
+            Object.keys(updated).forEach(stationId => {
+                if (updated?.[stationId]?.[year]?.[month]) {
+                    delete updated[stationId][year][month];
+                }
+            });
+
+            return updated;
+        });
+
+        setBackyardData(prev => {
+            const updated = { ...prev };
+
+            Object.keys(updated).forEach(stationId => {
+                if (updated?.[stationId]?.[year]?.[month]) {
+                    delete updated[stationId][year][month];
+                }
+            });
+
+            return updated;
+        });
+
+    }, [selectedDate]);
+
+
+    useEffect(() => {
+        if (!selectedDate || !gasStationOil?.length) return;
+
+        const year = selectedDate.year();
+        const month = selectedDate.month() + 1;
+
+        let hasChanged = false;
+
+        setCbpData(prev => {
+            const updated = { ...prev };
+
             gasStationOil.forEach(row => {
                 const stationId = row.id;
 
-                if (!updated[stationId]) updated[stationId] = {};
-                if (!updated[stationId][year]) updated[stationId][year] = {};
-                if (updated[stationId][year][month]) return;
+                if (updated?.[stationId]?.[year]?.[month]) return;
+
+                hasChanged = true;
+
+                updated[stationId] ??= {};
+                updated[stationId][year] ??= {};
 
                 const cbpOfMonth = row.CBP?.[year]?.[month] ?? {};
                 const productMap = {};
 
-                row.Products.forEach((p, idx) => {
+                row.Products.sort((a, b) => {
+                    const ai = customOrder.indexOf(a.Name);
+                    const bi = customOrder.indexOf(b.Name);
+                    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                }).forEach((p, idx) => {
                     const total = calculateMonthlyTotal(
+                        row.Report,
+                        p.Name,
+                        year,
+                        month,
+                        daysInMonth,
+                        row.Backyard
+                    );
+
+                    const { py, pm } = getPrevYearMonth(year, month);
+
+                    const prevAcc = getCarryFromHistory(
+                        stationId,
+                        idx,
+                        year,
+                        month,
+                        prev
+                    );
+
+                    const diff = (cbpOfMonth[idx]?.CBP ?? 0) - total;
+
+                    productMap[idx] = {
+                        ProductName: p.Name,
+                        Color: p.Color,
+                        CBP: cbpOfMonth[idx]?.CBP ?? "",
+                        Total: total,
+                        Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
+                        Carry: prevAcc,
+                        Accumulate: prevAcc + diff
+                    };
+                });
+
+                updated[stationId][year][month] = productMap;
+            });
+
+            return hasChanged ? updated : prev;
+        });
+
+        setBackyardData(prev => {
+            const updated = { ...prev };
+            let changed = false;
+
+            gasStationOil.forEach(row => {
+                const stationId = row.id;
+
+                if (updated?.[stationId]?.[year]?.[month]) return;
+
+                changed = true;
+
+                updated[stationId] ??= {};
+                updated[stationId][year] ??= {};
+
+                const cbpOfMonth = row.Backyard?.[year]?.[month] ?? {};
+                const productMap = {};
+
+                row.Products.sort((a, b) => {
+                    const ai = customOrder.indexOf(a.Name);
+                    const bi = customOrder.indexOf(b.Name);
+                    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                }).forEach((p, idx) => {
+                    const total = calculateBackyardMonthlyTotal(
                         row.Report,
                         p.Name,
                         year,
@@ -215,75 +445,41 @@ const ReportGasStation = ({ openNavbar }) => {
                         daysInMonth
                     );
 
+                    const { py, pm } = getPrevYearMonth(year, month);
+
+                    const prevAcc = getCarryFromHistory(
+                        stationId,
+                        idx,
+                        year,
+                        month,
+                        prev
+                    );
+
+                    const cbpValue =
+                        cbpOfMonth?.[p.Name]?.CBP ?? "";
+
+                    const diff = (cbpValue || 0) - total;
+
                     productMap[idx] = {
                         ProductName: p.Name,
                         Color: p.Color,
                         CBP: cbpOfMonth[idx]?.CBP ?? "",
                         Total: total,
-                        Diff:
-                            (cbpOfMonth[idx]?.CBP ?? 0) - total
+                        Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
+                        Carry: prevAcc,
+                        Accumulate: prevAcc + diff
                     };
                 });
 
                 updated[stationId][year][month] = productMap;
             });
 
-            return updated;
+            return changed ? updated : prev;
         });
-    }, [selectedDate, gasStationOil]);
 
-    const handleSaveCBP = async (row) => {
-        if (!selectedDate) return;
+    }, [selectedDate, gasStationOil, daysInMonth]);
 
-        // const year = selectedDate.year();
-        // const month = selectedDate.month() + 1;
-
-        // // 🔑 index ของ gasStation
-        // const gasStationIndex = Number(row.id) - 1;
-
-        // // 🔥 เตรียมข้อมูล CBP สำหรับเดือนนี้
-        // const cbpPayload = {};
-
-        // Object.keys(cbpData).forEach((idx) => {
-        //     const item = cbpData[idx];
-        //     if (!item?.ProductName) return;
-
-        //     cbpPayload[idx] = {
-        //         ProductName: item.ProductName,
-        //         CBP: Number(item.CBP ?? 0),
-        //         Total: Number(item.Total ?? 0),
-        //         Diff: Number(item.Diff ?? 0),
-        //         Color: item.Color
-        //     };
-        // });
-        // await database
-        //     .ref(`/depot/gasStations/${gasStationIndex}/CBP/${year}/${month}`)
-        //     .set(cbpPayload)
-        //     .then(() => {
-        //         ShowSuccess("✅ บันทึก CBP สำเร็จ", cbpPayload);
-        //     })
-        //     .catch((err) => {
-        //         ShowError("❌ บันทึก CBP ล้มเหลว", err);
-        //     });
-
-        const year = selectedDate.year();
-        const month = selectedDate.month() + 1;
-        const monthKey = `${year}-${month}`;
-
-        const gasStationIndex = Number(row.id) - 1;
-
-        const payload = cbpData[monthKey] ?? {};
-
-        await database
-            .ref(`/depot/gasStations/${gasStationIndex}/CBP/${year}/${month}`)
-            .set(payload)
-            .then(() => {
-                ShowSuccess("✅ บันทึก CBP สำเร็จ", payload);
-            })
-            .catch((err) => {
-                ShowError("❌ บันทึก CBP ล้มเหลว", err);
-            });
-    };
+    console.log("cbpData", cbpData);
 
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 95) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
@@ -312,7 +508,7 @@ const ReportGasStation = ({ openNavbar }) => {
                             <LocalizationProvider dateAdapter={AdapterDayjs} >
                                 <DatePicker
                                     openTo="month"
-                                    views={["month"]}
+                                    views={["year", "month"]}
                                     value={selectedDate ? dayjs(selectedDate, "MMMM") : null}
                                     format="MMMM"
                                     onChange={(newValue) => {
@@ -432,15 +628,57 @@ const ReportGasStation = ({ openNavbar }) => {
                                             acc.total += Number(item?.Total ?? 0);
                                             acc.cbp += Number(item?.CBP ?? 0);
                                             acc.diff += Number(item?.Diff ?? 0);
+                                            acc.carry += Number(item?.Carry ?? 0);
+                                            acc.accumulate += Number(item?.Accumulate ?? 0);
                                             return acc;
                                         },
                                         { total: 0, cbp: 0, diff: 0 }
                                     );
 
+                                    const dailySummaryByStation = {};
+                                    daysInMonth.forEach(d => (dailySummaryByStation[d] = 0));
+
+                                    row.Products.forEach(product => {
+                                        const dailyByProduct = calculateDailyByProduct(
+                                            row.Report,
+                                            product.Name,
+                                            y,
+                                            m,
+                                            daysInMonth,
+                                            "Sell", // หรือ BackyardSales
+                                            product.Backyard
+                                        );
+
+                                        daysInMonth.forEach(d => {
+                                            dailySummaryByStation[d] += dailyByProduct[d];
+                                        });
+                                    });
+
+                                    const dailySummaryByStationBackyard = {};
+                                    daysInMonth.forEach(d => (dailySummaryByStationBackyard[d] = 0));
+
+                                    row.Products.forEach(product => {
+                                        const dailyByProductBackyard = calculateDailyByProduct(
+                                            row.Report,
+                                            product.Name,
+                                            y,
+                                            m,
+                                            daysInMonth,
+                                            "BackyardSales", // หรือ BackyardSales
+                                            product.Backyard
+                                        );
+
+                                        daysInMonth.forEach(d => {
+                                            dailySummaryByStationBackyard[d] += dailyByProductBackyard[d];
+                                        });
+                                    });
+
                                     // 🔹 เอาค่าปั้มนี้ไปรวมใน stock
                                     stockSummary.total += pumpSummary.total;
                                     stockSummary.cbp += pumpSummary.cbp;
                                     stockSummary.diff += pumpSummary.diff;
+                                    stockSummary.carry += pumpSummary.carry;
+                                    stockSummary.accumulate += pumpSummary.accumulate;
 
                                     matchCount++;
                                     return (
@@ -505,10 +743,10 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                     textAlign: "center",
                                                                     fontSize: 14,
                                                                     backgroundColor: theme.palette.panda.main,
-                                                                    minWidth: 150,
+                                                                    minWidth: 120,
                                                                     whiteSpace: "nowrap",
                                                                     position: "sticky",
-                                                                    left: 130,
+                                                                    left: 140,
                                                                     zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
                                                                 }}>
                                                                     ส่วนต่าง
@@ -517,10 +755,10 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                     textAlign: "center",
                                                                     fontSize: 14,
                                                                     backgroundColor: theme.palette.panda.main,
-                                                                    minWidth: 150,
+                                                                    minWidth: 120,
                                                                     whiteSpace: "nowrap",
                                                                     position: "sticky",
-                                                                    left: 280,
+                                                                    left: 260,
                                                                     zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
                                                                 }}>
                                                                     ยอด CBP
@@ -529,10 +767,10 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                     textAlign: "center",
                                                                     fontSize: 14,
                                                                     backgroundColor: theme.palette.panda.main,
-                                                                    minWidth: 150,
+                                                                    minWidth: 120,
                                                                     whiteSpace: "nowrap",
                                                                     position: "sticky",
-                                                                    left: 430,
+                                                                    left: 380,
                                                                     zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
                                                                 }}>
                                                                     รวม
@@ -552,6 +790,30 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                         {`วันที่ ${day}`}
                                                                     </TablecellHeader>
                                                                 ))}
+                                                                <TablecellHeader sx={{
+                                                                    textAlign: "center",
+                                                                    fontSize: 14,
+                                                                    backgroundColor: theme.palette.panda.main,
+                                                                    minWidth: 120,
+                                                                    whiteSpace: "nowrap",
+                                                                    position: "sticky",
+                                                                    right: 220,
+                                                                    zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                }}>
+                                                                    ยอดยกมา
+                                                                </TablecellHeader>
+                                                                <TablecellHeader sx={{
+                                                                    textAlign: "center",
+                                                                    fontSize: 14,
+                                                                    backgroundColor: theme.palette.panda.main,
+                                                                    minWidth: 120,
+                                                                    whiteSpace: "nowrap",
+                                                                    position: "sticky",
+                                                                    right: 100,
+                                                                    zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                }}>
+                                                                    ยอดสะสม
+                                                                </TablecellHeader>
                                                                 <TablecellHeader sx={{
                                                                     textAlign: "center",
                                                                     fontSize: 14,
@@ -581,7 +843,8 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                         product.Name,
                                                                         y,
                                                                         m,
-                                                                        daysInMonth
+                                                                        daysInMonth,
+                                                                        product.Backyard
                                                                     );
 
                                                                     const year = selectedDate.year();
@@ -593,7 +856,9 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                             Color: product.Color,
                                                                             CBP: "",
                                                                             Total: total,
-                                                                            Diff: -total
+                                                                            Diff: -total,
+                                                                            Carry: 0,
+                                                                            Accumulate: -total
                                                                         };
 
                                                                     // ✅ สร้าง summary ของปั้มนี้ ถ้ายังไม่มี
@@ -601,279 +866,44 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                         stationSummary[row.id] = {
                                                                             total: 0,
                                                                             cbp: 0,
-                                                                            diff: 0
+                                                                            diff: 0,
+                                                                            carry: 0,
+                                                                            accumulate: 0
                                                                         };
                                                                     }
 
                                                                     stationSummary[row.id].total += Number(cbpItem?.Total ?? 0);
                                                                     stationSummary[row.id].cbp += Number(cbpItem?.CBP ?? 0);
                                                                     stationSummary[row.id].diff += Number(cbpItem?.Diff ?? 0);
+                                                                    stationSummary[row.id].carry += Number(cbpItem?.Carry ?? 0);
+                                                                    stationSummary[row.id].accumulate += Number(cbpItem?.Accumulate ?? 0);
 
                                                                     const summary = stationSummary[row.id] ?? {
                                                                         total: 0,
                                                                         cbp: 0,
-                                                                        diff: 0
+                                                                        diff: 0,
+                                                                        carry: 0,
+                                                                        accumulate: 0
                                                                     };
 
                                                                     return (
                                                                         <React.Fragment key={index}>
-                                                                            <TableRow>
-                                                                                <TablecellHeader
-                                                                                    sx={{
-                                                                                        backgroundColor: product.Color ?? "white",
-                                                                                        width: 50,
-                                                                                        color: "black",
-                                                                                        position: "sticky",
-                                                                                        left: 0,
-                                                                                        zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
-                                                                                        borderBottom: "2px solid white"
-                                                                                    }}
-                                                                                >
-                                                                                    {product.Name}
-                                                                                </TablecellHeader>
-                                                                                <TableCell sx={{
-                                                                                    textAlign: "center",
-                                                                                    fontWeight: "bold",
-                                                                                    position: "sticky",
-                                                                                    left: 130,
-                                                                                    backgroundColor: lightenColor(product.Color, 0.6),
-                                                                                }}>
-                                                                                    {(cbpItem.Diff ?? 0).toLocaleString()}
-                                                                                </TableCell>
-                                                                                <TableCell sx={{
-                                                                                    position: "sticky",
-                                                                                    left: 280,
-                                                                                    backgroundColor: lightenColor(product.Color, 0.6),
-                                                                                }}>
-                                                                                    <Paper sx={{ width: "100%" }}>
-                                                                                        <TextField
-                                                                                            size="small"
-                                                                                            // type={isFieldFocused(index, "EstimateSell") ? "text" : "text"}
-                                                                                            // label={"ขาย"}
-                                                                                            // แนะนำใช้ text ตลอด เพราะจัดการ input เอง
-                                                                                            InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
-                                                                                            value={cbpItem.CBP}
-                                                                                            onChange={(e) => {
-                                                                                                const raw = e.target.value.replace(/,/g, "");
-                                                                                                if (!/^-?\d*$/.test(raw)) return;
-
-                                                                                                const cbp = raw === "" ? "" : Number(raw);
-
-                                                                                                setCbpData(prev => ({
-                                                                                                    ...prev,
-                                                                                                    [row.id]: {
-                                                                                                        ...prev[row.id],
-                                                                                                        [year]: {
-                                                                                                            ...prev[row.id]?.[year],
-                                                                                                            [month]: {
-                                                                                                                ...prev[row.id]?.[year]?.[month],
-                                                                                                                [index]: {
-                                                                                                                    ProductName: product.Name,
-                                                                                                                    Color: product.Color,
-                                                                                                                    CBP: cbp,
-                                                                                                                    Total: total, // ✅ เก็บ total ล่าสุด
-                                                                                                                    Diff: (cbp || 0) - total
-                                                                                                                }
-                                                                                                            }
-                                                                                                        }
-                                                                                                    }
-                                                                                                }));
-                                                                                            }}
-                                                                                            // onFocus={() => handleFocus(index, "EstimateSell")}
-                                                                                            // onBlur={(e) => handleBlur(index, "EstimateSell", e)} // ส่ง event
-                                                                                            // onChange={(e) => {
-                                                                                            //     let raw = e.target.value.replace(/,/g, "");
-
-                                                                                            //     // ⭐ อนุญาตให้เริ่มด้วย "-"
-                                                                                            //     if (raw === "-" || raw === "") {
-                                                                                            //         handleProductChange(index, "EstimateSell", raw);
-                                                                                            //         return;
-                                                                                            //     }
-
-                                                                                            //     // ⭐ อนุญาตเลขติดลบ เช่น "-1000"
-                                                                                            //     if (/^-?\d+$/.test(raw)) {
-                                                                                            //         handleProductChange(index, "EstimateSell", Number(raw));
-                                                                                            //     }
-                                                                                            // }}
-                                                                                            // onKeyDown={(e) => {
-                                                                                            //     let raw = String(s.EstimateSell).replace(/,/g, "");
-
-                                                                                            //     // รองรับค่าที่เป็น "-" หรือค่าว่าง
-                                                                                            //     if (raw === "" || raw === "-") raw = "0";
-
-                                                                                            //     let current = Number(raw);
-
-                                                                                            //     if (e.key === "ArrowUp") {
-                                                                                            //         e.preventDefault();
-                                                                                            //         handleProductChange(index, "EstimateSell", current + 1000);
-                                                                                            //     }
-
-                                                                                            //     if (e.key === "ArrowDown") {
-                                                                                            //         e.preventDefault();
-                                                                                            //         handleProductChange(index, "EstimateSell", current - 1000);
-                                                                                            //     }
-                                                                                            // }}
-                                                                                            fullWidth
-                                                                                            // InputProps={{
-                                                                                            //     inputProps: {
-                                                                                            //         min: undefined, // ❗ เอาออกเพื่อรองรับค่าติดลบ
-                                                                                            //         step: 1000,
-                                                                                            //     },
-                                                                                            //     sx: {
-                                                                                            //         "& input::-webkit-inner-spin-button": {
-                                                                                            //             marginLeft: isFieldFocused(index, "EstimateSell") ? 1 : 0,
-                                                                                            //             marginRight: -0.5
-                                                                                            //         }
-                                                                                            //     },
-                                                                                            // }}
-                                                                                            sx={{
-                                                                                                "& .MuiOutlinedInput-root": { height: 25 },
-                                                                                                "& .MuiInputBase-input": {
-                                                                                                    fontSize: 12,
-                                                                                                    fontWeight: "bold",
-                                                                                                    textAlign: "right",
-                                                                                                    mr: -0.5,
-                                                                                                    ml: -0.5,
-                                                                                                    pr: 0.5,
-                                                                                                    paddingLeft: -3, // เพิ่มพื้นที่ให้ endAdornment
-                                                                                                    paddingRight: 2, // เพิ่มพื้นที่ให้ endAdornment
-                                                                                                },
-                                                                                            }}
-                                                                                        />
-                                                                                    </Paper>
-                                                                                </TableCell>
-                                                                                <TableCell sx={{
-                                                                                    textAlign: "center",
-                                                                                    fontWeight: "bold",
-                                                                                    position: "sticky",
-                                                                                    left: 430,
-                                                                                    backgroundColor: lightenColor(product.Color, 0.4),
-                                                                                }}>
-                                                                                    {(cbpItem.Total ?? total).toLocaleString()}
-                                                                                </TableCell>
-
-                                                                                {/* วันที่ เรียงตาม daysInMonth */}
-                                                                                {daysInMonth.map((d) => {
-                                                                                    const productOfDay =
-                                                                                        row.Report?.[y]?.[m]?.[d]?.Products?.find(
-                                                                                            p => p.ProductName === product.Name
-                                                                                        );
-
-                                                                                    const sell = productOfDay?.Sell ?? "-";
-
-                                                                                    // 🔥🔥🔥 ตรงนี้คือ "การเก็บผลรวม" 🔥🔥🔥
-                                                                                    if (sell !== "-" && !isNaN(sell)) {
-                                                                                        dailySummary[d] += Number(sell);
-                                                                                    }
-
-                                                                                    return (
-                                                                                        <TableCell
-                                                                                            key={d}
-                                                                                            sx={{
-                                                                                                width: 50,
-                                                                                                textAlign: "center",
-                                                                                                backgroundColor: lightenColor(product.Color, 0.75)
-                                                                                            }}
-                                                                                        >
-                                                                                            {sell === "-" ? "-" : new Intl.NumberFormat("en-US").format(Math.round(sell))}
-                                                                                        </TableCell>
-                                                                                    );
-                                                                                })}
-                                                                                {
-                                                                                    index === 0 &&
-                                                                                    <TableCell rowSpan={row.Products.length + 1}
-                                                                                        sx={{
-                                                                                            right: 0,
-                                                                                            position: "sticky",
-                                                                                            zIndex: 5,
-                                                                                            backgroundColor: "white"
-                                                                                        }}>
-                                                                                        <Paper
-                                                                                            sx={{
-                                                                                                display: "flex",
-                                                                                                justifyContent: "center",
-                                                                                                alignItems: "center",
-                                                                                                borderRadius: 2,
-                                                                                                backgroundColor: theme.palette.success.main
-                                                                                            }}
-                                                                                        >
-                                                                                            <Button
-                                                                                                color="inherit"
-                                                                                                fullWidth
-                                                                                                sx={{ flexDirection: "column", gap: 0.5 }}
-                                                                                                onClick={() => handleSaveCBP(row)}   // ⭐ เพิ่มตรงนี้
-                                                                                            >
-                                                                                                <SaveIcon fontSize="large" sx={{ color: "white" }} />
-                                                                                                <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
-                                                                                                    บันทึก
-                                                                                                </Typography>
-                                                                                            </Button>
-                                                                                        </Paper>
-                                                                                    </TableCell>
-                                                                                }
-                                                                            </TableRow>
-                                                                            {
-                                                                                index === row.Products.length - 1 && (
-                                                                                    <TableRow>
-                                                                                        <TablecellHeader
-                                                                                            sx={{
-                                                                                                backgroundColor: "#bdbdbd",
-                                                                                                width: 50,
-                                                                                                color: "black",
-                                                                                                position: "sticky",
-                                                                                                left: 0,
-                                                                                                zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
-                                                                                                borderBottom: "2px solid white"
-                                                                                            }}
-                                                                                        >
-                                                                                            {/* {`รวม${row.ShortName}`} */}
-                                                                                            ผลรวม
-                                                                                        </TablecellHeader>
-                                                                                        <TableCell sx={{
-                                                                                            textAlign: "center",
-                                                                                            fontWeight: "bold",
-                                                                                            position: "sticky",
-                                                                                            left: 130,
-                                                                                            backgroundColor: lightenColor("#bdbdbd", 0.6),
-                                                                                        }}>
-                                                                                            {summary.diff.toLocaleString()}
-                                                                                        </TableCell>
-                                                                                        <TableCell sx={{
-                                                                                            textAlign: "center",
-                                                                                            fontWeight: "bold",
-                                                                                            position: "sticky",
-                                                                                            left: 280,
-                                                                                            backgroundColor: lightenColor("#bdbdbd", 0.6),
-                                                                                        }}>
-                                                                                            {summary.cbp.toLocaleString()}
-                                                                                        </TableCell>
-                                                                                        <TableCell sx={{
-                                                                                            textAlign: "center",
-                                                                                            fontWeight: "bold",
-                                                                                            position: "sticky",
-                                                                                            left: 430,
-                                                                                            backgroundColor: lightenColor("#bdbdbd", 0.4),
-                                                                                        }}>
-                                                                                            {summary.total.toLocaleString()}
-                                                                                        </TableCell>
-                                                                                        {daysInMonth.map((d) => (
-                                                                                            <TableCell
-                                                                                                key={d}
-                                                                                                sx={{
-                                                                                                    width: 50,
-                                                                                                    textAlign: "center",
-                                                                                                    fontWeight: "bold",
-                                                                                                    backgroundColor: lightenColor("#bdbdbd", 0.6)
-                                                                                                }}
-                                                                                            >
-                                                                                                {dailySummary[d] === 0
-                                                                                                    ? "-"
-                                                                                                    : new Intl.NumberFormat("en-US").format(Math.round(dailySummary[d]))}
-                                                                                            </TableCell>
-                                                                                        ))}
-                                                                                    </TableRow>
-                                                                                )
-                                                                            }
+                                                                            <ReportDetail
+                                                                                total={total}
+                                                                                row={row}
+                                                                                product={product}
+                                                                                index={index}
+                                                                                cbpItem={cbpItem}
+                                                                                setCbpData={setCbpData}
+                                                                                selectedDate={selectedDate}
+                                                                                lightenColor={lightenColor}
+                                                                                summary={summary}
+                                                                                pumpOrder={pumpOrder}
+                                                                                stockCount={stockCount}
+                                                                                daysInMonth={daysInMonth}
+                                                                                cbpData={cbpData}
+                                                                                dailySummary={dailySummaryByStation}
+                                                                            />
                                                                         </React.Fragment>
                                                                     );
                                                                 })}
@@ -910,6 +940,244 @@ const ReportGasStation = ({ openNavbar }) => {
                                                     </Table>
                                                 </TableContainer> */}
                                             </Box>
+                                            {
+                                                Object.values(row.Products || {}).some(
+                                                    p => p?.Backyard === true
+                                                ) && (
+                                                    <React.Fragment>
+                                                        <Box textAlign="center"
+                                                            sx={{
+                                                                display: "flex",
+                                                                justifyContent: "space-between", // ชิดซ้าย-ขวา
+                                                                alignItems: "center",
+                                                                backgroundColor:
+                                                                    row.Stock.split(":")[1] === "แม่โจ้" ? "#92D050"
+                                                                        : row.Stock.split(":")[1] === "สันกลาง" ? "#B1A0C7"
+                                                                            : row.Stock.split(":")[1] === "สันทราย" ? "#B7DEE8"
+                                                                                : row.Stock.split(":")[1] === "บ้านโฮ่ง" ? "#FABF8F"
+                                                                                    : row.Stock.split(":")[1] === "ป่าแดด" ? "#B1A0C7"
+                                                                                        : "lightgray"
+                                                                ,
+                                                                paddingLeft: 2,
+                                                                paddingTop: 2,
+                                                                paddingBottom: 1,
+                                                                borderTopLeftRadius: 10,
+                                                                borderTopRightRadius: 10
+                                                            }}>
+
+                                                            {/* ด้านซ้าย */}
+                                                            <Typography
+                                                                variant="subtitle1"
+                                                                fontWeight="bold"
+                                                                sx={{ fontSize: 18, marginBottom: -1 }}
+                                                            >
+                                                                {`ยอดขายหลังบ้าน`}
+                                                            </Typography>
+                                                        </Box>
+                                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <TableContainer
+                                                                component={Paper}
+                                                                style={{ maxHeight: "70vh" }}
+                                                                sx={{ marginBottom: 2 }}
+                                                            >
+                                                                <Table stickyHeader size="small" sx={{ width: "100%" }}>
+                                                                    <TableHead>
+                                                                        <TableRow>
+                                                                            <TablecellHeader sx={{
+                                                                                textAlign: "center",
+                                                                                backgroundColor: theme.palette.panda.main,
+                                                                                minWidth: 140,
+                                                                                position: "sticky",
+                                                                                left: 0,
+                                                                                zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                            }}>
+                                                                                <Paper
+                                                                                    component="form"
+                                                                                    sx={{
+                                                                                        width: "100%", // กำหนดความกว้างของ Paper
+                                                                                        height: "25px"
+                                                                                    }}
+                                                                                >
+                                                                                    <Typography fontSize="18px" fontWeight="bold" gutterBottom paddingTop={-0.5}>{formatThaiMonth(dayjs(selectedDate))}</Typography>
+                                                                                </Paper>
+                                                                            </TablecellHeader>
+                                                                            <TablecellHeader sx={{
+                                                                                textAlign: "center",
+                                                                                fontSize: 14,
+                                                                                backgroundColor: theme.palette.panda.main,
+                                                                                minWidth: 120,
+                                                                                whiteSpace: "nowrap",
+                                                                                position: "sticky",
+                                                                                left: 140,
+                                                                                zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                            }}>
+                                                                                ส่วนต่าง
+                                                                            </TablecellHeader>
+                                                                            <TablecellHeader sx={{
+                                                                                textAlign: "center",
+                                                                                fontSize: 14,
+                                                                                backgroundColor: theme.palette.panda.main,
+                                                                                minWidth: 120,
+                                                                                whiteSpace: "nowrap",
+                                                                                position: "sticky",
+                                                                                left: 260,
+                                                                                zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                            }}>
+                                                                                ยอด CBP
+                                                                            </TablecellHeader>
+                                                                            <TablecellHeader sx={{
+                                                                                textAlign: "center",
+                                                                                fontSize: 14,
+                                                                                backgroundColor: theme.palette.panda.main,
+                                                                                minWidth: 120,
+                                                                                whiteSpace: "nowrap",
+                                                                                position: "sticky",
+                                                                                left: 380,
+                                                                                zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                            }}>
+                                                                                รวม
+                                                                            </TablecellHeader>
+                                                                            {daysInMonth.map(day => (
+                                                                                <TablecellHeader
+                                                                                    key={day}
+                                                                                    sx={{
+                                                                                        textAlign: "center",
+                                                                                        fontSize: 13,
+                                                                                        backgroundColor: theme.palette.panda.main,
+
+                                                                                        minWidth: 120,   // ⭐ ใช้ minWidth ดีกว่า width
+                                                                                        whiteSpace: "nowrap"
+                                                                                    }}
+                                                                                >
+                                                                                    {`วันที่ ${day}`}
+                                                                                </TablecellHeader>
+                                                                            ))}
+                                                                            <TablecellHeader sx={{
+                                                                                textAlign: "center",
+                                                                                fontSize: 14,
+                                                                                backgroundColor: theme.palette.panda.main,
+                                                                                minWidth: 120,
+                                                                                whiteSpace: "nowrap",
+                                                                                position: "sticky",
+                                                                                right: 220,
+                                                                                zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                            }}>
+                                                                                ยอดยกมา
+                                                                            </TablecellHeader>
+                                                                            <TablecellHeader sx={{
+                                                                                textAlign: "center",
+                                                                                fontSize: 14,
+                                                                                backgroundColor: theme.palette.panda.main,
+                                                                                minWidth: 120,
+                                                                                whiteSpace: "nowrap",
+                                                                                position: "sticky",
+                                                                                right: 100,
+                                                                                zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                            }}>
+                                                                                ยอดสะสม
+                                                                            </TablecellHeader>
+                                                                            <TablecellHeader sx={{
+                                                                                textAlign: "center",
+                                                                                fontSize: 14,
+                                                                                backgroundColor: theme.palette.panda.main,
+                                                                                minWidth: 100,
+                                                                                whiteSpace: "nowrap",
+                                                                                position: "sticky",
+                                                                                right: 0,
+                                                                                zIndex: 5, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                                                            }}>
+
+                                                                            </TablecellHeader>
+                                                                        </TableRow>
+                                                                    </TableHead>
+                                                                    <TableBody>
+                                                                        {
+                                                                            row.Products
+                                                                                .sort((a, b) => {
+                                                                                    const ai = customOrder.indexOf(a.Name);
+                                                                                    const bi = customOrder.indexOf(b.Name);
+                                                                                    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                                                                                }).map((product, index) => {
+                                                                                    const y = selectedDate.year();
+                                                                                    const m = selectedDate.month() + 1;
+
+                                                                                    const total = calculateBackyardMonthlyTotal(
+                                                                                        row.Report,
+                                                                                        product.Name,
+                                                                                        y,
+                                                                                        m,
+                                                                                        daysInMonth
+                                                                                    );
+
+                                                                                    console.log("total backyard", row.id, total);
+
+                                                                                    const year = selectedDate.year();
+                                                                                    const month = selectedDate.month() + 1;
+
+                                                                                    const backyardItem =
+                                                                                        backyardData?.[row.id]?.[year]?.[month]?.[index] ?? {
+                                                                                            ProductName: product.Name,
+                                                                                            Color: product.Color,
+                                                                                            CBP: "",
+                                                                                            Total: total,
+                                                                                            Diff: -total,
+                                                                                            Carry: 0,
+                                                                                            Accumulate: -total
+                                                                                        };
+
+                                                                                    // ✅ สร้าง summary ของปั้มนี้ ถ้ายังไม่มี
+                                                                                    if (!stationSummaryBackyard[row.id]) {
+                                                                                        stationSummaryBackyard[row.id] = {
+                                                                                            total: 0,
+                                                                                            cbp: 0,
+                                                                                            diff: 0,
+                                                                                            carry: 0,
+                                                                                            accumulate: 0
+                                                                                        };
+                                                                                    }
+
+                                                                                    stationSummaryBackyard[row.id].total += Number(backyardItem?.Total ?? 0);
+                                                                                    stationSummaryBackyard[row.id].cbp += Number(backyardItem?.CBP ?? 0);
+                                                                                    stationSummaryBackyard[row.id].diff += Number(backyardItem?.Diff ?? 0);
+                                                                                    stationSummaryBackyard[row.id].carry += Number(backyardItem?.Carry ?? 0);
+                                                                                    stationSummaryBackyard[row.id].accumulate += Number(backyardItem?.Accumulate ?? 0);
+
+                                                                                    const summary = stationSummaryBackyard[row.id] ?? {
+                                                                                        total: 0,
+                                                                                        cbp: 0,
+                                                                                        diff: 0,
+                                                                                        carry: 0,
+                                                                                        accumulate: 0
+                                                                                    };
+
+                                                                                    return (
+                                                                                        <React.Fragment key={index}>
+                                                                                            <ReportBackyard
+                                                                                                total={total}
+                                                                                                row={row}
+                                                                                                product={product}
+                                                                                                index={index}
+                                                                                                backyardItem={backyardItem}
+                                                                                                setBackyardData={setBackyardData}
+                                                                                                selectedDate={selectedDate}
+                                                                                                lightenColor={lightenColor}
+                                                                                                summary={summary}
+                                                                                                pumpOrder={pumpOrder}
+                                                                                                stockCount={stockCount}
+                                                                                                daysInMonth={daysInMonth}
+                                                                                                backyardData={backyardData}
+                                                                                                dailySummaryBackyard={dailySummaryByStationBackyard}
+                                                                                            />
+                                                                                        </React.Fragment>
+                                                                                    );
+                                                                                })}
+                                                                    </TableBody>
+                                                                </Table>
+                                                            </TableContainer>
+                                                        </Box>
+                                                    </React.Fragment>
+                                                )
+                                            }
                                         </React.Fragment>
                                     )
                                 }

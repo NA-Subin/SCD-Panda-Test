@@ -1939,7 +1939,7 @@ export default function Navbar({ open, onOpenChange }) {
                     }
                   >
                     <Collapse in={!trucksmall} unmountOnExit={false}>
-                      {["จัดเที่ยววิ่ง", "ชำระค่าน้ำมัน", "สรุปยอดน้ำมัน", "รายงานชำระน้ำมัน", "รายงานเที่ยววิ่ง", "กำไรขายส่งน้ำมัน"].map((text, index) => (
+                      {["จัดเที่ยววิ่ง", "ชำระค่าน้ำมัน", "สรุปยอดน้ำมัน", "รายงานชำระน้ำมัน", "รายงานเที่ยววิ่ง", "ปิดงบบัญชีการเงิน", "กำไรขายส่งน้ำมัน"].map((text, index) => (
                         <ListItem
                           key={text}
                           disablePadding
@@ -1952,7 +1952,7 @@ export default function Navbar({ open, onOpenChange }) {
                           <ListItemButton
                             component={Link}
                             to={
-                              index === 0 ? "/trips-smalltruck" : index === 1 ? "/invoice-smalltruck" : index === 2 ? "/oil-balance-smalltruck" : index === 3 ? "/payment-smalltruck" : index === 4 ? "/report-smalltruck" : "/profit-loss-smalltruck"
+                              index === 0 ? "/trips-smalltruck" : index === 1 ? "/invoice-smalltruck" : index === 2 ? "/oil-balance-smalltruck" : index === 3 ? "/payment-smalltruck" : index === 4 ? "/report-smalltruck": index === 5 ? "/close-financial-smalltruck" : "/profit-loss-smalltruck"
                             }
                             sx={{
                               height: 35, // กำหนดความสูงให้ ListItem

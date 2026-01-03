@@ -80,21 +80,17 @@ const UpdateGasStations = (props) => {
     const [originalProducts, setOriginalProducts] = useState(products?.Products || []);
 
     const isSmallTrucksEmpty = (arr) => {
-        // กรณี array ว่างหรือ undefined → ไม่มีข้อมูล
         if (!Array.isArray(arr) || arr.length === 0) return true;
-
-        // กรณีมีมากกว่า 1 แถว → มีข้อมูลแน่นอน
         if (arr.length > 1) return false;
 
-        // กรณีมี 1 แถว → ตรวจสอบค่าภายใน
         const t = arr[0];
 
         const noValue =
-            (t.Truck ?? "").trim() === "" &&
-            (t.Price ?? "").trim() === "" &&
-            (t.Volume ?? "").trim() === "";
+            String(t.Truck ?? "").trim() === "" &&
+            Number(t.Price || 0) === 0 &&
+            Number(t.Volume || 0) === 0;
 
-        return noValue; // true = ว่าง, false = มี
+        return noValue;
     };
 
     const [checkTruck, setCheckTruck] = useState(gasStation.id);

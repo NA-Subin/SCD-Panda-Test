@@ -258,6 +258,7 @@ const PrintInvoiceSmallTruck = () => {
   console.log("invoice C : ", invoiceC);
   console.log("invoiceData : ", invoiceData);
   console.log("invoiceData Address : ", invoiceData?.Address);
+  console.log("date : ",invoiceData?.DateEnd);
 
   return (
     <Box display="flex" alignItems="center" justifyContent="center" marginTop={5} >

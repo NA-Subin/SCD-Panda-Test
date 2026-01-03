@@ -42,14 +42,14 @@ import "dayjs/locale/th";
 import { buildPeriodsForYear, findCurrentPeriod } from "./Paid";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import theme from "../../theme/theme";
-import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellSelling, TablecellTickets } from "../../theme/style";
+import { RateOils, TablecellFinancial, TablecellFinancialHead, TablecellHeader, TablecellPink, TablecellTickets } from "../../theme/style";
 import { database } from "../../server/firebase";
 import { useData } from "../../server/path";
 import InsertType from "./InsertType";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
 
-const CloseFS = ({ openNavbar }) => {
+const CloseFSSmallTruck = ({ openNavbar }) => {
     const [date, setDate] = React.useState(false);
     const [check, setCheck] = React.useState(true);
     const [months, setMonths] = React.useState(dayjs(new Date));
@@ -492,67 +492,16 @@ const CloseFS = ({ openNavbar }) => {
         const normalOrders = filteredOrders.filter(tk => tk.TruckType === "รถใหญ่");
 
         // 🔹 ส่วน 1: CustomerType !== "ตั๋วรถเล็ก" → ใช้ registrationH
-        const normalGroups = registrationH
-            .filter(reg => companyName === "0:ทั้งหมด" ? true : reg.Company === companyName)
-            .reduce((acc, curr) => {
-                const key = `${curr.Driver}-${curr.id}:${curr.RegHead}`;
-                let group = acc.find(g => g.key === key);
-
-                const ticketname = normalOrders.filter(tk => {
-                    const regMatch = (tk.Registration ? Number(tk.Registration.split(":")[0]) : null) === curr.id;
-
-                    const rowDate = dayjs(tk.DateReceive, "DD/MM/YYYY", true);
-                    const selectedMonth = dayjs(months);
-                    const selectedYear = dayjs(years);
-
-                    const dateMatch = !date
-                        ? rowDate.format("MM") === selectedMonth.format("MM") &&
-                        rowDate.format("YYYY") === selectedMonth.format("YYYY")
-                        : rowDate.format("YYYY") === selectedYear.format("YYYY");
-
-                    const companyCheck = companyName === "0:ทั้งหมด"
-                        ? true
-                        : companyName === tk.TruckCompany;
-
-                    return regMatch && dateMatch && companyCheck;
-                });
-
-                if (!group) {
-                    group = {
-                        key,
-                        Driver: curr.Driver,
-                        Registration: `${curr.id}:${curr.RegHead}`,
-                        RegistrationTail: curr.RegTail,
-                        TicketName: ticketname,
-                        TruckType: "รถใหญ่"
-                    };
-                    acc.push(group);
-                }
-
-                return acc;
-            }, []);
-
-        // 🔹 ส่วน 2: CustomerType === "ตั๋วรถเล็ก" → ใช้ filteredOrders ที่กรองออกมา
-        // const smallTruckGroups = registrationSm
+        // const normalGroups = registrationH
         //     .filter(reg => companyName === "0:ทั้งหมด" ? true : reg.Company === companyName)
         //     .reduce((acc, curr) => {
-        //         const Driver = smallTruckOrders.find((r) => r.RegistrationTail === curr.RegHead)?.Driver;
-        //         console.log("Driver : ", Driver);
-        //         const key = `${Driver}-${curr.id}:${curr.RegHead}`;
+        //         const key = `${curr.Driver}-${curr.id}:${curr.RegHead}`;
         //         let group = acc.find(g => g.key === key);
 
-        //         const ticketname = smallTruckOrders.filter(tk => {
-        //             if (!tk.Registration) {
-        //                 console.warn("⚠️ smallTruckOrders: ไม่มี Registration", tk);
-        //                 return false;
-        //             }
+        //         const ticketname = normalOrders.filter(tk => {
+        //             const regMatch = (tk.Registration ? Number(tk.Registration.split(":")[0]) : null) === curr.id;
 
-        //             const regParts = tk.Registration.split(":");
-        //             const regId = Number(regParts[0]);
-
-        //             const regMatch = regId === curr.id;
-
-        //             const rowDate = dayjs(tk.DateDelivery, "DD/MM/YYYY");
+        //             const rowDate = dayjs(tk.DateReceive, "DD/MM/YYYY", true);
         //             const selectedMonth = dayjs(months);
         //             const selectedYear = dayjs(years);
 
@@ -568,28 +517,79 @@ const CloseFS = ({ openNavbar }) => {
         //             return regMatch && dateMatch && companyCheck;
         //         });
 
-        //         // ❗ ถ้าไม่มี TicketName เลย ไม่ต้องสร้าง group
-        //         if (ticketname.length === 0) return acc;
-
-        //         console.log("ticketname : ", ticketname);
-
-        //         // 📌 ดึง Driver จาก ticketname (อิงข้อมูลจริง)
-        //         const driverFromTicket = ticketname[0]?.Driver || curr.Driver || "";
-
         //         if (!group) {
         //             group = {
         //                 key,
-        //                 Driver: Driver,            // ← ใช้จาก ticketname
+        //                 Driver: curr.Driver,
         //                 Registration: `${curr.id}:${curr.RegHead}`,
-        //                 RegistrationTail: curr.ShortName,
+        //                 RegistrationTail: curr.RegTail,
         //                 TicketName: ticketname,
-        //                 TruckType: "รถเล็ก",
+        //                 TruckType: "รถใหญ่"
         //             };
         //             acc.push(group);
         //         }
 
         //         return acc;
         //     }, []);
+
+        // 🔹 ส่วน 2: CustomerType === "ตั๋วรถเล็ก" → ใช้ filteredOrders ที่กรองออกมา
+        const smallTruckGroups = registrationSm
+            .filter(reg => companyName === "0:ทั้งหมด" ? true : reg.Company === companyName)
+            .reduce((acc, curr) => {
+                const Driver = smallTruckOrders.find((r) => r.RegistrationTail === curr.RegHead)?.Driver;
+                console.log("Driver : ", Driver);
+                const key = `${Driver}-${curr.id}:${curr.RegHead}`;
+                let group = acc.find(g => g.key === key);
+
+                const ticketname = smallTruckOrders.filter(tk => {
+                    if (!tk.Registration) {
+                        console.warn("⚠️ smallTruckOrders: ไม่มี Registration", tk);
+                        return false;
+                    }
+
+                    const regParts = tk.Registration.split(":");
+                    const regId = Number(regParts[0]);
+
+                    const regMatch = regId === curr.id;
+
+                    const rowDate = dayjs(tk.DateDelivery, "DD/MM/YYYY");
+                    const selectedMonth = dayjs(months);
+                    const selectedYear = dayjs(years);
+
+                    const dateMatch = !date
+                        ? rowDate.format("MM") === selectedMonth.format("MM") &&
+                        rowDate.format("YYYY") === selectedMonth.format("YYYY")
+                        : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+                    const companyCheck = companyName === "0:ทั้งหมด"
+                        ? true
+                        : companyName === tk.TruckCompany;
+
+                    return regMatch && dateMatch && companyCheck;
+                });
+
+                // ❗ ถ้าไม่มี TicketName เลย ไม่ต้องสร้าง group
+                if (ticketname.length === 0) return acc;
+
+                console.log("ticketname : ", ticketname);
+
+                // 📌 ดึง Driver จาก ticketname (อิงข้อมูลจริง)
+                const driverFromTicket = ticketname[0]?.Driver || curr.Driver || "";
+
+                if (!group) {
+                    group = {
+                        key,
+                        Driver: Driver,            // ← ใช้จาก ticketname
+                        Registration: `${curr.id}:${curr.RegHead}`,
+                        RegistrationTail: curr.ShortName,
+                        TicketName: ticketname,
+                        TruckType: "รถเล็ก",
+                    };
+                    acc.push(group);
+                }
+
+                return acc;
+            }, []);
 
         // const transportTruckGroups = registrationT
         //     .filter(reg => companyName === "0:ทั้งหมด" ? true : reg.Company === companyName)
@@ -650,7 +650,7 @@ const CloseFS = ({ openNavbar }) => {
         //     }, []);
 
         // 🔹 รวมทั้งสองส่วนเข้าด้วยกัน
-        const allGroups = [...normalGroups/*, ...smallTruckGroups , ...transportTruckGroups*/];
+        const allGroups = [...smallTruckGroups/*, ...smallTruckGroups , ...transportTruckGroups*/];
 
         // 🔹 sort ตาม Driver
         const truckTypeOrder = {
@@ -674,7 +674,7 @@ const CloseFS = ({ openNavbar }) => {
             return nameA.localeCompare(nameB, "th");
         });
 
-    }, [registrationH, filteredOrders, date, months, years, companyName]);
+    }, [registrationSm, filteredOrders, date, months, years, companyName]);
     // ===============================
     // 3️⃣ สร้าง ReportDetail จาก expenseitem + reports
     // ===============================
@@ -738,13 +738,17 @@ const CloseFS = ({ openNavbar }) => {
         // merge reports
         reports
             .filter((ex) => {
-                const regMatch = ex.TruckType === "หัวรถใหญ่"
-                    ? registrationH.find((h) => h.id === Number(ex.Registration.split(":")[0]))
-                    : ex.TruckType === "หางรถใหญ่"
-                        ? registrationS.find((h) => h.id === Number(ex.Registration.split(":")[0]))
-                        : ex.TruckType === "รถเล็ก"
-                            ? registrationSm.find((h) => h.id === Number(ex.Registration.split(":")[0]))
-                            : false;
+                // const regMatch = ex.TruckType === "หัวรถใหญ่"
+                //     ? registrationH.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                //     : ex.TruckType === "หางรถใหญ่"
+                //         ? registrationS.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                //         : ex.TruckType === "รถเล็ก"
+                //             ? registrationSm.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                //             : false;
+
+                const regMatch = ex.TruckType === "รถเล็ก"
+                    ? registrationSm.find((h) => h.id === Number(ex.Registration.split(":")[0]))
+                    : false;
 
                 const rowDate = dayjs(ex.SelectedDateInvoice, "DD/MM/YYYY");
                 const selectedMonth = dayjs(months);
@@ -863,8 +867,8 @@ const CloseFS = ({ openNavbar }) => {
                 }
 
                 let registration = ""
-                if (curr.TruckType === "รถใหญ่") {
-                    const regHead = registrationH.find((rg) => rg.id === Number(curr.Registration.split(":")[0]));
+                if (curr.TruckType === "รถเล็ก") {
+                    const regHead = registrationSm.find((rg) => rg.id === Number(curr.Registration.split(":")[0]));
                     registration = `${regHead?.id}:${regHead?.RegHead}`;
 
                 } else if (curr.TruckType === "รถรับจ้างขนส่ง") {
@@ -1019,7 +1023,7 @@ const CloseFS = ({ openNavbar }) => {
     // 5️⃣ คำนวณ Totals
     // ===============================
     const grandTotal = useMemo(() => {
-        return ticketGroups.reduce(
+        return ticketGroups.filter((r) => r.TruckType === "รถเล็ก").reduce(
             (sum, ticket) => {
                 ticket.TotalVolume = ticket.Drivers.reduce((v, d) => v + d.Volume, 0);
                 ticket.TotalAmount = ticket.Drivers.reduce((a, d) => a + d.Amount, 0);
@@ -1032,7 +1036,7 @@ const CloseFS = ({ openNavbar }) => {
     }, [ticketGroups]);
 
     const driverTotals = useMemo(() => {
-        return ticketGroups.reduce((acc, ticket) => {
+        return ticketGroups.filter((r) => r.TruckType === "รถเล็ก").reduce((acc, ticket) => {
             ticket.Drivers.forEach(d => {
                 const driverName = d.Driver.split(":")[1];
                 if (!acc[driverName]) acc[driverName] = { Volume: 0, Amount: 0 };
@@ -1048,7 +1052,7 @@ const CloseFS = ({ openNavbar }) => {
         // TicketGroups per type
         // =======================
         const calcGrandDriver = (filterType) => {
-            const tickets = ticketGroups.filter(t => t.CustomerType === filterType);
+            const tickets = ticketGroups.filter(t => t.CustomerType === filterType && t.TruckType === "รถเล็ก");
             const grand = tickets.reduce(
                 (sum, t) => {
                     t.TotalVolume = t.Drivers.reduce((v, d) => v + d.Volume, 0);
@@ -1113,6 +1117,7 @@ const CloseFS = ({ openNavbar }) => {
     console.log("grandTotalReport : ", grandTotalReport);
     console.log("driverReportTotals : ", driverReportTotals);
     console.log("ReportDetail : ", reportDetail);
+    console.log("grandTotalA : ", grandTotalA);
 
     console.log("grandTotal : ", grandTotal);
     console.log("filteredOrders : ", filteredOrders.filter((tk) => {
@@ -1525,6 +1530,7 @@ const CloseFS = ({ openNavbar }) => {
                                     <Checkbox
                                         checked={date === false ? false : true}
                                         onChange={() => setDate(true)}
+                                        color="pink"
                                     />
                                 }
                                 label={
@@ -1538,6 +1544,7 @@ const CloseFS = ({ openNavbar }) => {
                                     <Checkbox
                                         checked={date === true ? false : true}
                                         onChange={() => setDate(false)}
+                                        color="pink"
                                     />
                                 }
                                 label={
@@ -1588,7 +1595,7 @@ const CloseFS = ({ openNavbar }) => {
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DatePicker
                                             openTo="month"
-                                            views={["year", "month"]}
+                                            views={["year","month"]}
                                             value={dayjs(months)} // แปลงสตริงกลับเป็น dayjs object
                                             format="MMMM"
                                             onChange={handleMonth}
@@ -1711,6 +1718,7 @@ const CloseFS = ({ openNavbar }) => {
                                     <Checkbox
                                         checked={check === true ? true : false}
                                         onChange={() => setCheck(true)}
+                                        color="pink"
                                     />
                                 }
                                 label={
@@ -1724,6 +1732,7 @@ const CloseFS = ({ openNavbar }) => {
                                     <Checkbox
                                         checked={check === false ? true : false}
                                         onChange={() => setCheck(false)}
+                                        color="pink"
                                     />
                                 }
                                 label={
@@ -1766,24 +1775,24 @@ const CloseFS = ({ openNavbar }) => {
                     <Table stickyHeader size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "4px" }, width: "100%" }}>
                         <TableHead sx={{ height: "5vh" }}>
                             <TableRow>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
+                                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 5, borderRight: "2px solid white" }}>
                                     ลำดับ
-                                </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, zIndex: 5 }}>
+                                </TablecellPink>
+                                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100, zIndex: 5 }}>
                                     ประเภท
-                                </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 280, position: "sticky", left: 50, zIndex: 5, borderRight: "2px solid white" }}>
+                                </TablecellPink>
+                                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 280, position: "sticky", left: 50, zIndex: 5, borderRight: "2px solid white" }}>
                                     ชื่อรายการ
-                                </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 140 }}>
+                                </TablecellPink>
+                                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 140 }}>
                                     เฉลี่ยค่าขนส่ง/ลิตร
-                                </TablecellSelling>
-                                <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 130, position: "sticky", left: 320, zIndex: 5, borderRight: "2px solid white" }}>
+                                </TablecellPink>
+                                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 130, position: "sticky", left: 320, zIndex: 5, borderRight: "2px solid white" }}>
                                     รวม
-                                </TablecellSelling>
+                                </TablecellPink>
                                 {
                                     driverGroups.map((row) => (
-                                        <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
                                             <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1, marginTop: 1 }} gutterBottom>
                                                 {row.Driver.split(":")[1]}
                                             </Typography>
@@ -1796,7 +1805,7 @@ const CloseFS = ({ openNavbar }) => {
                                                             : `${row.Registration.split(":")[1]}/${row.RegistrationTail.split(":")[1]}`
                                                 }
                                             </Typography>
-                                        </TablecellSelling>
+                                        </TablecellPink>
                                     ))
                                 }
                             </TableRow>
@@ -1822,7 +1831,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 left: 0,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#a9c7ecff",
+                                                backgroundColor: "#eca9e1ff",
                                                 fontWeight: "bold",
                                             }}
                                             colSpan={2}
@@ -1834,11 +1843,11 @@ const CloseFS = ({ openNavbar }) => {
 
                                     {/* รายการแต่ละ ticket */}
                                     {ticketGroups
-                                        .filter((t) => t.CustomerType === label)
+                                        .filter((t) => t.CustomerType === label && t.TruckType === "รถเล็ก")
                                         .map((row, index) => (
                                             <TableRow
                                                 key={index}
-                                                sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}
+                                                sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff" }}
                                             >
                                                 <TableCell
                                                     sx={{
@@ -1847,7 +1856,7 @@ const CloseFS = ({ openNavbar }) => {
                                                         left: 0,
                                                         zIndex: 4,
                                                         borderRight: "2px solid white",
-                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
                                                     }}
                                                 >
                                                     {index + 1}
@@ -1862,7 +1871,7 @@ const CloseFS = ({ openNavbar }) => {
                                                         left: 50,
                                                         zIndex: 4,
                                                         borderRight: "2px solid white",
-                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
                                                     }}
                                                 >
                                                     <Typography
@@ -1884,7 +1893,7 @@ const CloseFS = ({ openNavbar }) => {
                                                         left: 320,
                                                         zIndex: 4,
                                                         borderRight: "2px solid white",
-                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                        backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
                                                         paddingLeft: "15px !important",
                                                         paddingRight: "15px !important",
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -1942,10 +1951,10 @@ const CloseFS = ({ openNavbar }) => {
                                                 left: 0,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#c9d9efff",
+                                                backgroundColor: "#efc9ecff",
                                             }}
                                         />
-                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff" }}></TableCell>
+                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff" }}></TableCell>
                                         <TableCell
                                             sx={{
                                                 textAlign: "right",
@@ -1953,7 +1962,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 left: 50,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#c9d9efff",
+                                                backgroundColor: "#efc9ecff",
                                             }}
                                         >
                                             <Typography
@@ -1964,7 +1973,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 รวมรายได้ของ{label}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff" }}></TableCell>
+                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff" }}></TableCell>
                                         <TableCell
                                             sx={{
                                                 textAlign: "right",
@@ -1973,7 +1982,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 left: 320,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: "#c9d9efff",
+                                                backgroundColor: "#efc9ecff",
                                                 paddingLeft: "15px !important",
                                                 paddingRight: "15px !important",
                                                 fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -1997,7 +2006,7 @@ const CloseFS = ({ openNavbar }) => {
                                                     key={driverName + regis}
                                                     sx={{
                                                         textAlign: "right",
-                                                        backgroundColor: "#c9d9efff",
+                                                        backgroundColor: "#efc9ecff",
                                                         paddingLeft: "15px !important",
                                                         paddingRight: "15px !important",
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -2034,10 +2043,10 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 0,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#e3f2fd",
+                                        backgroundColor: "#fce3fdff",
                                     }}
                                 />
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd" }}></TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff" }}></TableCell>
                                 <TableCell
                                     sx={{
                                         textAlign: "right",
@@ -2045,7 +2054,7 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 50,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#e3f2fd",
+                                        backgroundColor: "#fce3fdff",
                                     }}
                                 >
                                     <Typography
@@ -2056,7 +2065,7 @@ const CloseFS = ({ openNavbar }) => {
                                         รวมรายได้ทั้งหมด
                                     </Typography>
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd" }}></TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff" }}></TableCell>
                                 <TableCell
                                     sx={{
                                         textAlign: "right",
@@ -2065,7 +2074,7 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 320,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#e3f2fd",
+                                        backgroundColor: "#fce3fdff",
                                         paddingLeft: "15px !important",
                                         paddingRight: "15px !important",
                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -2089,7 +2098,7 @@ const CloseFS = ({ openNavbar }) => {
                                             key={driverName + regis}
                                             sx={{
                                                 textAlign: "right",
-                                                backgroundColor: "#e3f2fd",
+                                                backgroundColor: "#fce3fdff",
                                                 paddingLeft: "15px !important",
                                                 paddingRight: "15px !important",
                                                 fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -2111,7 +2120,7 @@ const CloseFS = ({ openNavbar }) => {
                             </TableRow>
                             {
                                 reportDetail.map((row, index) => (
-                                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff" }}>
                                         <TableCell
                                             sx={{
                                                 textAlign: "center",
@@ -2119,7 +2128,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 left: 0,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
                                             }}
                                         >
                                             {index + 1}
@@ -2132,7 +2141,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 left: 50,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
                                             }}
                                         >
                                             <Typography variant="subtitle2" sx={{ marginLeft: 2, lineHeight: 1.2, whiteSpace: "nowrap" }} gutterBottom>{row.Bank ? row.Bank.split(":")[1] : row.Bank}</Typography>
@@ -2145,7 +2154,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 left: 320,
                                                 zIndex: 4,
                                                 borderRight: "2px solid white",
-                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
                                                 paddingLeft: "15px !important",
                                                 paddingRight: "15px !important",
                                                 fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -2207,14 +2216,14 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 0,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#c9d9efff",
+                                        backgroundColor: "#efc9ecff",
                                     }}
                                 >
 
                                 </TableCell>
 
                                 {/* ✅ ประเภท */}
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff", }}></TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff", }}></TableCell>
 
                                 <TableCell
                                     sx={{
@@ -2223,14 +2232,14 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 50,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#c9d9efff",
+                                        backgroundColor: "#efc9ecff",
                                     }}
                                 >
                                     <Typography variant="subtitle2" sx={{ marginRight: 2, lineHeight: 1.2, whiteSpace: "nowrap", fontWeight: "bold" }} gutterBottom>
                                         รวมค่าใช้จ่าย
                                     </Typography>
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#c9d9efff", }}></TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff", }}></TableCell>
                                 <TableCell
                                     sx={{
                                         textAlign: "right",
@@ -2239,7 +2248,7 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 320,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#c9d9efff",
+                                        backgroundColor: "#efc9ecff",
                                         paddingLeft: "15px !important",
                                         paddingRight: "15px !important",
                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -2259,7 +2268,7 @@ const CloseFS = ({ openNavbar }) => {
                                             key={`${regis}-${index}`}    // <— ใช้ key ไม่ซ้ำ 100%
                                             sx={{
                                                 textAlign: "right",
-                                                backgroundColor: "#c9d9efff",
+                                                backgroundColor: "#efc9ecff",
                                                 paddingLeft: "15px !important",
                                                 paddingRight: "15px !important",
                                                 fontVariantNumeric: "tabular-nums",
@@ -2283,14 +2292,14 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 0,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#e3f2fd",
+                                        backgroundColor: "#fce3fdff",
                                     }}
                                 >
 
                                 </TableCell>
 
                                 {/* ✅ ประเภท */}
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd", }}></TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff", }}></TableCell>
 
                                 <TableCell
                                     sx={{
@@ -2299,14 +2308,14 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 50,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#e3f2fd",
+                                        backgroundColor: "#fce3fdff",
                                     }}
                                 >
                                     <Typography variant="subtitle2" sx={{ marginRight: 2, lineHeight: 1.2, whiteSpace: "nowrap", fontWeight: "bold" }} gutterBottom>
                                         ยอดกำไรสุทธิ
                                     </Typography>
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#e3f2fd", }}></TableCell>
+                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff", }}></TableCell>
                                 <TableCell
                                     sx={{
                                         textAlign: "right",
@@ -2315,7 +2324,7 @@ const CloseFS = ({ openNavbar }) => {
                                         left: 320,
                                         zIndex: 4,
                                         borderRight: "2px solid white",
-                                        backgroundColor: "#e3f2fd",
+                                        backgroundColor: "#fce3fdff",
                                         paddingLeft: "15px !important",
                                         paddingRight: "15px !important",
                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -2340,7 +2349,7 @@ const CloseFS = ({ openNavbar }) => {
                                             key={regis}
                                             sx={{
                                                 textAlign: "right",
-                                                backgroundColor: "#e3f2fd",
+                                                backgroundColor: "#fce3fdff",
                                                 paddingLeft: "15px !important",
                                                 paddingRight: "15px !important",
                                                 fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
@@ -2362,4 +2371,4 @@ const CloseFS = ({ openNavbar }) => {
     );
 };
 
-export default CloseFS;
+export default CloseFSSmallTruck;

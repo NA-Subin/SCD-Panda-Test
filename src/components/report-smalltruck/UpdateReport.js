@@ -113,7 +113,7 @@ const UpdateReport = (props) => {
     //const showTickets = Object.values(tickets || {});
     const showTickets = Object.values(tickets || {}).filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
     const customertransport = Object.values(customertransports || {});
     const customergasstation = Object.values(customergasstations || {});
@@ -122,7 +122,7 @@ const UpdateReport = (props) => {
     const showTrips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+        const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
 
         return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });

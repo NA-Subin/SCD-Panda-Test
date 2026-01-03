@@ -160,16 +160,53 @@ const ReportTransports = ({ openNavbar }) => {
     };
 
     // const { reportFinancial, drivers } = useData();
-    const { drivers, customertransports, reghead } = useBasicData();
+    const { drivers, customertransports, reghead, regtail, small, transport, } = useBasicData();
     const { tickets, transferMoney, trip } = useTripData();
+
+    const registrationH = Object.values(reghead);
+    const registrationT = Object.values(transport);
+    const registrationS = Object.values(regtail);
+    const registrationSm = Object.values(small);
     // const ticket = Object.values(tickets || {});
-    const ticket = Object.values(tickets || {}).filter(item => {
-        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    const trips = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });
+
+    const ticketWithTrip = Object.values(tickets || {}).map(curr => {
+        const trip = trips.find(
+            t => Number(t.id) - 1 === Number(curr.Trip)
+        );
+
+        return {
+            ...curr,
+            TripDetail: trip,
+            TripDate:
+                trip?.DateReceive ||
+                null
+        };
+    });
+    const ticket = ticketWithTrip.filter(item => {
+        if (!item.TripDate) return false; // หรือ true ถ้าไม่อยากตัดทิ้ง
+
+        const d = dayjs(item.TripDate, "DD/MM/YYYY");
+        if (!d.isValid()) return false;
+
+        return d.isSameOrAfter(
+            dayjs("01/01/2026", "DD/MM/YYYY"),
+            "day"
+        );
+    });
+    // const ticket = Object.values(tickets || {}).filter(item => {
+    //     const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+    //     return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
+    // });
     const driver = Object.values(drivers || {});
     const ticketsT = Object.values(customertransports || {});
-    const trips = Object.values(trip || {});
+    // const trips = Object.values(trip || {});
     const registration = Object.values(reghead || {});
     const transferMoneyDetail = Object.values(transferMoney || {});
 
@@ -219,6 +256,118 @@ const ReportTransports = ({ openNavbar }) => {
     //             TotalOverdue: totalIncomingMoney,
     //         };
     //     }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
+    const normalizeDepotName = (depotName = "") => {
+        // เอาข้อความหลัง :
+        const name = depotName.split(":").pop().trim();
+        return name;
+    };
+
+    const calcProductTotal = (products = {}, rateOil = 0) => {
+        return Object.entries(products)
+            .filter(([key, val]) => key !== "P" && val?.Volume > 0)
+            .reduce((sum, [, val]) => {
+                return sum + (val.Volume * 1000) * rateOil;
+            }, 0);
+    };
+
+    const calcProductVolume = (products = {}, rateOil = 0) => {
+        return Object.entries(products)
+            .filter(([key, val]) => key !== "P" && val?.Volume > 0)
+            .reduce((sum, [, val]) => {
+                return sum + (val.Volume * 1000);
+            }, 0);
+    };
+
+    const filteredOrders = useMemo(() => {
+        if (!ticket || !trips) return [];
+
+        const psOrder = ["PSสันทราย", "PS1", "PS2", "NP", "PS3", "PS4"];
+
+        return ticket
+            .filter((item) =>
+                !["ตั๋วรถใหญ่", "ตั๋วรถเล็ก"].includes(item.CustomerType) &&
+                item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined &&
+                item.Trip !== "ยกเลิก"
+            )
+            .map((curr) => {
+                const tripDetail = trips.find((trip) => (Number(trip.id) - 1) === Number(curr.Trip));
+
+                let registrationTail = "";
+                let truckCompany = "";
+                if (tripDetail?.TruckType === "รถใหญ่") {
+                    const reg = registrationH.find(
+                        (h) => h.id === Number(tripDetail?.Registration.split(":")[0])
+                    );
+                    registrationTail = reg?.RegTail || "";
+                    truckCompany = reg?.Company || "";
+                }
+                else if (tripDetail?.TruckType === "รถเล็ก") {
+                    const reg = registrationSm.find(
+                        (h) => h.id === Number(tripDetail?.Registration.split(":")[0])
+                    );
+                    registrationTail = reg?.RegHead || "";
+                    truckCompany = reg?.Company || "";
+                }
+
+                const depot = normalizeDepotName(tripDetail?.Depot);
+
+                let Rate = 0;
+                if (depot === "ลำปาง") Rate = parseFloat(curr.Rate1) || 0;
+                else if (depot === "พิจิตร") Rate = parseFloat(curr.Rate2) || 0;
+                else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot))
+                    Rate = parseFloat(curr.Rate3) || 0;
+
+                // 🔥 คำนวณยอดจาก Product
+                const totalProductCost = calcProductTotal(curr.Product, Rate);
+
+                return {
+                    ...curr,
+                    DateReceive: tripDetail?.DateReceive,
+                    DateDelivery: tripDetail?.DateDelivery,
+                    TruckType: tripDetail?.TruckType,
+                    Driver: tripDetail?.Driver,
+                    RateOil: Rate,
+                    ProductTotal: totalProductCost, // ✅ ยอดรวม Volume * 1000 * Rate
+                    ProductVolume: calcProductVolume(curr.Product, Rate), // ✅ ยอดรวม Volume * 1000
+                    Registration: tripDetail?.Registration,
+                    RegistrationTail: registrationTail,
+                    TruckCompany: truckCompany
+                };
+            })
+            .sort((a, b) => {
+                // 🧩 ขั้นแรก: เรียงตามประเภท CustomerType
+                const typeOrder = ["ตั๋วน้ำมัน", "ตั๋วรับจ้างขนส่ง", "ตั๋วปั้ม"];
+                const aNamePart = (a.TicketName?.split(":")[1] || "").trim();
+                const bNamePart = (b.TicketName?.split(":")[1] || "").trim();
+
+                const typeA = typeOrder.indexOf(a.CustomerType) !== -1 ? typeOrder.indexOf(a.CustomerType) : 999;
+                const typeB = typeOrder.indexOf(b.CustomerType) !== -1 ? typeOrder.indexOf(b.CustomerType) : 999;
+
+                if (typeA !== typeB) return typeA - typeB;
+
+                // 🧩 ขั้นสอง: สำหรับ "ตั๋วปั้ม"
+                if (a.CustomerType === "ตั๋วปั้ม" && b.CustomerType === "ตั๋วปั้ม") {
+                    const getPSKey = (name) => {
+                        // ลบจุดออกก่อน แล้วดึงเฉพาะตัวหน้าชื่อ เช่น PSสันทราย, PS1, NP
+                        const cleanName = name.replace(/\./g, "").replace(/\s+/g, "");
+                        const match = psOrder.find(key => cleanName.startsWith(key));
+                        return match || "ZZ";
+                    };
+
+                    const aKey = getPSKey(aNamePart);
+                    const bKey = getPSKey(bNamePart);
+
+                    const orderA = psOrder.indexOf(aKey);
+                    const orderB = psOrder.indexOf(bKey);
+
+                    if (orderA !== orderB) return orderA - orderB;
+                }
+
+                // 🧩 ขั้นสุดท้าย: เรียงตามชื่อปกติ
+                return aNamePart.localeCompare(bNamePart, "th");
+            });
+    }, [ticket, trips, registrationH, registrationT, date, months, years]);
+    console.log("filteredOrders truck : ", filteredOrders.filter((tk) => tk.TruckType === "รถใหญ่" && tk.TruckCompany === "2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" && tk.Status !== "ยกเลิก" && tk.TicketName.split(":")[1] === "ศรีพลัง").reduce((sum, tk) => sum + (tk.ProductTotal || 0), 0));
 
     const orderDetail = useMemo(() => {
         if (!selectedDateStart || !selectedDateEnd) return [];
@@ -285,11 +434,7 @@ const ReportTransports = ({ openNavbar }) => {
             return isValidStatus && isRegistration && isValidCustomerType && isInSelectedYearMonth;
         });
 
-        console.log("filteredItems : ", filteredItems.filter((row) => row.TicketName.split(":")[1] === "NP..บฮ(นางจาก)...D1"));
-
         filteredItemsRef.current = filteredItems;
-
-        console.log("transferMoneyDetail : ", transferMoneyDetail);
 
         // 2. แตก Product รายการย่อยออกมา
 
@@ -302,7 +447,12 @@ const ReportTransports = ({ openNavbar }) => {
                 (com) => com.id === Number(item.Registration?.split(":")[0] || 0)
             );
 
-            const tripdetail = trips.find((trip) => (trip.id - 1) === item.Trip);
+            const tripdetail = trips.find(
+                (trip) => (trip.id - 1) === item.Trip && trip.TruckType === "รถใหญ่"
+            );
+
+            if (!tripdetail) return null; // ไม่ใช่รถใหญ่ → ตัดทิ้ง
+
             const depotName = tripdetail?.Depot?.split(":")[1] || "";
 
             let Rate = 0;
@@ -379,13 +529,14 @@ const ReportTransports = ({ openNavbar }) => {
                 Company: item.Registration !== "1:ไม่มี" ? company?.Company : "4:รถรับจ้างขนส่ง",
                 RegistrationHead: company?.RegHead,
                 RegistrationTail: company?.RegTail,
+                TruckType: tripdetail?.TruckType || "",
             };
         }).filter(Boolean);
 
         flattenedRef.current = flattened;
 
         console.log("registraion : ", registration.filter((row) => row.Company.split(":")[0] === check.split(":")[0]));
-        console.log("flattened : ", flattened);
+        console.log("flattened : ", flattened.filter((row) => row.TruckType === "รถเล็ก"));
         console.log("transferMoneyDetail.filter((t) => ", transferMoneyDetail.filter((t) => t.Status !== "ยกเลิก" && t.TicketType === "ตั๋วรับจ้างขนส่ง"))
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)

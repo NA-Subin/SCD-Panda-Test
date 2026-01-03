@@ -131,7 +131,7 @@ const SummaryOilBalance = ({ openNavbar }) => {
     const { order } = useTripData();
     const orders = Object.values(order || {}).filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
 
     const driver = Object.values(drivers || {});

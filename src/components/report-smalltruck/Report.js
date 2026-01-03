@@ -108,14 +108,17 @@ const ReportSmallTruck = () => {
   const { company, drivers, small, customerbigtruck, customersmalltruck } = useBasicData();
   const { order, trip, typeFinancial, reghead, tickets } = useTripData();
   const registrations = Object.values(reghead || {});
-  const ticketsdetail = Object.values(tickets || {})
+  const ticketsdetail = Object.values(tickets || {}).filter(item => {
+      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+      return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
+    });
   const companies = Object.values(company || {});
   const driver = Object.values(drivers || {});
   const typeF = Object.values(typeFinancial || {});
   // const orders = Object.values(order || {});
   const orders = Object.values(order || {}).filter(item => {
     const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-    return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+    return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
   });
   const customerB = Object.values(customerbigtruck || {});
   const customerS = Object.values(customersmalltruck || {});
@@ -124,7 +127,7 @@ const ReportSmallTruck = () => {
   const trips = Object.values(trip || {}).filter(item => {
     const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
     const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-    const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+    const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
 
     return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
   });
@@ -315,7 +318,7 @@ const ReportSmallTruck = () => {
 
 
   console.log("Customer Details: ", customerDetails);
-  console.log("Matched Orders: ", matchedOrdersWithAll);
+  console.log("Matched Orders: ", matchedOrdersWithAll.filter((item) => item.type === "ส่งออก"));
 
   console.log("Order Filter : ", matchedOrders);
 

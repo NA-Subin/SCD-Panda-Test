@@ -534,6 +534,31 @@ const GasStationsDetail = (props) => {
         }));
     };
 
+    const findYesterdayTruck = (report, selectedDate) => {
+        const prev = dayjs(selectedDate).subtract(1, "day");
+
+        const y = prev.year();
+        const m = prev.month() + 1;
+        const d = prev.date();
+
+        return report?.[y]?.[m]?.[d]?.Truck ?? [];
+    };
+
+    const getYesterdayTotal = (todayTruck, yesterdayTruck) => {
+        if (!Array.isArray(yesterdayTruck)) return 0;
+
+        const match = yesterdayTruck.find(
+            yt => yt.Truck === todayTruck.Truck
+        );
+
+        if (!match) return 0;
+
+        return Number(match.Price || 0) + Number(match.Volume || 0);
+    };
+
+    const isEmptyValue = v =>
+        v === undefined || v === null || Number(v) === 0;
+
     // --- โหลดข้อมูลเมื่อ selectedDate หรือ stocks/gasStationOil พร้อม ---
     useEffect(() => {
         if (!Array.isArray(memoStocks) || memoStocks.length === 0) return;
@@ -566,36 +591,42 @@ const GasStationsDetail = (props) => {
 
         const hasValidTruck = (truckArray) => {
             if (!Array.isArray(truckArray) || truckArray.length === 0) return false;
-            return truckArray.some(t => t.Truck && t.Truck.trim() !== "");
+
+            return truckArray.some(t =>
+                typeof t?.Truck === "string" && t.Truck.trim() !== ""
+            );
         };
 
         // หาค่า Truck ล่าสุดที่มีข้อมูลจริงก่อน selectedDate
         const findLatestValidTruck = (report, selectedDate) => {
-            if (!report) return null;
+            if (!report) return [];
 
-            let latestTruck = null;
+            let latest = [];
 
             for (const yr of Object.keys(report).sort((a, b) => b - a)) {
                 for (const mon of Object.keys(report[yr]).sort((a, b) => b - a)) {
                     for (const day of Object.keys(report[yr][mon]).sort((a, b) => b - a)) {
+
                         const currDate = dayjs(`${day}/${mon}/${yr}`, "D/M/YYYY");
-                        if (currDate.isAfter(selectedDate, "day")) continue;
+                        if (currDate.isSameOrAfter(selectedDate, "day")) continue;
 
                         const truckArray = report[yr][mon][day]?.Truck ?? [];
-                        if (hasValidTruck(truckArray)) {
-                            latestTruck = truckArray.map((t, idx) => ({
-                                id: idx,
-                                Truck: t.Truck ?? "",
-                                Price: "",
-                                Volume: ""
-                            }));
-                            return latestTruck; // เจอแล้ว return เลย
-                        }
+                        if (!hasValidTruck(truckArray)) continue;
+
+                        // ✅ ใช้ Price + Volume ของวันล่าสุดจริง
+                        latest = truckArray.map((t, idx) => ({
+                            id: idx,
+                            Truck: t.Truck ?? "",
+                            Price: Number(t.Price || 0) + Number(t.Volume || 0),
+                            Volume: 0
+                        }));
+
+                        return latest; // 👈 เจอวันล่าสุดแล้ว หยุดทันที
                     }
                 }
             }
 
-            return null;
+            return [];
         };
 
         const merged = prepared.map((station, index) => {
@@ -606,16 +637,33 @@ const GasStationsDetail = (props) => {
 
             let finalTruck = [];
 
+            console.log("todayTruck : ", todayTruck);
+            console.log("hasValidTruck(todayTruck) : ", hasValidTruck(todayTruck));
+
             if (hasValidTruck(todayTruck)) {
-                finalTruck = todayTruck.map((t, idx) => ({
-                    id: idx,
-                    Truck: t.Truck ?? "",
-                    Price: t.Price ?? "",
-                    Volume: t.Volume ?? ""
-                }));
+                const yesterdayTruck = findYesterdayTruck(st?.Report, selectedDate);
+
+                finalTruck = todayTruck.map((t, idx) => {
+                    const yesterdayTotal = getYesterdayTotal(t, yesterdayTruck);
+
+                    return {
+                        id: idx,
+                        Truck: t.Truck ?? "",
+                        Price: isEmptyValue(t.Price) ? yesterdayTotal : Number(t.Price),
+                        Volume: Number(t.Volume) || 0
+                    };
+                });
             } else {
                 const latestTruck = findLatestValidTruck(st?.Report, selectedDate);
-                finalTruck = latestTruck ?? DEFAULT_TRUCK;
+
+                finalTruck = latestTruck.length > 0
+                    ? latestTruck
+                    : DEFAULT_TRUCK.map((t, idx) => ({
+                        ...t,
+                        id: idx,
+                        Price: 0,
+                        Volume: 0
+                    }));
             }
 
             // 🔥 สำคัญที่สุดตรงนี้
@@ -709,6 +757,10 @@ const GasStationsDetail = (props) => {
             // ---------------------------------------------------
             let updated = prev.map(s => {
                 if (s.stationId !== stationId) return s;
+
+                if (fieldOrType === "Driver0" || fieldOrType === "Driver1" || fieldOrType === "Driver2") {
+                    return { ...s, [fieldOrType]: products };
+                }
 
                 if (fieldOrType === "Products") {
                     return { ...s, Products: products };

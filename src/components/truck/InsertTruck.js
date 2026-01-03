@@ -334,7 +334,7 @@ const InsertTruck = (props) => {
                         <Grid item md={4} xs={9}>
                             <Paper
                                 component="form">
-                                <Select
+                                {/* <Select
                                     id="demo-simple-select"
                                     value={companies}
                                     size="small"
@@ -356,6 +356,20 @@ const InsertTruck = (props) => {
                                                 <MenuItem value={`${row.id}:${row.Name}`}>{row.Name}</MenuItem>
                                             ))
                                     }
+                                </Select> */}
+                                <Select
+                                    id="demo-simple-select"
+                                    value={companies}
+                                    size="small"
+                                    sx={{ textAlign: "left" }}
+                                    onChange={(e) => setCompanies(e.target.value)}
+                                    fullWidth
+                                >
+                                    <MenuItem value={0}>
+                                        กรุณาเลือกบริษัท
+                                    </MenuItem>
+                                    <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
+                                    <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
                                 </Select>
                             </Paper>
                         </Grid>

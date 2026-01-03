@@ -83,13 +83,22 @@ const TripsSmallTruck = ({ openNavbar }) => {
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+        const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
 
         return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });
 
     const ticketsdetail = Object.values(tickets || {})
-    console.log("ticketsdetail : ",ticketsdetail.filter((row) => row.CustomerType === "ตั๋วรถเล็ก" ))
+    console.log("ticketsdetail : ", ticketsdetail.filter((row) => row.CustomerType === "ตั๋วรถเล็ก"))
+    const result = trips.filter(item =>
+        item.TruckType === "รถเล็ก" &&
+        item.StatusTrip !== "ยกเลิก" &&
+        [item.Ticket1, item.Ticket2, item.Ticket3].some(
+            t => t !== undefined && t !== null && t !== ""
+        )
+    );
+
+    console.log("trips :", result);
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "desc" });
 

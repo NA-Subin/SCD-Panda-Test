@@ -75,13 +75,13 @@ const ProfitSmallTruck = ({ openNavbar }) => {
     // const orders = Object.values(order || {});
     const orders = Object.values(order || {}).filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
 
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+        const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
 
         return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });

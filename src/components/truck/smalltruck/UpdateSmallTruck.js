@@ -225,20 +225,22 @@ const UpdateSmallTruck = (props) => {
                                     update ?
                                         <TextField fullWidth variant="standard" value={companies.split(":")[1]} disabled />
                                         :
-                                        <FormControl variant="standard" fullWidth>
+                                        <FormControl
+                                            variant="standard"
+                                            fullWidth
+                                            size="small"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { height: '30px' },
+                                                '& .MuiInputBase-input': { fontSize: "16px", textAlign: 'left' },
+                                            }}
+                                        >
                                             <Select
-                                                labelId="demo-simple-select-standard-label"
-                                                id="demo-simple-select-standard"
                                                 value={companies}
                                                 onChange={(e) => setCompanies(e.target.value)}
                                             >
-                                                <MenuItem value={companies}>{companies.split(":")[1]}</MenuItem>
-                                                {
-                                                    dataCompany.map((truck) => (
-                                                        (truck.id !== 1 && truck.id !== Number(companies.split(":")[0])) &&
-                                                        <MenuItem value={`${truck.id}:${truck.Name}`}>{truck.Name}</MenuItem>
-                                                    ))
-                                                }
+                                                <MenuItem value={companies} sx={{ fontSize: "14px", }}>{companies.split(":")[1]}</MenuItem>
+                                                {Number(companies.split(":")[0]) !== 2 && <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
+                                                {Number(companies.split(":")[0]) !== 3 && <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
                                             </Select>
                                         </FormControl>
                                 }

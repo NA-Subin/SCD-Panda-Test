@@ -3,6 +3,10 @@ import {
     Box,
     Button,
     Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Divider,
     FormControl,
     Grid,
@@ -44,6 +48,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ReplyAllIcon from '@mui/icons-material/ReplyAll';
+import ImageIcon from "@mui/icons-material/Image";
 import SettingsIcon from '@mui/icons-material/Settings';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -68,6 +73,8 @@ const DriverDetail = () => {
     const userId = Cookies.get("sessionToken");
     const navigate = useNavigate();
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    console.log("user id : ", userId);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -101,14 +108,14 @@ const DriverDetail = () => {
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-        const targetDate = dayjs("01/06/2025", "DD/MM/YYYY");
+        const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
 
         return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });
     // const orders = Object.values(order || {});
     const orders = Object.values(order || {}).filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-        return itemDate.isSameOrAfter(dayjs("01/06/2025", "DD/MM/YYYY"), 'day');
+        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
     const depot = Object.values(depots || {});
     const driverDetails = Object.values(drivers || {});
@@ -131,23 +138,24 @@ const DriverDetail = () => {
 
     const PREFIXES = ["นาย", "นาง", "นางสาว", "เด็กชาย", "เด็กหญิง", "ด.ช.", "ด.ญ."];
 
-    const splitThaiName = (fullName) => {
-        if (!fullName) return { prefix: "", firstName: "", lastName: "" };
+    const splitThaiName = (fullName = "") => {
+        if (!fullName.trim()) return { firstName: "", lastName: "" };
 
+        // หา prefix ถ้ามี
         const prefix = PREFIXES.find(p => fullName.startsWith(p));
-        if (!prefix) return { prefix: "", firstName: "", lastName: "" };
 
-        // ตัดคำนำหน้าออกจากชื่อเต็ม
-        const rest = fullName.slice(prefix.length).trim();
-        const nameParts = rest.split(" ");
+        // ถ้ามี prefix → ตัดออก
+        const nameWithoutPrefix = prefix
+            ? fullName.slice(prefix.length).trim()
+            : fullName.trim();
+
+        const parts = nameWithoutPrefix.split(/\s+/);
 
         return {
-            prefix,
-            firstName: nameParts[0] || "",
-            lastName: nameParts[1] || "",
+            firstName: parts[0] || "",
+            lastName: parts.slice(1).join(" ") || ""
         };
     };
-
     // ตัวอย่างการใช้งาน
     const { prefix, firstName, lastName } = splitThaiName(driverDeetail?.Name);
 
@@ -155,22 +163,48 @@ const DriverDetail = () => {
     console.log("ชื่อ:", firstName);       // สมส่วน
     console.log("นามสกุล:", lastName);     // สามสี
 
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [file, setFile] = useState(null);
+    const [preview, setPreview] = useState(null);
+    const [dataNo, setDataNo] = useState(null);
+
+    const handleFileChange = (e) => {
+        const selected = e.target.files?.[0];
+        if (!selected) return;
+
+        setFile(selected);
+        setPreview(URL.createObjectURL(selected));
+    };
+
+    const handleClose = () => {
+        setDialogOpen(false);
+        setFile(null);
+        setPreview(null);
+    };
+
     const [truck, setTruck] = React.useState(`${registrationDetail?.Driver}:${registrationDetail?.RegHead}:${registrationDetail?.RegTail}`);
 
     useEffect(() => {
-        console.log("driver and truck : ", truck);
-        const check = tripDetail.find((item) => Number(item.Driver.split(":")[0]) === Number(truck.split(":")[0])) || {};
-        console.log("check : ", check);
-        const checkOrder = orders.filter((item) => item.Trip === (check.id - 1))
-        console.log("checkOrder : ", checkOrder);
+        if (!truck || !orders.length || !tripDetail.length) return;
 
-        const depotZone = typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
-        const checkDepot = depot.find((item) => item.Zone === depotZone) || {};
+        const check = tripDetail.find(
+            (item) => Number(item.Driver.split(":")[0]) === Number(truck.split(":")[0])
+        );
+        if (!check) return;
 
-        console.log("check : ", check);
+        const checkOrder = orders.filter(
+            (item) => item.Trip === (check.id - 1)
+        );
+
+        const depotZone =
+            typeof check.Depot === "string" ? check.Depot.split(":")[1] : null;
+
+        const checkDepot = depot.find(
+            (item) => item.Zone === depotZone
+        ) || {};
 
         const tripNewData = Object.keys(check)
-            .filter(key => key.startsWith("Order")) // เอาเฉพาะ Order1, Order2, Order3
+            .filter(key => key.startsWith("Order"))
             .reduce((acc, key, index) => {
                 acc[index] = { Name: check[key], No: index };
                 return acc;
@@ -181,27 +215,65 @@ const DriverDetail = () => {
         setOrderNew(checkOrder);
         setDepotNew(checkDepot);
 
-        if (
-            checkOrder.length > 0 &&
-            checkOrder.every(item => item.Status === "จัดส่งสำเร็จ")
-        ) {
-            database
-                .ref("trip/")
-                .child(check.id - 1)
-                .update({
-                    StatusTrips: "จบทริป",
-                    DateEnd: dayjs(new Date).format("DD/MM/YYYY")
-                })
-                .then(() => {
-                    console.log("Data pushed successfully");
-                })
-                .catch((error) => {
-                    ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                    console.error("Error pushing data:", error);
-                });
-        }
+    }, [truck, orders, tripDetail, depot]);
 
-    }, [truck]); // อัปเดตเมื่อ orderNew เปลี่ยน
+    useEffect(() => {
+        if (!check || !orderNew?.length) return;
+
+        const isAllDone = orderNew.every(
+            item => item.Status === "จัดส่งสำเร็จ"
+        );
+
+        if (!isAllDone) return;
+
+        database
+            .ref("trip/")
+            .child(check.id - 1)
+            .update({
+                StatusTrip: "จบทริป",
+                DateEnd: dayjs().format("DD/MM/YYYY"),
+            })
+            .then(() => {
+                if (!check || !orderNew?.length) return;
+
+                if (check.TruckType === "รถใหญ่") {
+                    database
+                        .ref("truck/registration/")
+                        .child(Number(check.Registration.split(":")[0]) - 1)
+                        .update({
+                            Status: "ว่าง",
+                        })
+                        .then(() => {
+                            console.log("Trip completed");
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error(error);
+                        });
+                } else if (check.TruckType === "รถเล็ก") {
+                    database
+                        .ref("truck/small/")
+                        .child(Number(check.Registration.split(":")[0]) - 1)
+                        .update({
+                            Status: "ว่าง",
+                        })
+                        .then(() => {
+                            console.log("Trip completed");
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error(error);
+                        });
+                }
+
+                console.log("Trip completed");
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error(error);
+            });
+
+    }, [orderNew, check]);
 
     const handleChangeDriver = (e) => {
         const trucks = e.target.value;
@@ -251,21 +323,64 @@ const DriverDetail = () => {
         }
     }
 
-    const handleSaveStatus = (no) => {
-        database
-            .ref("order/")
-            .child(no)
-            .update({
-                Status: "จัดส่งสำเร็จ"
-            })
-            .then(() => {
-                console.log("Data pushed successfully");
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
-    }
+    const handleSaveStatus = async (no) => {
+        if (!file) {
+            alert("กรุณาเลือกไฟล์ก่อน");
+            return;
+        }
+
+        let img = "ไม่แนบไฟล์";
+
+        try {
+            const formData = new FormData();
+            formData.append("pic", file);
+
+            const response = await fetch(
+                "https://upload.happysoftth.com/panda/uploads",
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Upload failed");
+            }
+
+            const data = await response.json();
+
+            if (!data?.file_path) {
+                throw new Error("No file_path returned");
+            }
+
+            img = data.file_path;
+
+        } catch (err) {
+            console.error("Upload error:", err);
+            alert("อัปโหลดรูปไม่สำเร็จ");
+            return; // ❗ หยุด ไม่ให้ update Firebase
+        }
+
+        try {
+            await database
+                .ref("order")
+                .child(String(no)) // ✅ แปลงเป็น string ชัวร์
+                .update({
+                    Status: "จัดส่งสำเร็จ",
+                    file_path: img,
+                });
+
+            setDialogOpen(false);
+            setFile(null);
+            setPreview(null);
+
+            console.log("Data pushed successfully");
+
+        } catch (error) {
+            console.error("Firebase update error:", error);
+            alert("บันทึกข้อมูลไม่สำเร็จ");
+        }
+    };
 
     const handleBack = () => {
         withReactContent(Swal)
@@ -728,9 +843,78 @@ const DriverDetail = () => {
                                                                                     fontSize: { xs: "16px", sm: "14px", md: "12px" },
                                                                                     padding: { xs: "12px 20px", sm: "10px 18px", md: "8px 16px" },
                                                                                     whiteSpace: "nowrap"
-                                                                                }} color="primary" onClick={() => handleSaveStatus(row.No)}>จัดส่งแล้ว</Button>
+                                                                                }} color="primary" onClick={() => { setDialogOpen(true); setDataNo(row.No); }}>จัดส่งแล้ว</Button>
                                                                         }
                                                                     </TableCell>
+                                                                    <Dialog open={dialogOpen} onClose={handleClose}>
+                                                                        <DialogTitle sx={{
+                                                                            display: "flex",
+                                                                            flexDirection: "column",
+                                                                            alignItems: "center",
+                                                                            gap: 2,
+                                                                        }}
+                                                                        >เพิ่มรูปภาพการจัดส่ง</DialogTitle>
+
+                                                                        <DialogContent>
+                                                                            <Box
+                                                                                sx={{
+                                                                                    display: "flex",
+                                                                                    flexDirection: "column",
+                                                                                    alignItems: "center",
+                                                                                    gap: 2,
+                                                                                }}
+                                                                            >
+                                                                                {/* 🔹 Preview รูป */}
+                                                                                {preview ? (
+                                                                                    <Box
+                                                                                        component="img"
+                                                                                        src={preview}
+                                                                                        alt="preview"
+                                                                                        sx={{
+                                                                                            width: 500,
+                                                                                            height: 500,
+                                                                                            objectFit: "contain",
+                                                                                            borderRadius: 2,
+                                                                                            border: "1px solid #ddd",
+                                                                                        }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <ImageIcon
+                                                                                        sx={{
+                                                                                            fontSize: 80,
+                                                                                            color: "lightgray",
+                                                                                        }}
+                                                                                    />
+                                                                                )}
+
+                                                                                {/* 🔹 ปุ่มเลือกไฟล์ */}
+                                                                                <Button
+                                                                                    variant="outlined"
+                                                                                    component="label"
+                                                                                    size="small"
+                                                                                >
+                                                                                    แนบไฟล์รูปภาพ
+                                                                                    <input
+                                                                                        type="file"
+                                                                                        hidden
+                                                                                        accept="image/*"
+                                                                                        onChange={handleFileChange}
+                                                                                    />
+                                                                                </Button>
+                                                                            </Box>
+                                                                        </DialogContent>
+
+                                                                        <DialogActions sx={{ justifyContent: "center" }}>
+                                                                            <Button
+                                                                                variant="contained"
+                                                                                size="small"
+                                                                                onClick={() => handleSaveStatus(dataNo)}
+                                                                                disabled={!file}
+                                                                            >
+                                                                                บันทึก
+                                                                            </Button>
+                                                                        </DialogActions>
+                                                                    </Dialog>
                                                                 </TableRow>
                                                             )
                                                         })))

@@ -67,6 +67,7 @@ import Profit from "./components/financial/Profit";
 import Quotation from "./components/quotation/Quotation";
 import ProfitSmallTruck from "./components/financial/ProfitSmallTruck";
 import ReportGasStation from "./components/depots/report/ReportGasStation";
+import CloseFSSmallTruck from "./components/financial/CloseFSSmallTruck";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -347,6 +348,9 @@ function App() {
                   </Routes>
                   <Routes>
                     <Route path="/close-financial" element={<CloseFS openNavbar={open} />} />
+                  </Routes>
+                  <Routes>
+                    <Route path="/close-financial-smalltruck" element={<CloseFSSmallTruck openNavbar={open} />} />
                   </Routes>
                   <Routes>
                     <Route path="/profit-loss" element={<Profit openNavbar={open} />} />
