@@ -466,7 +466,7 @@ const UpdateInvoice = (props) => {
             Volume: ticket.TotalVolume || 0,
             Amount: ticket.TotalAmount || 0,
             Date: invoices[0]?.DateStart,
-            DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
+            DateEnd: calculateDueDate(ticket.DateDelivery, ticket.CreditTime === "-" ? "0" : ticket.CreditTime),
             Company: (customer?.Company && customer.Company !== "ไม่มี")
                 ? (customer.Company.split(":")[1] ?? companyName.Name)
                 : companyName.Name,

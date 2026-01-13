@@ -200,7 +200,7 @@ const TicketsTransport = ({ openNavbar }) => {
                 Rate3: rate3,
                 Bill: bill,
                 Code: code,
-                companyName: companyName,
+                CompanyName: companyName,
                 CodeID: codeID,
                 Address:
                     (no === "-" ? "-" : no) +
@@ -211,7 +211,7 @@ const TicketsTransport = ({ openNavbar }) => {
                     (zipCode === "-" ? "" : ` ${zipCode}`)
                 ,
                 Phone: phone,
-                creditTime: creditTime
+                CreditTime: creditTime
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");

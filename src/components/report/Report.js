@@ -204,7 +204,9 @@ const Report = ({ openNavbar }) => {
         TotalOverdue: totalOverdue,
         Depot: tripdetail?.Depot || "-",
         Rate: Rate || 0,
-        CreditTime: Match?.CreditTime || 0
+        CreditTime: Match?.CreditTime || 0,
+        CompanyName: Match?.CompanyName || "-",
+        CompanyAddress: Match?.Address || "-"
       };
     });
 
@@ -263,7 +265,9 @@ const Report = ({ openNavbar }) => {
         TotalOverdue: totalOverdue,
         Depot: tripdetail?.Depot || "-",
         Rate: Rate || 0,
-        CreditTime: Match?.CreditTime || 0
+        CreditTime: Match?.CreditTime || 0,
+        CompanyName: Match?.CompanyName || "-",
+        CompanyAddress: Match?.Address || "-"
       };
     });
 
@@ -320,7 +324,9 @@ const Report = ({ openNavbar }) => {
         TotalOverdue: totalOverdue,
         Depot: tripdetail?.Depot || "-",
         Rate: Rate || 0,
-        CreditTime: Match?.CreditTime || 0
+        CreditTime: Match?.CreditTime || 0,
+        CompanyName: Match?.CompanyName || "-",
+        CompanyAddress: Match?.Address || "-"
       };
     });
 
@@ -462,6 +468,9 @@ const Report = ({ openNavbar }) => {
 
       if (!acc[key]) {
         acc[key] = {
+          CompanyName: item.CompanyName,
+          CompanyAddress: item.CompanyAddress,
+          TicketAddress: item.Address,
           TicketName: item.TicketName,
           DateStart,
           DateEnd,
@@ -660,6 +669,9 @@ const Report = ({ openNavbar }) => {
 
       if (!acc[key]) {
         acc[key] = {
+          CompanyName: item.CompanyName,
+          CompanyAddress: item.CompanyAddress,
+          TicketAddress: item.Address,
           TicketName: item.TicketName,
           DateStart,
           DateEnd,
@@ -901,6 +913,9 @@ const Report = ({ openNavbar }) => {
 
       if (!acc[key]) {
         acc[key] = {
+          CompanyName: item.CompanyName,
+          CompanyAddress: item.CompanyAddress,
+          TicketAddress: item.Address,
           TicketName: item.TicketName,
           DateStart,
           DateEnd,
@@ -1422,19 +1437,59 @@ const Report = ({ openNavbar }) => {
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.TotalPrice)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.VatOnePercent)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.TotalAmount)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(totalIncomingMoney)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(
                                             Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
                                               ? 0
@@ -1556,19 +1611,59 @@ const Report = ({ openNavbar }) => {
                                       <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                         {row.TicketName.split(":")[1]}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                      <TableCell
+                                        sx={{
+                                          textAlign: "right",
+                                          fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                          paddingLeft: "10px !important",
+                                          paddingRight: "10px !important",
+                                          fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                        }}
+                                      >
                                         {formatNumber(row.TotalPrice)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                      <TableCell
+                                        sx={{
+                                          textAlign: "right",
+                                          fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                          paddingLeft: "10px !important",
+                                          paddingRight: "10px !important",
+                                          fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                        }}
+                                      >
                                         {formatNumber(row.VatOnePercent)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                      <TableCell
+                                        sx={{
+                                          textAlign: "right",
+                                          fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                          paddingLeft: "10px !important",
+                                          paddingRight: "10px !important",
+                                          fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                        }}
+                                      >
                                         {formatNumber(row.TotalAmount)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                      <TableCell
+                                        sx={{
+                                          textAlign: "right",
+                                          fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                          paddingLeft: "10px !important",
+                                          paddingRight: "10px !important",
+                                          fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                        }}
+                                      >
                                         {formatNumber(totalIncomingMoney)}
                                       </TableCell>
-                                      <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                      <TableCell
+                                        sx={{
+                                          textAlign: "right",
+                                          fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                          paddingLeft: "10px !important",
+                                          paddingRight: "10px !important",
+                                          fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                        }}
+                                      >
                                         {formatNumber(
                                           Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
                                             ? 0
@@ -1822,19 +1917,59 @@ const Report = ({ openNavbar }) => {
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {row.TicketName.split(":")[1]}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(row.TotalPrice)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(row.VatOnePercent)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(row.TotalAmount)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(totalIncomingMoney)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(
                                               Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
                                                 ? 0
@@ -1953,19 +2088,59 @@ const Report = ({ openNavbar }) => {
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.TotalPrice)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.VatOnePercent)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.TotalAmount)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(totalIncomingMoney)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(
                                             Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
                                               ? 0
@@ -2218,19 +2393,59 @@ const Report = ({ openNavbar }) => {
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {row.TicketName.split(":")[1]}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(row.TotalPrice)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(row.VatOnePercent)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(row.TotalAmount)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(totalIncomingMoney)}
                                           </TableCell>
-                                          <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                          <TableCell
+                                            sx={{
+                                              textAlign: "right",
+                                              fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                              paddingLeft: "10px !important",
+                                              paddingRight: "10px !important",
+                                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                            }}
+                                          >
                                             {formatNumber(
                                               Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
                                                 ? 0
@@ -2349,19 +2564,59 @@ const Report = ({ openNavbar }) => {
                                         <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                           {row.TicketName.split(":")[1]}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.TotalPrice)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.VatOnePercent)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(row.TotalAmount)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(totalIncomingMoney)}
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "right",
+                                            fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold",
+                                            paddingLeft: "10px !important",
+                                            paddingRight: "10px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                          }}
+                                        >
                                           {formatNumber(
                                             Math.abs(Number(row.TotalAmount) - totalIncomingMoney) < 1e-6
                                               ? 0

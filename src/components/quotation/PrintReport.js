@@ -550,6 +550,9 @@ const PrintReport = () => {
                     {isBangchak ? "กสิกรไทย 663-100-9768" : "กสิกรไทย 633-101-3579"}
                   </Typography>
                 </Box>
+                <Typography variant="subtitle2" marginLeft={7.5}>
+                    {isBangchak ? "" : " กรุงไทย   357-300-2259"}
+                  </Typography>
               </Grid>
 
               {/* ส่วนวันที่และเลขที่เอกสาร */}

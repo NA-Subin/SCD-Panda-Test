@@ -208,7 +208,10 @@ const ReportTransports = ({ openNavbar }) => {
     const ticketsT = Object.values(customertransports || {});
     // const trips = Object.values(trip || {});
     const registration = Object.values(reghead || {});
-    const transferMoneyDetail = Object.values(transferMoney || {});
+    const transferMoneyDetail = Object.values(transferMoney || {}).filter(item => {
+        const itemDate = dayjs(item.DateStart, "DD/MM/YYYY");
+        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
+    });
 
     console.log("1.Orders : ", ticket);
     // const orderDetail = ticket
@@ -1188,22 +1191,64 @@ const ReportTransports = ({ openNavbar }) => {
                                                 <TableCell sx={{ textAlign: "center" }}>
                                                     {`${row.TicketName.split(":")[1] !== "" ? row.TicketName.split(":")[1] : row.TicketName} (${row.CustomerType})`}
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
                                                     {new Intl.NumberFormat("en-US").format(row.VolumeProduct)}
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
                                                     {formatNumber(row.Amount)}
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
                                                     {formatNumber(row.VatOnePercent)}
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
                                                     {formatNumber(row.TotalAmount)}
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
                                                     {formatNumber(row.IncomingMoney)}
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center" }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
                                                     {formatNumber(row.OverdueTransfer)}
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center" }}>

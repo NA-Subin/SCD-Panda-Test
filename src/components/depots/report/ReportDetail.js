@@ -56,15 +56,27 @@ const ReportDetail = (props) => {
         selectedDate,
         lightenColor,
         summary,
+        stockSummary,
         pumpOrder,
         stockCount,
         daysInMonth,
         cbpData,
-        dailySummary } = props;
+        dailySummary,
+        dailySummaryByStock
+    } = props;
     const [openMenu, setOpenMenu] = React.useState(1);
+
+    console.log("🚀 ~ file: ReportDetail.js:55 ~ ReportDetail ~ cbpItem:", cbpItem);
 
     const { depots } = useBasicData();
     const { gasstationDetail, stockDetail } = useGasStationData();
+    const [isEditingCBP, setIsEditingCBP] = useState(false);
+
+    const formatNumber = (value) => {
+        if (value === null || value === undefined) return "";
+        if (isNaN(value)) return "0";
+        return Number(value).toLocaleString("en-US");
+    };
 
     const gasStationOil = Object.values(gasstationDetail || {});
     const stocks = Object.values(stockDetail || {});
@@ -138,6 +150,7 @@ const ReportDetail = (props) => {
                     fontWeight: "bold",
                     position: "sticky",
                     left: 140,
+                    color: cbpItem.Diff < 0 ? "#d50000" : "black",
                     backgroundColor: lightenColor(product.Color, 0.6),
                 }}>
                     {(cbpItem.Diff ?? 0).toLocaleString()}
@@ -153,13 +166,48 @@ const ReportDetail = (props) => {
                                 <TextField
                                     size="small"
                                     type="text"
-                                    value={cbpItem.CBP ?? ""}
+                                    value={
+                                        isEditingCBP && (cbpItem.CBP ?? 0) === 0
+                                            ? ""
+                                            : formatNumber(cbpItem.CBP ?? 0)
+                                    }
                                     onChange={(e) => {
-                                        const raw = e.target.value.replace(/,/g, "");
-                                        if (!/^-?\d*$/.test(raw)) return;
+                                        let raw = e.target.value.replace(/,/g, "");
 
-                                        const cbp = raw === "" ? "" : Number(raw);
-                                        const diff = (cbp || 0) - total;
+                                        // ⭐ ลบหมด → ถือว่าเป็น 0 ทันที
+                                        if (raw === "" || raw === "-") {
+                                            const cbp = 0;
+                                            const diff = cbp - total;
+                                            const carry = cbpItem.Carry || 0;
+
+                                            setCbpData(prev => ({
+                                                ...prev,
+                                                [row.id]: {
+                                                    ...prev[row.id],
+                                                    [year]: {
+                                                        ...prev[row.id]?.[year],
+                                                        [month]: {
+                                                            ...prev[row.id]?.[year]?.[month],
+                                                            [index]: {
+                                                                ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                CBP: 0,
+                                                                Total: total,
+                                                                Diff: diff,
+                                                                Carry: carry,
+                                                                Accumulate: carry + diff
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }));
+                                            return;
+                                        }
+
+                                        // รับเฉพาะตัวเลข (รวมติดลบ)
+                                        if (!/^-?\d+$/.test(raw)) return;
+
+                                        const cbp = Number(raw);
+                                        const diff = cbp - total;
                                         const carry = cbpItem.Carry || 0;
 
                                         setCbpData(prev => ({
@@ -172,7 +220,7 @@ const ReportDetail = (props) => {
                                                         ...prev[row.id]?.[year]?.[month],
                                                         [index]: {
                                                             ...prev[row.id]?.[year]?.[month]?.[index],
-                                                            CBP: cbp,
+                                                            CBP: cbp,        // ✅ เก็บเป็น number เสมอ
                                                             Total: total,
                                                             Diff: diff,
                                                             Carry: carry,
@@ -183,6 +231,33 @@ const ReportDetail = (props) => {
                                             }
                                         }));
                                     }}
+                                    onFocus={() => {
+                                        setIsEditingCBP(true);
+                                    }}
+                                    onBlur={() => {
+                                        setIsEditingCBP(false);
+
+                                        // ป้องกันกรณี user ลบหมดแล้วออก
+                                        if ((cbpItem.CBP ?? 0) === 0) {
+                                            setCbpData(prev => ({
+                                                ...prev,
+                                                [row.id]: {
+                                                    ...prev[row.id],
+                                                    [year]: {
+                                                        ...prev[row.id]?.[year],
+                                                        [month]: {
+                                                            ...prev[row.id]?.[year]?.[month],
+                                                            [index]: {
+                                                                ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                CBP: 0
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }));
+                                        }
+                                    }}
+
                                     // onFocus={() => handleFocus(index, "EstimateSell")}
                                     // onBlur={(e) => handleBlur(index, "EstimateSell", e)} // ส่ง event
                                     // onChange={(e) => {
@@ -255,6 +330,7 @@ const ReportDetail = (props) => {
                     fontWeight: "bold",
                     position: "sticky",
                     left: 380,
+                    color: cbpItem.Total < 0 ? "#d50000" : "black",
                     backgroundColor: lightenColor(product.Color, 0.4),
                 }}>
                     {(cbpItem.Total ?? total).toLocaleString()}
@@ -291,6 +367,7 @@ const ReportDetail = (props) => {
                             sx={{
                                 width: 50,
                                 textAlign: "center",
+                                color: sell !== "-" && (sell < 0 ? "#d50000" : "black"),
                                 backgroundColor: lightenColor(product.Color, 0.75)
                             }}
                         >
@@ -303,6 +380,7 @@ const ReportDetail = (props) => {
                     fontWeight: "bold",
                     position: "sticky",
                     right: 220,
+                    color: cbpItem.Carry < 0 ? "#d50000" : "black",
                     backgroundColor: lightenColor(product.Color, 0.4),
                 }}>
                     {new Intl.NumberFormat("en-US").format(Math.round(cbpItem.Carry))}
@@ -312,6 +390,7 @@ const ReportDetail = (props) => {
                     fontWeight: "bold",
                     position: "sticky",
                     right: 100,
+                    color: cbpItem.Accumulate < 0 ? "#d50000" : "black",
                     backgroundColor: lightenColor(product.Color, 0.4),
                 }}>
                     {new Intl.NumberFormat("en-US").format(Math.round(cbpItem.Accumulate))}
@@ -325,108 +404,206 @@ const ReportDetail = (props) => {
                             zIndex: 5,
                             backgroundColor: "white"
                         }}>
-                        <Paper
-                            sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                borderRadius: 2,
-                                backgroundColor: theme.palette.success.main
-                            }}
-                        >
-                            <Button
-                                color="inherit"
-                                fullWidth
-                                sx={{ flexDirection: "column", gap: 0.5 }}
-                                onClick={() => handleSaveCBP(row)}   // ⭐ เพิ่มตรงนี้
-                            >
-                                <SaveIcon fontSize="large" sx={{ color: "white" }} />
-                                <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
-                                    บันทึก
-                                </Typography>
-                            </Button>
-                        </Paper>
+                        {
+                            pumpOrder === 0 ? (
+                                <Paper
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        borderRadius: 2,
+                                        backgroundColor: theme.palette.success.main
+                                    }}
+                                >
+                                    <Button
+                                        color="inherit"
+                                        fullWidth
+                                        sx={{ flexDirection: "column", gap: 0.5 }}
+                                        onClick={() => handleSaveCBP(row)}   // ⭐ เพิ่มตรงนี้
+                                    >
+                                        <SaveIcon fontSize="large" sx={{ color: "white" }} />
+                                        <Typography sx={{ fontSize: 12, fontWeight: "bold", color: "white" }}>
+                                            บันทึก
+                                        </Typography>
+                                    </Button>
+                                </Paper>
+                            ) : null
+                        }
+
                     </TableCell>
                 }
             </TableRow>
             {
                 index === row.Products.length - 1 && (
-                    <TableRow>
-                        <TablecellHeader
-                            sx={{
-                                backgroundColor: "#bdbdbd",
-                                width: 140,
-                                color: "black",
-                                position: "sticky",
-                                left: 0,
-                                zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
-                                borderBottom: "2px solid white"
-                            }}
-                        >
-                            {/* {`รวม${row.ShortName}`} */}
-                            ผลรวม
-                        </TablecellHeader>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            left: 140,
-                            backgroundColor: lightenColor("#bdbdbd", 0.6),
-                        }}>
-                            {summary.diff.toLocaleString()}
-                        </TableCell>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            left: 260,
-                            backgroundColor: lightenColor("#bdbdbd", 0.6),
-                        }}>
-                            {summary.cbp.toLocaleString()}
-                        </TableCell>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            left: 380,
-                            backgroundColor: lightenColor("#bdbdbd", 0.4),
-                        }}>
-                            {summary.total.toLocaleString()}
-                        </TableCell>
-                        {daysInMonth.map((d) => (
-                            <TableCell
-                                key={d}
+                    <React.Fragment>
+                        <TableRow>
+                            <TablecellHeader
                                 sx={{
-                                    width: 50,
-                                    textAlign: "center",
-                                    fontWeight: "bold",
-                                    backgroundColor: lightenColor("#bdbdbd", 0.6)
+                                    backgroundColor: "#bdbdbd",
+                                    width: 140,
+                                    color: "black",
+                                    position: "sticky",
+                                    left: 0,
+                                    zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                    borderBottom: "2px solid white"
                                 }}
                             >
-                                {dailySummary[d] === 0
-                                    ? "-"
-                                    : new Intl.NumberFormat("en-US").format(Math.round(dailySummary[d]))}
+                                {/* {`รวม${row.ShortName}`} */}
+                                ผลรวม
+                            </TablecellHeader>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 140,
+                                color: summary.diff < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.6),
+                            }}>
+                                {summary.diff.toLocaleString()}
                             </TableCell>
-                        ))}
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            right: 220,
-                            backgroundColor: lightenColor("#bdbdbd", 0.4),
-                        }}>
-                            {new Intl.NumberFormat("en-US").format(Math.round(summary.carry))}
-                        </TableCell>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            right: 100,
-                            backgroundColor: lightenColor("#bdbdbd", 0.4),
-                        }}>
-                            {new Intl.NumberFormat("en-US").format(Math.round(summary.accumulate))}
-                        </TableCell>
-                    </TableRow>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 260,
+                                color: summary.cbp < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.6),
+                            }}>
+                                {summary.cbp.toLocaleString()}
+                            </TableCell>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 380,
+                                color: summary.total < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.4),
+                            }}>
+                                {summary.total.toLocaleString()}
+                            </TableCell>
+                            {daysInMonth.map((d) => (
+                                <TableCell
+                                    key={d}
+                                    sx={{
+                                        width: 50,
+                                        textAlign: "center",
+                                        fontWeight: "bold",
+                                        color: dailySummary[d] < 0 ? "#d50000" : "black",
+                                        backgroundColor: lightenColor("#bdbdbd", 0.6)
+                                    }}
+                                >
+                                    {dailySummary[d] === 0
+                                        ? "-"
+                                        : new Intl.NumberFormat("en-US").format(Math.round(dailySummary[d]))}
+                                </TableCell>
+                            ))}
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                right: 220,
+                                color: summary.carry < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.4),
+                            }}>
+                                {new Intl.NumberFormat("en-US").format(Math.round(summary.carry))}
+                            </TableCell>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                right: 100,
+                                color: summary.accumulate < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.4),
+                            }}>
+                                {new Intl.NumberFormat("en-US").format(Math.round(summary.accumulate))}
+                            </TableCell>
+                        </TableRow>
+                        {
+                            pumpOrder === stockCount - 1 && stockCount > 1 &&
+                            <TableRow>
+                                <TablecellHeader
+                                    sx={{
+                                        backgroundColor: "#929292ff",
+                                        width: 140,
+                                        color: "black",
+                                        position: "sticky",
+                                        left: 0,
+                                        zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                        borderBottom: "2px solid white"
+                                    }}
+                                >
+                                    {/* {`รวม${row.ShortName}`} */}
+                                    ผลรวมทั้งหมด
+                                </TablecellHeader>
+                                <TableCell sx={{
+                                    textAlign: "center",
+                                    fontWeight: "bold",
+                                    position: "sticky",
+                                    left: 140,
+                                    color: stockSummary.diff < 0 ? "#d50000" : "black",
+                                    backgroundColor: lightenColor("#929292ff", 0.6),
+                                }}>
+                                    {stockSummary.diff.toLocaleString()}
+                                </TableCell>
+                                <TableCell sx={{
+                                    textAlign: "center",
+                                    fontWeight: "bold",
+                                    position: "sticky",
+                                    left: 260,
+                                    color: stockSummary.cbp < 0 ? "#d50000" : "black",
+                                    backgroundColor: lightenColor("#929292ff", 0.6),
+                                }}>
+                                    {stockSummary.cbp.toLocaleString()}
+                                </TableCell>
+                                <TableCell sx={{
+                                    textAlign: "center",
+                                    fontWeight: "bold",
+                                    position: "sticky",
+                                    left: 380,
+                                    color: stockSummary.total < 0 ? "#d50000" : "black",
+                                    backgroundColor: lightenColor("#929292ff", 0.4),
+                                }}>
+                                    {stockSummary.total.toLocaleString()}
+                                </TableCell>
+                                {daysInMonth.map((d) => (
+                                    <TableCell
+                                        key={d}
+                                        sx={{
+                                            width: 50,
+                                            textAlign: "center",
+                                            fontWeight: "bold",
+                                            color: dailySummaryByStock[d] < 0 ? "#d50000" : "black",
+                                            backgroundColor: lightenColor("#929292ff", 0.6)
+                                        }}
+                                    >
+                                        {dailySummaryByStock[d] === 0
+                                            ? "-"
+                                            : new Intl.NumberFormat("en-US").format(Math.round(dailySummaryByStock[d]))}
+                                    </TableCell>
+                                ))}
+                                <TableCell sx={{
+                                    textAlign: "center",
+                                    fontWeight: "bold",
+                                    position: "sticky",
+                                    right: 220,
+                                    color: stockSummary.carry < 0 ? "#d50000" : "black",
+                                    backgroundColor: lightenColor("#929292ff", 0.4),
+                                }}>
+                                    {new Intl.NumberFormat("en-US").format(Math.round(stockSummary.carry))}
+                                </TableCell>
+                                <TableCell sx={{
+                                    textAlign: "center",
+                                    fontWeight: "bold",
+                                    position: "sticky",
+                                    right: 100,
+                                    color: stockSummary.accumulate < 0 ? "#d50000" : "black",
+                                    backgroundColor: lightenColor("#929292ff", 0.4),
+                                }}>
+                                    {new Intl.NumberFormat("en-US").format(Math.round(stockSummary.accumulate))}
+                                </TableCell>
+                            </TableRow>
+                        }
+                    </React.Fragment>
                 )
             }
         </React.Fragment>

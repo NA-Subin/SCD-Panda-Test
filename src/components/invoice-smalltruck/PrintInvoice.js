@@ -258,7 +258,7 @@ const PrintInvoiceSmallTruck = () => {
   console.log("invoice C : ", invoiceC);
   console.log("invoiceData : ", invoiceData);
   console.log("invoiceData Address : ", invoiceData?.Address);
-  console.log("date : ",invoiceData?.DateEnd);
+  console.log("date : ", invoiceData?.DateEnd);
 
   return (
     <Box display="flex" alignItems="center" justifyContent="center" marginTop={5} >
@@ -488,19 +488,33 @@ const PrintInvoiceSmallTruck = () => {
 
               <Grid item xs={12}>
                 <Grid container spacing={2} marginTop={-3} justifyContent="center" alignItems="center">
-                  <Grid item xs={4.5}>
-                    <Typography variant="subtitle2" gutterBottom>ชื่อบัญชี...บริษัท แพนด้า สตาร์ ออยล์ จำกัด</Typography>
-                    <Typography variant="subtitle2" gutterBottom>กสิกรไทย</Typography>
-                    <Typography variant="subtitle2" gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
-                    <Typography variant="subtitle2" gutterBottom>ป่าแดด...เชียงราย 062-8-16524-6</Typography>
-                    <Typography variant="subtitle2" gutterBottom>พะเยา - แม่ต่ำ 065-1-88088-2</Typography>
+                  <Grid item xs={8}>
+                    {
+                      invoiceC?.Name?.includes("หจก.นาครา ปิโตรเลียม 2016") ?
+                        <Box marginTop={-2}>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ชื่อบัญชี :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 2 }} gutterBottom>หจก.นาครา ปิโตรเลียม 2016</Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>กสิกรไทย :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 1 }} gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-00976-8</Typography>
+                          </Box>
+                        </Box>
+                        :
+                        <Box marginTop={-2}>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ชื่อบัญชี :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 2 }} gutterBottom>บริษัท แพนด้า สตาร์ ออยล์ จำกัด</Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
+                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>กสิกรไทย :</Typography>
+                            <Typography variant="subtitle2" sx={{ marginLeft: 1 }} gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 663-1-01357-9</Typography>
+                          </Box>
+                        </Box>
+                    }
                   </Grid>
-                  <Grid item xs={5}>
-                    <Typography variant="subtitle2" gutterBottom>กรุงเทพ</Typography>
-                    <Typography variant="subtitle2" gutterBottom>เซ็นทรัล...เฟสติเวลเชียงใหม่ 587-7-23442-6</Typography>
-                    <Typography variant="subtitle2" gutterBottom>เชียงคำ...พะเยา 433-4-06375-9</Typography>
-                  </Grid>
-                  <Grid item xs={2.5} sx={{ textAlign: "center" }}>
+                  <Grid item xs={4} sx={{ textAlign: "center" }}>
                     <Box width="100%" borderTop="2px solid black" sx={{ marginTop: 3.5 }}>
                       <Typography variant="subtitle2" fontWeight="bold" sx={{ marginTop: 0.5 }} gutterBottom>ผู้วางบิล</Typography>
                     </Box>

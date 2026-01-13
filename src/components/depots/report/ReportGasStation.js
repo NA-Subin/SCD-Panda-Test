@@ -144,7 +144,7 @@ const ReportGasStation = ({ openNavbar }) => {
 
         return {
             ProductName: product.Name,
-            CBP: "",
+            CBP: 0,
             Total: total,
             Diff: 0 - total,
             Color: product.Color
@@ -188,7 +188,9 @@ const ReportGasStation = ({ openNavbar }) => {
     const stockSummary = {
         total: 0,
         cbp: 0,
-        diff: 0
+        diff: 0,
+        carry: 0,
+        accumulate: 0
     };
 
     // const dailySummary = {};
@@ -310,10 +312,39 @@ const ReportGasStation = ({ openNavbar }) => {
         );
     };
 
-    const getPrevYearMonth = (y, m) => {
-        if (m === 1) return { py: y - 1, pm: 12 };
-        return { py: y, pm: m - 1 };
+    const getPrevYearMonth = (year, month) => {
+        if (month === 1) {
+            return {
+                py: year - 1,
+                pm: 12
+            };
+        }
+
+        return {
+            py: year,
+            pm: month - 1
+        };
     };
+
+    const ensurePrevMonthComputed = (
+        stationId,
+        productIdx,
+        year,
+        month,
+        cbpData,
+        row
+    ) => {
+        const { py, pm } = getPrevYearMonth(year, month);
+
+        if (cbpData?.[stationId]?.[py]?.[pm]?.[productIdx]) {
+            return cbpData[stationId][py][pm][productIdx].Accumulate;
+        }
+
+        const Accumulate = row.CBP?.[py]?.[pm]?.[productIdx]?.Accumulate ?? 0;
+
+        return Accumulate; // เดือนแรก Carry = 0
+    };
+
 
     useEffect(() => {
         if (!selectedDate) return;
@@ -388,12 +419,21 @@ const ReportGasStation = ({ openNavbar }) => {
 
                     const { py, pm } = getPrevYearMonth(year, month);
 
-                    const prevAcc = getCarryFromHistory(
+                    // const prevAcc = getCarryFromHistory(
+                    //     stationId,
+                    //     idx,
+                    //     year,
+                    //     month,
+                    //     prev
+                    // );
+
+                    const prevAcc = ensurePrevMonthComputed(
                         stationId,
                         idx,
                         year,
                         month,
-                        prev
+                        prev,
+                        row
                     );
 
                     const diff = (cbpOfMonth[idx]?.CBP ?? 0) - total;
@@ -401,7 +441,7 @@ const ReportGasStation = ({ openNavbar }) => {
                     productMap[idx] = {
                         ProductName: p.Name,
                         Color: p.Color,
-                        CBP: cbpOfMonth[idx]?.CBP ?? "",
+                        CBP: cbpOfMonth[idx]?.CBP ?? 0,
                         Total: total,
                         Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
                         Carry: prevAcc,
@@ -447,23 +487,31 @@ const ReportGasStation = ({ openNavbar }) => {
 
                     const { py, pm } = getPrevYearMonth(year, month);
 
-                    const prevAcc = getCarryFromHistory(
+                    // const prevAcc = getCarryFromHistory(
+                    //     stationId,
+                    //     idx,
+                    //     year,
+                    //     month,
+                    //     prev
+                    // );
+                    const prevAcc = ensurePrevMonthComputed(
                         stationId,
                         idx,
                         year,
                         month,
-                        prev
+                        prev,
+                        row
                     );
 
                     const cbpValue =
-                        cbpOfMonth?.[p.Name]?.CBP ?? "";
+                        cbpOfMonth?.[p.Name]?.CBP ?? 0;
 
                     const diff = (cbpValue || 0) - total;
 
                     productMap[idx] = {
                         ProductName: p.Name,
                         Color: p.Color,
-                        CBP: cbpOfMonth[idx]?.CBP ?? "",
+                        CBP: cbpOfMonth[idx]?.CBP ?? 0,
                         Total: total,
                         Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
                         Carry: prevAcc,
@@ -494,7 +542,57 @@ const ReportGasStation = ({ openNavbar }) => {
             <Divider />
             <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2} sx={{ mb: 2 }}>
-                    <Grid item xs={12} sm={6} lg={4}>
+                    <Grid item xs={12} sm={2} lg={1}>
+                        <Paper
+                            component="form"
+                            sx={{
+                                //width: "100%", // กำหนดความกว้างของ Paper
+                                height: "40px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}
+                        >
+                            <TextField
+                                type="number"
+                                size="small"
+                                fullWidth
+                                value={selectedDate.year() + 543}   // 👈 แสดง พ.ศ.
+                                onChange={(e) => {
+                                    const beYear = Number(e.target.value);
+                                    const adYear = beYear - 543;
+                                    setSelectedDate(prev => prev.year(adYear));
+                                }}
+                                onWheel={(e) => {
+                                    e.preventDefault();
+                                    const delta = e.deltaY < 0 ? 1 : -1;
+                                    setSelectedDate(prev =>
+                                        prev.year(prev.year() + delta)
+                                    );
+                                }}
+                                InputProps={{                         // ✅ ใส่ตรงนี้
+                                    startAdornment: (
+                                        <InputAdornment position="start" sx={{ marginLeft: 1 }}>
+                                            ปี :
+                                        </InputAdornment>
+                                    ),
+                                    sx: {
+                                        fontSize: "16px",
+                                        height: "40px",
+                                        fontWeight: "bold",
+                                        padding: 0,
+                                    },
+                                }}
+                                inputProps={{
+                                    min: 2500,
+                                    max: 2600,
+                                    step: 1,
+                                    style: { textAlign: "center", fontWeight: "bold", marginRight: -5 }
+                                }}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={4} lg={3}>
                         <Paper
                             component="form"
                             sx={{
@@ -621,19 +719,46 @@ const ReportGasStation = ({ openNavbar }) => {
                                     const year = selectedDate.year();
                                     const month = selectedDate.month() + 1;
 
-                                    // 🔹 summary ต่อปั้ม
-                                    const pumpSummary = row.Products.reduce(
-                                        (acc, _, idx) => {
-                                            const item = cbpData?.[row.id]?.[year]?.[month]?.[idx];
-                                            acc.total += Number(item?.Total ?? 0);
-                                            acc.cbp += Number(item?.CBP ?? 0);
-                                            acc.diff += Number(item?.Diff ?? 0);
-                                            acc.carry += Number(item?.Carry ?? 0);
-                                            acc.accumulate += Number(item?.Accumulate ?? 0);
+                                    const pumpsInStock = gasStationOil.filter(
+                                        r => Number(r.Stock.split(":")[0]) === stock.id
+                                    );
+
+                                    const stockSummary = pumpsInStock.reduce(
+                                        (acc, row) => {
+                                            row.Products.forEach((_, idx) => {
+                                                const item = cbpData?.[row.id]?.[year]?.[month]?.[idx];
+                                                acc.total += Number(item?.Total ?? 0);
+                                                acc.cbp += Number(item?.CBP ?? 0);
+                                                acc.diff += Number(item?.Diff ?? 0);
+                                                acc.carry += Number(item?.Carry ?? 0);
+                                                acc.accumulate += Number(item?.Accumulate ?? 0);
+                                            });
                                             return acc;
                                         },
-                                        { total: 0, cbp: 0, diff: 0 }
+                                        { total: 0, cbp: 0, diff: 0, carry: 0, accumulate: 0 }
                                     );
+
+                                    const dailySummaryByStock = {};
+
+                                    daysInMonth.forEach(d => (dailySummaryByStock[d] = 0));
+
+                                    pumpsInStock.forEach(row => {
+                                        row.Products.forEach(product => {
+                                            const dailyByProduct = calculateDailyByProduct(
+                                                row.Report,
+                                                product.Name,
+                                                y,
+                                                m,
+                                                daysInMonth,
+                                                "Sell",
+                                                product.Backyard
+                                            );
+
+                                            daysInMonth.forEach(d => {
+                                                dailySummaryByStock[d] += Number(dailyByProduct[d] ?? 0);
+                                            });
+                                        });
+                                    });
 
                                     const dailySummaryByStation = {};
                                     daysInMonth.forEach(d => (dailySummaryByStation[d] = 0));
@@ -674,11 +799,11 @@ const ReportGasStation = ({ openNavbar }) => {
                                     });
 
                                     // 🔹 เอาค่าปั้มนี้ไปรวมใน stock
-                                    stockSummary.total += pumpSummary.total;
-                                    stockSummary.cbp += pumpSummary.cbp;
-                                    stockSummary.diff += pumpSummary.diff;
-                                    stockSummary.carry += pumpSummary.carry;
-                                    stockSummary.accumulate += pumpSummary.accumulate;
+                                    // stockSummary.total += pumpSummary.total;
+                                    // stockSummary.cbp += pumpSummary.cbp;
+                                    // stockSummary.diff += pumpSummary.diff;
+                                    // stockSummary.carry += pumpSummary.carry;
+                                    // stockSummary.accumulate += pumpSummary.accumulate;
 
                                     matchCount++;
                                     return (
@@ -854,7 +979,7 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                         cbpData?.[row.id]?.[year]?.[month]?.[index] ?? {
                                                                             ProductName: product.Name,
                                                                             Color: product.Color,
-                                                                            CBP: "",
+                                                                            CBP: 0,
                                                                             Total: total,
                                                                             Diff: -total,
                                                                             Carry: 0,
@@ -898,11 +1023,13 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                                 selectedDate={selectedDate}
                                                                                 lightenColor={lightenColor}
                                                                                 summary={summary}
+                                                                                stockSummary={stockSummary}
                                                                                 pumpOrder={pumpOrder}
                                                                                 stockCount={stockCount}
                                                                                 daysInMonth={daysInMonth}
                                                                                 cbpData={cbpData}
                                                                                 dailySummary={dailySummaryByStation}
+                                                                                dailySummaryByStock={dailySummaryByStock}
                                                                             />
                                                                         </React.Fragment>
                                                                     );
@@ -1118,7 +1245,7 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                                         backyardData?.[row.id]?.[year]?.[month]?.[index] ?? {
                                                                                             ProductName: product.Name,
                                                                                             Color: product.Color,
-                                                                                            CBP: "",
+                                                                                            CBP: 0,
                                                                                             Total: total,
                                                                                             Diff: -total,
                                                                                             Carry: 0,
@@ -1167,6 +1294,8 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                                                 daysInMonth={daysInMonth}
                                                                                                 backyardData={backyardData}
                                                                                                 dailySummaryBackyard={dailySummaryByStationBackyard}
+                                                                                                stockSummary={stockSummary}
+                                                                                                dailySummaryByStock={dailySummaryByStock}
                                                                                             />
                                                                                         </React.Fragment>
                                                                                     );

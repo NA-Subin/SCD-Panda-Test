@@ -1900,7 +1900,9 @@ const UpdateTrip = (props) => {
                                                                                     Trip: row.Trip,
                                                                                     TicketName: `${newValue.id}:${newValue.Name}`,
                                                                                     CustomerType: newValue.CustomerType || "-",
-                                                                                    Product: row.Product
+                                                                                    Product: row.Product,
+                                                                                    // ✅ เพิ่มเฉพาะเมื่อจบทริป
+                                                                                    ...(trip.StatusTrip === "จบทริป" && { Status: "จัดส่งสำเร็จ" }),
                                                                                     // Product: {
                                                                                     //     P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                                     // }
@@ -2223,6 +2225,8 @@ const UpdateTrip = (props) => {
                                                                 Trip: (Number(tripID) - 1),
                                                                 TicketName: `${newValue.id}:${newValue.Name}`,
                                                                 CustomerType: newValue.CustomerType || "-",
+                                                                // ✅ เพิ่มเฉพาะเมื่อจบทริป
+                                                                ...(trip.StatusTrip === "จบทริป" && { Status: "จัดส่งสำเร็จ" }),
                                                                 Product: {
                                                                     P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                 }
@@ -2736,7 +2740,7 @@ const UpdateTrip = (props) => {
                                                                                     CodeID: newValue.CodeID || "-",
                                                                                     CompanyName: newValue.CompanyName || "-",
                                                                                     CreditTime: newValue.CreditTime || "-",
-                                                                                    Date: trip.DateStart,
+                                                                                    Date: selectedDateDelivery,
                                                                                     Driver: trip.Driver,
                                                                                     Lat: newValue.Lat || 0,
                                                                                     Lng: newValue.Lng || 0,
@@ -2750,7 +2754,10 @@ const UpdateTrip = (props) => {
                                                                                     Trip: row.Trip,
                                                                                     TicketName: `${newValue.id}:${newValue.Name}`,
                                                                                     CustomerType: newValue.CustomerType || "-",
-                                                                                    Product: row.Product
+                                                                                    Product: row.Product,
+
+                                                                                    // ✅ เพิ่มเฉพาะเมื่อจบทริป
+                                                                                    ...(trip.StatusTrip === "จบทริป" && { Status: "จัดส่งสำเร็จ" }),
                                                                                     // Product: {
                                                                                     //     P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                                     // }
@@ -3022,7 +3029,7 @@ const UpdateTrip = (props) => {
                                                                         CodeID: newValue.CodeID || "-",
                                                                         CompanyName: newValue.CompanyName || "-",
                                                                         CreditTime: newValue.CreditTime || "-",
-                                                                        Date: trip.DateStart,
+                                                                        Date: selectedDateDelivery,
                                                                         Driver: trip.Driver,
                                                                         Lat: newValue.Lat || 0,
                                                                         Lng: newValue.Lng || 0,
@@ -3040,7 +3047,10 @@ const UpdateTrip = (props) => {
                                                                         LastName: newValue.LastName || "-",
                                                                         Product: {
                                                                             P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                        }
+                                                                        },
+
+                                                                        // ✅ เพิ่มเฉพาะเมื่อจบทริป
+                                                                        ...(trip.StatusTrip === "จบทริป" && { Status: "จัดส่งสำเร็จ" })
                                                                     });
                                                                     // }
 

@@ -460,7 +460,21 @@ const ReportDetail = (props) => {
                                                 const amount = totalLiters * item.RateOil;
                                                 const withholding = amount * 0.01;
                                                 const payment = amount - withholding;
-                                                const registration = item.Registration ? (item.Registration.split(":")[1] === "ไม่มี" ? "รถรับจ้างขนส่ง" : `${item.RegistrationHead}/${item.RegistrationTail.split(":")[1]}`) : "-";
+                                                const registration = (() => {
+                                                    if (!item?.Registration) return "-";
+
+                                                    const reg = String(item.Registration).split(":")[1];
+                                                    if (reg === "ไม่มี") return "รถรับจ้างขนส่ง";
+
+                                                    const head = item?.RegistrationHead;
+                                                    const tail = item?.RegistrationTail
+                                                        ? String(item.RegistrationTail).split(":")[1]
+                                                        : null;
+
+                                                    return head && tail ? `${head}/${tail}` : "-";
+                                                })();
+
+                                                // const registration = item.Registration ? (item.Registration.split(":")[1] === "ไม่มี" ? "รถรับจ้างขนส่ง" : `${item.RegistrationHead}/${item.RegistrationTail.split(":")[1]}`) : "-";
 
                                                 return (
                                                     <TableRow key={`${key}-${index}`}>

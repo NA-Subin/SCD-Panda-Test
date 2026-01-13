@@ -60,11 +60,21 @@ const ReportBackyard = (props) => {
         stockCount,
         daysInMonth,
         backyardData,
-        dailySummaryBackyard } = props;
+        dailySummaryBackyard,
+        stockSummary,
+        dailySummaryByStock
+    } = props;
     const [openMenu, setOpenMenu] = React.useState(1);
 
     const { depots } = useBasicData();
     const { gasstationDetail, stockDetail } = useGasStationData();
+    const [isEditingBackyard, setIsEditingBackyard] = useState(false);
+
+    const formatNumber = (value) => {
+        if (value === null || value === undefined) return "";
+        if (isNaN(value)) return "0";
+        return Number(value).toLocaleString("en-US");
+    };
 
     const gasStationOil = Object.values(gasstationDetail || {});
     const stocks = Object.values(stockDetail || {});
@@ -139,7 +149,7 @@ const ReportBackyard = (props) => {
                     position: "sticky",
                     left: 140,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.6) : "lightgray",
-                    color: product.Backyard ? "black" : "darkgray",
+                    color: product.Backyard ? (backyardItem.Diff < 0 ? "#d50000" : "black") : "darkgray",
                 }}>
                     {product.Backyard ? (backyardItem.Diff ?? 0).toLocaleString() : "-"}
                 </TableCell>
@@ -160,12 +170,49 @@ const ReportBackyard = (props) => {
                                         // label={"ขาย"}
                                         // แนะนำใช้ text ตลอด เพราะจัดการ input เอง
                                         InputLabelProps={{ sx: { fontSize: 12, fontWeight: "bold" } }}
-                                        value={backyardItem.CBP}
+                                        value={
+                                            isEditingBackyard && (backyardItem.CBP ?? 0) === 0
+                                                ? ""
+                                                : formatNumber(backyardItem.CBP ?? 0)
+                                        }
                                         onChange={(e) => {
-                                            const raw = e.target.value.replace(/,/g, "");
-                                            if (!/^-?\d*$/.test(raw)) return;
+                                            let raw = e.target.value.replace(/,/g, "");
 
-                                            const cbp = raw === "" ? "" : Number(raw);
+                                            // ⭐ ลบหมด → ถือว่าเป็น 0 ทันที
+                                            if (raw === "" || raw === "-") {
+                                                const cbp = 0;
+                                                const diff = cbp - total;
+                                                const carry = backyardItem.Carry || 0;
+
+                                                setBackyardData(prev => ({
+                                                    ...prev,
+                                                    [row.id]: {
+                                                        ...prev[row.id],
+                                                        [year]: {
+                                                            ...prev[row.id]?.[year],
+                                                            [month]: {
+                                                                ...prev[row.id]?.[year]?.[month],
+                                                                [index]: {
+                                                                    ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                    CBP: 0,
+                                                                    Total: total,
+                                                                    Diff: diff,
+                                                                    Carry: carry,
+                                                                    Accumulate: carry + diff
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }));
+                                                return;
+                                            }
+
+                                            // รับเฉพาะตัวเลข (รวมติดลบ)
+                                            if (!/^-?\d+$/.test(raw)) return;
+
+                                            const cbp = Number(raw);
+                                            const diff = cbp - total;
+                                            const carry = backyardItem.Carry || 0;
 
                                             setBackyardData(prev => ({
                                                 ...prev,
@@ -176,17 +223,45 @@ const ReportBackyard = (props) => {
                                                         [month]: {
                                                             ...prev[row.id]?.[year]?.[month],
                                                             [index]: {
-                                                                ProductName: product.Name,
-                                                                Color: product.Color,
-                                                                CBP: cbp,
-                                                                Total: total, // ✅ เก็บ total ล่าสุด
-                                                                Diff: (cbp || 0) - total
+                                                                ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                CBP: cbp,        // ✅ เก็บเป็น number เสมอ
+                                                                Total: total,
+                                                                Diff: diff,
+                                                                Carry: carry,
+                                                                Accumulate: carry + diff
                                                             }
                                                         }
                                                     }
                                                 }
                                             }));
                                         }}
+                                        onFocus={() => {
+                                            setIsEditingBackyard(true);
+                                        }}
+                                        onBlur={() => {
+                                            setIsEditingBackyard(false);
+
+                                            // ป้องกันกรณี user ลบหมดแล้วออก
+                                            if ((backyardItem.CBP ?? 0) === 0) {
+                                                setBackyardData(prev => ({
+                                                    ...prev,
+                                                    [row.id]: {
+                                                        ...prev[row.id],
+                                                        [year]: {
+                                                            ...prev[row.id]?.[year],
+                                                            [month]: {
+                                                                ...prev[row.id]?.[year]?.[month],
+                                                                [index]: {
+                                                                    ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                    CBP: 0
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }));
+                                            }
+                                        }}
+
                                         // onFocus={() => handleFocus(index, "EstimateSell")}
                                         // onBlur={(e) => handleBlur(index, "EstimateSell", e)} // ส่ง event
                                         // onChange={(e) => {
@@ -262,7 +337,7 @@ const ReportBackyard = (props) => {
                     position: "sticky",
                     left: 380,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.4) : "lightgray",
-                    color: product.Backyard ? "black" : "darkgray",
+                    color: product.Backyard ? (backyardItem.Total ?? total < 0 ? "#d50000" : "black") : "darkgray",
                 }}>
                     {product.Backyard ? (backyardItem.Total ?? total).toLocaleString() : "-"}
                 </TableCell>
@@ -295,7 +370,7 @@ const ReportBackyard = (props) => {
                                 width: 50,
                                 textAlign: "center",
                                 backgroundColor: product.Backyard ? lightenColor(product.Color, 0.75) : "lightgray",
-                                color: product.Backyard ? "black" : "darkgray"
+                                color: product.Backyard ? (sell !== "-" && (sell < 0 ? "#d50000" : "black")) : "darkgray"
                             }}
                         >
                             {sell === "-" ? "-" : new Intl.NumberFormat("en-US").format(Math.round(sell))}
@@ -308,7 +383,7 @@ const ReportBackyard = (props) => {
                     position: "sticky",
                     right: 220,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.4) : "lightgray",
-                    color: product.Backyard ? "black" : "darkgray",
+                    color: product.Backyard ? (backyardItem.Carry < 0 ? "#d50000" : "black") : "darkgray"
                 }}>
                     {new Intl.NumberFormat("en-US").format(Math.round(backyardItem.Carry))}
                 </TableCell>
@@ -318,7 +393,7 @@ const ReportBackyard = (props) => {
                     position: "sticky",
                     right: 100,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.4) : "lightgray",
-                    color: product.Backyard ? "black" : "darkgray",
+                    color: product.Backyard ? (backyardItem.Accumulate < 0 ? "#d50000" : "black") : "darkgray"
                 }}>
                     {new Intl.NumberFormat("en-US").format(Math.round(backyardItem.Accumulate))}
                 </TableCell>
@@ -357,82 +432,172 @@ const ReportBackyard = (props) => {
             </TableRow>
             {
                 index === row.Products.length - 1 && (
-                    <TableRow>
-                        <TablecellHeader
-                            sx={{
-                                backgroundColor: "#bdbdbd",
-                                width: 140,
-                                color: "black",
-                                position: "sticky",
-                                left: 0,
-                                zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
-                                borderBottom: "2px solid white"
-                            }}
-                        >
-                            {/* {`รวม${row.ShortName}`} */}
-                            ผลรวม
-                        </TablecellHeader>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            left: 140,
-                            backgroundColor: lightenColor("#bdbdbd", 0.6),
-                        }}>
-                            {summary.diff.toLocaleString()}
-                        </TableCell>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            left: 260,
-                            backgroundColor: lightenColor("#bdbdbd", 0.6),
-                        }}>
-                            {summary.cbp.toLocaleString()}
-                        </TableCell>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            left: 380,
-                            backgroundColor: lightenColor("#bdbdbd", 0.4),
-                        }}>
-                            {summary.total.toLocaleString()}
-                        </TableCell>
-                        {daysInMonth.map((d) => (
-                            <TableCell
-                                key={d}
+                    <React.Fragment>
+                        <TableRow>
+                            <TablecellHeader
                                 sx={{
-                                    width: 50,
-                                    textAlign: "center",
-                                    fontWeight: "bold",
-                                    backgroundColor: lightenColor("#bdbdbd", 0.6)
+                                    backgroundColor: "#bdbdbd",
+                                    width: 140,
+                                    color: "black",
+                                    position: "sticky",
+                                    left: 0,
+                                    zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                    borderBottom: "2px solid white"
                                 }}
                             >
-                                {dailySummaryBackyard[d] === 0
-                                    ? "-"
-                                    : new Intl.NumberFormat("en-US").format(Math.round(dailySummaryBackyard[d]))}
+                                {/* {`รวม${row.ShortName}`} */}
+                                ผลรวม
+                            </TablecellHeader>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 140,
+                                color: summary.diff < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.6),
+                            }}>
+                                {summary.diff.toLocaleString()}
                             </TableCell>
-                        ))}
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            right: 220,
-                            backgroundColor: lightenColor("#bdbdbd", 0.4),
-                        }}>
-                            {new Intl.NumberFormat("en-US").format(Math.round(summary.carry))}
-                        </TableCell>
-                        <TableCell sx={{
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            position: "sticky",
-                            right: 100,
-                            backgroundColor: lightenColor("#bdbdbd", 0.4),
-                        }}>
-                            {new Intl.NumberFormat("en-US").format(Math.round(summary.accumulate))}
-                        </TableCell>
-                    </TableRow>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 260,
+                                color: summary.cbp < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.6),
+                            }}>
+                                {summary.cbp.toLocaleString()}
+                            </TableCell>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 380,
+                                color: summary.total < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.4),
+                            }}>
+                                {summary.total.toLocaleString()}
+                            </TableCell>
+                            {daysInMonth.map((d) => (
+                                <TableCell
+                                    key={d}
+                                    sx={{
+                                        width: 50,
+                                        textAlign: "center",
+                                        fontWeight: "bold",
+                                        color: dailySummaryBackyard[d] < 0 ? "#d50000" : "black",
+                                        backgroundColor: lightenColor("#bdbdbd", 0.6)
+                                    }}
+                                >
+                                    {dailySummaryBackyard[d] === 0
+                                        ? "-"
+                                        : new Intl.NumberFormat("en-US").format(Math.round(dailySummaryBackyard[d]))}
+                                </TableCell>
+                            ))}
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                right: 220,
+                                color: summary.carry < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.4),
+                            }}>
+                                {new Intl.NumberFormat("en-US").format(Math.round(summary.carry))}
+                            </TableCell>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                right: 100,
+                                color: summary.accumulate < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#bdbdbd", 0.4),
+                            }}>
+                                {new Intl.NumberFormat("en-US").format(Math.round(summary.accumulate))}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TablecellHeader
+                                sx={{
+                                    backgroundColor: "#929292ff",
+                                    width: 140,
+                                    color: "black",
+                                    position: "sticky",
+                                    left: 0,
+                                    zIndex: 1, // กำหนด z-indexProduct เพื่อให้อยู่ด้านบน
+                                    borderBottom: "2px solid white"
+                                }}
+                            >
+                                {/* {`รวม${row.ShortName}`} */}
+                                ผลรวมทั้งหมด
+                            </TablecellHeader>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 140,
+                                color: (stockSummary.diff + summary.diff) < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#929292ff", 0.6),
+                            }}>
+                                {(stockSummary.diff + summary.diff).toLocaleString()}
+                            </TableCell>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 260,
+                                color: (stockSummary.cbp + summary.cbp) < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#929292ff", 0.6),
+                            }}>
+                                {(stockSummary.cbp + summary.cbp).toLocaleString()}
+                            </TableCell>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                left: 380,
+                                color: (stockSummary.total + summary.total) < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#929292ff", 0.4),
+                            }}>
+                                {(stockSummary.total + summary.total).toLocaleString()}
+                            </TableCell>
+                            {daysInMonth.map((d) => (
+                                <TableCell
+                                    key={d}
+                                    sx={{
+                                        width: 50,
+                                        textAlign: "center",
+                                        fontWeight: "bold",
+                                        color: (dailySummaryBackyard[d] + dailySummaryByStock[d]) < 0 ? "#d50000" : "black",
+                                        backgroundColor: lightenColor("#929292ff", 0.6)
+                                    }}
+                                >
+                                    {(dailySummaryBackyard[d] + dailySummaryByStock[d]) === 0
+                                        ? "-"
+                                        : new Intl.NumberFormat("en-US").format(Math.round((dailySummaryBackyard[d] + dailySummaryByStock[d])))}
+                                </TableCell>
+                            ))}
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                right: 220,
+                                color: (stockSummary.carry + summary.carry) < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#929292ff", 0.4),
+                            }}>
+                                {new Intl.NumberFormat("en-US").format(Math.round((stockSummary.carry + summary.carry)))}
+                            </TableCell>
+                            <TableCell sx={{
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                position: "sticky",
+                                right: 100,
+                                color: (stockSummary.accumulate + summary.accumulate) < 0 ? "#d50000" : "black",
+                                backgroundColor: lightenColor("#929292ff", 0.4),
+                            }}>
+                                {new Intl.NumberFormat("en-US").format(Math.round((stockSummary.accumulate + summary.accumulate)))}
+                            </TableCell>
+                        </TableRow>
+                    </React.Fragment>
                 )
             }
         </React.Fragment>

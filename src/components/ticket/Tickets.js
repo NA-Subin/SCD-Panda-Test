@@ -179,7 +179,7 @@ const Tickets = ({ openNavbar }) => {
                 Rate3: rate3,
                 Bill: bill,
                 Code: code,
-                companyName: companyName,
+                CompanyName: companyName,
                 CodeID: codeID,
                 Address:
                     (no === "-" ? "-" : no) +
@@ -190,7 +190,7 @@ const Tickets = ({ openNavbar }) => {
                     (zipCode === "-" ? "" : ` ${zipCode}`)
                 ,
                 Phone: phone,
-                creditTime: creditTime,
+                CreditTime: creditTime,
                 Type: type1 === false && type2 === true ? "รถใหญ่" : type1 === true && type2 === false ? "รถเล็ก" : type1 === false && type2 === false ? "รถใหญ่/รถเล็ก" : "-",
             })
             .then(() => {

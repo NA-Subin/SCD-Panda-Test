@@ -125,12 +125,21 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
 
     // const { reportFinancial, drivers } = useData();
     const { drivers, customertransports, customergasstations, customerbigtruck, customersmalltruck, customertickets } = useBasicData();
-    const { order } = useTripData();
+    const { order, trip } = useTripData();
     // const orders = Object.values(order || {});
     const orders = Object.values(order || {}).filter(item => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
         return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
+
+    const trips = Object.values(trip || {}).filter(item => {
+        const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
+        const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
+        const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
+
+        return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
+    });
+
     const driver = Object.values(drivers || {});
     const ticketsT = Object.values(customertransports || {});
     const ticketsPS = Object.values(customergasstations || {});
@@ -154,7 +163,9 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                 // ตรวจสอบเงื่อนไขของ driver ตาม selectDriver
                 const matchTickets = selectTickets === "0:แสดงทั้งหมด" || item.TicketName === selectTickets;
 
-                return isValidStatus && isInDateRange && matchTickets && item.CustomerType === "ตั๋วรถเล็ก";
+                const TruckType = trips.find((t) => (Number(t.id) - 1) === item.Trip)
+
+                return isValidStatus && isInDateRange && matchTickets && TruckType?.TruckType === "รถเล็ก" && TruckType?.Status !== "ยกเลิก";
             })
             .flatMap((item) => {
                 if (!item.Product) return [];
@@ -791,7 +802,7 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                             </Grid>
                         </Grid>
                 }
-                <Grid container spacing={2} width="100%" sx={{ marginTop: { lg: -4, xs: -1} }}>
+                <Grid container spacing={2} width="100%" sx={{ marginTop: { lg: -4, xs: -1 } }}>
                     <Grid item xs={12}>
                         <TableContainer
                             component={Paper}

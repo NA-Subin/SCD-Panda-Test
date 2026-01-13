@@ -456,7 +456,7 @@ const PrintInvoice = () => {
                             sx={{ borderRight: "2px solid black", textAlign: "center" }}
                           >
                             <Typography variant="subtitle2" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                              {formatThaiDate(dayjs(row.Date, "DD/MM/YYYY").format("DD/MM/YYYY"))}
+                              {formatThaiDate(dayjs(row.DateDelivery, "DD/MM/YYYY").format("DD/MM/YYYY"))}
                             </Typography>
                           </TableCell>
                         )}

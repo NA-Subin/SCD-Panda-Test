@@ -508,6 +508,8 @@ const UpdateReport = (props) => {
     console.log("invoices1 : ", invoices1);
     console.log("invoices2 : ", invoices2);
 
+    console.log("TicketName : ", ticket);
+
     const generatePDFCompany1 = () => {
         let Code = ""
         if (invoices1.length !== 0) {
@@ -552,9 +554,15 @@ const UpdateReport = (props) => {
             CardID: company1Tickets[0]?.CardID,
             Phone: company1Tickets[0]?.Phone,
             Code: Code,
-            Date: invoices1[0]?.DateStart,
-            DateStart: ticket.Date,
-            DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
+            Date: invoices1[0]?.DateStart ?? dayjs(new Date).format("DD/MM/YYYY"),
+            TicketName: ticket.TicketName,
+            TicketAddress: ticket.TicketAddress,
+            DateStart: ticket.DateStart,
+            DateEnd: ticket.DateEnd,
+            CompanyName: ticket.CompanyName,
+            CompanyAddress: ticket.CompanyAddress,
+            // DateStart: ticket.Date,
+            // DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -626,8 +634,14 @@ const UpdateReport = (props) => {
             Phone: company2Tickets[0]?.Phone,
             Code: Code,
             Date: invoices2[0]?.DateStart,
-            DateStart: ticket.Date,
-            DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
+            TicketName: ticket.TicketName,
+            TicketAddress: ticket.TicketAddress,
+            DateStart: ticket.DateStart,
+            DateEnd: ticket.DateEnd,
+            CompanyName: ticket.CompanyName,
+            CompanyAddress: ticket.CompanyAddress,
+            // DateStart: ticket.Date,
+            // DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };
 
         // บันทึกข้อมูลลง sessionStorage
@@ -932,10 +946,16 @@ const UpdateReport = (props) => {
                         </Grid>
                     }
 
-                    <Grid item md={7.5} xs={12}>
+                    <Grid item md={5.5} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                             บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
                         </Typography>
+                    </Grid>
+                    <Grid item md={2} xs={12}>
+                        <Typography variant="subtitle2" color="error" fontWeight="bold" sx={{ fontSize: "12px", mt: -1 }} gutterBottom>*ถ้าต้องการรีเซ็ตวันที่วางบิลให้กด NEW *</Typography>
+                        <Button variant="contained" color="info" sx={{ height: "25px", fontWeight: "bold", mt: -2 }} disabled>
+                            {invoices1 ? `วันที่วางบิล ${invoices1[0]?.DateStart === undefined ? "-" : invoices1[0]?.DateStart}` : ""}
+                        </Button>
                     </Grid>
                     <Grid item md={3} xs={8} textAlign="right">
                         <Grid container sx={{ marginTop: 1 }}>
@@ -1275,27 +1295,68 @@ const UpdateReport = (props) => {
                                                         {row.ProductName}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 150,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}
+                                                >
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(row.Volume)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 100,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(row.Rate)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 150,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(total)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 100,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(total * 0.01)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 100,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(total * 0.99)}
                                                     </Typography>
@@ -1307,21 +1368,48 @@ const UpdateReport = (props) => {
                                                     <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         รวม
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            fontWeight: "bold",
+                                                            backgroundColor: "#e0e0e0",
+                                                            borderBottom: "3px solid lightgray",
+                                                            paddingLeft: "20px !important",
+                                                            paddingRight: "20px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                        }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals1[key].volume)}
                                                     </TableCell>
                                                     <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            fontWeight: "bold",
+                                                            backgroundColor: "#e0e0e0",
+                                                            borderBottom: "3px solid lightgray",
+                                                            paddingLeft: "20px !important",
+                                                            paddingRight: "20px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                        }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals1[key].amount)}
                                                     </TableCell>
                                                     <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            fontWeight: "bold",
+                                                            backgroundColor: "#e0e0e0",
+                                                            borderBottom: "3px solid lightgray",
+                                                            paddingLeft: "20px !important",
+                                                            paddingRight: "20px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                        }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
@@ -1599,10 +1687,16 @@ const UpdateReport = (props) => {
                             <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "right", marginBottom: -1 }} gutterBottom>*พิมพ์ใบวางบิลของหจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
                         </Grid>
                     }
-                    <Grid item md={7.5} xs={12}>
+                    <Grid item md={5.5} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
                             หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
                         </Typography>
+                    </Grid>
+                    <Grid item md={2} xs={12}>
+                        <Typography variant="subtitle2" color="error" fontWeight="bold" sx={{ fontSize: "12px", mt: -1 }} gutterBottom>*ถ้าต้องการรีเซ็ตวันที่วางบิลให้กด NEW *</Typography>
+                        <Button variant="contained" color="info" sx={{ height: "25px", fontWeight: "bold", mt: -2 }} disabled>
+                            {invoices2 ? `วันที่วางบิล ${invoices2[0]?.DateStart === undefined ? "-" : invoices2[0]?.DateStart}` : ""}
+                        </Button>
                     </Grid>
                     <Grid item md={3} xs={8} textAlign="right">
                         <Grid container sx={{ marginTop: 1 }}>
@@ -1839,27 +1933,67 @@ const UpdateReport = (props) => {
                                                         {row.ProductName}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 150,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(row.Volume)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 100,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(row.Rate)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 150 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 150,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber(row.Volume * row.Rate)}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        width: 100,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber((row.Volume * row.Rate) * (0.01))}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell sx={{ textAlign: "center", height: '30px', width: 100 }}>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "center",
+                                                        height: '30px',
+                                                        width: 100,
+                                                        paddingLeft: "20px !important",
+                                                        paddingRight: "20px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                    }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                                         {formatNumber((row.Volume * row.Rate) - ((row.Volume * row.Rate) * (0.01)))}
                                                     </Typography>
@@ -1871,21 +2005,48 @@ const UpdateReport = (props) => {
                                                     <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
                                                         รวม
                                                     </TableCell>
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            fontWeight: "bold",
+                                                            backgroundColor: "#e0e0e0",
+                                                            borderBottom: "3px solid lightgray",
+                                                            paddingLeft: "20px !important",
+                                                            paddingRight: "20px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                        }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals2[key].volume)}
                                                     </TableCell>
                                                     <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            fontWeight: "bold",
+                                                            backgroundColor: "#e0e0e0",
+                                                            borderBottom: "3px solid lightgray",
+                                                            paddingLeft: "20px !important",
+                                                            paddingRight: "20px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
+                                                        }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2
                                                         }).format(groupTotals2[key].amount)}
                                                     </TableCell>
                                                     <TableCell sx={{ backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }} />
-                                                    <TableCell sx={{ textAlign: "center", fontWeight: "bold", backgroundColor: "#e0e0e0", borderBottom: "3px solid lightgray" }}>
+                                                    <TableCell
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            fontWeight: "bold",
+                                                            backgroundColor: "#e0e0e0",
+                                                            borderBottom: "3px solid lightgray",
+                                                            paddingLeft: "20px !important",
+                                                            paddingRight: "20px !important",
+                                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                        }}>
                                                         {new Intl.NumberFormat("en-US", {
                                                             minimumFractionDigits: 2,
                                                             maximumFractionDigits: 2

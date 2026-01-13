@@ -107,7 +107,7 @@ const TicketsGasStation = (props) => {
                 Rate3: rate3,
                 CreditTime: creditTime,
                 Code: code,
-                companyName: companyName,
+                CompanyName: companyName,
                 CodeID: codeID,
                 Address:
                     (no === "-" ? "-" : no) +
