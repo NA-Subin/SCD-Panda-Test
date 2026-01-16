@@ -427,12 +427,12 @@ const TripsSmallTruck = ({ openNavbar }) => {
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             ปริมาณน้ำมัน
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
+                                        {/* <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 100 }}>
                                             น้ำหนักรถ
                                         </TablecellPink>
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 130 }}>
                                             น้ำหนักรวม
-                                        </TablecellPink>
+                                        </TablecellPink> */}
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 120 }}>
                                             สถานะ
                                         </TablecellPink>

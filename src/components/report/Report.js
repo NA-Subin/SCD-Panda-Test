@@ -271,6 +271,8 @@ const Report = ({ openNavbar }) => {
       };
     });
 
+  console.log("resultGasStation : ", resultGasStation.filter((t) => t.TicketName.split(":")[1] === "NP..บฮ(นางจาก)...D1"));
+
   const resultTickets = ticket
     .filter((item) => {
       const itemDate = dayjs(item.Date, "DD/MM/YYYY");
@@ -330,6 +332,8 @@ const Report = ({ openNavbar }) => {
       };
     });
 
+  console.log("resultTickets : ", resultTickets);
+
   const groupedByPeriodTickets = resultTickets.reduce((groups, item) => {
     const date = dayjs(item.Date, "DD/MM/YYYY");
     const day = date.date(); // วันที่ในเดือน เช่น 5, 12, 25
@@ -344,7 +348,7 @@ const Report = ({ openNavbar }) => {
     // } else {
     //   period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
     // }
-    const creditTime = parseInt(item.CreditTime || "0", 10);
+    const creditTime = Number(item.CreditTime) || 0;
     let period = "";
 
     if (creditTime === 10) {
@@ -436,7 +440,7 @@ const Report = ({ openNavbar }) => {
     //   return acc;
     // }, {});
     const grouped = items.reduce((acc, item) => {
-      const creditTime = parseInt(item.CreditTime || "0", 10);
+      const creditTime = Number(item.CreditTime) || 0;
 
       // คำนวณ DateStart / DateEnd ตามแต่ละรายการ
       let DateStart = "", DateEnd = "";
@@ -545,7 +549,7 @@ const Report = ({ openNavbar }) => {
     // } else {
     //   period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
     // }
-    const creditTime = parseInt(item.CreditTime || "0", 10);
+    const creditTime = Number(item.CreditTime) || 0;
     let period = "";
 
     if (creditTime === 10) {
@@ -637,7 +641,7 @@ const Report = ({ openNavbar }) => {
     //   return acc;
     // }, {});
     const grouped = items.reduce((acc, item) => {
-      const creditTime = parseInt(item.CreditTime || "0", 10);
+      const creditTime = Number(item.CreditTime) || 0;
 
       // คำนวณ DateStart / DateEnd ตามแต่ละรายการ
       let DateStart = "", DateEnd = "";
@@ -788,7 +792,7 @@ const Report = ({ openNavbar }) => {
     // } else {
     //   period = "ช่วงที่ 3"; // 21 ถึงวันสุดท้ายของเดือน
     // }
-    const creditTime = parseInt(item.CreditTime || "0", 10);
+    const creditTime = Number(item.CreditTime) || 0;
     let period = "";
 
     if (creditTime === 10) {
@@ -881,7 +885,7 @@ const Report = ({ openNavbar }) => {
     //   return acc;
     // }, {});
     const grouped = items.reduce((acc, item) => {
-      const creditTime = parseInt(item.CreditTime || "0", 10);
+      const creditTime = Number(item.CreditTime) || 0;
 
       // คำนวณ DateStart / DateEnd ตามแต่ละรายการ
       let DateStart = "", DateEnd = "";

@@ -346,15 +346,17 @@ const ReportDetail = (props) => {
                     );
 
                     const productOfDay =
-                        row.Report?.[source.y]?.[source.m]?.[source.d]?.Products?.find(
-                            p => p.ProductName === product.Name
-                        );
+                        row.Report?.[source.y]?.[source.m]?.[source.d]?.Products
+                            ?.find(p => p.ProductName === product.Name);
 
-                    const rawSell = product.Backyard
-                        ? Number(productOfDay?.Sell ?? 0) - Number(productOfDay?.BackyardSales ?? 0)
-                        : Number(productOfDay?.Sell ?? 0);
+                    const rawSell = productOfDay
+                        ? product.Backyard
+                            ? Number(productOfDay.Sell ?? 0) - Number(productOfDay.BackyardSales ?? 0)
+                            : Number(productOfDay.Sell ?? 0)
+                        : 0;
 
                     const sell = rawSell === 0 ? "-" : rawSell;
+
 
                     // ✅ เก็บ daily summary แยกตามวันในตาราง
                     // if (sell !== "-" && !isNaN(sell)) {

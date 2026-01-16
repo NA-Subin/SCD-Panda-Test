@@ -188,24 +188,24 @@ const BankDetail = () => {
     };
 
     const handlePost = () => {
-        const isDuplicateBankID = bankDetail.some(
-            (bank) => bank.BankID === bankID
-        );
+        // const isDuplicateBankID = bankDetail.some(
+        //     (bank) => bank.BankID === bankID
+        // );
 
-        const isDuplicateBankName = bankDetail.some(
-            (bank) => bank.BankName === bankName
-        );
+        // const isDuplicateBankName = bankDetail.some(
+        //     (bank) => bank.BankName === bankName
+        // );
 
 
-        if (isDuplicateBankID || isDuplicateBankName) {
-            let message = "ไม่สามารถบันทึกได้ เนื่องจาก";
-            if (isDuplicateBankID) message += " BankID ซ้ำ";
-            if (isDuplicateBankID && isDuplicateBankName) message += " และ";
-            if (isDuplicateBankName) message += " BankName ซ้ำ";
+        // if (isDuplicateBankID || isDuplicateBankName) {
+        //     let message = "ไม่สามารถบันทึกได้ เนื่องจาก";
+        //     if (isDuplicateBankID) message += " BankID ซ้ำ";
+        //     if (isDuplicateBankID && isDuplicateBankName) message += " และ";
+        //     if (isDuplicateBankName) message += " BankName ซ้ำ";
 
-            ShowError(message);
-            return;
-        }
+        //     ShowError(message);
+        //     return;
+        // }
 
         database
             .ref("banks/")

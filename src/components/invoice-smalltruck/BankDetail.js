@@ -104,23 +104,23 @@ const BankDetail = () => {
     const handleSaveClick = () => {
         const normalize = (str) => (str || "").trim().toLowerCase();
 
-        const isDuplicateBankID = bankDetail.some(
-            (bank) => normalize(bank.BankID) === normalize(editedData.BankID) && bank.id !== editedData.id
-        );
+        // const isDuplicateBankID = bankDetail.some(
+        //     (bank) => normalize(bank.BankID) === normalize(editedData.BankID) && bank.id !== editedData.id
+        // );
 
-        const isDuplicateBankName = bankDetail.some(
-            (bank) => normalize(bank.BankName) === normalize(editedData.BankName) && bank.id !== editedData.id
-        );
+        // const isDuplicateBankName = bankDetail.some(
+        //     (bank) => normalize(bank.BankName) === normalize(editedData.BankName) && bank.id !== editedData.id
+        // );
 
-        if (isDuplicateBankID || isDuplicateBankName) {
-            let message = "ไม่สามารถบันทึกได้ เนื่องจาก";
-            if (isDuplicateBankID) message += " BankID ซ้ำ";
-            if (isDuplicateBankID && isDuplicateBankName) message += " และ";
-            if (isDuplicateBankName) message += " BankName ซ้ำ";
+        // if (isDuplicateBankID || isDuplicateBankName) {
+        //     let message = "ไม่สามารถบันทึกได้ เนื่องจาก";
+        //     if (isDuplicateBankID) message += " BankID ซ้ำ";
+        //     if (isDuplicateBankID && isDuplicateBankName) message += " และ";
+        //     if (isDuplicateBankName) message += " BankName ซ้ำ";
 
-            ShowError(message);
-            return;
-        }
+        //     ShowError(message);
+        //     return;
+        // }
 
         database
             .ref("banks/")

@@ -1714,7 +1714,7 @@ const UpdateTrip = (props) => {
                                                                 ? `${matchedReg.RegHead} : ${matchedReg.RegTail.split(":")[1]}`
                                                                 : regName;
 
-                                                            return `${driverName} / ${fullPlate}`;
+                                                            return driverName === "รับจ้างขนส่ง" ? "รถรับจ้างขนส่ง" : `${driverName} / ${fullPlate}`;
                                                         })()}
                                                     </Box>
                                                 </Typography>
@@ -2560,7 +2560,7 @@ const UpdateTrip = (props) => {
                                                                 ? `${matchedReg.RegHead} : ${matchedReg.RegTail.split(":")[1]}`
                                                                 : regName;
 
-                                                            return `${driverName} / ${fullPlate}`;
+                                                            return driverName === "รับจ้างขนส่ง" ? "รถรับจ้างขนส่ง" : `${driverName} / ${fullPlate}`;
                                                         })()}
                                                     </Box>
                                                 </Typography>

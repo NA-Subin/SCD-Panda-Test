@@ -138,7 +138,7 @@ const TripsDetail = (props) => {
                         maximumFractionDigits: 2,
                     }).format(parseFloat(trips.WeightOil))}
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                     sx={{
                         textAlign: "right",
                         paddingLeft: "20px !important",
@@ -163,7 +163,7 @@ const TripsDetail = (props) => {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                     }).format(trips.TotalWeight)}
-                </TableCell>
+                </TableCell> */}
                 <TableCell sx={{ textAlign: "center" }}>
                     {trips.StatusTrip}
                 </TableCell>

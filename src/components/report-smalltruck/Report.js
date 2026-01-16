@@ -109,9 +109,9 @@ const ReportSmallTruck = () => {
   const { order, trip, typeFinancial, reghead, tickets } = useTripData();
   const registrations = Object.values(reghead || {});
   const ticketsdetail = Object.values(tickets || {}).filter(item => {
-      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-      return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
-    });
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+    return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
+  });
   const companies = Object.values(company || {});
   const driver = Object.values(drivers || {});
   const typeF = Object.values(typeFinancial || {});
@@ -759,7 +759,7 @@ const ReportSmallTruck = () => {
 
       productTypes.forEach((key) => {
         const volume = row.Product?.[key]?.Volume;
-        dataRow[key] = row.type === "รับเข้า" ? (volume ? Number(volume) * 1000 : "") : (volume ? -Number(volume) : "");
+        dataRow[key] = (row.type === "รับเข้า" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? (volume ? Number(volume) * 1000 : "") : (volume ? -Number(volume) : "");
       });
 
       summarizedList.forEach((s) => {
@@ -811,6 +811,8 @@ const ReportSmallTruck = () => {
     const buffer = await workbook.xlsx.writeBuffer();
     saveAs(new Blob([buffer]), `รายงานสรุปยอดน้ำมัน_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
   };
+
+  console.log("matchedOrdersWithAll : ", matchedOrdersWithAll);
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
@@ -1037,7 +1039,7 @@ const ReportSmallTruck = () => {
                       {/* ✅ ตรงกับ column ที่หัว */}
                       {productTypes.map((productKey) => {
                         const volume = row.Product?.[productKey]?.Volume;
-                        const value = row.sourceType === "order" ? Number(volume) * 1000 : Number(volume);
+                        const value = (row.sourceType === "order" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? Number(volume) * 1000 : Number(volume);
 
                         return (
                           <TableCell
@@ -1093,6 +1095,8 @@ const ReportSmallTruck = () => {
                       {/* ✅ ตรงกับ column ที่หัว */}
                       {productTypes.map((productKey) => {
                         const volume = row.Product?.[productKey]?.Volume;
+                        const value = (row.sourceType === "order" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? Number(volume) * 1000 : Number(volume);
+
                         return (
                           <TableCell
                             key={productKey}
@@ -1101,10 +1105,10 @@ const ReportSmallTruck = () => {
                               fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
                               paddingLeft: "10px !important",
                               paddingRight: "10px !important",
-                              color: volume ? "#720000ff" : "lightgray",
+                              color: value ? "#720000ff" : "lightgray",
                             }}
                           >
-                            {(volume ? (-Number(volume)).toLocaleString() : "0")}
+                            {(value ? (-Number(value)).toLocaleString() : "0")}
                           </TableCell>
                         );
                       })}

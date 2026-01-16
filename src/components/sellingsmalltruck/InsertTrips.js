@@ -1117,10 +1117,10 @@ const InsertTrips = () => {
                 return;
             }
 
-            if (!item.Travel || item.Travel === 0) {
-                ShowError(`รายการที่ ${+key + 1} กรุณาระบุจำนวนเที่ยว ให้ครบ`);
-                return;
-            }
+            // if (!item.Travel || item.Travel === 0) {
+            //     ShowError(`รายการที่ ${+key + 1} กรุณาระบุจำนวนเที่ยว ให้ครบ`);
+            //     return;
+            // }
         }
 
         const orderRef = database.ref("order/");
