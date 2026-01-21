@@ -38,8 +38,9 @@ const InsertCustomerBigTruck = (props) => {
     const [check, setCheck] = React.useState(true);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    const { company } = useBasicData();
+    const { company, small } = useBasicData();
     const companyDetail = Object.values(company || {});
+    const registrations = Object.values(small || {});
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -89,6 +90,8 @@ const InsertCustomerBigTruck = (props) => {
     const [ticketChecked, setTicketChecked] = React.useState(true);
     const [companyChecked, setCompanyChecked] = React.useState(true);
     const [companies, setCompanies] = React.useState("ไม่มี");
+    const [registrantionCheck, setRegistrationChecked] = React.useState(false);
+    const [registration, setRegistration] = React.useState("ไม่มี");
 
     const getTicket = async () => {
         database.ref("/customers/smalltruck").on("value", (snapshot) => {
@@ -138,7 +141,9 @@ const InsertCustomerBigTruck = (props) => {
                 Type: show === 1 ? "เชียงใหม่" : "บ้านโฮ่ง",
                 Credit: credit,
                 CreditTime: creditTime,
-                Phone: phone
+                Phone: phone,
+                RegistrationCheck: registrantionCheck,
+                Registration: registration
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -161,6 +166,8 @@ const InsertCustomerBigTruck = (props) => {
                 setZipCode("")
                 setLat("")
                 setLng("")
+                setRegistrationChecked(false)
+                setRegistration("ไม่มี")
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -305,6 +312,38 @@ const InsertCustomerBigTruck = (props) => {
                                     </TextField>
                                 </Grid>
                             </Grid>
+                        </Grid>
+                        <Grid item md={2.5} xs={2.5} display="flex" justifyContent="left" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" marginRight={1} sx={{ marginLeft: { md: 0, xs: 4 } }}>เลือกทะเบียน :</Typography>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={registrantionCheck}
+                                        onChange={() => setRegistrationChecked(!registrantionCheck)}
+                                        size="small"
+                                    />
+                                }
+                            />
+                        </Grid>
+                        <Grid item md={9.5} xs={9.5} display="flex" justifyContent="left" alignItems="center">
+                            {
+                                registrantionCheck &&
+                                <TextField
+                                    select
+                                    fullWidth
+                                    size="small"
+                                    value={registration}
+                                    SelectProps={{ MenuProps: { PaperProps: { style: { maxHeight: 150 } } } }}
+                                    onChange={(e) => setRegistration(e.target.value)}
+                                >
+                                    <MenuItem value="ไม่มี">กรุณาเลือกทะเบียน</MenuItem>
+                                    {
+                                        registrations.map((item, index) => (
+                                            <MenuItem value={`${item.id}:${item.RegHead}`}>{`${item.ShortName}${item.RegHead}`}</MenuItem>
+                                        ))
+                                    }
+                                </TextField>
+                            }
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Divider>

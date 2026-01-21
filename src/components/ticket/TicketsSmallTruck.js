@@ -75,9 +75,10 @@ const TicketsSmallTruck = ({ openNavbar }) => {
     //const [ticketR, setTicketR] = React.useState([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    const { customersmalltruck, company } = useBasicData();
+    const { customersmalltruck, company, small } = useBasicData();
     const ticket = Object.values(customersmalltruck || {});
     const companyDetail = Object.values(company || {});
+    const registrations = Object.values(small || {});
 
     const ticketM = ticket.filter((item) => item.Type === "เชียงใหม่" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
     const ticketR = ticket.filter((item) => item.Type === "บ้านโฮ่ง" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
@@ -172,9 +173,11 @@ const TicketsSmallTruck = ({ openNavbar }) => {
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
     const [name, setName] = useState("");
     const [rowId, setRowId] = useState(null);
+    const [registrantionCheck, setRegistrationChecked] = useState(false);
+    const [registration, setRegistration] = useState("ไม่มี");
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (index, rowId, statusCompany, status, rowCreditTime, newname, newCompany
+    const handleSetting = (index, rowId, statusCompany, status, rowCreditTime, newname, newCompany, newregistrantionCheck, newregistraion
         // , rowRate1, rowRate2, rowRate3
     ) => {
         setRowId(index + 1);
@@ -194,6 +197,8 @@ const TicketsSmallTruck = ({ openNavbar }) => {
             setRecipientChecked(true);
         }
 
+        setRegistrationChecked(newregistrantionCheck);
+        setRegistration(newregistraion);
         setCreditTimeEdit(rowCreditTime);
         setName(newname);
         setCompanies(newCompany || "ไม่มี");
@@ -251,6 +256,8 @@ const TicketsSmallTruck = ({ openNavbar }) => {
     const handleCancel = () => {
         setSetting(false);
         setSelectedRowId(null);
+        setUpdateCustomer(true);
+        setOpenCustomer("");
     };
 
     const handleSaveCustomer = () => {
@@ -276,7 +283,9 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                 ,
                 Credit: credit,
                 CreditTime: creditTime,
-                Phone: phone
+                Phone: phone,
+                RegistrationCheck: registrantionCheck,
+                Registration: registration
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -305,6 +314,8 @@ const TicketsSmallTruck = ({ openNavbar }) => {
         setBill(row.Bill);
         setType(row.Type);
         setCompanies(row.Company ? row.Company : "ไม่มี");
+        setRegistrationChecked(row.RegistrationCheck)
+        setRegistration(row.Registration)
         if (row.StatusCompany === "อยู่บริษัทในเครือ") {
             setCompanyChecked(true);
         } else {
@@ -883,7 +894,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.RegistrationCheck, row.Registration)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
@@ -1321,7 +1332,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.RegistrationCheck, row.Registration)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
@@ -1623,6 +1634,40 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                 </Grid>
                             </Grid>
                         </Grid>
+                        <Grid item md={2.5} xs={2.5} display="flex" justifyContent="left" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" marginRight={1} sx={{ marginLeft: { md: 0, xs: 4 } }}>เลือกทะเบียน :</Typography>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={registrantionCheck}
+                                        onChange={() => setRegistrationChecked(!registrantionCheck)}
+                                        size="small"
+                                    />
+                                }
+                                disabled={updateCustomer}
+                            />
+                        </Grid>
+                        <Grid item md={9.5} xs={9.5} display="flex" justifyContent="left" alignItems="center">
+                            {
+                                registrantionCheck &&
+                                <TextField
+                                    select
+                                    fullWidth
+                                    size="small"
+                                    value={registration}
+                                    SelectProps={{ MenuProps: { PaperProps: { style: { maxHeight: 150 } } } }}
+                                    onChange={(e) => setRegistration(e.target.value)}
+                                    disabled={updateCustomer}
+                                >
+                                    <MenuItem value="ไม่มี">กรุณาเลือกทะเบียน</MenuItem>
+                                    {
+                                        registrations.map((item, index) => (
+                                            <MenuItem value={`${item.id}:${item.RegHead}`}>{`${item.ShortName}${item.RegHead}`}</MenuItem>
+                                        ))
+                                    }
+                                </TextField>
+                            }
+                        </Grid>
                         <Grid item md={12} xs={12}>
                             <Divider>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ใบวางบิล/ใบแจ้งหนี้</Typography>
@@ -1670,7 +1715,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                     :
                                     <React.Fragment>
                                         <Button variant="contained" color="success" size="small" sx={{ marginRight: 2 }} onClick={() => handleSaveCustomer()} >บันทึก</Button>
-                                        <Button variant="contained" color="error" size="small" onClick={() => setUpdateCustomer(true)}>ยกเลิก</Button>
+                                        <Button variant="contained" color="error" size="small" onClick={handleCancel}>ยกเลิก</Button>
                                     </React.Fragment>
 
                             }

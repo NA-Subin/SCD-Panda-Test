@@ -204,8 +204,7 @@ const ReportGasStation = ({ openNavbar }) => {
         y,
         m,
         daysInMonth,
-        field,
-        isBackyard
+        field
     ) => {
         const result = {};
         daysInMonth.forEach(d => (result[d] = 0));
@@ -218,13 +217,17 @@ const ReportGasStation = ({ openNavbar }) => {
                     x => x.ProductName === productName
                 );
 
-            if (p?.[field]) {
-                if (isBackyard) {
-                    result[d] += (toNumber(p["Sell"]) - toNumber(p["BackyardSales"]));
-                } else {
-                    result[d] += toNumber(p[field]);
-                }
-            }
+            if (!p) return;
+
+            const sell = Number(p.Sell ?? 0);
+            const backyard = Number(p.BackyardSales ?? 0);
+            const fieldValue = Number(p[field] ?? 0);
+
+            const value = p.Backyard === true
+                ? sell - backyard
+                : fieldValue;
+
+            result[d] += isNaN(value) ? 0 : value;
         });
 
         return result;
@@ -259,8 +262,7 @@ const ReportGasStation = ({ openNavbar }) => {
         productName,
         y,
         m,
-        daysInMonth,
-        isBackyard
+        daysInMonth
     ) => {
         return daysInMonth.reduce((sum, d) => {
             const source = getNextDate(y, m, d, daysInMonth.length);
@@ -270,9 +272,16 @@ const ReportGasStation = ({ openNavbar }) => {
                     x => x.ProductName === productName
                 );
 
-            if (!product?.Sell) return sum;
+            if (!product) return sum;
 
-            return sum + toNumber(isBackyard ? (product.Sell - product.BackyardSales) : product.Sell);
+            const sell = Number(product.Sell ?? 0);
+            const backyard = Number(product.BackyardSales ?? 0);
+
+            const value = product.Backyard === true
+                ? sell - backyard
+                : sell;
+
+            return sum + (isNaN(value) ? 0 : value);
         }, 0);
     };
 
@@ -442,10 +451,10 @@ const ReportGasStation = ({ openNavbar }) => {
                         ProductName: p.Name,
                         Color: p.Color,
                         CBP: cbpOfMonth[idx]?.CBP ?? 0,
-                        Total: total,
+                        Total: cbpOfMonth[idx]?.Total ?? total,
                         Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
-                        Carry: prevAcc,
-                        Accumulate: prevAcc + diff
+                        Carry: cbpOfMonth[idx]?.Carry ?? prevAcc,
+                        Accumulate: cbpOfMonth[idx]?.Accumulate ?? prevAcc + diff
                     };
                 });
 
@@ -512,10 +521,10 @@ const ReportGasStation = ({ openNavbar }) => {
                         ProductName: p.Name,
                         Color: p.Color,
                         CBP: cbpOfMonth[idx]?.CBP ?? 0,
-                        Total: total,
+                        Total: cbpOfMonth[idx]?.Total ?? total,
                         Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
-                        Carry: prevAcc,
-                        Accumulate: prevAcc + diff
+                        Carry: cbpOfMonth[idx]?.Carry ?? prevAcc,
+                        Accumulate: cbpOfMonth[idx]?.Accumulate ?? prevAcc + diff
                     };
                 });
 
@@ -969,7 +978,7 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                         y,
                                                                         m,
                                                                         daysInMonth,
-                                                                        product.Backyard
+                                                                        row.Backyard
                                                                     );
 
                                                                     const year = selectedDate.year();

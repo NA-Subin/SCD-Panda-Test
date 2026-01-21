@@ -81,9 +81,10 @@ const TicketsBigTruck = ({ openNavbar }) => {
     // const [ticketR, setTicketR] = React.useState([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    const { customerbigtruck, company } = useBasicData();
+    const { customerbigtruck, company, small } = useBasicData();
     const ticket = Object.values(customerbigtruck || {});
     const companyDetail = Object.values(company || {});
+    const registrations = Object.values(small || {});
 
     const ticketM = ticket.filter((item) => item.Type === "เชียงใหม่" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
     const ticketR = ticket.filter((item) => item.Type === "เชียงราย" && item.SystemStatus !== "ไม่อยู่ในระบบ").sort((a, b) => a.id - b.id);
@@ -175,12 +176,17 @@ const TicketsBigTruck = ({ openNavbar }) => {
     const [creditTimeEdit, setCreditTimeEdit] = useState("");
     const [name, setName] = useState("");
     const [rowIndex, setRowIndex] = useState(null);
+    const [registrantionCheck, setRegistrationChecked] = useState(false);
+    const [registration, setRegistration] = useState("ไม่มี");
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (index, rowId, statusCompany, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname, newCompany) => {
+    const handleSetting = (index, rowId, statusCompany, status, rowRate1, rowRate2, rowRate3, rowCreditTime, newname, newCompany, newregistrantionCheck, newregistraion) => {
         setRowIndex(index + 1);
         setSetting(true);
         setSelectedRowId(rowId);
+
+        setRegistrationChecked(newregistrantionCheck);
+        setRegistration(newregistraion);
 
         if (statusCompany === "อยู่บริษัทในเครือ") {
             setTicketCheckedC(true);
@@ -251,6 +257,8 @@ const TicketsBigTruck = ({ openNavbar }) => {
     const handleCancel = () => {
         setSetting(false);
         setSelectedRowId(null);
+        setUpdateCustomer(true);
+        setOpenCustomer("");
     };
 
     const handleCustomer = (row) => {
@@ -266,6 +274,8 @@ const TicketsBigTruck = ({ openNavbar }) => {
         setCompanyName(row.CompanyName)
         setPhone(row.Phone)
         setCreditTime(row.CreditTime)
+        setRegistrationChecked(row.RegistrationCheck)
+        setRegistration(row.Registration)
         setType(row.Type);
         setCompanies(row.Company ? row.Company : "ไม่มี");
         if (row.StatusCompany === "อยู่บริษัทในเครือ") {
@@ -292,7 +302,7 @@ const TicketsBigTruck = ({ openNavbar }) => {
     const handleSaveCustomer = () => {
         database
             .ref("/customers/bigtruck/")
-            .child(Number(openCustomer)-1)
+            .child(Number(openCustomer) - 1)
             .update({
                 Name: name,
                 Status: ticketChecked === true ? "ลูกค้าประจำ" : "ลูกค้าไม่ประจำ",
@@ -313,7 +323,9 @@ const TicketsBigTruck = ({ openNavbar }) => {
                     (zipCode === "-" ? "" : ` ${zipCode}`)
                 ,
                 Phone: phone,
-                CreditTime: creditTime
+                CreditTime: creditTime,
+                RegistrationCheck: registrantionCheck,
+                Registration: registration
             }) // อัพเดท values ทั้งหมด
             .then(() => {
                 ShowSuccess("แก้ไขข้อมูลสำเร็จ");
@@ -880,7 +892,7 @@ const TicketsBigTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name, row.registrantionCheck, row.registraion)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
@@ -1318,7 +1330,7 @@ const TicketsBigTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name, row.Company, row.Company)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.Rate1, row.Rate2, row.Rate3, row.CreditTime, row.Name, row.Company, row.Company, row.registrantionCheck, row.registraion)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
@@ -1618,6 +1630,40 @@ const TicketsBigTruck = ({ openNavbar }) => {
                                 </Grid>
                             </Grid>
                         </Grid>
+                        <Grid item md={2.5} xs={2.5} display="flex" justifyContent="left" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" marginRight={1} sx={{ marginLeft: { md: 0, xs: 4 } }}>เลือกทะเบียน :</Typography>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={registrantionCheck}
+                                        onChange={() => setRegistrationChecked(!registrantionCheck)}
+                                        size="small"
+                                    />
+                                }
+                                disabled={updateCustomer}
+                            />
+                        </Grid>
+                        <Grid item md={9.5} xs={9.5} display="flex" justifyContent="left" alignItems="center">
+                            {
+                                registrantionCheck &&
+                                <TextField
+                                    select
+                                    fullWidth
+                                    size="small"
+                                    value={registration}
+                                    SelectProps={{ MenuProps: { PaperProps: { style: { maxHeight: 150 } } } }}
+                                    onChange={(e) => setRegistration(e.target.value)}
+                                    disabled={updateCustomer}
+                                >
+                                    <MenuItem value="ไม่มี">กรุณาเลือกทะเบียน</MenuItem>
+                                    {
+                                        registrations.map((item, index) => (
+                                            <MenuItem value={`${item.id}:${item.RegHead}`}>{`${item.ShortName}${item.RegHead}`}</MenuItem>
+                                        ))
+                                    }
+                                </TextField>
+                            }
+                        </Grid>
                         <Grid item md={12} xs={12}>
                             <Divider>
                                 <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap' }} gutterBottom>ใบวางบิล/ใบแจ้งหนี้</Typography>
@@ -1673,7 +1719,7 @@ const TicketsBigTruck = ({ openNavbar }) => {
                                     :
                                     <React.Fragment>
                                         <Button variant="contained" color="success" size="small" sx={{ marginRight: 2 }} onClick={() => handleSaveCustomer()} >บันทึก</Button>
-                                        <Button variant="contained" color="error" size="small" onClick={() => setUpdateCustomer(true)}>ยกเลิก</Button>
+                                        <Button variant="contained" color="error" size="small" onClick={handleCancel}>ยกเลิก</Button>
                                     </React.Fragment>
 
                             }
@@ -1702,7 +1748,7 @@ const TicketsBigTruck = ({ openNavbar }) => {
                     </Button>
                 </DialogActions> */}
             </Dialog>
-        </Container>
+        </Container >
     );
 };
 

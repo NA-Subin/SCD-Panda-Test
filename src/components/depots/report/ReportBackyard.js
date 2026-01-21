@@ -127,6 +127,8 @@ const ReportBackyard = (props) => {
             });
     };
 
+    console.log("stockSummary.total + summary.total : ", stockSummary.total, summary.total, stockSummary.total + summary.total);
+
     return (
         <React.Fragment>
             <TableRow>
@@ -194,6 +196,8 @@ const ReportBackyard = (props) => {
                                                                 ...prev[row.id]?.[year]?.[month],
                                                                 [index]: {
                                                                     ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                    ProductName: product.Name,
+                                                                    Color: product.Color,
                                                                     CBP: 0,
                                                                     Total: total,
                                                                     Diff: diff,
@@ -224,6 +228,8 @@ const ReportBackyard = (props) => {
                                                             ...prev[row.id]?.[year]?.[month],
                                                             [index]: {
                                                                 ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                ProductName: product.Name,
+                                                                Color: product.Color,
                                                                 CBP: cbp,        // ✅ เก็บเป็น number เสมอ
                                                                 Total: total,
                                                                 Diff: diff,

@@ -177,8 +177,8 @@ const ReportDetail = (props) => {
                                         // ⭐ ลบหมด → ถือว่าเป็น 0 ทันที
                                         if (raw === "" || raw === "-") {
                                             const cbp = 0;
-                                            const diff = cbp - total;
-                                            const carry = cbpItem.Carry || 0;
+                                            const diff = cbp - (cbpItem.Total ?? total);
+                                            const carry = (cbpItem.Carry ?? 0);
 
                                             setCbpData(prev => ({
                                                 ...prev,
@@ -190,8 +190,10 @@ const ReportDetail = (props) => {
                                                             ...prev[row.id]?.[year]?.[month],
                                                             [index]: {
                                                                 ...prev[row.id]?.[year]?.[month]?.[index],
+                                                                ProductName: product.Name,
+                                                                Color: product.Color,
                                                                 CBP: 0,
-                                                                Total: total,
+                                                                Total: (cbpItem.Total ?? total),
                                                                 Diff: diff,
                                                                 Carry: carry,
                                                                 Accumulate: carry + diff
@@ -207,8 +209,8 @@ const ReportDetail = (props) => {
                                         if (!/^-?\d+$/.test(raw)) return;
 
                                         const cbp = Number(raw);
-                                        const diff = cbp - total;
-                                        const carry = cbpItem.Carry || 0;
+                                        const diff = cbp - (cbpItem.Total ?? total);
+                                        const carry = (cbpItem.Carry ?? 0);
 
                                         setCbpData(prev => ({
                                             ...prev,
@@ -220,8 +222,10 @@ const ReportDetail = (props) => {
                                                         ...prev[row.id]?.[year]?.[month],
                                                         [index]: {
                                                             ...prev[row.id]?.[year]?.[month]?.[index],
+                                                            ProductName: product.Name,
+                                                            Color: product.Color,
                                                             CBP: cbp,        // ✅ เก็บเป็น number เสมอ
-                                                            Total: total,
+                                                            Total: (cbpItem.Total ?? total),
                                                             Diff: diff,
                                                             Carry: carry,
                                                             Accumulate: carry + diff

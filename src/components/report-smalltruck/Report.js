@@ -418,105 +418,44 @@ const ReportSmallTruck = () => {
   });
 
   const carryOverSummary = useMemo(() => {
-    const summary = {
-      inbound: {},
-      outbound: {},
-      balance: {},
-    };
+    const balance = {};
 
     productTypes.forEach((key) => {
-      summary.inbound[key] = 0;
-      summary.outbound[key] = 0;
-      summary.balance[key] = 0;
+      balance[key] = 0;
     });
 
-    const selectedId = Number(selectOrder?.id);
+    // 🔒 cutoff = สิ้นวันก่อนหน้า
+    const cutoff = dayjs(selectedDateStart)
+      .subtract(1, "day")
+      .endOf("day");
 
-    const carryOverOrders = orders
-      .filter((order) => {
-        const orderDate = dayjs(order.Date, "DD/MM/YYYY");
+    orders.forEach((order) => {
+      const orderDate = dayjs(order.Date, "DD/MM/YYYY");
+      if (!orderDate.isValid()) return;
+      if (orderDate.isAfter(cutoff)) return;
+      if (order.Status !== "จัดส่งสำเร็จ") return;
 
-        // ✅ เอาเฉพาะรายการที่อยู่นอกช่วงวันที่เลือก
-        const isOutOfRange =
-          orderDate.isValid() &&
-          (orderDate.isBefore(selectedDateStart, "day") ||
-            orderDate.isAfter(selectedDateEnd, "day"));
+      const isInbound = order.CustomerType === "ตั๋วรถใหญ่";
+      const isOutbound = order.CustomerType === "ตั๋วรถเล็ก";
+      if (!isInbound && !isOutbound) return;
 
-        if (!isOutOfRange) return false;
-        if (order.Status !== "จัดส่งสำเร็จ") return false;
-
-        const isTruck = order.CustomerType === "ตั๋วรถใหญ่" || order.CustomerType === "ตั๋วรถเล็ก";
-        if (!isTruck) return false;
-
-        // ✅ ถ้าเป็น "ตั๋วรถเล็ก" ต้องเช็คทะเบียนให้ตรงกับ plate
-        if (
-          order.CustomerType === "ตั๋วรถเล็ก" &&
-          order.Registration.split(":")[1] !== selectOrder?.RegHead
-          //order.Registration.split(":")[1] !== plate
-        ) {
-          return false;
-        }
-
-        const orderTicketId = Number(order.TicketName?.split(":")[0]);
-        if (isNaN(orderTicketId)) return false;
-
-        if (selectedId === 0) {
-          // ✅ แสดงทั้งหมดในเครือ
-          return customerB.some(
-            (cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.id === orderTicketId
-          );
-        }
-
-        // ✅ แสดงเฉพาะเจาะจง + อยู่ในเครือ
-        const isInCompany = customerB.some(
-          (cust) => cust.StatusCompany === "อยู่บริษัทในเครือ" && cust.id === orderTicketId
-        );
-        if (!isInCompany) return false;
-
-        const selectedRegHead = selectOrder?.RegHead; // ถ้า selectOrder เป็น object แล้ว
-        if (!selectedRegHead) return false;
-
-        // ดึงข้อมูลจาก TicketName
-        const ticketInfo = order.TicketName?.split(":")[1] ?? "";
-
-        // Regex หาเลขทะเบียน (รูปแบบ: ตัวเลข 1–2 หลัก, ขีด, ตัวเลข 3–4 หลัก)
-        const match = ticketInfo.match(/\d{1,2}-\d{3,4}/);
-        if (!match) return false;
-
-        const orderRegHead = match[0]; // เช่น "71-1639"
-
-        return selectedRegHead === orderRegHead;
-      })
-      .map((order) => ({
-        ...order,
-        type: order.CustomerType === "ตั๋วรถใหญ่" ? "รับเข้า" : "ส่งออก",
-      }));
-
-    // ✅ รวมข้อมูลทั้งรับเข้าและส่งออก
-    carryOverOrders.forEach((row) => {
-      Object.entries(row.Product || {})
-        .filter(([key]) => key !== "P") // ❌ ตัด P ออก
+      Object.entries(order.Product || {})
+        .filter(([key]) => key !== "P")
         .forEach(([key, product]) => {
           const volume = Number(product?.Volume) || 0;
-          const liters = volume * 1000;
 
-          if (row.type === "รับเข้า") {
-            summary.inbound[key] += liters;
+          if (isInbound) {
+            // รับเข้า = m³ → ลิตร
+            balance[key] += volume * 1000;
           } else {
-            const outboundLiters = -volume; // ✅ ติดลบ
-            summary.outbound[key] += outboundLiters;
+            // ส่งออก = ลิตร
+            balance[key] -= volume;
           }
         });
     });
 
-    console.log("carryOverOrders : ", carryOverOrders);
-
-    productTypes.forEach((key) => {
-      summary.balance[key] = summary.inbound[key] + summary.outbound[key];
-    });
-
-    return summary;
-  }, [orders, selectedDateStart, selectedDateEnd, customerB, selectOrder]);
+    return { balance };
+  }, [orders, selectedDateStart]);
 
   console.log("carryOverSummary inbound:", carryOverSummary.inbound);
   console.log("carryOverSummary outbound:", carryOverSummary.outbound);
@@ -527,14 +466,25 @@ const ReportSmallTruck = () => {
     summary.balance[key] = summary.inbound[key] + summary.outbound[key];
   });
 
+  // const differenceBalanceSummary = {
+  //   balance: {},
+  // };
+
+  // productTypes.forEach((key) => {
+  //   const current = summary?.balance?.[key] || 0;
+  //   const carryOver = carryOverSummary?.balance?.[key] || 0;
+  //   differenceBalanceSummary.balance[key] = carryOver + current;
+  // });
+
   const differenceBalanceSummary = {
     balance: {},
   };
 
   productTypes.forEach((key) => {
-    const current = summary?.balance?.[key] || 0;
-    const carryOver = carryOverSummary?.balance?.[key] || 0;
-    differenceBalanceSummary.balance[key] = carryOver + current;
+    const opening = carryOverSummary.balance[key] || 0;
+    const movement = summary.balance[key] || 0;
+
+    differenceBalanceSummary.balance[key] = opening + movement;
   });
 
   const [driverData, setDriverData] = useState([])
@@ -551,6 +501,9 @@ const ReportSmallTruck = () => {
 
   console.log("data : ", data);
   console.log("Data Not Cancel : ", dataNotCancel);
+
+  console.log("carryOverSummary : ", carryOverSummary);
+  console.log("differenceBalanceSummary : ", differenceBalanceSummary);
 
   const cellComponents = {
     G95: TableCellG95,
