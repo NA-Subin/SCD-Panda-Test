@@ -45,6 +45,7 @@ import { database } from "../../../server/firebase";
 import UpdateRegTail from "./UpdateRegTail";
 import { useData } from "../../../server/path";
 import { useBasicData } from "../../../server/provider/BasicDataProvider";
+import RegTailDetail from "./RegTailDetail";
 
 const BigTruckRegTail = (props) => {
   const { status } = props;
@@ -209,27 +210,13 @@ const BigTruckRegTail = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       สถานะ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ width: 30, position: "sticky", right: 0 }} />
+                    <TablecellHeader sx={{ position: "sticky", right: 0 }} />
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {
                     truck.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow >
-                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.RegTail}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap1 === undefined ? "-" : row.Cap1}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap2 === undefined ? "-" : row.Cap2}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap3 === undefined ? "-" : row.Cap3}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap4 === undefined ? "-" : row.Cap4}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap5 === undefined ? "-" : row.Cap5}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap6 === undefined ? "-" : row.Cap6}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap7 === undefined ? "-" : row.Cap7}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Cap8 === undefined ? "-" : row.Cap8}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(row.Weight)}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
-                        <UpdateRegTail key={row.id} truck={row} />
-                      </TableRow>
+                      <RegTailDetail key={row.RegTail} truck={row} />
                     ))
                   }
                 </TableBody>

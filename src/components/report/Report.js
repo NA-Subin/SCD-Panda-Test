@@ -1337,12 +1337,25 @@ const Report = ({ openNavbar }) => {
                                     console.log("Tranfer Detail : ", transfer);
                                     console.log("month Detail : ", row.Month);
 
-                                    const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                      return sum + (Number(transferRow.IncomingMoney) || 0);
-                                    }, 0);
+                                    const round2 = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+
+                                    const totalIncomingMoney = round2(
+                                      transfer.reduce(
+                                        (sum, row) => sum + (Number(row.IncomingMoney) || 0),
+                                        0
+                                      )
+                                    );
+
+                                    const totalAmounts = round2(
+                                      Number(row.TotalAmount) - totalIncomingMoney
+                                    );
+
+                                    // const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                    //   return sum + (Number(transferRow.IncomingMoney) || 0);
+                                    // }, 0);
                                     // <<<<<<
 
-                                    return (
+                                    return totalAmounts !== 0 && (
                                       <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
                                         sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                       >
@@ -1814,12 +1827,25 @@ const Report = ({ openNavbar }) => {
                                       console.log("Tranfer Detail : ", transfer);
                                       console.log("month Detail : ", row.Month);
 
-                                      const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                        return sum + (Number(transferRow.IncomingMoney) || 0);
-                                      }, 0);
+                                      const round2 = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+
+                                      const totalIncomingMoney = round2(
+                                        transfer.reduce(
+                                          (sum, row) => sum + (Number(row.IncomingMoney) || 0),
+                                          0
+                                        )
+                                      );
+
+                                      const totalAmounts = round2(
+                                        Number(row.TotalAmount) - totalIncomingMoney
+                                      );
+
+                                      // const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                      //   return sum + (Number(transferRow.IncomingMoney) || 0);
+                                      // }, 0);
                                       // <<<<<<
 
-                                      return (
+                                      return totalAmounts !== 0 && (
                                         <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
                                           sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                         >
@@ -1920,6 +1946,7 @@ const Report = ({ openNavbar }) => {
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {row.TicketName.split(":")[1]}
+                                            {Number(row.TotalAmount)}{totalIncomingMoney}
                                           </TableCell>
                                           <TableCell
                                             sx={{
@@ -2293,12 +2320,25 @@ const Report = ({ openNavbar }) => {
                                       console.log("Tranfer Detail : ", transfer);
                                       console.log("month Detail : ", row.Month);
 
-                                      const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
-                                        return sum + (Number(transferRow.IncomingMoney) || 0);
-                                      }, 0);
+                                      const round2 = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+
+                                      const totalIncomingMoney = round2(
+                                        transfer.reduce(
+                                          (sum, row) => sum + (Number(row.IncomingMoney) || 0),
+                                          0
+                                        )
+                                      );
+
+                                      const totalAmounts = round2(
+                                        Number(row.TotalAmount) - totalIncomingMoney
+                                      );
+
+                                      // const totalIncomingMoney = transfer.reduce((sum, transferRow) => {
+                                      //   return sum + (Number(transferRow.IncomingMoney) || 0);
+                                      // }, 0);
                                       // <<<<<<
 
-                                      return (
+                                      return totalAmounts !== 0 && (
                                         <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
                                           sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                         >

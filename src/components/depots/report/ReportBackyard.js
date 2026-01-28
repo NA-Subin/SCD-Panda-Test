@@ -146,12 +146,15 @@ const ReportBackyard = (props) => {
                     {product.Name}
                 </TablecellHeader>
                 <TableCell sx={{
-                    textAlign: "center",
+                    textAlign: "right",
                     fontWeight: "bold",
                     position: "sticky",
                     left: 140,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.6) : "lightgray",
                     color: product.Backyard ? (backyardItem.Diff < 0 ? "#d50000" : "black") : "darkgray",
+                    paddingLeft: "30px !important",
+                    paddingRight: "30px !important",
+                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                 }}>
                     {product.Backyard ? (backyardItem.Diff ?? 0).toLocaleString() : "-"}
                 </TableCell>
@@ -338,12 +341,15 @@ const ReportBackyard = (props) => {
                     }
                 </TableCell>
                 <TableCell sx={{
-                    textAlign: "center",
+                    textAlign: "right",
                     fontWeight: "bold",
                     position: "sticky",
                     left: 380,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.4) : "lightgray",
                     color: product.Backyard ? (backyardItem.Total ?? total < 0 ? "#d50000" : "black") : "darkgray",
+                    paddingLeft: "30px !important",
+                    paddingRight: "30px !important",
+                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                 }}>
                     {product.Backyard ? (backyardItem.Total ?? total).toLocaleString() : "-"}
                 </TableCell>
@@ -374,9 +380,12 @@ const ReportBackyard = (props) => {
                             key={d}
                             sx={{
                                 width: 50,
-                                textAlign: "center",
+                                textAlign: "right",
                                 backgroundColor: product.Backyard ? lightenColor(product.Color, 0.75) : "lightgray",
-                                color: product.Backyard ? (sell !== "-" && (sell < 0 ? "#d50000" : "black")) : "darkgray"
+                                color: product.Backyard ? (sell !== "-" && (sell < 0 ? "#d50000" : "black")) : "darkgray",
+                                paddingLeft: "35px !important",
+                                paddingRight: "35px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}
                         >
                             {sell === "-" ? "-" : new Intl.NumberFormat("en-US").format(Math.round(sell))}
@@ -384,24 +393,36 @@ const ReportBackyard = (props) => {
                     );
                 })}
                 <TableCell sx={{
-                    textAlign: "center",
+                    textAlign: "right",
                     fontWeight: "bold",
                     position: "sticky",
                     right: 220,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.4) : "lightgray",
-                    color: product.Backyard ? (backyardItem.Carry < 0 ? "#d50000" : "black") : "darkgray"
+                    color: product.Backyard ? (backyardItem.Carry < 0 ? "#d50000" : "black") : "darkgray",
+                    paddingLeft: "10px !important",
+                    paddingRight: "10px !important",
+                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                 }}>
-                    {new Intl.NumberFormat("en-US").format(Math.round(backyardItem.Carry))}
+                    {new Intl.NumberFormat("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format((backyardItem.Carry))}
                 </TableCell>
                 <TableCell sx={{
-                    textAlign: "center",
+                    textAlign: "right",
                     fontWeight: "bold",
                     position: "sticky",
                     right: 100,
                     backgroundColor: product.Backyard ? lightenColor(product.Color, 0.4) : "lightgray",
-                    color: product.Backyard ? (backyardItem.Accumulate < 0 ? "#d50000" : "black") : "darkgray"
+                    color: product.Backyard ? (backyardItem.Accumulate < 0 ? "#d50000" : "black") : "darkgray",
+                    paddingLeft: "10px !important",
+                    paddingRight: "10px !important",
+                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                 }}>
-                    {new Intl.NumberFormat("en-US").format(Math.round(backyardItem.Accumulate))}
+                    {new Intl.NumberFormat("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format((backyardItem.Accumulate))}
                 </TableCell>
                 {
                     index === 0 &&
@@ -455,32 +476,41 @@ const ReportBackyard = (props) => {
                                 ผลรวม
                             </TablecellHeader>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 left: 140,
                                 color: summary.diff < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#bdbdbd", 0.6),
+                                paddingLeft: "30px !important",
+                                paddingRight: "30px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
                                 {summary.diff.toLocaleString()}
                             </TableCell>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 left: 260,
                                 color: summary.cbp < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#bdbdbd", 0.6),
+                                paddingLeft: "20px !important",
+                                paddingRight: "20px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
                                 {summary.cbp.toLocaleString()}
                             </TableCell>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 left: 380,
                                 color: summary.total < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#bdbdbd", 0.4),
+                                paddingLeft: "30px !important",
+                                paddingRight: "30px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
                                 {summary.total.toLocaleString()}
                             </TableCell>
@@ -489,10 +519,13 @@ const ReportBackyard = (props) => {
                                     key={d}
                                     sx={{
                                         width: 50,
-                                        textAlign: "center",
+                                        textAlign: "right",
                                         fontWeight: "bold",
                                         color: dailySummaryBackyard[d] < 0 ? "#d50000" : "black",
-                                        backgroundColor: lightenColor("#bdbdbd", 0.6)
+                                        backgroundColor: lightenColor("#bdbdbd", 0.6),
+                                        paddingLeft: "35px !important",
+                                        paddingRight: "35px !important",
+                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                                     }}
                                 >
                                     {dailySummaryBackyard[d] === 0
@@ -501,24 +534,36 @@ const ReportBackyard = (props) => {
                                 </TableCell>
                             ))}
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 right: 220,
                                 color: summary.carry < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#bdbdbd", 0.4),
+                                paddingLeft: "10px !important",
+                                paddingRight: "10px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
-                                {new Intl.NumberFormat("en-US").format(Math.round(summary.carry))}
+                                {new Intl.NumberFormat("en-US", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }).format((summary.carry))}
                             </TableCell>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 right: 100,
                                 color: summary.accumulate < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#bdbdbd", 0.4),
+                                paddingLeft: "10px !important",
+                                paddingRight: "10px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
-                                {new Intl.NumberFormat("en-US").format(Math.round(summary.accumulate))}
+                                {new Intl.NumberFormat("en-US", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }).format((summary.accumulate))}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -537,32 +582,41 @@ const ReportBackyard = (props) => {
                                 ผลรวมทั้งหมด
                             </TablecellHeader>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 left: 140,
                                 color: (stockSummary.diff + summary.diff) < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#929292ff", 0.6),
+                                paddingLeft: "30px !important",
+                                paddingRight: "30px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
                                 {(stockSummary.diff + summary.diff).toLocaleString()}
                             </TableCell>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 left: 260,
                                 color: (stockSummary.cbp + summary.cbp) < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#929292ff", 0.6),
+                                paddingLeft: "20px !important",
+                                paddingRight: "20px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
                                 {(stockSummary.cbp + summary.cbp).toLocaleString()}
                             </TableCell>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 left: 380,
                                 color: (stockSummary.total + summary.total) < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#929292ff", 0.4),
+                                paddingLeft: "30px !important",
+                                paddingRight: "30px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
                                 {(stockSummary.total + summary.total).toLocaleString()}
                             </TableCell>
@@ -571,10 +625,13 @@ const ReportBackyard = (props) => {
                                     key={d}
                                     sx={{
                                         width: 50,
-                                        textAlign: "center",
+                                        textAlign: "right",
                                         fontWeight: "bold",
                                         color: (dailySummaryBackyard[d] + dailySummaryByStock[d]) < 0 ? "#d50000" : "black",
-                                        backgroundColor: lightenColor("#929292ff", 0.6)
+                                        backgroundColor: lightenColor("#929292ff", 0.6),
+                                        paddingLeft: "35px !important",
+                                        paddingRight: "35px !important",
+                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                                     }}
                                 >
                                     {(dailySummaryBackyard[d] + dailySummaryByStock[d]) === 0
@@ -583,24 +640,36 @@ const ReportBackyard = (props) => {
                                 </TableCell>
                             ))}
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 right: 220,
                                 color: (stockSummary.carry + summary.carry) < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#929292ff", 0.4),
+                                paddingLeft: "10px !important",
+                                paddingRight: "10px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
-                                {new Intl.NumberFormat("en-US").format(Math.round((stockSummary.carry + summary.carry)))}
+                                {new Intl.NumberFormat("en-US", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }).format(((stockSummary.carry + summary.carry)))}
                             </TableCell>
                             <TableCell sx={{
-                                textAlign: "center",
+                                textAlign: "right",
                                 fontWeight: "bold",
                                 position: "sticky",
                                 right: 100,
                                 color: (stockSummary.accumulate + summary.accumulate) < 0 ? "#d50000" : "black",
                                 backgroundColor: lightenColor("#929292ff", 0.4),
+                                paddingLeft: "10px !important",
+                                paddingRight: "10px !important",
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
                             }}>
-                                {new Intl.NumberFormat("en-US").format(Math.round((stockSummary.accumulate + summary.accumulate)))}
+                                {new Intl.NumberFormat("en-US", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }).format(((stockSummary.accumulate + summary.accumulate)))}
                             </TableCell>
                         </TableRow>
                     </React.Fragment>

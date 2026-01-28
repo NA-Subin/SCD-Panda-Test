@@ -347,8 +347,10 @@ const PrintReport = () => {
                         : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
                     }
                   </Typography>
-                  <Typography variant="subtitle2" gutterBottom>1. KBANK สาขา เฟสติเวล 663-1-00798-6</Typography>
-                  <Typography variant="subtitle2" gutterBottom>2. KBANK สาขาป่าแดด 064-8-29539-1</Typography>
+                  {
+                    invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "1. KBANK สาขา เฟสติเวล 663-1-00798-6"
+                      : "1. KBANK สาขา เฟสติเวล 663-1-00629-7"
+                  }
                 </Grid>
                 <Grid item xs={4} sx={{ textAlign: "center", marginTop: 4 }}>
                   <Typography variant="subtitle2" gutterBottom>_________________________</Typography>

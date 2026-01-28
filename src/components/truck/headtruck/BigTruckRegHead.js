@@ -193,7 +193,7 @@ const BigTruckRegHead = (props) => {
               component={Paper}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small" sx={{ width: "1380px" }}>
+              <Table stickyHeader size="small" sx={{ width: "1680px" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -212,6 +212,9 @@ const BigTruckRegHead = (props) => {
                       เลขจดทะเบียนรถ
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                      ไฟล์ / รูปภาพ
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       ตรวจสอบสภาพรถ
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
@@ -223,7 +226,7 @@ const BigTruckRegHead = (props) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       พนักงานขับรถ
                     </TablecellHeader>
-                    {/* <TablecellHeader colSpan={2} width={50} sx={{ position: "sticky", right: 0 }} /> */}
+                    <TablecellHeader width={50} sx={{ position: "sticky", right: 0 }} />
                   </TableRow>
                 </TableHead>
                 <TableBody>

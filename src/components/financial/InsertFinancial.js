@@ -1447,7 +1447,7 @@ const InsertFinancial = () => {
                                                 value={file.name}
                                                 sx={{ marginRight: 2 }}
                                             />
-                                            <Button variant="outlined" color="error" size="small" sx={{ marginRight: 2 }} onClick={() => { setFile(null); setFileType(null); }}>
+                                            <Button variant="outlined" color="error" size="small" sx={{ marginRight: 2 }} onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}>
                                                 ลบไฟล์
                                             </Button>
                                         </Box>

@@ -951,9 +951,10 @@ const UpdateTrip = (props) => {
             { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },  // เพิ่มตั๋วเปล่าเข้าไป
             ...ticketsA.map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
             ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
-            // ...ticketsT
-            //     .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
-            //     .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+            ...ticketsT
+                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
+            ...ticketsB.filter((t) => t.RegistrationCheck === true && t.Registration !== "" && t.Registration !== undefined).map((item) => ({ ...item })),
         ];
 
         return tickets.filter((item) => item.id || item.TicketsCode);

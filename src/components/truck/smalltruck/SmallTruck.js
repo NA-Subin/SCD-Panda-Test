@@ -45,6 +45,7 @@ import { database } from "../../../server/firebase";
 import UpdateSmallTruck from "./UpdateSmallTruck";
 import { useData } from "../../../server/path";
 import { useBasicData } from "../../../server/provider/BasicDataProvider";
+import SmallDetail from "./SmallDetail";
 
 const SmallTruck = (props) => {
   const { repair } = props;
@@ -162,7 +163,7 @@ const SmallTruck = (props) => {
               component={Paper}
               sx={{ marginTop: 2 }}
             >
-              <Table stickyHeader size="small" sx={{ width: "100%" }}>
+              <Table stickyHeader size="small" sx={{ width: "1500px" }}>
                 <TableHead sx={{ height: "7vh" }}>
                   <TableRow>
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
@@ -176,6 +177,9 @@ const SmallTruck = (props) => {
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       เลขจดทะเบียนรถ
+                    </TablecellHeader>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
+                      ไฟล์ / รูปภาพ
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16 }}>
                       ตรวจสอบสภาพรถ
@@ -195,17 +199,7 @@ const SmallTruck = (props) => {
                 <TableBody>
                   {
                     truck.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow >
-                        <TableCell sx={{ textAlign: "center" }}>{row.id}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.ShortName}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.RegHead}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.VehicleRegistration}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.RepairTruck.split(":")[1]}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Status}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Company.split(":")[1]}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Driver === "ไม่มี" ? row.Driver : row.Driver.split(":")[1]}</TableCell>
-                        <UpdateSmallTruck key={row.id} truck={row} />
-                      </TableRow>
+                      <SmallDetail key={row.ShortName} truck={row} />
                     ))
                   }
                 </TableBody>

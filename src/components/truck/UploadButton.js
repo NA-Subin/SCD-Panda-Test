@@ -1,55 +1,72 @@
 import React, { useState } from 'react';
 import { Button, Box, Typography, Grid } from '@mui/material';
 
-const UploadButton = () => {
-  const [selectedImages, setSelectedImages] = useState([]);
+const FilePreview = ({ file }) => {
+  if (!file || file === "ไม่แนบไฟล์") return null;
 
-  // ฟังก์ชันเมื่อผู้ใช้เลือกไฟล์
-  const handleImageChange = (event) => {
-    const files = Array.from(event.target.files);
-    const newImages = files.slice(0, 3 - selectedImages.length).map((file) => URL.createObjectURL(file));
+  const isFileObject = file instanceof File;
 
-    // เพิ่มรูปภาพใหม่เข้ากับรูปภาพเดิม (สูงสุด 3 รูป)
-    setSelectedImages((prevImages) => [...prevImages, ...newImages].slice(0, 3));
-  };
+  // ตรวจชนิดไฟล์
+  const isImage =
+    (isFileObject && file.type.startsWith("image/")) ||
+    (!isFileObject && /\.(jpg|jpeg|png|webp)$/i.test(file));
+
+  const isPdf =
+    (isFileObject && file.type === "application/pdf") ||
+    (!isFileObject && /\.pdf$/i.test(file));
+
+  // แหล่งที่มาของรูป
+  const src = isFileObject
+    ? URL.createObjectURL(file)
+    : file.startsWith("http")
+      ? file
+      : `https://${file}`;
 
   return (
-    <Box sx={{ textAlign: 'center', marginTop: 4 }}>
-      <input
-        accept="image/*"
-        id="upload-image"
-        type="file"
-        style={{ display: 'none' }}
-        multiple
-        onChange={handleImageChange}
-      />
-      <label htmlFor="upload-image">
-        <Button
-          variant="contained"
-          color="primary"
-          component="span"
-          disabled={selectedImages.length >= 3}
-        >
-          เพิ่มใบจดทะเบียน (สูงสุด 3 รูป)
-        </Button>
-      </label>
+    <Box
+      sx={{
+        width: 200,
+        height: 200,
+        border: "1px solid #ccc",
+        borderRadius: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        backgroundColor: "#fafafa"
+      }}
+    >
+      {isImage && (
+        <img
+          src={src}
+          alt="preview"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover"
+          }}
+        />
+      )}
 
-      <Box sx={{ marginTop: 1 }}>
-        <Typography variant="h6">ตัวอย่างรูปภาพใบจดทะเบียน:</Typography>
-        <Grid container spacing={2} justifyContent="center" sx={{ marginTop: 1 }}>
-          {selectedImages.map((image, index) => (
-            <Grid item key={index}>
-              <img
-                src={image}
-                alt={`Selected ${index + 1}`}
-                style={{ maxWidth: 100, height: 'auto', borderRadius: 8 }}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
+      {isPdf && (
+        <Typography
+          sx={{
+            fontSize: 40,
+            fontWeight: "bold",
+            color: "error.main"
+          }}
+        >
+          PDF
+        </Typography>
+      )}
+
+      {!isImage && !isPdf && (
+        <Typography fontSize={12} color="text.secondary">
+          FILE
+        </Typography>
+      )}
     </Box>
   );
 };
 
-export default UploadButton;
+export default FilePreview;

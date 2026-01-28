@@ -894,7 +894,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.RegistrationCheck, row.Registration)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.Company, row.RegistrationCheck, row.Registration)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
@@ -1332,7 +1332,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.RegistrationCheck, row.Registration)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.Company, row.RegistrationCheck, row.Registration)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>

@@ -35,11 +35,16 @@ import "dayjs/locale/th";
 import theme from "../../theme/theme";
 import { IconButtonError, RateOils, TablecellHeader } from "../../theme/style";
 import CancelIcon from '@mui/icons-material/Cancel';
+import FolderOffIcon from '@mui/icons-material/FolderOff';
+import ImageIcon from "@mui/icons-material/Image";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import UploadButton from "./UploadButton";
 import { database } from "../../server/firebase";
 import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { useData } from "../../server/path";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import FilePreview from "./UploadButton";
 
 const InsertTruck = (props) => {
     const { openMenu } = props;
@@ -94,6 +99,8 @@ const InsertTruck = (props) => {
     const [registration, setRegistration] = React.useState("");
     const [regTail, setRegTail] = React.useState("");
     const [shortName, setShortName] = React.useState("");
+    const [file, setFile] = useState("ไม่แนบไฟล์");
+    const [fileType, setFileType] = useState(1);
 
     const [fields, setFields] = useState([]); // เก็บค่าของแต่ละช่องกรอก
 
@@ -143,7 +150,28 @@ const InsertTruck = (props) => {
     console.log("registrationTail : ", regtailsDetail);
     console.log("Comapy : ", companies);
 
-    const handlePost = () => {
+    const handlePost = async () => {
+        if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
+
+        let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
+
+        // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
+        if (file !== "ไม่แนบไฟล์") {
+            const formData = new FormData();
+            formData.append("pic", file);
+
+            try {
+                const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+                img = data.file_path;
+            } catch (err) {
+                console.error("Upload failed:", err);
+            }
+        }
         if (menu === 1) {
             database
                 .ref("/truck/registration/")
@@ -163,7 +191,8 @@ const InsertTruck = (props) => {
                     VehicleRegistration: licenseRegHead === "มี" ? vehicleRegistration : "ไม่มี",
                     DateEndTax: licenseRegHead === "มี" ? dateEndTax : "ไม่มี",
                     DateEndInsurance: licenseRegHead === "มี" ? dateEndInsurance : "ไม่มี",
-                    VehPicture: "ไม่มี"
+                    VehPicture: "ไม่มี",
+                    Path: img
                 })
                 .then(() => {
                     if (tail.split(":")[1] !== "ไม่มี") {
@@ -191,6 +220,8 @@ const InsertTruck = (props) => {
                     setVehicleRegistration("");
                     setDateEndTax("");
                     setDateEndInsurance("");
+                    setFile("ไม่แนบไฟล์");
+                    setFileType(1);
                 })
                 .catch((error) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -217,7 +248,8 @@ const InsertTruck = (props) => {
                     VehicleRegistration: licenseRegTail === "มี" ? vehicleRegistration : "ไม่มี",
                     DateEndTax: licenseRegTail === "มี" ? dateEndTax : "ไม่มี",
                     DateEndInsurance: licenseRegTail === "มี" ? dateEndInsurance : "ไม่มี",
-                    VehPicture: "ไม่มี"
+                    VehPicture: "ไม่มี",
+                    Path: img
                 })
                 .then(() => {
                     ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -231,6 +263,8 @@ const InsertTruck = (props) => {
                     setVehicleRegistration("");
                     setDateEndTax("");
                     setDateEndInsurance("");
+                    setFile("ไม่แนบไฟล์");
+                    setFileType(1);
                 })
                 .catch((error) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -254,7 +288,8 @@ const InsertTruck = (props) => {
                     VehicleRegistration: licenseSmallTruck === "มี" ? vehicleRegistration : "ไม่มี",
                     DateEndTax: licenseSmallTruck === "มี" ? dateEndTax : "ไม่มี",
                     DateEndInsurance: licenseSmallTruck === "มี" ? dateEndInsurance : "ไม่มี",
-                    VehPicture: "ไม่มี"
+                    VehPicture: "ไม่มี",
+                    Path: img
                 })
                 .then(() => {
                     ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -266,6 +301,8 @@ const InsertTruck = (props) => {
                     setVehicleRegistration("");
                     setDateEndTax("");
                     setDateEndInsurance("");
+                    setFile("ไม่แนบไฟล์");
+                    setFileType(1);
                 })
                 .catch((error) => {
                     ShowError("เพิ่มข้อมูลไม่สำเร็จ");
@@ -490,7 +527,162 @@ const InsertTruck = (props) => {
                                                     </Paper>
                                                 </Grid>
                                                 <Grid item md={12} xs={12}>
-                                                    <UploadButton />
+                                                    <Divider>
+                                                        <Chip label="เพิ่มไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -0.5, marginBottom: 1 }} />
+                                                    </Divider>
+                                                    {
+                                                        file === "ไม่แนบไฟล์" ?
+                                                            <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    component="label"
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    sx={{
+                                                                        height: "50px",
+                                                                        backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
+                                                                        borderRadius: 2,
+                                                                    }}
+                                                                    onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="subtitle2"
+                                                                        fontWeight="bold"
+                                                                        color={fileType === 1 ? "white" : "lightgray"}
+                                                                        sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
+                                                                        gutterBottom
+                                                                    >
+                                                                        ไม่แนบไฟล์
+                                                                    </Typography>
+                                                                    <FolderOffIcon
+                                                                        sx={{
+                                                                            fontSize: 30,
+                                                                            color: fileType === 1 ? "white" : "lightgray",
+                                                                            marginLeft: 0.5,
+                                                                        }}
+                                                                    />
+                                                                </Button>
+                                                                {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
+                                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    component="label"
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    sx={{
+                                                                        height: "50px",
+                                                                        backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
+                                                                        borderRadius: 2,
+                                                                        display: "flex",
+                                                                        justifyContent: "center",
+                                                                        alignItems: "center",
+                                                                    }}
+                                                                    onClick={() => setFileType(2)}
+                                                                >
+                                                                    <Typography
+                                                                        variant="h6"
+                                                                        fontWeight="bold"
+                                                                        color={fileType === 2 ? "white" : "lightgray"}
+                                                                        gutterBottom
+                                                                    >
+                                                                        PDF
+                                                                    </Typography>
+                                                                    <PictureAsPdfIcon
+                                                                        sx={{
+                                                                            fontSize: 40,
+                                                                            color: fileType === 2 ? "white" : "lightgray",
+                                                                            marginLeft: 0.5,
+                                                                        }}
+                                                                    />
+                                                                    <input
+                                                                        type="file"
+                                                                        hidden
+                                                                        accept="application/pdf"
+                                                                        onChange={(e) => {
+                                                                            const file = e.target.files?.[0];
+                                                                            if (file) setFile(file);
+                                                                        }}
+                                                                    />
+                                                                </Button>
+                                                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    component="label"
+                                                                    size="small"
+                                                                    fullWidth
+                                                                    sx={{
+                                                                        height: "50px",
+                                                                        backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
+                                                                        borderRadius: 2,
+                                                                        display: "flex",
+                                                                        justifyContent: "center",
+                                                                        alignItems: "center",
+                                                                    }}
+                                                                    onClick={() => setFileType(3)}
+                                                                >
+                                                                    <Typography
+                                                                        variant="h6"
+                                                                        fontWeight="bold"
+                                                                        color={fileType === 3 ? "white" : "lightgray"}
+                                                                        gutterBottom
+                                                                    >
+                                                                        รูปภาพ
+                                                                    </Typography>
+                                                                    <ImageIcon
+                                                                        sx={{
+                                                                            fontSize: 40,
+                                                                            color: fileType === 3 ? "white" : "lightgray",
+                                                                            marginLeft: 0.5,
+                                                                        }}
+                                                                    />
+                                                                    <input
+                                                                        type="file"
+                                                                        hidden
+                                                                        accept="image/*"
+                                                                        onChange={(e) => {
+                                                                            const file = e.target.files?.[0];
+                                                                            if (file) setFile(file);
+                                                                        }}
+                                                                    />
+                                                                </Button>
+                                                            </Box>
+                                                            :
+                                                            <Box textAlign="center">
+                                                                {/* <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={file.name}
+                                                                        sx={{ marginRight: 2 }}
+                                                                    /> */}
+
+                                                                <Box display="flex" alignItems="center" justifyContent="center" >
+                                                                    <FilePreview file={file} />
+                                                                    <Button variant="outlined" color="error" size="small" sx={{ marginLeft: 2 }} onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}>
+                                                                        <DeleteForeverIcon />
+                                                                    </Button>
+                                                                </Box>
+                                                                <Box textAlign="center">
+                                                                    <Typography variant="subtitle1" gutterBottom>{file.name}</Typography>
+                                                                </Box>
+                                                            </Box>
+                                                        // <Box sx={{
+                                                        //     display: "flex",
+                                                        //     alignItems: "center",
+                                                        //     justifyContent: "space-between", // ช่วยแยกซ้ายขวา
+                                                        //     paddingLeft: 12,
+                                                        // }}>
+                                                        //     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                                        //         File : {file.name}
+                                                        //     </Typography>
+                                                        //     {/* <IconButton color="error" onClick={() => { setFile(null); setFileType(null); }}>
+                                                        //         <DeleteForeverIcon />
+                                                        //     </IconButton> */}
+                                                        //     <Button variant="outlined" color="error" size="small" onClick={() => { setFile(null); setFileType(null); }}>
+                                                        //         ลบไฟล์
+                                                        //     </Button>
+                                                        // </Box>
+                                                    }
                                                 </Grid>
                                             </>
                                             : ""
@@ -581,7 +773,162 @@ const InsertTruck = (props) => {
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item md={12} xs={12}>
-                                                        <UploadButton />
+                                                        <Divider>
+                                                            <Chip label="เพิ่มไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -0.5, marginBottom: 1 }} />
+                                                        </Divider>
+                                                        {
+                                                            file === "ไม่แนบไฟล์" ?
+                                                                <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        component="label"
+                                                                        size="small"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            height: "50px",
+                                                                            backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
+                                                                            borderRadius: 2,
+                                                                        }}
+                                                                        onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
+                                                                    >
+                                                                        <Typography
+                                                                            variant="subtitle2"
+                                                                            fontWeight="bold"
+                                                                            color={fileType === 1 ? "white" : "lightgray"}
+                                                                            sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
+                                                                            gutterBottom
+                                                                        >
+                                                                            ไม่แนบไฟล์
+                                                                        </Typography>
+                                                                        <FolderOffIcon
+                                                                            sx={{
+                                                                                fontSize: 30,
+                                                                                color: fileType === 1 ? "white" : "lightgray",
+                                                                                marginLeft: 0.5,
+                                                                            }}
+                                                                        />
+                                                                    </Button>
+                                                                    {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
+                                                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        component="label"
+                                                                        size="small"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            height: "50px",
+                                                                            backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
+                                                                            borderRadius: 2,
+                                                                            display: "flex",
+                                                                            justifyContent: "center",
+                                                                            alignItems: "center",
+                                                                        }}
+                                                                        onClick={() => setFileType(2)}
+                                                                    >
+                                                                        <Typography
+                                                                            variant="h6"
+                                                                            fontWeight="bold"
+                                                                            color={fileType === 2 ? "white" : "lightgray"}
+                                                                            gutterBottom
+                                                                        >
+                                                                            PDF
+                                                                        </Typography>
+                                                                        <PictureAsPdfIcon
+                                                                            sx={{
+                                                                                fontSize: 40,
+                                                                                color: fileType === 2 ? "white" : "lightgray",
+                                                                                marginLeft: 0.5,
+                                                                            }}
+                                                                        />
+                                                                        <input
+                                                                            type="file"
+                                                                            hidden
+                                                                            accept="application/pdf"
+                                                                            onChange={(e) => {
+                                                                                const file = e.target.files?.[0];
+                                                                                if (file) setFile(file);
+                                                                            }}
+                                                                        />
+                                                                    </Button>
+                                                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        component="label"
+                                                                        size="small"
+                                                                        fullWidth
+                                                                        sx={{
+                                                                            height: "50px",
+                                                                            backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
+                                                                            borderRadius: 2,
+                                                                            display: "flex",
+                                                                            justifyContent: "center",
+                                                                            alignItems: "center",
+                                                                        }}
+                                                                        onClick={() => setFileType(3)}
+                                                                    >
+                                                                        <Typography
+                                                                            variant="h6"
+                                                                            fontWeight="bold"
+                                                                            color={fileType === 3 ? "white" : "lightgray"}
+                                                                            gutterBottom
+                                                                        >
+                                                                            รูปภาพ
+                                                                        </Typography>
+                                                                        <ImageIcon
+                                                                            sx={{
+                                                                                fontSize: 40,
+                                                                                color: fileType === 3 ? "white" : "lightgray",
+                                                                                marginLeft: 0.5,
+                                                                            }}
+                                                                        />
+                                                                        <input
+                                                                            type="file"
+                                                                            hidden
+                                                                            accept="image/*"
+                                                                            onChange={(e) => {
+                                                                                const file = e.target.files?.[0];
+                                                                                if (file) setFile(file);
+                                                                            }}
+                                                                        />
+                                                                    </Button>
+                                                                </Box>
+                                                                :
+                                                                <Box textAlign="center">
+                                                                    {/* <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={file.name}
+                                                                        sx={{ marginRight: 2 }}
+                                                                    /> */}
+
+                                                                    <Box display="flex" alignItems="center" justifyContent="center" >
+                                                                        <FilePreview file={file} />
+                                                                        <Button variant="outlined" color="error" size="small" sx={{ marginLeft: 2 }} onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}>
+                                                                            <DeleteForeverIcon />
+                                                                        </Button>
+                                                                    </Box>
+                                                                    <Box textAlign="center">
+                                                                        <Typography variant="subtitle1" gutterBottom>{file.name}</Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                            // <Box sx={{
+                                                            //     display: "flex",
+                                                            //     alignItems: "center",
+                                                            //     justifyContent: "space-between", // ช่วยแยกซ้ายขวา
+                                                            //     paddingLeft: 12,
+                                                            // }}>
+                                                            //     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                                            //         File : {file.name}
+                                                            //     </Typography>
+                                                            //     {/* <IconButton color="error" onClick={() => { setFile(null); setFileType(null); }}>
+                                                            //         <DeleteForeverIcon />
+                                                            //     </IconButton> */}
+                                                            //     <Button variant="outlined" color="error" size="small" onClick={() => { setFile(null); setFileType(null); }}>
+                                                            //         ลบไฟล์
+                                                            //     </Button>
+                                                            // </Box>
+                                                        }
                                                     </Grid>
                                                 </>
                                                 : ""
@@ -654,7 +1001,162 @@ const InsertTruck = (props) => {
                                                             </Paper>
                                                         </Grid>
                                                         <Grid item md={12} xs={12}>
-                                                            <UploadButton />
+                                                            <Divider>
+                                                                <Chip label="เพิ่มไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -0.5, marginBottom: 1 }} />
+                                                            </Divider>
+                                                            {
+                                                                file === "ไม่แนบไฟล์" ?
+                                                                    <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
+                                                                        <Button
+                                                                            variant="contained"
+                                                                            component="label"
+                                                                            size="small"
+                                                                            fullWidth
+                                                                            sx={{
+                                                                                height: "50px",
+                                                                                backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
+                                                                                borderRadius: 2,
+                                                                            }}
+                                                                            onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
+                                                                        >
+                                                                            <Typography
+                                                                                variant="subtitle2"
+                                                                                fontWeight="bold"
+                                                                                color={fileType === 1 ? "white" : "lightgray"}
+                                                                                sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
+                                                                                gutterBottom
+                                                                            >
+                                                                                ไม่แนบไฟล์
+                                                                            </Typography>
+                                                                            <FolderOffIcon
+                                                                                sx={{
+                                                                                    fontSize: 30,
+                                                                                    color: fileType === 1 ? "white" : "lightgray",
+                                                                                    marginLeft: 0.5,
+                                                                                }}
+                                                                            />
+                                                                        </Button>
+                                                                        {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
+                                                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                        <Button
+                                                                            variant="contained"
+                                                                            component="label"
+                                                                            size="small"
+                                                                            fullWidth
+                                                                            sx={{
+                                                                                height: "50px",
+                                                                                backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
+                                                                                borderRadius: 2,
+                                                                                display: "flex",
+                                                                                justifyContent: "center",
+                                                                                alignItems: "center",
+                                                                            }}
+                                                                            onClick={() => setFileType(2)}
+                                                                        >
+                                                                            <Typography
+                                                                                variant="h6"
+                                                                                fontWeight="bold"
+                                                                                color={fileType === 2 ? "white" : "lightgray"}
+                                                                                gutterBottom
+                                                                            >
+                                                                                PDF
+                                                                            </Typography>
+                                                                            <PictureAsPdfIcon
+                                                                                sx={{
+                                                                                    fontSize: 40,
+                                                                                    color: fileType === 2 ? "white" : "lightgray",
+                                                                                    marginLeft: 0.5,
+                                                                                }}
+                                                                            />
+                                                                            <input
+                                                                                type="file"
+                                                                                hidden
+                                                                                accept="application/pdf"
+                                                                                onChange={(e) => {
+                                                                                    const file = e.target.files?.[0];
+                                                                                    if (file) setFile(file);
+                                                                                }}
+                                                                            />
+                                                                        </Button>
+                                                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                                        <Button
+                                                                            variant="contained"
+                                                                            component="label"
+                                                                            size="small"
+                                                                            fullWidth
+                                                                            sx={{
+                                                                                height: "50px",
+                                                                                backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
+                                                                                borderRadius: 2,
+                                                                                display: "flex",
+                                                                                justifyContent: "center",
+                                                                                alignItems: "center",
+                                                                            }}
+                                                                            onClick={() => setFileType(3)}
+                                                                        >
+                                                                            <Typography
+                                                                                variant="h6"
+                                                                                fontWeight="bold"
+                                                                                color={fileType === 3 ? "white" : "lightgray"}
+                                                                                gutterBottom
+                                                                            >
+                                                                                รูปภาพ
+                                                                            </Typography>
+                                                                            <ImageIcon
+                                                                                sx={{
+                                                                                    fontSize: 40,
+                                                                                    color: fileType === 3 ? "white" : "lightgray",
+                                                                                    marginLeft: 0.5,
+                                                                                }}
+                                                                            />
+                                                                            <input
+                                                                                type="file"
+                                                                                hidden
+                                                                                accept="image/*"
+                                                                                onChange={(e) => {
+                                                                                    const file = e.target.files?.[0];
+                                                                                    if (file) setFile(file);
+                                                                                }}
+                                                                            />
+                                                                        </Button>
+                                                                    </Box>
+                                                                    :
+                                                                    <Box textAlign="center">
+                                                                        {/* <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={file.name}
+                                                                        sx={{ marginRight: 2 }}
+                                                                    /> */}
+
+                                                                        <Box display="flex" alignItems="center" justifyContent="center" >
+                                                                            <FilePreview file={file} />
+                                                                            <Button variant="outlined" color="error" size="small" sx={{ marginLeft: 2 }} onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}>
+                                                                                <DeleteForeverIcon />
+                                                                            </Button>
+                                                                        </Box>
+                                                                        <Box textAlign="center">
+                                                                            <Typography variant="subtitle1" gutterBottom>{file.name}</Typography>
+                                                                        </Box>
+                                                                    </Box>
+                                                                // <Box sx={{
+                                                                //     display: "flex",
+                                                                //     alignItems: "center",
+                                                                //     justifyContent: "space-between", // ช่วยแยกซ้ายขวา
+                                                                //     paddingLeft: 12,
+                                                                // }}>
+                                                                //     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                                                //         File : {file.name}
+                                                                //     </Typography>
+                                                                //     {/* <IconButton color="error" onClick={() => { setFile(null); setFileType(null); }}>
+                                                                //         <DeleteForeverIcon />
+                                                                //     </IconButton> */}
+                                                                //     <Button variant="outlined" color="error" size="small" onClick={() => { setFile(null); setFileType(null); }}>
+                                                                //         ลบไฟล์
+                                                                //     </Button>
+                                                                // </Box>
+                                                            }
                                                         </Grid>
                                                     </>
                                                     : ""

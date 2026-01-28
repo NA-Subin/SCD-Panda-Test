@@ -158,6 +158,8 @@ const ReportGasStation = ({ openNavbar }) => {
     const y = selectedDate ? selectedDate.year() : null;
     const m = selectedDate ? selectedDate.month() + 1 : null; // month เริ่มต้นที่ 0
 
+    const to2Decimal = v => Number(Number(v ?? 0).toFixed(2));
+
     const getDaysInMonth = (date) => {
         if (!date) return [];
         const d = dayjs(date);
@@ -219,12 +221,12 @@ const ReportGasStation = ({ openNavbar }) => {
 
             if (!p) return;
 
-            const sell = Number(p.Sell ?? 0);
-            const backyard = Number(p.BackyardSales ?? 0);
-            const fieldValue = Number(p[field] ?? 0);
+            const sell = to2Decimal(p.Sell ?? 0);
+            const backyard = to2Decimal(p.BackyardSales ?? 0);
+            const fieldValue = to2Decimal(p[field] ?? 0);
 
             const value = p.Backyard === true
-                ? sell - backyard
+                ? backyard
                 : fieldValue;
 
             result[d] += isNaN(value) ? 0 : value;
@@ -274,8 +276,8 @@ const ReportGasStation = ({ openNavbar }) => {
 
             if (!product) return sum;
 
-            const sell = Number(product.Sell ?? 0);
-            const backyard = Number(product.BackyardSales ?? 0);
+            const sell = to2Decimal(product.Sell ?? 0);
+            const backyard = to2Decimal(product.BackyardSales ?? 0);
 
             const value = product.Backyard === true
                 ? sell - backyard
@@ -302,7 +304,13 @@ const ReportGasStation = ({ openNavbar }) => {
 
             if (!product?.BackyardSales) return sum;
 
-            return sum + toNumber(product.BackyardSales);
+            // return sum + toNumber(product.BackyardSales);
+            const backyard = to2Decimal(product.BackyardSales ?? 0);
+            const value = product.Backyard === true
+                ? backyard
+                : 0;
+
+            return sum + (isNaN(value) ? 0 : value);
         }, 0);
     };
 
@@ -349,7 +357,7 @@ const ReportGasStation = ({ openNavbar }) => {
             return cbpData[stationId][py][pm][productIdx].Accumulate;
         }
 
-        const Accumulate = row.CBP?.[py]?.[pm]?.[productIdx]?.Accumulate ?? 0;
+        const Accumulate = row?.[py]?.[pm]?.[productIdx]?.Accumulate ?? 0;
 
         return Accumulate; // เดือนแรก Carry = 0
     };
@@ -442,7 +450,7 @@ const ReportGasStation = ({ openNavbar }) => {
                         year,
                         month,
                         prev,
-                        row
+                        row.CBP
                     );
 
                     const diff = (cbpOfMonth[idx]?.CBP ?? 0) - total;
@@ -451,10 +459,10 @@ const ReportGasStation = ({ openNavbar }) => {
                         ProductName: p.Name,
                         Color: p.Color,
                         CBP: cbpOfMonth[idx]?.CBP ?? 0,
-                        Total: cbpOfMonth[idx]?.Total ?? total,
+                        Total: total,
                         Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
-                        Carry: cbpOfMonth[idx]?.Carry ?? prevAcc,
-                        Accumulate: cbpOfMonth[idx]?.Accumulate ?? prevAcc + diff
+                        Carry: prevAcc,
+                        Accumulate: prevAcc + diff
                     };
                 });
 
@@ -509,7 +517,7 @@ const ReportGasStation = ({ openNavbar }) => {
                         year,
                         month,
                         prev,
-                        row
+                        row.Backyard
                     );
 
                     const cbpValue =
@@ -521,10 +529,10 @@ const ReportGasStation = ({ openNavbar }) => {
                         ProductName: p.Name,
                         Color: p.Color,
                         CBP: cbpOfMonth[idx]?.CBP ?? 0,
-                        Total: cbpOfMonth[idx]?.Total ?? total,
+                        Total: total,
                         Diff: (cbpOfMonth[idx]?.CBP ?? 0) - total,
-                        Carry: cbpOfMonth[idx]?.Carry ?? prevAcc,
-                        Accumulate: cbpOfMonth[idx]?.Accumulate ?? prevAcc + diff
+                        Carry: prevAcc,
+                        Accumulate: prevAcc + diff
                     };
                 });
 
@@ -736,11 +744,11 @@ const ReportGasStation = ({ openNavbar }) => {
                                         (acc, row) => {
                                             row.Products.forEach((_, idx) => {
                                                 const item = cbpData?.[row.id]?.[year]?.[month]?.[idx];
-                                                acc.total += Number(item?.Total ?? 0);
-                                                acc.cbp += Number(item?.CBP ?? 0);
-                                                acc.diff += Number(item?.Diff ?? 0);
-                                                acc.carry += Number(item?.Carry ?? 0);
-                                                acc.accumulate += Number(item?.Accumulate ?? 0);
+                                                acc.total += to2Decimal(item?.Total ?? 0);
+                                                acc.cbp += to2Decimal(item?.CBP ?? 0);
+                                                acc.diff += to2Decimal(item?.Diff ?? 0);
+                                                acc.carry += to2Decimal(item?.Carry ?? 0);
+                                                acc.accumulate += to2Decimal(item?.Accumulate ?? 0);
                                             });
                                             return acc;
                                         },
@@ -764,7 +772,7 @@ const ReportGasStation = ({ openNavbar }) => {
                                             );
 
                                             daysInMonth.forEach(d => {
-                                                dailySummaryByStock[d] += Number(dailyByProduct[d] ?? 0);
+                                                dailySummaryByStock[d] += to2Decimal(dailyByProduct[d] ?? 0);
                                             });
                                         });
                                     });
@@ -1006,11 +1014,11 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                         };
                                                                     }
 
-                                                                    stationSummary[row.id].total += Number(cbpItem?.Total ?? 0);
-                                                                    stationSummary[row.id].cbp += Number(cbpItem?.CBP ?? 0);
-                                                                    stationSummary[row.id].diff += Number(cbpItem?.Diff ?? 0);
-                                                                    stationSummary[row.id].carry += Number(cbpItem?.Carry ?? 0);
-                                                                    stationSummary[row.id].accumulate += Number(cbpItem?.Accumulate ?? 0);
+                                                                    stationSummary[row.id].total += to2Decimal(cbpItem?.Total ?? 0);
+                                                                    stationSummary[row.id].cbp += to2Decimal(cbpItem?.CBP ?? 0);
+                                                                    stationSummary[row.id].diff += to2Decimal(cbpItem?.Diff ?? 0);
+                                                                    stationSummary[row.id].carry += to2Decimal(cbpItem?.Carry ?? 0);
+                                                                    stationSummary[row.id].accumulate += to2Decimal(cbpItem?.Accumulate ?? 0);
 
                                                                     const summary = stationSummary[row.id] ?? {
                                                                         total: 0,
@@ -1272,11 +1280,11 @@ const ReportGasStation = ({ openNavbar }) => {
                                                                                         };
                                                                                     }
 
-                                                                                    stationSummaryBackyard[row.id].total += Number(backyardItem?.Total ?? 0);
-                                                                                    stationSummaryBackyard[row.id].cbp += Number(backyardItem?.CBP ?? 0);
-                                                                                    stationSummaryBackyard[row.id].diff += Number(backyardItem?.Diff ?? 0);
-                                                                                    stationSummaryBackyard[row.id].carry += Number(backyardItem?.Carry ?? 0);
-                                                                                    stationSummaryBackyard[row.id].accumulate += Number(backyardItem?.Accumulate ?? 0);
+                                                                                    stationSummaryBackyard[row.id].total += to2Decimal(backyardItem?.Total ?? 0);
+                                                                                    stationSummaryBackyard[row.id].cbp += to2Decimal(backyardItem?.CBP ?? 0);
+                                                                                    stationSummaryBackyard[row.id].diff += to2Decimal(backyardItem?.Diff ?? 0);
+                                                                                    stationSummaryBackyard[row.id].carry += to2Decimal(backyardItem?.Carry ?? 0);
+                                                                                    stationSummaryBackyard[row.id].accumulate += to2Decimal(backyardItem?.Accumulate ?? 0);
 
                                                                                     const summary = stationSummaryBackyard[row.id] ?? {
                                                                                         total: 0,

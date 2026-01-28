@@ -231,6 +231,16 @@ const ReportSmallTruck = () => {
   console.log("ticket : ", ticketsdetail?.filter((row) => row.CustomerType === "ตั๋วรถเล็ก"));
   console.log("selectOrder : ", selectOrder);
 
+  const customerMap = useMemo(() => {
+    const map = new Map();
+    customerB.forEach(c => {
+      if (c.StatusCompany === "อยู่บริษัทในเครือ") {
+        map.set(Number(c.id), c);
+      }
+    });
+    return map;
+  }, [customerB]);
+
   const matchedOrders = useMemo(() => {
     const normalizePlate = (text) => {
       const match = text?.match(/\d{1,2}-\d{3,4}/);
@@ -240,7 +250,7 @@ const ReportSmallTruck = () => {
     const selectedId = selectOrder?.id;
     if (selectedId === undefined || selectedId === null) return [];
 
-    const selectedRegHead = normalizePlate(selectOrder?.RegHead);
+    const selectedRegHead = selectOrder?.RegHead;
 
     // ✅ กรองเฉพาะ ticketsdetail
     const filteredTickets = ticketsdetail
@@ -271,40 +281,44 @@ const ReportSmallTruck = () => {
       .filter(Boolean); // ✅ ตัด null ออก
 
     // ✅ กรองเฉพาะ orders
-    const filteredOrders = orders.filter((order) => {
-      const orderDate = dayjs(order.Date, "DD/MM/YYYY");
-      const isInDateRange =
-        orderDate.isValid() &&
-        orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+    const filteredOrders = orders
+      .filter(order => {
+        const orderDate = dayjs(order.Date, "DD/MM/YYYY");
+        if (
+          !orderDate.isValid() ||
+          !orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+        ) return false;
 
-      if (!isInDateRange) return false;
-      if (order.Status !== "จัดส่งสำเร็จ") return false;
+        if (order.Status !== "จัดส่งสำเร็จ") return false;
 
-      const orderTicketId = order.TicketName?.split(":")[0];
-      if (!orderTicketId) return false;
-      if (Number(selectedId) === 0) return true;
+        const orderTicketId = Number(order.TicketName?.split(":")?.[0]);
+        if (!orderTicketId) return false;
 
-      // ✅ เฉพาะลูกค้ารถใหญ่ในเครือ
-      if (order.CustomerType === "ตั๋วรถใหญ่") {
-        const isInCompany = customerB.some(
-          (cust) =>
-            cust.StatusCompany === "อยู่บริษัทในเครือ" &&
-            cust.id.toString() === orderTicketId.toString()
-        );
-        if (!isInCompany) return false;
-      }
+        // console.log("order.TicketName : ", order.TicketName);
 
-      const orderRegHead = normalizePlate(order.TicketName?.split(":")[1] ?? "");
-      if (!selectedRegHead || !orderRegHead) return false;
+        if (Number(selectedId) === 0) return true;
 
-      return selectedRegHead === orderRegHead;
-    })
-      .map((o) => ({
+        const customer = customerB.find(b => b.id === orderTicketId);
+
+        const registration =
+          customer?.RegistrationCheck === true &&
+            typeof customer?.Registration === "string" &&
+            customer.Registration.trim() !== "" &&
+            customer.Registration.includes(":")
+            ? customer.Registration.split(":")[1].trim()
+            : "";
+
+        if (selectedRegHead == null) return true;
+
+        // console.log("Registration : ", selectedRegHead, registration);
+
+        return selectedRegHead === registration;
+      })
+      .map(o => ({
         ...o,
         sourceType: "order",
         type: "รับเข้า",
       }));
-
 
     // ✅ รวมผลลัพธ์ทั้งสอง
     return [...filteredTickets, ...filteredOrders];
@@ -651,7 +665,7 @@ const ReportSmallTruck = () => {
     // 2️⃣ Title row
     worksheet.mergeCells(1, 1, 1, worksheet.columns.length);
     const titleCell = worksheet.getCell("A1");
-    titleCell.value = "รายงานสรุปยอดน้ำมัน";
+    titleCell.value = `รายงานสรุปยอดน้ำมัน(${selectOrder.ShortName}${selectOrder.RegHead})`;
     titleCell.font = { size: 16, bold: true };
     titleCell.alignment = { horizontal: "center", vertical: "middle" };
     titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };

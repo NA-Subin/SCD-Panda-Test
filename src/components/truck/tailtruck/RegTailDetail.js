@@ -14,7 +14,6 @@ import {
   Grid,
   IconButton,
   InputLabel,
-  Link,
   MenuItem,
   Paper,
   Popover,
@@ -35,22 +34,21 @@ import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import InfoIcon from '@mui/icons-material/Info';
 import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import theme from "../../../theme/theme";
 import { IconButtonError, IconButtonSuccess, IconButtonWarning, RateOils, TablecellHeader } from "../../../theme/style";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { database } from "../../../server/firebase";
 import { ShowConfirm, ShowError, ShowSuccess } from "../../sweetalert/sweetalert";
-import UpdateRegHead from "./UpdateRegHead";
-import TruckRepair from "./TruckRepair";
 import { fetchRealtimeData } from "../../../server/data";
 import { useData } from "../../../server/path";
 import { useBasicData } from "../../../server/provider/BasicDataProvider";
+import UpdateRegTail from "./UpdateRegTail";
 
-const RegHeadDetail = (props) => {
+const RegTailDetail = (props) => {
   const { truck } = props;
 
   const [openTab, setOpenTab] = React.useState(true);
@@ -138,21 +136,16 @@ const RegHeadDetail = (props) => {
       return;
     }
 
-    if (t.Status !== "ว่าง") {
+    if (t.Status === "เชื่อมทะเบียนหัวแล้ว") {
       ShowError("ไม่สามารถลบได้ เนื่องจากรถไม่ได้อยู่ในสถานะว่าง");
       return;
     }
 
-    if (t.RegTail !== "0:ไม่มี") {
-      ShowError("ไม่สามารถลบได้ เนื่องจากรถมีการเชื่อมทะเบียนหางอยู่");
-      return;
-    }
-
     ShowConfirm(
-      `ต้องการลบทะเบียนรถ ${t.RegHead} ใช่หรือไม่`,
+      `ต้องการลบทะเบียนรถ ${t.RegTail} ใช่หรือไม่`,
       () => {
         database
-          .ref("/truck/registration/")
+          .ref("/truck/registrationTail/")
           .child(t.id - 1)
           .update({
             StatusTruck: "ยกเลิก",
@@ -166,7 +159,7 @@ const RegHeadDetail = (props) => {
           });
       },
       () => {
-        console.log(`ยกเลิกลบทะเบียนรถ ${t.RegHead}`);
+        console.log(`ยกเลิกลบทะเบียนรถ ${t.RegTail}`);
       }
     )
   }
@@ -184,118 +177,17 @@ const RegHeadDetail = (props) => {
         onClick={() => handleRowClick(truck)}
       >
         <TableCell sx={{ textAlign: "center" }}>{truck.id}</TableCell>
-        <TableCell sx={{
-          textAlign: "center",
-          position: "sticky",
-          left: 0,
-        }}>
-          <Box sx={{ backgroundColor: "white" }}>
-            {truck.RegHead}
-          </Box>
-        </TableCell>
-        {
-          setting.split(":")[1] === truck.RegTail ?
-            <TableCell
-              sx={{
-                textAlign: "center",
-                position: "sticky",
-                left: 140,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <Box sx={{ backgroundColor: "white" }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={8}>
-                    <Paper
-                      component="form">
-                      <Select
-                        id="demo-simple-select"
-                        value={tail}
-                        size="small"
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              '& .MuiMenuItem-root': {
-                                fontSize: "14px", // ขนาดตัวอักษรในรายการเมนู
-                              },
-                            },
-                          },
-                        }}
-                        sx={{ textAlign: "left", height: 25, fontSize: "14px" }}
-                        onChange={(e) =>
-                          setTail(e.target.value)}
-                        fullWidth
-                      >
-                        <MenuItem value={"ไม่มี:0:0:0"}>
-                          เลือกทะเบียน
-                        </MenuItem>
-                        {
-                          registrationTail.map((row) => (
-                            <MenuItem value={`${row.id}:${row.RegTail}:${row.Cap}:${row.Weight}`}>{row.RegTail}</MenuItem>
-                          ))
-                        }
-                      </Select>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={4} display="flex" justifyContent="center" alignItems="center">
-                    <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={() => setSetting("")}>
-                      <CancelIcon color="error" fontSize="12px" />
-                    </IconButton>
-                    <IconButton size="small" sx={{ marginTop: -0.5 }} onClick={handlePost}>
-                      <CheckCircleIcon color="success" fontSize="12px" />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </Box>
-            </TableCell>
-            :
-            <TableCell
-              sx={{
-                textAlign: "center",
-                position: "sticky",
-                left: 140,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <Box sx={{ backgroundColor: "white" }}>
-                {truck.RegTail === "0:ไม่มี" || truck.RegTail === "ไม่มี" ?
-                  <IconButton size="small" sx={{ marginTop: -0.5 }}
-                    onClick={() =>
-                      setSetting(truck.RegTail)
-                    }
-                  ><SettingsIcon color="warning" fontSize="12px" /></IconButton>
-                  : truck.RegTail.split(":")[1]}
-              </Box>
-            </TableCell>
-        }
+        <TableCell sx={{ textAlign: "center" }}>{truck.RegTail}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap1 === undefined ? "-" : truck.Cap1}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap2 === undefined ? "-" : truck.Cap2}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap3 === undefined ? "-" : truck.Cap3}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap4 === undefined ? "-" : truck.Cap4}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap5 === undefined ? "-" : truck.Cap5}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap6 === undefined ? "-" : truck.Cap6}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap7 === undefined ? "-" : truck.Cap7}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{truck.Cap8 === undefined ? "-" : truck.Cap8}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{new Intl.NumberFormat("en-US").format(truck.Weight)}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{truck.VehicleRegistration}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          {truck.Path ? (
-            <Link
-              href={truck.Path.startsWith("http") ? truck.Path : `https://${truck.Path}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="hover"
-            >
-              {truck.Path}
-            </Link>
-          ) : (
-            "-"
-          )}
-        </TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{truck.RepairTruck.split(":")[1]}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{truck.Status}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{truck.Company.split(":")[1]}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{truck.Driver === "ไม่มี" ? truck.Driver : truck.Driver.split(":")[1]}</TableCell>
         <TableCell
           sx={{
             backgroundColor: "white",
@@ -325,18 +217,16 @@ const RegHeadDetail = (props) => {
           </Box>
         </TableCell> */}
       </TableRow>
-      {
-        selectedTruck && (
-          <UpdateRegHead
-            truck={selectedTruck}
-            open={true}
-            type={"รายละเอียด"}
-            onClose={() => setSelectedTruck(null)}
-          />
-        )
-      }
-    </React.Fragment >
+      {selectedTruck && (
+        <UpdateRegTail
+          truck={selectedTruck}
+          open={true}
+          type={"รายละเอียด"}
+          onClose={() => setSelectedTruck(null)}
+        />
+      )}
+    </React.Fragment>
   );
 };
 
-export default RegHeadDetail;
+export default RegTailDetail;

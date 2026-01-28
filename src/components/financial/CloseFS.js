@@ -742,8 +742,6 @@ const CloseFS = ({ openNavbar }) => {
                     ? registrationH.find((h) => h.id === Number(ex.Registration.split(":")[0]))
                     : ex.TruckType === "หางรถใหญ่"
                         ? registrationS.find((h) => h.id === Number(ex.Registration.split(":")[0]))
-                        : ex.TruckType === "รถเล็ก"
-                            ? registrationSm.find((h) => h.id === Number(ex.Registration.split(":")[0]))
                             : false;
 
                 const rowDate = dayjs(ex.SelectedDateInvoice, "DD/MM/YYYY");
