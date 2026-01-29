@@ -23,7 +23,7 @@ export function buildPeriodsForYear(Y) {
     for (let M = 1; M <= 12; M++) {
         // งวดคี่ (2M - 1)
         const oddStart =
-            M === 1 ? makeDate(Y - 1, 12, 27) : makeDate(Y, M - 1, 27);
+            M === 1 ? makeDate(Y - 1, 12, 28) : makeDate(Y, M - 1, 28);
         const oddEnd = makeDate(Y, M, 11);
         periods.push({
             id: id++, // เก็บ id แล้วเพิ่ม
@@ -35,7 +35,7 @@ export function buildPeriodsForYear(Y) {
 
         // งวดคู่ (2M)
         const evenStart = makeDate(Y, M, 12);
-        const evenEnd = makeDate(Y, M, 26);
+        const evenEnd = makeDate(Y, M, 27);
         periods.push({
             id: id++, // เก็บ id แล้วเพิ่ม
             no: 2 * M,

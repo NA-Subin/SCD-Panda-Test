@@ -1946,7 +1946,6 @@ const Report = ({ openNavbar }) => {
                                           </TableCell>
                                           <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow.No === row.No) || (indexes === index)) && "bold" }}>
                                             {row.TicketName.split(":")[1]}
-                                            {Number(row.TotalAmount)}{totalIncomingMoney}
                                           </TableCell>
                                           <TableCell
                                             sx={{

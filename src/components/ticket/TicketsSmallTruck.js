@@ -841,7 +841,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
-                                                                row.Company ? row.Company.split(":")[1] : "ไม่มี"
+                                                                ((row.Company) ? (row.Company === "ไม่มี") ? "ไม่มี" : row.Company.split(":")[1] : "ไม่มี")
                                                                 :
                                                                 <Paper sx={{ width: "100%" }}>
                                                                     <TextField
