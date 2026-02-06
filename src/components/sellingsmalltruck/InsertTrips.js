@@ -85,9 +85,9 @@ const InsertTrips = () => {
     const [costTrip, setCostTrip] = React.useState(0);
 
     const { reghead, small, transport, drivers } = useBasicData();
-    const truckH = Object.values(reghead || {});
-    const truckS = Object.values(small || {});
-    const truckT = Object.values(transport || {});
+    const truckH = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const truckS = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const truckT = Object.values(transport || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const driver = Object.values(drivers || {});
 
     const driverDetail = driver.filter((row) => row.Registration === "0:ไม่มี" && (row.TruckType === "รถเล็ก" || row.TruckType === "รถใหญ่/รถเล็ก"));

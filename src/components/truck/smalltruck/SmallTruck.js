@@ -54,7 +54,7 @@ const SmallTruck = (props) => {
 
   // const { small } = useData();
   const { small } = useBasicData();
-  const truck = Object.values(small || {});
+  const truck = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
   const isMobile = useMediaQuery("(max-width:1100px)");
 

@@ -54,7 +54,7 @@ const BigTruckRegTail = (props) => {
 
   // const { regtail } = useData();
   const { regtail } = useBasicData();
-  const truck = Object.values(regtail || {});
+  const truck = Object.values(regtail || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
   const isMobile = useMediaQuery("(max-width:1100px)");
 

@@ -304,9 +304,9 @@ const InsertTrips = () => {
     };
 
     const { reghead, small, transport } = useBasicData();
-    const truckH = Object.values(reghead || {});
-    const truckS = Object.values(small || {});
-    const truckT = Object.values(transport || {});
+    const truckH = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const truckS = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const truckT = Object.values(transport || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
     const [orders, setOrders] = useState([]);
     const [data, setData] = useState([]);
@@ -739,7 +739,7 @@ const InsertTrips = () => {
         setCostTrip(Number(raw));
     };
 
-    console.log("cost trip : ",costTrip);
+    console.log("cost trip : ", costTrip);
 
     // ฟังก์ชันอัพเดตราคาใน ordersTickets เมื่อมีการเปลี่ยน depot
     const updateRatesByDepot = (selectedDepot) => {
@@ -1646,7 +1646,11 @@ const InsertTrips = () => {
                                             options={getDriver()}
                                             getOptionLabel={(option) =>
                                                 option.Type === "รถบริษัท" ?
-                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail.split(":")[1] : ""}`
+                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}${option.RegTail &&
+                                                        option.RegTail !== "0:ไม่มี"
+                                                        ? `/${option.RegTail.split(":")[1]}`
+                                                        : ""
+                                                    }`
                                                     :
                                                     `${option.Name ? option.Name : ""} ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`
                                             }
@@ -1689,7 +1693,11 @@ const InsertTrips = () => {
                                                 <li {...props}>
                                                     {
                                                         option.Type === "รถบริษัท" ?
-                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail.split(":")[1]}`}</Typography>
+                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}${option.RegTail &&
+                                                                    option.RegTail !== "0:ไม่มี"
+                                                                    ? `/${option.RegTail.split(":")[1]}`
+                                                                    : ""
+                                                                }`}</Typography>
                                                             :
                                                             <Typography fontSize="16px">{`${option.Name}  ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`}</Typography>
                                                     }
@@ -2339,7 +2347,11 @@ const InsertTrips = () => {
                                                         (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
                                                 );
                                                 return selectedItem && selectedItem.Type === "รถบริษัท"
-                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail.split(":")[1] : ""}`
+                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}${selectedItem.RegTail &&
+                                                                    selectedItem.RegTail !== "0:ไม่มี"
+                                                                    ? `/${selectedItem.RegTail.split(":")[1]}`
+                                                                    : ""
+                                                                }`
                                                     : selectedItem && selectedItem.Type === "รถรับจ้างขนส่ง"
                                                         ? `${selectedItem.Name ? selectedItem.Name : ""} ${selectedItem.Registration === "ไม่มี" ? "" : `:${selectedItem.Registration}`}`
                                                         : "";

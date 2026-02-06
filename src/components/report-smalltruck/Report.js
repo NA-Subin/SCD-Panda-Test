@@ -107,7 +107,7 @@ const ReportSmallTruck = () => {
   // const { company, drivers, typeFinancial, order, reghead, trip } = useData();
   const { company, drivers, small, customerbigtruck, customersmalltruck } = useBasicData();
   const { order, trip, typeFinancial, reghead, tickets } = useTripData();
-  const registrations = Object.values(reghead || {});
+  const registrations = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
   const ticketsdetail = Object.values(tickets || {}).filter(item => {
     const itemDate = dayjs(item.Date, "DD/MM/YYYY");
     return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
@@ -118,16 +118,16 @@ const ReportSmallTruck = () => {
   // const orders = Object.values(order || {});
   const orders = Object.values(order || {}).filter(item => {
     const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-    return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
+    return itemDate.isSameOrAfter(dayjs("01/12/2025", "DD/MM/YYYY"), 'day');
   });
   const customerB = Object.values(customerbigtruck || {});
   const customerS = Object.values(customersmalltruck || {});
-  const registration = Object.values(small || {});
+  const registration = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
   // const trips = Object.values(trip || {});
   const trips = Object.values(trip || {}).filter(item => {
     const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
     const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-    const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
+    const targetDate = dayjs("01/12/2025", "DD/MM/YYYY");
 
     return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
   });
@@ -171,20 +171,20 @@ const ReportSmallTruck = () => {
 
   const outboundList = orders
     .filter((trip) => {
-      const orderDate = dayjs(trip.Date, "DD/MM/YYYY");
-      const isInDateRange =
-        orderDate.isValid() &&
-        orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+      // const orderDate = dayjs(trip.Date, "DD/MM/YYYY");
+      // const isInDateRange =
+      //   orderDate.isValid() &&
+      //   orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
 
       if (
         trip.CustomerType !== "ตั๋วรถเล็ก" ||
-        trip.Status !== "จัดส่งสำเร็จ" ||
-        !isInDateRange
+        trip.Status !== "จัดส่งสำเร็จ"
+        // !isInDateRange
       ) {
         return false;
       }
 
-      if (Number(selectOrder?.id) === 0) {
+      if (selectOrder?.RegHead === "แสดงทั้งหมด" || Number(selectOrder?.id) === 0) {
         return true; // ✅ "แสดงทั้งหมด"
       }
 
@@ -247,7 +247,7 @@ const ReportSmallTruck = () => {
       return match ? match[0] : null;
     };
 
-    const selectedId = selectOrder?.id;
+    const selectedId = Number(selectOrder?.id);
     if (selectedId === undefined || selectedId === null) return [];
 
     const selectedRegHead = selectOrder?.RegHead;
@@ -258,16 +258,19 @@ const ReportSmallTruck = () => {
         const trip = trips.find((tp) => (tp.id - 1) === ticket.Trip && tp.TruckType === "รถเล็ก");
         if (!trip) return null;
 
-        const orderDate = dayjs(trip?.DateReceive, "DD/MM/YYYY");
-        const isInDateRange =
-          orderDate.isValid() &&
-          orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+        // const orderDate = dayjs(trip?.DateReceive, "DD/MM/YYYY");
+        // const isInDateRange =
+        //   orderDate.isValid() &&
+        //   orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
 
-        if (!isInDateRange) return null;
+        // if (!isInDateRange) return null;
         if (ticket.Status !== "จัดส่งสำเร็จ") return null;
 
-        const tripIdFromReg = Number(trip?.Registration?.split(":")[0]);
-        if (selectedId !== tripIdFromReg) return null;
+        // ✅ ถ้ายังไม่ได้เลือกทะเบียน → ผ่านได้
+        if (selectedRegHead !== "แสดงทั้งหมด" && Number(selectOrder) !== 0) {
+          const tripIdFromReg = Number(trip?.Registration?.split(":")[0]);
+          if (selectedId !== tripIdFromReg) return null;
+        }
 
         return {
           ...ticket,
@@ -283,36 +286,40 @@ const ReportSmallTruck = () => {
     // ✅ กรองเฉพาะ orders
     const filteredOrders = orders
       .filter(order => {
-        const orderDate = dayjs(order.Date, "DD/MM/YYYY");
-        if (
-          !orderDate.isValid() ||
-          !orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
-        ) return false;
-
         if (order.Status !== "จัดส่งสำเร็จ") return false;
 
         const orderTicketId = Number(order.TicketName?.split(":")?.[0]);
         if (!orderTicketId) return false;
 
-        // console.log("order.TicketName : ", order.TicketName);
-
-        if (Number(selectedId) === 0) return true;
-
+        // ================================
+        // 🔍 กรณีกรองตามทะเบียน
+        // ================================
         const customer = customerB.find(b => b.id === orderTicketId);
+        if (!customer) return false;
+        if (customer.RegistrationCheck !== true) return false;
+        if (customer?.Name !== order?.TicketName.split(":")[1]) return false;
 
-        const registration =
-          customer?.RegistrationCheck === true &&
-            typeof customer?.Registration === "string" &&
-            customer.Registration.trim() !== "" &&
+        if (selectedRegHead === "แสดงทั้งหมด" || Number(selectedId) === 0) {
+          return true;
+        }
+
+        // 1️⃣ ตรวจทะเบียนจาก order
+        const orderReg =
+          typeof order.Registration === "string" &&
+            order.Registration.includes(":")
+            ? order.Registration.split(":")[1].trim()
+            : "";
+
+        if (orderReg === selectedRegHead) return true;
+
+        // 2️⃣ ตรวจทะเบียนจาก customer
+        const customerReg =
+          typeof customer.Registration === "string" &&
             customer.Registration.includes(":")
             ? customer.Registration.split(":")[1].trim()
             : "";
 
-        if (selectedRegHead == null) return true;
-
-        // console.log("Registration : ", selectedRegHead, registration);
-
-        return selectedRegHead === registration;
+        return customerReg === selectedRegHead;
       })
       .map(o => ({
         ...o,
@@ -321,18 +328,65 @@ const ReportSmallTruck = () => {
       }));
 
     // ✅ รวมผลลัพธ์ทั้งสอง
-    return [...filteredTickets, ...filteredOrders];
+    let result = [...filteredTickets, ...filteredOrders];
+
+    const fixedCarryIn = {
+      id: "carry-2025-12-31",
+      Date: "31/12/2025",
+      Status: "จัดส่งสำเร็จ",
+      CustomerType: "ตั๋วรถใหญ่",
+      TicketName: "ยอดยกมา (ธันวาคม)",
+      Driver: "0:ยอดยกมา",
+      Registration: "1:71-1639",
+
+      Product: {
+        B7: {
+          Volume: 7
+        }
+      },
+
+      sourceType: "order",
+      type: "รับเข้า",
+    };
+
+    // const carryDate = dayjs(fixedCarryIn.Date, "DD/MM/YYYY");
+
+    // const isCarryInDateRange =
+    //   carryDate.isValid() &&
+    //   carryDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+
+    if (
+      selectedRegHead === "71-1639" ||
+      selectedRegHead === "แสดงทั้งหมด" ||
+      Number(selectedId) === 0
+    ) {
+      result = [fixedCarryIn, ...result];
+    }
+
+    return result;
   }, [orders, ticketsdetail, trips, customerB, selectedDateStart, selectedDateEnd, selectOrder]);
 
   const matchedOrdersWithAll = [...matchedOrders, ...outboundList]
-    .filter(item => dayjs(item.Date, "DD/MM/YYYY").isValid())
+    .filter(item => {
+      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+
+      if (
+        !itemDate.isValid() ||
+        !itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+      ) {
+        return false;
+      }
+
+      return true;
+    })
     .sort((a, b) =>
-      dayjs(a.Date, "DD/MM/YYYY").toDate() - dayjs(b.Date, "DD/MM/YYYY").toDate()
+      dayjs(a.Date, "DD/MM/YYYY").toDate() -
+      dayjs(b.Date, "DD/MM/YYYY").toDate()
     );
 
 
   console.log("Customer Details: ", customerDetails);
-  console.log("Matched Orders: ", matchedOrdersWithAll.filter((item) => item.type === "ส่งออก"));
+  console.log("Matched Orders: ", matchedOrdersWithAll);
 
   console.log("Order Filter : ", matchedOrders);
 
@@ -438,38 +492,50 @@ const ReportSmallTruck = () => {
       balance[key] = 0;
     });
 
-    // 🔒 cutoff = สิ้นวันก่อนหน้า
     const cutoff = dayjs(selectedDateStart)
       .subtract(1, "day")
       .endOf("day");
 
-    orders.forEach((order) => {
+    [...matchedOrders, ...outboundList].forEach((order) => {
       const orderDate = dayjs(order.Date, "DD/MM/YYYY");
       if (!orderDate.isValid()) return;
       if (orderDate.isAfter(cutoff)) return;
       if (order.Status !== "จัดส่งสำเร็จ") return;
 
-      const isInbound = order.CustomerType === "ตั๋วรถใหญ่";
-      const isOutbound = order.CustomerType === "ตั๋วรถเล็ก";
-      if (!isInbound && !isOutbound) return;
-
       Object.entries(order.Product || {})
-        .filter(([key]) => key !== "P")
+        .filter(([key]) => key !== "P") // ❌ ตัด P ออก
         .forEach(([key, product]) => {
-          const volume = Number(product?.Volume) || 0;
+          const volume = Number(
+            String(product?.Volume).replace(/,/g, "")
+          ) || 0;
 
-          if (isInbound) {
-            // รับเข้า = m³ → ลิตร
-            balance[key] += volume * 1000;
+          const liters =
+            order.sourceType === "order"
+              ? volume * 1000
+              : volume;
+
+          if (order.type === "รับเข้า") {
+            balance[key] = Number(balance[key]) + Number(liters);
           } else {
-            // ส่งออก = ลิตร
-            balance[key] -= volume;
+            balance[key] = Number(balance[key]) - Number(liters);
           }
         });
+
+      // Object.entries(order.Product || {})
+      //   .filter(([key]) => key !== "P")
+      //   .forEach(([key, product]) => {
+      //     const volume = Number(product?.Volume) || 0;
+
+      //     if (isInbound) {
+      //       balance[key] += volume;
+      //     } else {
+      //       balance[key] -= volume;
+      //     }
+      //   });
     });
 
     return { balance };
-  }, [orders, selectedDateStart]);
+  }, [matchedOrders, outboundList, selectedDateStart]);
 
   console.log("carryOverSummary inbound:", carryOverSummary.inbound);
   console.log("carryOverSummary outbound:", carryOverSummary.outbound);

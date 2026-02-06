@@ -126,10 +126,10 @@ const UpdateReport = (props) => {
 
         return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
     });
-    const registrationHead = Object.values(reghead || {});
+    const registrationHead = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {});
-    const transferMoneyDetail = Object.values(transferMoney || {});
+    const transferMoneyDetail = Object.values(transferMoney || {}).filter(row => row.Status !== "ยกเลิก");
     const invoiceDetail = Object.values(invoiceReport || {});
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);

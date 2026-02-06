@@ -91,7 +91,11 @@ const TripsDetail = (props) => {
                         const regName = trips.Registration?.split(":")[1] || trips.Registration || "";
 
                         if (trips.TruckType !== "รถรับจ้างขนส่ง") {
-                            return `${driverName}/${regHead} - ${regTail}`;
+                            return `${driverName}/${regHead}${regTail &&
+                                regTail !== "ไม่มี"
+                                ? `- ${regTail}`
+                                : ""
+                                }`;
                         } else {
                             return `${driverName}${regName !== "ไม่มี" ? `/${regName}` : ""}`;
                         }

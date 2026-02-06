@@ -140,9 +140,9 @@ const InsertTruck = (props) => {
     const { company, drivers, reghead, regtail, small } = useBasicData();
     const dataCompany = Object.values(company || {});
     const dataDrivers = Object.values(drivers || {});
-    const regheads = Object.values(reghead || {});
-    const regtails = Object.values(regtail || {});
-    const smalls = Object.values(small || {});
+    const regheads = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const regtails = Object.values(regtail || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const smalls = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
     const driverDetail = dataDrivers.filter((row) => row.Status === "ว่าง");
     const regtailsDetail = regtails.filter((row) => row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");

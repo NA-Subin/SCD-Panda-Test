@@ -61,7 +61,7 @@ const UpdateRegHead = (props) => {
 
     // const { regtail, company, drivers } = useData();
     const { regtail, company, drivers } = useBasicData();
-    const dataregtail = Object.values(regtail || {});
+    const dataregtail = Object.values(regtail || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const dataCompany = Object.values(company || {});
     const dataDrivers = Object.values(drivers || {});
     const registrationTail = dataregtail.filter(row => row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");

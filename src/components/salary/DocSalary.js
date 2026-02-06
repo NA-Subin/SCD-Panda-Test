@@ -116,8 +116,8 @@ const DocSalary = ({ openNavbar }) => {
         });
 
     const driver = Object.values(drivers || {});
-    const smalls = Object.values(small || {});
-    const registrationH = Object.values(reghead || {});
+    const smalls = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const registrationH = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const tripDetail = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
@@ -480,14 +480,34 @@ const DocSalary = ({ openNavbar }) => {
                     );
                     acc[col.id] = found
                         ? col.type === "รายได้"
-                            ? found.Money
-                            : -found.Money
-                        : "";
+                            ? Number(found.Money)
+                            : -Number(found.Money)
+                        : 0.00;
                     return acc;
                 }, {}),
                 total: total + costrip,
-                guarantee: moneyGuarantee.reduce((acc, d) => acc + Number(d.Money), 0),
-                loan: moneyLoan.reduce((acc, d) => acc + Number(d.Money), 0),
+                guarantee: moneyGuarantee.reduce((acc, doc) => {
+                    const value = Number(doc.Money) || 0;
+
+                    if (doc.Type === "รายได้") {
+                        return acc + value; // ✅ รายได้ = บวก
+                    } else if (doc.Type === "รายหัก") {
+                        return acc - value; // ✅ รายหัก = ลบ
+                    }
+
+                    return acc;
+                }, 0),
+                loan: moneyLoan.reduce((acc, doc) => {
+                    const value = Number(doc.Money) || 0;
+
+                    if (doc.Type === "รายได้") {
+                        return acc + value; // ✅ รายได้ = บวก
+                    } else if (doc.Type === "รายหัก") {
+                        return acc - value; // ✅ รายหัก = ลบ
+                    }
+
+                    return acc;
+                }, 0)
             };
 
             const newRow = worksheet.addRow(dataRow);
@@ -524,11 +544,31 @@ const DocSalary = ({ openNavbar }) => {
             ...dynamicTotals,
             total: processed.reduce((acc, p) => acc + p.total + p.costrip, 0),
             guarantee: processed.reduce(
-                (acc, p) => acc + p.moneyGuarantee.reduce((a, d) => a + Number(d.Money), 0),
+                (acc, p) => acc + p.moneyGuarantee.reduce((acc, doc) => {
+                    const value = Number(doc.Money) || 0;
+
+                    if (doc.Type === "รายได้") {
+                        return acc + value; // ✅ รายได้ = บวก
+                    } else if (doc.Type === "รายหัก") {
+                        return acc - value; // ✅ รายหัก = ลบ
+                    }
+
+                    return acc;
+                }, 0),
                 0
             ),
             loan: processed.reduce(
-                (acc, p) => acc + p.moneyLoan.reduce((a, d) => a + Number(d.Money), 0),
+                (acc, p) => acc + p.moneyLoan.reduce((acc, doc) => {
+                    const value = Number(doc.Money) || 0;
+
+                    if (doc.Type === "รายได้") {
+                        return acc + value; // ✅ รายได้ = บวก
+                    } else if (doc.Type === "รายหัก") {
+                        return acc - value; // ✅ รายหัก = ลบ
+                    }
+
+                    return acc;
+                }, 0),
                 0
             ),
         });

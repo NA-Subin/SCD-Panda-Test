@@ -34,6 +34,10 @@ import {
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import FolderOffIcon from '@mui/icons-material/FolderOff';
+import ImageIcon from "@mui/icons-material/Image";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -46,6 +50,7 @@ import { auth, database } from "../../server/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useData } from "../../server/path";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
+import FilePreview from "../truck/UploadButton";
 
 const InsertEmployee = (props) => {
     const { type, driver, officer, truck, smallTruck } = props;
@@ -62,6 +67,7 @@ const InsertEmployee = (props) => {
 
     console.log("Positions : ", positionDetail);
 
+    const [error, setError] = useState(false);
     const [open, setOpen] = React.useState(false);
     const [prefix, setPrefix] = React.useState(0);
     const [name, setName] = React.useState('');
@@ -81,6 +87,7 @@ const InsertEmployee = (props) => {
     const [bigTrucks, setBigTrucks] = useState(true);
     const [smallTrucks, setSmallTrucks] = useState(true);
 
+    console.log("user truck : ", `t${driver.length.toString().padStart(4, '0')}`);
     console.log(!bigTrucks && !smallTrucks ? "รถใหญ่/รถเล็ก" : !bigTrucks && smallTrucks ? "รถใหญ่" : bigTrucks && !smallTrucks ? "รถเล็ก" : "กรุณาเลือกประเภทรถ")
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
@@ -115,16 +122,19 @@ const InsertEmployee = (props) => {
     const [deposit, setDeposit] = React.useState("");
     const [loan, setLoan] = React.useState("");
     const [drivingLicense, setDrivingLicense] = React.useState("");
-    const [expiration, setExpiration] = React.useState("");
+    const [expiration, setExpiration] = React.useState(dayjs(new Date).format("DD/MM/YYYY"));
     const [gasStations, setGasStations] = useState("0:0");
     const [telephoneBill, setTelephoneBill] = useState("");
 
-    const [position, setPosition] = React.useState("0:0");
+    const [position, setPosition] = React.useState(type === 1 ? "4:พนักงานขับรถ" : "0:0");
     const [newPosition, setNewPosition] = React.useState("");
     const [phone, setPhone] = React.useState("");
     const [password, setPassword] = React.useState("1234567")
     const [openPosition, setOpenPosition] = React.useState(false);
     const [check, setCheck] = React.useState(1);
+
+    const [file, setFile] = useState("ไม่แนบไฟล์");
+    const [fileType, setFileType] = useState(1);
 
     const handleAddPosition = () => {
         database
@@ -154,134 +164,196 @@ const InsertEmployee = (props) => {
             });
     }
 
-    const handlePost = () => {
-        if (position.split(":")[0] !== "5") {
-            createUserWithEmailAndPassword(auth, (user + "@gmail.com"), password).then(
-                (userCredential) => {
-                    database
-                        .ref("employee/officers/")
-                        .child(officer.length)
-                        .update({
-                            id: officer.length + 1,
-                            Name: name + " " + lastname,
-                            User: user,
-                            Password: password,
-                            Position: position,
-                            Phone: phone,
-                            GasStation: gasStations,
-                            Rights: check === 1 ? "แอดมิน" : check === 2 ? "หน้าลาน" : check === 3 ? "เจ้าหนี้น้ำมัน" : ""
-                        })
-                        .then(() => {
-                            ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                            console.log("Data pushed successfully");
-                            //setPrefix("");
-                            setName("");
-                            setLastname("");
-                            setUser("");
-                            setPosition("");
-                            setPhone("");
-                            setGasStations("");
-                        })
-                        .catch((error) => {
-                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                            console.error("Error pushing data:", error);
-                        });
-                }
-            )
-        } else {
-            createUserWithEmailAndPassword(auth, (`t${driver.length.toString().padStart(4, '0')}` + "@gmail.com"), password).then(
-                (userCredential) => {
-                    database
-                        .ref("employee/drivers/")
-                        .child(driver.length)
-                        .update({
-                            id: driver.length + 1,
-                            Name: name + " " + lastname,
-                            User: `t${driver.length.toString().padStart(4, '0')}`,
-                            Password: password,
-                            Phone: phone,
-                            Registration: `${regTruck.split(":")[0]}:${regTruck.split(":")[1]}`,
-                            BankID: bankID,
-                            BankName: bank,
-                            IDCard: idCard,
-                            Position: position,
-                            Salary: salary,
-                            TripCost: tripCost,
-                            PointCost: pointCost,
-                            Security: security,
-                            TelephoneBill: telephoneBill,
-                            TruckType: !bigTrucks && !smallTrucks ? "รถใหญ่/รถเล็ก" : !bigTrucks && smallTrucks ? "รถใหญ่" : bigTrucks && !smallTrucks ? "รถเล็ก" : "",
-                            Deposit: deposit,
-                            Loan: loan,
-                            DrivingLicense: drivingLicense,
-                            DrivingLicenseExpiration: expiration,
-                            DrivingLicensePicture: "ไม่มี"
-                        })
-                        .then(() => {
-                            if (regTruck.split(":")[2] === "รถใหญ่" && regTruck !== "0:ไม่มี") {
-                                database
-                                    .ref("/truck/registration/")
-                                    .child(regTruck.split(":")[0] - 1)
-                                    .update({
-                                        Driver: name + " " + lastname,
-                                    })
-                                    .then(() => {
-                                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                                        console.log("Data pushed successfully");
-                                    })
-                                    .catch((error) => {
-                                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                        console.error("Error pushing data:", error);
-                                    });
-                            } else if (regTruck.split(":")[2] === "รถเล็ก" && regTruck !== "0:ไม่มี") {
-                                database
-                                    .ref("/truck/small/")
-                                    .child(regTruck.split(":")[0] - 1)
-                                    .update({
-                                        Driver: name + " " + lastname,
-                                    })
-                                    .then(() => {
-                                        ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                                        console.log("Data pushed successfully");
-                                    })
-                                    .catch((error) => {
-                                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                                        console.error("Error pushing data:", error);
-                                    });
-                            } else {
+    const handleDateChange = (newDate) => {
+        setExpiration(newDate);
+    };
 
-                            }
-                            ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                            console.log("Data pushed successfully");
-                            //setPrefix("");
-                            setName("");
-                            setLastname("");
-                            setRegTruck("");
-                            setBankID("");
-                            setBank("");
-                            setIDCard("");
-                            setSalary("");
-                            setTripCost("");
-                            setPointCost("");
-                            setSecurity("");
-                            setTrucks("");
-                            setDeposit("");
-                            setLoan("");
-                            setDrivingLicense("");
-                            setExpiration("");
-                            setPhone("");
-                            setUser("");
-                            setTelephoneBill("");
-                        })
-                        .catch((error) => {
-                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                            console.error("Error pushing data:", error);
+    const handlePost = async () => {
+        try {
+
+            if (phone.trim() === "" || name.trim() === "" || lastname.trim() === "" || idCard.trim() === "" || user.trim() === "" || bankID.trim() === "" || bank.trim() === "" || salary.trim() === "" || tripCost.trim() === "" || pointCost.trim() === "" || security.trim() === "" || deposit.trim() === "" || loan.trim() === "" || drivingLicense.trim() === "") {
+                setError(true);
+                return; // ❌ ไม่ให้บันทึก
+            }
+            let email = "";
+
+            // =======================
+            // OFFICER
+            // =======================
+            if (position.split(":")[1] !== "พนักงานขับรถ") {
+
+                if (!user || user.trim() === "") {
+                    ShowError("กรุณากรอก User");
+                    return;
+                }
+
+                email = `${user.trim()}@gmail.com`;
+
+                createUserWithEmailAndPassword(auth, (email), password).then(
+                    (userCredential) => {
+                        database
+                            .ref("employee/officers/")
+                            .child(officer.length)
+                            .update({
+                                id: officer.length + 1,
+                                Name: name + " " + lastname,
+                                User: user,
+                                Password: password,
+                                Position: position,
+                                Phone: phone,
+                                GasStation: gasStations,
+                                Rights: check === 1 ? "แอดมิน" : check === 2 ? "หน้าลาน" : check === 3 ? "เจ้าหนี้น้ำมัน" : ""
+                            })
+                            .then(() => {
+                                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                                console.log("Data pushed successfully");
+                                //setPrefix("");
+                                setName("");
+                                setLastname("");
+                                setUser("");
+                                setPosition("");
+                                setPhone("");
+                                setGasStations("");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                    }
+                )
+
+            } else {
+
+                if (!Array.isArray(driver)) {
+                    ShowError("ข้อมูล driver ยังไม่พร้อม");
+                    return;
+                }
+
+                if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
+
+                let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
+
+                // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
+                if (file !== "ไม่แนบไฟล์") {
+                    const formData = new FormData();
+                    formData.append("pic", file);
+
+                    try {
+                        const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
+                            method: "POST",
+                            body: formData,
                         });
-                })
+
+                        const data = await response.json();
+                        img = data.file_path;
+                    } catch (err) {
+                        console.error("Upload failed:", err);
+                    }
+                }
+
+                email = `t${String(driver.length).padStart(4, "0")}@gmail.com`;
+                createUserWithEmailAndPassword(auth, (`t${driver.length.toString().padStart(4, '0')}@gmail.com`), password).then(
+                    (userCredential) => {
+                        database
+                            .ref("employee/drivers/")
+                            .child(driver.length)
+                            .update({
+                                id: driver.length + 1,
+                                Name: name + " " + lastname,
+                                User: `t${driver.length.toString().padStart(4, '0')}`,
+                                Password: password,
+                                Phone: phone,
+                                Registration: `${regTruck.split(":")[0]}:${regTruck.split(":")[1]}`,
+                                BankID: bankID,
+                                BankName: bank,
+                                IDCard: idCard,
+                                Position: position,
+                                Salary: salary,
+                                TripCost: tripCost,
+                                PointCost: pointCost,
+                                Security: security,
+                                TelephoneBill: telephoneBill,
+                                TruckType: !bigTrucks && !smallTrucks ? "รถใหญ่/รถเล็ก" : !bigTrucks && smallTrucks ? "รถใหญ่" : bigTrucks && !smallTrucks ? "รถเล็ก" : "",
+                                Deposit: deposit,
+                                Loan: loan,
+                                DrivingLicense: drivingLicense,
+                                DrivingLicenseExpiration: expiration === "ไม่มี" ? "ไม่มี" : dayjs(expiration).format("DD/MM/YYYY"),
+                                DrivingLicensePicture: img,
+                            })
+                            .then(() => {
+                                if (regTruck.split(":")[2] === "รถใหญ่" && regTruck !== "0:ไม่มี") {
+                                    database
+                                        .ref("/truck/registration/")
+                                        .child(regTruck.split(":")[0] - 1)
+                                        .update({
+                                            Driver: name + " " + lastname,
+                                        })
+                                        .then(() => {
+                                            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                            console.log("Data pushed successfully");
+                                        })
+                                        .catch((error) => {
+                                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                            console.error("Error pushing data:", error);
+                                        });
+                                } else if (regTruck.split(":")[2] === "รถเล็ก" && regTruck !== "0:ไม่มี") {
+                                    database
+                                        .ref("/truck/small/")
+                                        .child(regTruck.split(":")[0] - 1)
+                                        .update({
+                                            Driver: name + " " + lastname,
+                                        })
+                                        .then(() => {
+                                            ShowSuccess("แก้ไขข้อมูลสำเร็จ");
+                                            console.log("Data pushed successfully");
+                                        })
+                                        .catch((error) => {
+                                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                            console.error("Error pushing data:", error);
+                                        });
+                                } else {
+
+                                }
+                                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                                console.log("Data pushed successfully");
+                                //setPrefix("");
+                                setName("");
+                                setLastname("");
+                                setRegTruck("");
+                                setBankID("");
+                                setBank("");
+                                setIDCard("");
+                                setSalary("");
+                                setTripCost("");
+                                setPointCost("");
+                                setSecurity("");
+                                setTrucks("");
+                                setDeposit("");
+                                setLoan("");
+                                setDrivingLicense("");
+                                setExpiration("");
+                                setPhone("");
+                                setUser("");
+                                setTelephoneBill("");
+                            })
+                            .catch((error) => {
+                                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                                console.error("Error pushing data:", error);
+                            });
+                    })
+            }
+        } catch (error) {
+            console.error(error);
+
+            if (error.code === "auth/invalid-email") {
+                ShowError("Email ไม่ถูกต้อง กรุณาตรวจสอบ user");
+            } else {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+            }
         }
     };
 
-    console.log("registration Truck ",regTruck);
+    console.log("registration Truck ", regTruck);
 
     return (
         <React.Fragment>
@@ -346,7 +418,20 @@ const InsertEmployee = (props) => {
                         <Grid item md={4} xs={9}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+                                    {/* <TextField size="small" fullWidth value={name} onChange={(e) => setName(e.target.value)} /> */}
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        value={name}
+                                        onChange={(e) => {
+                                            setName(e.target.value);
+                                            if (e.target.value.trim() !== "") {
+                                                setError(false);
+                                            }
+                                        }}
+                                        error={error}
+                                        helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                    />
                                 </Paper>
                             </Box>
                         </Grid>
@@ -356,7 +441,20 @@ const InsertEmployee = (props) => {
                         <Grid item md={4} xs={9}>
                             <Box display="flex" justifyContent="center" alignItems="center">
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} />
+                                    {/* <TextField size="small" fullWidth value={lastname} onChange={(e) => setLastname(e.target.value)} /> */}
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        value={lastname}
+                                        onChange={(e) => {
+                                            setLastname(e.target.value);
+                                            if (e.target.value.trim() !== "") {
+                                                setError(false);
+                                            }
+                                        }}
+                                        error={error}
+                                        helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                    />
                                 </Paper>
                             </Box>
                         </Grid>
@@ -368,7 +466,19 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                            <TextField size="small" fullWidth value={user} onChange={(e) => setUser(e.target.value)} />
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={user}
+                                                onChange={(e) => {
+                                                    setUser(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                 </>
@@ -380,7 +490,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form" sx={{ width: "100%" }}>
-                                            <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={idCard} onChange={(e) => setIDCard(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={idCard}
+                                                onChange={(e) => {
+                                                    setIDCard(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                 </>
@@ -412,7 +535,19 @@ const InsertEmployee = (props) => {
                         </Grid>
                         <Grid item md={4} xs={9}>
                             <Paper component="form" sx={{ width: "100%" }}>
-                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    value={phone}
+                                    onChange={(e) => {
+                                        setPhone(e.target.value);
+                                        if (e.target.value.trim() !== "") {
+                                            setError(false);
+                                        }
+                                    }}
+                                    error={error}
+                                    helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                />
                             </Paper>
                         </Grid>
                         <Grid item md={2} xs={3}>
@@ -731,7 +866,20 @@ const InsertEmployee = (props) => {
                                     <Grid item md={4} xs={9}>
                                         <Box display="flex" justifyContent="center" alignItems="center">
                                             <Paper component="form" sx={{ width: "100%" }}>
-                                                <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                                {/* <TextField size="small" fullWidth value={phone} onChange={(e) => setPhone(e.target.value)} /> */}
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    value={phone}
+                                                    onChange={(e) => {
+                                                        setPhone(e.target.value);
+                                                        if (e.target.value.trim() !== "") {
+                                                            setError(false);
+                                                        }
+                                                    }}
+                                                    error={error}
+                                                    helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                                />
                                             </Paper>
                                         </Box>
                                     </Grid>
@@ -745,7 +893,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={bankID} onChange={(e) => setBankID(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={bankID} onChange={(e) => setBankID(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={bankID}
+                                                onChange={(e) => {
+                                                    setBankID(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -753,7 +914,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={bank} onChange={(e) => setBank(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={bank} onChange={(e) => setBank(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={bank}
+                                                onChange={(e) => {
+                                                    setBank(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -761,7 +935,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={salary} onChange={(e) => setSalary(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={salary} onChange={(e) => setSalary(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={salary}
+                                                onChange={(e) => {
+                                                    setSalary(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -769,7 +956,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={security} onChange={(e) => setSecurity(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={security} onChange={(e) => setSecurity(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={security}
+                                                onChange={(e) => {
+                                                    setSecurity(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -777,7 +977,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={tripCost} onChange={(e) => setTripCost(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={tripCost} onChange={(e) => setTripCost(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={tripCost}
+                                                onChange={(e) => {
+                                                    setTripCost(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -785,7 +998,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={pointCost} onChange={(e) => setPointCost(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={pointCost} onChange={(e) => setPointCost(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={pointCost}
+                                                onChange={(e) => {
+                                                    setPointCost(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -793,7 +1019,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={telephoneBill} onChange={(e) => setTelephoneBill(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={telephoneBill} onChange={(e) => setTelephoneBill(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={telephoneBill}
+                                                onChange={(e) => {
+                                                    setTelephoneBill(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -801,7 +1040,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={deposit} onChange={(e) => setDeposit(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={deposit} onChange={(e) => setDeposit(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={deposit}
+                                                onChange={(e) => {
+                                                    setDeposit(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
@@ -809,7 +1061,20 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={loan} onChange={(e) => setLoan(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={loan} onChange={(e) => setLoan(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={loan}
+                                                onChange={(e) => {
+                                                    setLoan(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={6} xs={12} />
@@ -823,19 +1088,195 @@ const InsertEmployee = (props) => {
                                     </Grid>
                                     <Grid item md={4} xs={9}>
                                         <Paper component="form">
-                                            <TextField size="small" fullWidth value={drivingLicense} onChange={(e) => setDrivingLicense(e.target.value)} />
+                                            {/* <TextField size="small" fullWidth value={drivingLicense} onChange={(e) => setDrivingLicense(e.target.value)} /> */}
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                value={drivingLicense}
+                                                onChange={(e) => {
+                                                    setDrivingLicense(e.target.value);
+                                                    if (e.target.value.trim() !== "") {
+                                                        setError(false);
+                                                    }
+                                                }}
+                                                error={error}
+                                                helperText={error ? "กรุณากรอกข้อมูล/กรณีไม่มีข้อมูลให้กรอก - " : ""}
+                                            />
                                         </Paper>
                                     </Grid>
                                     <Grid item md={2} xs={3}>
                                         <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} gutterBottom>วันหมดอายุ</Typography>
                                     </Grid>
                                     <Grid item md={4} xs={9}>
-                                        <Paper component="form">
-                                            <TextField size="small" fullWidth value={expiration} onChange={(e) => setExpiration(e.target.value)} />
-                                        </Paper>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DatePicker
+                                                openTo="day"
+                                                views={["year", "month", "day"]}
+                                                value={dayjs(expiration === "ไม่มี" ? new Date : expiration).locale("th")}
+                                                format="DD/MM/YYYY"
+                                                slotProps={{ textField: { variant: "standard", size: "medium" } }}
+                                                sx={{ backgroundColor: theme.palette.primary.contrastText, height: "45px", width: "100%", mt: 1 }}
+                                                onChange={handleDateChange}
+                                            />
+                                        </LocalizationProvider>
                                     </Grid>
                                     <Grid item md={12} xs={12}>
-                                        <UploadButton />
+                                        <Divider>
+                                            <Chip label="เพิ่มไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -0.5, marginBottom: 1 }} />
+                                        </Divider>
+                                        {
+                                            file === "ไม่แนบไฟล์" ?
+                                                <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
+                                                    <Button
+                                                        variant="contained"
+                                                        component="label"
+                                                        size="small"
+                                                        fullWidth
+                                                        sx={{
+                                                            height: "50px",
+                                                            backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
+                                                            borderRadius: 2,
+                                                        }}
+                                                        onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
+                                                    >
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            fontWeight="bold"
+                                                            color={fileType === 1 ? "white" : "lightgray"}
+                                                            sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
+                                                            gutterBottom
+                                                        >
+                                                            ไม่แนบไฟล์
+                                                        </Typography>
+                                                        <FolderOffIcon
+                                                            sx={{
+                                                                fontSize: 30,
+                                                                color: fileType === 1 ? "white" : "lightgray",
+                                                                marginLeft: 0.5,
+                                                            }}
+                                                        />
+                                                    </Button>
+                                                    {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
+                                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                    <Button
+                                                        variant="contained"
+                                                        component="label"
+                                                        size="small"
+                                                        fullWidth
+                                                        sx={{
+                                                            height: "50px",
+                                                            backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
+                                                            borderRadius: 2,
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                        }}
+                                                        onClick={() => setFileType(2)}
+                                                    >
+                                                        <Typography
+                                                            variant="h6"
+                                                            fontWeight="bold"
+                                                            color={fileType === 2 ? "white" : "lightgray"}
+                                                            gutterBottom
+                                                        >
+                                                            PDF
+                                                        </Typography>
+                                                        <PictureAsPdfIcon
+                                                            sx={{
+                                                                fontSize: 40,
+                                                                color: fileType === 2 ? "white" : "lightgray",
+                                                                marginLeft: 0.5,
+                                                            }}
+                                                        />
+                                                        <input
+                                                            type="file"
+                                                            hidden
+                                                            accept="application/pdf"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (file) setFile(file);
+                                                            }}
+                                                        />
+                                                    </Button>
+                                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                    <Button
+                                                        variant="contained"
+                                                        component="label"
+                                                        size="small"
+                                                        fullWidth
+                                                        sx={{
+                                                            height: "50px",
+                                                            backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
+                                                            borderRadius: 2,
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                        }}
+                                                        onClick={() => setFileType(3)}
+                                                    >
+                                                        <Typography
+                                                            variant="h6"
+                                                            fontWeight="bold"
+                                                            color={fileType === 3 ? "white" : "lightgray"}
+                                                            gutterBottom
+                                                        >
+                                                            รูปภาพ
+                                                        </Typography>
+                                                        <ImageIcon
+                                                            sx={{
+                                                                fontSize: 40,
+                                                                color: fileType === 3 ? "white" : "lightgray",
+                                                                marginLeft: 0.5,
+                                                            }}
+                                                        />
+                                                        <input
+                                                            type="file"
+                                                            hidden
+                                                            accept="image/*"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (file) setFile(file);
+                                                            }}
+                                                        />
+                                                    </Button>
+                                                </Box>
+                                                :
+                                                <Box textAlign="center">
+                                                    {/* <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={file.name}
+                                                                        sx={{ marginRight: 2 }}
+                                                                    /> */}
+
+                                                    <Box display="flex" alignItems="center" justifyContent="center" >
+                                                        <FilePreview file={file} />
+                                                        <Button variant="outlined" color="error" size="small" sx={{ marginLeft: 2 }} onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}>
+                                                            <DeleteForeverIcon />
+                                                        </Button>
+                                                    </Box>
+                                                    <Box textAlign="center">
+                                                        <Typography variant="subtitle1" gutterBottom>{file.name}</Typography>
+                                                    </Box>
+                                                </Box>
+                                            // <Box sx={{
+                                            //     display: "flex",
+                                            //     alignItems: "center",
+                                            //     justifyContent: "space-between", // ช่วยแยกซ้ายขวา
+                                            //     paddingLeft: 12,
+                                            // }}>
+                                            //     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                            //         File : {file.name}
+                                            //     </Typography>
+                                            //     {/* <IconButton color="error" onClick={() => { setFile(null); setFileType(null); }}>
+                                            //         <DeleteForeverIcon />
+                                            //     </IconButton> */}
+                                            //     <Button variant="outlined" color="error" size="small" onClick={() => { setFile(null); setFileType(null); }}>
+                                            //         ลบไฟล์
+                                            //     </Button>
+                                            // </Box>
+                                        }
                                     </Grid>
                                 </>
                                 : position.split(":")[0] === "6" ?

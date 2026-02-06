@@ -163,10 +163,10 @@ const ReportTransports = ({ openNavbar }) => {
     const { drivers, customertransports, reghead, regtail, small, transport, } = useBasicData();
     const { tickets, transferMoney, trip } = useTripData();
 
-    const registrationH = Object.values(reghead);
-    const registrationT = Object.values(transport);
-    const registrationS = Object.values(regtail);
-    const registrationSm = Object.values(small);
+    const registrationH = Object.values(reghead).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const registrationT = Object.values(transport).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const registrationS = Object.values(regtail).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const registrationSm = Object.values(small).filter((item) => item.StatusTruck !== "ยกเลิก");
     // const ticket = Object.values(tickets || {});
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
@@ -210,7 +210,7 @@ const ReportTransports = ({ openNavbar }) => {
     const registration = Object.values(reghead || {});
     const transferMoneyDetail = Object.values(transferMoney || {}).filter(item => {
         const itemDate = dayjs(item.DateStart, "DD/MM/YYYY");
-        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
+        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day') && item.Status !== "ยกเลิก";
     });
 
     console.log("1.Orders : ", ticket);
@@ -499,13 +499,36 @@ const ReportTransports = ({ openNavbar }) => {
             // รวม IncomingMoney ของ TicketName นี้แค่ครั้งเดียว
             let totalIncomingMoney = 0;
             if (!processedTickets.has(item.TicketName)) {
-                const matchedTrans = transferMoneyDetail.filter((t) =>
-                    check === "0:ทั้งหมด"
-                        ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก")
-                        : check === "4:รถรับจ้างขนส่ง"
-                            ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && item.Registration === "1:ไม่มี")
-                            : (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && t.Transport === check)
-                );
+                // const matchedTrans = transferMoneyDetail.filter((t) =>
+                //     check === "0:ทั้งหมด"
+                //         ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก")
+                //         : check === "4:รถรับจ้างขนส่ง"
+                //             ? (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && item.Registration === "1:ไม่มี")
+                //             : (t.TicketName === item.TicketName && t.TicketType === item.CustomerType && t.Status !== "ยกเลิก" && t.Transport === check)
+                // );
+
+                const matchedTrans = transferMoneyDetail.filter((t) => {
+                    const selectedMonth = Number(
+                        t.month?.split("_")?.[0]?.split("-")?.[1]
+                    );
+                    // ถ้า record ไม่มี month → ตัดทิ้ง
+                    if ((Number(month) + 1) !== selectedMonth) return false;
+
+                    const baseCondition =
+                        t.TicketName === item.TicketName &&
+                        t.TicketType === item.CustomerType &&
+                        t.Status !== "ยกเลิก";
+
+                    if (check === "0:ทั้งหมด") {
+                        return baseCondition;
+                    }
+
+                    if (check === "4:รถรับจ้างขนส่ง") {
+                        return baseCondition && item.Registration === "1:ไม่มี";
+                    }
+
+                    return baseCondition && t.Transport === check;
+                });
 
                 totalIncomingMoney = matchedTrans.reduce((sum, t) => {
                     const money = parseFloat((t.IncomingMoney || "0").toString().replace(/,/g, "").trim());

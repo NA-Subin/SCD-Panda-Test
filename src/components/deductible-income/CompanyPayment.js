@@ -262,25 +262,27 @@ const CompanyPayment = ({ openNavbar }) => {
                                     }
                                     {
                                         open &&
-                                        <TableRow>
-                                            <TableCell sx={{ textAlign: "center" }}>{companypayments.length + 1}</TableCell>
+                                        <TableRow sx={{ backgroundColor: "#c5cae9" }}>
+                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{companypayments.length + 1}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>
-                                                <TextField
-                                                    fullWidth
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    size="small"
-                                                    sx={{
-                                                        '& .MuiInputBase-root': {
-                                                            height: 30, // ปรับความสูงรวม
-                                                        },
-                                                        '& .MuiInputBase-input': {
-                                                            padding: '4px 8px', // ปรับ padding ด้านใน input
-                                                            fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
-                                                        },
-                                                    }}
-                                                    InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
-                                                />
+                                                <Paper>
+                                                    <TextField
+                                                        fullWidth
+                                                        value={name}
+                                                        onChange={(e) => setName(e.target.value)}
+                                                        size="small"
+                                                        sx={{
+                                                            '& .MuiInputBase-root': {
+                                                                height: 30, // ปรับความสูงรวม
+                                                            },
+                                                            '& .MuiInputBase-input': {
+                                                                padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                                fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                                            },
+                                                        }}
+                                                        InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
+                                                    />
+                                                </Paper>
                                             </TableCell>
                                         </TableRow>
                                     }

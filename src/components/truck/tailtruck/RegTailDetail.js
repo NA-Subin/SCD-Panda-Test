@@ -92,7 +92,7 @@ const RegTailDetail = (props) => {
 
   // const { regtail } = useData();
   const { regtail } = useBasicData();
-  const dataregtail = Object.values(regtail || {});
+  const dataregtail = Object.values(regtail || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
   const registrationTail = dataregtail.filter(row => row.Status && row.Status === "ยังไม่ได้เชื่อมต่อทะเบียนหัว");
 
   // useEffect(() => {

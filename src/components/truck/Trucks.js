@@ -60,9 +60,9 @@ const Trucks = ({ openNavbar }) => {
 
   // const { reghead,regtail,small } = useData();
   const { reghead, regtail, small } = useBasicData();
-  const datareghead = Object.values(reghead || {});
-  const dataregtail = Object.values(regtail || {});
-  const datasmall = Object.values(small || {});
+  const datareghead = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+  const dataregtail = Object.values(regtail || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+  const datasmall = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 

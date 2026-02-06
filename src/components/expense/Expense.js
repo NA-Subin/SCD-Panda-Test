@@ -332,46 +332,50 @@ const ExpenseDetail = ({ openNavbar }) => {
                                     }
                                     {
                                         open &&
-                                        <TableRow>
-                                            <TableCell sx={{ textAlign: "center" }}>{expenseitem.length + 1}</TableCell>
+                                        <TableRow sx={{ backgroundColor: "#c5cae9" }}>
+                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{expenseitem.length + 1}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>
-                                                <TextField
-                                                    fullWidth
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    size="small"
-                                                    sx={{
-                                                        '& .MuiInputBase-root': {
-                                                            height: 30, // ปรับความสูงรวม
-                                                        },
-                                                        '& .MuiInputBase-input': {
-                                                            padding: '4px 8px', // ปรับ padding ด้านใน input
-                                                            fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
-                                                        },
-                                                    }}
-                                                    InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
-                                                />
+                                                <Paper>
+                                                    <TextField
+                                                        fullWidth
+                                                        value={name}
+                                                        onChange={(e) => setName(e.target.value)}
+                                                        size="small"
+                                                        sx={{
+                                                            '& .MuiInputBase-root': {
+                                                                height: 30, // ปรับความสูงรวม
+                                                            },
+                                                            '& .MuiInputBase-input': {
+                                                                padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                                fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                                            },
+                                                        }}
+                                                        InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
+                                                    />
+                                                </Paper>
                                             </TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>
-                                                <TextField
-                                                    select
-                                                    fullWidth
-                                                    value={type}
-                                                    onChange={(e) => setType(e.target.value)}
-                                                    size="small"
-                                                    sx={{
-                                                        "& .MuiInputBase-root": {
-                                                            height: 30, // ปรับความสูงรวม
-                                                        },
-                                                        "& .MuiInputBase-input": {
-                                                            padding: "4px 8px", // ปรับ padding ด้านใน input
-                                                            fontSize: "0.85rem", // ลดขนาด font
-                                                        },
-                                                    }}
-                                                    InputProps={{ sx: { height: 30 } }}
-                                                >
-                                                    <MenuItem value="ค่าใช้จ่าย">ค่าใช้จ่าย</MenuItem>
-                                                </TextField>
+                                                <Paper>
+                                                    <TextField
+                                                        select
+                                                        fullWidth
+                                                        value={type}
+                                                        onChange={(e) => setType(e.target.value)}
+                                                        size="small"
+                                                        sx={{
+                                                            "& .MuiInputBase-root": {
+                                                                height: 30, // ปรับความสูงรวม
+                                                            },
+                                                            "& .MuiInputBase-input": {
+                                                                padding: "4px 8px", // ปรับ padding ด้านใน input
+                                                                fontSize: "0.85rem", // ลดขนาด font
+                                                            },
+                                                        }}
+                                                        InputProps={{ sx: { height: 30 } }}
+                                                    >
+                                                        <MenuItem value="ค่าใช้จ่าย">ค่าใช้จ่าย</MenuItem>
+                                                    </TextField>
+                                                </Paper>
                                             </TableCell>
                                             {/* <TableCell sx={{ textAlign: "center" }}>
                                                 <TextField
@@ -451,7 +455,7 @@ const ExpenseDetail = ({ openNavbar }) => {
                                 <Button variant="contained" color="success" size="small" onClick={() => handleSave()}>บันทึก</Button>
                             </Box>
                             :
-                            <Button variant="contained" size="small" onClick={() => setOpen(true)}>เพิ่มบริษัทสั่งจ่าย</Button>
+                            <Button variant="contained" size="small" onClick={() => setOpen(true)}>เพิ่มค่าใช้จ่าย</Button>
                     }
                 </Box>
             </Box>

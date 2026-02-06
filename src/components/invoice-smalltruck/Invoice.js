@@ -138,7 +138,7 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
   });
   const transferMoneyDetail = Object.values(transferMoney || {});
 
-  console.log("Transfer Money : ", transferMoneyDetail);
+  console.log("Transfer Money : ", transferMoneyDetail.filter((t) => t.TicketNo === 623));
 
   const orderDetail = orders
     .map((item) => {

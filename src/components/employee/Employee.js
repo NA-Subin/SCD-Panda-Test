@@ -108,8 +108,8 @@ const Employee = ({ openNavbar }) => {
   // คำนวณค่าที่ใช้หลายครั้งด้วย useMemo
   const dataofficers = useMemo(() => Object.values(officers || {}), [officers]);
   const datadrivers = useMemo(() => Object.values(drivers || {}), [drivers]);
-  const datareghead = useMemo(() => Object.values(reghead || {}), [reghead]);
-  const datasmall = useMemo(() => Object.values(small || {}), [small]);
+  const datareghead = useMemo(() => Object.values(reghead || {}), [reghead]).filter((item) => item.StatusTruck !== "ยกเลิก");
+  const datasmall = useMemo(() => Object.values(small || {}), [small]).filter((item) => item.StatusTruck !== "ยกเลิก");
 
   // ตัวกรองรถที่ไม่มีคนขับ
   const registrationHead = useMemo(() =>
@@ -404,7 +404,7 @@ const Employee = ({ openNavbar }) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 150 }}>
                       UserID
                     </TablecellHeader>
-                    <TablecellHeader sx={{ width: 50 }} />
+                    {/* <TablecellHeader sx={{ width: 50 }} /> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -413,15 +413,7 @@ const Employee = ({ openNavbar }) => {
                     //   <p> กำลังโหลด...</p>
                     // ) :
                     dataofficers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                      <TableRow>
-                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Position.split(":")[1]}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Phone}</TableCell>
-                        {/* <TableCell sx={{ textAlign: "center" }}>{row.Rights}</TableCell> */}
-                        <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
-                        <UpdateEmployee key={row.id} row={row} />
-                      </TableRow>
+                      <UpdateEmployee key={row.id} row={row} index={index} />
                     ))
                   }
                 </TableBody>
@@ -484,7 +476,7 @@ const Employee = ({ openNavbar }) => {
                     <TablecellHeader width={50} sx={{ textAlign: "center", fontSize: 16 }}>
                       ลำดับ
                     </TablecellHeader>
-                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 300 }}>
+                    <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
                       ชื่อ-สกุล
                     </TablecellHeader>
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 200 }}>
@@ -505,7 +497,7 @@ const Employee = ({ openNavbar }) => {
                     <TablecellHeader sx={{ textAlign: "center", fontSize: 16, width: 80 }}>
                       UserID
                     </TablecellHeader>
-                    <TablecellHeader sx={{ width: 50 }} />
+                    {/* <TablecellHeader sx={{ width: 50 }} /> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -514,18 +506,7 @@ const Employee = ({ openNavbar }) => {
                     //   <p> กำลังโหลด...</p>
                     // ) :
                     paginatedDrivers.map((row, index) => (
-                      <TableRow key={row.id}>
-                        <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Name}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.IDCard}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.Registration?.split(":")[1]}</TableCell>
-                        {/* {renderSettingCell(row)} */}
-                        <TableCell sx={{ textAlign: "center" }}>{row.TruckType}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.BankID}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.BankName}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{row.User}</TableCell>
-                        <UpdateDriver driver={row} />
-                      </TableRow>
+                      <UpdateDriver key={row.id} driver={row} index={index} />
                     ))
                   }
                 </TableBody>

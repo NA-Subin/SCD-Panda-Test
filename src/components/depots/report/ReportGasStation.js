@@ -221,15 +221,45 @@ const ReportGasStation = ({ openNavbar }) => {
 
             if (!p) return;
 
-            const sell = to2Decimal(p.Sell ?? 0);
-            const backyard = to2Decimal(p.BackyardSales ?? 0);
-            const fieldValue = to2Decimal(p[field] ?? 0);
+            result[d] += Number(p[field] ?? 0);
+        });
 
-            const value = p.Backyard === true
-                ? backyard
-                : fieldValue;
+        return result;
+    };
 
-            result[d] += isNaN(value) ? 0 : value;
+    const normalizeName = (name) =>
+        name.replace(/\(\d+\)/g, "").trim();
+
+    const calculateDailySellAndBackyard = (
+        report,
+        productName,
+        y,
+        m,
+        daysInMonth
+    ) => {
+        const result = {};
+        daysInMonth.forEach(d => {
+            result[d] = { sell: 0, backyard: 0 };
+        });
+
+        daysInMonth.forEach(d => {
+            const source = getNextDate(y, m, d, daysInMonth.length);
+
+            const list =
+                report?.[source.y]?.[source.m]?.[source.d]?.Products
+                    ?.filter(x =>
+                        normalizeName(x.ProductName) === normalizeName(productName)
+                    ) ?? [];
+
+            result[d].sell += list.reduce(
+                (acc, p) => acc + (Number(p.Sell ?? 0) - Number(p.BackyardSales ?? 0)),
+                0
+            );
+
+            result[d].backyard += list.reduce(
+                (acc, p) => acc + Number(p.BackyardSales ?? 0),
+                0
+            );
         });
 
         return result;
@@ -756,64 +786,144 @@ const ReportGasStation = ({ openNavbar }) => {
                                     );
 
                                     const dailySummaryByStock = {};
+                                    const dailySummaryByStockBackyard = {};
 
-                                    daysInMonth.forEach(d => (dailySummaryByStock[d] = 0));
+                                    daysInMonth.forEach(d => {
+                                        dailySummaryByStock[d] = 0;
+                                        dailySummaryByStockBackyard[d] = 0;
+                                    });
 
-                                    pumpsInStock.forEach(row => {
-                                        row.Products.forEach(product => {
-                                            const dailyByProduct = calculateDailyByProduct(
-                                                row.Report,
-                                                product.Name,
+                                    pumpsInStock.forEach(pumpRow => {
+
+                                        const uniqueProducts = [
+                                            ...new Map(
+                                                pumpRow.Products.map(p => [normalizeName(p.Name), p])
+                                            ).values()
+                                        ];
+
+                                        uniqueProducts.forEach(product => {
+
+                                            const cleanName = normalizeName(product.Name);
+
+                                            const daily = calculateDailySellAndBackyard(
+                                                pumpRow.Report,
+                                                cleanName,
                                                 y,
                                                 m,
-                                                daysInMonth,
-                                                "Sell",
-                                                product.Backyard
+                                                daysInMonth
                                             );
 
                                             daysInMonth.forEach(d => {
-                                                dailySummaryByStock[d] += to2Decimal(dailyByProduct[d] ?? 0);
+                                                dailySummaryByStock[d] += daily[d].sell;
+                                                dailySummaryByStockBackyard[d] += daily[d].backyard;
                                             });
                                         });
                                     });
 
                                     const dailySummaryByStation = {};
-                                    daysInMonth.forEach(d => (dailySummaryByStation[d] = 0));
-
-                                    row.Products.forEach(product => {
-                                        const dailyByProduct = calculateDailyByProduct(
-                                            row.Report,
-                                            product.Name,
-                                            y,
-                                            m,
-                                            daysInMonth,
-                                            "Sell", // หรือ BackyardSales
-                                            product.Backyard
-                                        );
-
-                                        daysInMonth.forEach(d => {
-                                            dailySummaryByStation[d] += dailyByProduct[d];
-                                        });
-                                    });
-
                                     const dailySummaryByStationBackyard = {};
-                                    daysInMonth.forEach(d => (dailySummaryByStationBackyard[d] = 0));
 
-                                    row.Products.forEach(product => {
-                                        const dailyByProductBackyard = calculateDailyByProduct(
+                                    daysInMonth.forEach(d => {
+                                        dailySummaryByStation[d] = 0;
+                                        dailySummaryByStationBackyard[d] = 0;
+                                    });
+
+                                    const uniqueProducts = [
+                                        ...new Map(
+                                            row.Products.map(p => [normalizeName(p.Name), p])
+                                        ).values()
+                                    ];
+
+                                    uniqueProducts.forEach(product => {
+                                        const cleanName = normalizeName(product.Name);
+
+                                        const daily = calculateDailySellAndBackyard(
                                             row.Report,
-                                            product.Name,
+                                            cleanName,
                                             y,
                                             m,
-                                            daysInMonth,
-                                            "BackyardSales", // หรือ BackyardSales
-                                            product.Backyard
+                                            daysInMonth
                                         );
 
                                         daysInMonth.forEach(d => {
-                                            dailySummaryByStationBackyard[d] += dailyByProductBackyard[d];
+                                            dailySummaryByStation[d] += daily[d].sell;
+                                            dailySummaryByStationBackyard[d] += daily[d].backyard;
                                         });
                                     });
+
+
+                                    // const dailySummaryByStock = {};
+
+                                    // daysInMonth.forEach(d => (dailySummaryByStock[d] = 0));
+
+                                    // pumpsInStock.forEach(row => {
+                                    //     row.Products.forEach(product => {
+                                    //         // if (product.Backyard) return;
+
+                                    //         const dailyByProduct = calculateDailyByProduct(
+                                    //             row.Report,
+                                    //             product.Name,
+                                    //             y,
+                                    //             m,
+                                    //             daysInMonth,
+                                    //             "Sell"
+                                    //         );
+
+                                    //         const hasSell = Object.values(dailyByProduct).some(v => v > 0);
+                                    //         if (!hasSell) return;
+
+                                    //         daysInMonth.forEach(d => {
+                                    //             dailySummaryByStock[d] += to2Decimal(dailyByProduct[d] ?? 0);
+                                    //         });
+                                    //     });
+                                    // });
+
+                                    // const dailySummaryByStation = {};
+                                    // daysInMonth.forEach(d => (dailySummaryByStation[d] = 0));
+
+                                    // row.Products.forEach(product => {
+                                    //     // if (product.Backyard) return;
+
+                                    //     const dailyByProduct = calculateDailyByProduct(
+                                    //         row.Report,
+                                    //         product.Name,
+                                    //         y,
+                                    //         m,
+                                    //         daysInMonth,
+                                    //         "Sell"
+                                    //     );
+
+                                    //     // ✅ ถ้าไม่มี BackyardSales เลย → ข้าม
+                                    //     const hasSell = Object.values(dailyByProduct).some(v => v > 0);
+                                    //     if (!hasSell) return;
+
+                                    //     daysInMonth.forEach(d => {
+                                    //         dailySummaryByStation[d] += dailyByProduct[d];
+                                    //     });
+                                    // });
+
+                                    // const dailySummaryByStationBackyard = {};
+                                    // daysInMonth.forEach(d => (dailySummaryByStationBackyard[d] = 0));
+
+                                    // row.Products.forEach(product => {
+                                    //     // if (!product.Backyard) return;
+
+                                    //     const dailyByProductBackyard = calculateDailyByProduct(
+                                    //         row.Report,
+                                    //         product.Name,
+                                    //         y,
+                                    //         m,
+                                    //         daysInMonth,
+                                    //         "BackyardSales"
+                                    //     );
+
+                                    //     const hasBackyard = Object.values(dailyByProductBackyard).some(v => v > 0);
+                                    //     if (!hasBackyard) return;
+
+                                    //     daysInMonth.forEach(d => {
+                                    //         dailySummaryByStationBackyard[d] += dailyByProductBackyard[d];
+                                    //     });
+                                    // });
 
                                     // 🔹 เอาค่าปั้มนี้ไปรวมใน stock
                                     // stockSummary.total += pumpSummary.total;

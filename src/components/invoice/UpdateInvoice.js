@@ -124,7 +124,7 @@ const UpdateInvoice = (props) => {
     });
 
     const bankDetail = Object.values(banks || {});
-    const transferMoneyDetail = Object.values(transferMoney || {});
+    const transferMoneyDetail = Object.values(transferMoney || {}).filter(row => row.Status !== "ยกเลิก");
     const invoiceDetail = Object.values(invoiceReport || {});
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && ticket.Status !== "ยกเลิก");

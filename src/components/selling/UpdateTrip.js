@@ -112,9 +112,9 @@ const UpdateTrip = (props) => {
     // const { depots, reghead } = useData();
     const { depots, reghead, small, transport } = useBasicData();
     const depotOptions = Object.values(depots || {});
-    const truckH = Object.values(reghead || {});
-    const truckS = Object.values(small || {});
-    const truckT = Object.values(transport || {});
+    const truckH = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const truckS = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const truckT = Object.values(transport || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
     console.log("truckH : ", truckH);
 
@@ -903,7 +903,7 @@ const UpdateTrip = (props) => {
     const getDriver = () => {
         const driverss = [
             ...[...truckH]
-                .filter((item) => item.Driver !== "0:ไม่มี" && item.RegTail !== "0:ไม่มี" && (item.Status === "ว่าง" || item.id === Number(registrations.split(":")[0])))
+                .filter((item) => item.Driver !== "0:ไม่มี" && (item.Status === "ว่าง" || item.id === Number(registrations.split(":")[0])))
                 .sort((a, b) => a.Driver.localeCompare(b.Driver, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, Type: "รถบริษัท" })),
 
@@ -1567,7 +1567,11 @@ const UpdateTrip = (props) => {
                                                             options={getDriver()}
                                                             getOptionLabel={(option) =>
                                                                 option.Type === "รถบริษัท" ?
-                                                                    `${option.Driver ? option.Driver.split(":")[1] : ""} : ${option.RegHead ? option.RegHead : ""}/${option.RegTail ? option.RegTail.split(":")[1] : ""}`
+                                                                    `${option.Driver ? option.Driver.split(":")[1] : ""}${option.RegHead ? option.RegHead : ""}${option.RegTail &&
+                                                                        option.RegTail !== "0:ไม่มี"
+                                                                        ? ` : /${option.RegTail.split(":")[1]}`
+                                                                        : ""
+                                                                    }`
                                                                     :
                                                                     `${option.Name ? option.Name : ""} ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`
                                                             }
@@ -1610,7 +1614,11 @@ const UpdateTrip = (props) => {
                                                                 <li {...props}>
                                                                     {
                                                                         option.Type === "รถบริษัท" ?
-                                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}/${option.RegTail.split(":")[1]}`}</Typography>
+                                                                            <Typography fontSize="16px">{`${option.Driver.split(":")[1]}${option.RegHead}${option.RegTail &&
+                                                                                option.RegTail !== "0:ไม่มี"
+                                                                                ? ` : /${option.RegTail.split(":")[1]}`
+                                                                                : ""
+                                                                                }`}</Typography>
                                                                             :
                                                                             <Typography fontSize="16px">{`${option.Name}  ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`}</Typography>
                                                                     }
@@ -1711,7 +1719,11 @@ const UpdateTrip = (props) => {
                                                             const matchedReg = truckH.find(reg => reg.id === Number(regId));
 
                                                             const fullPlate = matchedReg
-                                                                ? `${matchedReg.RegHead} : ${matchedReg.RegTail.split(":")[1]}`
+                                                                ? `${matchedReg.RegHead}${matchedReg.RegTail &&
+                                                                    matchedReg.RegTail !== "0:ไม่มี"
+                                                                    ? `: /${matchedReg.RegTail.split(":")[1]}`
+                                                                    : ""
+                                                                }`
                                                                 : regName;
 
                                                             return driverName === "รับจ้างขนส่ง" ? "รถรับจ้างขนส่ง" : `${driverName} / ${fullPlate}`;
@@ -2502,7 +2514,11 @@ const UpdateTrip = (props) => {
                                                                         (`${item.id}:${item.Registration}:${item.id}:${item.Name}:${item.Type}` === registration)
                                                                 );
                                                                 return selectedItem && selectedItem.Type === "รถบริษัท"
-                                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}/${selectedItem.RegTail ? selectedItem.RegTail : ""}`
+                                                                    ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}${selectedItem.RegTail &&
+                                                                        selectedItem.RegTail !== "0:ไม่มี"
+                                                                        ? ` : /${selectedItem.RegTail.split(":")[1]}`
+                                                                        : ""
+                                                                    }`
                                                                     : selectedItem && selectedItem.Type === "รถรับจ้างขนส่ง"
                                                                         ? `${selectedItem.Name ? selectedItem.Name : ""} ${selectedItem.Registration === "ไม่มี" ? "" : `:${selectedItem.Registration}`}`
                                                                         : "";
@@ -2557,7 +2573,11 @@ const UpdateTrip = (props) => {
                                                             const matchedReg = truckH.find(reg => reg.id === Number(regId));
 
                                                             const fullPlate = matchedReg
-                                                                ? `${matchedReg.RegHead} : ${matchedReg.RegTail.split(":")[1]}`
+                                                                ? `${matchedReg.RegHead ? matchedReg.RegHead : ""}${matchedReg.RegTail &&
+                                                                    matchedReg.RegTail !== "0:ไม่มี"
+                                                                    ? ` : /${matchedReg.RegTail.split(":")[1]}`
+                                                                    : ""
+                                                                }`
                                                                 : regName;
 
                                                             return driverName === "รับจ้างขนส่ง" ? "รถรับจ้างขนส่ง" : `${driverName} / ${fullPlate}`;

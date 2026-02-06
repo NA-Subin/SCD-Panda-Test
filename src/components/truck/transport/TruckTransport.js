@@ -46,7 +46,7 @@ const TruckTransport = ({ openNavbar }) => {
     // const { reghead,regtail,small } = useData();
 
     const { transport, company } = useBasicData();
-    const dataTransport = Object.values(transport || {});
+    const dataTransport = Object.values(transport || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const dataCompany = Object.values(company || {});
 
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);

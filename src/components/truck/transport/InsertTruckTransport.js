@@ -77,7 +77,7 @@ const InsertTruckTransport = () => {
     const { company, transport, drivers } = useBasicData();
     const dataCompany = Object.values(company || {});
     const dataDriver = Object.values(drivers || {});
-    const dataTransport = Object.values(transport || {});
+    const dataTransport = Object.values(transport || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
     console.log(`User Id : t${(dataDriver.length + 1).toString().padStart(4, '0')}`);
 

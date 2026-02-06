@@ -126,9 +126,9 @@ const UpdateInvoice = (props) => {
         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
         return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
-    const smalls = Object.values(small || {})
+    const smalls = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const bankDetail = Object.values(banks || {});
-    const transferMoneyDetail = Object.values(transferMoney || {});
+    const transferMoneyDetail = Object.values(transferMoney || {}).filter(row => row.Status !== "ยกเลิก");
     const invoiceDetail = Object.values(invoiceReport || {});
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && ticket.Status !== "ยกเลิก");

@@ -80,7 +80,7 @@ const TripsBigTruck = ({ openNavbar }) => {
     // const { trip } = useData();
     const { trip } = useTripData();
     const { reghead } = useBasicData();
-    const registrations = Object.values(reghead || {});
+    const registrations = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");

@@ -129,7 +129,7 @@ const UpdateTrip = (props) => {
     console.log("Driver Detail ss ", driversdetail);
 
     const depotOptions = Object.values(depots || {});
-    const smalls = Object.values(small || {});
+    const smalls = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const registrationTruck = smalls.filter((row) => (row.Driver === "0:ไม่มี" && row.Status === "ว่าง") || row.Driver === driverss);
     console.log("registrationTruck : ", registrationTruck);
 
@@ -779,6 +779,16 @@ const UpdateTrip = (props) => {
             });
     };
 
+    const safeUpdateFirebase = (path, value, data) => {
+        const id = Number(value.split(":")[0]);
+
+        if (id <= 0) {
+            console.warn("Skip update because id = 0", value);
+            return;
+        }
+
+        updateFirebase(path, id - 1, data);
+    };
 
     const handleSave = () => {
         const noCountTicket = {}; // เก็บจำนวนครั้งที่ No ปรากฏ
@@ -909,28 +919,34 @@ const UpdateTrip = (props) => {
 
         // เงื่อนไขเมื่อทะเบียนเปลี่ยน
         if (registrations !== registration) {
-            updateFirebase("truck/small/", Number(registrations.split(":")[0]) - 1, {
+
+            safeUpdateFirebase("truck/small/", registrations, {
                 Driver: "0:ไม่มี",
                 Status: "ว่าง",
             });
-            updateFirebase("truck/small/", Number(registration.split(":")[0]) - 1, {
+
+            safeUpdateFirebase("truck/small/", registration, {
                 Driver: trip.StatusTrip !== "จบทริป" ? driverss : "0:ไม่มี",
                 Status: trip.StatusTrip !== "จบทริป" ? `TR:${tripID - 1}` : "ว่าง",
             });
-            updateFirebase("employee/drivers/", Number(driverss.split(":")[0]) - 1, {
+
+            safeUpdateFirebase("employee/drivers/", driverss, {
                 Registration: trip.StatusTrip !== "จบทริป" ? registration : "0:ไม่มี",
             });
         }
 
         // เงื่อนไขเมื่อพนักงานขับรถเปลี่ยน
         if (driversdetail !== driverss) {
-            updateFirebase("employee/drivers/", Number(driversdetail.split(":")[0]) - 1, {
+
+            safeUpdateFirebase("employee/drivers/", driversdetail, {
                 Registration: "0:ไม่มี",
             });
-            updateFirebase("employee/drivers/", Number(driverss.split(":")[0]) - 1, {
+
+            safeUpdateFirebase("employee/drivers/", driverss, {
                 Registration: trip.StatusTrip !== "จบทริป" ? registration : "0:ไม่มี",
             });
-            updateFirebase("truck/small/", Number(registration.split(":")[0]) - 1, {
+
+            safeUpdateFirebase("truck/small/", registration, {
                 Driver: trip.StatusTrip !== "จบทริป" ? driverss : "0:ไม่มี",
                 Status: trip.StatusTrip !== "จบทริป" ? `TR:${tripID - 1}` : "ว่าง",
             });
@@ -1256,6 +1272,8 @@ const UpdateTrip = (props) => {
 
     // };
 
+    console.log("registration before change status : ", registration);
+
     const handleChangeStatus = () => {
         if (!driverss || driverss === "0:0" || driverss === "0:ไม่มี") {
             ShowError("กรุณาเพิ่มชื่อพนักงานขับรถก่อน");
@@ -1267,12 +1285,25 @@ const UpdateTrip = (props) => {
             return;
         }
 
+        const truckId = Number(registration.split(":")[0]);
+        const driverId = Number(driverss.split(":")[0]);
+
+        if (truckId <= 0) {
+            ShowError("กรุณาเพิ่มทะเบียนรถ");
+            return;
+        }
+
+        if (driverId <= 0) {
+            ShowError("กรุณาเพิ่มพนักงานขับรถ");
+            return;
+        }
+
         ShowConfirm(
             `ต้องการจบเที่ยววิ่งใช่หรือไม่`,
             () => {
                 database
                     .ref("truck/small/")
-                    .child(Number(registration.split(":")[0]) - 1)
+                    .child((truckId) - 1)
                     .update({
                         Driver: "0:ไม่มี",
                         Status: "ว่าง"
@@ -1288,7 +1319,7 @@ const UpdateTrip = (props) => {
 
                 database
                     .ref("employee/drivers/")
-                    .child(Number(driverss.split(":")[0]) - 1)
+                    .child((driverId) - 1)
                     .update({
                         Registration: "0:ไม่มี",
                     })
@@ -2230,7 +2261,8 @@ const UpdateTrip = (props) => {
                                                                 CustomerType: newValue.CustomerType || "-",
                                                                 Product: {
                                                                     P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                }
+                                                                },
+                                                                ...(trip.StatusTrip === "จบทริป" && { Status: "จัดส่งสำเร็จ" })
                                                             });
                                                             // }
 
@@ -3024,7 +3056,8 @@ const UpdateTrip = (props) => {
                                                                     CustomerType: newValue.CustomerType || "-",
                                                                     Product: {
                                                                         P: { Volume: 0, Cost: 0, Selling: 0 },
-                                                                    }
+                                                                    },
+                                                                    ...(trip.StatusTrip === "จบทริป" && { Status: "จัดส่งสำเร็จ" })
                                                                 });
                                                                 // }
 

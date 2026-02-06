@@ -48,7 +48,7 @@ import { useData } from "../../server/path";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const UpdateEmployee = (props) => {
-    const { row } = props;
+    const { row, index } = props;
     const [update, setUpdate] = React.useState(true);
     const [openOfficeDetail, setOpenOfficeDetail] = useState(false);
     // const { positions } = useData();
@@ -89,9 +89,23 @@ const UpdateEmployee = (props) => {
 
     return (
         <React.Fragment>
-            <TableCell sx={{ textAlign: "center" }}>
-                <IconButton sx={{ marginTop: -0.5 }} onClick={() => setOpenOfficeDetail(row.id)}><InfoIcon color="info" fontSize="12px" /></IconButton>
-            </TableCell>
+            <TableRow
+                key={row.id}
+                sx={{
+                    cursor: "pointer",
+                    "&:hover": {
+                        backgroundColor: "#ffebee",
+                    },
+                }}
+                onClick={() => setOpenOfficeDetail(row.id)}
+            >
+                <TableCell sx={{ textAlign: "center", height: "35px" }}>{index + 1}</TableCell>
+                <TableCell sx={{ textAlign: "center", height: "35px" }}>{row.Name}</TableCell>
+                <TableCell sx={{ textAlign: "center", height: "35px" }}>{row.Position.split(":")[1]}</TableCell>
+                <TableCell sx={{ textAlign: "center", height: "35px" }}>{row.Phone}</TableCell>
+                {/* <TableCell sx={{ textAlign: "center", height: "35px" }}>{row.Rights}</TableCell> */}
+                <TableCell sx={{ textAlign: "center", height: "35px" }}>{row.User}</TableCell>
+            </TableRow>
             <Dialog
                 open={openOfficeDetail === row.id ? true : false}
                 keepMounted
