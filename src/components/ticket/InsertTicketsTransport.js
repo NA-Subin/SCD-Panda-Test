@@ -103,6 +103,15 @@ const InsertTicketsTransport = () => {
     console.log("tickket:", ticket);
 
     const handlePost = () => {
+        const address = {
+            no: no?.trim() || "",
+            village: village?.trim() || "",
+            subDistrict: subDistrict?.trim() || "",
+            district: district?.trim() || "",
+            province: province?.trim() || "",
+            zipCode: zipCode?.trim() || ""
+        };
+
         database
             .ref("/customers/transports/")
             .child(ticket)
@@ -118,14 +127,7 @@ const InsertTicketsTransport = () => {
                 Code: code,
                 CompanyName: companyName,
                 CodeID: codeID,
-                Address:
-                    (no === "-" ? "-" : no) +
-                    (village === "-" ? "" : ` ${village}`) +
-                    (subDistrict === "-" ? "" : ` ${subDistrict}`) +
-                    (district === "-" ? "" : ` ${district}`) +
-                    (province === "-" ? "" : ` ${province}`) +
-                    (zipCode === "-" ? "" : ` ${zipCode}`)
-                ,
+                Address: address,
                 lat: lat,
                 lng: lng,
                 Phone: phone,
@@ -166,7 +168,7 @@ const InsertTicketsTransport = () => {
             <Dialog
                 open={open}
                 keepMounted
-                fullScreen={ windowWidth <= 600 ? true :false }
+                fullScreen={windowWidth <= 600 ? true : false}
                 onClose={handleClose}
                 maxWidth="md"
             >
@@ -248,9 +250,13 @@ const InsertTicketsTransport = () => {
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5.5 } }} gutterBottom>ชื่อบริษัท</Typography>
                             <TextField size="small" fullWidth value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                         </Grid>
-                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5 } }} gutterBottom>บ้านเลขที่</Typography>
+                        <Grid item md={2.5} xs={6} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>บ้านเลขที่</Typography>
                             <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} />
+                        </Grid>
+                        <Grid item md={1.5} xs={6} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 7 } }} gutterBottom>หมู่ที่</Typography>
+                            <TextField size="small" fullWidth value={village} onChange={(e) => setVillage(e.target.value)} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 8 } }} gutterBottom>ตำบล</Typography>

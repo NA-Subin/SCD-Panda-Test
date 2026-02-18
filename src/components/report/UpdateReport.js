@@ -109,7 +109,7 @@ const UpdateReport = (props) => {
         invoiceReport
     } = useTripData();
 
-    const { reghead, company } = useBasicData();
+    const { reghead, company, drivers, small } = useBasicData();
 
     const productOrder = ["G95", "B95", "B7", "G91", "E20", "E85", "PWD"];
     console.log("Show Data ", ticket);
@@ -122,6 +122,8 @@ const UpdateReport = (props) => {
     const customertransport = Object.values(customertransports || {});
     const customergasstation = Object.values(customergasstations || {});
     const customerTickets = Object.values(customertickets || {});
+    const driverDetail = Object.values(drivers || {});
+
     //const showTrips = Object.values(trip || {});
     const showTrips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
@@ -131,10 +133,13 @@ const UpdateReport = (props) => {
         return (deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day')) && item.StatusTrip !== "ยกเลิก";
     });
     const registrationHead = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
+    const registrationSmall = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const companies = Object.values(company || {});
     const bankDetail = Object.values(banks || {}).filter((row) => row.Status !== "ยกเลิก");
-    const transferMoneyDetail = Object.values(transferMoney || {}).filter(row => row.Status !== "ยกเลิก");
+    const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
+
+    console.log("small : ", registrationSmall);
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName && row.Status !== "ยกเลิก" && row.month === months);
 
@@ -348,62 +353,99 @@ const UpdateReport = (props) => {
     };
 
     const processTickets = (tickets, showTrips) => {
-        return tickets.flatMap((row) => {
-            const matchedTrip = showTrips.find(trip => (trip.id - 1) === row.Trip);
 
-            const company = registrationHead.find(trip => trip.id === Number(matchedTrip?.Registration.split(":")[0]));
+        const safeSplit = (value, index) => {
+            if (!value || typeof value !== "string") return undefined;
+            return value.split(":")[index];
+        };
 
-            //console.log("RegTail :", `"${company.RegTail}"`);
-            // console.log("Company (trim):", `"${company.Company.trim()}"`);
-            // console.log("Company (length):", company.Company.length);
+        const tripMap = new Map(showTrips.map(t => [(t.id - 1), t]));
+        const regHeadMap = new Map(registrationHead.map(r => [r.id, r]));
+        const regSmallMap = new Map(registrationSmall.map(r => [r.id, r]));
+        const companyMap = new Map(companies.map(c => [c.id, c]));
 
-            const companyAddress = companies.find(com => com.id === Number(company?.Company.split(":")[0]));
+        const result = [];
 
-            // console.log("Address (raw):", `"${companyAddress.Name}"`);
-            // console.log("Address (trim):", `"${companyAddress.Name.trim()}"`);
-            // console.log("Address (length):", companyAddress.Name.length);
+        for (const row of tickets) {
 
-            return Object.entries(row.Product)
-                .filter(([productName]) => productName !== "P")
-                .map(([productName, Volume], index) => ({
+            const matchedTrip = tripMap.get(row.Trip);
+            if (!matchedTrip || !row.Product) continue; // กันข้อมูลเสีย
+
+            const isSmallTruck = matchedTrip?.TruckType?.trim() === "รถเล็ก";
+
+            const regId = Number(safeSplit(matchedTrip?.Registration, 0));
+            const companyObj = isSmallTruck
+                ? regSmallMap.get(regId)
+                : regHeadMap.get(regId);
+
+            const companyId = Number(safeSplit(companyObj?.Company, 0));
+            const companyAddress = companyMap.get(companyId);
+
+            const depotName = safeSplit(matchedTrip?.Depot, 1);
+
+            let rate = 0;
+            if (depotName === "ลำปาง") rate = row.Rate1 || 0;
+            else if (depotName === "พิจิตร") rate = row.Rate2 || 0;
+            else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) rate = row.Rate3 || 0;
+
+            for (const [productName, Volume] of Object.entries(row.Product)) {
+
+                if (productName === "P") continue;
+
+                result.push({
                     No: row.No,
                     TicketName: row.TicketName,
-                    Rate: matchedTrip?.Depot.split(":")[1] === "ลำปาง" ? (row.Rate1 || 0)
-                        : matchedTrip?.Depot.split(":")[1] === "พิจิตร" ? (row.Rate2 || 0)
-                            : matchedTrip?.Depot.split(":")[1] === "สระบุรี" || matchedTrip?.Depot.split(":")[1] === "บางปะอิน" || matchedTrip?.Depot.split(":")[1] === "IR" ? (row.Rate3 || 0)
-                                : 0,
-                    Amount: Volume.Amount || 0,
-                    Depot: matchedTrip ? matchedTrip?.Depot : row.Depot,
-                    //Date: matchedTrip ? matchedTrip.DateDelivery : row.DateDelivery,
-                    DateDelivery: matchedTrip ? matchedTrip?.DateDelivery : row.DateDelivery,
-                    DateReceive: matchedTrip ? matchedTrip?.DateReceive : row.DateReceive,
+                    Rate: rate,
+                    Amount: Volume?.Amount || 0,
+
+                    Depot: matchedTrip?.Depot ?? row.Depot,
+                    DateDelivery: matchedTrip?.DateDelivery ?? row.DateDelivery,
+                    DateReceive: matchedTrip?.DateReceive ?? row.DateReceive,
                     Date: row.Date,
-                    Driver: matchedTrip ? matchedTrip?.Driver : row.Driver,
-                    Registration: matchedTrip ? matchedTrip?.Registration : row.Registration,
-                    RegTail: company?.RegTail,
+
+                    Driver: matchedTrip?.Driver ?? row.Driver,
+                    Registration: matchedTrip?.Registration ?? row.Registration,
+
+                    RegTail: companyObj?.RegTail,
                     ProductName: productName,
-                    Volume: Volume.Volume * 1000,
-                    Company: `${companyAddress?.id}:${companyAddress?.Name}`,
+
+                    ShortName: isSmallTruck ? companyObj?.ShortName : "-",
+
+                    Volume: isSmallTruck
+                        ? Volume?.Volume
+                        : (Volume?.Volume || 0) * 1000,
+
+                    Company: companyAddress
+                        ? `${companyAddress.id}:${companyAddress.Name}`
+                        : "",
+
                     CompanyAddress: companyAddress?.Address,
                     CardID: companyAddress?.CardID,
                     Phone: companyAddress?.Phone,
-                    uniqueRowId: `${index}:${productName}:${row.No}`,
-                }));
-        }).sort((a, b) => {
-            // เปรียบเทียบ key group ก่อน
-            const keyA = `${a.Date} : ${a.Driver} : ${a.Registration}`;
-            const keyB = `${b.Date} : ${b.Driver} : ${b.Registration}`;
+
+                    uniqueRowId: `${row.No}:${productName}`,
+
+                    TruckType: matchedTrip?.TruckType
+                });
+            }
+        }
+
+        // 🔽 sort เร็วขึ้น (คำนวณ key ครั้งเดียว)
+        result.sort((a, b) => {
+
+            const keyA = `${a.Date}|${a.Driver}|${a.Registration}`;
+            const keyB = `${b.Date}|${b.Driver}|${b.Registration}`;
 
             if (keyA < keyB) return -1;
             if (keyA > keyB) return 1;
 
-            // ถ้าอยู่ในกลุ่มเดียวกัน ให้เรียงตาม productOrder
             const indexA = productOrder.indexOf(a.ProductName);
             const indexB = productOrder.indexOf(b.ProductName);
 
-            // ถ้าไม่พบในลำดับ ให้เอาไว้ท้ายสุด
             return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-        })
+        });
+
+        return result;
     };
 
     const processedTickets = processTickets(
@@ -1274,7 +1316,7 @@ const UpdateReport = (props) => {
                                                 {rowSpan > 0 && (
                                                     <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                            {row.Registration.split(":")[1] === "ไม่มี" ? "รถรับจ้างขนส่ง" : row.Registration.split(":")[1]} / {row.RegTail.split(":")[1]}
+                                                            {row.TruckType === "รถใหญ่" ? ` ${row.Registration.split(":")[1]} / ${row.RegTail.split(":")[1]}` : row.TruckType === "รถเล็ก" ? `${row.ShortName}${row.Registration.split(":")[1]}` : "รถรับจ้างขนส่ง"}
                                                         </Typography>
                                                     </TableCell>
                                                 )}
@@ -1912,7 +1954,7 @@ const UpdateReport = (props) => {
                                                         sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}
                                                     >
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                            {row.Registration.split(":")[1]} / {row.RegTail.split(":")[1]}
+                                                            {row.TruckType === "รถใหญ่" ? ` ${row.Registration.split(":")[1]} / ${row.RegTail.split(":")[1]}` : row.TruckType === "รถเล็ก" ? `${row.ShortName}${row.Registration.split(":")[1]}` : "รถรับจ้างขนส่ง"}
                                                         </Typography>
                                                     </TableCell>
                                                 )}

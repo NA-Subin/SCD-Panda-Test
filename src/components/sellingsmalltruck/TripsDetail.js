@@ -85,17 +85,27 @@ const TripsDetail = (props) => {
                 <TableCell sx={{ textAlign: "left" }}>
                     <Box sx={{ marginLeft: 2 }}>
                         {
-                            trips.Driver.split(":")[1] !== undefined ?
-                                trips.Driver.split(":")[1]
-                                :
-                                trips.Driver
-                        }/
-                        {
-                            trips.Registration.split(":")[1] !== undefined ?
-                                trips.Registration.split(":")[1]
-                                :
-                                trips.Registration
+                            trips.Driver?.split(":")[1] !== undefined
+                                ? trips.Driver.split(":")[1]
+                                : trips.Driver
                         }
+                        {" / "}
+                        <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ color: theme.palette.error.dark }}
+                        >
+                            {(() => {
+                                const reg = trips?.Registration ?? "";
+                                const value = reg.split(":")[1];
+
+                                if (!value || value === "0") {
+                                    return "(ยังไม่ได้เลือกทะเบียนรถ)";
+                                }
+
+                                return value;
+                            })()}
+                        </Typography>
                     </Box>
                     {/* {trips.Driver}/{trips.Registration} */}
                 </TableCell>

@@ -268,7 +268,7 @@ const InsertSpendingAbout = ({ onSend }) => {
                                     </TableHead>
                                     <TableBody>
                                         {
-                                            companypaymentDetail.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                            companypaymentDetail.filter((item) => item.Status === "อยู่ในระบบ").slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                                 <TableRow>
                                                     <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#ffecb3" }}>
                                                         <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
@@ -349,11 +349,11 @@ const InsertSpendingAbout = ({ onSend }) => {
                                     </TableBody>
                                 </Table>
                                 {
-                                    companypaymentDetail.length <= 10 ? null :
+                                    companypaymentDetail.filter((item) => item.Status === "อยู่ในระบบ").length <= 10 ? null :
                                         <TablePagination
                                             rowsPerPageOptions={[10, 25, 30]}
                                             component="div"
-                                            count={companypaymentDetail.length}
+                                            count={companypaymentDetail.filter((item) => item.Status === "อยู่ในระบบ").length}
                                             rowsPerPage={rowsPerPage}
                                             page={page}
                                             onPageChange={handleChangePage}

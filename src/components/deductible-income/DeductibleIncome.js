@@ -30,11 +30,12 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import DisabledByDefaultIcon from '@mui/icons-material/DisabledByDefault';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { IconButtonWarning, TablecellSelling } from "../../theme/style";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import InsertDeductibleIncome from "./InsertDeductibleIncome";
 import { database } from "../../server/firebase";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 
 const DeductibleIncomeDetail = ({ openNavbar }) => {
     const [update, setUpdate] = React.useState({});
@@ -44,6 +45,9 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
     const [ID, setID] = React.useState("");
     const [name, setName] = React.useState("");
     const [status, setStatus] = React.useState("");
+    const [checkIncome, setCheckIncome] = React.useState(false);
+    const [checkDeduction, setCheckDeduction] = React.useState(false);
+    const [checkData, setCheckData] = React.useState(true);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -85,8 +89,26 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
     const creditor = Object.values(creditors || {});
     const deductibleIncome = Object.values(deductibleincome || {});
 
-    const deduction = deductibleIncome.filter((row, index) => row.Type === "รายหัก")
-    const income = deductibleIncome.filter((row, index) => row.Type === "รายได้")
+    const deduction = deductibleIncome.filter((row) => {
+        if (row.Type !== "รายหัก") return false;
+
+        if (checkDeduction) {
+            return row.Status === "ประจำ";
+        }
+
+        return true;
+    });
+
+    const income = deductibleIncome.filter((row) => {
+        if (row.Type !== "รายได้") return false;
+
+        if (checkIncome) {
+            return row.Status === "ประจำ";
+        }
+
+        return true;
+    });
+
 
     const [pageIncome, setPageIncome] = useState(0);
     const [rowsPerPageIncome, setRowsPerPageIncome] = useState(10);
@@ -130,7 +152,8 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
             .child(Number(ID) - 1)
             .update({
                 Name: name,
-                Status: status ? "ประจำ" : "ไม่ประจำ"
+                Status: status ? "ประจำ" : "ไม่ประจำ",
+                StatusData: checkData ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ"
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -143,6 +166,56 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+    };
+
+    const handleDeleteData = (data) => {
+        ShowConfirm(
+            `ต้องการลบข้อมูล ${data.Name} ใช่หรือไม่`,
+            () => {
+                database
+                    .ref("/deductibleincome/")
+                    .child(Number(data.id) - 1)
+                    .update({
+                        StatusData: "ไม่อยู่ในระบบ"
+                    })
+                    .then(() => {
+                        ShowSuccess("ลบข้อมูลสำเร็จ");
+                        console.log("Data pushed successfully");
+                    })
+                    .catch((error) => {
+                        ShowError("ลบข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+            },
+            () => {
+                ShowError("ยกเลิกการลบข้อมูล");
+            }
+        )
+    };
+
+    const handleResetData = (data) => {
+        ShowConfirm(
+            `ต้องการกู้ข้อมูล ${data.Name} ใช่หรือไม่`,
+            () => {
+                database
+                    .ref("/deductibleincome/")
+                    .child(Number(data.id) - 1)
+                    .update({
+                        StatusData: "อยู่ในระบบ"
+                    })
+                    .then(() => {
+                        ShowSuccess("กู้ข้อมูลสำเร็จ");
+                        console.log("Data pushed successfully");
+                    })
+                    .catch((error) => {
+                        ShowError("กู้ข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+            },
+            () => {
+                ShowError("ยกเลิกการลบข้อมูล");
+            }
+        )
     };
 
     return (
@@ -172,6 +245,16 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                 <Typography variant="subtitle1" sx={{ marginRight: 1, marginTop: 1 }} gutterBottom>เลือกเพื่อแสดงข้อมูล</Typography>
                                 <FormControlLabel control={<Checkbox checked={typeIncome} color="info" onChange={() => setTypeIncome(!typeIncome)} />} label="รายได้" />
                                 <FormControlLabel control={<Checkbox checked={typeDeduction} color="info" onChange={() => setTypeDeduction(!typeDeduction)} />} label="รายหัก" />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={checkData}
+                                            color="info"
+                                            onChange={() => setCheckData(!checkData)}
+                                        />
+                                    }
+                                    label="อยู่ในระบบ"
+                                />
                             </FormGroup>
                         </Grid>
                     </Grid>
@@ -195,6 +278,16 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                 <Typography variant="subtitle1" sx={{ marginRight: 1, marginTop: 1 }} gutterBottom>เลือกเพื่อแสดงข้อมูล</Typography>
                                 <FormControlLabel control={<Checkbox checked={typeIncome} color="info" onChange={() => setTypeIncome(!typeIncome)} />} label="รายได้" />
                                 <FormControlLabel control={<Checkbox checked={typeDeduction} color="info" onChange={() => setTypeDeduction(!typeDeduction)} />} label="รายหัก" />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={checkData}
+                                            color="info"
+                                            onChange={() => setCheckData(!checkData)}
+                                        />
+                                    }
+                                    label="อยู่ในระบบ"
+                                />
                             </FormGroup>
                         </Grid>
                     </Grid>
@@ -222,7 +315,26 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                     {
                         typeIncome &&
                         <Grid item xs={12} md={(typeIncome && typeDeduction) ? 6 : 12} >
-                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>รายละเอียดรายได้</Typography>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mb: 1
+                                }}
+                            >
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>รายละเอียดรายได้</Typography>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={checkIncome}
+                                            color="info"
+                                            onChange={() => setCheckIncome(!checkIncome)}
+                                        />
+                                    }
+                                    label="ประจำ"
+                                />
+                            </Box>
                             <TableContainer
                                 component={Paper}
                                 style={{ maxHeight: "70vh" }}
@@ -241,14 +353,14 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                                 ชื่อ
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
-                                                ประจำ
+                                                สถานะ
                                             </TablecellSelling>
                                             <TablecellSelling width={50} />
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {
-                                            income.slice(pageIncome * rowsPerPageIncome, pageIncome * rowsPerPageIncome + rowsPerPageIncome).map((row, index) => (
+                                            income.filter((t) => t.StatusData === (checkData ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).slice(pageIncome * rowsPerPageIncome, pageIncome * rowsPerPageIncome + rowsPerPageIncome).map((row, index) => (
                                                 <TableRow>
                                                     <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
                                                         <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
@@ -314,9 +426,21 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                                     <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
                                                         {
                                                             ID !== row.id ?
-                                                                <IconButton size="small" onClick={() => handleUpdate(row)}>
-                                                                    <SettingsIcon fontSize="small" color="warning" />
-                                                                </IconButton>
+                                                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                                    <IconButton size="small" onClick={() => handleUpdate(row)}>
+                                                                        <SettingsIcon fontSize="small" color="warning" />
+                                                                    </IconButton>
+                                                                    {
+                                                                        row.StatusData === "อยู่ในระบบ" ?
+                                                                            <IconButton size="small" onClick={() => handleDeleteData(row)}>
+                                                                                <DeleteForeverIcon fontSize="small" color="error" />
+                                                                            </IconButton>
+                                                                            :
+                                                                            <IconButton size="small" onClick={() => handleResetData(row)}>
+                                                                                <AssignmentTurnedInIcon fontSize="small" color="success" />
+                                                                            </IconButton>
+                                                                    }
+                                                                </Box>
                                                                 :
                                                                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginLeft: -2, marginRight: -2 }}>
                                                                     <IconButton size="small" onClick={() => handleCancel()}>
@@ -364,11 +488,11 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                 </Table>
                             </TableContainer>
                             {
-                                income.length <= 10 ? null :
+                                income.filter((t) => t.StatusData === (checkData ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length <= 10 ? null :
                                     <TablePagination
                                         rowsPerPageOptions={[10, 25, 30]}
                                         component="div"
-                                        count={income.length}
+                                        count={income.filter((t) => t.StatusData === (checkData ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length}
                                         rowsPerPage={rowsPerPageIncome}
                                         page={pageIncome}
                                         onPageChange={handleChangePageIncome}
@@ -413,7 +537,26 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                     {
                         typeDeduction &&
                         <Grid item xs={12} md={(typeIncome && typeDeduction) ? 6 : 12} >
-                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>รายละเอียดรายหัก</Typography>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mb: 1
+                                }}
+                            >
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>รายละเอียดรายหัก</Typography>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={checkDeduction}
+                                            color="info"
+                                            onChange={() => setCheckDeduction(!checkDeduction)}
+                                        />
+                                    }
+                                    label="ประจำ"
+                                />
+                            </Box>
                             <TableContainer
                                 component={Paper}
                                 style={{ maxHeight: "70vh" }}
@@ -432,14 +575,14 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                                 ชื่อ
                                             </TablecellSelling>
                                             <TablecellSelling sx={{ textAlign: "center", fontSize: 16 }}>
-                                                ประจำ
+                                                สถานะ
                                             </TablecellSelling>
                                             <TablecellSelling width={50} />
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {
-                                            deduction.slice(pageDeduction * rowsPerPageDeduction, pageDeduction * rowsPerPageDeduction + rowsPerPageDeduction).map((row, index) => (
+                                            deduction.filter((t) => t.StatusData === (checkData ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).slice(pageDeduction * rowsPerPageDeduction, pageDeduction * rowsPerPageDeduction + rowsPerPageDeduction).map((row, index) => (
                                                 <TableRow>
                                                     <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
                                                         <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
@@ -505,9 +648,21 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                                     <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
                                                         {
                                                             ID !== row.id ?
-                                                                <IconButton size="small" onClick={() => handleUpdate(row)}>
-                                                                    <SettingsIcon fontSize="small" color="warning" />
-                                                                </IconButton>
+                                                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                                    <IconButton size="small" onClick={() => handleUpdate(row)}>
+                                                                        <SettingsIcon fontSize="small" color="warning" />
+                                                                    </IconButton>
+                                                                    {
+                                                                        row.StatusData === "อยู่ในระบบ" ?
+                                                                            <IconButton size="small" onClick={() => handleDeleteData(row)}>
+                                                                                <DeleteForeverIcon fontSize="small" color="error" />
+                                                                            </IconButton>
+                                                                            :
+                                                                            <IconButton size="small" onClick={() => handleResetData(row)}>
+                                                                                <AssignmentTurnedInIcon fontSize="small" color="success" />
+                                                                            </IconButton>
+                                                                    }
+                                                                </Box>
                                                                 :
                                                                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginLeft: -2, marginRight: -2 }}>
                                                                     <IconButton size="small" onClick={() => handleCancel()}>
@@ -555,11 +710,11 @@ const DeductibleIncomeDetail = ({ openNavbar }) => {
                                 </Table>
                             </TableContainer>
                             {
-                                deduction.length <= 10 ? null :
+                                deduction.filter((t) => t.StatusData === (checkData ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length <= 10 ? null :
                                     <TablePagination
                                         rowsPerPageOptions={[10, 25, 30]}
                                         component="div"
-                                        count={deduction.length}
+                                        count={deduction.filter((t) => t.StatusData === (checkData ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length}
                                         rowsPerPage={rowsPerPageDeduction}
                                         page={pageDeduction}
                                         onPageChange={handleChangePageDeduction}

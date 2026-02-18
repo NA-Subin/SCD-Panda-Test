@@ -123,8 +123,8 @@ const UpdateInvoice = (props) => {
         return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
 
-    const bankDetail = Object.values(banks || {});
-    const transferMoneyDetail = Object.values(transferMoney || {}).filter(row => row.Status !== "ยกเลิก");
+    const bankDetail = Object.values(banks || {}).filter((row) => row.Status !== "ยกเลิก");
+    const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && ticket.Status !== "ยกเลิก");
@@ -463,6 +463,8 @@ const UpdateInvoice = (props) => {
                 }
                 return acc;
             }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
+            CustomerAddress: customer?.Address || "",
+            BankCompany: invoiceC?.Name || "",
             Volume: ticket.TotalVolume || 0,
             Amount: ticket.TotalAmount || 0,
             Date: invoices[0]?.DateStart,

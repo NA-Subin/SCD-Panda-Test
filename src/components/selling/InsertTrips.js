@@ -1394,7 +1394,7 @@ const InsertTrips = () => {
     const getDriver = () => {
         const driverss = [
             ...[...truckH]
-                .filter((item) => item.Driver !== "0:ไม่มี" && item.RegTail !== "0:ไม่มี" && item.Status === "ว่าง")
+                .filter((item) => item.Driver !== "0:ไม่มี" && item.Status === "ว่าง")
                 .sort((a, b) => a.Driver.localeCompare(b.Driver, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, Type: "รถบริษัท" })),
 

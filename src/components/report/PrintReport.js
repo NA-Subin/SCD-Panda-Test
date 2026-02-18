@@ -109,6 +109,108 @@ const PrintReport = () => {
     return "-";
   };
 
+  const formatAddressStandard = (address) => {
+    if (!address) return "-";
+
+    let addr = {
+      no: "",
+      village: "",
+      subDistrict: "",
+      district: "",
+      province: "",
+      zipCode: "",
+      road: ""
+    };
+
+    // ======================
+    // 1️⃣ normalize object
+    // ======================
+    if (typeof address === "object") {
+      addr = {
+        no: address.no ?? "",
+        village: address.village ?? "",
+        subDistrict: address.subDistrict ?? "",
+        district: address.district ?? "",
+        province: address.province ?? "",
+        zipCode: address.zipCode ?? "",
+        road: ""
+      };
+    }
+
+    // ======================
+    // 2️⃣ normalize string (legacy)
+    // ======================
+    if (typeof address === "string") {
+      let parts = address.trim().split(/\s+/);
+
+      // หา "ถ."
+      const roadIndex = parts.findIndex(p => p.startsWith("ถ."));
+      if (roadIndex !== -1) {
+        addr.road = parts[roadIndex];
+        parts.splice(roadIndex, 1);
+      }
+
+      // zip
+      if (/^\d{5}$/.test(parts.at(-1))) {
+        addr.zipCode = parts.pop();
+      }
+
+      addr.province = parts.pop() ?? "";
+      addr.district = parts.pop() ?? "";
+      addr.subDistrict = parts.pop() ?? "";
+
+      const maybeVillage = parts.at(-1);
+      if (/^\d+$/.test(maybeVillage)) {
+        addr.village = parts.pop();
+      }
+
+      addr.no = parts.join(" ");
+    }
+
+    // ======================
+    // 3️⃣ clean ค่า "-", null, ""
+    // ======================
+    const clean = (v) =>
+      v && v !== "-" && String(v).trim() !== "" ? v : "";
+
+    addr = Object.fromEntries(
+      Object.entries(addr).map(([k, v]) => [k, clean(v)])
+    );
+
+    // ======================
+    // 4️⃣ ตรวจจับ "ถ." ที่หลงผิดช่อง
+    // ======================
+    // ถ้า village เป็นถนน
+    if (addr.village.startsWith("ถ.")) {
+      addr.road = addr.village;
+      addr.village = "";
+    }
+
+    // ถ้า subDistrict เป็นถนน
+    if (addr.subDistrict.startsWith("ถ.")) {
+      addr.road = addr.subDistrict;
+      addr.subDistrict = "";
+    }
+
+    // ======================
+    // 5️⃣ ต้องมีขั้นต่ำ
+    // ======================
+    if (!addr.no || !addr.district || !addr.province) return "-";
+
+    // ======================
+    // 6️⃣ format มาตรฐาน
+    // ======================
+    return [
+      `บ้านเลขที่ ${addr.no}`,
+      addr.village && `หมู่ ${addr.village}`,
+      addr.road && addr.road,
+      addr.subDistrict && `ต.${addr.subDistrict}`,
+      `อ.${addr.district}`,
+      `จ.${addr.province}`,
+      addr.zipCode
+    ].filter(Boolean).join(" ");
+  };
+
   const formatTaxID = (taxID) => {
     if (!taxID || taxID === "-") {
       return "-";
@@ -370,7 +472,7 @@ const PrintReport = () => {
                           }
                         </Typography>
                         <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>
-                          {formatAddress(invoiceData?.Address)}
+                          {formatAddressStandard(invoiceData?.Address)}
                           {/* เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)} */}
                         </Typography>
                         <Typography variant="subtitle2" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
@@ -402,7 +504,7 @@ const PrintReport = () => {
                       </Box>
                       <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
                         <Typography variant="subtitle2"><b>ที่อยู่:</b></Typography>
-                        <Typography variant="subtitle2" marginLeft={4}>{formatAddress(invoiceData?.CompanyAddress)}</Typography>
+                        <Typography variant="subtitle2" marginLeft={4}>{formatAddressStandard(invoiceData?.CompanyAddress)}</Typography>
                         {/* <Typography variant="subtitle2" marginLeft={4}>{formatAddress(invoiceData?.Address)}</Typography> */}
                       </Box>
                       <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
@@ -838,7 +940,7 @@ const PrintReport = () => {
                             invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "1. KBANK สาขา เฟสติเวล 663-1-00798-6"
                               : "1. KBANK สาขา เฟสติเวล 663-1-00629-7"
                           }
-                          </Typography>
+                        </Typography>
                         {/* <Typography variant="subtitle2" gutterBottom>2. KBANK สาขาป่าแดด 064-8-29539-1</Typography> */}
                       </Grid>
                       <Grid item xs={4} sx={{ textAlign: "center", marginTop: 4 }}>

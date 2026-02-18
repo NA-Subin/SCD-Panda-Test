@@ -102,6 +102,37 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
         };
     }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
+    const formatBalanceOrOverdue = (totalAmount, totalOverdue) => {
+        const toNumber = (val) => {
+            if (val === null || val === undefined || val === "") return 0;
+            const cleaned = String(val).replace(/,/g, "");
+            const num = Number(cleaned);
+            return isNaN(num) ? 0 : num;
+        };
+
+        const amount = toNumber(totalAmount);
+        const overdue = toNumber(totalOverdue);
+
+        // ✅ คำนวณแบบกัน floating error
+        let balance = Math.round((amount - overdue) * 100) / 100;
+
+        // ✅ ถ้าใกล้ศูนย์มาก ให้ถือว่าเป็น 0 ไปเลย
+        if (Math.abs(balance) < 0.005) {
+            balance = 0;
+        }
+
+        const formatter = new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+
+        if (balance !== 0) {
+            return formatter.format(overdue);
+        }
+
+        return formatter.format(balance);
+    };
+
     const handleSort = (key) => {
         setSortConfig((prev) => ({
             key,
@@ -194,6 +225,11 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
     //         };
     //     }).sort((a, b) => a.TicketName.localeCompare(b.TicketName));
 
+    console.log("transfer : ", transferMoneyDetail
+        .filter(trans => trans.TicketName === "15:C.สหพานิช"));
+
+    console.log("orders : ", orders.filter((t) => t.TicketName === "15:C.สหพานิช"));
+
     const orderDetail = useMemo(() => {
         if (!selectedDateStart || !selectedDateEnd) return [];
 
@@ -221,14 +257,14 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
             return isValidStatus && isInDateRange && matchTickets && isInCompany && item.CustomerType === "ตั๋วรถเล็ก";
         });
 
-        filteredItemsRef.current = filteredItems;
+        filteredItemsRef.current = filteredItems.filter((t) => t.Trip !== "ยกเลิก");
 
         // 2. แตก Product รายการย่อยออกมา
         const flattened = filteredItems.flatMap((item) => {
             if (!item.Product) return [];
 
             const totalIncomingMoney = transferMoneyDetail
-                .filter(trans => trans.TicketNo === item.No)
+                .filter(trans => trans.TicketNo === item.No && trans.Status !== "ยกเลิก")
                 .reduce((sum, trans) => {
                     const value = parseFloat(trans.IncomingMoney) || 0;
                     return sum + value;
@@ -248,7 +284,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                     VolumeProduct: Number(productData.Volume),
                     Amount: productData.Amount || 0,
                     IncomingMoney: totalIncomingMoney || 0,
-                    OverdueTransfer: Number(productData.Amount || 0) - Number(totalIncomingMoney || 0),
+                    OverdueTransfer: 0,
                     RateOil: productData.RateOil || 0,
                 }));
         });
@@ -256,28 +292,53 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
         flattenedRef.current = flattened;
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
-        const merged = Object.values(flattened.reduce((acc, curr) => {
-            const key = curr.TicketName;
+        const countedTicketNo = new Set();
 
-            if (!acc[key]) {
-                acc[key] = { ...curr };
-            } else {
-                acc[key].VolumeProduct += Number(curr.VolumeProduct);
-                acc[key].Amount += Number(curr.Amount);
-                acc[key].IncomingMoney += Number(curr.IncomingMoney);
-                acc[key].OverdueTransfer += Number(curr.OverdueTransfer);
+        const merged = Object.values(
+            flattened.reduce((acc, curr) => {
+                const key = curr.TicketName;
+                const ticketNo = curr.No;
 
-                // กรณีข้อมูลรวมอ้างอิงวันเดียว: ให้เลือกวันล่าสุดหรือแรกสุดก็ได้ (ตัวอย่างใช้วันล่าสุด)
-                // const dateA = dayjs(acc[key].Date, "DD/MM/YYYY");
-                // const dateB = dayjs(curr.Date, "DD/MM/YYYY");
-                // acc[key].Date = dateA.isAfter(dateB) ? acc[key].Date : curr.Date;
-            }
+                if (!acc[key]) {
+                    acc[key] = {
+                        ...curr,
+                        VolumeProduct: 0,
+                        Amount: 0,
+                        IncomingMoney: 0,
+                    };
+                }
 
-            return acc;
-        }, {}));
+                // รวมสินค้า (ถูกแล้ว)
+                acc[key].VolumeProduct += Number(curr.VolumeProduct) || 0;
+                acc[key].Amount += Number(curr.Amount) || 0;
+
+                // เงินโอนคิดครั้งเดียวต่อ Ticket (ถูกแล้ว)
+                if (!countedTicketNo.has(ticketNo)) {
+                    acc[key].IncomingMoney += Number(curr.IncomingMoney) || 0;
+                    countedTicketNo.add(ticketNo);
+                }
+
+                return acc;
+            }, {})
+        );
+
+        const finalData = merged.map(row => {
+            const amount = Number(row.Amount) || 0;
+            const incoming = Number(row.IncomingMoney) || 0;
+
+            let overdue = amount - incoming;
+
+            // กัน floating และ -0
+            if (Math.abs(overdue) < 0.01) overdue = 0;
+
+            return {
+                ...row,
+                OverdueTransfer: overdue
+            };
+        });
 
         // 4. เรียงตามวันที่ และชื่อคนขับ
-        return merged.sort((a, b) => {
+        return finalData.sort((a, b) => {
             const dateA = dayjs(a.Date, "DD/MM/YYYY");
             const dateB = dayjs(b.Date, "DD/MM/YYYY");
             if (!dateA.isSame(dateB)) {
@@ -287,8 +348,6 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
         });
 
     }, [orders, selectedDateStart, selectedDateEnd, selectTickets, transferMoneyDetail]);
-
-
 
     const totalAmount = orderDetail.reduce((sum, item) => sum + Number(item.Amount || 0), 0);
     const totalOverdueTransfer = orderDetail.reduce((sum, item) => sum + Number(item.OverdueTransfer || 0), 0);
@@ -467,7 +526,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        marginBottom: { lg: 3 , xs: -1}
+                                        marginBottom: { lg: 3, xs: -1 }
                                     }}
                                 >
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -608,7 +667,7 @@ const ReportPaymentSmallTruck = ({ openNavbar }) => {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        marginBottom: { lg: 3 , xs: -1}
+                                        marginBottom: { lg: 3, xs: -1 }
                                     }}
                                 >
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>

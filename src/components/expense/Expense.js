@@ -3,12 +3,14 @@ import {
     Badge,
     Box,
     Button,
+    Checkbox,
     Container,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
+    FormControlLabel,
     Grid,
     IconButton,
     MenuItem,
@@ -28,9 +30,10 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import DisabledByDefaultIcon from '@mui/icons-material/DisabledByDefault';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { TablecellSelling } from "../../theme/style";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import { database } from "../../server/firebase";
 
 const ExpenseDetail = ({ openNavbar }) => {
@@ -40,6 +43,7 @@ const ExpenseDetail = ({ openNavbar }) => {
     const [type, setType] = useState("");
     const [status, setStatus] = useState("");
     const [ID, setID] = useState("");
+    const [check, setCheck] = useState(true);
 
     const [openTab, setOpenTab] = React.useState(true);
 
@@ -88,7 +92,7 @@ const ExpenseDetail = ({ openNavbar }) => {
         setID(data.id);
         setName(data.Name);
         setType(data.Type);
-        setStatus(data.Status);
+        setStatus(data.Status === "อยู่ในระบบ" ? true : false);
     }
 
     const handleSave = () => {
@@ -112,17 +116,17 @@ const ExpenseDetail = ({ openNavbar }) => {
             });
     };
 
-    const handleUpdateData = () => {
+    const handleUpdateData = (data) => {
         database
             .ref("/expenseitems/")
             .child(Number(ID) - 1)
             .update({
                 Name: name,
                 Type: type,
-                Status: status
+                Status: status ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ"
             })
             .then(() => {
-                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                ShowSuccess("แก้ไขข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
                 setID("");
                 setName("");
@@ -133,6 +137,56 @@ const ExpenseDetail = ({ openNavbar }) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");
                 console.error("Error pushing data:", error);
             });
+    };
+
+    const handleDeleteData = (data) => {
+        ShowConfirm(
+            `ต้องการลบข้อมูล ${data.Name} ใช่หรือไม่`,
+            () => {
+                database
+                    .ref("/expenseitems/")
+                    .child(Number(data.id) - 1)
+                    .update({
+                        Status: "ไม่อยู่ในระบบ"
+                    })
+                    .then(() => {
+                        ShowSuccess("ลบข้อมูลสำเร็จ");
+                        console.log("Data pushed successfully");
+                    })
+                    .catch((error) => {
+                        ShowError("ลบข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+            },
+            () => {
+                ShowError("ยกเลิกการลบข้อมูล");
+            }
+        )
+    };
+
+    const handleResetData = (data) => {
+        ShowConfirm(
+            `ต้องการกู้ข้อมูล ${data.Name} ใช่หรือไม่`,
+            () => {
+                database
+                    .ref("/expenseitems/")
+                    .child(Number(data.id) - 1)
+                    .update({
+                        Status: "อยู่ในระบบ"
+                    })
+                    .then(() => {
+                        ShowSuccess("กู้ข้อมูลสำเร็จ");
+                        console.log("Data pushed successfully");
+                    })
+                    .catch((error) => {
+                        ShowError("กู้ข้อมูลไม่สำเร็จ");
+                        console.error("Error pushing data:", error);
+                    });
+            },
+            () => {
+                ShowError("ยกเลิกการลบข้อมูล");
+            }
+        )
     };
 
     const handleCancel = () => {
@@ -158,10 +212,27 @@ const ExpenseDetail = ({ openNavbar }) => {
                 {
                     windowWidth >= 800 ?
                         <Grid container spacing={2} p={1}>
-                            <Grid item sm={8} lg={10}>
-                                <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>รายการค่าใช้จ่าย</Typography>
-                            </Grid>
-                            <Grid item sm={4} lg={2} sx={{ textAlign: "right" }}>
+                            <Grid item sm={12} lg={12}>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        mb: 1
+                                    }}
+                                >
+                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>รายการค่าใช้จ่าย</Typography>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={check}
+                                                color="info"
+                                                onChange={() => setCheck(!check)}
+                                            />
+                                        }
+                                        label="อยู่ในระบบ"
+                                    />
+                                </Box>
 
                             </Grid>
                         </Grid>
@@ -199,7 +270,7 @@ const ExpenseDetail = ({ openNavbar }) => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        expenseitem.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                        expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
                                                     <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
@@ -262,22 +333,27 @@ const ExpenseDetail = ({ openNavbar }) => {
                                                         ID !== row.id ?
                                                             <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Status}</Typography>
                                                             :
-                                                            <Paper>
-                                                                <TextField
-                                                                    fullWidth
-                                                                    value={status}
-                                                                    onChange={(e) => setStatus(e.target.value)}
-                                                                    size="small"
+                                                            <Paper
+                                                                elevation={0}
+                                                                sx={{
+                                                                    p: 0, // ไม่มี padding
+                                                                    m: 0, // ไม่มี margin
+                                                                    display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
+                                                                    width: 'fit-content', // ปรับตาม Checkbox
+                                                                    height: 'fit-content',
+                                                                    backgroundColor: 'white',
+                                                                    marginLeft: 2
+                                                                }}
+                                                            >
+                                                                <Checkbox
+                                                                    checked={status}
+                                                                    onChange={() => setStatus(!status)}
                                                                     sx={{
-                                                                        '& .MuiInputBase-root': {
-                                                                            height: 30, // ปรับความสูงรวม
-                                                                        },
-                                                                        '& .MuiInputBase-input': {
-                                                                            padding: '4px 8px', // ปรับ padding ด้านใน input
-                                                                            fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
-                                                                        },
+                                                                        p: 0, // ไม่มี padding รอบ checkbox
+                                                                        m: 0, // ไม่มี margin
                                                                     }}
-                                                                    InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
                                                                 />
                                                             </Paper>
                                                     }
@@ -285,9 +361,22 @@ const ExpenseDetail = ({ openNavbar }) => {
                                                 <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
                                                     {
                                                         ID !== row.id ?
-                                                            <IconButton size="small" onClick={() => handleUpdate(row)}>
-                                                                <SettingsIcon fontSize="small" color="warning" />
-                                                            </IconButton>
+                                                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                                <IconButton size="small" onClick={() => handleUpdate(row)}>
+                                                                    <SettingsIcon fontSize="small" color="warning" />
+                                                                </IconButton>
+                                                                {
+                                                                    row.Status === "อยู่ในระบบ" ?
+                                                                        <IconButton size="small" onClick={() => handleDeleteData(row)}>
+                                                                            <DeleteForeverIcon fontSize="small" color="error" />
+                                                                        </IconButton>
+                                                                        :
+                                                                        <IconButton size="small" onClick={() => handleResetData(row)}>
+                                                                            <AssignmentTurnedInIcon fontSize="small" color="success" />
+                                                                        </IconButton>
+                                                                }
+                                                            </Box>
+
                                                             :
                                                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginLeft: -2, marginRight: -2 }}>
                                                                 <IconButton size="small" onClick={() => handleCancel()}>
@@ -333,7 +422,7 @@ const ExpenseDetail = ({ openNavbar }) => {
                                     {
                                         open &&
                                         <TableRow sx={{ backgroundColor: "#c5cae9" }}>
-                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{expenseitem.length + 1}</TableCell>
+                                            <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length + 1}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>
                                                 <Paper>
                                                     <TextField
@@ -401,11 +490,11 @@ const ExpenseDetail = ({ openNavbar }) => {
                             </Table>
                         </TableContainer>
                         {
-                            expenseitem.length <= 10 ? null :
+                            expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length <= 10 ? null :
                                 <TablePagination
                                     rowsPerPageOptions={[10, 25, 30]}
                                     component="div"
-                                    count={expenseitem.length}
+                                    count={expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length}
                                     rowsPerPage={rowsPerPage}
                                     page={page}
                                     onPageChange={handleChangePage}

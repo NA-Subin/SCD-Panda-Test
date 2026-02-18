@@ -127,11 +127,12 @@ const UpdateInvoice = (props) => {
         return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
     });
     const smalls = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
-    const bankDetail = Object.values(banks || {});
-    const transferMoneyDetail = Object.values(transferMoney || {}).filter(row => row.Status !== "ยกเลิก");
+    const bankDetail = Object.values(banks || {}).filter((row) => row.Status !== "ยกเลิก");
+    const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && ticket.Status !== "ยกเลิก");
+    const transfer = transferMoneyDetail.filter((row) =>
+        row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && ticket.Status !== "ยกเลิก");
     const invoices = invoiceDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);
 
     console.log("invoice : ", invoices);
@@ -231,6 +232,8 @@ const UpdateInvoice = (props) => {
         const companyId = Number(companyIdStr.split(":")[0]);
         return row.id === companyId;
     });
+
+    console.log("customer : ", customer);
 
     const [invoice, setInvoice] = React.useState({});
 
@@ -489,13 +492,15 @@ const UpdateInvoice = (props) => {
                         uniqueRowId: `${index}:${productName}`, // 🟢 สร้าง ID ที่ไม่ซ้ำกัน
                     }))
             ),
-            Order: order.reduce((acc, current) => {
+            Order: orders.reduce((acc, current) => {
                 // ✅ ตรวจสอบว่าค่า TicketName ซ้ำหรือไม่ และต้องตรงกับ ticket.TicketName
                 if (!acc.some(item => item.TicketName === current.TicketName) && current.TicketName === ticket.TicketName) {
                     acc.push(current);
                 }
                 return acc;
             }, []), // ✅ ต้องมีค่าเริ่มต้นเป็น []
+            CustomerAddress: customer?.Address || "",
+            BankCompany: invoiceC?.Name || "",
             Volume: ticket.TotalVolume || 0,
             Amount: ticket.TotalAmount || 0,
             Date: invoices[0]?.DateStart,
@@ -1005,11 +1010,11 @@ const UpdateInvoice = (props) => {
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ชนิดน้ำมัน
                                     </TablecellSelling>
-                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
-                                        ราคาน้ำมัน
-                                    </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 120, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         จำนวนลิตร
+                                    </TablecellSelling>
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 100, height: '30px', backgroundColor: theme.palette.primary.dark }}>
+                                        ราคาน้ำมัน
                                     </TablecellSelling>
                                     <TablecellSelling sx={{ textAlign: "center", fontSize: "14px", width: 130, height: '30px', backgroundColor: theme.palette.primary.dark }}>
                                         ยอดเงิน
@@ -1063,6 +1068,18 @@ const UpdateInvoice = (props) => {
                                                                                         "#FFFFFF"
                                                 }}>
                                                     <Typography variant="subtitle2" fontSize="14px" fontWeight="bold" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{report[row.uniqueRowId]?.ProductName || row.ProductName}</Typography>
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        textAlign: "right",
+                                                        height: '30px',
+                                                        paddingLeft: "40px !important",
+                                                        paddingRight: "40px !important",
+                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                                    }}>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                                        {new Intl.NumberFormat("en-US").format(row.Volume)}
+                                                    </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "center", fontSize: "14px", }}>
                                                     <Paper component="form" sx={{ marginTop: -1, marginBottom: -1 }}>
@@ -1138,18 +1155,6 @@ const UpdateInvoice = (props) => {
                                                     sx={{
                                                         textAlign: "right",
                                                         height: '30px',
-                                                        paddingLeft: "40px !important",
-                                                        paddingRight: "40px !important",
-                                                        fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
-                                                    }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {new Intl.NumberFormat("en-US").format(row.Volume)}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{
-                                                        textAlign: "right",
-                                                        height: '30px',
                                                         paddingLeft: "10px !important",
                                                         paddingRight: "10px !important",
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
@@ -1169,7 +1174,7 @@ const UpdateInvoice = (props) => {
                         <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "1px" }, width: openNavbar ? "1020px" : "1110px" }}>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 750 }} colSpan={5}>
+                                    <TableCell sx={{ textAlign: "center", height: '30px', fontWeight: "bold", borderLeft: "1px solid white", backgroundColor: "#616161", color: "white", width: 650 }} colSpan={4}>
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             รวม
                                         </Typography>
@@ -1190,6 +1195,24 @@ const UpdateInvoice = (props) => {
                                     >
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
                                             {new Intl.NumberFormat("en-US").format(ticket.TotalVolume)}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell
+                                        sx={{
+                                            textAlign: "right",
+                                            height: '30px',
+                                            fontWeight: "bold",
+                                            borderLeft: "1px solid white",
+                                            width: 100,
+                                            backgroundColor: "#616161",
+                                            color: "white",
+                                            paddingLeft: "40px !important",
+                                            paddingRight: "40px !important",
+                                            fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                        }}
+                                    >
+                                        <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
+                                            
                                         </Typography>
                                     </TableCell>
                                     <TableCell
@@ -1288,7 +1311,7 @@ const UpdateInvoice = (props) => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        transfer.map((row, index) => (
+                                        transfer.filter((t) => t.Status !== "ยกเลิก").map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center", height: '30px' }}>{index + 1}</TableCell>
                                                 <TableCell sx={{ textAlign: "center", height: '30px' }}>{`${row.Code} - ${row.Number}`}</TableCell>
@@ -1308,7 +1331,7 @@ const UpdateInvoice = (props) => {
                                                                             size: "small",
                                                                             fullWidth: true,
                                                                             inputProps: {
-                                                                                value: formatThaiFull(dayjs(price.DateStart, "DD/MM/YYYY")), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
+                                                                                value: formatThaiFull(dayjs(tranferDateStart, "DD/MM/YYYY")), // ✅ แสดงวันแบบ "1 กรกฎาคม พ.ศ.2568"
                                                                                 readOnly: true, // ✅ ปิดไม่ให้พิมพ์เอง เพราะใช้ format แบบ custom
                                                                             },
                                                                             sx: {
@@ -1410,7 +1433,6 @@ const UpdateInvoice = (props) => {
                                                             :
                                                             <Paper component="form" sx={{ width: "100%" }}>
                                                                 <TextField
-                                                                    type="number"
                                                                     value={tranferNote}
                                                                     onChange={(e) => setTranferNote(e.target.value)}
                                                                     size="small"
@@ -1544,7 +1566,7 @@ const UpdateInvoice = (props) => {
 
                                                         // filter เอาเฉพาะ Code = เดือนปัจจุบัน
                                                         const filtered = transferMoneyDetail.filter(
-                                                            (row) => row.Code === code
+                                                            (row) => row.Code === code && row.Status !== "ยกเลิก"
                                                         );
 
                                                         // หา Number ล่าสุด

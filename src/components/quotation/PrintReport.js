@@ -114,6 +114,108 @@ const PrintReport = () => {
     return `${addrObj.no} หมู่ ${addrObj.village}${roadPart} ต.${addrObj.subDistrict} อ.${addrObj.district} จ.${addrObj.province}${zipPart}`;
   };
 
+  const formatAddressStandard = (address) => {
+    if (!address) return "-";
+
+    let addr = {
+      no: "",
+      village: "",
+      subDistrict: "",
+      district: "",
+      province: "",
+      zipCode: "",
+      road: ""
+    };
+
+    // ======================
+    // 1️⃣ normalize object
+    // ======================
+    if (typeof address === "object") {
+      addr = {
+        no: address.no ?? "",
+        village: address.village ?? "",
+        subDistrict: address.subDistrict ?? "",
+        district: address.district ?? "",
+        province: address.province ?? "",
+        zipCode: address.zipCode ?? "",
+        road: ""
+      };
+    }
+
+    // ======================
+    // 2️⃣ normalize string (legacy)
+    // ======================
+    if (typeof address === "string") {
+      let parts = address.trim().split(/\s+/);
+
+      // หา "ถ."
+      const roadIndex = parts.findIndex(p => p.startsWith("ถ."));
+      if (roadIndex !== -1) {
+        addr.road = parts[roadIndex];
+        parts.splice(roadIndex, 1);
+      }
+
+      // zip
+      if (/^\d{5}$/.test(parts.at(-1))) {
+        addr.zipCode = parts.pop();
+      }
+
+      addr.province = parts.pop() ?? "";
+      addr.district = parts.pop() ?? "";
+      addr.subDistrict = parts.pop() ?? "";
+
+      const maybeVillage = parts.at(-1);
+      if (/^\d+$/.test(maybeVillage)) {
+        addr.village = parts.pop();
+      }
+
+      addr.no = parts.join(" ");
+    }
+
+    // ======================
+    // 3️⃣ clean ค่า "-", null, ""
+    // ======================
+    const clean = (v) =>
+      v && v !== "-" && String(v).trim() !== "" ? v : "";
+
+    addr = Object.fromEntries(
+      Object.entries(addr).map(([k, v]) => [k, clean(v)])
+    );
+
+    // ======================
+    // 4️⃣ ตรวจจับ "ถ." ที่หลงผิดช่อง
+    // ======================
+    // ถ้า village เป็นถนน
+    if (addr.village.startsWith("ถ.")) {
+      addr.road = addr.village;
+      addr.village = "";
+    }
+
+    // ถ้า subDistrict เป็นถนน
+    if (addr.subDistrict.startsWith("ถ.")) {
+      addr.road = addr.subDistrict;
+      addr.subDistrict = "";
+    }
+
+    // ======================
+    // 5️⃣ ต้องมีขั้นต่ำ
+    // ======================
+    if (!addr.no || !addr.district || !addr.province) return "-";
+
+    // ======================
+    // 6️⃣ format มาตรฐาน
+    // ======================
+    return [
+      `บ้านเลขที่ ${addr.no}`,
+      addr.village && `หมู่ ${addr.village}`,
+      addr.road && addr.road,
+      addr.subDistrict && `ต.${addr.subDistrict}`,
+      `อ.${addr.district}`,
+      `จ.${addr.province}`,
+      addr.zipCode
+    ].filter(Boolean).join(" ");
+  };
+
   const formatTaxID = (taxID) => {
     if (!taxID || taxID === "-") {
       return "-";
@@ -268,7 +370,7 @@ const PrintReport = () => {
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1 }} >
                   <Typography variant="subtitle2"><b>เลขที่ :</b></Typography>
                   <Typography variant="subtitle2" marginLeft={2}>
-                    {formatAddress(invoiceData?.Customer.Address)}
+                    {formatAddressStandard(invoiceData?.Customer.Address)}
                   </Typography>
                 </Box>
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1, mb: -0.5 }} >
@@ -551,8 +653,8 @@ const PrintReport = () => {
                   </Typography>
                 </Box>
                 <Typography variant="subtitle2" marginLeft={7.5}>
-                    {isBangchak ? "" : " กรุงไทย   357-300-2259"}
-                  </Typography>
+                  {isBangchak ? "" : " กรุงไทย   357-300-2259"}
+                </Typography>
               </Grid>
 
               {/* ส่วนวันที่และเลขที่เอกสาร */}

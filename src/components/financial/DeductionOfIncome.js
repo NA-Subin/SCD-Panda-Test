@@ -96,7 +96,7 @@ const DeductionOfIncome = (props) => {
         });
 
     const driver = Object.values(drivers || {});
-    const deductibleincomeDetail = Object.values(deductibleincome);
+    const deductibleincomeDetail = Object.values(deductibleincome).filter((item) => item.StatusData === "อยู่ในระบบ");
     // const reportDetail = reports.filter((row) => row.Status !== "ยกเลิก")
     // const formatted = [];
 

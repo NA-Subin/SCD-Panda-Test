@@ -49,9 +49,9 @@ const PrintInvoiceSmallTruck = () => {
   console.log("customer smalltruck : ", customerS);
   console.log("TicketName :  ", invoiceData?.Order[0].TicketName);
 
-  const address = invoiceData?.Order[0].Address || ''; // ดึงที่อยู่จาก invoiceData
+  // const address = invoiceData?.Order[0].Address || ''; // ดึงที่อยู่จาก invoiceData
 
-  console.log("Address : ", address);
+  // console.log("Address : ", address);
 
   const customer = customerS.find((row, index) => (row.id === Number(invoiceData?.Order[0].TicketName.split(":")[0])));
   const invoiceC = companyDetail.find((row) => {
@@ -66,15 +66,15 @@ const PrintInvoiceSmallTruck = () => {
 
   let formattedAddress = "-"; // ค่าเริ่มต้นเป็น "-"
 
-  if (address !== "-") {
-    // แยกที่อยู่เป็นส่วนๆ โดยใช้ split(" ")
-    const addressParts = address.split(" ");
+  // if (address !== "-") {
+  //   // แยกที่อยู่เป็นส่วนๆ โดยใช้ split(" ")
+  //   const addressParts = address.split(" ");
 
-    // ตรวจสอบว่ามีค่าพอให้ใช้งานหรือไม่ (ป้องกัน error)
-    if (addressParts.length >= 6) {
-      formattedAddress = `บ้านเลขที่${addressParts[0]} หมู่ที่${addressParts[1]} ตำบล${addressParts[2]} อำเภอ${addressParts[3]} จังหวัด${addressParts[4]} รหัสไปรษณีย์${addressParts[5]}`;
-    }
-  }
+  //   // ตรวจสอบว่ามีค่าพอให้ใช้งานหรือไม่ (ป้องกัน error)
+  //   if (addressParts.length >= 6) {
+  //     formattedAddress = `บ้านเลขที่${addressParts[0]} หมู่ที่${addressParts[1]} ตำบล${addressParts[2]} อำเภอ${addressParts[3]} จังหวัด${addressParts[4]} รหัสไปรษณีย์${addressParts[5]}`;
+  //   }
+  // }
 
   const numberToThaiText = (num) => {
     const thaiNumbers = ["ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
@@ -134,26 +134,106 @@ const PrintInvoiceSmallTruck = () => {
     return `${date}`;
   };
 
-  const formatAddressS = (address) => {
+  const formatAddressStandard = (address) => {
     if (!address) return "-";
 
-    // แยกข้อมูลโดยใช้ช่องว่าง
-    let parts = address.trim().split(/\s+/);
+    let addr = {
+      no: "",
+      village: "",
+      subDistrict: "",
+      district: "",
+      province: "",
+      zipCode: "",
+      road: ""
+    };
 
-    // กรองคำที่ขึ้นต้นด้วย "ถ." ออก
-    parts = parts.filter(part => !part.startsWith("ถ."));
-
-    // ถ้าส่วนท้ายเป็นตัวเลข 5 หลัก ให้ถือว่าเป็นรหัสไปรษณีย์
-    let postalCode = "";
-    if (/^\d{5}$/.test(parts[parts.length - 1])) {
-      postalCode = parts.pop();
+    // ======================
+    // 1️⃣ normalize object
+    // ======================
+    if (typeof address === "object") {
+      addr = {
+        no: address.no ?? "",
+        village: address.village ?? "",
+        subDistrict: address.subDistrict ?? "",
+        district: address.district ?? "",
+        province: address.province ?? "",
+        zipCode: address.zipCode ?? "",
+        road: ""
+      };
     }
 
-    if (parts.length < 5) return "-";
+    // ======================
+    // 2️⃣ normalize string (legacy)
+    // ======================
+    if (typeof address === "string") {
+      let parts = address.trim().split(/\s+/);
 
-    const [houseNo, moo, subdistrict, district, province] = parts;
+      // หา "ถ."
+      const roadIndex = parts.findIndex(p => p.startsWith("ถ."));
+      if (roadIndex !== -1) {
+        addr.road = parts[roadIndex];
+        parts.splice(roadIndex, 1);
+      }
 
-    return `${houseNo} หมู่ ${moo} ต.${subdistrict} อ.${district} จ.${province}${postalCode ? " " + postalCode : ""}`;
+      // zip
+      if (/^\d{5}$/.test(parts.at(-1))) {
+        addr.zipCode = parts.pop();
+      }
+
+      addr.province = parts.pop() ?? "";
+      addr.district = parts.pop() ?? "";
+      addr.subDistrict = parts.pop() ?? "";
+
+      const maybeVillage = parts.at(-1);
+      if (/^\d+$/.test(maybeVillage)) {
+        addr.village = parts.pop();
+      }
+
+      addr.no = parts.join(" ");
+    }
+
+    // ======================
+    // 3️⃣ clean ค่า "-", null, ""
+    // ======================
+    const clean = (v) =>
+      v && v !== "-" && String(v).trim() !== "" ? v : "";
+
+    addr = Object.fromEntries(
+      Object.entries(addr).map(([k, v]) => [k, clean(v)])
+    );
+
+    // ======================
+    // 4️⃣ ตรวจจับ "ถ." ที่หลงผิดช่อง
+    // ======================
+    // ถ้า village เป็นถนน
+    if (addr.village.startsWith("ถ.")) {
+      addr.road = addr.village;
+      addr.village = "";
+    }
+
+    // ถ้า subDistrict เป็นถนน
+    if (addr.subDistrict.startsWith("ถ.")) {
+      addr.road = addr.subDistrict;
+      addr.subDistrict = "";
+    }
+
+    // ======================
+    // 5️⃣ ต้องมีขั้นต่ำ
+    // ======================
+    if (!addr.no || !addr.district || !addr.province) return "-";
+
+    // ======================
+    // 6️⃣ format มาตรฐาน
+    // ======================
+    return [
+      `บ้านเลขที่ ${addr.no}`,
+      addr.village && `หมู่ ${addr.village}`,
+      addr.road && addr.road,
+      addr.subDistrict && `ต.${addr.subDistrict}`,
+      `อ.${addr.district}`,
+      `จ.${addr.province}`,
+      addr.zipCode
+    ].filter(Boolean).join(" ");
   };
 
   const formatAddress = (address) => {
@@ -330,7 +410,7 @@ const PrintInvoiceSmallTruck = () => {
                   </Box>
                   <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
                     <Typography variant="subtitle2"><b>ที่อยู่:</b></Typography>
-                    <Typography variant="subtitle2" marginLeft={4}>{formatAddressS(address)}</Typography>
+                    <Typography variant="subtitle2" marginLeft={4}>{formatAddressStandard(invoiceData?.CustomerAddress)}</Typography>
                   </Box>
                   <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
                     <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b></Typography>
@@ -490,7 +570,7 @@ const PrintInvoiceSmallTruck = () => {
                 <Grid container spacing={2} marginTop={-3} justifyContent="center" alignItems="center">
                   <Grid item xs={8}>
                     {
-                      invoiceC?.Name?.includes("หจก.นาครา ปิโตรเลียม 2016") ?
+                      invoiceData?.BankCompany?.includes("หจก.นาครา ปิโตรเลียม 2016") ?
                         <Box marginTop={-2}>
                           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
                             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>ชื่อบัญชี :</Typography>

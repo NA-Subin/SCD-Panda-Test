@@ -101,6 +101,36 @@ const Invoice = ({ openNavbar }) => {
     };
   }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
+  const formatBalanceOrOverdue = (totalAmount, totalOverdue) => {
+    const toNumber = (val) => {
+      if (val === null || val === undefined || val === "") return 0;
+
+      const cleaned = String(val).replace(/,/g, "");
+      const num = Number(cleaned);
+
+      return isNaN(num) ? 0 : num;
+    };
+
+    const amount = toNumber(totalAmount);
+    const overdue = toNumber(totalOverdue);
+
+    // ✅ คำนวณผลต่างจริง
+    let balance = amount - overdue;
+
+    // ✅ กัน floating error เช่น 0.0000000002
+    balance = Math.round(balance * 100) / 100;
+
+    // ✅ กัน -0.00
+    if (Math.abs(balance) < 0.005) {
+      balance = 0;
+    }
+
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(balance);
+  };
+
   const [selectedRow, setSelectedRow] = useState(0);
   const [indexes, setIndex] = useState(0);
 
@@ -138,9 +168,9 @@ const Invoice = ({ openNavbar }) => {
 
     return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
   });
-  const transferMoneyDetail = Object.values(transferMoney || {});
+  const transferMoneyDetail = Object.values(transferMoney || {}).filter((row) => row.Status !== "ยกเลิก");
 
-  console.log("Transfer Money : ", transferMoneyDetail);
+  console.log("Transfer Money : ", transferMoneyDetail.filter((t) => t.TicketName.split(":")[1] === "A...ทรัพย์ทวี......ลำปาง+ส่งรูป"));
 
   const orderDetail = orders
     .map((item) => {
@@ -219,8 +249,6 @@ const Invoice = ({ openNavbar }) => {
     }, [])
     .sort((a, b) => a.TicketName.localeCompare(b.TicketName));
 
-
-
   const sortedOrderDetail = useMemo(() => {
     const sorted = [...orderDetail];
     const key = sortConfig.key || 'Date';
@@ -247,6 +275,19 @@ const Invoice = ({ openNavbar }) => {
 
     return sorted;
   }, [orderDetail, sortConfig]);
+
+  const displayRows = sortedOrderDetail.filter((row) => {
+    const amount = Number(String(row.TotalAmount).replace(/,/g, "")) || 0;
+    const overdue = Number(String(row.TotalOverdue).replace(/,/g, "")) || 0;
+
+    let result = amount - overdue;
+
+    // ✅ กัน floating error เช่น -0.0000001
+    if (Math.abs(result) < 1e-9) result = 0;
+
+    // ✅ แสดงเฉพาะรายการที่ "ไม่ใช่ 0"
+    return result !== 0;
+  });
 
   console.log("sortedOrderDetail : ", sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0)));
   console.log("Order Detail : ", orderDetail);
@@ -538,41 +579,52 @@ const Invoice = ({ openNavbar }) => {
                       <TableBody>
                         {
                           checkOverdueTransfer ?
-                            sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
-                              .map((row, index) => (
-                                <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.DateDelivery)}
-                                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
-                                >
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {index + 1}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {formatThaiSlash(dayjs(row.DateDelivery, "DD/MM/YYYY"))}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {formatThaiSlash(
-                                      dayjs(row.DateDelivery, "DD/MM/YYYY")
-                                        .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : Number(row.CreditTime), "day")
-                                    )}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {row.TicketName.split(":")[1]}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
-                                  </TableCell>
-                                  <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                    {new Intl.NumberFormat("en-US").format(Number(row.TotalAmount) - Number(row.TotalOverdue))}
-                                  </TableCell>
-                                </TableRow>
-                              )
-                              )
+                            displayRows.map((row, index) => (
+                              <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.DateDelivery)}
+                                sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
+                              >
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {index + 1}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {formatThaiSlash(dayjs(row.DateDelivery, "DD/MM/YYYY"))}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {formatThaiSlash(
+                                    dayjs(row.DateDelivery, "DD/MM/YYYY")
+                                      .add((row.CreditTime === "-" || row.CreditTime === "0") ? 0 : Number(row.CreditTime), "day")
+                                  )}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {row.TicketName.split(":")[1]}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {new Intl.NumberFormat("en-US").format(row.TotalVolume)}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {new Intl.NumberFormat("en-US").format(row.TotalAmount)}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
+                                  {
+                                    (() => {
+                                      const amount = Number(String(row.TotalAmount).replace(/,/g, "")) || 0;
+                                      const overdue = Number(String(row.TotalOverdue).replace(/,/g, "")) || 0;
+
+                                      let result = amount - overdue;
+
+                                      // ✅ กัน floating error + ลบ -0
+                                      if (Math.abs(result) < 1e-9) result = 0;
+
+                                      return new Intl.NumberFormat("en-US").format(result);
+                                    })()
+                                  }
+                                </TableCell>
+                              </TableRow>
+                            )
+                            )
                             :
                             sortedOrderDetail.map((row, index) => (
                               <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.DateDelivery)}
@@ -602,7 +654,7 @@ const Invoice = ({ openNavbar }) => {
                                   {new Intl.NumberFormat("en-US").format(row.TotalOverdue)}
                                 </TableCell>
                                 <TableCell sx={{ textAlign: "center", fontWeight: ((selectedRow === row.No) || (indexes === index)) && "bold" }}>
-                                  {new Intl.NumberFormat("en-US").format(Number(row.TotalAmount) - Number(row.TotalOverdue))}
+                                  {formatBalanceOrOverdue(row.TotalAmount, row.TotalOverdue)}
                                 </TableCell>
                               </TableRow>
                             ))

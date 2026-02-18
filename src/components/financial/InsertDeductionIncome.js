@@ -658,7 +658,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                             <Paper sx={{ width: "100%" }}>
                                                 <Autocomplete
                                                     options={deductibleincomeDetail
-                                                        .filter((row) => row.Type === "รายได้")
+                                                        .filter((row) => row.Type === "รายได้" && row.StatusData === "อยู่ในระบบ")
                                                         .sort((a, b) =>
                                                             (a?.Name || "").localeCompare(b?.Name || "", "th")
                                                         )}
@@ -754,7 +754,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                             <Paper sx={{ width: "100%" }}>
                                                 <Autocomplete
                                                     options={deductibleincomeDetail
-                                                        .filter((row) => row.Type === "รายหัก")
+                                                        .filter((row) => row.Type === "รายหัก" && row.StatusData === "อยู่ในระบบ")
                                                         .sort((a, b) =>
                                                             (a?.Name || "").localeCompare(b?.Name || "", "th")
                                                         )}

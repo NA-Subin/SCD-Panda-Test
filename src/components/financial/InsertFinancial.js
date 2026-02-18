@@ -457,7 +457,7 @@ const InsertFinancial = () => {
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <Autocomplete
                                         id="autocomplete-tickets"
-                                        options={companypaymentDetail}
+                                        options={companypaymentDetail.filter((item) => item.Status === "อยู่ในระบบ").sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th"))}
                                         getOptionLabel={(option) => option?.Name || ""}
                                         value={company} // registrationTruck เป็น object แล้ว
                                         onChange={(event, newValue) => {

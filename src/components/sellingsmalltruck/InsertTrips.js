@@ -620,7 +620,7 @@ const InsertTrips = () => {
                     Trip: trip.length,
                     Date: dayjs(selectedDateDelivery).format('DD/MM/YYYY'),
                     Registration: registration,
-                    CustomerType: "ตั๋วรถเล็ก",
+                    CustomerType: ticketData.CustomerType || "ตั๋วรถเล็ก",
                     Driver: driverss,
                     Travel: ticketData.Travel || 0,
                     id: newIndex,
@@ -1403,15 +1403,18 @@ const InsertTrips = () => {
                     const nameB = (b.Name || "").trim();
                     return nameA.localeCompare(nameB, "th"); // รองรับภาษาไทย
                 })
-                .map((item) => ({ ...item }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" })),
+
             // ...(selectedTruck.type === "รถใหญ่"
             //     ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
             //     : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
             //),
         ];
 
-        return customers.filter((item) => item.id || item.TicketsCode);
+        return customers;
     };
+
+    console.log("getCustomers : ", getCustomers());
 
     const sortedSmallTruck = [...smallTruck].sort((a, b) =>
         (a.ShortName || "").localeCompare(b.ShortName || "")

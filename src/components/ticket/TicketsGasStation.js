@@ -75,15 +75,53 @@ const TicketsGasStation = (props) => {
         };
     }, [openNavbar]); // ✅ ทำงานใหม่ทุกครั้งที่ openNavbar เปลี่ยน
 
-    const [openCustomer, setOpenCustomer] = React.useState("");
-    const parts = row.Address.split(" ");
+    const normalizeAddress = (address) => {
+        // ---------- แบบใหม่ (object) ----------
+        if (address && typeof address === "object") {
+            return {
+                no: address.no || "-",
+                village: address.village || "-",
+                subDistrict: address.subDistrict || "-",
+                district: address.district || "-",
+                province: address.province || "-",
+                zipCode: address.zipCode || "-"
+            };
+        }
 
-    const [no, setNo] = React.useState(parts[0] || "-");
-    const [village, setVillage] = React.useState(parts[1] || "-");
-    const [subDistrict, setSubDistrict] = React.useState(parts[2] || "-");
-    const [district, setDistrict] = React.useState(parts[3] ? parts[3].replace("อ.", "") : "-");
-    const [province, setProvince] = React.useState(parts[4] || "-");
-    const [zipCode, setZipCode] = React.useState(parts[5] || "-");
+        // ---------- แบบเก่า (string) ----------
+        if (typeof address === "string") {
+            const parts = address.trim().split(/\s+/);
+
+            return {
+                no: parts[0] || "-",
+                village: parts[1] || "-",
+                subDistrict: parts[2] || "-",
+                district: parts[3] ? parts[3].replace("อ.", "") : "-",
+                province: parts[4] || "-",
+                zipCode: parts[5] || "-"
+            };
+        }
+
+        // ---------- fallback ----------
+        return {
+            no: "-",
+            village: "-",
+            subDistrict: "-",
+            district: "-",
+            province: "-",
+            zipCode: "-"
+        };
+    };
+
+    const [openCustomer, setOpenCustomer] = React.useState("");
+    const addr = normalizeAddress(row.Address);
+
+    const [no, setNo] = React.useState(addr.no || "");
+    const [village, setVillage] = React.useState(addr.village || "");
+    const [subDistrict, setSubDistrict] = React.useState(addr.subDistrict || "");
+    const [district, setDistrict] = React.useState(addr.district || "");
+    const [province, setProvince] = React.useState(addr.province || "");
+    const [zipCode, setZipCode] = React.useState(addr.zipCode || "");
     const [ticketsName, setTicketsName] = React.useState(row.Name);
     const [code, setCode] = React.useState(row.Code);
     const [codeID, setCodeID] = React.useState(row.CodeID);
@@ -94,6 +132,15 @@ const TicketsGasStation = (props) => {
     const [bill, setBill] = React.useState(row.Bill);
 
     const handleSaveCustomer = () => {
+        const address = {
+            no: no?.trim() || "",
+            village: village?.trim() || "",
+            subDistrict: subDistrict?.trim() || "",
+            district: district?.trim() || "",
+            province: province?.trim() || "",
+            zipCode: zipCode?.trim() || ""
+        };
+
         database
             .ref("/customers/gasstations/")
             .child(Number(row.id) - 1)
@@ -109,14 +156,7 @@ const TicketsGasStation = (props) => {
                 Code: code,
                 CompanyName: companyName,
                 CodeID: codeID,
-                Address:
-                    (no === "-" ? "-" : no) +
-                    (village === "-" ? "" : ` ${village}`) +
-                    (subDistrict === "-" ? "" : ` ${subDistrict}`) +
-                    (district === "-" ? "" : ` ${district}`) +
-                    (province === "-" ? "" : ` ${province}`) +
-                    (zipCode === "-" ? "" : ` ${zipCode}`)
-                ,
+                Address: address,
             })
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
@@ -510,9 +550,13 @@ const TicketsGasStation = (props) => {
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5.5 } }} gutterBottom>ชื่อบริษัท</Typography>
                             <TextField size="small" fullWidth value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={updateCustomer} />
                         </Grid>
-                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5 } }} gutterBottom>บ้านเลขที่</Typography>
+                        <Grid item md={2.5} xs={6} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>บ้านเลขที่</Typography>
                             <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} disabled={updateCustomer} />
+                        </Grid>
+                        <Grid item md={1.5} xs={6} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 7 } }} gutterBottom>หมู่ที่</Typography>
+                            <TextField size="small" fullWidth value={village} onChange={(e) => setVillage(e.target.value)} disabled={updateCustomer} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 8 } }} gutterBottom>ตำบล</Typography>

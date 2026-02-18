@@ -128,11 +128,11 @@ const UpdateReport = (props) => {
     });
     const registrationHead = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const companies = Object.values(company || {});
-    const bankDetail = Object.values(banks || {});
-    const transferMoneyDetail = Object.values(transferMoney || {}).filter(row => row.Status !== "ยกเลิก");
+    const bankDetail = Object.values(banks || {}).filter((row) => row.Status !== "ยกเลิก");
+    const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName);
+    const transfer = transferMoneyDetail.filter((row) => row.TicketNo === ticket.No && row.TicketName === ticket.TicketName && row.Status !== "ยกเลิก");
 
     console.log("Ticket No ", ticket.No);
     console.log("Tranfer : ", transfer);
@@ -155,7 +155,7 @@ const UpdateReport = (props) => {
     console.log("ยอดบริษัท 2:", CountCompany2);
 
     const totalIncomingMoney = transferMoneyDetail
-        .filter(trans => trans.TicketName === ticket.TicketName)
+        .filter(trans => trans.TicketName === ticket.TicketName && trans.Status !== "ยกเลิก")
         .reduce((sum, trans) => {
             const value = parseFloat(trans.IncomingMoney) || 0;
             return sum + value;

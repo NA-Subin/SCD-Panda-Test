@@ -105,7 +105,7 @@ const Report = ({ openNavbar }) => {
   console.log("selectedRow : ", selectedRow);
   console.log("index : ", indexes);
 
-  const { customertransports, customergasstations, customertickets } = useBasicData();
+  const { customertransports, customergasstations, customertickets, drivers } = useBasicData();
   const { tickets, trip, transferMoney } = useTripData();
   //const ticket = Object.values(tickets || {});
   const ticket = Object.values(tickets || {}).filter(item => {
@@ -115,6 +115,7 @@ const Report = ({ openNavbar }) => {
   const transports = Object.values(customertransports || {});
   const gasstations = Object.values(customergasstations || {});
   const ticketsOrder = Object.values(customertickets || {});
+  const driverDetail = Object.values(drivers || {});
   // const trips = Object.values(trip || {});
   const trips = Object.values(trip || {}).filter(item => {
     const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
@@ -163,9 +164,30 @@ const Report = ({ openNavbar }) => {
       let totalAmount = 0;
       let totalOverdue = 0;
 
+      // แยก driverId ออกมาก่อน
+      const driverId = Number(item.Driver?.split(":")[0]);
+
+      const TruckType =
+        driverDetail.find((driver) => driver.id === driverId)?.TruckType || "";
+
+      // ✅ flag สำหรับรถรับจ้างขนส่ง
+      const isContractTransport = driverId === 1;
+
+      // ✅ flag สำหรับรถใหญ่ปกติ
+      const isBigTruck = TruckType?.trim() === "รถใหญ่";
+
       Object.entries(item.Product).forEach(([key, value]) => {
         if (key !== "P") {
-          totalVolume += parseFloat(value.Volume || 0) * 1000;
+          let volume = parseFloat(value.Volume || 0);
+
+          // ✅ คูณ 1000 กรณี:
+          // 1. เป็นรถใหญ่
+          // 2. เป็น 1:รับจ้างขนส่ง (ให้ถือเป็นรถใหญ่เสมอ)
+          if (isBigTruck || isContractTransport) {
+            volume *= 1000;
+          }
+
+          totalVolume += volume;
           totalAmount += parseFloat(value.Amount || 0);
         }
       });
@@ -206,7 +228,8 @@ const Report = ({ openNavbar }) => {
         Rate: Rate || 0,
         CreditTime: Match?.CreditTime || 0,
         CompanyName: Match?.CompanyName || "-",
-        CompanyAddress: Match?.Address || "-"
+        CompanyAddress: Match?.Address || "-",
+        TruckType: isContractTransport ? "รถรับจ้างขนส่ง" : TruckType
       };
     });
 
@@ -227,9 +250,30 @@ const Report = ({ openNavbar }) => {
       let totalAmount = 0;
       let totalOverdue = 0;
 
+      // แยก driverId ออกมาก่อน
+      const driverId = Number(item.Driver?.split(":")[0]);
+
+      const TruckType =
+        driverDetail.find((driver) => driver.id === driverId)?.TruckType || "";
+
+      // ✅ flag สำหรับรถรับจ้างขนส่ง
+      const isContractTransport = driverId === 1;
+
+      // ✅ flag สำหรับรถใหญ่ปกติ
+      const isBigTruck = TruckType?.trim() === "รถใหญ่";
+
       Object.entries(item.Product).forEach(([key, value]) => {
         if (key !== "P") {
-          totalVolume += parseFloat(value.Volume || 0) * 1000;
+          let volume = parseFloat(value.Volume || 0);
+
+          // ✅ คูณ 1000 กรณี:
+          // 1. เป็นรถใหญ่
+          // 2. เป็น 1:รับจ้างขนส่ง (ให้ถือเป็นรถใหญ่เสมอ)
+          if (isBigTruck || isContractTransport) {
+            volume *= 1000;
+          }
+
+          totalVolume += volume;
           totalAmount += parseFloat(value.Amount || 0);
         }
       });
@@ -267,7 +311,8 @@ const Report = ({ openNavbar }) => {
         Rate: Rate || 0,
         CreditTime: Match?.CreditTime || 0,
         CompanyName: Match?.CompanyName || "-",
-        CompanyAddress: Match?.Address || "-"
+        CompanyAddress: Match?.Address || "-",
+        TruckType: isContractTransport ? "รถรับจ้างขนส่ง" : TruckType
       };
     });
 
@@ -288,9 +333,30 @@ const Report = ({ openNavbar }) => {
       let totalAmount = 0;
       let totalOverdue = 0;
 
+      // แยก driverId ออกมาก่อน
+      const driverId = Number(item.Driver?.split(":")[0]);
+
+      const TruckType =
+        driverDetail.find((driver) => driver.id === driverId)?.TruckType || "";
+
+      // ✅ flag สำหรับรถรับจ้างขนส่ง
+      const isContractTransport = driverId === 1;
+
+      // ✅ flag สำหรับรถใหญ่ปกติ
+      const isBigTruck = TruckType?.trim() === "รถใหญ่";
+
       Object.entries(item.Product).forEach(([key, value]) => {
         if (key !== "P") {
-          totalVolume += parseFloat(value.Volume || 0) * 1000;
+          let volume = parseFloat(value.Volume || 0);
+
+          // ✅ คูณ 1000 กรณี:
+          // 1. เป็นรถใหญ่
+          // 2. เป็น 1:รับจ้างขนส่ง (ให้ถือเป็นรถใหญ่เสมอ)
+          if (isBigTruck || isContractTransport) {
+            volume *= 1000;
+          }
+
+          totalVolume += volume;
           totalAmount += parseFloat(value.Amount || 0);
         }
       });
@@ -328,7 +394,8 @@ const Report = ({ openNavbar }) => {
         Rate: Rate || 0,
         CreditTime: Match?.CreditTime || 0,
         CompanyName: Match?.CompanyName || "-",
-        CompanyAddress: Match?.Address || "-"
+        CompanyAddress: Match?.Address || "-",
+        TruckType: isContractTransport ? "รถรับจ้างขนส่ง" : TruckType
       };
     });
 
@@ -725,6 +792,8 @@ const Report = ({ openNavbar }) => {
     if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
     return 0;
   });
+
+  console.log("resultArrayGasStation : ", resultArrayGasStation);
 
   // ⭐ ใส่ No ตอนสุดท้าย
   resultArrayGasStation = resultArrayGasStation.map((item, idx) => ({
@@ -2309,7 +2378,7 @@ const Report = ({ openNavbar }) => {
                             <TableBody>
                               {
                                 checkOverdueTransfer ?
-                                  GasStationDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0))
+                                  GasStationDetail
                                     .map((row, index) => {
                                       // <<<<<< เพิ่มตรงนี้
                                       const transfer = transferMoneyDetail.filter((transferRow) =>
@@ -2337,7 +2406,7 @@ const Report = ({ openNavbar }) => {
                                       // }, 0);
                                       // <<<<<<
 
-                                      return totalAmounts !== 0 && (
+                                      return (
                                         <TableRow key={row.No} onClick={() => handleRowClick(row, index, row.Month)}
                                           sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow.No === row.No) || (indexes === index) ? "#fff9c4" : "" }}
                                         >
@@ -2680,7 +2749,7 @@ const Report = ({ openNavbar }) => {
                       } */}
                         {
                           GasStationDetail.map((row, index) => (
-                            (selectedRow && selectedRow.No === row.No) || indexes === index ?
+                            (selectedRow && selectedRow.No === row.No) ?
                               <UpdateReport key={row.No} ticket={row} open={open} dateRanges={dateRangesG} months={month} />
                               : ""
                           ))

@@ -997,7 +997,7 @@ const UpdateTrip = (props) => {
                     const nameB = (b.Name || "").trim();
                     return nameA.localeCompare(nameB, "th"); // รองรับภาษาไทย
                 })
-                .map((item) => ({ ...item }))
+                .map((item) => ({ ...item, CustomerType: "ตั๋วรถเล็ก" }))
             // ...(selectedTruck.type === "รถใหญ่"
             //     ? ticketsB.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถใหญ่ใช้ ticketsB
             //     : ticketsS.filter((item) => item.Status === "ลูกค้าประจำ").map((item) => ({ ...item })) // รถเล็กใช้ ticketsS
@@ -1765,19 +1765,34 @@ const UpdateTrip = (props) => {
                                                                 ? trip.Driver.split(":")[1]
                                                                 : trip.Driver || "";
 
-                                                            const registrationId = trip.Registration?.includes(":")
-                                                                ? Number(trip.Registration.split(":")[0])
+                                                            const registrationParts = trip.Registration?.includes(":")
+                                                                ? trip.Registration.split(":")
+                                                                : [];
+
+                                                            const registrationId = registrationParts.length > 0
+                                                                ? Number(registrationParts[0])
                                                                 : null;
 
-                                                            const plate = trip.Registration?.includes(":")
-                                                                ? trip.Registration.split(":")[1]
+                                                            const plate = registrationParts.length > 1
+                                                                ? registrationParts[1]
                                                                 : trip.Registration || "";
 
                                                             const shortName = registrationTruck.find(
                                                                 (row) => row.id === registrationId
                                                             )?.ShortName || "";
 
-                                                            return `${shortName.includes("...") ? shortName.split("...")[1] : shortName} : ${plate} / ${driverName}`;
+                                                            const cleanShortName = shortName.includes("...")
+                                                                ? shortName.split("...")[1]
+                                                                : shortName;
+
+                                                            // 🔥 ถ้ายังไม่ได้เลือกทะเบียน
+                                                            if (!plate || plate === "0") {
+                                                                return driverName
+                                                                    ? `${driverName} (ยังไม่ได้เลือกทะเบียนรถ)`
+                                                                    : "(ยังไม่ได้เลือกทะเบียนรถ)";
+                                                            }
+
+                                                            return `${cleanShortName} : ${plate} / ${driverName}`;
                                                         })()}
                                                     </Box>
                                                 </Typography>
@@ -2544,20 +2559,36 @@ const UpdateTrip = (props) => {
                                                                 ? trip.Driver.split(":")[1]
                                                                 : trip.Driver || "";
 
-                                                            const registrationId = trip.Registration?.includes(":")
-                                                                ? Number(trip.Registration.split(":")[0])
+                                                            const registrationParts = trip.Registration?.includes(":")
+                                                                ? trip.Registration.split(":")
+                                                                : [];
+
+                                                            const registrationId = registrationParts.length > 0
+                                                                ? Number(registrationParts[0])
                                                                 : null;
 
-                                                            const plate = trip.Registration?.includes(":")
-                                                                ? trip.Registration.split(":")[1]
+                                                            const plate = registrationParts.length > 1
+                                                                ? registrationParts[1]
                                                                 : trip.Registration || "";
 
                                                             const shortName = registrationTruck.find(
                                                                 (row) => row.id === registrationId
                                                             )?.ShortName || "";
 
-                                                            return `${shortName.includes("...") ? shortName.split("...")[1] : shortName} : ${plate} / ${driverName}`;
+                                                            const cleanShortName = shortName.includes("...")
+                                                                ? shortName.split("...")[1]
+                                                                : shortName;
+
+                                                            // 🔥 ถ้ายังไม่ได้เลือกทะเบียน
+                                                            if (!plate || plate === "0") {
+                                                                return driverName
+                                                                    ? `${driverName} (ยังไม่ได้เลือกทะเบียนรถ)`
+                                                                    : "(ยังไม่ได้เลือกทะเบียนรถ)";
+                                                            }
+
+                                                            return `${cleanShortName} : ${plate} / ${driverName}`;
                                                         })()}
+
                                                     </Box>
                                                 </Typography>
 
@@ -3053,7 +3084,7 @@ const UpdateTrip = (props) => {
                                                                     No: orderLength, // คำนวณจำนวน order
                                                                     Trip: (Number(tripID) - 1),
                                                                     TicketName: `${newValue.id}:${newValue.Name}`,
-                                                                    CustomerType: newValue.CustomerType || "-",
+                                                                    CustomerType: newValue.CustomerType || "ตั๋วรถเล็ก",
                                                                     Product: {
                                                                         P: { Volume: 0, Cost: 0, Selling: 0 },
                                                                     },

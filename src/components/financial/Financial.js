@@ -974,11 +974,11 @@ const Financial = () => {
                                                     :
                                                     <Paper sx={{ width: "100%" }}>
                                                         <Autocomplete
-                                                            options={companypaymentDetail.sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th"))
+                                                            options={companypaymentDetail.filter((item) => item.Status === "อยู่ในระบบ").sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th"))
                                                             }
                                                             getOptionLabel={(option) => option?.Name || ""}
                                                             value={
-                                                                companypaymentDetail.sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th")).find(
+                                                                companypaymentDetail.filter((item) => item.Status === "อยู่ในระบบ").sort((a, b) => (a?.Name || "").localeCompare(b?.Name || "", "th")).find(
                                                                     //(opt) => `${opt.id}:${opt.Name}` === company
                                                                     (opt) => opt.id === companyID
                                                                 ) || null
@@ -1021,7 +1021,7 @@ const Financial = () => {
                                                                 .sort((a, b) => a.Name.localeCompare(b.Name))}
                                                             getOptionLabel={(option) => option?.Name || ""}
                                                             value={
-                                                                expenseitem.find(
+                                                                expenseitem.filter((item) => item.Status === "อยู่ในระบบ").find(
                                                                     (opt) => `${opt.id}:${opt.Name}` === bank
                                                                 ) || null
                                                             }

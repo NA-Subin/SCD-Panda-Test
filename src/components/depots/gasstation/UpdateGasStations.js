@@ -1645,7 +1645,7 @@ const UpdateGasStations = (props) => {
                                             textAlign: "right",
                                             borderBottom: "2px solid white",
                                             backgroundColor: "#a5d6a7",
-                                            color: (new Intl.NumberFormat("en-US").format(downHoleByProduct[s.ProductName]) ?? 0) < 0 ? "#d50000" : "black",
+                                            color: Number(downHoleByProduct[s.ProductName]) < 0 ? "#d50000" : "black",
                                             fontWeight: "bold",
                                             paddingLeft: "30px !important",
                                             paddingRight: "30px !important",

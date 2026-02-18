@@ -237,7 +237,7 @@ const FuelPaymentReport = ({ openNavbar }) => {
             if (!item.Product) return [];
 
             const totalIncomingMoney = transferMoneyDetail
-                .filter(trans => trans.TicketNo === item.No)
+                .filter(trans => trans.TicketNo === item.No && trans.Status !== "ยกเลิก")
                 .reduce((sum, trans) => {
                     const value = parseFloat(trans.IncomingMoney) || 0;
                     return sum + value;
@@ -248,69 +248,70 @@ const FuelPaymentReport = ({ openNavbar }) => {
 
             console.log("show incoming : ", incomingMoneyDetail);
 
-            const productEntries = Object.entries(item.Product)
-                .filter(([productName]) => productName !== "P");
-
-            const OverdueTransfer = productEntries.reduce((sum, entry) => {
-                const productData = entry[1];
-                const value = parseFloat(productData.Amount) || 0;
-                return sum + value;
-            }, 0);
-
-            console.log("OverdueTransfer : ", OverdueTransfer);
-
-            return productEntries.map(([productName, productData], index) => ({
-                ...item,
-                IncomingMoneyDetail: index === 0 ? incomingMoneyDetail : 0,
-                ProductName: productName,
-                VolumeProduct: productData.Volume * 1000,
-                Amount: productData.Amount || 0,
-                IncomingMoney: index === 0 ? (totalIncomingMoney || 0) : 0,
-                OverdueTransfer: index === 0 ? ((OverdueTransfer || 0) - (totalIncomingMoney || 0)) : 0,
-                RateOil: productData.RateOil || 0,
-            }));
-
-            // return Object.entries(item.Product)
-            //     .filter(([productName]) => productName !== "P")
-            //     .map(([productName, productData]) => ({
-            //         ...item,
-            //         IncomingMoneyDetail: incomingMoneyDetail,
-            //         ProductName: productName,
-            //         VolumeProduct: productData.Volume * 1000,
-            //         Amount: productData.Amount || 0,
-            //         IncomingMoney: totalIncomingMoney || 0,
-            //         OverdueTransfer: (productData.Amount || 0) - (totalIncomingMoney || 0),
-            //         RateOil: productData.RateOil || 0,
-            //     }));
+            return Object.entries(item.Product)
+                .filter(([productName]) => productName !== "P")
+                .map(([productName, productData]) => ({
+                    ...item,
+                    IncomingMoneyDetail: incomingMoneyDetail,
+                    ProductName: productName,
+                    VolumeProduct: Number(productData.Volume || 0) * 1000, // แปลงเป็นลิตร
+                    Amount: productData.Amount || 0,
+                    IncomingMoney: totalIncomingMoney || 0,
+                    OverdueTransfer: 0,
+                    RateOil: productData.RateOil || 0,
+                }));
         });
 
         flattenedRef.current = flattened;
 
-        console.log("flattened : ", flattened);
-
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
-        const merged = Object.values(flattened.reduce((acc, curr) => {
-            const key = curr.TicketName;
+        const countedTicketNo = new Set();
 
-            if (!acc[key]) {
-                acc[key] = { ...curr };
-            } else {
-                acc[key].VolumeProduct += curr.VolumeProduct;
-                acc[key].Amount += curr.Amount;
-                acc[key].IncomingMoney += curr.IncomingMoney;
-                acc[key].OverdueTransfer += curr.OverdueTransfer;
+        const merged = Object.values(
+            flattened.reduce((acc, curr) => {
+                const key = curr.TicketName;
+                const ticketNo = curr.No;
 
-                // กรณีข้อมูลรวมอ้างอิงวันเดียว: ให้เลือกวันล่าสุดหรือแรกสุดก็ได้ (ตัวอย่างใช้วันล่าสุด)
-                // const dateA = dayjs(acc[key].Date, "DD/MM/YYYY");
-                // const dateB = dayjs(curr.Date, "DD/MM/YYYY");
-                // acc[key].Date = dateA.isAfter(dateB) ? acc[key].Date : curr.Date;
-            }
+                if (!acc[key]) {
+                    acc[key] = {
+                        ...curr,
+                        VolumeProduct: 0,
+                        Amount: 0,
+                        IncomingMoney: 0,
+                    };
+                }
 
-            return acc;
-        }, {}));
+                // รวมสินค้า (ถูกแล้ว)
+                acc[key].VolumeProduct += Number(curr.VolumeProduct) || 0;
+                acc[key].Amount += Number(curr.Amount) || 0;
+
+                // เงินโอนคิดครั้งเดียวต่อ Ticket (ถูกแล้ว)
+                if (!countedTicketNo.has(ticketNo)) {
+                    acc[key].IncomingMoney += Number(curr.IncomingMoney) || 0;
+                    countedTicketNo.add(ticketNo);
+                }
+
+                return acc;
+            }, {})
+        );
+
+        const finalData = merged.map(row => {
+            const amount = Number(row.Amount) || 0;
+            const incoming = Number(row.IncomingMoney) || 0;
+
+            let overdue = amount - incoming;
+
+            // กัน floating และ -0
+            if (Math.abs(overdue) < 0.01) overdue = 0;
+
+            return {
+                ...row,
+                OverdueTransfer: overdue
+            };
+        });
 
         // 4. เรียงตามวันที่ และชื่อคนขับ
-        return merged.sort((a, b) => {
+        return finalData.sort((a, b) => {
             const dateA = dayjs(a.Date, "DD/MM/YYYY");
             const dateB = dayjs(b.Date, "DD/MM/YYYY");
             if (!dateA.isSame(dateB)) {

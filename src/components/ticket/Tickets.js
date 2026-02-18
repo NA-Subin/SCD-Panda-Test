@@ -129,6 +129,44 @@ const Tickets = ({ openNavbar }) => {
         setName(newname)
     };
 
+    const normalizeAddress = (address) => {
+        // ---------- แบบใหม่ (object) ----------
+        if (address && typeof address === "object") {
+            return {
+                no: address.no || "-",
+                village: address.village || "-",
+                subDistrict: address.subDistrict || "-",
+                district: address.district || "-",
+                province: address.province || "-",
+                zipCode: address.zipCode || "-"
+            };
+        }
+
+        // ---------- แบบเก่า (string) ----------
+        if (typeof address === "string") {
+            const parts = address.trim().split(/\s+/);
+
+            return {
+                no: parts[0] || "-",
+                village: parts[1] || "-",
+                subDistrict: parts[2] || "-",
+                district: parts[3] ? parts[3].replace("อ.", "") : "-",
+                province: parts[4] || "-",
+                zipCode: parts[5] || "-"
+            };
+        }
+
+        // ---------- fallback ----------
+        return {
+            no: "-",
+            village: "-",
+            subDistrict: "-",
+            district: "-",
+            province: "-",
+            zipCode: "-"
+        };
+    };
+
     const handleCustomer = (row) => {
         setOpenCustomer(row.id);
         setName(row.Name)
@@ -157,17 +195,27 @@ const Tickets = ({ openNavbar }) => {
             setType1(true);
             setType2(true);
         }
-        const parts = row.Address.split(" ");
-        setNo(parts[0] || "-")
-        setVillage(parts[1] || "-")
-        setSubDistrict(parts[2] || "-")
-        setDistrict(parts[3] ? parts[3].replace("อ.", "") : "-")
-        setProvince(parts[4] || "-")
-        setZipCode(parts[5] || "-")
+        const addr = normalizeAddress(row.Address);
+
+        setNo(addr.no);
+        setVillage(addr.village);
+        setSubDistrict(addr.subDistrict);
+        setDistrict(addr.district);
+        setProvince(addr.province);
+        setZipCode(addr.zipCode);
         //setCompanyChecked
     }
 
     const handleSaveCustomer = () => {
+        const address = {
+            no: no?.trim() || "",
+            village: village?.trim() || "",
+            subDistrict: subDistrict?.trim() || "",
+            district: district?.trim() || "",
+            province: province?.trim() || "",
+            zipCode: zipCode?.trim() || ""
+        };
+
         database
             .ref("/customers/tickets/")
             .child(Number(openCustomer) - 1)
@@ -181,14 +229,7 @@ const Tickets = ({ openNavbar }) => {
                 Code: code,
                 CompanyName: companyName,
                 CodeID: codeID,
-                Address:
-                    (no === "-" ? "-" : no) +
-                    (village === "-" ? "" : ` ${village}`) +
-                    (subDistrict === "-" ? "" : ` ${subDistrict}`) +
-                    (district === "-" ? "" : ` ${district}`) +
-                    (province === "-" ? "" : ` ${province}`) +
-                    (zipCode === "-" ? "" : ` ${zipCode}`)
-                ,
+                Address: address,
                 Phone: phone,
                 CreditTime: creditTime,
                 Type: type1 === false && type2 === true ? "รถใหญ่" : type1 === true && type2 === false ? "รถเล็ก" : type1 === false && type2 === false ? "รถใหญ่/รถเล็ก" : "-",
@@ -710,9 +751,13 @@ const Tickets = ({ openNavbar }) => {
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5.5 } }} gutterBottom>ชื่อบริษัท</Typography>
                             <TextField size="small" fullWidth value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={updateCustomer} />
                         </Grid>
-                        <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 5 } }} gutterBottom>บ้านเลขที่</Typography>
+                        <Grid item md={2.5} xs={6} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 4 } }} gutterBottom>บ้านเลขที่</Typography>
                             <TextField size="small" fullWidth value={no} onChange={(e) => setNo(e.target.value)} disabled={updateCustomer} />
+                        </Grid>
+                        <Grid item md={1.5} xs={6} display="flex" justifyContent="center" alignItems="center">
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 7 } }} gutterBottom>หมู่ที่</Typography>
+                            <TextField size="small" fullWidth value={village} onChange={(e) => setVillage(e.target.value)} disabled={updateCustomer} />
                         </Grid>
                         <Grid item md={4} xs={12} display="flex" justifyContent="center" alignItems="center">
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ whiteSpace: 'nowrap', marginRight: 1, marginTop: 1, marginLeft: { md: 0, xs: 8 } }} gutterBottom>ตำบล</Typography>
