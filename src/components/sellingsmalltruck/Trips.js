@@ -147,35 +147,36 @@ const TripsSmallTruck = ({ openNavbar }) => {
                         //(itemDateR.isBetween(selectedDateStart, selectedDateEnd, null, "[]") || itemDateD.isBetween(selectedDateStart, selectedDateEnd, null, "[]"))
                         itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
         );
-    }).sort((a, b) => {
-        if (!sortConfig.key) return 0;
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+    })
+        .sort((a, b) => {
+            if (!sortConfig.key) return 0;
+            const aValue = a[sortConfig.key];
+            const bValue = b[sortConfig.key];
 
-        // ถ้าเป็น number
-        if (typeof aValue === "number" && typeof bValue === "number") {
-            return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
-        }
+            // ถ้าเป็น number
+            if (typeof aValue === "number" && typeof bValue === "number") {
+                return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+            }
 
-        // ถ้าเป็นวันที่
-        if (
-            typeof aValue === "string" &&
-            typeof bValue === "string" &&
-            /^\d{2}\/\d{2}\/\d{4}$/.test(aValue) &&
-            /^\d{2}\/\d{2}\/\d{4}$/.test(bValue)
-        ) {
-            const dateA = parseDate(aValue);
-            const dateB = parseDate(bValue);
+            // ถ้าเป็นวันที่
+            if (
+                typeof aValue === "string" &&
+                typeof bValue === "string" &&
+                /^\d{2}\/\d{2}\/\d{4}$/.test(aValue) &&
+                /^\d{2}\/\d{2}\/\d{4}$/.test(bValue)
+            ) {
+                const dateA = parseDate(aValue);
+                const dateB = parseDate(bValue);
+                return sortConfig.direction === "asc"
+                    ? dateA - dateB
+                    : dateB - dateA;
+            }
+
+            // ถ้าเป็น string (ตัวหนังสือ)
             return sortConfig.direction === "asc"
-                ? dateA - dateB
-                : dateB - dateA;
-        }
-
-        // ถ้าเป็น string (ตัวหนังสือ)
-        return sortConfig.direction === "asc"
-            ? String(aValue).localeCompare(String(bValue), "th")
-            : String(bValue).localeCompare(String(aValue), "th");
-    });
+                ? String(aValue).localeCompare(String(bValue), "th")
+                : String(bValue).localeCompare(String(aValue), "th");
+        });
 
     console.log("Trip Detail : ", tripDetail);
 
@@ -210,6 +211,11 @@ const TripsSmallTruck = ({ openNavbar }) => {
 
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const handleChangeCheck = (value) => {
+        setCheck(value);
         setPage(0);
     };
 
@@ -338,10 +344,10 @@ const TripsSmallTruck = ({ openNavbar }) => {
                     <Grid item xs={12}>
                         <FormGroup row sx={{ marginBottom: -2 }}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-                            <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-                            <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
-                            <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ยกเลิก" />
-                            <FormControlLabel control={<Checkbox color="pink" checked={check === 4 ? true : false} />} onChange={() => setCheck(4)} label="จบทริป" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 1 ? true : false} />} onChange={() => handleChangeCheck(1)} label="ทั้งหมด" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 2 ? true : false} />} onChange={() => handleChangeCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 3 ? true : false} />} onChange={() => handleChangeCheck(3)} label="ยกเลิก" />
+                            <FormControlLabel control={<Checkbox color="pink" checked={check === 4 ? true : false} />} onChange={() => handleChangeCheck(4)} label="จบทริป" />
                         </FormGroup>
                     </Grid>
                     <Grid item xs={12}>
@@ -388,7 +394,7 @@ const TripsSmallTruck = ({ openNavbar }) => {
                                                 )}
                                             </Box>
                                         </TablecellPink>
-                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 300, cursor: "pointer" }}
+                                        <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 350, cursor: "pointer" }}
                                             onClick={() => handleSort("Driver")}
                                         >
                                             <Box display="flex" alignItems="center" justifyContent="center">

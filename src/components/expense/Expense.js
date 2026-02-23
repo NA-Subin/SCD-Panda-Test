@@ -13,6 +13,7 @@ import {
     FormControlLabel,
     Grid,
     IconButton,
+    InputAdornment,
     MenuItem,
     Paper,
     Popover,
@@ -44,6 +45,7 @@ const ExpenseDetail = ({ openNavbar }) => {
     const [status, setStatus] = useState("");
     const [ID, setID] = useState("");
     const [check, setCheck] = useState(true);
+    const [searchText, setSearchText] = useState("");
 
     const [openTab, setOpenTab] = React.useState(true);
 
@@ -216,13 +218,56 @@ const ExpenseDetail = ({ openNavbar }) => {
                                 <Box
                                     sx={{
                                         display: "flex",
-                                        justifyContent: "space-between",
                                         alignItems: "center",
                                         mb: 1
                                     }}
                                 >
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>รายการค่าใช้จ่าย</Typography>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        sx={{ marginTop: 1, minWidth: 220 }}
+                                        gutterBottom
+                                    >
+                                        รายการค่าใช้จ่าย
+                                    </Typography>
+
+                                    <Box
+                                        sx={{
+                                            flex: 1,
+                                            display: "flex",
+                                            justifyContent: "center"
+                                        }}
+                                    >
+                                        <TextField
+                                            fullWidth
+                                            value={searchText}
+                                            onChange={(e) => {
+                                                setSearchText(e.target.value);
+                                                setPage(0); // 🔥 รีเซ็ตหน้าเวลา search กันหน้าว่าง
+                                            }}
+                                            size="small"
+                                            sx={{
+                                                '& .MuiInputBase-root': {
+                                                    height: 35, // ปรับความสูงรวม
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                    padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                    fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                                },
+                                            }}
+                                            InputProps={{
+                                                sx: { height: 35 },
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <b>ค้นหา :</b>
+                                                    </InputAdornment>
+                                                )
+                                            }}
+                                        />
+                                    </Box>
+
                                     <FormControlLabel
+                                        sx={{ minWidth: 160, justifyContent: "flex-end", m: 0 }}
                                         control={
                                             <Checkbox
                                                 checked={check}
@@ -270,158 +315,160 @@ const ExpenseDetail = ({ openNavbar }) => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                                            <TableRow>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
-                                                    <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
-                                                    {
-                                                        ID !== row.id ?
-                                                            <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Name}</Typography>
-                                                            :
-                                                            <Paper>
-                                                                <TextField
-                                                                    fullWidth
-                                                                    value={name}
-                                                                    onChange={(e) => setName(e.target.value)}
-                                                                    size="small"
+                                        expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ") && t.Name?.toLowerCase().includes(searchText.toLowerCase()))
+                                            // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                            .map((row, index) => (
+                                                <TableRow>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        {
+                                                            ID !== row.id ?
+                                                                <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Name}</Typography>
+                                                                :
+                                                                <Paper>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        value={name}
+                                                                        onChange={(e) => setName(e.target.value)}
+                                                                        size="small"
+                                                                        sx={{
+                                                                            '& .MuiInputBase-root': {
+                                                                                height: 30, // ปรับความสูงรวม
+                                                                            },
+                                                                            '& .MuiInputBase-input': {
+                                                                                padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                                                fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                                                            },
+                                                                        }}
+                                                                        InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
+                                                                    />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        {
+                                                            ID !== row.id ?
+                                                                <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Type}</Typography>
+                                                                :
+                                                                <Paper>
+                                                                    <TextField
+                                                                        select
+                                                                        fullWidth
+                                                                        value={type}
+                                                                        onChange={(e) => setType(e.target.value)}
+                                                                        size="small"
+                                                                        sx={{
+                                                                            "& .MuiInputBase-root": {
+                                                                                height: 30, // ปรับความสูงรวม
+                                                                            },
+                                                                            "& .MuiInputBase-input": {
+                                                                                padding: "4px 8px", // ปรับ padding ด้านใน input
+                                                                                fontSize: "0.85rem", // ลดขนาด font
+                                                                            },
+                                                                        }}
+                                                                        InputProps={{ sx: { height: 30 } }}
+                                                                    >
+                                                                        <MenuItem value="ค่าใช้จ่าย">ค่าใช้จ่าย</MenuItem>
+                                                                    </TextField>
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        {
+                                                            ID !== row.id ?
+                                                                <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Status}</Typography>
+                                                                :
+                                                                <Paper
+                                                                    elevation={0}
                                                                     sx={{
-                                                                        '& .MuiInputBase-root': {
-                                                                            height: 30, // ปรับความสูงรวม
-                                                                        },
-                                                                        '& .MuiInputBase-input': {
-                                                                            padding: '4px 8px', // ปรับ padding ด้านใน input
-                                                                            fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
-                                                                        },
-                                                                    }}
-                                                                    InputProps={{ sx: { height: 30 } }} // เพิ่มตรงนี้ด้วยถ้า sx ไม่พอ
-                                                                />
-                                                            </Paper>
-                                                    }
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
-                                                    {
-                                                        ID !== row.id ?
-                                                            <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Type}</Typography>
-                                                            :
-                                                            <Paper>
-                                                                <TextField
-                                                                    select
-                                                                    fullWidth
-                                                                    value={type}
-                                                                    onChange={(e) => setType(e.target.value)}
-                                                                    size="small"
-                                                                    sx={{
-                                                                        "& .MuiInputBase-root": {
-                                                                            height: 30, // ปรับความสูงรวม
-                                                                        },
-                                                                        "& .MuiInputBase-input": {
-                                                                            padding: "4px 8px", // ปรับ padding ด้านใน input
-                                                                            fontSize: "0.85rem", // ลดขนาด font
-                                                                        },
-                                                                    }}
-                                                                    InputProps={{ sx: { height: 30 } }}
-                                                                >
-                                                                    <MenuItem value="ค่าใช้จ่าย">ค่าใช้จ่าย</MenuItem>
-                                                                </TextField>
-                                                            </Paper>
-                                                    }
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
-                                                    {
-                                                        ID !== row.id ?
-                                                            <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5 }} gutterBottom>{row.Status}</Typography>
-                                                            :
-                                                            <Paper
-                                                                elevation={0}
-                                                                sx={{
-                                                                    p: 0, // ไม่มี padding
-                                                                    m: 0, // ไม่มี margin
-                                                                    display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
-                                                                    width: 'fit-content', // ปรับตาม Checkbox
-                                                                    height: 'fit-content',
-                                                                    backgroundColor: 'white',
-                                                                    marginLeft: 2
-                                                                }}
-                                                            >
-                                                                <Checkbox
-                                                                    checked={status}
-                                                                    onChange={() => setStatus(!status)}
-                                                                    sx={{
-                                                                        p: 0, // ไม่มี padding รอบ checkbox
+                                                                        p: 0, // ไม่มี padding
                                                                         m: 0, // ไม่มี margin
+                                                                        display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
+                                                                        width: 'fit-content', // ปรับตาม Checkbox
+                                                                        height: 'fit-content',
+                                                                        backgroundColor: 'white',
+                                                                        marginLeft: 2
                                                                     }}
-                                                                />
-                                                            </Paper>
-                                                    }
-                                                </TableCell>
-                                                <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
-                                                    {
-                                                        ID !== row.id ?
-                                                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                                                <IconButton size="small" onClick={() => handleUpdate(row)}>
-                                                                    <SettingsIcon fontSize="small" color="warning" />
-                                                                </IconButton>
-                                                                {
-                                                                    row.Status === "อยู่ในระบบ" ?
-                                                                        <IconButton size="small" onClick={() => handleDeleteData(row)}>
-                                                                            <DeleteForeverIcon fontSize="small" color="error" />
-                                                                        </IconButton>
-                                                                        :
-                                                                        <IconButton size="small" onClick={() => handleResetData(row)}>
-                                                                            <AssignmentTurnedInIcon fontSize="small" color="success" />
-                                                                        </IconButton>
-                                                                }
-                                                            </Box>
+                                                                >
+                                                                    <Checkbox
+                                                                        checked={status}
+                                                                        onChange={() => setStatus(!status)}
+                                                                        sx={{
+                                                                            p: 0, // ไม่มี padding รอบ checkbox
+                                                                            m: 0, // ไม่มี margin
+                                                                        }}
+                                                                    />
+                                                                </Paper>
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
+                                                        {
+                                                            ID !== row.id ?
+                                                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                                    <IconButton size="small" onClick={() => handleUpdate(row)}>
+                                                                        <SettingsIcon fontSize="small" color="warning" />
+                                                                    </IconButton>
+                                                                    {
+                                                                        row.Status === "อยู่ในระบบ" ?
+                                                                            <IconButton size="small" onClick={() => handleDeleteData(row)}>
+                                                                                <DeleteForeverIcon fontSize="small" color="error" />
+                                                                            </IconButton>
+                                                                            :
+                                                                            <IconButton size="small" onClick={() => handleResetData(row)}>
+                                                                                <AssignmentTurnedInIcon fontSize="small" color="success" />
+                                                                            </IconButton>
+                                                                    }
+                                                                </Box>
 
-                                                            :
-                                                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginLeft: -2, marginRight: -2 }}>
-                                                                <IconButton size="small" onClick={() => handleCancel()}>
-                                                                    <Paper
-                                                                        elevation={0}
-                                                                        sx={{
-                                                                            p: 0, // ไม่มี padding
-                                                                            m: 0, // ไม่มี margin
-                                                                            display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
-                                                                            width: 'fit-content', // ปรับตาม Checkbox
-                                                                            height: 'fit-content',
-                                                                            backgroundColor: 'white'
-                                                                        }}
-                                                                    >
-                                                                        <DisabledByDefaultIcon fontSize="small" color="error" />
-                                                                    </Paper>
-                                                                </IconButton>
-                                                                <IconButton size="small" onClick={() => handleUpdateData()}>
-                                                                    <Paper
-                                                                        elevation={0}
-                                                                        sx={{
-                                                                            p: 0, // ไม่มี padding
-                                                                            m: 0, // ไม่มี margin
-                                                                            display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
-                                                                            width: 'fit-content', // ปรับตาม Checkbox
-                                                                            height: 'fit-content',
-                                                                            backgroundColor: 'white'
-                                                                        }}
-                                                                    >
-                                                                        <AssignmentTurnedInIcon fontSize="small" color="success" />
-                                                                    </Paper>
-                                                                </IconButton>
-                                                            </Box>
-                                                    }
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
+                                                                :
+                                                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", marginLeft: -2, marginRight: -2 }}>
+                                                                    <IconButton size="small" onClick={() => handleCancel()}>
+                                                                        <Paper
+                                                                            elevation={0}
+                                                                            sx={{
+                                                                                p: 0, // ไม่มี padding
+                                                                                m: 0, // ไม่มี margin
+                                                                                display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
+                                                                                width: 'fit-content', // ปรับตาม Checkbox
+                                                                                height: 'fit-content',
+                                                                                backgroundColor: 'white'
+                                                                            }}
+                                                                        >
+                                                                            <DisabledByDefaultIcon fontSize="small" color="error" />
+                                                                        </Paper>
+                                                                    </IconButton>
+                                                                    <IconButton size="small" onClick={() => handleUpdateData()}>
+                                                                        <Paper
+                                                                            elevation={0}
+                                                                            sx={{
+                                                                                p: 0, // ไม่มี padding
+                                                                                m: 0, // ไม่มี margin
+                                                                                display: 'flex', // ให้ Checkbox ขยายได้เต็มพื้นที่
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center', // กรณีต้องการอยู่ตรงกลาง (เลือกปรับตามต้องการ)
+                                                                                width: 'fit-content', // ปรับตาม Checkbox
+                                                                                height: 'fit-content',
+                                                                                backgroundColor: 'white'
+                                                                            }}
+                                                                        >
+                                                                            <AssignmentTurnedInIcon fontSize="small" color="success" />
+                                                                        </Paper>
+                                                                    </IconButton>
+                                                                </Box>
+                                                        }
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
                                     }
                                     {
                                         open &&
-                                        <TableRow sx={{ backgroundColor: "#c5cae9" }}>
+                                        <TableRow sx={{ backgroundColor: "#c5cae9", position: "sticky", bottom: 0 }}>
                                             <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>{expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length + 1}</TableCell>
                                             <TableCell sx={{ textAlign: "center" }}>
                                                 <Paper>
@@ -466,6 +513,7 @@ const ExpenseDetail = ({ openNavbar }) => {
                                                     </TextField>
                                                 </Paper>
                                             </TableCell>
+                                            <TableCell sx={{ textAlign: "center" }} colSpan={2}></TableCell>
                                             {/* <TableCell sx={{ textAlign: "center" }}>
                                                 <TextField
                                                     fullWidth
@@ -489,7 +537,7 @@ const ExpenseDetail = ({ openNavbar }) => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        {
+                        {/* {
                             expenseitem.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length <= 10 ? null :
                                 <TablePagination
                                     rowsPerPageOptions={[10, 25, 30]}
@@ -533,7 +581,7 @@ const ExpenseDetail = ({ openNavbar }) => {
                                         }
                                     }}
                                 />
-                        }
+                        } */}
                     </Grid>
                 </Grid>
                 <Box sx={{ marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>

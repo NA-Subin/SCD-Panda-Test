@@ -286,7 +286,7 @@ const Invoice = ({ openNavbar }) => {
     if (Math.abs(result) < 1e-9) result = 0;
 
     // ✅ แสดงเฉพาะรายการที่ "ไม่ใช่ 0"
-    return result !== 0;
+    return result !== 0 || (amount === 0 && overdue === 0);
   });
 
   console.log("sortedOrderDetail : ", sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0)));
@@ -706,12 +706,11 @@ const Invoice = ({ openNavbar }) => {
                 <Grid item xs={12}>
                   {
                     checkOverdueTransfer ?
-                      sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
-                        .map((row, index) => (
-                          (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
-                            : ""
-                        ))
+                      displayRows.map((row, index) => (
+                        (selectedRow && selectedRow === row.No) || indexes === index ?
+                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
+                          : ""
+                      ))
                       :
                       sortedOrderDetail.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?

@@ -423,10 +423,10 @@ const QuotationUpdate = ({ setOpen }) => {
                 {/* <Grid item xs={12}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: -2, marginBottom: -1 }} gutterBottom>กรอกข้อมูลใบเสนอราคาลูกค้า</Typography>
                         </Grid> */}
-                <Grid item xs={12} textAlign="right">
+                <Grid item xs={12} sm={12} md={12} textAlign="right">
                     <Button variant="contained" color="error" onClick={() => setOpen(true)} startIcon={<KeyboardDoubleArrowLeftIcon />} >กลับไปยังหน้าสำหรับเพิ่มข้อมูล</Button>
                 </Grid>
-                <Grid item xs={6} sx={{ display: "flex", justifyContent: "left", alignItems: "center" }}>
+                <Grid item xs={12} sm={12} md={6} sx={{ display: "flex", justifyContent: "left", alignItems: "center" }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <Paper sx={{ mr: 2 }}>
                             <DatePicker
@@ -494,7 +494,7 @@ const QuotationUpdate = ({ setOpen }) => {
                         </Paper>
                     </LocalizationProvider>
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={12} sm={10} md={5}>
                     <Paper>
                         <TextField
                             variant="outlined"
@@ -521,7 +521,7 @@ const QuotationUpdate = ({ setOpen }) => {
                         />
                     </Paper>
                 </Grid>
-                <Grid item xs={1}>
+                <Grid item xs={12} sm={2} md={1}>
                     <FormGroup row >
                         {/* <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะ : </Typography> */}
                         <FormControlLabel control={<Checkbox checked={cancel} />} onChange={() => setCancel(!cancel)} label="ยกเลิก" />
@@ -739,12 +739,12 @@ const QuotationUpdate = ({ setOpen }) => {
                 {
                     invoice &&
                     <React.Fragment>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} sm={12} md={12}>
                             <Divider sx={{ marginBottom: 1, marginTop: 1 }}>
                                 <Chip label="ข้อมูลใบเสนอราคา" size="small" />
                             </Divider>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs={12} sm={6} md={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <Paper>
                                     <DatePicker
@@ -781,7 +781,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                 </Paper>
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs={12} sm={6} md={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <Paper>
                                     <DatePicker
@@ -818,14 +818,14 @@ const QuotationUpdate = ({ setOpen }) => {
                                 </Paper>
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs={12} sm={12} md={4}>
                             <FormGroup row >
                                 <Typography variant="subtitle1" fontWeight="bold" color={edit ? "gray" : "black"} sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะรถ : </Typography>
                                 <FormControlLabel disabled={edit ? true : false} control={<Checkbox checked={check ? true : false} />} onChange={() => setCheck(true)} label="รถใหญ่" />
                                 <FormControlLabel disabled={edit ? true : false} control={<Checkbox checked={!check ? true : false} />} onChange={() => setCheck(false)} label="รถเล็ก" />
                             </FormGroup>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} sm={12} md={6}>
                             <Paper sx={{ width: "100%" }}>
                                 <Autocomplete
                                     options={companyDetail.filter((row) => row.id !== 1)}
@@ -872,7 +872,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                 />
                             </Paper>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} sm={12} md={6}>
                             <Paper sx={{ width: "100%" }}>
                                 {
                                     check ?
@@ -956,9 +956,9 @@ const QuotationUpdate = ({ setOpen }) => {
                                 }
                             </Paper>
                         </Grid>
-                        <Grid item xs={12}>
-                            <TableContainer component={Paper} sx={{ height: "15vh" }}>
-                                <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" } }}>
+                        <Grid item xs={12} sm={12} md={12}>
+                            <TableContainer component={Paper} sx={{ height: "17vh" }}>
+                                <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" },width: "1070px" }}>
                                     <TableHead>
                                         <TableRow>
                                             {products.map((product) => (
@@ -1085,7 +1085,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                 </Box>
                             </Box>
                         </Grid> */}
-                        <Grid item xs={12} sx={{ mb: -2 }}>
+                        <Grid item xs={12} sm={12} md={12} sx={{ mb: -2 }}>
                             <Typography variant="subtitle1" fontWeight="bold" color={edit ? "gray" : "black"} gutterBottom>
                                 เลือกหมายเหตุมาตรฐานที่ต้องการเพิ่มในใบเสนอราคา
                             </Typography>
@@ -1093,7 +1093,7 @@ const QuotationUpdate = ({ setOpen }) => {
                         {items.map((text, idx) => {
                             const selected = idx === selectedIndex;
                             return (
-                                <Grid item xs={12} md={4} key={idx}>
+                                <Grid item xs={12} sm={6} md={4} key={idx}>
                                     {
                                         edit ? (
                                             <Box
@@ -1149,7 +1149,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                 </Grid>
                             );
                         })}
-                        <Grid item xs={6}>
+                        <Grid item xs={12} sm={12} md={6}>
                             <TextField
                                 size="small"
                                 type="number"
@@ -1181,8 +1181,8 @@ const QuotationUpdate = ({ setOpen }) => {
                                 disabled={edit ? true : false}
                             />
                         </Grid>
-                        <Grid item xs={6}>
-                            <Grid item xs={12}>
+                        <Grid item xs={12} sm={12} md={6}>
+                            <Grid item xs={12} sm={12} md={12}>
                                 <Autocomplete
                                     options={employees}
                                     getOptionLabel={(option) => option.Name}
@@ -1222,7 +1222,7 @@ const QuotationUpdate = ({ setOpen }) => {
                                     disabled={edit ? true : false}
                                 />
                             </Grid>
-                            <Grid item xs={12} textAlign="right">
+                            <Grid item xs={12} sm={12} md={12} textAlign="right">
                                 <Box sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "right" }}>
                                     {
                                         edit ?

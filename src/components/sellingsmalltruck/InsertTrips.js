@@ -1220,38 +1220,86 @@ const InsertTrips = () => {
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
                 console.log("Data pushed successfully");
-                database
-                    .ref("truck/small/")
-                    .child(Number(registration.split(":")[0]) - 1)
-                    .update({
-                        Driver: driverss,
-                        Status: "TR:" + trip.length
-                    })
-                    .then(() => {
-                        setOpen(false);
-                        console.log("Data pushed successfully");
+                const getIdFromValue = (value) => {
+                    if (!value) return null;
 
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
+                    const id = Number(String(value).split(":")[0]);
 
-                database
-                    .ref("employee/drivers/")
-                    .child(Number(driverss.split(":")[0]) - 1)
-                    .update({
-                        Registration: registration
-                    })
-                    .then(() => {
-                        setOpen(false);
-                        console.log("Data pushed successfully");
+                    if (!Number.isInteger(id) || id <= 0) return null; // ❌ กัน 0 และ NaN
 
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
+                    return id-1;
+                };
+
+                const regId = getIdFromValue(registration);
+                const driverId = getIdFromValue(driverss);
+
+                if (regId !== null) {
+                    database
+                        .ref("truck/small/")
+                        .child(regId) // ❗ ไม่ต้อง -1 แล้ว
+                        .update({
+                            Driver: driverss,
+                            Status: "TR:" + trip.length
+                        })
+                        .then(() => {
+                            setOpen(false);
+                            console.log("Truck updated");
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error(error);
+                        });
+                }
+
+                if (driverId !== null) {
+                    database
+                        .ref("employee/drivers/")
+                        .child(driverId) // ❗ ไม่ต้อง -1 แล้ว
+                        .update({
+                            Registration: registration
+                        })
+                        .then(() => {
+                            setOpen(false);
+                            console.log("Driver updated");
+                        })
+                        .catch((error) => {
+                            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                            console.error(error);
+                        });
+                }
+
+                // database
+                //     .ref("truck/small/")
+                //     .child(Number(registration.split(":")[0]) - 1)
+                //     .update({
+                //         Driver: driverss,
+                //         Status: "TR:" + trip.length
+                //     })
+                //     .then(() => {
+                //         setOpen(false);
+                //         console.log("Data pushed successfully");
+
+                //     })
+                //     .catch((error) => {
+                //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                //         console.error("Error pushing data:", error);
+                //     });
+
+                // database
+                //     .ref("employee/drivers/")
+                //     .child(Number(driverss.split(":")[0]) - 1)
+                //     .update({
+                //         Registration: registration
+                //     })
+                //     .then(() => {
+                //         setOpen(false);
+                //         console.log("Data pushed successfully");
+
+                //     })
+                //     .catch((error) => {
+                //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                //         console.error("Error pushing data:", error);
+                //     });
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");

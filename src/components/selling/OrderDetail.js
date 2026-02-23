@@ -202,12 +202,12 @@ const OrderDetail = (props) => {
                                         onUpdateOrderID("OrderID", newValue);
                                         //onUpdateOrderID("OrderID", newValue === "" ? "" : Number(newValue.replace(/^0+(?=\d)/, "")));
                                     }}
-                                    // onFocus={(e) => {
-                                    //     if (e.target.value === "0") onUpdateOrderID("OrderID", "");
-                                    // }}
-                                    // onBlur={(e) => {
-                                    //     if (e.target.value === "") onUpdateOrderID("OrderID", 0);
-                                    // }}
+                                // onFocus={(e) => {
+                                //     if (e.target.value === "0") onUpdateOrderID("OrderID", "");
+                                // }}
+                                // onBlur={(e) => {
+                                //     if (e.target.value === "") onUpdateOrderID("OrderID", 0);
+                                // }}
                                 />
                             </Paper>
                             :
@@ -222,6 +222,10 @@ const OrderDetail = (props) => {
                                     <Paper component="form" sx={{ width: "100%" }}>
                                         <TextField size="small" fullWidth
                                             type="number"
+                                            inputProps={{
+                                                step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                            }}
                                             InputLabelProps={{
                                                 sx: {
                                                     fontSize: '12px',
@@ -258,6 +262,10 @@ const OrderDetail = (props) => {
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField size="small" fullWidth
                                                 type="number"
+                                                inputProps={{
+                                                    step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                    min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                }}
                                                 InputLabelProps={{
                                                     sx: {
                                                         fontSize: '12px',
@@ -290,10 +298,14 @@ const OrderDetail = (props) => {
                                                 }}
                                             />
                                         </Paper>
-                                        : 
+                                        :
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField size="small" fullWidth
                                                 type="number"
+                                                inputProps={{
+                                                    step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                    min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                }}
                                                 InputLabelProps={{
                                                     sx: {
                                                         fontSize: '12px',

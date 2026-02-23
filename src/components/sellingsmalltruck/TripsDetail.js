@@ -37,10 +37,14 @@ import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
 import InfoIcon from '@mui/icons-material/Info';
 import UpdateTrip from "./UpdateTrip";
 import { formatThaiSlash } from "../../theme/DateTH";
+import { useBasicData } from "../../server/provider/BasicDataProvider";
 
 const TripsDetail = (props) => {
     const { trips, windowWidth, index, maxOrder } = props;
     const [approve, setApprove] = React.useState(false);
+    const {small} = useBasicData();
+
+    const smalls = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
     const handleApprove = () => {
         database
@@ -76,6 +80,10 @@ const TripsDetail = (props) => {
             });
     };
 
+    const ShortName = smalls.find((t) => t.id === Number(trips.Registration.split(":")[0]))?.ShortName || "-";
+
+    console.log("trips:", trips);
+
     return (
         <React.Fragment>
             <TableRow>
@@ -93,7 +101,12 @@ const TripsDetail = (props) => {
                         <Typography
                             component="span"
                             variant="body2"
-                            sx={{ color: theme.palette.error.dark }}
+                            sx={{
+                                color:
+                                    trips?.Registration?.split(":")[1] === "0" ?
+                                        theme.palette.error.dark
+                                        : "black"
+                            }}
                         >
                             {(() => {
                                 const reg = trips?.Registration ?? "";
@@ -103,7 +116,8 @@ const TripsDetail = (props) => {
                                     return "(ยังไม่ได้เลือกทะเบียนรถ)";
                                 }
 
-                                return value;
+                                // return `${ShortName} (${value})`;
+                                return `${value}`;
                             })()}
                         </Typography>
                     </Box>

@@ -331,7 +331,7 @@ const UpdateGasStations = (props) => {
         );
     };
 
-    const truckDriver = registration.filter((item => item.RegTail !== "0:ไม่มี" && item.Driver !== "0:ไม่มี"));
+    const truckDriver = registration.filter((item => item.Driver !== "0:ไม่มี" && item.StatusTruck !== "ยกเลิก"));
     // console.log("1.truckDriver : ", truckDriver);
     // console.log("2.truckDriver : ", truckDriver.map((row) => row.Driver.split(":")[1]?.split(" ")[0]));
 

@@ -84,6 +84,24 @@ const InsertFinancial = () => {
     const [manualTotal, setManualTotal] = useState(false); // เช็คว่าผู้ใช้แก้ total โดยตรง
     const [file, setFile] = useState("ไม่แนบไฟล์");
     const [fileType, setFileType] = useState(1);
+    const [errors, setErrors] = useState({
+        invoiceID: false,
+        selectedDateInvoice: false,
+        selectedDateTransfer: false,
+        company: false,
+        bank: false,
+        price: false,
+        details: false,
+        file: false,   // เผื่ออยากบังคับแนบไฟล์
+        list: false,
+        vat: false,
+        total: false,
+        registration: {
+            "หัวรถ": false,
+            "หางรถ": false,
+            "รถเล็ก": false,
+        }
+    });
 
     console.log("P : ", price);
     console.log("V : ", vat);
@@ -246,11 +264,101 @@ const InsertFinancial = () => {
         setOpen(false);
     };
 
-    const handlePost = async () => {
-        if (!list || list.length === 0) {
-            ShowError("ไม่มีข้อมูลที่จะบันทึก");
-            return;
+    const validateBeforeSave = () => {
+        const newErrors = {
+            invoiceID: false,
+            selectedDateInvoice: false,
+            selectedDateTransfer: false,
+            company: false,
+            bank: false,
+            price: false,
+            file: false,
+            list: false,
+            vat: false,
+            total: false,
+            registration: {
+                "หัวรถ": false,
+                "หางรถ": false,
+                "รถเล็ก": false,
+            },
+            details: false,
+        };
+
+        let hasError = false;
+
+        if (!invoiceID || invoiceID.trim() === "") {
+            newErrors.invoiceID = true;
+            hasError = true;
         }
+
+        if (!selectedDateInvoice) {
+            newErrors.selectedDateInvoice = true;
+            hasError = true;
+        }
+
+        if (!selectedDateTransfer) {
+            newErrors.selectedDateTransfer = true;
+            hasError = true;
+        }
+
+        if (!company) {
+            newErrors.company = true;
+            hasError = true;
+        }
+
+        if (!bank) {
+            newErrors.bank = true;
+            hasError = true;
+        }
+
+        if (!list || list.length === 0) {
+            newErrors.list = true;
+            hasError = true;
+        }
+
+        if (!details || details.trim() === "") {
+            newErrors.details = true;
+            hasError = true;
+        }
+
+        if (!selectedValue) {
+            newErrors.registration[type] = true;
+            hasError = true;
+        }
+
+        if (vat === "0.00" || vat === "") {
+            newErrors.vat = true;
+            hasError = true;
+        }
+
+        if (total === "0.00" || total === "") {
+            newErrors.total = true;
+            hasError = true;
+        }
+
+        // กรณีมีแค่ 1 คัน ต้องกรอกราคาเอง
+        if (list.length <= 1 && (!price || Number(price) === 0)) {
+            newErrors.price = true;
+            hasError = true;
+        }
+
+        // 🔴 ถ้าต้อง “บังคับแนบไฟล์”
+        // if (file === "ไม่แนบไฟล์") {
+        //   newErrors.file = true;
+        //   hasError = true;
+        // }
+
+        setErrors(newErrors);
+        return !hasError;
+    };
+
+    const handlePost = async () => {
+        // if (!list || list.length === 0) {
+        //     ShowError("ไม่มีข้อมูลที่จะบันทึก");
+        //     return;
+        // }
+
+        if (!validateBeforeSave()) return;
 
         if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
 
@@ -479,6 +587,8 @@ const InsertFinancial = () => {
                                                 label={!company ? "เลือกบริษัทที่ต้องการเพิ่ม" : ""}
                                                 variant="outlined"
                                                 size="small"
+                                                error={errors.company}
+                                                helperText={errors.company ? "กรุณาเลือกบริษัท" : ""}
                                             //   sx={{
                                             //     "& .MuiOutlinedInput-root": { height: "30px" },
                                             //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
@@ -577,6 +687,12 @@ const InsertFinancial = () => {
                                                 label={`กรุณาเลือก${type}`}
                                                 variant="outlined"
                                                 size="small"
+                                                error={errors.registration?.[type] || false}
+                                                helperText={
+                                                    errors.registration?.[type]
+                                                        ? `กรุณาเลือก${type}`
+                                                        : ""
+                                                }
                                             />
                                         )}
                                         renderOption={(props, option) => (
@@ -653,6 +769,8 @@ const InsertFinancial = () => {
                                         fullWidth
                                         value={details}
                                         onChange={(e) => setDetails(e.target.value)}
+                                        error={errors.details}
+                                        helperText={errors.details ? "กรุณากรอกรายละเอียด" : ""}
                                     />
                                 </Paper>
                             </Box>
@@ -686,6 +804,8 @@ const InsertFinancial = () => {
                                                 label={!bank ? "เลือกชื่อบัญชีที่ต้องการเพิ่ม" : ""}
                                                 variant="outlined"
                                                 size="small"
+                                                error={errors.bank}
+                                                helperText={errors.bank ? "กรุณาเลือกชื่อบัญชี" : ""}
                                             //   sx={{
                                             //     "& .MuiOutlinedInput-root": { height: "30px" },
                                             //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
@@ -757,6 +877,8 @@ const InsertFinancial = () => {
                                                         setPrice(price.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                     }
                                                 }}
+                                                error={errors.price}
+                                                helperText={errors.price ? "กรุณากรอกยอดก่อน Vat" : ""}
                                             />
                                         </Paper>
                                     </Box>
@@ -811,6 +933,8 @@ const InsertFinancial = () => {
                                                         setVat(vat.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                     }
                                                 }}
+                                                error={errors.vat}
+                                                helperText={errors.vat ? "กรุณากรอกยอด Vat" : ""}
                                             />
                                         </Paper>
                                     </Box>
@@ -853,6 +977,8 @@ const InsertFinancial = () => {
                                                         setTotal(total.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                     }
                                                 }}
+                                                error={errors.total}
+                                                helperText={errors.total ? "กรุณากรอกยอดรวม" : ""}
                                             />
                                             {/* <TextField
                                                 size="small"

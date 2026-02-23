@@ -13,6 +13,7 @@ import {
     FormControlLabel,
     Grid,
     IconButton,
+    InputAdornment,
     Paper,
     Popover,
     Table,
@@ -43,6 +44,8 @@ const CompanyPayment = ({ openNavbar }) => {
     const [ID, setID] = useState("");
     const [status, setStatus] = useState("");
     const [check, setCheck] = useState(true);
+    const [searchText, setSearchText] = useState("");
+    const [keyword, setKeyword] = useState(""); // ค่าที่ใช้ค้นหาจริง (กดปุ่มก่อนค่อยค้น)
 
     const [openTab, setOpenTab] = React.useState(true);
 
@@ -92,6 +95,12 @@ const CompanyPayment = ({ openNavbar }) => {
         setName(data.Name);
         setStatus(data.Status === "อยู่ในระบบ" ? true : false);
     }
+
+    const filteredData = companypayments
+        .filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ"))
+        .filter((t) =>
+            t.Name?.toLowerCase().includes(searchText.toLowerCase())
+        );
 
     const handleSave = () => {
         database
@@ -209,13 +218,59 @@ const CompanyPayment = ({ openNavbar }) => {
                                 <Box
                                     sx={{
                                         display: "flex",
-                                        justifyContent: "space-between",
                                         alignItems: "center",
                                         mb: 1
                                     }}
                                 >
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1 }} gutterBottom>รายชื่อบริษัทที่สั่งจ่าย</Typography>
+                                    {/* ซ้าย */}
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        sx={{ marginTop: 1, minWidth: 220 }}
+                                        gutterBottom
+                                    >
+                                        รายชื่อบริษัทที่สั่งจ่าย
+                                    </Typography>
+
+                                    {/* กลาง (Search) */}
+                                    <Box
+                                        sx={{
+                                            flex: 1,
+                                            display: "flex",
+                                            justifyContent: "center"
+                                        }}
+                                    >
+                                        <TextField
+                                            fullWidth
+                                            value={searchText}
+                                            onChange={(e) => {
+                                                setSearchText(e.target.value);
+                                                setPage(0); // 🔥 รีเซ็ตหน้าเวลา search กันหน้าว่าง
+                                            }}
+                                            size="small"
+                                            sx={{
+                                                '& .MuiInputBase-root': {
+                                                    height: 35, // ปรับความสูงรวม
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                    padding: '4px 8px', // ปรับ padding ด้านใน input
+                                                    fontSize: '0.85rem', // (ถ้าต้องการลดขนาดตัวอักษร)
+                                                },
+                                            }}
+                                            InputProps={{
+                                                sx: { height: 35 },
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <b>ค้นหา :</b>
+                                                    </InputAdornment>
+                                                )
+                                            }}
+                                        />
+                                    </Box>
+
+                                    {/* ขวา */}
                                     <FormControlLabel
+                                        sx={{ minWidth: 160, justifyContent: "flex-end", m: 0 }}
                                         control={
                                             <Checkbox
                                                 checked={check}
@@ -259,7 +314,7 @@ const CompanyPayment = ({ openNavbar }) => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        companypayments.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                        filteredData.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                                             <TableRow>
                                                 <TableCell sx={{ textAlign: "center", backgroundColor: ID === row.id && "#c5cae9" }}>
                                                     <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', marginTop: 0.5, fontWeight: ID === row.id && "bold" }} gutterBottom>{index + 1}</Typography>
@@ -403,17 +458,18 @@ const CompanyPayment = ({ openNavbar }) => {
                                                     />
                                                 </Paper>
                                             </TableCell>
+                                            <TableCell sx={{ textAlign: "center" }} colSpan={2}></TableCell>
                                         </TableRow>
                                     }
                                 </TableBody>
                             </Table>
                         </TableContainer>
                         {
-                            companypayments.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length <= 10 ? null :
+                            filteredData.length <= 10 ? null :
                                 <TablePagination
                                     rowsPerPageOptions={[10, 25, 30]}
                                     component="div"
-                                    count={companypayments.filter((t) => t.Status === (check ? "อยู่ในระบบ" : "ไม่อยู่ในระบบ")).length}
+                                    count={filteredData.length}
                                     rowsPerPage={rowsPerPage}
                                     page={page}
                                     onPageChange={handleChangePage}

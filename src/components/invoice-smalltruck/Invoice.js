@@ -286,7 +286,7 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
     if (Math.abs(result) < 1e-9) result = 0;
 
     // ✅ แสดงเฉพาะรายการที่ "ไม่ใช่ 0"
-    return result !== 0;
+    return result !== 0 || (amount === 0 && overdue === 0);
   });
 
   console.log("sortedOrderDetail : ", sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0)));
@@ -556,7 +556,6 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                         {
                           checkOverdueTransfer ?
                             displayRows.map((row, index) => {
-
                               return (
                                 <TableRow key={row.No} onClick={() => handleRowClick(row.No, index, row.TicketName, row.DateDelivery)}
                                   sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#e0e0e0" }, backgroundColor: (selectedRow === row.No) || (indexes === index) ? "#fff59d" : "" }}
@@ -752,12 +751,11 @@ const InvoiceSmallTruck = ({ openNavbar }) => {
                 <Grid item xs={12}>
                   {
                     checkOverdueTransfer ?
-                      sortedOrderDetail.filter(row => ((Number(row.TotalAmount) - Number(row.TotalOverdue)) !== 0) || (row.TotalAmount === 0 && row.TotalOverdue === 0))
-                        .map((row, index) => (
-                          (selectedRow && selectedRow === row.No) || indexes === index ?
-                            <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
-                            : ""
-                        ))
+                      displayRows.map((row, index) => (
+                        (selectedRow && selectedRow === row.No) || indexes === index ?
+                          <UpdateInvoice key={row.No} ticket={row} ticketNo={ticketNo} date={newDate} openNavbar={openNavbar} />
+                          : ""
+                      ))
                       :
                       sortedOrderDetail.map((row, index) => (
                         (selectedRow && selectedRow === row.No) || indexes === index ?

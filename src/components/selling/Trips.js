@@ -240,6 +240,11 @@ const TripsBigTruck = ({ openNavbar }) => {
         setPage(0);
     };
 
+    const handleChangeCheck = (value) => {
+        setCheck(value);
+        setPage(0);
+    };
+
     return (
         <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 230) }}>
             {/* <Typography
@@ -353,10 +358,10 @@ const TripsBigTruck = ({ openNavbar }) => {
                     <Grid item xs={12}>
                         <FormGroup row sx={{ marginBottom: -2 }}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>กรุณาเลือกสถานะที่ต้องการ : </Typography>
-                            <FormControlLabel control={<Checkbox color="success" checked={check === 1 ? true : false} />} onChange={() => setCheck(1)} label="ทั้งหมด" />
-                            <FormControlLabel control={<Checkbox color="success" checked={check === 2 ? true : false} />} onChange={() => setCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
-                            <FormControlLabel control={<Checkbox color="success" checked={check === 3 ? true : false} />} onChange={() => setCheck(3)} label="ยกเลิก" />
-                            <FormControlLabel control={<Checkbox color="success" checked={check === 4 ? true : false} />} onChange={() => setCheck(4)} label="จบทริป" />
+                            <FormControlLabel control={<Checkbox color="success" checked={check === 1 ? true : false} />} onChange={() => handleChangeCheck(1)} label="ทั้งหมด" />
+                            <FormControlLabel control={<Checkbox color="success" checked={check === 2 ? true : false} />} onChange={() => handleChangeCheck(2)} label="กำลังจัดเที่ยววิ่ง" />
+                            <FormControlLabel control={<Checkbox color="success" checked={check === 3 ? true : false} />} onChange={() => handleChangeCheck(3)} label="ยกเลิก" />
+                            <FormControlLabel control={<Checkbox color="success" checked={check === 4 ? true : false} />} onChange={() => handleChangeCheck(4)} label="จบทริป" />
                         </FormGroup>
                     </Grid>
                     <Grid item xs={12}>

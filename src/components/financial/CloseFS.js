@@ -742,7 +742,7 @@ const CloseFS = ({ openNavbar }) => {
                     ? registrationH.find((h) => h.id === Number(ex.Registration.split(":")[0]))
                     : ex.TruckType === "หางรถใหญ่"
                         ? registrationS.find((h) => h.id === Number(ex.Registration.split(":")[0]))
-                            : false;
+                        : false;
 
                 const rowDate = dayjs(ex.SelectedDateInvoice, "DD/MM/YYYY");
                 const selectedMonth = dayjs(months);
@@ -1320,7 +1320,7 @@ const CloseFS = ({ openNavbar }) => {
         // 2️⃣ Title
         worksheet.mergeCells(1, 1, 1, columns.length);
         const titleCell = worksheet.getCell("A1");
-        titleCell.value = `รายงานน้ำมัน ประจำงวด`;
+        titleCell.value = `รายงานน้ำมัน ประจำงวด ${date ? years : dayjs(months).format("MMMM YYYY")} ของบริษัท ${companyName === "0:ทั้งหมด" ? "ทุกบริษัท" : companyName.split(":")[1]}`;
         titleCell.font = { size: 16, bold: true };
         titleCell.alignment = { horizontal: "center", vertical: "middle" };
         titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEBF7" } };
@@ -1419,6 +1419,20 @@ const CloseFS = ({ openNavbar }) => {
             cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
         });
 
+        const getDriverTotalPrice = (row, driver) => {
+            const matchedRegs = row.Registrations.filter((reg) => {
+                const regNum = normalizeReg(reg.Registration);
+                const driverReg = normalizeReg(driver.Registration);
+                const driverTail = normalizeReg(driver.RegistrationTail);
+
+                return driver.TruckType === "รถเล็ก"
+                    ? regNum === driverReg
+                    : regNum === driverReg || regNum === driverTail;
+            });
+
+            return matchedRegs.reduce((sum, reg) => sum + (reg.TotalPrice || 0), 0);
+        };
+
         // 6️⃣ ReportDetail + รวมค่าใช้จ่าย
         reportDetail.forEach((row, idx) => {
             const dataRow = [
@@ -1427,12 +1441,7 @@ const CloseFS = ({ openNavbar }) => {
                 row.Bank ? row.Bank.split(":")[1] : row.Bank,
                 "-",
                 row.TotalPrice || 0,
-                ...driverGroups.map(dg => {
-                    const found = row.Registrations.find(
-                        r => Number(r.Registration.split(":")[0]) === Number(dg.Registration.split(":")[0])
-                    );
-                    return found ? (found.TotalPrice) : 0;
-                }),
+                ...driverGroups.map(driver => getDriverTotalPrice(row, driver))
             ];
             const excelRow = worksheet.addRow(dataRow);
             excelRow.eachCell((cell, colIndex) => {

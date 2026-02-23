@@ -294,14 +294,14 @@ const QuotationDetail = ({ setOpen }) => {
                 {/* <Grid item xs={12}>
                             <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: -2, marginBottom: -1 }} gutterBottom>กรอกข้อมูลใบเสนอราคาลูกค้า</Typography>
                         </Grid> */}
-                <Grid item xs={8} textAlign="left">
+                <Grid item xs={12} sm={6} md={8} textAlign="left">
                     <Typography variant="h6" fontWeight="bold" gutterBottom>กรอกข้อมูลใบเสนอราคาลูกค้า</Typography>
                     <Divider />
                 </Grid>
-                <Grid item xs={4} textAlign="right">
+                <Grid item xs={12} sm={6} md={4} textAlign="right">
                     <Button variant="contained" color="warning" onClick={() => setOpen(false)} endIcon={<KeyboardDoubleArrowRightIcon />} >ตรวจสอบใบวางบิลที่เคยกรอกข้อมูล</Button>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12} sm={6} md={4}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <Paper>
                             <DatePicker
@@ -337,7 +337,7 @@ const QuotationDetail = ({ setOpen }) => {
                         </Paper>
                     </LocalizationProvider>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12} sm={6} md={4}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <Paper>
                             <DatePicker
@@ -373,7 +373,7 @@ const QuotationDetail = ({ setOpen }) => {
                         </Paper>
                     </LocalizationProvider>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12} sm={12} md={4}>
                     <FormGroup row >
                         <Typography variant="subtitle1" fontWeight="bold" sx={{ marginTop: 1, marginRight: 2 }} gutterBottom>สถานะรถ : </Typography>
                         <FormControlLabel control={<Checkbox checked={check ? true : false} />} onChange={() => setCheck(true)} label="รถใหญ่" />
@@ -383,7 +383,7 @@ const QuotationDetail = ({ setOpen }) => {
                 {/* <Grid item xs={4} textAlign="right">
                     <Button variant="contained" color="warning" onClick={() => setOpen(false)} endIcon={<KeyboardDoubleArrowRightIcon />} >ตรวจสอบใบวางบิลที่เคยกรอกข้อมูล</Button>
                 </Grid> */}
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={12} md={6}>
                     <Paper sx={{ width: "100%" }}>
                         <Autocomplete
                             options={companyDetail.filter((row) => row.id !== 1)}
@@ -429,7 +429,7 @@ const QuotationDetail = ({ setOpen }) => {
                         />
                     </Paper>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={12} md={6}>
                     <Paper sx={{ width: "100%" }}>
                         {
                             check ?
@@ -511,9 +511,9 @@ const QuotationDetail = ({ setOpen }) => {
                         }
                     </Paper>
                 </Grid>
-                <Grid item xs={12}>
-                    <TableContainer component={Paper} sx={{ height: "15vh" }}>
-                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" } }}>
+                <Grid item xs={12} sm={12} md={12}>
+                    <TableContainer component={Paper} sx={{ height: "17vh" }}>
+                        <Table size="small" sx={{ tableLayout: "fixed", "& .MuiTableCell-root": { padding: "2px" },width: "1070px" }}>
                             <TableHead>
                                 <TableRow>
                                     {products.map((product) => (
@@ -637,7 +637,7 @@ const QuotationDetail = ({ setOpen }) => {
                         </Box>
                     </Box>
                 </Grid> */}
-                <Grid item xs={12} sx={{ mb: -2 }}>
+                <Grid item xs={12} sm={12} md={12} sx={{ mb: -2 }}>
                     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                         เลือกหมายเหตุมาตรฐานที่ต้องการเพิ่มในใบเสนอราคา
                     </Typography>
@@ -645,7 +645,7 @@ const QuotationDetail = ({ setOpen }) => {
                 {items.map((text, idx) => {
                     const selected = idx === selectedIndex;
                     return (
-                        <Grid item xs={12} md={4} key={idx}>
+                        <Grid item xs={12} sm={6} md={4} key={idx}>
                             <Box
                                 role="button"
                                 tabIndex={0}
@@ -676,7 +676,7 @@ const QuotationDetail = ({ setOpen }) => {
                         </Grid>
                     );
                 })}
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={12} md={6}>
                     <TextField
                         size="small"
                         type="text"
@@ -707,9 +707,9 @@ const QuotationDetail = ({ setOpen }) => {
                         }}
                     />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={12} md={6}>
                     <Grid container>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} sm={6} md={12}>
                             <Autocomplete
                                 options={employees}
                                 getOptionLabel={(option) => option.Name}
@@ -748,7 +748,7 @@ const QuotationDetail = ({ setOpen }) => {
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={12} textAlign="right">
+                        <Grid item xs={12} sm={6} md={12} textAlign="right">
                             <Button variant="contained" onClick={exportToPDF} sx={{ marginTop: 1 }} >พิมพ์ใบเสนอราคาลูกค้า</Button>
                         </Grid>
                     </Grid>

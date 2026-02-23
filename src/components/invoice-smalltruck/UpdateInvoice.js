@@ -195,6 +195,14 @@ const UpdateInvoice = (props) => {
         return `${day} ${month} ${year}`;
     };
 
+    const trimShortName = (text) => {
+        if (!text) return "";
+
+        return text
+            .replace(/^\d+\.{1,}/, "") // ลบเลข + จุด เช่น 3..., 2.., 1.
+            .trim();                   // ตัด space ซ้ำ
+    };
+
     const currentCode = dayjs(new Date()).format("YYYYMM");
 
     // ดึงรายการล่าสุด
@@ -481,7 +489,7 @@ const UpdateInvoice = (props) => {
                     .map(([productName, Volume], index) => ({
                         No: row.No,
                         TicketName: row.TicketName,
-                        ShortName: row.ShortName,
+                        ShortName: trimShortName(row.ShortName),
                         RateOil: isNaN(Volume.RateOil) ? 0 : numberFormat.format(Volume.RateOil),
                         Amount: Volume.Amount || 0,
                         Date: row.Date,
@@ -1036,6 +1044,7 @@ const UpdateInvoice = (props) => {
                                                     Date: row.Date,
                                                     Driver: row.Driver,
                                                     Registration: row.Registration,
+                                                    ShortName: trimShortName(row.ShortName),
                                                     ProductName: productName,
                                                     Volume: Volume.Volume,
                                                     DateDelivery: row.DateDelivery,
@@ -1052,7 +1061,7 @@ const UpdateInvoice = (props) => {
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>{formatThaiSlash(dayjs(report[row.uniqueRowId]?.Date || row.Date, "DD/MM/YYYY"))}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ textAlign: "left", height: '30px' }}>
-                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0, marginLeft: 4 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
+                                                    <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0, marginLeft: 4 }} gutterBottom>{report[row.uniqueRowId]?.Driver || row.Driver.split(":")[1]} : {(trimShortName(row.ShortName))} {report[row.uniqueRowId]?.Registration || row.Registration.split(":")[1]}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{
                                                     textAlign: "center", height: '30px',
@@ -1212,7 +1221,7 @@ const UpdateInvoice = (props) => {
                                         }}
                                     >
                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                            
+
                                         </Typography>
                                     </TableCell>
                                     <TableCell

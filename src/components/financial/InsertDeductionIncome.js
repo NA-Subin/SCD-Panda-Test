@@ -59,6 +59,12 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
     const [check, setCheck] = useState(true); // true = รายได้, false = รายหัก
     const [incomeRows, setIncomeRows] = useState([{ type: null, money: 0 }]);
     const [deductRows, setDeductRows] = useState([{ type: null, money: 0 }]);
+    const [errors, setErrors] = useState({
+        driver: false,
+        period: false,
+        note: false,
+        rows: [] // error ของแต่ละ row
+    });
 
     // reset เวลาเปลี่ยนประเภท
     useEffect(() => {
@@ -247,6 +253,50 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
     // };
     console.log("Driver vehicleType : ", driver.vehicleType)
 
+    const validateBeforeSave = (rows) => {
+        let hasError = false;
+
+        const newErrors = {
+            driver: false,
+            period: false,
+            note: false,
+            rows: rows.map(() => ({ type: false, money: false }))
+        };
+
+        // ✅ ตรวจ driver
+        if (!driver || !driver.id) {
+            newErrors.driver = true;
+            hasError = true;
+        }
+
+        // ✅ ตรวจ period
+        if (!period || String(period).trim() === "") {
+            newErrors.period = true;
+            hasError = true;
+        }
+
+        if (!note || note.trim() === "") {
+            newErrors.note = true;
+            hasError = true;
+        }
+
+        // ✅ ตรวจแต่ละ row
+        rows.forEach((row, index) => {
+            if (!row.type) {
+                newErrors.rows[index].type = true;
+                hasError = true;
+            }
+
+            if (row.money === "" || row.money === null || Number(row.money) === 0) {
+                newErrors.rows[index].money = true;
+                hasError = true;
+            }
+        });
+
+        setErrors(newErrors);
+        return !hasError;
+    };
+
     const handlePost = () => {
         // เลือกว่าจะใช้ incomeRows หรือ deductRows
         const rows = check ? incomeRows : deductRows;
@@ -255,6 +305,8 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
             ShowError("ไม่มีข้อมูลสำหรับบันทึก");
             return;
         }
+
+        if (!validateBeforeSave(rows)) return;
 
         const updates = rows.map((row, index) => {
             const newId = reportFinancialDetail.length + index; // ให้ id ต่อเนื่อง
@@ -450,7 +502,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                                     regTail = option.RegTail.includes(":")
                                                         ? `/${option.RegTail.split(":")[1]}`
                                                         : `/${option.RegTail}`;
-                                                }else{
+                                                } else {
                                                     regTail = "( ไม่ได้ผูกทะเบียนหาง )"
                                                 }
                                             } else {
@@ -476,6 +528,8 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                                 label={!driver ? "เลือกพนักงานขับรถ" : ""}
                                                 variant="outlined"
                                                 size="small"
+                                                error={errors.driver}
+                                                helperText={errors.driver ? "กรุณาเลือกพนักงานขับรถ" : ""}
                                             //   sx={{
                                             //     "& .MuiOutlinedInput-root": { height: "30px" },
                                             //     "& .MuiInputBase-input": { fontSize: "16px", marginLeft: -1 },
@@ -501,7 +555,7 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                                     regTail = option.RegTail.includes(":")
                                                         ? `/${option.RegTail.split(":")[1]}`
                                                         : `/${option.RegTail}`;
-                                                }else{
+                                                } else {
                                                     regTail = "( ไม่ได้ผูกทะเบียนหาง )"
                                                 }
                                             } else {
@@ -675,6 +729,8 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                                             label={!row.type ? "เลือกรายได้" : ""}
                                                             variant="outlined"
                                                             size="small"
+                                                            error={errors.rows[index]?.type}
+                                                            helperText={errors.rows[index]?.type ? "เลือกประเภท" : ""}
                                                         />
                                                     )}
                                                 />
@@ -718,6 +774,8 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                                             setIncomeRows(updated);
                                                         }
                                                     }}
+                                                    error={errors.rows[index]?.money}
+                                                    helperText={errors.rows[index]?.money ? "กรุณากรอกข้อมูล" : ""}
                                                 />
                                             </Paper>
                                         </Box>
@@ -771,6 +829,8 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                                             label={!row.type ? "เลือกรายหัก" : ""}
                                                             variant="outlined"
                                                             size="small"
+                                                            error={errors.rows[index]?.type}
+                                                            helperText={errors.rows[index]?.type ? "เลือกประเภท" : ""}
                                                         />
                                                     )}
                                                 />
@@ -814,6 +874,8 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                                             setDeductRows(updated);
                                                         }
                                                     }}
+                                                    error={errors.rows[index]?.money}
+                                                    helperText={errors.rows[index]?.money ? "กรุณากรอกข้อมูล" : ""}
                                                 />
                                             </Paper>
                                         </Box>
@@ -884,6 +946,8 @@ const InsertDeducetionIncome = ({ year, periodData, periods }) => {
                                         multiline
                                         rows={3}
                                         onChange={(e) => setNote(e.target.value)}
+                                        error={errors.note}
+                                        helperText={errors.note ? "กรุณากรอกข้อมูล" : ""}
                                     />
                                 </Paper>
                             </Box>

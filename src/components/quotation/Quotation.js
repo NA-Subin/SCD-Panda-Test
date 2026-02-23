@@ -130,62 +130,68 @@ const Quotation = () => {
                             กลับหน้าแรก
                         </Button>
                     </Box>
-                    <Box
-                        display="flex"
-                        justifyContent="left"
-                        alignItems="center"
-                        marginTop={-3}
-                    >
-                        <img src={Logo} width="150" />
-                        <Box
-                            display="flex"
-                            justifyContent="center"
-                            alignItems="center"
-                            marginLeft={-4.7}
-                            marginTop={3.7}
-                        >
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={12} md={4}>
+                            <Box
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                                marginTop={-3}
+                            >
+                                <img src={Logo} width="150" />
+                                <Box
+                                    display="flex"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    marginLeft={-4.7}
+                                    marginTop={3.7}
+                                >
+                                    <Typography
+                                        variant="h2"
+                                        fontSize={70}
+                                        color={theme.palette.error.main}
+                                        sx={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 1)" }}
+                                        fontWeight="bold"
+                                        gutterBottom
+                                    >
+                                        S
+                                    </Typography>
+                                    <Typography
+                                        variant="h2"
+                                        fontSize={70}
+                                        color={theme.palette.warning.light}
+                                        sx={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 1)" }}
+                                        fontWeight="bold"
+                                        gutterBottom
+                                    >
+                                        C
+                                    </Typography>
+                                    <Typography
+                                        variant="h2"
+                                        fontSize={70}
+                                        color={theme.palette.info.dark}
+                                        sx={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 1)" }}
+                                        fontWeight="bold"
+                                        gutterBottom
+                                    >
+                                        D
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={8}>
                             <Typography
-                                variant="h2"
-                                fontSize={70}
-                                color={theme.palette.error.main}
-                                sx={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 1)" }}
+                                variant="h4"
                                 fontWeight="bold"
+                                textAlign="center"
+                                color={theme.palette.panda.main}
+                                sx={{ marginTop: 5, marginLeft: 1 }}
                                 gutterBottom
                             >
-                                S
+                                ยินดีต้อนรับเข้าสู่หน้าใบเสนอราคาลูกค้า
                             </Typography>
-                            <Typography
-                                variant="h2"
-                                fontSize={70}
-                                color={theme.palette.warning.light}
-                                sx={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 1)" }}
-                                fontWeight="bold"
-                                gutterBottom
-                            >
-                                C
-                            </Typography>
-                            <Typography
-                                variant="h2"
-                                fontSize={70}
-                                color={theme.palette.info.dark}
-                                sx={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 1)" }}
-                                fontWeight="bold"
-                                gutterBottom
-                            >
-                                D
-                            </Typography>
-                        </Box>
-                        <Typography
-                            variant="h4"
-                            fontWeight="bold"
-                            textAlign="center"
-                            color={theme.palette.panda.main}
-                            sx={{ marginTop: 5, marginLeft: 1 }}
-                            gutterBottom
-                        >
-                            ยินดีต้อนรับเข้าสู่หน้าใบเสนอราคาลูกค้า
-                        </Typography>
-                    </Box>
+                        </Grid>
+                    </Grid>
                     <Divider />
                     {
                         open ? <QuotationDetail setOpen={setOpen} /> : <QuotationUpdate setOpen={setOpen} />
@@ -200,7 +206,7 @@ const Quotation = () => {
                     }}
                 />
             </Paper>
-        </Container>
+        </Container >
     );
 };
 

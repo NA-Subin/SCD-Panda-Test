@@ -94,6 +94,9 @@ const UpdateTrip = (props) => {
     const [windowWidths, setWindowWidth] = useState(window.innerWidth);
     const [editIdx1, setEditIdx1] = useState(null); // row index กำลังแก้ไข
     const [editIdx2, setEditIdx2] = useState(null);
+    const [driverss, setDriverss] = useState(trip.Driver);
+    const [depotTrips, setDepotTrips] = useState(trip.Depot);
+    const [registrationTruck, setRegistrationTruck] = useState(trip.Registration);
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -418,6 +421,8 @@ const UpdateTrip = (props) => {
         setOrderTrip([]);
         setEditIdx1(null);
         setEditIdx2(null);
+        setDriverss(trip.Driver);
+        setRegistrationTruck(trip.Registration);
         setRegistration(registrations);
         setWeightTrucks(weightTruck);
         setSelectedDateReceive(dateReceive);
@@ -1394,6 +1399,9 @@ const UpdateTrip = (props) => {
                 Driver: driver,
             }));
 
+            setDriverss(driver);
+            setRegistrationTruck(registration);
+
             // ถ้าคุณต้องการ set เป็น array:
             setEditableTickets(updatedTicketsArray);
         }
@@ -1408,6 +1416,9 @@ const UpdateTrip = (props) => {
                 Registration: registration,
                 Driver: driver,
             }));
+
+            setDriverss(driver);
+            setRegistrationTruck(registration);
 
             // ถ้าคุณต้องการ set เป็น array:
             setEditableOrders(updatedOrdersArray);
@@ -1898,15 +1909,15 @@ const UpdateTrip = (props) => {
                                                                                     CodeID: newValue.CodeID || "-",
                                                                                     CompanyName: newValue.CompanyName || "-",
                                                                                     CreditTime: newValue.CreditTime || "-",
-                                                                                    Date: trip.DateStart,
-                                                                                    Driver: trip.Driver,
+                                                                                    Date: selectedDateReceive,
+                                                                                    Driver: driverss,
                                                                                     Lat: newValue.Lat || 0,
                                                                                     Lng: newValue.Lng || 0,
                                                                                     Product: newValue.Product || "-",
                                                                                     Rate1: newValue.Rate1,
                                                                                     Rate2: newValue.Rate2,
                                                                                     Rate3: newValue.Rate3,
-                                                                                    Registration: trip.Registration,
+                                                                                    Registration: registrationTruck,
                                                                                     id: row.id,
                                                                                     No: row.No,
                                                                                     Trip: row.Trip,
@@ -2025,6 +2036,10 @@ const UpdateTrip = (props) => {
                                                                     <TextField
                                                                         value={row.Rate1}
                                                                         type="number"
+                                                                        inputProps={{
+                                                                            step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                                            min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                                        }}
                                                                         fullWidth
                                                                         InputLabelProps={{
                                                                             sx: {
@@ -2048,6 +2063,10 @@ const UpdateTrip = (props) => {
                                                                         <TextField
                                                                             value={row.Rate2}
                                                                             type="number"
+                                                                            inputProps={{
+                                                                                step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                                                min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                                            }}
                                                                             fullWidth
                                                                             InputLabelProps={{
                                                                                 sx: {
@@ -2071,6 +2090,10 @@ const UpdateTrip = (props) => {
                                                                             <TextField
                                                                                 value={row.Rate3}
                                                                                 type="number"
+                                                                                inputProps={{
+                                                                                    step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                                                    min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                                                }}
                                                                                 fullWidth
                                                                                 InputLabelProps={{
                                                                                     sx: {
@@ -2223,14 +2246,14 @@ const UpdateTrip = (props) => {
                                                                 CompanyName: newValue.CompanyName || "-",
                                                                 CreditTime: newValue.CreditTime || "-",
                                                                 Date: selectedDateReceive,
-                                                                Driver: trip.Driver,
+                                                                Driver: driverss,
                                                                 Lat: newValue.Lat || 0,
                                                                 Lng: newValue.Lng || 0,
                                                                 Product: newValue.Product || "-",
                                                                 Rate1: newValue.Rate1,
                                                                 Rate2: newValue.Rate2,
                                                                 Rate3: newValue.Rate3,
-                                                                Registration: trip.Registration,
+                                                                Registration: registrationTruck,
                                                                 OrderID: newValue.OrderID || "",
                                                                 id: updatedTickets.length, // ลำดับ id ใหม่
                                                                 No: ticketLength, // คำนวณจำนวน order
@@ -2761,14 +2784,14 @@ const UpdateTrip = (props) => {
                                                                                     CompanyName: newValue.CompanyName || "-",
                                                                                     CreditTime: newValue.CreditTime || "-",
                                                                                     Date: selectedDateDelivery,
-                                                                                    Driver: trip.Driver,
+                                                                                    Driver: driverss,
                                                                                     Lat: newValue.Lat || 0,
                                                                                     Lng: newValue.Lng || 0,
                                                                                     Product: newValue.Product || "-",
                                                                                     Rate1: newValue.Rate1,
                                                                                     Rate2: newValue.Rate2,
                                                                                     Rate3: newValue.Rate3,
-                                                                                    Registration: trip.Registration,
+                                                                                    Registration: registrationTruck,
                                                                                     id: row.id,
                                                                                     No: row.No,
                                                                                     Trip: row.Trip,
@@ -2842,6 +2865,10 @@ const UpdateTrip = (props) => {
                                                                     <TextField
                                                                         value={editableOrders[rowIdx]?.Rate1 || ""}
                                                                         type="number"
+                                                                        inputProps={{
+                                                                            step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                                            min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                                        }}
                                                                         fullWidth
                                                                         sx={{
                                                                             '& .MuiOutlinedInput-root': { height: '22px' },
@@ -2853,6 +2880,10 @@ const UpdateTrip = (props) => {
                                                                         <TextField
                                                                             value={editableOrders[rowIdx]?.Rate2 || ""}
                                                                             type="number"
+                                                                            inputProps={{
+                                                                                step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                                                min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                                            }}
                                                                             fullWidth
                                                                             sx={{
                                                                                 '& .MuiOutlinedInput-root': { height: '22px' },
@@ -2864,6 +2895,10 @@ const UpdateTrip = (props) => {
                                                                             <TextField
                                                                                 value={editableOrders[rowIdx]?.Rate3 || ""}
                                                                                 type="number"
+                                                                                inputProps={{
+                                                                                    step: 0.01,   // ✅ เพิ่มลดทีละ 0.01
+                                                                                    min: 0        // (ถ้าไม่อยากให้ติดลบ ใส่เพิ่มได้)
+                                                                                }}
                                                                                 fullWidth
                                                                                 sx={{
                                                                                     '& .MuiOutlinedInput-root': { height: '22px' },
@@ -3050,14 +3085,14 @@ const UpdateTrip = (props) => {
                                                                         CompanyName: newValue.CompanyName || "-",
                                                                         CreditTime: newValue.CreditTime || "-",
                                                                         Date: selectedDateDelivery,
-                                                                        Driver: trip.Driver,
+                                                                        Driver: driverss,
                                                                         Lat: newValue.Lat || 0,
                                                                         Lng: newValue.Lng || 0,
                                                                         Product: newValue.Product || "-",
                                                                         Rate1: newValue.Rate1,
                                                                         Rate2: newValue.Rate2,
                                                                         Rate3: newValue.Rate3,
-                                                                        Registration: trip.Registration,
+                                                                        Registration: registrationTruck,
                                                                         id: updatedOrders.length, // ลำดับ id ใหม่
                                                                         No: orderLength, // คำนวณจำนวน order
                                                                         Trip: (Number(tripID) - 1),
